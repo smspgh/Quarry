@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { canGroupUndo, shouldStopToEnd } from "../lib/macros";
-import { describeWhen, formatScriptError, scriptApplies } from "../lib/scripting";
+import { describeWhen, formatScriptError, isScriptPath, newScriptFileName, scriptApplies, scriptNameOf } from "../lib/scripting";
 
 describe("macro play-to-end", () => {
   it("stops when the cursor does not move down or the last line was processed", () => {
@@ -31,6 +31,21 @@ describe("script applicability", () => {
     expect(describeWhen({})).toBe("");
     expect(describeWhen({ when: { languages: ["JSON", "YAML"] } })).toBe("JSON / YAML only");
     expect(describeWhen({ when: { languages: ["JSON"], extensions: [".csv"] } })).toBe("JSON or .csv files only");
+  });
+});
+
+describe("script files", () => {
+  it("names a script after its file and recognises scripts by extension", () => {
+    expect(isScriptPath("C:\\s\\Sort Lines.JS")).toBe(true);
+    expect(isScriptPath("C:\\s\\notes.md")).toBe(false);
+    expect(scriptNameOf("C:\\s\\csv\\Sort Lines.js")).toBe("Sort Lines");
+    expect(scriptNameOf("C:/s/readme.md")).toBe("readme.md");
+  });
+  it("adds .js to a new script's name unless an extension was typed", () => {
+    expect(newScriptFileName("trim")).toBe("trim.js");
+    expect(newScriptFileName("trim.js")).toBe("trim.js");
+    expect(newScriptFileName("notes.md")).toBe("notes.md");
+    expect(newScriptFileName("v1.2 cleanup")).toBe("v1.2 cleanup.js");
   });
 });
 

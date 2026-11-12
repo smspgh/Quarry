@@ -133,7 +133,7 @@ In the JSON tree: **Ctrl+C** copies the value, **Ctrl+Shift+C** copies the path.
 | – | Pause / Resume Playback | `macro.pause` |
 | Shift+Esc | Stop Playback | `macro.stop` |
 | Ctrl+Shift+Enter | Run Current Script | `script.runActive` |
-| – | Open Scripts / New Script | `script.panel` / `script.new` |
+| – | Edit Scripts / Run Scripts / New Script | `script.panel` / `script.runPanel` / `script.new` |
 
 ## Code intelligence
 

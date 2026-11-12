@@ -180,7 +180,7 @@ export interface Settings {
   confirmRuns: boolean;
   /** Look for a new Quarry release a few seconds after start (Help > Check for Updates always works). */
   autoUpdateCheck: boolean;
-  /** Folder holding user scripts (.js). Empty = <app data>\scripts. */
+  /** Root folder of the user's scripts (.js, subfolders included). Empty = <app data>\scripts. */
   scriptsDir: string;
   /** Folder holding macros (.macro.json). Empty = <app data>\macros. */
   macrosDir: string;
@@ -257,14 +257,12 @@ export interface Macro {
 }
 
 export interface Script {
+  /** The script file's path. */
   id: string;
   name: string;
   source: string;
-  /** File this script was loaded from / saved to. */
   path?: string;
   updatedAt: number;
   /** Optional applicability filter: the script is offered only for matching documents. */
   when?: { languages?: string[]; extensions?: string[] };
-  /** In-memory only: differs from what is on disk (new or edited). Cleared by Save. */
-  unsaved?: boolean;
 }

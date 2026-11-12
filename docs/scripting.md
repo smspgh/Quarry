@@ -13,33 +13,45 @@ A Quarry script is a plain JavaScript file that transforms the current document:
 
 ## Where scripts live
 
-Each script is one `.js` file in the scripts folder. The file name without `.js` is the script's name.
+Each script is one `.js` file in the scripts folder or in a subfolder of it. The file name without `.js` is the script's name.
 
 - Default folder: `%APPDATA%\com.quarry.app\scripts` (created on first use).
-- Change it in **Settings › Folders › Scripts folder**, or with the folder button in the Scripts panel. If a custom folder can't be used, Quarry falls back to the default and says so.
-- Only `*.js` files directly in the folder are loaded. Subfolders are ignored.
-- The list reloads by itself when Quarry regains focus, as long as you have no unsaved scripts. So you can also edit scripts in another editor.
+- **Settings › Folders › Scripts folder** always shows the folder in use, and is where you change it. If a custom folder can't be used, Quarry falls back to the default and says so.
+- Subfolders are yours to organise scripts with; the Scripts panel shows the whole tree.
+- The tree reloads when the panel opens and when Quarry regains focus, so you can also manage scripts in File Explorer or another editor.
 
 Quarry ships with no scripts. Common conversions (JSON ↔ CSV, listing keys) are built-in [JSON commands](json.md#converting-between-json-and-csv) instead.
 
 ## Writing and running a script
 
-Open the panel with **Scripts › Open Scripts**, or from the command palette (**Script: Open Scripts**).
+The Scripts panel is the scripts folder as a tree, like the [Explorer](editing.md). It has two views, both in the **Scripts** menu and the command palette. The pencil / play button in the panel's header switches between them.
+
+**Scripts › Edit Scripts** is for working on the script files. It behaves like the Explorer: click a script to open it in a tab, and edit and save it like any other file.
 
 | Action | How |
 | --- | --- |
-| New script | **+** in the panel, or **Scripts › New Script**. It starts as an unsaved draft. |
-| Edit | Select it; the source opens in the panel's small editor. Unsaved scripts show `•`. |
-| Rename | Click the name in the list and type. |
-| Save | **Save** writes `<name>.js`. Nothing touches disk before that. Renaming a saved script deletes the old file on save. |
-| Duplicate / Delete | Buttons on the list item. Delete asks first and removes the file. |
-| API reference | The book icon in the panel. |
-| Run on the current document | **Run**, **Ctrl+Shift+Enter** (runs the script selected in the panel), or **Scripts › *name* › Run**. |
-| Run several times | **Run ×N** (1 to 100,000; each run is its own undo step, stops at the first error). |
-| Run until nothing changes | **To end** repeats until a run leaves both the text and the selection unchanged, up to 10,000 runs. |
-| Cancel | The panel's **Cancel** button, or the stop button beside **SCRIPT** in the status bar. |
+| New script | **New Script** in the panel header, or **Scripts › New Script**. Type a name; `.js` is added, and the file opens in a tab with a short starting template. |
+| New folder | **New Script Folder** in the panel header. Both go into the selected folder (or the folder of the selected script). |
+| Edit | Click the script (double-click to keep the tab), or right-click › **Edit**. |
+| Rename / Cut / Copy / Paste / Delete | Right-click, or **F2**, **Ctrl+X / C / V**, **Delete**, as in the Explorer. Delete moves the file to the Recycle Bin. |
+| Run | Right-click › **Run** runs it on the document in front. |
+| API reference | The book icon in the panel header. |
 
-By default, a script started from a menu or shortcut first asks **Run / Review first / Cancel**. **Review first** opens the script in its panel without running it. Turn the prompt off with **Settings › Confirm script & macro runs**.
+**Scripts › Run Scripts** shows the same tree for running. Nothing opens when you click, and the files can't be changed from here.
+
+| Action | How |
+| --- | --- |
+| Run on the current document | Select a script and press **Run** below the tree, double-click it, press **Enter**, or right-click › **Run**. |
+| Edit | Right-click › **Edit** opens the script in a tab. |
+| Run several times | **×N** (1 to 100,000; each run is its own undo step, stops at the first error). |
+| Run until nothing changes | **To end** repeats until a run leaves both the text and the selection unchanged, up to 10,000 runs. |
+| Cancel | **Cancel** below the tree, or the stop button beside **SCRIPT** in the status bar. |
+
+The script you last selected or ran is the *current script*: **Ctrl+Shift+Enter** (**Scripts › Run Script "name"**) runs it again on the document in front, with the panel open or not.
+
+A script that is open in a tab runs as it is in the tab, unsaved changes included, so you can try an edit before saving it. A script never runs on its own tab: switch to the document it should change first.
+
+By default, a script first asks **Run / Review first / Cancel**. **Review first** opens the script in a tab without running it. Turn the prompt off with **Settings › Confirm script & macro runs**.
 
 Scripts run on regular text tabs only, not on files open in [large-file mode](large-files.md). Only one script runs at a time.
 
@@ -128,7 +140,7 @@ Header comments in the first 20 lines restrict where a script can run:
 - If both are given, matching **either** is enough.
 - A script with neither tag runs on any text document.
 
-A script that doesn't apply is greyed out in the **Scripts** menu with a note such as "JSON / YAML only", and running it anyway shows a message. The header is read when scripts load or are saved, so save after changing it.
+In the Run Scripts view, the selected script shows a note such as "JSON / YAML only", and its **Run** is greyed out for a document it doesn't apply to; running it another way shows a message. The header is read each time the script runs.
 
 ## Sandbox and limits
 

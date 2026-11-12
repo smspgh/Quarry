@@ -1,8 +1,8 @@
-import { ArrowDown, ArrowUp, Check, ChevronRight, CloudDownload, CloudOff, FileDiff, FileText, GitBranch, History, Minus, Plus, RefreshCw, TriangleAlert, Undo2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, ChevronRight, CircleDot, CloudDownload, CloudOff, FileDiff, FileText, GitBranch, History, Minus, Plus, RefreshCw, TriangleAlert, Undo2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { openPath } from "../../lib/actions";
 import { checkRemote, isMissingRepo, commit, compareCommitWithCurrent, currentRepo, discard, moreHistory, openChange, openCommitChange, pickBranch, remote, rescanGit, stage, unstage, useGit } from "../../lib/git";
-import { groupFiles, KIND_LABEL, KIND_LETTER, rowKind, type Group } from "../../lib/gitStatus";
+import { commitLabel, groupFiles, KIND_LABEL, KIND_LETTER, rowKind, syncLine, type Group } from "../../lib/gitStatus";
 import type { GitFile, GitRemoteOp, GitStatus } from "../../lib/gitApi";
 import { relativeTime } from "../../editor/git";
 import { useStore } from "../../lib/store";
@@ -159,7 +159,6 @@ function HistorySection() {
   );
 }
 
-const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
 
 /**
  * Where the branch stands against its remote, after a background check of the remote (on opening
@@ -216,36 +215,33 @@ function SyncStatus({ repo }: { repo: GitStatus }) {
     kind = "warn";
     text = `${up} no longer exists on the remote.`;
     actions = act("Push to Recreate It", "push", `Push ${repo.branch} to the remote again and track it`, true);
-  } else if (repo.ahead && repo.behind) {
-    kind = "warn";
-    text = `Diverged from ${up}: ${plural(repo.ahead, "commit")} to push, ${repo.behind} to pull. Pull first, then push.`;
-    actions = (
-      <>
-        {act("Pull (Merge)", "pull-merge", "Pull and join both histories with a merge commit", true)}
-        {act("Pull (Rebase)", "pull-rebase", "Pull, then replay your commits on top of the remote's (no merge commit)")}
-      </>
-    );
-  } else if (repo.behind) {
-    kind = "todo";
-    text = `${plural(repo.behind, "commit")} to pull from ${up}.`;
-    actions = act("Pull", "pull", `Bring ${up}'s new commits into ${repo.branch}`, true);
-  } else if (repo.ahead) {
-    kind = "todo";
-    text = `${plural(repo.ahead, "commit")} to push to ${up}.`;
-    actions = act("Push", "push", `Send your commits to ${up}`, true);
-  } else text = `Up to date with ${up}.`;
+  } else {
+    // Uncommitted work and commits to push / pull are separate things: say both.
+    const line = syncLine(repo.files.length, repo.ahead, repo.behind, up);
+    kind = line.kind;
+    text = line.text;
+    if (repo.ahead && repo.behind) {
+      actions = (
+        <>
+          {act("Pull (Merge)", "pull-merge", "Pull and join both histories with a merge commit", true)}
+          {act("Pull (Rebase)", "pull-rebase", "Pull, then replay your commits on top of the remote's (no merge commit)")}
+        </>
+      );
+    } else if (repo.behind) actions = act("Pull", "pull", `Bring ${up}'s new commits into ${repo.branch}`, true);
+    else if (repo.ahead) actions = act("Push", "push", `Send your commits to ${up}`, true);
+  }
 
-  const when = check?.checking ? "Checking the remote…" : check?.at && !check.error ? `Checked ${relativeTime(Math.floor(check.at / 1000))}.` : "";
-  const Icon = kind === "ok" ? Check : kind === "warn" ? TriangleAlert : RefreshCw;
+  const when = check?.at && !check.error ? ` (checked ${relativeTime(Math.floor(check.at / 1000))})` : "";
+  const Icon = kind === "ok" ? Check : kind === "warn" ? TriangleAlert : kind === "local" ? CircleDot : RefreshCw;
   return (
     <div className={`scm-sync ${kind}`} role="status">
       <div className="row">
         <Icon size={13} className="scm-sync-icon" />
         <span className="grow">
-          {text} {when && <span className="muted">{when}</span>}
+          {text} {check?.checking && <span className="muted">Checking the remote…</span>}
         </span>
         {!check?.checking && (
-          <button className="icon-btn xs" title="Check the remote now" disabled={!!busy} onClick={() => void checkRemote(repo.root, true)}>
+          <button className="icon-btn xs" title={`Check the remote now${when}`} disabled={!!busy} onClick={() => void checkRemote(repo.root, true)}>
             <RefreshCw size={13} />
           </button>
         )}
@@ -328,6 +324,7 @@ export function GitPanel() {
   const repos = Object.entries(g.repos);
   const branchLabel = repo.branch ?? (repo.head ? `${repo.head} (detached)` : "no commits yet");
   const target = repo.branch ? ` on ${repo.branch}` : "";
+  const who = g.identity?.root === repo.root ? g.identity : null;
 
   return (
     <>
@@ -335,14 +332,17 @@ export function GitPanel() {
       <div className="panel-body">
         <div className="panel-section scm-top">
           {repos.length > 1 && <Select size="sm" value={g.current ?? ""} options={repos.map(([k, r]) => ({ value: k, label: nameOf(r.root), hint: r.root }))} onChange={(v) => useGit.setState({ current: v })} title="Repository" />}
-          <div className="row scm-branch">
-            <button className="btn small" title="Switch branch or create one" disabled={!!busy} onClick={() => void pickBranch()}>
-              <GitBranch size={13} /> <span className="truncate">{branchLabel}</span>
-            </button>
-            {repo.operation && <span className="scm-op">{OPERATION[repo.operation] ?? repo.operation}</span>}
-            {busy && <span className="muted scm-busy">{busy}</span>}
+          {/* Branch and where it stands share a row when the panel is wide enough. */}
+          <div className="scm-status-row">
+            <div className="row scm-branch">
+              <button className="btn small" title="Switch branch or create one" disabled={!!busy} onClick={() => void pickBranch()}>
+                <GitBranch size={13} /> <span className="truncate">{branchLabel}</span>
+              </button>
+              {repo.operation && <span className="scm-op">{OPERATION[repo.operation] ?? repo.operation}</span>}
+              {busy && <span className="muted scm-busy">{busy}</span>}
+            </div>
+            <SyncStatus repo={repo} />
           </div>
-          <SyncStatus repo={repo} />
           <textarea
             className="input scm-message"
             placeholder={`Message (Ctrl+Enter to commit${target})`}
@@ -360,20 +360,25 @@ export function GitPanel() {
           />
           <div className="row">
             <button className="btn btn-primary small grow" disabled={!!busy || (!message.trim() && !amend)} onClick={() => void doCommit()}>
-              {amend ? "Amend Last Commit" : `Commit${groups.staged.length ? "" : " All"}`}
+              {commitLabel(groups.staged.length, repo.files.length, amend)}
             </button>
             <label className="check" title="Replace the last commit with this one (the message box empty keeps its message)">
               <input type="checkbox" checked={amend} disabled={!repo.head} onChange={(e) => setAmend(e.target.checked)} />
               Amend
             </label>
           </div>
+          {who?.name && who.email && (
+            <div className="scm-hint truncate" title={`Commits are made as ${who.name} <${who.email}>. Change it under Repository, below.`}>
+              as {who.name} &lt;{who.email}&gt;
+            </div>
+          )}
         </div>
-        <RepoSettings repo={repo} />
         <Section title="Merge Changes" group="conflict" files={groups.conflict} repo={repo} />
         <Section title="Staged Changes" group="staged" files={groups.staged} repo={repo} />
         <Section title="Changes" group="changes" files={groups.changes} repo={repo} />
-        {repo.files.length === 0 && <div className="panel-note">No changes.</div>}
+        {repo.files.length === 0 && <div className="panel-note">No changes: everything is committed.</div>}
         <HistorySection />
+        <RepoSettings repo={repo} />
       </div>
     </>
   );

@@ -54,8 +54,8 @@ Settings are stored in `%APPDATA%\com.quarry.app\settings.json`. If that file ca
 
 | Setting | Default | Description |
 | --- | --- | --- |
-| Scripts folder | `%APPDATA%\com.quarry.app\scripts` | Where [scripts](scripting.md) are loaded from and saved to. |
-| Macros folder | `%APPDATA%\com.quarry.app\macros` | Where [macros](macros.md) are loaded from and saved to. |
+| Scripts folder | `%APPDATA%\com.quarry.app\scripts` | The root folder of your [scripts](scripting.md), subfolders included. The field always shows the folder in use, also when it is the default. |
+| Macros folder | `%APPDATA%\com.quarry.app\macros` | Where [macros](macros.md) are loaded from and saved to. Shows the folder in use, like the scripts folder. |
 
 If a folder you choose can't be used, Quarry switches back to the default and tells you.
 

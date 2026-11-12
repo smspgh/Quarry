@@ -1,33 +1,25 @@
-import { javascript } from "@codemirror/lang-javascript";
-import { EditorState } from "@codemirror/state";
-import { EditorView } from "@codemirror/view";
-import { BookOpen, Copy, FastForward, FolderOpen, Loader2, Play, Plus, RefreshCw, Repeat, Save, Square, Trash2 } from "lucide-react";
-import { open as openDialog } from "@tauri-apps/plugin-dialog";
-import { confirmDelete, persistSettings } from "../../lib/actions";
-import { useEffect, useRef, useState } from "react";
-import { baseExtensions } from "../../editor/cmSetup";
-import { bus } from "../../lib/bus";
-import { confirmRun } from "../../lib/commands";
+import { BookOpen, FastForward, Loader2, Pencil, Play, Repeat, Square } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { openPath } from "../../lib/actions";
+import { runScriptPath, type ScriptRunHow } from "../../lib/commands";
 import {
   cancelScript,
-  deleteScript,
   describeWhen,
-  displayPath,
-  loadScripts,
-  runScript,
-  runScriptTimes,
-  runScriptToEnd,
-  saveScript,
+  isScriptPath,
+  newScriptFileName,
+  readScript,
   scriptApplies,
-  scriptFileName,
+  scriptNameOf,
   scriptsDir,
-  stageScripts,
+  NEW_SCRIPT_SOURCE,
   SCRIPT_API,
   useScriptRunState,
 } from "../../lib/scripting";
+import { editor } from "../../editor/manager";
+import { isPanelShown } from "../../lib/panels";
 import { useActiveDoc, useStore } from "../../lib/store";
-import type { Script } from "../../lib/types";
-import { ItemList } from "./ItemList";
+import type { DirEntry, Script } from "../../lib/types";
+import { FileTree, type TreeVariant } from "./ExplorerPanel";
 
 /** Status-bar item shown while a script runs (imported by StatusBar). */
 export function ScriptStatusItem() {
@@ -41,174 +33,131 @@ export function ScriptStatusItem() {
   );
 }
 
+/** Run Scripts lists scripts only. */
+const onlyScripts = (e: DirEntry) => isScriptPath(e.path);
+
+/** Open a script in a tab of its own and go to it. */
+function editScript(path: string) {
+  void openPath(path).then((d) => {
+    if (d?.preview) useStore.getState().updateDoc(d.id, { preview: false });
+    requestAnimationFrame(() => editor.focus());
+  });
+}
+
+/**
+ * The scripts folder as a tree (the Explorer's, over the scripts root). Two modes:
+ * - edit: manage the script files; clicking one opens it in a tab, like the Explorer.
+ * - run: nothing opens; pick a script and run it on the document in front.
+ */
 export function ScriptsPanel() {
-  const scripts = useStore((s) => s.scripts);
-  const activeId = useStore((s) => s.activeScriptId);
+  const mode = useStore((s) => s.scriptsMode);
+  const dirSetting = useStore((s) => s.settings.scriptsDir);
+  const current = useStore((s) => s.activeScriptId);
+  const shown = useStore((s) => isPanelShown(s, "scripts"));
   const set = useStore((s) => s.set);
-  const settings = useStore((s) => s.settings);
-  const hostRef = useRef<HTMLDivElement>(null);
-  const viewRef = useRef<EditorView | null>(null);
-  const [showHelp, setShowHelp] = useState(false);
-  const [times, setTimes] = useState(1);
-  const toast = useStore((s) => s.toast);
-  const run = useScriptRunState();
-  const running = run.running;
-  const active = scripts.find((s) => s.id === activeId) ?? null;
   const doc = useActiveDoc();
-  const applies = !!active && doc?.kind === "text" && scriptApplies(active, doc);
-  const canRun = applies && !running;
-  const runTitle = !active ? "Choose a script" : doc?.kind !== "text" ? "Open a text document to run scripts" : running ? "A script is running" : applies ? "Run once (Ctrl+Shift+Enter)" : `This script is for ${describeWhen(active)}`;
+  const run = useScriptRunState();
+  const [root, setRoot] = useState<string | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
+  const [times, setTimes] = useState(2);
+  /** The current script as last read (for its `@languages` / `@extensions` filter). */
+  const [info, setInfo] = useState<Script | null>(null);
 
   useEffect(() => {
-    if (!activeId && scripts.length) set({ activeScriptId: scripts[0].id });
-  }, [scripts.length]);
+    let live = true;
+    scriptsDir().then((d) => {
+      if (!live) return;
+      setRoot(d);
+      const st = useStore.getState();
+      if (!st.scriptsExpanded.has(d)) st.set({ scriptsExpanded: new Set([...st.scriptsExpanded, d]) });
+    }).catch(() => {});
+    return () => { live = false; };
+  }, [dirSetting]);
 
-  const sourceListener = () =>
-    EditorView.updateListener.of((u) => {
-      if (!u.docChanged) return;
-      const id = useStore.getState().activeScriptId;
-      const cur = useStore.getState().scripts.find((s) => s.id === id);
-      if (!cur) return;
-      const src = u.state.doc.toString();
-      if (src === cur.source) return;
-      stageScripts(useStore.getState().scripts.map((s) => (s.id === id ? { ...s, source: src, updatedAt: Date.now(), unsaved: true } : s)));
-    });
-  const makeState = (src: string) => EditorState.create({ doc: src, extensions: [...baseExtensions({ ...settings, fontSize: 12, lineNumbers: true }), javascript(), sourceListener(), EditorView.contentAttributes.of({ "aria-label": "Script source" })] });
-
-  // Mount a small CodeMirror instance for the script source.
   useEffect(() => {
-    if (!hostRef.current || viewRef.current) return;
-    viewRef.current = new EditorView({ parent: hostRef.current, state: makeState("") });
-    return () => {
-      viewRef.current?.destroy();
-      viewRef.current = null;
-    };
-  }, []);
-
-  const save = async () => {
-    if (!active) return;
-    try {
-      const saved = await saveScript(active);
-      if (saved) toast(`Saved ${displayPath(saved.path ?? "")}`, "success", 2000);
-    } catch (e) {
-      toast(`Could not save script: ${String(e)}`, "error");
+    if (!current || !shown) {
+      if (!current) setInfo(null);
+      return;
     }
-  };
-  const [dir, setDir] = useState("");
-  useEffect(() => {
-    scriptsDir().then(setDir).catch(() => {});
-  }, [settings.scriptsDir]);
-  const chooseFolder = async () => {
-    const picked = await openDialog({ directory: true, title: "Scripts folder" });
-    if (!picked || Array.isArray(picked)) return;
-    set({ settings: { ...useStore.getState().settings, scriptsDir: picked } });
-    await persistSettings();
-    await loadScripts("switch");
-  };
-  const reload = async () => {
-    const list = await loadScripts();
-    if (list) toast(`Loaded ${list.length} script${list.length === 1 ? "" : "s"} from ${displayPath(dir)}`, "info", 2000);
-  };
-  // Pick up external edits when the window regains focus (only when nothing is unsaved, so no prompt appears).
-  useEffect(() => {
-    const onFocus = () => {
-      if (useStore.getState().scripts.some((s) => s.unsaved)) return;
-      void loadScripts();
+    let live = true;
+    readScript(current).then((sc) => live && setInfo(sc), () => live && setInfo(null));
+    return () => { live = false; };
+  }, [current, shown, doc?.id]);
+
+  const isText = doc?.kind === "text";
+  const known = info && current && info.id === current ? info : null;
+  const applies = !known || scriptApplies(known, doc);
+  const self = !!current && !!doc?.path && doc.path.toLowerCase() === current.toLowerCase();
+  const why = (path: string) =>
+    !isText ? "Open a text document to run scripts"
+    : run.running ? "A script is running"
+    : doc?.path?.toLowerCase() === path.toLowerCase() ? "This tab is the script itself: go to the document it should change"
+    : known && known.id === path && !applies ? `This script is for ${describeWhen(known)}`
+    : "";
+
+  const start = (path: string, how: ScriptRunHow = "once") => void runScriptPath(path, how);
+
+  const variant = useMemo<TreeVariant | null>(() => {
+    if (!root) return null;
+    const runMode = mode === "run";
+    return {
+      root,
+      panel: "scripts",
+      title: runMode ? "Run Scripts" : "Edit Scripts",
+      labels: { newFile: "New Script", newFolder: "New Script Folder", filePlaceholder: "script name", folderPlaceholder: "script folder name" },
+      readOnly: runMode,
+      fileFilter: runMode ? onlyScripts : undefined,
+      newFile: (name) => ({ name: newScriptFileName(name), content: NEW_SCRIPT_SOURCE }),
+      newFileEvent: "script.new",
+      onSelect: (e: DirEntry) => { if (isScriptPath(e.path)) set({ activeScriptId: e.path }); },
+      onActivate: runMode ? (e: DirEntry) => { if (isScriptPath(e.path)) start(e.path); } : undefined,
+      headerExtra: (
+        <>
+          <button className={`icon-btn ${showHelp ? "on" : ""}`} aria-pressed={showHelp} title="Script API reference" onClick={() => setShowHelp((h) => !h)}><BookOpen size={15} /></button>
+          {runMode
+            ? <button className="icon-btn" title="Edit Scripts: create, rename and open scripts" onClick={() => set({ scriptsMode: "edit" })}><Pencil size={14} /></button>
+            : <button className="icon-btn" title="Run Scripts: pick a script to run on the current document" onClick={() => set({ scriptsMode: "run" })}><Play size={14} /></button>}
+        </>
+      ),
+      menuLead: (e: DirEntry, close: () => void) => {
+        if (e.isDir || !isScriptPath(e.path)) return null;
+        const blocked = why(e.path);
+        return (
+          <>
+            <button className="palette-item" disabled={!!blocked} title={blocked || `Run on ${doc?.name ?? "the current document"}`} onClick={() => { close(); start(e.path); }}>
+              <Play size={13} /><span className="title">Run</span>{runMode && <span className="kbd">Enter</span>}
+            </button>
+            <button className="palette-item" title="Open the script in a tab" onClick={() => { close(); editScript(e.path); }}>
+              <Pencil size={13} /><span className="title">Edit</span>
+            </button>
+            {!runMode && <div className="menu-sep" />}
+          </>
+        );
+      },
     };
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-  }, []);
+    // `why` and `start` only read the values listed here.
+  }, [root, mode, showHelp, isText, run.running, doc?.path, doc?.name, known, applies]);
 
-  useEffect(() => {
-    const v = viewRef.current;
-    if (!v) return;
-    const src = active?.source ?? "";
-    if (v.state.doc.toString() !== src) v.setState(makeState(src));
-  }, [active?.id, active?.source]);
-
-  const create = (from?: Script) => {
-    const s: Script = {
-      id: `s-${Date.now().toString(36)}`,
-      name: from ? `${from.name} (copy)` : `Script ${scripts.length + 1}`,
-      source: from?.source ?? `// ${"Transform the current document."}\n// See the API reference (book icon) for doc, selection, util, clipboard.\n\ndoc.mapLines((line, i) => line);\n`,
-      updatedAt: Date.now(),
-      unsaved: true,
-    };
-    stageScripts([s, ...scripts]);
-    set({ activeScriptId: s.id });
-  };
-
-  useEffect(() => bus.on("script.new", () => create()), [scripts]);
-
-  const rename = (id: string, name: string) => stageScripts(scripts.map((s) => (s.id === id ? { ...s, name, unsaved: true } : s)));
-
-  const runOnce = async () => {
-    if (!active || !(await confirmRun("script", active))) return;
-    await runScript(active.source, undefined, active);
-  };
-  const runMany = async () => {
-    if (!active || !(await confirmRun("script", active, `Runs ${times} time${times === 1 ? "" : "s"} in a row.`))) return;
-    const n = await runScriptTimes(active, times);
-    toast(`Ran ${n} time${n === 1 ? "" : "s"}`, "success");
-  };
-  const runToEnd = async () => {
-    if (!active || !(await confirmRun("script", active, "Repeats until the script stops changing the document or selection."))) return;
-    const n = await runScriptToEnd(active);
-    toast(`Ran ${n} time${n === 1 ? "" : "s"}`, "success");
-  };
-  const remove = async () => {
-    if (!active) return;
-    if (!(await confirmDelete(`script "${active.name}"`, active.path ? `This moves ${displayPath(active.path)} to the Recycle Bin.` : "This script has not been saved yet; it will be discarded."))) return;
-    try {
-      await deleteScript(active);
-      toast(`Deleted "${active.name}"`, "info", 2000);
-    } catch (e) {
-      toast(`Could not delete script: ${String(e)}`, "error");
-    }
-  };
+  const blocked = current ? why(current) : "Choose a script";
 
   return (
     <>
-      <div className="sidebar-header">
-        Scripts
-        <span className="grow" />
-        <button className="icon-btn" title={`Scripts folder: ${displayPath(dir) || "…"}\nClick to choose a different folder`} onClick={() => void chooseFolder()}><FolderOpen size={15} /></button>
-        <button className="icon-btn" title="Reload scripts from the folder" onClick={() => void reload()}><RefreshCw size={15} /></button>
-        <button className={`icon-btn ${showHelp ? "on" : ""}`} aria-pressed={!!showHelp} title="API reference" onClick={() => setShowHelp((h) => !h)}><BookOpen size={15} /></button>
-        <button className="icon-btn" title="New script" onClick={() => create()}><Plus size={16} /></button>
-      </div>
-      <div className="panel-section list-section">
-        <ItemList
-          items={scripts.map((x) => {
-            const file = scriptFileName(x.name);
-            return { id: x.id, name: x.name, unsaved: x.unsaved, meta: x.when ? describeWhen(x).replace(/ only$/, "") : undefined, sub: file !== `${x.name}.js` ? file : undefined };
-          })}
-          selected={activeId}
-          onSelect={(id) => set({ activeScriptId: id })}
-          onRename={rename}
-          emptyText={<>No scripts in this folder yet.<br />Create one with the + button, or point the folder icon at your scripts.</>}
-        />
-      </div>
-      {active && (
-        <div className="panel-section">
-          <div className="row">
-            {running ? (
-              <>
-                <span className="muted row" style={{ fontSize: 11.5 }}><Loader2 size={13} className="spin" /> Running {run.name}…</span>
-                <button className="btn btn-danger small" title="Cancel the running script" onClick={() => cancelScript()}><Square size={13} /> Cancel</button>
-              </>
-            ) : (
-              <button className="btn btn-primary small" disabled={!canRun} title={runTitle} onClick={() => void runOnce()}><Play size={13} /> Run</button>
-            )}
-            <span className="grow" />
-            <button className={`icon-btn xs ${active.unsaved ? "attention" : ""}`} title={active.unsaved ? "Save script to the scripts folder (unsaved changes)" : "Saved"} disabled={!active.unsaved} onClick={() => void save()}><Save size={13} /></button>
-            <button className="icon-btn xs" title="Duplicate" onClick={() => create(active)}><Copy size={13} /></button>
-            <button className="icon-btn xs" title="Delete script file" onClick={() => void remove()}><Trash2 size={13} /></button>
+      {variant ? <FileTree variant={variant} /> : <div className="sidebar-header">Scripts</div>}
+      {mode === "run" && (
+        <div className="panel-section script-run-bar">
+          <div className="muted truncate" title={current ?? undefined}>
+            {run.running ? <span className="row"><Loader2 size={13} className="spin" /> Running {run.name}…</span>
+              : current ? <>{scriptNameOf(current)}{known?.when ? ` · ${describeWhen(known)}` : ""}{isText && !self ? ` → ${doc?.name}` : ""}</>
+              : "Select a script, then Run (or double-click it)."}
           </div>
           <div className="row">
-            <input className="input" type="number" min={1} max={100000} style={{ width: 80, height: 26, fontSize: 12 }} value={times} title="How many times to run" onChange={(e) => setTimes(Math.max(1, Number(e.target.value) || 1))} />
-            <button className="btn small" disabled={!canRun} title="Run the script this many times in a row" onClick={() => void runMany()}><Repeat size={13} /> Run ×{times}</button>
-            <button className="btn small" disabled={!canRun} title="Repeat until the script stops changing the document or selection" onClick={() => void runToEnd()}><FastForward size={13} /> To end</button>
+            {run.running
+              ? <button className="btn btn-danger small" title="Cancel the running script" onClick={() => cancelScript()}><Square size={13} /> Cancel</button>
+              : <button className="btn btn-primary small" disabled={!!blocked} title={blocked || "Run once (Ctrl+Shift+Enter)"} onClick={() => current && start(current)}><Play size={13} /> Run</button>}
+            <span className="grow" />
+            <input className="input script-times" type="number" min={1} max={100000} value={times} title="How many times to run" aria-label="How many times to run" onChange={(e) => setTimes(Math.max(1, Math.min(100000, Number(e.target.value) || 1)))} />
+            <button className="btn small" disabled={!!blocked} title={blocked || "Run the script this many times in a row"} onClick={() => current && start(current, { times })}><Repeat size={13} /> ×{times}</button>
+            <button className="btn small" disabled={!!blocked} title={blocked || "Repeat until the script stops changing the document or selection"} onClick={() => current && start(current, "toEnd")}><FastForward size={13} /> To end</button>
           </div>
         </div>
       )}
@@ -229,7 +178,6 @@ export function ScriptsPanel() {
           ))}
         </div>
       )}
-      <div className="script-editor-host" ref={hostRef} style={{ display: active ? undefined : "none" }} />
     </>
   );
 }

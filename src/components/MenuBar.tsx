@@ -2,7 +2,6 @@ import { ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { dirName } from "../lib/actions";
 import { getCommand, isEnabled, prettyKeys, runCommand } from "../lib/commands";
-import { describeWhen, scriptApplies } from "../lib/scripting";
 import { activeDoc } from "../lib/store";
 import { useStore } from "../lib/store";
 import { allLanguageNames } from "../editor/cmSetup";
@@ -25,25 +24,9 @@ function languageMenu(): Item[] {
   return items;
 }
 
+/** Scripts are browsed in the Scripts panel's tree (Edit Scripts / Run Scripts), not listed here. */
 function scriptsMenu(): Item[] {
-  const st = useStore.getState();
-  const doc = activeDoc(st);
-  const text = doc?.kind === "text";
-  // Each script is a submenu: Run (greyed when the script's filter does not match the document) and Edit.
-  const entry = (x: (typeof st.scripts)[number]): Item => {
-    const ok = text && scriptApplies(x, doc);
-    return {
-      label: x.name,
-      submenu: () => [
-        { label: "Run", sub: !ok && x.when ? describeWhen(x) : undefined, disabled: !ok, run: () => void runCommand("script.run", x.id) },
-        { label: "Edit", run: () => void runCommand("script.edit", x.id) },
-      ],
-    };
-  };
-  const items: Item[] = [{ cmd: "script.panel", label: "Open Scripts" }, { cmd: "script.new" }, { cmd: "script.runActive" }, { sep: true }];
-  if (st.scripts.length) for (const x of st.scripts) items.push(entry(x));
-  else items.push({ label: "No scripts yet — use New Script", run: () => {}, disabled: true });
-  return items;
+  return [{ cmd: "script.panel", label: "Edit Scripts" }, { cmd: "script.runPanel", label: "Run Scripts" }, { sep: true }, { cmd: "script.new" }, { cmd: "script.runActive" }];
 }
 
 function macrosMenu(): Item[] {
@@ -461,7 +444,7 @@ export function MenuBar({ inline = false, overlay = false }: { inline?: boolean;
   const [byKeyboard, setByKeyboard] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   // Subscribe to the bits that drive enabled/disabled state so an open menu re-renders live.
-  useStore((st) => `${st.activeId}|${st.docs.length}|${st.recording}|${st.macroPlaying}|${st.macroPaused}|${st.macros.length}|${st.activeScriptId}|${st.scripts.length}`);
+  useStore((st) => `${st.activeId}|${st.docs.length}|${st.recording}|${st.macroPlaying}|${st.macroPaused}|${st.macros.length}|${st.activeScriptId}`);
 
   const openWithKeyboard = (i: number | null) => {
     setByKeyboard(true);

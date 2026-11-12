@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { BigDocInfo, BigMatch, FileMatch, IndexProgress, Macro, Script, SearchQuery, Settings, UndoEntry } from "./types";
+import type { BigDocInfo, BigMatch, FileMatch, IndexProgress, Macro, SearchQuery, Settings, UndoEntry } from "./types";
 import { DEFAULT_SETTINGS } from "./types";
 
 export type SidebarPanel = "explorer" | "search" | "git" | "json" | "macros" | "scripts" | "settings";
@@ -208,8 +208,12 @@ interface AppState {
   macroPlaying: boolean;
   macroPaused: boolean;
   macros: Macro[];
-  scripts: Script[];
+  /** Path of the current script: the one last selected or run (Run Current Script). */
   activeScriptId: string | null;
+  /** What the Scripts panel is for: managing script files, or picking one to run. */
+  scriptsMode: "edit" | "run";
+  /** Expanded folders of the Scripts panel's tree. */
+  scriptsExpanded: Set<string>;
   activeMacroId: string | null;
 
   search: SearchState;
@@ -296,8 +300,9 @@ export const useStore = create<AppState>((set, get) => ({
   macroPlaying: false,
   macroPaused: false,
   macros: [],
-  scripts: [],
   activeScriptId: null,
+  scriptsMode: "edit",
+  scriptsExpanded: new Set(),
   activeMacroId: null,
 
   search: {

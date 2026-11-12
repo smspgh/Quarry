@@ -2055,13 +2055,14 @@ button {
   border-color: var(--accent-ring);
   background: var(--accent-soft);
 }
-.script-editor-host {
-  flex: 1;
-  min-height: 160px;
+/* Run Scripts: the selected script and its Run buttons, under the tree. */
+.script-run-bar {
   border-top: 1px solid var(--stroke);
-  position: relative;
+  font-size: 11.5px;
 }
-.script-editor-host .cm-editor {
+.script-run-bar .script-times {
+  width: 64px;
+  height: 26px;
   font-size: 12px;
 }
 
@@ -3054,26 +3055,6 @@ select optgroup {
 }
 
 /* ---- scripts & macros fixes ---- */
-/* Script editor: scroll inside the panel instead of widening the sidebar; opaque editor background like the main editor. */
-.script-editor-host {
-  min-width: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  background: var(--editor-bg);
-}
-.script-editor-host .cm-editor {
-  flex: 1;
-  min-height: 0;
-  background: var(--editor-bg);
-}
-.script-editor-host .cm-scroller {
-  min-width: 0;
-  overflow: auto;
-}
-.script-editor-host .cm-content {
-  padding-bottom: 24px;
-}
 /* API reference: two columns that wrap per row, not per character. */
 .script-api {
   border-top: 1px solid var(--stroke);
@@ -3164,11 +3145,6 @@ select optgroup {
   outline: 2px solid var(--focus-ring);
   outline-offset: 1px;
 }
-/* Scripts editor: an opaque surface so syntax colours keep their contrast over Mica. */
-.script-editor-host {
-  background: var(--gutter-bg);
-}
-
 /* Inline text button (e.g. "Undo" after Replace in Files). */
 .link-btn {
   background: none;
@@ -4618,6 +4594,18 @@ select optgroup {
   line-height: 1.4;
 }
 .scm-sync .row { gap: 6px; align-items: flex-start; }
+/* Branch button and status share a row when there is room; the status drops below when not. */
+.scm-status-row { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: flex-start; min-width: 0; }
+.scm-status-row > .scm-branch { flex: 0 1 auto; max-width: 100%; }
+.scm-status-row > .scm-sync { flex: 1 1 210px; min-width: 0; }
+/* Nothing to act on: a plain line, no box. */
+.scm-sync.ok, .scm-sync.local { border-color: transparent; padding: 3px 0; }
+.scm-sync.local .scm-sync-icon { color: var(--text-3); }
+.scm-sync.todo .scm-sync-icon { color: var(--accent); }
+.scm-repo-section { border-top: 1px solid var(--divider); margin-top: 6px; }
+.scm-repo-section .scm-repo { border-top: 0; }
+.scm-repo-section .scm-repo[hidden] { display: none; }
+.scm-repo-summary { margin-left: 6px; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--text-3); min-width: 0; }
 .scm-sync-icon { flex-shrink: 0; margin-top: 2px; }
 .scm-sync.ok .scm-sync-icon { color: var(--success); }
 .scm-sync.warn { border-color: var(--warning); }
@@ -4869,3 +4857,4 @@ select optgroup {
   pointer-events: auto;
   white-space: pre;
 }
+.scm-status-row > .scm-branch .btn { max-width: 100%; }

@@ -61,7 +61,7 @@ import { csvToJson, jsonToCsv, topLevelKeys } from "./convert";
 import { readText as readClipboardText, writeText as writeClipboardText } from "@tauri-apps/plugin-clipboard-manager";
 import { clipboardText, cutSpec, foldLineSpec, foldTreeSpec, pasteSpec } from "../editor/lineMenu";
 import { bindAppKeyFallback, bindCommandRunner, guarded, pausePlayback, playSteps, playToEnd, recordCommand, stageMacros, startRecording, stopPlayback, stopRecording } from "./macros";
-import { runScript, scriptApplies } from "./scripting";
+import { readScript, runScript, runScriptTimes, runScriptToEnd, scriptNameOf } from "./scripting";
 import { activeDoc, useStore, type SidebarPanel } from "./store";
 import type { Macro, Script } from "./types";
 import { undoReplaceInFiles } from "./replaceUndo";
@@ -411,7 +411,7 @@ export async function confirmRun(kind: "script" | "macro", item: { id: string; n
   const doc = activeDoc(store);
   const choice = await choose<"run" | "review" | "cancel">(
     `Run ${kind} "${item.name}"?`,
-    `${detail ? detail + " " : ""}This will edit ${doc?.name ?? "the current document"}. You can undo with Ctrl+Z.\n\n"Review first" opens the ${kind} in its panel without running it.`,
+    `${detail ? detail + " " : ""}This will edit ${doc?.name ?? "the current document"}. You can undo with Ctrl+Z.\n\n"Review first" opens the ${kind} in ${kind === "script" ? "a tab" : "its panel"} without running it.`,
     [
       { label: "Run", kind: "primary", value: "run" },
       { label: "Review first", value: "review" },
@@ -420,15 +420,50 @@ export async function confirmRun(kind: "script" | "macro", item: { id: string; n
     "cancel",
   );
   if (choice === "review") {
-    if (kind === "script") store.set({ sidebarVisible: true, sidebarPanel: "scripts", pinnedHidden: false, activeScriptId: item.id });
+    // A script's id is its file: review it in a tab.
+    if (kind === "script") void openPath(item.id);
     else store.set({ sidebarVisible: true, sidebarPanel: "macros", activeMacroId: item.id });
   }
   return choice === "run";
 }
 
-function currentScript(): Script | undefined {
+/** Once, a number of times in a row, or until a run changes nothing. */
+export type ScriptRunHow = "once" | "toEnd" | { times: number };
+
+/**
+ * Run a script file on the document in front (after the Run / Review first prompt). It becomes the
+ * current script. Resolves false when nothing ran.
+ */
+export async function runScriptPath(path: string, how: ScriptRunHow = "once"): Promise<boolean> {
   const st = useStore.getState();
-  return st.scripts.find((x) => x.id === st.activeScriptId);
+  const doc = activeDoc(st);
+  if (doc?.path && samePath(doc.path, path)) {
+    st.toast("This tab is the script itself. Go to the document it should change, then run it.", "warning");
+    return false;
+  }
+  let sc: Script;
+  try {
+    sc = await readScript(path);
+  } catch (e) {
+    st.toast(`Could not read the script: ${String(e)}`, "error");
+    return false;
+  }
+  st.set({ activeScriptId: path });
+  const detail = how === "once" ? undefined : how === "toEnd" ? "Repeats until the script stops changing the document or selection." : `Runs ${how.times} time${how.times === 1 ? "" : "s"} in a row.`;
+  if (!(await confirmRun("script", sc, detail))) return false;
+  if (how === "once") {
+    await runScript(sc.source, undefined, sc);
+    return true;
+  }
+  const n = how === "toEnd" ? await runScriptToEnd(sc) : await runScriptTimes(sc, how.times);
+  useStore.getState().toast(`Ran ${n} time${n === 1 ? "" : "s"}`, n ? "success" : "info");
+  return n > 0;
+}
+
+/** Show the Scripts panel for managing script files ("edit") or for running them ("run"). */
+function showScripts(mode: "edit" | "run") {
+  useStore.getState().set({ scriptsMode: mode });
+  showPanelOnly("scripts");
 }
 
 let lastMacro: Macro | null = null;
@@ -1047,28 +1082,27 @@ export function registerAllCommands() {
     title: "Script: Run Current Script",
     category: "Scripts",
     keys: "Ctrl+Shift+Enter",
-    enabled: () => { const sc = currentScript(); return hasText() && !!sc && scriptApplies(sc, activeDoc(s())); },
-    dynamicTitle: () => { const sc = currentScript(); return sc ? `Run Script "${sc.name}"` : "Run Current Script"; },
+    enabled: () => hasText() && !!s().activeScriptId,
+    dynamicTitle: () => { const p = s().activeScriptId; return p ? `Run Script "${scriptNameOf(p)}"` : "Run Current Script"; },
     run: async () => {
-      const sc = currentScript();
-      if (!sc) {
-        s().toast("No script selected. Pick one in the Scripts panel or menu.", "info");
+      const p = s().activeScriptId;
+      if (!p) {
+        s().toast("No script selected. Pick one with Scripts › Run Scripts.", "info");
         return false;
       }
-      if (!(await confirmRun("script", sc))) return false;
-      await runScript(sc.source, undefined, sc);
+      return runScriptPath(p);
     },
   });
-  register({ id: "script.panel", title: "Script: Open Scripts", category: "Scripts", run: () => showPanel("scripts") });
+  register({ id: "script.panel", title: "Script: Edit Scripts", category: "Scripts", run: () => showScripts("edit") });
+  register({ id: "script.runPanel", title: "Script: Run Scripts", category: "Scripts", run: () => showScripts("run") });
   register({
     id: "script.edit",
-    title: "Script: Edit Script by Id",
+    title: "Script: Edit Script by Path",
     category: "Scripts",
     hidden: true,
-    run: (args?: unknown) => {
-      const sc = s().scripts.find((x) => x.id === args);
-      if (!sc) return false;
-      s().set({ sidebarVisible: true, sidebarPanel: "scripts", activeScriptId: sc.id });
+    run: async (args?: unknown) => {
+      if (typeof args !== "string") return false;
+      return !!(await openPath(args));
     },
   });
   register({
@@ -1076,23 +1110,18 @@ export function registerAllCommands() {
     title: "Script: New Script",
     category: "Scripts",
     run: () => {
-      s().set({ sidebarVisible: true, sidebarPanel: "scripts" });
-      requestAnimationFrame(() => bus.emit("script.new"));
+      showScripts("edit");
+      // Two frames: the tree has to switch out of its read-only (Run) mode before it can take the name.
+      requestAnimationFrame(() => requestAnimationFrame(() => bus.emit("script.new")));
     },
   });
   register({
     id: "script.run",
-    title: "Script: Run Script by Id",
+    title: "Script: Run Script by Path",
     category: "Scripts",
     hidden: true,
     enabled: () => hasText() && !s().recording && !s().macroPlaying,
-    run: async (args?: unknown) => {
-      const sc = s().scripts.find((x) => x.id === args);
-      if (!sc) return false;
-      s().set({ activeScriptId: sc.id });
-      if (!(await confirmRun("script", sc))) return false;
-      await runScript(sc.source, undefined, sc);
-    },
+    run: (args?: unknown) => (typeof args === "string" ? runScriptPath(args) : false),
   });
 
   // Large file

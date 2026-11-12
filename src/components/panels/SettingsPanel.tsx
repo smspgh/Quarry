@@ -5,7 +5,7 @@ import { askDialog, closeDocument, persistSettings } from "../../lib/actions";
 import { appData } from "../../lib/ipc";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { loadMacros } from "../../lib/macros";
-import { loadScripts } from "../../lib/scripting";
+import { scriptsDir } from "../../lib/scripting";
 import { useStore } from "../../lib/store";
 import { isPanelShown } from "../../lib/panels";
 import { DEFAULT_SETTINGS, type Settings } from "../../lib/types";
@@ -257,14 +257,25 @@ function TextField({ value, placeholder, onCommit, onBlurCheck }: { value: strin
   );
 }
 
-function FolderRow({ label, hint, k, value, onChange }: { label: string; hint: string; k: keyof Settings; value: string; onChange: (v: string) => void }) {
+/** A folder setting. The field always shows the folder in use: with the setting empty, that is the
+ *  default `<app data>\<sub>` (and typing that path back in keeps the setting empty). */
+function FolderRow({ label, hint, k, sub, value, onChange }: { label: string; hint: string; k: keyof Settings; sub: string; value: string; onChange: (v: string) => void }) {
+  const [dflt, setDflt] = React.useState("");
+  React.useEffect(() => {
+    appData.path().then((p) => setDflt(`${p}\\${sub}`)).catch(() => {});
+  }, [sub]);
+  const commit = (v: string) => {
+    const t = v.trim().replace(/[\\/]+$/, "");
+    const next = dflt && t.toLowerCase() === dflt.toLowerCase() ? "" : v;
+    if (next !== value) onChange(next);
+  };
   const browse = async () => {
-    const picked = await openDialog({ directory: true, title: label });
-    if (picked && !Array.isArray(picked)) onChange(picked);
+    const picked = await openDialog({ directory: true, title: label, defaultPath: value || dflt || undefined });
+    if (picked && !Array.isArray(picked)) commit(picked);
   };
   return (
-    <Row label={label} hint={hint} k={k} stack apply={onChange}>
-      <TextField value={value} placeholder="Default (app data folder)" onCommit={onChange} />
+    <Row label={label} hint={value ? hint : `${hint} · default folder`} k={k} stack apply={onChange}>
+      <TextField value={value || dflt} placeholder="Default (app data folder)" onCommit={commit} />
       <button className="btn small" onClick={() => void browse()}>Browse…</button>
     </Row>
   );
@@ -456,12 +467,13 @@ export function SettingsPanel() {
     toast("Find & replace history cleared", "info");
   };
 
-  /** Folder changes may be cancelled by the unsaved-items guard inside loadScripts/loadMacros; the
+  /** A macros folder change may be cancelled by the unsaved-items guard inside loadMacros; the
    *  store is the source of truth afterwards, so TextField re-syncs from it. */
   const changeFolder = async (key: "scriptsDir" | "macrosDir", v: string) => {
     change(key, v);
     // The loaders toast themselves when the change is cancelled or the folder is unusable.
-    await (key === "scriptsDir" ? loadScripts("switch") : loadMacros("switch"));
+    // Scripts are files in tabs, so there are no drafts to lose; resolving reports an unusable folder.
+    await (key === "scriptsDir" ? scriptsDir() : loadMacros("switch"));
   };
 
   const resetAll = async () => {
@@ -470,7 +482,6 @@ export function SettingsPanel() {
     update({ ...DEFAULT_SETTINGS });
     editor.applySettings(useStore.getState().settings);
     persistSettings();
-    void loadScripts("switch");
     void loadMacros("switch");
     toast("Settings reset to defaults", "info");
   };
@@ -574,8 +585,8 @@ export function SettingsPanel() {
         </Section>
 
         <Section title="Folders">
-          <FolderRow label="Scripts folder" hint="Each script is a .js file here" k="scriptsDir" value={settings.scriptsDir} onChange={(v) => void changeFolder("scriptsDir", v)} />
-          <FolderRow label="Macros folder" hint="Each macro is a .macro.json file here" k="macrosDir" value={settings.macrosDir} onChange={(v) => void changeFolder("macrosDir", v)} />
+          <FolderRow label="Scripts folder" hint="Root of your scripts: .js files here and in its subfolders" k="scriptsDir" sub="scripts" value={settings.scriptsDir} onChange={(v) => void changeFolder("scriptsDir", v)} />
+          <FolderRow label="Macros folder" hint="Each macro is a .macro.json file here" k="macrosDir" sub="macros" value={settings.macrosDir} onChange={(v) => void changeFolder("macrosDir", v)} />
         </Section>
 
         <Section title="Search">

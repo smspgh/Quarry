@@ -69,3 +69,30 @@ export function repoNameFor(folder: string): string {
 export function isMissingRepo(error: string | null | undefined): boolean {
   return !!error && /repository .*not found|not found.*repository|does not appear to be a git repository|does not exist/i.test(error);
 }
+
+const count = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
+
+/** "ok": nothing to do anywhere; "local": only uncommitted work; "todo": push or pull; "warn": diverged. */
+export type SyncKind = "ok" | "local" | "todo" | "warn";
+
+/**
+ * The Source Control status line for a branch that has an upstream: uncommitted work and the
+ * commits to push / pull are told apart, so "matches the remote" is never read as "all saved".
+ */
+export function syncLine(changes: number, ahead: number, behind: number, upstream: string): { kind: SyncKind; text: string } {
+  const local = changes ? count(changes, "uncommitted change") : "";
+  if (ahead && behind) {
+    return { kind: "warn", text: `${local ? local + ". " : ""}Diverged from ${upstream}: ${count(ahead, "commit")} to push, ${behind} to pull. Pull first, then push.` };
+  }
+  if (behind) return { kind: "todo", text: `${local ? local + ", " : ""}${count(behind, "commit")} to pull from ${upstream}.` };
+  if (ahead) return { kind: "todo", text: `${local ? local + ", " : ""}${count(ahead, "commit")} to push to ${upstream}.` };
+  if (changes) return { kind: "local", text: `${local}. Your commits match ${upstream}.` };
+  return { kind: "ok", text: `Everything is committed and matches ${upstream}.` };
+}
+
+/** The Commit button: what it will take. */
+export function commitLabel(staged: number, total: number, amend: boolean): string {
+  if (amend) return "Amend Last Commit";
+  if (staged) return `Commit ${staged} Staged`;
+  return total ? `Commit All (${count(total, "file")})` : "Commit All";
+}

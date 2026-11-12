@@ -25,7 +25,7 @@ import { installGit } from "./lib/git";
 import { bus } from "./lib/bus";
 import { useShallow } from "zustand/react/shallow";
 import { installRecorderHooks, loadMacros } from "./lib/macros";
-import { loadScripts } from "./lib/scripting";
+import { migrateLegacyScripts } from "./lib/scripting";
 import { paneDocId, useStore } from "./lib/store";
 import { SplitDivider } from "./components/SplitDivider";
 import { MenuBar } from "./components/MenuBar";
@@ -76,7 +76,7 @@ export default function App() {
         installGit();
         installRecorderHooks();
         setReady(true);
-        await Promise.all([loadMacros(), loadScripts()]);
+        await Promise.all([loadMacros(), migrateLegacyScripts()]);
         await restoreSession();
         installCloseGuard();
         if (useStore.getState().settings.autoUpdateCheck) setTimeout(() => void import("./lib/updater").then((m) => m.checkForUpdates(true)), 6000);

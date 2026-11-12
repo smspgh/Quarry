@@ -1,9 +1,8 @@
 import { readText as readClipboard, writeText as writeClipboard } from "@tauri-apps/plugin-clipboard-manager";
 import { useSyncExternalStore } from "react";
 import { editor } from "../editor/manager";
-import { askDialog, persistSettings } from "./actions";
 import { appData, fs } from "./ipc";
-import { cleanDirSetting, displayPath, resolveFolder, safeFileName, type LoadReason } from "./macros";
+import { displayPath, resolveFolder, safeFileName } from "./macros";
 import { activeDoc, useStore } from "./store";
 import type { Script } from "./types";
 
@@ -303,74 +302,51 @@ export async function runScriptToEnd(script: Script, maxIterations = 10_000): Pr
   return n;
 }
 
-// ---------- folder-backed persistence ----------
-// Every script is a plain .js file in the scripts folder (Settings › Folders, default <app data>\scripts).
-// The file name is the script name. Nothing touches disk until the user clicks Save.
+// ---------- folder-backed scripts ----------
+// Every script is a plain .js file in the scripts folder or one of its subfolders (Settings › Folders,
+// default <app data>\scripts). The file name is the script name; scripts are edited in ordinary tabs.
 
 /** Resolve the scripts folder (see resolveFolder in macros.ts). */
 export function scriptsDir(): Promise<string> {
   return resolveFolder("scriptsDir", "scripts", "Scripts");
 }
 
-/** File name a script is written to (shown as a sub-label when it differs from the display name). */
-export function scriptFileName(name: string): string {
-  return safeFileName(name) + EXT;
+/** Is this file a script (by extension)? */
+export function isScriptPath(path: string): boolean {
+  return path.toLowerCase().endsWith(EXT);
 }
 
-let loadedDir: string | null = null;
+/** A script's name: its file name without `.js`. */
+export function scriptNameOf(path: string): string {
+  const base = path.split(/[\\/]/).pop() ?? path;
+  return isScriptPath(base) ? base.slice(0, -EXT.length) : base;
+}
+
+/** File name for a new script typed into the tree: `.js` is added unless an extension was given. */
+export function newScriptFileName(name: string): string {
+  return /\.[A-Za-z0-9]+$/.test(name) ? name : name + EXT;
+}
+
+/** What a new script starts with. */
+export const NEW_SCRIPT_SOURCE = "// Transform the current document.\n// See the API reference (book icon in the Scripts panel) for doc, selection, util, clipboard.\n\ndoc.mapLines((line, i) => line);\n";
 
 /**
- * (Re)load all scripts from the scripts folder. Unsaved in-memory drafts are lost, so when there are
- * any the user is asked first; cancelling reverts a pending folder change. Returns null when cancelled.
+ * Read a script for running. When its file is open in a tab, the tab's text is used (unsaved edits
+ * included), so a script can be tried before it is saved.
  */
-export async function loadScripts(reason: LoadReason = "reload"): Promise<Script[] | null> {
-  const st = useStore.getState();
-  const unsaved = st.scripts.filter((x) => x.unsaved).length;
-  if (unsaved > 0) {
-    const switching = reason === "switch" && loadedDir !== null;
-    const ok = await askDialog(
-      switching ? "Switch scripts folder?" : "Reload scripts from folder?",
-      `${unsaved} unsaved script${unsaved === 1 ? "" : "s"} will be discarded.`,
-      switching ? "Switch and discard" : "Reload and discard",
-    );
-    if (!ok) {
-      if (switching) {
-        st.set({ settings: { ...useStore.getState().settings, scriptsDir: loadedDir ?? "" } });
-        await persistSettings();
-        st.toast("Scripts folder change cancelled.", "info", 2500);
-      }
-      return null;
-    }
-  }
-  let list: Script[] = [];
-  try {
-    const dir = await scriptsDir();
-    loadedDir = cleanDirSetting(useStore.getState().settings.scriptsDir);
-    await migrateLegacy(dir);
-    const entries = (await fs.listDir(dir)).filter((e) => !e.isDir && e.name.toLowerCase().endsWith(EXT));
-    const loaded = await Promise.all(
-      entries.map(async (e) => {
-        try {
-          const f = await fs.readText(e.path);
-          return { id: e.path, path: e.path, name: e.name.slice(0, -EXT.length), source: f.content, updatedAt: e.modifiedMs, when: parseWhen(f.content) } as Script;
-        } catch {
-          return null;
-        }
-      }),
-    );
-    list = loaded.filter((s): s is Script => !!s).sort((a, b) => a.name.localeCompare(b.name));
-  } catch (e) {
-    useStore.getState().toast(`Could not read the scripts folder: ${String(e)}`, "error");
-  }
-  useStore.getState().set({ scripts: list });
-  return list;
+export async function readScript(path: string): Promise<Script> {
+  const open = useStore.getState().docs.find((d) => d.kind === "text" && d.path?.toLowerCase() === path.toLowerCase());
+  const live = open ? editor.stateOf(open.id)?.doc.toString() : undefined;
+  const source = live ?? (await fs.readText(path)).content;
+  return { id: path, path, name: scriptNameOf(path), source, updatedAt: Date.now(), when: parseWhen(source) };
 }
 
 /** One-time import of the old scripts.json store into individual files. */
-async function migrateLegacy(dir: string) {
+export async function migrateLegacyScripts() {
   try {
     const raw = await appData.read("scripts.json");
     if (!raw) return;
+    const dir = await scriptsDir();
     const old = JSON.parse(raw) as { name: string; source: string; builtin?: boolean }[];
     for (const s of old) {
       if (s.builtin) continue;
@@ -381,38 +357,6 @@ async function migrateLegacy(dir: string) {
   } catch {
     /* ignore */
   }
-}
-
-/** Keep an edit in memory only (marks the script unsaved). */
-export function stageScripts(list: Script[]) {
-  useStore.getState().set({ scripts: list });
-}
-
-/**
- * Write one script to its file (renaming the file if the name changed) and clear its unsaved flag.
- * Asks before overwriting a file that belongs to a different script; returns null when cancelled.
- */
-export async function saveScript(script: Script): Promise<Script | null> {
-  const dir = await scriptsDir();
-  const target = `${dir}\\${safeFileName(script.name)}${EXT}`;
-  if (script.path !== target && (await fs.exists(target))) {
-    const ok = await askDialog("Overwrite existing script?", `${displayPath(target)} already exists. Replace it with "${script.name}"?`, "Overwrite");
-    if (!ok) return null;
-  }
-  if (script.path && script.path !== target && (await fs.exists(script.path))) await fs.remove(script.path);
-  await fs.writeText(target, script.source);
-  const saved: Script = { ...script, path: target, when: parseWhen(script.source), unsaved: false, updatedAt: Date.now() };
-  const st = useStore.getState();
-  // Another in-memory item may have pointed at the overwritten file; drop it to avoid duplicates.
-  st.set({ scripts: st.scripts.filter((s) => s.id === script.id || s.path !== target).map((s) => (s.id === script.id ? saved : s)) });
-  return saved;
-}
-
-/** Delete a script's file (if it has one) and drop it from the list. */
-export async function deleteScript(script: Script) {
-  if (script.path && (await fs.exists(script.path))) await fs.trash(script.path);
-  const st = useStore.getState();
-  st.set({ scripts: st.scripts.filter((s) => s.id !== script.id), activeScriptId: st.activeScriptId === script.id ? null : st.activeScriptId });
 }
 
 // ---------- API reference ----------

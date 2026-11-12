@@ -7,9 +7,9 @@ import { ClaudeMark } from "../ClaudeView";
 import { runCommand } from "../../lib/commands";
 import { bus } from "../../lib/bus";
 import { fs } from "../../lib/ipc";
-import { showPanel } from "../../lib/panels";
+import { isPanelShown, showPanel } from "../../lib/panels";
 import { editor } from "../../editor/manager";
-import { useStore } from "../../lib/store";
+import { useStore, type SidebarPanel } from "../../lib/store";
 import { KIND_LABEL, KIND_LETTER, kindOf, useGit } from "../../lib/git";
 import type { DirEntry } from "../../lib/types";
 
@@ -76,10 +76,49 @@ export function collapseUnder(expanded: ReadonlySet<string>, dir: string): Set<s
   return new Set([...expanded].filter((p) => !samePath(p, dir) && !isUnder(p, dir)));
 }
 
+/**
+ * The same tree over another root (the Scripts panel). It keeps its own expanded folders
+ * (`scriptsExpanded`) and leaves the Explorer's folder watcher and Find in Files targets alone.
+ */
+export interface TreeVariant {
+  root: string;
+  title: string;
+  /** The side panel it lives in: the tree reloads when that panel opens. */
+  panel: SidebarPanel;
+  labels: { newFile: string; newFolder: string; filePlaceholder: string; folderPlaceholder: string };
+  /** Browse only: no New / Rename / Cut / Copy / Paste / Delete. */
+  readOnly?: boolean;
+  /** Which files to list (folders always are). Must be a stable function. */
+  fileFilter?: (entry: DirEntry) => boolean;
+  /** Buttons after Refresh (instead of Close Folder). */
+  headerExtra?: React.ReactNode;
+  /** New File: the final file name and what the file starts with. */
+  newFile?: (name: string) => { name: string; content: string };
+  /** A file row was clicked or right-clicked. */
+  onSelect?: (entry: DirEntry) => void;
+  /** Given: clicking a file only selects it, and double-click / Enter call this instead of opening it. */
+  onActivate?: (entry: DirEntry) => void;
+  /** Items at the top of a row's right-click menu. */
+  menuLead?: (entry: DirEntry, close: () => void) => React.ReactNode;
+  /** Bus event that starts New File in the root. */
+  newFileEvent?: string;
+}
+
 export function ExplorerPanel() {
-  const folder = useStore((s) => s.folder);
+  return <FileTree />;
+}
+
+export function FileTree({ variant }: { variant?: TreeVariant }) {
+  const openFolder = useStore((s) => s.folder);
+  const folder = variant ? variant.root : openFolder;
+  const isVariant = !!variant;
+  const readOnly = !!variant?.readOnly;
+  const fileFilter = variant?.fileFilter;
   const claudeOn = useStore((s) => s.settings.claudeEnabled);
-  const expanded = useStore((s) => s.explorerExpanded);
+  const expanded = useStore((s) => (isVariant ? s.scriptsExpanded : s.explorerExpanded));
+  const getExpanded = () => (isVariant ? useStore.getState().scriptsExpanded : useStore.getState().explorerExpanded);
+  const setExpanded = (next: Set<string>) => useStore.getState().set(isVariant ? { scriptsExpanded: next } : { explorerExpanded: next });
+  const panelShown = useStore((s) => (variant ? isPanelShown(s, variant.panel) : false));
   const set = useStore((s) => s.set);
   const toast = useStore((s) => s.toast);
   const activePath = useStore((s) => s.docs.find((d) => d.id === s.activeId)?.path ?? null);
@@ -102,14 +141,20 @@ export function ExplorerPanel() {
   const revealWanted = useRef<string | null>(null);
   const typeahead = useRef<{ text: string; at: number }>({ text: "", at: 0 });
 
-  const load = useCallback(async (dir: string, force = false) => {
+  const load = useCallback(async (dir: string, force = false, quiet = false) => {
     if (!force && children.has(dir)) return;
     try {
       const list = await fs.listDir(dir, true);
       list.sort(compareEntries);
       setChildren((m) => new Map(m).set(dir, list));
     } catch (e) {
-      toast(String(e), "error");
+      // A background reload of a folder that has gone just forgets it.
+      if (quiet) setChildren((m) => {
+        const n = new Map(m);
+        n.delete(dir);
+        return n;
+      });
+      else toast(String(e), "error");
     }
   }, [children]);
 
@@ -147,13 +192,25 @@ export function ExplorerPanel() {
       for (const d of dirs) void loadRef.current(d, true);
       if (dirs.size) set({ fileListCache: null });
     });
-    fs.watchStart(folder).catch((e) => toast(`File watcher unavailable: ${e}`, "warning"));
+    // There is one watcher and it belongs to the Explorer's folder; another tree only listens.
+    if (!isVariant) fs.watchStart(folder).catch((e) => toast(`File watcher unavailable: ${e}`, "warning"));
     return () => {
       disposed = true;
       un.then((f) => f());
-      fs.watchStop().catch(() => {});
+      if (!isVariant) fs.watchStop().catch(() => {});
     };
   }, [folder]);
+
+  // Without a watcher of its own, the tree reloads when its panel opens and when the window regains focus.
+  useEffect(() => {
+    if (!isVariant || !panelShown) return;
+    const reload = () => {
+      for (const d of childrenRef.current.keys()) void loadRef.current(d, true, true);
+    };
+    reload();
+    window.addEventListener("focus", reload);
+    return () => window.removeEventListener("focus", reload);
+  }, [isVariant, panelShown, folder]);
 
   const rows = useMemo(() => {
     const out: Row[] = [];
@@ -161,20 +218,21 @@ export function ExplorerPanel() {
       const list = children.get(dir);
       if (!list) return;
       for (const e of list) {
+        if (!e.isDir && fileFilter && !fileFilter(e)) continue;
         out.push({ entry: e, depth });
         if (e.isDir && expanded.has(e.path)) walk(e.path, depth + 1);
       }
     };
     if (folder) walk(folder, 0);
     return out;
-  }, [children, expanded, folder]);
+  }, [children, expanded, folder, fileFilter]);
 
   // Reveal the active file: expand its ancestors, then scroll its row into view once it exists.
   const reveal = useCallback((path: string | null) => {
     if (!folder || !path || !isUnder(path, folder)) return;
     const dirs = ancestorDirs(folder, path);
-    const cur = useStore.getState().explorerExpanded;
-    if (dirs.some((d) => !cur.has(d))) set({ explorerExpanded: new Set([...cur, ...dirs]) });
+    const cur = getExpanded();
+    if (dirs.some((d) => !cur.has(d))) setExpanded(new Set([...cur, ...dirs]));
     revealWanted.current = path;
     setSelected(path);
   }, [folder]);
@@ -187,10 +245,13 @@ export function ExplorerPanel() {
   // just before a newly opened folder reaches this component, so it waits for the folder.
   const pendingReveal = useRef<string | null>(null);
   const [revealTick, setRevealTick] = useState(0);
-  useEffect(() => bus.on("explorer.reveal", (p) => {
-    pendingReveal.current = p as string;
-    setRevealTick((t) => t + 1);
-  }), []);
+  useEffect(() => {
+    if (isVariant) return;
+    return bus.on("explorer.reveal", (p) => {
+      pendingReveal.current = p as string;
+      setRevealTick((t) => t + 1);
+    });
+  }, [isVariant]);
   useEffect(() => {
     const p = pendingReveal.current;
     if (!p || !folder || !isUnder(p, folder)) return;
@@ -240,7 +301,7 @@ export function ExplorerPanel() {
       // Keep the selection visible: a selected row inside the collapsed folder moves to the folder.
       if (selected && isUnder(selected, path)) setSelected(path);
     } else next.add(path);
-    set({ explorerExpanded: next });
+    setExpanded(next);
   };
 
   const refresh = () => {
@@ -272,20 +333,21 @@ export function ExplorerPanel() {
       return;
     }
     committingCreate.current = true;
-    const path = `${creating.dir}\\${newName.trim()}`;
+    const made = creating.kind === "file" && variant?.newFile ? variant.newFile(newName.trim()) : { name: newName.trim(), content: "" };
+    const path = `${creating.dir}\\${made.name}`;
     try {
       if (await fs.exists(path)) {
-        toast(`${newName.trim()} already exists`, "error");
+        toast(`${made.name} already exists`, "error");
         setCreating(null);
         setNewName("");
         return;
       }
       if (creating.kind === "dir") await fs.createDir(path);
       else {
-        await fs.writeText(path, "");
+        await fs.writeText(path, made.content);
         await openPath(path);
       }
-      set({ explorerExpanded: new Set([...expanded, creating.dir]) });
+      setExpanded(new Set([...getExpanded(), creating.dir]));
       await load(creating.dir, true);
     } catch (e) {
       toast(String(e), "error");
@@ -331,7 +393,7 @@ export function ExplorerPanel() {
         const next = new Set(expanded);
         next.delete(from);
         next.add(to);
-        set({ explorerExpanded: next });
+        setExpanded(next);
       }
       set({ fileListCache: null });
       await load(dir, true);
@@ -345,6 +407,7 @@ export function ExplorerPanel() {
 
   /** What Find in Files' Folder scope searches: the rows clicked or selected last. */
   const pickTargets = (paths: string[]) => {
+    if (isVariant) return;
     useStore.getState().setSearch({ treeTargets: paths.map((p) => ({ path: p, isDir: isDirPath(p) })) });
   };
 
@@ -373,7 +436,7 @@ export function ExplorerPanel() {
   /** Expand All: `root` and every folder beneath it (loading their listings), up to EXPAND_ALL_MAX. */
   const expandAll = async (root: string) => {
     setMenu(null);
-    const next = new Set(useStore.getState().explorerExpanded);
+    const next = new Set(getExpanded());
     const loaded = new Map<string, DirEntry[]>();
     const queue = [root];
     let count = 0;
@@ -405,14 +468,14 @@ export function ExplorerPanel() {
       for (const [d, list] of loaded) if (!n.has(d)) n.set(d, list);
       return n;
     });
-    set({ explorerExpanded: next });
+    setExpanded(next);
     if (capped) toast(`Expanded the first ${EXPAND_ALL_MAX} folders; expand the rest one at a time.`, "info", 4000);
   };
 
   /** Collapse All: the folder and every folder under it. */
   const collapseAll = (dir: string) => {
     setMenu(null);
-    set({ explorerExpanded: collapseUnder(useStore.getState().explorerExpanded, dir) });
+    setExpanded(collapseUnder(getExpanded(), dir));
     if (selected && isUnder(selected, dir)) setSelected(dir);
   };
 
@@ -431,7 +494,7 @@ export function ExplorerPanel() {
 
   const afterPaste = (pasted: string[], dest: string) => {
     if (!pasted.length) return;
-    if (folder && !samePath(dest, folder)) set({ explorerExpanded: new Set([...useStore.getState().explorerExpanded, dest]) });
+    if (folder && !samePath(dest, folder)) setExpanded(new Set([...getExpanded(), dest]));
     void load(dest, true);
     focusRow(pasted[0]);
     if (pasted.length > 1) setMulti(pasted);
@@ -443,6 +506,18 @@ export function ExplorerPanel() {
     if (selected && gone(selected)) setSelected(dirName(selected));
   };
   const deleteSelection = () => void trashPaths(selection(), isDirPath).then(afterDelete);
+  const startCreate = (kind: "file" | "dir", dir = targetDir()) => {
+    setCreating({ dir, kind });
+    setNewName("");
+  };
+  const newFileEvent = !readOnly ? variant?.newFileEvent : undefined;
+  useEffect(() => (newFileEvent && folder ? bus.on(newFileEvent, () => startCreate("file", folder)) : undefined), [newFileEvent, folder]);
+  /** Double-click / Enter on a file: the variant's action, or (false) the usual open. */
+  const activate = (entry: DirEntry) => {
+    if (!variant?.onActivate) return false;
+    variant.onActivate(entry);
+    return true;
+  };
   const pasteHere = () => {
     const dest = pasteDirFor(selected);
     void pasteInto(dest).then((p) => afterPaste(p, dest));
@@ -459,7 +534,8 @@ export function ExplorerPanel() {
     const idx = selected ? rows.findIndex((r) => samePath(r.entry.path, selected)) : -1;
     const row = idx >= 0 ? rows[idx] : null;
     const go = (i: number) => focusRow(rows[Math.max(0, Math.min(rows.length - 1, i))].entry.path);
-    if (e.ctrlKey && !e.shiftKey && !e.altKey && ["c", "x", "v"].includes(e.key.toLowerCase())) {
+    if (readOnly && (e.key === "F2" || e.key === "Delete")) return;
+    if (!readOnly && e.ctrlKey && !e.shiftKey && !e.altKey && ["c", "x", "v"].includes(e.key.toLowerCase())) {
       const k = e.key.toLowerCase();
       if (k === "v") pasteHere();
       else void filesToClipboard(selection(), k === "x");
@@ -503,7 +579,7 @@ export function ExplorerPanel() {
       case " ":
         if (!row) return;
         if (row.entry.isDir) toggle(row.entry.path);
-        else void openPath(row.entry.path);
+        else if (!activate(row.entry)) void openPath(row.entry.path);
         break;
       case "F2":
         if (row) startRename(row.entry);
@@ -552,30 +628,33 @@ export function ExplorerPanel() {
   return (
     <>
       <div className="sidebar-header">
-        <span className="truncate" title={folder}>{name}</span>
+        <span className="truncate" title={folder}>{variant?.title ?? name}</span>
         <span className="grow" />
-        <button className="icon-btn" title="New File" onClick={() => { setCreating({ dir: targetDir(), kind: "file" }); setNewName(""); }}><FilePlus size={15} /></button>
-        <button className="icon-btn" title="New Folder" onClick={() => { setCreating({ dir: targetDir(), kind: "dir" }); setNewName(""); }}><FolderPlus size={15} /></button>
+        {!readOnly && <button className="icon-btn" title={variant?.labels.newFile ?? "New File"} onClick={() => startCreate("file")}><FilePlus size={15} /></button>}
+        {!readOnly && <button className="icon-btn" title={variant?.labels.newFolder ?? "New Folder"} onClick={() => startCreate("dir")}><FolderPlus size={15} /></button>}
         <button className="icon-btn" title="Refresh" onClick={refresh}><RefreshCw size={14} /></button>
-        <button className="icon-btn" title="Close Folder" onClick={() => set({ folder: null, fileListCache: null })}><X size={15} /></button>
+        {variant ? variant.headerExtra : <button className="icon-btn" title="Close Folder" onClick={() => set({ folder: null, fileListCache: null })}><X size={15} /></button>}
       </div>
       <div
         className="panel-body"
         role="tree"
-        aria-label="Explorer"
+        aria-label={variant?.title ?? "Explorer"}
         aria-multiselectable
         data-file-keys
         onClick={() => { setSelected(null); setMulti([]); }}
-        onContextMenu={(e) => { e.preventDefault(); setSelected(null); setMulti([]); setMenu({ x: e.clientX, y: e.clientY, entry: null }); }}
+        onContextMenu={(e) => { e.preventDefault(); setSelected(null); setMulti([]); if (!readOnly) setMenu({ x: e.clientX, y: e.clientY, entry: null }); }}
         onKeyDown={onTreeKeyDown}
       >
+        {rows.length === 0 && !creating && children.has(folder) && variant && (
+          <div className="empty-state">{readOnly ? "No scripts here yet." : `Nothing here yet. Use ${variant.labels.newFile} above.`}</div>
+        )}
         {creating && (
           <div className="tree-row" style={{ paddingLeft: 24 }} onClick={(e) => e.stopPropagation()}>
             <input
               autoFocus
               className="input"
               style={{ height: 22, fontSize: 12 }}
-              placeholder={creating.kind === "dir" ? "folder name" : "file name"}
+              placeholder={creating.kind === "dir" ? (variant?.labels.folderPlaceholder ?? "folder name") : (variant?.labels.filePlaceholder ?? "file name")}
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => {
@@ -630,8 +709,9 @@ export function ExplorerPanel() {
                 setSelected(entry.path);
                 // Find in Files' Folder scope searches what was clicked last.
                 pickTargets([entry.path]);
+                if (!entry.isDir) variant?.onSelect?.(entry);
                 if (entry.isDir) toggle(entry.path);
-                else {
+                else if (!variant?.onActivate) {
                   // A single click opens the file but leaves focus here, so Ctrl+C / Ctrl+X /
                   // Delete act on it; double-click (or Enter) goes to the editor.
                   const st = useStore.getState();
@@ -643,6 +723,7 @@ export function ExplorerPanel() {
               onDoubleClick={(e) => {
                 if (entry.isDir || renaming === entry.path) return;
                 e.stopPropagation();
+                if (activate(entry)) return;
                 // Double-click keeps the tab (no longer a preview) and goes to the editor.
                 void openPath(entry.path).then((d) => {
                   if (d?.preview) useStore.getState().updateDoc(d.id, { preview: false });
@@ -658,6 +739,7 @@ export function ExplorerPanel() {
                 e.currentTarget.focus();
                 // A folder's listing tells the menu whether it has subfolders (Expand All).
                 if (entry.isDir) void load(entry.path);
+                else variant?.onSelect?.(entry);
                 setMenu({ x: e.clientX, y: e.clientY, entry });
               }}
             >
@@ -705,16 +787,16 @@ export function ExplorerPanel() {
           <FileMenu
             x={menu.x}
             y={menu.y}
-            paths={paths}
+            paths={readOnly ? [] : paths}
             isDir={isDirPath}
-            pasteDir={dest}
+            pasteDir={readOnly ? null : dest}
             onClose={() => setMenu(null)}
             showInQuarry={false}
             keyHints
             onPasted={(p) => afterPaste(p, dest)}
             onDeleted={afterDelete}
             lead={!e ? (
-              claudeOn && folder ? (
+              claudeOn && folder && !isVariant ? (
                 <>
                   <button className="palette-item" onClick={() => { setMenu(null); void runCommand("claude.openHere", folder); }}><ClaudeMark size={13} className="accent" /><span className="title">Work with Claude Code Here</span></button>
                   <button className="palette-item" onClick={() => { setMenu(null); void runCommand("claude.openTerminal", folder); }}><SquareTerminal size={13} /><span className="title">Claude Code Terminal Here</span></button>
@@ -733,20 +815,21 @@ export function ExplorerPanel() {
                       {hasSubfolders && <button className="palette-item" title="This folder and every folder inside it" onClick={() => void expandAll(e.path)}><ChevronsDown size={13} /><span className="title">Expand All</span></button>}
                       {isOpen && <button className="palette-item" onClick={() => { setMenu(null); toggle(e.path, false); }}><ChevronUp size={13} /><span className="title">Collapse</span><span className="kbd">←</span></button>}
                       {isOpen && openBelow && <button className="palette-item" title="This folder and every expanded folder inside it" onClick={() => collapseAll(e.path)}><ChevronsUp size={13} /><span className="title">Collapse All</span></button>}
-                      <div className="menu-sep" />
+                      {!readOnly && <div className="menu-sep" />}
                     </>
                   );
                 })()}
-                {(inSel || e.isDir) && <button className="palette-item" onClick={() => void openAll(paths)} title={inSel ? "Open each selected file in its own tab (and the files in selected folders)" : "Open each file in this folder in its own tab"}><Files size={13} /><span className="title">Open All Files</span></button>}
-                {e.isDir && !inSel && claudeOn && (
+                {!inSel && variant?.menuLead?.(e, () => setMenu(null))}
+                {!readOnly && (inSel || e.isDir) && <button className="palette-item" onClick={() => void openAll(paths)} title={inSel ? "Open each selected file in its own tab (and the files in selected folders)" : "Open each file in this folder in its own tab"}><Files size={13} /><span className="title">Open All Files</span></button>}
+                {e.isDir && !inSel && claudeOn && !isVariant && (
                   <button className="palette-item" onClick={() => { setMenu(null); void runCommand("claude.openHere", e.path); }}><ClaudeMark size={13} className="accent" /><span className="title">Work with Claude Code Here</span></button>
                 )}
-                {e.isDir && !inSel && claudeOn && (
+                {e.isDir && !inSel && claudeOn && !isVariant && (
                   <button className="palette-item" onClick={() => { setMenu(null); void runCommand("claude.openTerminal", e.path); }}><SquareTerminal size={13} /><span className="title">Claude Code Terminal Here</span></button>
                 )}
-                <button className="palette-item" onClick={() => findIn(paths)}><Search size={13} /><span className="title">{inSel ? `Find in Selected (${paths.length})` : e.isDir ? "Find in Folder" : "Find in File"}</span></button>
-                {!inSel && <button className="palette-item" onClick={() => startRename(e)}><Pencil size={13} /><span className="title">Rename</span><span className="kbd">F2</span></button>}
-                <div className="menu-sep" />
+                {!isVariant && <button className="palette-item" onClick={() => findIn(paths)}><Search size={13} /><span className="title">{inSel ? `Find in Selected (${paths.length})` : e.isDir ? "Find in Folder" : "Find in File"}</span></button>}
+                {!inSel && !readOnly && <button className="palette-item" onClick={() => startRename(e)}><Pencil size={13} /><span className="title">Rename</span><span className="kbd">F2</span></button>}
+                {!readOnly && <div className="menu-sep" />}
               </>
             )}
           />

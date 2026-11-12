@@ -1,4 +1,4 @@
-import { ExternalLink, Globe, Lock, Pencil, UserPlus, X } from "lucide-react";
+import { ChevronRight, ExternalLink, Globe, Lock, Pencil, UserPlus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { chooseGithub, createOnGithub, githubSignIn, loadGithub, loadIdentity, loadRemoteInfo, saveIdentity, saveRemote, useGit } from "../../lib/git";
 import type { GitRemote, GitStatus } from "../../lib/gitApi";
@@ -160,7 +160,7 @@ function RemoteForm({ repo, change, onCancel }: { repo: GitStatus; change?: GitR
 function GithubTarget() {
   const github = useGit((s) => s.github);
   const text = github?.chosen
-    ? `Created on the GitHub account ${github.chosen} (shown under Your identity).`
+    ? `Created on the GitHub account ${github.chosen} (shown under Repository).`
     : "Created on your GitHub account; Git Credential Manager asks you to sign in first.";
   return <div className="scm-hint">{text}</div>;
 }
@@ -253,9 +253,38 @@ export function RepoSettings({ repo }: { repo: GitStatus }) {
   // The GitHub account matters when a repository may be created there or a remote is on GitHub.
   const onGithub = showForm || repo.remotes.some((r) => /github\.com[:/]/i.test(r.url));
   const where = (scope: string | null) => (scope === "local" ? "this repository" : scope === "global" ? "all your repositories" : (scope ?? "git"));
+  // Set-once details: closed by default, open by itself while something is missing or being changed.
+  const [opened, setOpened] = useState(false);
+  const needed = missing || showForm || editId || !!editRemote;
+  const open = opened || needed;
+  const first = repo.remotes[0];
+  const firstInfo = useGit((s) => (first ? s.remoteInfo[first.url] : undefined));
+  const summary = [id?.name, first ? `${first.name}${firstInfo ? ` (${firstInfo.private ? "private" : "public"})` : ""}${repo.remotes.length > 1 ? ` +${repo.remotes.length - 1}` : ""}` : "no remote"].filter(Boolean).join(" · ");
 
   return (
-    <div className="panel-section scm-repo">
+    <div className="scm-section scm-repo-section" role="group" aria-label="Repository">
+      <div
+        className="scm-section-head"
+        role="button"
+        tabIndex={0}
+        aria-expanded={open}
+        title={needed ? "Something here needs you" : "Who you commit as, your GitHub account and this repository's remotes"}
+        onClick={() => !needed && setOpened(!opened)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            if (!needed) setOpened(!opened);
+          }
+        }}
+      >
+        <span className={`tree-chevron ${open ? "open" : ""}`}>
+          <ChevronRight size={14} />
+        </span>
+        <span>Repository</span>
+        {!open && <span className="scm-repo-summary truncate">{summary}</span>}
+      </div>
+      {/* Kept mounted while closed: the remote's Private / Public badge loads from here. */}
+      <div className="panel-section scm-repo" hidden={!open}>
       <div className="scm-group">Your identity</div>
       {id &&
         (missing || editId ? (
@@ -297,6 +326,7 @@ export function RepoSettings({ repo }: { repo: GitStatus }) {
         );
       })}
       {showForm && <RemoteForm key={`add:${repo.root}`} repo={repo} onCancel={repo.remotes.length ? () => useGit.setState({ addingRemote: false }) : undefined} />}
+      </div>
     </div>
   );
 }
