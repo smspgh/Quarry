@@ -1,0 +1,76 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Quarry",
+  "version": "0.1.0",
+  "identifier": "com.quarry.app",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Quarry",
+        "width": 1280,
+        "height": 820,
+        "minWidth": 720,
+        "minHeight": 400,
+        "decorations": false,
+        "transparent": true,
+        "shadow": true,
+        "center": true,
+        "dragDropEnabled": true,
+        "windowEffects": {
+          "effects": [
+            "mica",
+            "tabbed"
+          ]
+        }
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self' ipc: http://ipc.localhost; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; worker-src 'self' blob:; connect-src 'self' ipc: http://ipc.localhost",
+      "dangerousDisableAssetCspModification": [
+        "style-src"
+      ]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": true,
+    "targets": [
+      "nsis",
+      "msi"
+    ],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "installerHooks": "./windows/hooks.nsh"
+      }
+    },
+    "publisher": "Steve Shirey",
+    "copyright": "Copyright (c) 2026 Steve Shirey",
+    "category": "DeveloperTool",
+    "shortDescription": "Fast text, JSON and large-file editor",
+    "longDescription": "Quarry is a Windows text editor that opens multi-gigabyte files instantly, with JSON tools, find in files, scripts and macros."
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEVFMURBREU3NjNEQjEwRkQKUldUOUVOdGo1NjBkN3BZMjdnVmtGbm9YcTBZKytNUEtNai8yN1FHN3NJR0NqVGZ6TTN6V3A3UUQK",
+      "endpoints": [
+        "https://github.com/smspgh/quarry-releases/releases/latest/download/latest.json"
+      ],
+      "windows": { "installMode": "passive" }
+    }
+  }
+}

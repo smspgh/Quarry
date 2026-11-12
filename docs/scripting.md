@@ -1,0 +1,190 @@
+# Scripts
+
+A Quarry script is a plain JavaScript file that transforms the current document: reorder lines, rewrite selections, pull values out of CSV, reshape JSON, and so on. Scripts run in a sandboxed Web Worker, and whatever a script changes is applied back to the editor as **one undo step**.
+
+- [Where scripts live](#where-scripts-live)
+- [Writing and running a script](#writing-and-running-a-script)
+- [How a script runs](#how-a-script-runs)
+- [API reference](#api-reference)
+- [Limiting a script to certain files](#limiting-a-script-to-certain-files)
+- [Sandbox and limits](#sandbox-and-limits)
+- [Errors and the Console](#errors-and-the-console)
+- [Examples](#examples)
+
+## Where scripts live
+
+Each script is one `.js` file in the scripts folder. The file name without `.js` is the script's name.
+
+- Default folder: `%APPDATA%\com.quarry.app\scripts` (created on first use).
+- Change it in **Settings › Folders › Scripts folder**, or with the folder button in the Scripts panel. If a custom folder can't be used, Quarry falls back to the default and says so.
+- Only `*.js` files directly in the folder are loaded. Subfolders are ignored.
+- The list reloads by itself when Quarry regains focus, as long as you have no unsaved scripts. So you can also edit scripts in another editor.
+
+Quarry ships with no scripts. Common conversions (JSON ↔ CSV, listing keys) are built-in [JSON commands](json.md#converting-between-json-and-csv) instead.
+
+## Writing and running a script
+
+Open the panel with **Scripts › Open Scripts**, or from the command palette (**Script: Open Scripts**).
+
+| Action | How |
+| --- | --- |
+| New script | **+** in the panel, or **Scripts › New Script**. It starts as an unsaved draft. |
+| Edit | Select it; the source opens in the panel's small editor. Unsaved scripts show `•`. |
+| Rename | Click the name in the list and type. |
+| Save | **Save** writes `<name>.js`. Nothing touches disk before that. Renaming a saved script deletes the old file on save. |
+| Duplicate / Delete | Buttons on the list item. Delete asks first and removes the file. |
+| API reference | The book icon in the panel. |
+| Run on the current document | **Run**, **Ctrl+Shift+Enter** (runs the script selected in the panel), or **Scripts › *name* › Run**. |
+| Run several times | **Run ×N** (1 to 100,000; each run is its own undo step, stops at the first error). |
+| Run until nothing changes | **To end** repeats until a run leaves both the text and the selection unchanged, up to 10,000 runs. |
+| Cancel | The panel's **Cancel** button, or the stop button beside **SCRIPT** in the status bar. |
+
+By default, a script started from a menu or shortcut first asks **Run / Review first / Cancel**. **Review first** opens the script in its panel without running it. Turn the prompt off with **Settings › Confirm script & macro runs**.
+
+Scripts run on regular text tabs only, not on files open in [large-file mode](large-files.md). Only one script runs at a time.
+
+## How a script runs
+
+When you run a script, Quarry takes a snapshot of the current document: its text, every selection range (including multi-cursor and column selections), its name, path and line ending, and the clipboard text. The script works on that snapshot in a worker. When it finishes, Quarry applies the result:
+
+1. **If the script assigned to `selection`** (`selection.text`, `selection.lines` or `selection.map`), those selection replacements are applied. A script can't change both `doc` and `selection` in one run, because selection offsets refer to the original text. If it does, nothing is applied and the Console explains why.
+2. **Otherwise, if the document text changed**, the new text replaces the old. Quarry only rewrites the part that actually changed.
+3. **Otherwise, if the script returned a string**, that string replaces the document.
+4. Then `doc.select(from, to)`, if called, sets the selection in the new text.
+
+Either way the edit is one transaction, so a single **Ctrl+Z** undoes it.
+
+If you switch to another tab while a script is running, its changes are not applied, and a message tells you so.
+
+The script body is wrapped in an `async` function in strict mode, so top-level `await` and `return` are allowed. `doc`, `selection`, `util`, `clipboard`, `console` and `args` are its parameters.
+
+## API reference
+
+### `doc`
+
+| Member | Description |
+| --- | --- |
+| `doc.text` | The whole text. Read it or assign a new string. |
+| `doc.lines` | The text as an array of lines. Assigning joins them with `doc.eol`. |
+| `doc.lineCount` | Number of lines. |
+| `doc.length` | Number of characters (UTF-16 code units). |
+| `doc.name` | File name, e.g. `data.csv`. Read-only in practice; assigning it does nothing. |
+| `doc.path` | Full path, or `null` for an unsaved document. |
+| `doc.eol` | The line ending in use, as the actual characters: `"\r\n"`, `"\n"` or `"\r"`. |
+| `doc.mapLines((line, i) => …)` | Replaces every line with the function's result. Return `null` or `undefined` to delete the line. `i` is 0-based. |
+| `doc.filterLines((line, i) => bool)` | Keeps only the lines where the function returns a truthy value. |
+| `doc.replace(pattern, replacement)` | A **string** pattern replaces *every* occurrence (matched literally). A **RegExp** is used as given, so add the `g` flag to replace all matches. `replacement` may be a string (`$1`, `$&`, …) or a function, as in `String.prototype.replace`. |
+| `doc.insert(offset, text)` | Inserts text at a character offset. |
+| `doc.append(text)` / `doc.prepend(text)` | Adds text at the end / start. |
+| `doc.lineAt(offset)` | 1-based line number of a character offset in the current text. |
+| `doc.select(from, to)` | Sets the selection after the run. Offsets refer to the new text. |
+
+`doc.lines`, `mapLines` and `filterLines` split on any line ending and join with `doc.eol`, so they also normalise mixed line endings.
+
+### `selection`
+
+| Member | Description |
+| --- | --- |
+| `selection.all` | Array of `{ from, to, text }`, one per selection range or cursor, with offsets in the original document. |
+| `selection.text` | All selected text, joined with `doc.eol`. Assigning with **one** range replaces it; with **several** ranges, the new value is split into lines and line *i* goes into range *i* (missing lines become empty). |
+| `selection.lines` | `selection.text` as an array of lines. Assigning joins them and assigns `selection.text`. |
+| `selection.isEmpty` | `true` when every range is an empty cursor. |
+| `selection.map((text, i, range) => …)` | Replaces each range with the function's result, independently. |
+
+Assigning to an empty cursor inserts text at the cursor.
+
+### `util`
+
+| Function | Description |
+| --- | --- |
+| `util.sort(lines, { numeric, desc, caseInsensitive })` | Returns a new sorted array using locale-aware comparison. `numeric` sorts `2` before `10`; `caseInsensitive` also ignores accents. |
+| `util.unique(lines)` | Removes duplicates, keeping the first occurrence and the original order. |
+| `util.trimLines(lines)` | Removes trailing whitespace from each line. |
+| `util.pad(text, width, ch = " ")` | Left-pads to `width`. |
+| `util.csvSplit(line, delim = ",")` | Splits one CSV line, honouring quotes and `""`. Does not handle line breaks inside quoted cells. |
+| `util.json.parse(s)` | `JSON.parse`. |
+| `util.json.stringify(value, indent = 2)` | `JSON.stringify` with indentation. |
+
+### `clipboard`, `console`, `args`, `return`
+
+| Member | Description |
+| --- | --- |
+| `clipboard.text` | Clipboard text read just before the run (empty if it holds no text). Assign to write it to the clipboard after a successful run. |
+| `console.log / info / warn / error` | Writes to the Console panel. Objects are printed as JSON. Output appears when the script finishes. |
+| `args` | Reserved for passing values to a script. Runs started from the UI pass `undefined`. |
+| `return "…"` | A returned string replaces the document, unless the script assigned to `selection` (see [How a script runs](#how-a-script-runs)). Other return values are ignored. |
+
+## Limiting a script to certain files
+
+Header comments in the first 20 lines restrict where a script can run:
+
+```js
+// @languages JSON, YAML
+// @extensions .csv, .tsv
+```
+
+- `@languages` matches the language shown in the status bar, **exactly and case-sensitively** (`JSON`, `JavaScript`, `TypeScript`, `YAML`, …). Values are separated by commas or spaces, so a two-word language name such as `Plain Text` can't be used. There is no CSV language; use `@extensions .csv` for CSV files.
+- `@extensions` matches the end of the file name, ignoring case.
+- If both are given, matching **either** is enough.
+- A script with neither tag runs on any text document.
+
+A script that doesn't apply is greyed out in the **Scripts** menu with a note such as "JSON / YAML only", and running it anyway shows a message. The header is read when scripts load or are saved, so save after changing it.
+
+## Sandbox and limits
+
+- Scripts run in a dedicated Web Worker with no DOM and no access to the editor, the file system or Quarry's internal APIs. They only see the snapshot described above.
+- The app's Content Security Policy limits network connections to the app itself.
+- A run is stopped after **60 seconds**. The worker is then restarted, and anything the script logged is lost.
+- The worker is reused between runs, so a value a script stores on `globalThis` stays there until a timeout or cancel restarts it. Don't rely on either behaviour.
+
+## Errors and the Console
+
+A run opens the **Console** tab of the bottom panel (**Ctrl+J** toggles it). It shows `▶ Running script on <file>`, the script's output, then `✓ Done in N ms` or the error. When the error comes from a line of your script, the toast and the Console give the line number (`script:12:5`). The Console keeps the last 2,000 lines.
+
+## Examples
+
+Sort lines, numbers in natural order, and drop duplicates:
+
+```js
+doc.lines = util.unique(util.sort(doc.lines, { numeric: true }));
+```
+
+Remove blank lines and trailing whitespace:
+
+```js
+doc.lines = util.trimLines(doc.lines).filter(l => l !== "");
+```
+
+Upper-case every selection (works with multi-cursor and column mode):
+
+```js
+selection.map(t => t.toUpperCase());
+```
+
+Number the lines of the selection:
+
+```js
+selection.lines = selection.lines.map((l, i) => `${i + 1}. ${l}`);
+```
+
+Keep only the second column of a CSV file:
+
+```js
+// @extensions .csv
+doc.mapLines(line => util.csvSplit(line)[1] ?? "");
+```
+
+Wrap each line in quotes and join them with commas, ready for an SQL `IN (...)` list, and copy the result:
+
+```js
+const list = doc.lines.filter(Boolean).map(l => `'${l.replace(/'/g, "''")}'`).join(", ");
+clipboard.text = list;
+console.log(`Copied ${doc.lineCount} values`);
+```
+
+Pretty-print every JSON object in a JSON Lines file:
+
+```js
+// @extensions .jsonl, .ndjson
+doc.mapLines(line => line.trim() ? util.json.stringify(util.json.parse(line), 0) : null);
+```

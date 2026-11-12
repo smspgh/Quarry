@@ -1,0 +1,42 @@
+# Git
+
+Quarry works with git repositories through the `git` command line (Git for Windows), so it uses your own git configuration, hooks and credentials. If git isn't on PATH, the Source Control panel says so.
+
+A repository is picked up when the open folder, or any open file, is inside one. Status refreshes by itself after saves, file changes in the open folder, git actions, and when the Quarry window gets focus. **Git › Refresh Git Status** forces it (for example after `git init` in a terminal).
+
+## In the editor
+
+- **Change markers.** A thin bar in the gutter, next to the line numbers, marks lines that differ from the last commit (HEAD): green for added lines, blue for changed lines, and a red wedge where lines were deleted. The markers follow your typing; they compare the text on screen, saved or not.
+- **Peek and revert.** Click a marker to see the committed text of that change. The peek has **↑ / ↓** to move between changes, **Revert** to put the committed lines back (one undo step), and **✕** or **Escape** to close it.
+- **Keyboard.** **Alt+F5** / **Shift+Alt+F5** go to the next / previous change and open its peek. **Git › Show Change at Cursor** and **Git › Revert Change at Cursor** act on the change under the cursor.
+- **Line blame.** **Git › Show Line Blame** shows who last changed the cursor line, when, and the commit summary, at the end of the line; hover it for the commit id, e-mail and date. Lines you have changed show *not committed yet*. Blame follows unsaved edits (it is asked again a moment after you stop typing). The same command hides it.
+- **Compare with Last Commit** (Git menu, tab right-click menu) opens a [Compare](compare.md) tab with the HEAD version on the left and your tab, editable, on the right.
+
+## Source Control panel
+
+Open it from the rail (branch icon), **Git › Show Source Control** or **Ctrl+Shift+G**.
+
+- **Branch.** The button at the top shows the current branch (or the commit, when HEAD is detached). Click it to switch branches; see below. A badge shows a merge, rebase, cherry-pick or revert in progress.
+- **Commit.** Type the message and click **Commit** or press **Ctrl+Enter**. With nothing staged the button reads **Commit All** and asks before staging every change. **Amend** replaces the last commit; with the message box empty it keeps the old message. Unsaved changes in open tabs are not part of a commit; Quarry warns when there are some.
+- **Merge Changes / Staged Changes / Changes.** Files with conflicts, files staged for the next commit, and files changed but not staged (including new, untracked files). A file staged and then changed again is in both lists. The letter on the right is the change: **M** modified, **A** added, **D** deleted, **R** renamed, **U** untracked, **!** conflict.
+  - Click a file to see its change in a Compare tab: in Staged Changes HEAD against what is staged, in Changes what is staged (or HEAD) against the working copy. New files just open. Double-click to open the file itself.
+  - Hover a row (or a section heading, for all its files) for **Stage (+)**, **Unstage (−)**, **Discard** and **Open file**. Discard asks first; it restores the staged / committed version, and an untracked file goes to the Recycle Bin. Staging a conflicted file marks it resolved.
+- **Sync with the remote.** Under the branch, a status line says where the branch stands against its remote: **Up to date**, **N commits to pull** (Pull), **N commits to push** (Push), **Diverged** (both: **Pull (Merge)** joins the histories with a merge commit, **Pull (Rebase)** replays your commits on top of the remote's; push after either), **not on the remote yet** (Publish Branch), **no longer exists on the remote** (Push to Recreate It), or, when the remote repository itself is gone (deleted, renamed, or not visible to your account), **Create It on GitHub** / **Change URL**. To keep this true, the panel fetches the branch's remote by itself when it opens and when Quarry gets focus, at most once a minute (the ↻ button checks now). That fetch only updates git's copy of the remote's branches, never your files or branches, and it never asks you to sign in: if it can't reach the remote or needs a sign-in, the line says so and **Fetch** tries in the open.
+- **Fetch, Pull, Push** are the cloud, ↓ and ↑ buttons in the panel header (also in the Git menu). Push publishes a branch that has no upstream yet to `origin` (or the only remote). Sign-in prompts come from Git Credential Manager in their own window; SSH keys that need a passphrase must be loaded in an agent (Quarry can't show an SSH prompt).
+- **Your identity and remotes.** Under the commit box, *Your identity* shows **Commits as** (git's `user.name` / `user.email`, saved in every commit) and, when GitHub is involved, **GitHub**: the account Git Credential Manager is signed in to, which new repositories are created under. GitHub links your commits to that account when the *Commits as* email is one of its emails. With several accounts signed in, pick one there (Quarry remembers it); the person icon signs in to another account in GCM's window, and **Sign in** appears when there is none. *Remote* lists each remote with its URL; a GitHub remote also shows **Private** or **Public** (read from GitHub with your stored sign-in, never asking you to sign in; without a sign-in only public repositories can be seen, and an unknown one shows no badge). The "already exists" offer and the message after creating a repository say which it is too. The pencil changes them; the arrow opens the remote's page on GitHub (or GitLab, Bitbucket…).
+  - When git has no name or email yet, a form asks for them first. They are saved for all your repositories, or with **Only this repository** for this one alone (a save for all repositories also drops this repository's own values).
+  - When the repository has no remote, a form offers a choice, **Create a new repository on GitHub**: a repository name (the folder's name to start with) and **Private**, then **Create and Push** makes the repository on your GitHub account, adds it as `origin` and publishes the current branch there. It uses the GitHub sign-in Git already keeps for pushing (Git Credential Manager opens its sign-in window if there is none); the sign-in never leaves Quarry's Rust side except to GitHub. If your account already has a repository with that name, Quarry says whether it is empty and offers to use it (**Use It and Push**) instead; one that already has commits only takes the push when they are part of this repository's history, and nothing on GitHub is overwritten. **Use an existing repository's URL** adds a repository you already have instead. Push, Pull and Fetch point you to this form instead of failing; **Git › Add Remote…** adds another remote later.
+  - **Changing a remote** points it at another URL, or at a new repository created on GitHub (for example to carry the project on in a new repository). The old repository is left as it is; **Save and Push** (or **Create and Push**) publishes your branch to the new one and tracks it.
+- **More than one repository** (the folder and a file from elsewhere): a picker at the top chooses which one the panel shows. It follows the open folder by default.
+
+## Branches
+
+**Git › Switch Branch…**, the panel's branch button or the branch in the status bar open a list of branches: local ones first, then remote ones (marked *remote*), the current one marked *current*. Pick one to switch to it; a remote branch is checked out as a new local branch tracking it. Type a name that doesn't exist and pick **Create branch "…" from here** to create it from the current commit and switch to it. Git refuses a switch that would overwrite uncommitted changes; the message says which files.
+
+## File history
+
+**Git › Show File History** (or **Show File History** on a tab's right-click menu) lists the commits that changed the active file, newest first, following renames. It appears at the bottom of the Source Control panel. Click a commit to see what it changed in the file; the compare button on its row compares that version with the current file. **Show more** loads older commits.
+
+## Explorer and status bar
+
+Changed files in the Explorer are coloured and carry their letter (M, A, U, …); a folder holding changes gets a dot. The status bar shows the branch of the active file's repository (with `*` when there are changes, and ↓ / ↑ counts); click it to switch branches.
