@@ -42,7 +42,35 @@ Under the changes, **Commits** lists the branch's commits, newest first (30 at a
 - Click a file there to open a [Compare tab](compare.md) of what that commit changed in it; double-click opens the file as it is now.
 - Hover a commit for its full id, author and date.
 
-This is a list, not a branch graph: it follows the current branch only, and a merge commit shows what it changed against its first parent.
+The header also counts commits **to pull**, and its graph button opens the commit graph (below). This list stays a quick checklist of the current branch; a merge commit shows what it changed against its first parent.
+
+## Commit graph
+
+**Git › Show Commit Graph** (or the graph button on the Commits section) opens the repository's history in a full-width tab, so nothing is squeezed into the side panel.
+
+- **The graph.** Each commit is a dot on its branch's line; lines fork where a branch starts and join where it is merged. A branch's own line stays in its lane, and a lane is reused as soon as its branch ends, which keeps the graph narrow. Columns show the message, author, date and short id.
+- **Labels.** The branch you are on is a filled label; other local branches are outlined, remote branches (`origin/main`) dashed, tags tinted. Where `main` and `origin/main` sit on different commits, the ones between them are what you have to push or pull.
+- **Current branch / All branches.** *Current branch* shows your branch and the remote branch it tracks (so incoming commits appear too). *All branches* shows every branch and tag.
+- **Find** (Ctrl+F) searches the commits loaded so far by message, author, email, id or branch name: matches stay bright, **Enter** / **Shift+Enter** step through them.
+- **Details.** Click a commit (or move with the arrow keys) to see it in the pane below: the full id (with a copy button), the whole message, author and date, its parents (click one to jump to it), and the files it changed with a summary of lines added and removed. Click a file to open a [Compare tab](compare.md) of what the commit changed in it. Drag the pane's top edge to resize it.
+- **Loading.** Commits load 300 at a time as you scroll, in the background; the rest of Quarry, including the Source Control panel, never waits for the graph. Only the rows on screen are drawn.
+
+Right-click a commit for the actions:
+
+| Action | What it does |
+| --- | --- |
+| Copy Commit Id / Copy Message | To the clipboard. |
+| Switch to *branch* | For each branch label on that commit. A remote branch gets a local branch that tracks it. |
+| Create Branch Here… | A new branch starting at that commit, and switches to it. |
+| Create Tag Here… | A tag on that commit. |
+| Check Out This Commit… | Your files become that commit, on no branch ("detached"). Switch back with the branch button. |
+| Cherry-pick onto *branch*… | Copies that commit's changes onto your branch as a new commit. |
+| Revert This Commit… | Adds a commit that undoes it; history is kept. |
+| Reset *branch* to Here (Soft / Mixed / Hard)… | Moves your branch back to that commit. **Soft** keeps the later changes staged, **Mixed** keeps them in your files unstaged, **Hard** discards them along with uncommitted changes to tracked files. |
+
+Everything that moves your branch or files asks first and says what will happen. A cherry-pick or revert that hits a conflict stops part-way: Source Control shows the operation (**Cherry-picking**) with the conflicted files under **Merge Changes**. Resolve and commit them, or press **Abort** beside the branch to go back to how things were. Abort also works for a merge or rebase that stopped.
+
+Not in the graph: dropping a commit from the middle of a branch and interactive rebase.
 
 ## File history
 

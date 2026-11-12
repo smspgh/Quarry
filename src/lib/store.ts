@@ -9,7 +9,7 @@ export type PaletteMode = "commands" | "files" | "goto" | "language" | "encoding
 
 export interface Doc {
   id: string;
-  kind: "text" | "big" | "claude" | "terminal" | "diff";
+  kind: "text" | "big" | "claude" | "terminal" | "diff" | "graph";
   path: string | null;
   name: string;
   dirty: boolean;
@@ -36,6 +36,8 @@ export interface Doc {
   claude?: { cwd: string; sessionId?: string };
   /** Terminal tab running the `claude` command line in this folder (not kept in the session). */
   terminal?: { cwd: string; resume?: string; command?: string };
+  /** Commit graph tab of this repository (not kept in the session). */
+  graph?: { root: string };
 }
 
 export interface Toast {

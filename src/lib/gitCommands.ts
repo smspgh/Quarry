@@ -2,7 +2,7 @@
 import { editor } from "../editor/manager";
 import { changeAtLine, changeRows, changesOf, revertChange, setPeek } from "../editor/git";
 import { register } from "./commands";
-import { compareWithHead, currentRepo, checkout, fileStatus, pickBranch, refreshGit, remote, repoOf, showAddRemote, showHistory, stage, toggleBlame, unstage, useGit } from "./git";
+import { compareWithHead, currentRepo, checkout, openGraph, fileStatus, pickBranch, refreshGit, remote, repoOf, showAddRemote, showHistory, stage, toggleBlame, unstage, useGit } from "./git";
 import { showPanel } from "./panels";
 import { activeDoc, useStore } from "./store";
 
@@ -49,6 +49,7 @@ function changeAtCursor() {
 export function registerGitCommands() {
   const hasRepo = () => !!currentRepo();
   register({ id: "git.showPanel", title: "Show Source Control", category: "Git", keys: "Ctrl+Shift+G", run: () => showPanel("git") });
+  register({ id: "git.graph", title: "Show Commit Graph", category: "Git", enabled: hasRepo, run: () => openGraph() });
   register({ id: "git.refresh", title: "Refresh Git Status", category: "Git", run: () => refreshGit(0) });
   register({ id: "git.switchBranch", title: "Switch Branch…", category: "Git", enabled: hasRepo, run: () => void pickBranch() });
   register({ id: "git.checkoutTo", title: "Switch to Branch", category: "Git", hidden: true, run: (name) => void (typeof name === "string" && checkout(name)) });

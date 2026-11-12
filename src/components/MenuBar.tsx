@@ -238,6 +238,7 @@ const MENUS: Menu[] = [
     label: "Git",
     items: () => [
       { cmd: "git.showPanel" },
+      { cmd: "git.graph" },
       { cmd: "git.refresh" },
       { sep: true },
       { cmd: "git.compareWithHead" },

@@ -177,6 +177,7 @@ These need the file's [language server](code-intelligence.md).
 | – | Show Change at Cursor / Revert Change at Cursor | `git.peekChange` / `git.revertChange` |
 | – | Compare with Last Commit (HEAD) | `git.compareWithHead` |
 | – | Show File History | `git.fileHistory` |
+| – | Show Commit Graph | `git.graph` |
 | – | Show / Hide Line Blame | `git.toggleBlame` |
 | – | Stage / Unstage Current File | `git.stageFile` / `git.unstageFile` |
 | – | Switch Branch… | `git.switchBranch` |

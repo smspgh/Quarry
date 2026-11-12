@@ -1,7 +1,7 @@
-import { ArrowDown, ArrowUp, Check, ChevronRight, CircleDot, CloudDownload, CloudOff, FileDiff, FileText, GitBranch, History, Minus, Plus, RefreshCw, TriangleAlert, Undo2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, ChevronRight, CircleDot, CloudDownload, CloudOff, FileDiff, FileText, GitBranch, GitGraph, History, Minus, Plus, RefreshCw, TriangleAlert, Undo2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { openPath } from "../../lib/actions";
-import { checkRemote, isMissingRepo, commit, compareCommitWithCurrent, currentRepo, discard, moreHistory, openChange, openCommitChange, openCommitFile, pickBranch, remote, rescanGit, stage, unstage, useGit } from "../../lib/git";
+import { abortOperation, checkRemote, isMissingRepo, commit, compareCommitWithCurrent, currentRepo, discard, moreHistory, openChange, openCommitChange, openCommitFile, openGraph, pickBranch, remote, rescanGit, stage, unstage, useGit } from "../../lib/git";
 import { commitFileKind, commitLabel, groupFiles, KIND_LABEL, KIND_LETTER, rowKind, syncLine, type Group } from "../../lib/gitStatus";
 import { git, type GitCommitFile, type GitFile, type GitLogEntry, type GitRemoteOp, type GitStatus } from "../../lib/gitApi";
 import { relativeTime } from "../../editor/git";
@@ -169,6 +169,13 @@ function CommitsSection({ repo }: { repo: GitStatus }) {
         </span>
         <span>Commits</span>
         {unpushed.size > 0 && <span className="scm-count" title={`${unpushed.size} not on ${repo.upstream} yet`}>{unpushed.size} to push</span>}
+        {repo.behind > 0 && <span className="scm-count" title={`${repo.behind} on ${repo.upstream} that you don't have yet: open the graph to see them`}>{repo.behind} to pull</span>}
+        <span className="grow" />
+        <span className="scm-actions always" onClick={(e) => e.stopPropagation()}>
+          <button className="icon-btn xs" title="Open the commit graph in a tab: every branch, full details, and actions on commits" onClick={() => openGraph(repo.root)}>
+            <GitGraph size={14} />
+          </button>
+        </span>
       </div>
       {open && (
         <>
@@ -471,7 +478,12 @@ export function GitPanel() {
               <button className="btn small" title="Switch branch or create one" disabled={!!busy} onClick={() => void pickBranch()}>
                 <GitBranch size={13} /> <span className="truncate">{branchLabel}</span>
               </button>
-              {repo.operation && <span className="scm-op">{OPERATION[repo.operation] ?? repo.operation}</span>}
+              {repo.operation && <span className="scm-op" title="Stopped part-way, usually on a conflict: resolve the files under Merge Changes and commit, or abort">{OPERATION[repo.operation] ?? repo.operation}</span>}
+              {repo.operation && (
+                <button className="btn small" disabled={!!busy} title={`Give up the ${repo.operation} and go back to how things were before it`} onClick={() => void abortOperation(repo.root, repo.operation!)}>
+                  Abort
+                </button>
+              )}
               {busy && <span className="muted scm-busy">{busy}</span>}
             </div>
             <SyncStatus repo={repo} />

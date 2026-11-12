@@ -1135,6 +1135,171 @@ fn unpushed(root: &Path) -> Vec<String> {
     }
 }
 
+// ---------- commit graph ----------
+
+#[derive(Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct GitGraphCommit {
+    pub sha: String,
+    pub short: String,
+    pub parents: Vec<String>,
+    pub author: String,
+    pub email: String,
+    pub time: i64,
+    /// Full ref names pointing here: `HEAD`, `refs/heads/main`, `refs/remotes/origin/main`,
+    /// `refs/tags/v1` (a `HEAD -> x` decoration becomes `HEAD` and `x`).
+    pub refs: Vec<String>,
+    pub summary: String,
+}
+
+fn parse_graph(out: &[u8]) -> Vec<GitGraphCommit> {
+    let text = String::from_utf8_lossy(out);
+    let mut list = Vec::new();
+    for rec in text.split('\x1e').filter(|r| !r.is_empty()) {
+        let f: Vec<&str> = rec.split('\0').collect();
+        if f.len() < 8 {
+            continue;
+        }
+        let mut refs = Vec::new();
+        for d in f[6].split(", ").map(str::trim).filter(|d| !d.is_empty()) {
+            if let Some(target) = d.strip_prefix("HEAD -> ") {
+                refs.push("HEAD".to_string());
+                refs.push(target.to_string());
+            } else {
+                refs.push(d.strip_prefix("tag: ").unwrap_or(d).to_string());
+            }
+        }
+        list.push(GitGraphCommit {
+            sha: f[0].to_string(),
+            short: f[1].to_string(),
+            parents: f[2].split(' ').filter(|p| !p.is_empty()).map(str::to_string).collect(),
+            author: f[3].to_string(),
+            email: f[4].to_string(),
+            time: f[5].parse().unwrap_or(0),
+            refs,
+            summary: f[7].trim_end_matches(['\n', '\r']).to_string(),
+        });
+    }
+    list
+}
+
+/// One page of the commit graph, children before parents, newest first. `all`: every branch and
+/// tag; otherwise the current branch and its upstream (so commits to pull show too).
+fn graph(root: &Path, all: bool, skip: u32, limit: u32) -> Result<Vec<GitGraphCommit>, String> {
+    if !has_head(root) {
+        return Ok(Vec::new());
+    }
+    let skip_arg = format!("--skip={skip}");
+    let limit_arg = format!("--max-count={}", limit.clamp(1, 2000));
+    let mut args = vec!["log", "-z", "--date-order", "--decorate=full", "--format=%x1e%H%x00%h%x00%P%x00%an%x00%ae%x00%at%x00%D%x00%s", &skip_arg, &limit_arg];
+    if all {
+        args.extend(["--exclude=refs/stash", "--all", "HEAD"]);
+    } else {
+        args.push("HEAD");
+        if run(root, true, &["rev-parse", "--verify", "--quiet", "@{upstream}"], None).is_ok() {
+            args.push("@{upstream}");
+        }
+    }
+    let out = run(root, true, &args, None)?;
+    Ok(parse_graph(&out))
+}
+
+/// Everything the details pane shows for one commit.
+#[derive(Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct GitCommitDetail {
+    pub sha: String,
+    pub parents: Vec<String>,
+    pub author: String,
+    pub email: String,
+    pub time: i64,
+    pub committer: String,
+    pub committer_email: String,
+    pub commit_time: i64,
+    /// The whole message (subject and body).
+    pub message: String,
+    /// git's summary line: "3 files changed, 10 insertions(+), 2 deletions(-)" ("" when nothing changed).
+    pub stat: String,
+    pub files: Vec<GitCommitFile>,
+}
+
+fn commit_detail(root: &Path, sha: &str) -> Result<GitCommitDetail, String> {
+    if !is_sha(sha) {
+        return Err("not a commit id".into());
+    }
+    let head = run_text(root, true, &["show", "-s", "--format=%H%x00%P%x00%an%x00%ae%x00%at%x00%cn%x00%ce%x00%ct%x00%B", sha])?;
+    let f: Vec<&str> = head.splitn(9, '\0').collect();
+    if f.len() < 9 {
+        return Err("unexpected output from git show".into());
+    }
+    let stat = run_text(root, true, &["show", "--format=", "--shortstat", "--diff-merges=first-parent", sha]).unwrap_or_default();
+    Ok(GitCommitDetail {
+        sha: f[0].trim().to_string(),
+        parents: f[1].split(' ').filter(|p| !p.is_empty()).map(str::to_string).collect(),
+        author: f[2].to_string(),
+        email: f[3].to_string(),
+        time: f[4].parse().unwrap_or(0),
+        committer: f[5].to_string(),
+        committer_email: f[6].to_string(),
+        commit_time: f[7].parse().unwrap_or(0),
+        message: f[8].trim_end().to_string(),
+        stat: stat.trim().to_string(),
+        files: commit_files(root, sha)?,
+    })
+}
+
+/// A valid new branch / tag name (git's own rules), not starting with `-`.
+fn valid_ref_name(root: &Path, name: &str) -> bool {
+    !name.is_empty() && !name.starts_with('-') && run(root, true, &["check-ref-format", "--branch", name], None).is_ok()
+}
+
+/// An action on a commit from the graph. `name`: the new branch / tag for those actions.
+/// Returns git's output (shown when it says something useful).
+fn commit_action(root: &Path, action: &str, sha: &str, name: Option<&str>) -> Result<String, String> {
+    if !is_sha(sha) {
+        return Err("not a commit id".into());
+    }
+    let named = || -> Result<&str, String> {
+        let n = name.map(str::trim).unwrap_or("");
+        if valid_ref_name(root, n) { Ok(n) } else { Err(format!("\"{n}\" is not a valid name")) }
+    };
+    // A merge is picked / reverted against its first parent.
+    let merge = run_text(root, true, &["rev-list", "--parents", "-n", "1", sha]).map(|t| t.split_whitespace().count() > 2).unwrap_or(false);
+    let args: Vec<&str> = match action {
+        "checkout" => vec!["checkout", "--detach", sha],
+        "branch" => vec!["branch", named()?, sha],
+        "branch-switch" => vec!["switch", "-c", named()?, sha],
+        "tag" => vec!["tag", named()?, sha],
+        "cherry-pick" if merge => vec!["cherry-pick", "-m", "1", sha],
+        "cherry-pick" => vec!["cherry-pick", sha],
+        "revert" if merge => vec!["revert", "--no-edit", "-m", "1", sha],
+        "revert" => vec!["revert", "--no-edit", sha],
+        "reset-soft" => vec!["reset", "--soft", sha],
+        "reset-mixed" => vec!["reset", "--mixed", sha],
+        "reset-hard" => vec!["reset", "--hard", sha],
+        _ => return Err(format!("unknown action {action}")),
+    };
+    let mut cmd = git(root, false);
+    // Never wait on an editor (a conflict stops with a message instead).
+    cmd.env("GIT_EDITOR", "true").args(&args);
+    let out = exec(cmd, None)?;
+    if out.ok { Ok(combined(&out)) } else { Err(combined(&out)) }
+}
+
+/// Abandon the merge / rebase / cherry-pick / revert in progress: back to how things were before it.
+fn abort_operation(root: &Path) -> Result<String, String> {
+    let Some(op) = operation(root) else { return Err("Nothing is in progress.".into()) };
+    let out = exec(
+        {
+            let mut cmd = git(root, false);
+            cmd.args([op.as_str(), "--abort"]);
+            cmd
+        },
+        None,
+    )?;
+    if out.ok { Ok(op) } else { Err(combined(&out)) }
+}
+
 // ---------- commands ----------
 
 /// The git version (`git version 2.53.0.windows.2`), or None when git cannot be run.
@@ -1250,6 +1415,26 @@ pub async fn git_log(path: String, skip: u32, limit: u32) -> Result<Vec<GitLogEn
 #[tauri::command]
 pub async fn git_commit_files(root: String, sha: String) -> Result<Vec<GitCommitFile>, String> {
     blocking(move || commit_files(Path::new(&root), &sha)).await
+}
+
+#[tauri::command]
+pub async fn git_graph(root: String, all: bool, skip: u32, limit: u32) -> Result<Vec<GitGraphCommit>, String> {
+    blocking(move || graph(Path::new(&root), all, skip, limit)).await
+}
+
+#[tauri::command]
+pub async fn git_commit_detail(root: String, sha: String) -> Result<GitCommitDetail, String> {
+    blocking(move || commit_detail(Path::new(&root), &sha)).await
+}
+
+#[tauri::command]
+pub async fn git_commit_action(root: String, action: String, sha: String, name: Option<String>) -> Result<String, String> {
+    blocking(move || commit_action(Path::new(&root), &action, &sha, name.as_deref())).await
+}
+
+#[tauri::command]
+pub async fn git_abort(root: String) -> Result<String, String> {
+    blocking(move || abort_operation(Path::new(&root))).await
 }
 
 #[tauri::command]
@@ -1540,6 +1725,79 @@ mod tests {
         assert!(commit_files(&root, "HEAD; rm -rf").is_err());
         // No upstream: nothing is known to be unpushed.
         assert!(unpushed(&root).is_empty());
+    }
+
+    #[test]
+    fn graph_lists_parents_and_refs_and_actions_move_the_branch() {
+        let Some((_d, root)) = repo() else { return };
+        write(&root, "a.txt", "1\n");
+        git_ok(&root, &["add", "."]);
+        git_ok(&root, &["commit", "-qm", "base"]);
+        git_ok(&root, &["switch", "-qc", "feature"]);
+        write(&root, "b.txt", "feature\n");
+        git_ok(&root, &["add", "."]);
+        git_ok(&root, &["commit", "-qm", "on feature\n\nA body line."]);
+        git_ok(&root, &["switch", "-q", "main"]);
+        write(&root, "a.txt", "1\n2\n");
+        git_ok(&root, &["commit", "-qam", "on main"]);
+        git_ok(&root, &["tag", "v1"]);
+
+        // Current branch only: feature's commit is not listed.
+        let mine = graph(&root, false, 0, 50).unwrap();
+        assert_eq!(mine.iter().map(|c| c.summary.as_str()).collect::<Vec<_>>(), ["on main", "base"]);
+        assert_eq!(mine[0].parents, [mine[1].sha.clone()]);
+        assert!(mine[1].parents.is_empty());
+        assert_eq!(mine[0].refs, ["HEAD", "refs/heads/main", "refs/tags/v1"]);
+
+        let all = graph(&root, true, 0, 50).unwrap();
+        assert_eq!(all.len(), 3);
+        let feature = all.iter().find(|c| c.summary == "on feature").unwrap();
+        assert_eq!(feature.refs, ["refs/heads/feature"]);
+        assert_eq!(graph(&root, true, 1, 1).unwrap().len(), 1);
+
+        let d = commit_detail(&root, &feature.sha).unwrap();
+        assert_eq!(d.message, "on feature\n\nA body line.");
+        assert_eq!(d.author, "Test User");
+        assert_eq!(d.parents.len(), 1);
+        assert_eq!(d.files.len(), 1);
+        assert!(d.stat.contains("1 file changed"));
+
+        // Branch, tag, cherry-pick, revert and reset.
+        commit_action(&root, "branch", &feature.sha, Some("copy")).unwrap();
+        assert!(ref_exists(&root, "refs/heads/copy"));
+        commit_action(&root, "tag", &feature.sha, Some("t1")).unwrap();
+        assert!(ref_exists(&root, "refs/tags/t1"));
+        assert!(commit_action(&root, "branch", &feature.sha, Some("-D")).is_err());
+        assert!(commit_action(&root, "branch", &feature.sha, Some("bad name")).is_err());
+        assert!(commit_action(&root, "nonsense", &feature.sha, None).is_err());
+
+        commit_action(&root, "cherry-pick", &feature.sha, None).unwrap();
+        assert!(root.join("b.txt").exists());
+        let picked = graph(&root, false, 0, 1).unwrap().remove(0);
+        assert_eq!(picked.summary, "on feature");
+        commit_action(&root, "revert", &picked.sha, None).unwrap();
+        assert!(!root.join("b.txt").exists());
+        commit_action(&root, "reset-hard", &mine[0].sha, None).unwrap();
+        assert_eq!(graph(&root, false, 0, 1).unwrap()[0].sha, mine[0].sha);
+        commit_action(&root, "reset-soft", &mine[1].sha, None).unwrap();
+        // Soft: the newer commit's change is still there, staged.
+        assert_eq!(std::fs::read_to_string(root.join("a.txt")).unwrap(), "1\n2\n");
+        commit_action(&root, "reset-hard", &mine[0].sha, None).unwrap();
+
+        // A pick that conflicts stops; aborting puts everything back.
+        git_ok(&root, &["switch", "-qc", "clash", &mine[1].sha]);
+        write(&root, "a.txt", "different\n");
+        git_ok(&root, &["commit", "-qam", "clash"]);
+        assert!(abort_operation(&root).is_err());
+        assert!(commit_action(&root, "cherry-pick", &mine[0].sha, None).is_err());
+        assert_eq!(operation(&root).as_deref(), Some("cherry-pick"));
+        assert_eq!(abort_operation(&root).unwrap(), "cherry-pick");
+        assert!(operation(&root).is_none());
+        assert_eq!(std::fs::read_to_string(root.join("a.txt")).unwrap(), "different\n");
+        git_ok(&root, &["switch", "-q", "main"]);
+
+        commit_action(&root, "checkout", &feature.sha, None).unwrap();
+        assert!(status(&root).unwrap().unwrap().branch.is_none());
     }
 
     #[test]

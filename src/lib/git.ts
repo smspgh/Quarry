@@ -9,8 +9,8 @@ import { Text } from "@codemirror/state";
 import { create } from "zustand";
 import { editor } from "../editor/manager";
 import { setBlame, setGitBase } from "../editor/git";
-import { git, type GitBranch, type GitCommitFile, type GitFile, type GitLogEntry, type GitIdentity, type GitRemoteOp, type GitStatus, type GithubRepo } from "./gitApi";
-import { useStore, type Doc } from "./store";
+import { git, type GitBranch, type GitCommitAction, type GitCommitFile, type GitFile, type GitLogEntry, type GitIdentity, type GitRemoteOp, type GitStatus, type GithubRepo } from "./gitApi";
+import { newDocId, useStore, type Doc } from "./store";
 import { fs } from "./ipc";
 import { isMissingRepo, KIND_RANK, kindOf, type GitKind } from "./gitStatus";
 
@@ -654,6 +654,71 @@ export async function openCommitFile(entry: GitLogEntry, f: GitCommitFile) {
   }
   const name = nameOf(f.rel.replace(/\//g, "\\"));
   await openCompare({ kind: "text", label: `${name} @ ${entry.short}^`, text: a?.text ?? "" }, { kind: "text", label: `${name} @ ${entry.short}`, text: b?.text ?? "" });
+}
+
+// ---------- commit graph ----------
+
+/** Open the commit graph of a repository (the current one) in a tab; an open one is reused. */
+export function openGraph(root?: string) {
+  const repo = root ? useGit.getState().repos[key(root)] : currentRepo();
+  if (!repo) {
+    toast("The open folder is not in a git repository.", "info");
+    return;
+  }
+  const st = useStore.getState();
+  const open = st.docs.find((d) => d.kind === "graph" && d.graph && key(d.graph.root) === key(repo.root));
+  if (open) {
+    st.setActive(open.id);
+    return;
+  }
+  st.addDoc(
+    { id: newDocId(), kind: "graph", path: null, name: `Graph · ${nameOf(repo.root)}`, dirty: false, encoding: "", bom: false, eol: "CRLF", language: "Git Graph", readonly: true, modifiedMs: 0, graph: { root: repo.root } },
+    true,
+  );
+}
+
+const ACTION_LABEL: Record<GitCommitAction, string> = {
+  checkout: "Checking out…",
+  branch: "Creating branch…",
+  "branch-switch": "Creating branch…",
+  tag: "Creating tag…",
+  "cherry-pick": "Cherry-picking…",
+  revert: "Reverting…",
+  "reset-soft": "Resetting…",
+  "reset-mixed": "Resetting…",
+  "reset-hard": "Resetting…",
+};
+
+/** Run a graph action on a commit. True when it worked (open files are then re-checked against disk). */
+export async function commitAction(root: string, action: GitCommitAction, sha: string, name?: string): Promise<boolean> {
+  const out = await run(ACTION_LABEL[action], () => git.commitAction(root, action, sha, name));
+  if (out === undefined) return false;
+  if (action !== "branch" && action !== "tag") {
+    const { checkExternalChanges } = await import("./actions");
+    void checkExternalChanges();
+  }
+  return true;
+}
+
+/** Abandon the operation in progress (a stopped merge, rebase, cherry-pick or revert), after asking. */
+export async function abortOperation(root: string, operation: string) {
+  const { askDialog, checkExternalChanges } = await import("./actions");
+  const ok = await askDialog(`Abort the ${operation}?`, `Everything goes back to how it was before the ${operation} started. Conflict resolutions made so far are discarded.`, `Abort ${operation[0].toUpperCase()}${operation.slice(1)}`);
+  if (!ok) return;
+  const out = await run("Aborting…", () => git.abort(root));
+  if (out === undefined) return;
+  toast(`Aborted the ${out}.`, "info", 3000);
+  void checkExternalChanges();
+}
+
+/** Switch to a branch from the graph (a remote branch gets a local tracking branch). */
+export async function checkoutRef(root: string, name: string): Promise<boolean> {
+  const ok = (await run(`Switching to ${name}…`, () => git.checkout(root, name).then(() => true))) === true;
+  if (ok) {
+    const { checkExternalChanges } = await import("./actions");
+    void checkExternalChanges();
+  }
+  return ok;
 }
 
 /** A commit's version of the file vs the working copy. */

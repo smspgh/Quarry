@@ -7,6 +7,7 @@ import { BottomPanel } from "./components/BottomPanel";
 import { ClaudeView } from "./components/ClaudeView";
 import { TerminalView } from "./components/TerminalView";
 import { DiffView } from "./components/DiffView";
+import { GraphView } from "./components/GraphView";
 import { CodeEditor } from "./components/CodeEditor";
 import { CommandPalette } from "./components/CommandPalette";
 import { Sidebar } from "./components/Sidebar";
@@ -61,6 +62,7 @@ export default function App() {
   const claudeDocs = useStore(useShallow((s) => s.docs.filter((d) => d.kind === "claude")));
   const terminalDocs = useStore(useShallow((s) => s.docs.filter((d) => d.kind === "terminal")));
   const diffDocs = useStore(useShallow((s) => s.docs.filter((d) => d.kind === "diff")));
+  const graphDocs = useStore(useShallow((s) => s.docs.filter((d) => d.kind === "graph")));
   useTheme();
 
   useEffect(() => {
@@ -226,6 +228,7 @@ export default function App() {
               {claudeDocs.map((d) => <ClaudeView key={d.id} doc={d} visible={d.id === doc?.id} />)}
               {terminalDocs.map((d) => <TerminalView key={d.id} doc={d} visible={d.id === doc?.id} />)}
               {diffDocs.map((d) => <DiffView key={d.id} doc={d} visible={d.id === doc?.id} />)}
+              {graphDocs.map((d) => <GraphView key={d.id} doc={d} visible={d.id === doc?.id} />)}
               {docsCount === 0 && <Welcome />}
             </div>
             {split && (

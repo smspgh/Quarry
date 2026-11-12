@@ -126,6 +126,39 @@ export interface GitCommitFile {
   origRel: string | null;
 }
 
+/** A commit in the graph tab. */
+export interface GitGraphCommit {
+  sha: string;
+  short: string;
+  parents: string[];
+  author: string;
+  email: string;
+  /** Author time, unix seconds. */
+  time: number;
+  /** Full ref names pointing here: "HEAD", "refs/heads/main", "refs/remotes/origin/main", "refs/tags/v1". */
+  refs: string[];
+  summary: string;
+}
+
+export interface GitCommitDetail {
+  sha: string;
+  parents: string[];
+  author: string;
+  email: string;
+  time: number;
+  committer: string;
+  committerEmail: string;
+  commitTime: number;
+  /** Subject and body. */
+  message: string;
+  /** "3 files changed, 10 insertions(+), 2 deletions(-)", or "". */
+  stat: string;
+  files: GitCommitFile[];
+}
+
+/** What the graph can do to a commit ("branch" / "branch-switch" / "tag" take a name). */
+export type GitCommitAction = "checkout" | "branch" | "branch-switch" | "tag" | "cherry-pick" | "revert" | "reset-soft" | "reset-mixed" | "reset-hard";
+
 /** "check": the panel's background fetch of the branch's remote (never prompts). "pull-merge" /
  *  "pull-rebase": a pull that says how to join diverged branches. */
 export type GitRemoteOp = "fetch" | "check" | "pull" | "pull-merge" | "pull-rebase" | "push";
@@ -176,6 +209,13 @@ export const git = {
   log: (path: string, skip = 0, limit = 100) => invoke<GitLogEntry[]>("git_log", { path, skip, limit }),
   /** The files a commit changed. */
   commitFiles: (root: string, sha: string) => invoke<GitCommitFile[]>("git_commit_files", { root, sha }),
+  /** One page of the commit graph (children before parents). `all`: every branch and tag, else the
+   *  current branch and its upstream. */
+  graph: (root: string, all: boolean, skip: number, limit: number) => invoke<GitGraphCommit[]>("git_graph", { root, all, skip, limit }),
+  commitDetail: (root: string, sha: string) => invoke<GitCommitDetail>("git_commit_detail", { root, sha }),
+  commitAction: (root: string, action: GitCommitAction, sha: string, name?: string) => invoke<string>("git_commit_action", { root, action, sha, name: name ?? null }),
+  /** Abandon the merge / rebase / cherry-pick / revert in progress; resolves with its name. */
+  abort: (root: string) => invoke<string>("git_abort", { root }),
   /** Ids of the current branch's commits its upstream does not have yet (none without an upstream). */
   unpushed: (root: string) => invoke<string[]>("git_unpushed", { root }),
 };
