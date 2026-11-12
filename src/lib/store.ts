@@ -210,8 +210,6 @@ interface AppState {
   macros: Macro[];
   /** Path of the current script: the one last selected or run (Run Current Script). */
   activeScriptId: string | null;
-  /** What the Scripts panel is for: managing script files, or picking one to run. */
-  scriptsMode: "edit" | "run";
   /** Expanded folders of the Scripts panel's tree. */
   scriptsExpanded: Set<string>;
   activeMacroId: string | null;
@@ -301,7 +299,6 @@ export const useStore = create<AppState>((set, get) => ({
   macroPaused: false,
   macros: [],
   activeScriptId: null,
-  scriptsMode: "edit",
   scriptsExpanded: new Set(),
   activeMacroId: null,
 

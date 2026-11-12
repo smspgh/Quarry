@@ -61,7 +61,7 @@ import { csvToJson, jsonToCsv, topLevelKeys } from "./convert";
 import { readText as readClipboardText, writeText as writeClipboardText } from "@tauri-apps/plugin-clipboard-manager";
 import { clipboardText, cutSpec, foldLineSpec, foldTreeSpec, pasteSpec } from "../editor/lineMenu";
 import { bindAppKeyFallback, bindCommandRunner, guarded, pausePlayback, playSteps, playToEnd, recordCommand, stageMacros, startRecording, stopPlayback, stopRecording } from "./macros";
-import { readScript, runScript, runScriptTimes, runScriptToEnd, scriptNameOf } from "./scripting";
+import { readScript, runScript, runScriptTimes, runScriptToEnd, scriptNameOf, SCRIPT_API_HELP } from "./scripting";
 import { activeDoc, useStore, type SidebarPanel } from "./store";
 import type { Macro, Script } from "./types";
 import { undoReplaceInFiles } from "./replaceUndo";
@@ -460,10 +460,21 @@ export async function runScriptPath(path: string, how: ScriptRunHow = "once"): P
   return n > 0;
 }
 
-/** Show the Scripts panel for managing script files ("edit") or for running them ("run"). */
-function showScripts(mode: "edit" | "run") {
-  useStore.getState().set({ scriptsMode: mode });
-  showPanelOnly("scripts");
+/**
+ * Help > Script API Reference: the reference as a tab (comments in a JavaScript document, so it can
+ * be searched and copied from). An open one is reused.
+ */
+async function showScriptApi() {
+  const name = "Script API Reference.js";
+  const st = useStore.getState();
+  const open = st.docs.find((d) => d.kind === "text" && !d.path && d.name === name);
+  if (open) {
+    st.setActive(open.id);
+    return;
+  }
+  const doc = await newDocument(`// Quarry script API. A script is a .js file in your scripts folder (Scripts menu).\n// Full guide with examples: docs/scripting.md\n\n${SCRIPT_API_HELP}\n`, name);
+  // Nothing of the user's: closing it should not ask to save.
+  useStore.getState().updateDoc(doc.id, { dirty: false });
 }
 
 let lastMacro: Macro | null = null;
@@ -1087,14 +1098,14 @@ export function registerAllCommands() {
     run: async () => {
       const p = s().activeScriptId;
       if (!p) {
-        s().toast("No script selected. Pick one with Scripts › Run Scripts.", "info");
+        s().toast("No script selected. Select one in the Scripts panel.", "info");
         return false;
       }
       return runScriptPath(p);
     },
   });
-  register({ id: "script.panel", title: "Script: Edit Scripts", category: "Scripts", run: () => showScripts("edit") });
-  register({ id: "script.runPanel", title: "Script: Run Scripts", category: "Scripts", run: () => showScripts("run") });
+  register({ id: "script.panel", title: "Script: Show Scripts", category: "Scripts", run: () => showPanelOnly("scripts") });
+  register({ id: "help.scriptApi", title: "Script API Reference", category: "Help", run: () => void showScriptApi() });
   register({
     id: "script.edit",
     title: "Script: Edit Script by Path",
@@ -1110,9 +1121,8 @@ export function registerAllCommands() {
     title: "Script: New Script",
     category: "Scripts",
     run: () => {
-      showScripts("edit");
-      // Two frames: the tree has to switch out of its read-only (Run) mode before it can take the name.
-      requestAnimationFrame(() => requestAnimationFrame(() => bus.emit("script.new")));
+      showPanelOnly("scripts");
+      requestAnimationFrame(() => bus.emit("script.new"));
     },
   });
   register({

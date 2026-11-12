@@ -1,4 +1,4 @@
-import { BookOpen, FastForward, Loader2, Pencil, Play, Repeat, Square } from "lucide-react";
+import { FastForward, Loader2, Pencil, Play, Repeat, Square } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { openPath } from "../../lib/actions";
 import { runScriptPath, type ScriptRunHow } from "../../lib/commands";
@@ -12,7 +12,6 @@ import {
   scriptNameOf,
   scriptsDir,
   NEW_SCRIPT_SOURCE,
-  SCRIPT_API,
   useScriptRunState,
 } from "../../lib/scripting";
 import { editor } from "../../editor/manager";
@@ -33,10 +32,7 @@ export function ScriptStatusItem() {
   );
 }
 
-/** Run Scripts lists scripts only. */
-const onlyScripts = (e: DirEntry) => isScriptPath(e.path);
-
-/** Open a script in a tab of its own and go to it. */
+/** Open a script (or any file of the scripts folder) in a tab of its own and go to it. */
 function editScript(path: string) {
   void openPath(path).then((d) => {
     if (d?.preview) useStore.getState().updateDoc(d.id, { preview: false });
@@ -45,12 +41,11 @@ function editScript(path: string) {
 }
 
 /**
- * The scripts folder as a tree (the Explorer's, over the scripts root). Two modes:
- * - edit: manage the script files; clicking one opens it in a tab, like the Explorer.
- * - run: nothing opens; pick a script and run it on the document in front.
+ * The scripts folder as a tree (the Explorer's, over the scripts root), with a run bar under it.
+ * A click only selects a script (so the document it should run on stays in front); double-click,
+ * Enter or Edit opens it in a tab.
  */
 export function ScriptsPanel() {
-  const mode = useStore((s) => s.scriptsMode);
   const dirSetting = useStore((s) => s.settings.scriptsDir);
   const current = useStore((s) => s.activeScriptId);
   const shown = useStore((s) => isPanelShown(s, "scripts"));
@@ -58,7 +53,6 @@ export function ScriptsPanel() {
   const doc = useActiveDoc();
   const run = useScriptRunState();
   const [root, setRoot] = useState<string | null>(null);
-  const [showHelp, setShowHelp] = useState(false);
   const [times, setTimes] = useState(2);
   /** The current script as last read (for its `@languages` / `@extensions` filter). */
   const [info, setInfo] = useState<Script | null>(null);
@@ -99,85 +93,59 @@ export function ScriptsPanel() {
 
   const variant = useMemo<TreeVariant | null>(() => {
     if (!root) return null;
-    const runMode = mode === "run";
     return {
       root,
       panel: "scripts",
-      title: runMode ? "Run Scripts" : "Edit Scripts",
+      title: "Scripts",
       labels: { newFile: "New Script", newFolder: "New Script Folder", filePlaceholder: "script name", folderPlaceholder: "script folder name" },
-      readOnly: runMode,
-      fileFilter: runMode ? onlyScripts : undefined,
       newFile: (name) => ({ name: newScriptFileName(name), content: NEW_SCRIPT_SOURCE }),
       newFileEvent: "script.new",
       onSelect: (e: DirEntry) => { if (isScriptPath(e.path)) set({ activeScriptId: e.path }); },
-      onActivate: runMode ? (e: DirEntry) => { if (isScriptPath(e.path)) start(e.path); } : undefined,
-      headerExtra: (
-        <>
-          <button className={`icon-btn ${showHelp ? "on" : ""}`} aria-pressed={showHelp} title="Script API reference" onClick={() => setShowHelp((h) => !h)}><BookOpen size={15} /></button>
-          {runMode
-            ? <button className="icon-btn" title="Edit Scripts: create, rename and open scripts" onClick={() => set({ scriptsMode: "edit" })}><Pencil size={14} /></button>
-            : <button className="icon-btn" title="Run Scripts: pick a script to run on the current document" onClick={() => set({ scriptsMode: "run" })}><Play size={14} /></button>}
-        </>
-      ),
+      onActivate: (e: DirEntry) => editScript(e.path),
       menuLead: (e: DirEntry, close: () => void) => {
-        if (e.isDir || !isScriptPath(e.path)) return null;
+        if (e.isDir) return null;
+        const script = isScriptPath(e.path);
         const blocked = why(e.path);
         return (
           <>
-            <button className="palette-item" disabled={!!blocked} title={blocked || `Run on ${doc?.name ?? "the current document"}`} onClick={() => { close(); start(e.path); }}>
-              <Play size={13} /><span className="title">Run</span>{runMode && <span className="kbd">Enter</span>}
+            {script && (
+              <button className="palette-item" disabled={!!blocked} title={blocked || `Run on ${doc?.name ?? "the current document"}`} onClick={() => { close(); start(e.path); }}>
+                <Play size={13} /><span className="title">Run</span>
+              </button>
+            )}
+            <button className="palette-item" title="Open in a tab" onClick={() => { close(); editScript(e.path); }}>
+              <Pencil size={13} /><span className="title">Edit</span><span className="kbd">Enter</span>
             </button>
-            <button className="palette-item" title="Open the script in a tab" onClick={() => { close(); editScript(e.path); }}>
-              <Pencil size={13} /><span className="title">Edit</span>
-            </button>
-            {!runMode && <div className="menu-sep" />}
+            <div className="menu-sep" />
           </>
         );
       },
     };
     // `why` and `start` only read the values listed here.
-  }, [root, mode, showHelp, isText, run.running, doc?.path, doc?.name, known, applies]);
+  }, [root, isText, run.running, doc?.path, doc?.name, known, applies]);
 
-  const blocked = current ? why(current) : "Choose a script";
+  const blocked = current ? why(current) : "Select a script";
 
   return (
     <>
       {variant ? <FileTree variant={variant} /> : <div className="sidebar-header">Scripts</div>}
-      {mode === "run" && (
-        <div className="panel-section script-run-bar">
-          <div className="muted truncate" title={current ?? undefined}>
-            {run.running ? <span className="row"><Loader2 size={13} className="spin" /> Running {run.name}…</span>
-              : current ? <>{scriptNameOf(current)}{known?.when ? ` · ${describeWhen(known)}` : ""}{isText && !self ? ` → ${doc?.name}` : ""}</>
-              : "Select a script, then Run (or double-click it)."}
-          </div>
-          <div className="row">
-            {run.running
-              ? <button className="btn btn-danger small" title="Cancel the running script" onClick={() => cancelScript()}><Square size={13} /> Cancel</button>
-              : <button className="btn btn-primary small" disabled={!!blocked} title={blocked || "Run once (Ctrl+Shift+Enter)"} onClick={() => current && start(current)}><Play size={13} /> Run</button>}
-            <span className="grow" />
-            <input className="input script-times" type="number" min={1} max={100000} value={times} title="How many times to run" aria-label="How many times to run" onChange={(e) => setTimes(Math.max(1, Math.min(100000, Number(e.target.value) || 1)))} />
-            <button className="btn small" disabled={!!blocked} title={blocked || "Run the script this many times in a row"} onClick={() => current && start(current, { times })}><Repeat size={13} /> ×{times}</button>
-            <button className="btn small" disabled={!!blocked} title={blocked || "Repeat until the script stops changing the document or selection"} onClick={() => current && start(current, "toEnd")}><FastForward size={13} /> To end</button>
-          </div>
+      <div className="panel-section script-run-bar">
+        <div className="muted truncate" title={current ?? undefined}>
+          {run.running ? <span className="row"><Loader2 size={13} className="spin" /> Running {run.name}…</span>
+            : current ? <>{scriptNameOf(current)}{known?.when ? ` · ${describeWhen(known)}` : ""}{isText && !self ? ` → ${doc?.name}` : ""}</>
+            : "Select a script to run it. Double-click to edit."}
         </div>
-      )}
-      {showHelp && (
-        <div className="script-api selectable">
-          {SCRIPT_API.map((g) => (
-            <div key={g.name} className="script-api-group">
-              <div className="script-api-title">{g.name}</div>
-              <dl>
-                {g.items.map((it) => (
-                  <div key={it.sig} className="script-api-row">
-                    <dt className="mono">{it.sig}</dt>
-                    <dd>{it.desc}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          ))}
+        <div className="row">
+          {run.running
+            ? <button className="btn btn-danger small" title="Cancel the running script" onClick={() => cancelScript()}><Square size={13} /> Cancel</button>
+            : <button className="btn btn-primary small" disabled={!!blocked} title={blocked || "Run once (Ctrl+Shift+Enter)"} onClick={() => current && start(current)}><Play size={13} /> Run</button>}
+          <button className="btn small" disabled={!current} title={current ? "Open the script in a tab" : "Select a script"} onClick={() => current && editScript(current)}><Pencil size={13} /> Edit</button>
+          <span className="grow" />
+          <input className="input script-times" type="number" min={1} max={100000} value={times} title="How many times to run" aria-label="How many times to run" onChange={(e) => setTimes(Math.max(1, Math.min(100000, Number(e.target.value) || 1)))} />
+          <button className="btn small" disabled={!!blocked} title={blocked || "Run the script this many times in a row"} onClick={() => current && start(current, { times })}><Repeat size={13} /> ×{times}</button>
+          <button className="btn small" disabled={!!blocked} title={blocked || "Repeat until the script stops changing the document or selection"} onClick={() => current && start(current, "toEnd")}><FastForward size={13} /> To end</button>
         </div>
-      )}
+      </div>
     </>
   );
 }

@@ -328,7 +328,7 @@ export function newScriptFileName(name: string): string {
 }
 
 /** What a new script starts with. */
-export const NEW_SCRIPT_SOURCE = "// Transform the current document.\n// See the API reference (book icon in the Scripts panel) for doc, selection, util, clipboard.\n\ndoc.mapLines((line, i) => line);\n";
+export const NEW_SCRIPT_SOURCE = "// Transform the current document.\n// See Help > Script API Reference for doc, selection, util, clipboard.\n\ndoc.mapLines((line, i) => line);\n";
 
 /**
  * Read a script for running. When its file is open in a tab, the tab's text is used (unsaved edits

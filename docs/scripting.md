@@ -24,28 +24,19 @@ Quarry ships with no scripts. Common conversions (JSON ↔ CSV, listing keys) ar
 
 ## Writing and running a script
 
-The Scripts panel is the scripts folder as a tree, like the [Explorer](editing.md). It has two views, both in the **Scripts** menu and the command palette. The pencil / play button in the panel's header switches between them.
-
-**Scripts › Edit Scripts** is for working on the script files. It behaves like the Explorer: click a script to open it in a tab, and edit and save it like any other file.
+The Scripts panel (**Scripts › Scripts**, or the Scripts icon in the panel rail) is the scripts folder as a tree, with a run bar under it. It works like the [Explorer](editing.md) with one difference: a click only *selects* a script, so the document you want to run it on stays in front. Double-click a script to open it in a tab.
 
 | Action | How |
 | --- | --- |
 | New script | **New Script** in the panel header, or **Scripts › New Script**. Type a name; `.js` is added, and the file opens in a tab with a short starting template. |
 | New folder | **New Script Folder** in the panel header. Both go into the selected folder (or the folder of the selected script). |
-| Edit | Click the script (double-click to keep the tab), or right-click › **Edit**. |
-| Rename / Cut / Copy / Paste / Delete | Right-click, or **F2**, **Ctrl+X / C / V**, **Delete**, as in the Explorer. Delete moves the file to the Recycle Bin. |
-| Run | Right-click › **Run** runs it on the document in front. |
-| API reference | The book icon in the panel header. |
-
-**Scripts › Run Scripts** shows the same tree for running. Nothing opens when you click, and the files can't be changed from here.
-
-| Action | How |
-| --- | --- |
-| Run on the current document | Select a script and press **Run** below the tree, double-click it, press **Enter**, or right-click › **Run**. |
-| Edit | Right-click › **Edit** opens the script in a tab. |
+| Run on the current document | Select the script and press **Run** below the tree, or right-click › **Run**. |
+| Edit | Double-click the script, press **Enter**, use **Edit** in the run bar, or right-click › **Edit**. It opens in a tab; edit and save it like any other file. |
 | Run several times | **×N** (1 to 100,000; each run is its own undo step, stops at the first error). |
 | Run until nothing changes | **To end** repeats until a run leaves both the text and the selection unchanged, up to 10,000 runs. |
-| Cancel | **Cancel** below the tree, or the stop button beside **SCRIPT** in the status bar. |
+| Cancel | **Cancel** in the run bar, or the stop button beside **SCRIPT** in the status bar. |
+| Rename / Cut / Copy / Paste / Delete | Right-click, or **F2**, **Ctrl+X / C / V**, **Delete**, as in the Explorer. Delete moves the file to the Recycle Bin. |
+| API reference | **Help › Script API Reference** opens the list below in a tab. |
 
 The script you last selected or ran is the *current script*: **Ctrl+Shift+Enter** (**Scripts › Run Script "name"**) runs it again on the document in front, with the panel open or not.
 
@@ -140,7 +131,7 @@ Header comments in the first 20 lines restrict where a script can run:
 - If both are given, matching **either** is enough.
 - A script with neither tag runs on any text document.
 
-In the Run Scripts view, the selected script shows a note such as "JSON / YAML only", and its **Run** is greyed out for a document it doesn't apply to; running it another way shows a message. The header is read each time the script runs.
+In the run bar, the selected script shows a note such as "JSON / YAML only", and its **Run** is greyed out for a document it doesn't apply to; running it another way shows a message. The header is read each time the script runs.
 
 ## Sandbox and limits
 

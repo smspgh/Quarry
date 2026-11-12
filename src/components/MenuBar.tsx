@@ -24,9 +24,9 @@ function languageMenu(): Item[] {
   return items;
 }
 
-/** Scripts are browsed in the Scripts panel's tree (Edit Scripts / Run Scripts), not listed here. */
+/** Scripts are browsed (run, edited) in the Scripts panel's tree, not listed here. */
 function scriptsMenu(): Item[] {
-  return [{ cmd: "script.panel", label: "Edit Scripts" }, { cmd: "script.runPanel", label: "Run Scripts" }, { sep: true }, { cmd: "script.new" }, { cmd: "script.runActive" }];
+  return [{ cmd: "script.panel", label: "Scripts" }, { cmd: "script.new" }, { sep: true }, { cmd: "script.runActive" }];
 }
 
 function macrosMenu(): Item[] {
@@ -295,6 +295,7 @@ const MENUS: Menu[] = [
     label: "Help",
     items: () => [
       { cmd: "view.commandPalette", label: "All Commands and Shortcuts" },
+      { cmd: "help.scriptApi" },
       { sep: true },
       { cmd: "help.checkUpdates", label: "Check for Updates…" },
       { cmd: "help.about", label: "About Quarry" },
