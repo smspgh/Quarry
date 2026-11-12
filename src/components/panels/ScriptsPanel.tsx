@@ -53,7 +53,7 @@ export function ScriptsPanel() {
   const doc = useActiveDoc();
   const run = useScriptRunState();
   const [root, setRoot] = useState<string | null>(null);
-  const [times, setTimes] = useState(2);
+  const [times, setTimes] = useState(1);
   /** The current script as last read (for its `@languages` / `@extensions` filter). */
   const [info, setInfo] = useState<Script | null>(null);
 
