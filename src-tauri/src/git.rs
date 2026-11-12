@@ -1084,6 +1084,57 @@ fn log(path: &str, skip: u32, limit: u32) -> Result<Vec<GitLogEntry>, String> {
     Ok(parse_log(&out, &root, &rel, follow))
 }
 
+/// A file a commit changed (against its first parent; everything for the first commit).
+#[derive(Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct GitCommitFile {
+    /// Where the file is (or would be) in the work tree.
+    pub path: String,
+    /// Repo-relative path (`/`-separated) at this commit.
+    pub rel: String,
+    /// A (added), M (modified), D (deleted), R (renamed), ...: git's status letter.
+    pub status: String,
+    /// The path before the commit, for a rename or copy.
+    pub orig_rel: Option<String>,
+}
+
+fn parse_commit_files(out: &[u8], root: &Path) -> Vec<GitCommitFile> {
+    let text = String::from_utf8_lossy(out);
+    let mut parts = text.split('\0').map(|s| s.trim_start_matches(['\n', '\r'])).filter(|s| !s.is_empty());
+    let mut list = Vec::new();
+    while let Some(code) = parts.next() {
+        let status: String = code.chars().take(1).collect();
+        let two = matches!(status.as_str(), "R" | "C");
+        let Some(first) = parts.next() else { break };
+        let (orig_rel, rel) = if two {
+            let Some(to) = parts.next() else { break };
+            (Some(first.to_string()), to.to_string())
+        } else {
+            (None, first.to_string())
+        };
+        list.push(GitCommitFile { path: abs_path(root, &rel), rel, status, orig_rel });
+    }
+    list
+}
+
+/// The files `sha` changed.
+fn commit_files(root: &Path, sha: &str) -> Result<Vec<GitCommitFile>, String> {
+    if !is_sha(sha) {
+        return Err("not a commit id".into());
+    }
+    let out = run(root, true, &["show", "--format=", "--name-status", "-z", "-M", "--diff-merges=first-parent", sha], None)?;
+    Ok(parse_commit_files(&out, root))
+}
+
+/// Commits on the current branch that its upstream does not have yet (newest first, at most 500).
+/// Empty when there is no upstream.
+fn unpushed(root: &Path) -> Vec<String> {
+    match run_text(root, true, &["rev-list", "--max-count=500", "@{upstream}..HEAD"]) {
+        Ok(t) => t.lines().map(|l| l.trim().to_string()).filter(|l| !l.is_empty()).collect(),
+        Err(_) => Vec::new(),
+    }
+}
+
 // ---------- commands ----------
 
 /// The git version (`git version 2.53.0.windows.2`), or None when git cannot be run.
@@ -1194,6 +1245,16 @@ pub async fn git_blame(path: String, contents: Option<String>, encoding: Option<
 #[tauri::command]
 pub async fn git_log(path: String, skip: u32, limit: u32) -> Result<Vec<GitLogEntry>, String> {
     blocking(move || log(&path, skip, limit)).await
+}
+
+#[tauri::command]
+pub async fn git_commit_files(root: String, sha: String) -> Result<Vec<GitCommitFile>, String> {
+    blocking(move || commit_files(Path::new(&root), &sha)).await
+}
+
+#[tauri::command]
+pub async fn git_unpushed(root: String) -> Result<Vec<String>, String> {
+    blocking(move || Ok(unpushed(Path::new(&root)))).await
 }
 
 #[cfg(test)]
@@ -1443,6 +1504,42 @@ mod tests {
         let repo_log = log(&root.to_string_lossy(), 0, 10).unwrap();
         assert_eq!(repo_log.len(), 3);
         assert!(repo_log.iter().all(|e| e.rel.is_empty()));
+    }
+
+    #[test]
+    fn commit_files_lists_what_a_commit_changed() {
+        let Some((_d, root)) = repo() else { return };
+        write(&root, "keep.txt", "one\ntwo\nthree\nfour\n");
+        write(&root, "gone.txt", "x\n");
+        git_ok(&root, &["add", "."]);
+        git_ok(&root, &["commit", "-qm", "first"]);
+        std::fs::create_dir_all(root.join("sub dir")).unwrap();
+        git_ok(&root, &["mv", "keep.txt", "sub dir/kept.txt"]);
+        git_ok(&root, &["rm", "-q", "gone.txt"]);
+        write(&root, "new.txt", "n\n");
+        git_ok(&root, &["add", "."]);
+        git_ok(&root, &["commit", "-qm", "second"]);
+
+        let entries = log(&root.to_string_lossy(), 0, 10).unwrap();
+        let second = commit_files(&root, &entries[0].sha).unwrap();
+        let mut got: Vec<(String, String, Option<String>)> = second.iter().map(|f| (f.status.clone(), f.rel.clone(), f.orig_rel.clone())).collect();
+        got.sort();
+        assert_eq!(
+            got,
+            [
+                ("A".to_string(), "new.txt".to_string(), None),
+                ("D".to_string(), "gone.txt".to_string(), None),
+                ("R".to_string(), "sub dir/kept.txt".to_string(), Some("keep.txt".to_string())),
+            ]
+        );
+        assert!(second.iter().all(|f| f.path.starts_with(&*root.to_string_lossy())));
+        // The first commit has no parent: everything in it is added.
+        let first = commit_files(&root, &entries[1].sha).unwrap();
+        assert_eq!(first.len(), 2);
+        assert!(first.iter().all(|f| f.status == "A"));
+        assert!(commit_files(&root, "HEAD; rm -rf").is_err());
+        // No upstream: nothing is known to be unpushed.
+        assert!(unpushed(&root).is_empty());
     }
 
     #[test]

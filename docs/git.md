@@ -33,6 +33,17 @@ Open it from the rail (branch icon), **Git › Show Source Control** or **Ctrl+S
 
 **Git › Switch Branch…**, the panel's branch button or the branch in the status bar open a list of branches: local ones first, then remote ones (marked *remote*), the current one marked *current*. Pick one to switch to it; a remote branch is checked out as a new local branch tracking it. Type a name that doesn't exist and pick **Create branch "…" from here** to create it from the current commit and switch to it. Git refuses a switch that would overwrite uncommitted changes; the message says which files.
 
+## Commits
+
+Under the changes, **Commits** lists the branch's commits, newest first (30 at a time; **Show more** loads older ones). It is how you see what a commit you just made contains.
+
+- A commit your remote doesn't have yet is shown in bold with an up arrow and **not pushed**; the section header counts them (**2 to push**). Commits already on the remote have a tick. A branch with no remote branch shows neither.
+- Click a commit to list the files it changed, with the same letters as the changes list (**A** added, **M** modified, **D** deleted, **R** renamed). Click it again to close it.
+- Click a file there to open a [Compare tab](compare.md) of what that commit changed in it; double-click opens the file as it is now.
+- Hover a commit for its full id, author and date.
+
+This is a list, not a branch graph: it follows the current branch only, and a merge commit shows what it changed against its first parent.
+
 ## File history
 
 **Git › Show File History** (or **Show File History** on a tab's right-click menu) lists the commits that changed the active file, newest first, following renames. It appears at the bottom of the Source Control panel. Click a commit to see what it changed in the file; the compare button on its row compares that version with the current file. **Show more** loads older commits.

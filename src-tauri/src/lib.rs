@@ -857,6 +857,8 @@ pub fn run() {
             git::github_sign_in,
             git::git_blame,
             git::git_log,
+            git::git_commit_files,
+            git::git_unpushed,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -114,6 +114,18 @@ export interface GitLogEntry {
   root: string;
 }
 
+/** A file a commit changed (against its first parent). */
+export interface GitCommitFile {
+  /** Where the file is (or would be) in the work tree. */
+  path: string;
+  /** Repo-relative path at this commit. */
+  rel: string;
+  /** git's status letter: A, M, D, R, C, T. */
+  status: string;
+  /** The path before the commit (rename / copy). */
+  origRel: string | null;
+}
+
 /** "check": the panel's background fetch of the branch's remote (never prompts). "pull-merge" /
  *  "pull-rebase": a pull that says how to join diverged branches. */
 export type GitRemoteOp = "fetch" | "check" | "pull" | "pull-merge" | "pull-rebase" | "push";
@@ -162,4 +174,8 @@ export const git = {
     invoke<GitBlame | null>("git_blame", { path, contents: contents ?? null, encoding: encoding ?? null, eol: eol ?? null }),
   /** History of a file (following renames) or of a folder (the repository root: every commit). */
   log: (path: string, skip = 0, limit = 100) => invoke<GitLogEntry[]>("git_log", { path, skip, limit }),
+  /** The files a commit changed. */
+  commitFiles: (root: string, sha: string) => invoke<GitCommitFile[]>("git_commit_files", { root, sha }),
+  /** Ids of the current branch's commits its upstream does not have yet (none without an upstream). */
+  unpushed: (root: string) => invoke<string[]>("git_unpushed", { root }),
 };

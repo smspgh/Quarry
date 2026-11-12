@@ -9,7 +9,7 @@ import { Text } from "@codemirror/state";
 import { create } from "zustand";
 import { editor } from "../editor/manager";
 import { setBlame, setGitBase } from "../editor/git";
-import { git, type GitBranch, type GitFile, type GitLogEntry, type GitIdentity, type GitRemoteOp, type GitStatus, type GithubRepo } from "./gitApi";
+import { git, type GitBranch, type GitCommitFile, type GitFile, type GitLogEntry, type GitIdentity, type GitRemoteOp, type GitStatus, type GithubRepo } from "./gitApi";
 import { useStore, type Doc } from "./store";
 import { fs } from "./ipc";
 import { isMissingRepo, KIND_RANK, kindOf, type GitKind } from "./gitStatus";
@@ -639,6 +639,21 @@ export async function openCommitChange(h: FileHistory, i: number) {
   }
   const name = nameOf(e.rel.replace(/\//g, "\\"));
   await openCompare({ kind: "text", label: `${name} @ ${e.short}^`, text: a?.text ?? "" }, { kind: "text", label: `${name} @ ${e.short}`, text: b?.text ?? "" });
+}
+
+/** What a commit changed in one of its files (Commits section): the parent's text vs the commit's. */
+export async function openCommitFile(entry: GitLogEntry, f: GitCommitFile) {
+  const { openCompare } = await import("./diff");
+  const [a, b] = await Promise.all([
+    f.status === "A" ? null : git.show(f.path, `${entry.sha}^`, f.origRel ?? f.rel).catch(() => null),
+    f.status === "D" ? null : git.show(f.path, entry.sha, f.rel).catch(() => null),
+  ]);
+  if (a?.binary || b?.binary) {
+    toast("This file is binary.", "info");
+    return;
+  }
+  const name = nameOf(f.rel.replace(/\//g, "\\"));
+  await openCompare({ kind: "text", label: `${name} @ ${entry.short}^`, text: a?.text ?? "" }, { kind: "text", label: `${name} @ ${entry.short}`, text: b?.text ?? "" });
 }
 
 /** A commit's version of the file vs the working copy. */

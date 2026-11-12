@@ -4740,6 +4740,15 @@ select optgroup {
   text-overflow: ellipsis;
 }
 .scm-more { margin: 6px 26px; }
+/* Commits section: a commit row with a chevron, its files indented under it. */
+.scm-commit-row { display: flex; align-items: flex-start; gap: 4px; padding-left: 6px; }
+.scm-commit-row > .tree-chevron { margin-top: 2px; flex-shrink: 0; }
+.scm-commit-text { min-width: 0; flex: 1; }
+.scm-commit-state { flex-shrink: 0; color: var(--text-3); }
+.scm-commit-state.local { color: var(--accent); }
+.scm-commit-row.local .scm-commit-line { font-weight: 600; }
+.scm-row.scm-commit-file { padding-left: 40px; }
+.panel-note.scm-commit-files { padding-left: 40px; }
 
 /* Explorer */
 .tree-row .tree-label.git-deleted { text-decoration: line-through; }

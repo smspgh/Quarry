@@ -96,3 +96,8 @@ export function commitLabel(staged: number, total: number, amend: boolean): stri
   if (staged) return `Commit ${staged} Staged`;
   return total ? `Commit All (${count(total, "file")})` : "Commit All";
 }
+
+/** Kind (colour / letter) of a file in a commit, from git's status letter there. */
+export function commitFileKind(status: string): GitKind {
+  return status === "A" ? "added" : status === "D" ? "deleted" : status === "R" || status === "C" ? "renamed" : "modified";
+}

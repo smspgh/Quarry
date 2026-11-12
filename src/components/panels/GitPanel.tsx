@@ -1,9 +1,9 @@
 import { ArrowDown, ArrowUp, Check, ChevronRight, CircleDot, CloudDownload, CloudOff, FileDiff, FileText, GitBranch, History, Minus, Plus, RefreshCw, TriangleAlert, Undo2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { openPath } from "../../lib/actions";
-import { checkRemote, isMissingRepo, commit, compareCommitWithCurrent, currentRepo, discard, moreHistory, openChange, openCommitChange, pickBranch, remote, rescanGit, stage, unstage, useGit } from "../../lib/git";
-import { commitLabel, groupFiles, KIND_LABEL, KIND_LETTER, rowKind, syncLine, type Group } from "../../lib/gitStatus";
-import type { GitFile, GitRemoteOp, GitStatus } from "../../lib/gitApi";
+import { checkRemote, isMissingRepo, commit, compareCommitWithCurrent, currentRepo, discard, moreHistory, openChange, openCommitChange, openCommitFile, pickBranch, remote, rescanGit, stage, unstage, useGit } from "../../lib/git";
+import { commitFileKind, commitLabel, groupFiles, KIND_LABEL, KIND_LETTER, rowKind, syncLine, type Group } from "../../lib/gitStatus";
+import { git, type GitCommitFile, type GitFile, type GitLogEntry, type GitRemoteOp, type GitStatus } from "../../lib/gitApi";
 import { relativeTime } from "../../editor/git";
 import { useStore } from "../../lib/store";
 import { Select } from "../Select";
@@ -101,6 +101,139 @@ function Section({ title, group, files, repo }: { title: string; group: Group; f
             <FileRow key={`${group}:${f.path}`} f={f} repo={repo} group={group} />
           ))}
         </div>
+      )}
+    </div>
+  );
+}
+
+const COMMITS_PAGE = 30;
+
+/**
+ * The branch's commits, newest first. Commits the remote does not have yet are marked; a commit
+ * opens to the files it changed, and a file there opens what the commit changed in it.
+ */
+function CommitsSection({ repo }: { repo: GitStatus }) {
+  const [open, setOpen] = useState(true);
+  const [entries, setEntries] = useState<GitLogEntry[]>([]);
+  const [more, setMore] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [unpushed, setUnpushed] = useState<Set<string>>(new Set());
+  /** Expanded commits: their files once loaded (null while loading). */
+  const [files, setFiles] = useState<Record<string, GitCommitFile[] | null>>({});
+  const tracked = !!repo.upstream && !repo.upstreamGone;
+
+  // Reload when the branch moves: a commit, pull, push, checkout.
+  useEffect(() => {
+    let live = true;
+    setLoading(true);
+    void Promise.all([git.log(repo.root, 0, COMMITS_PAGE).catch(() => [] as GitLogEntry[]), git.unpushed(repo.root).catch(() => [] as string[])]).then(([list, ahead]) => {
+      if (!live) return;
+      setEntries(list);
+      setMore(list.length === COMMITS_PAGE);
+      setUnpushed(new Set(ahead));
+      setLoading(false);
+    });
+    return () => { live = false; };
+  }, [repo.root, repo.head, repo.branch, repo.ahead, repo.behind, repo.upstream]);
+
+  if (!repo.head) return null;
+
+  const loadMore = async () => {
+    setLoading(true);
+    const next = await git.log(repo.root, entries.length, COMMITS_PAGE).catch(() => [] as GitLogEntry[]);
+    setEntries((cur) => [...cur, ...next.filter((n) => !cur.some((c) => c.sha === n.sha))]);
+    setMore(next.length === COMMITS_PAGE);
+    setLoading(false);
+  };
+  const toggle = (e: GitLogEntry) => {
+    if (e.sha in files) {
+      setFiles((f) => {
+        const n = { ...f };
+        delete n[e.sha];
+        return n;
+      });
+      return;
+    }
+    setFiles((f) => ({ ...f, [e.sha]: null }));
+    void git.commitFiles(repo.root, e.sha).then(
+      (list) => setFiles((f) => (e.sha in f ? { ...f, [e.sha]: list } : f)),
+      () => setFiles((f) => (e.sha in f ? { ...f, [e.sha]: [] } : f)),
+    );
+  };
+
+  return (
+    <div className="scm-section" role="group" aria-label="Commits">
+      <div className="scm-section-head" onClick={() => setOpen(!open)}>
+        <span className={`tree-chevron ${open ? "open" : ""}`}>
+          <ChevronRight size={14} />
+        </span>
+        <span>Commits</span>
+        {unpushed.size > 0 && <span className="scm-count" title={`${unpushed.size} not on ${repo.upstream} yet`}>{unpushed.size} to push</span>}
+      </div>
+      {open && (
+        <>
+          {entries.length === 0 && <div className="panel-note">{loading ? "Loading…" : "No commits yet."}</div>}
+          <div role="list">
+            {entries.map((e) => {
+              const local = unpushed.has(e.sha);
+              const list = files[e.sha];
+              const isOpen = e.sha in files;
+              return (
+                <div key={e.sha} role="listitem">
+                  <div
+                    className={`scm-commit scm-commit-row ${local ? "local" : ""}`}
+                    tabIndex={0}
+                    aria-expanded={isOpen}
+                    title={`${e.summary}\n${e.sha}\n${e.author} <${e.email}>\n${new Date(e.time * 1000).toLocaleString()}\n${tracked ? (local ? `Only on this computer: not pushed to ${repo.upstream} yet` : `On ${repo.upstream}`) : "This branch has no remote branch yet"}\n\nClick to see the files it changed`}
+                    onClick={() => toggle(e)}
+                    onKeyDown={(ev) => ev.key === "Enter" && toggle(e)}
+                  >
+                    <span className={`tree-chevron ${isOpen ? "open" : ""}`}>
+                      <ChevronRight size={14} />
+                    </span>
+                    <div className="scm-commit-text">
+                      <div className="scm-commit-line">
+                        <span className="truncate grow">{e.summary}</span>
+                        {tracked && (local ? <ArrowUp size={12} className="scm-commit-state local" aria-label="Not pushed yet" /> : <Check size={12} className="scm-commit-state" aria-label="On the remote" />)}
+                      </div>
+                      <div className="scm-commit-meta">
+                        {e.author} · {relativeTime(e.time)} · <span className="mono">{e.short}</span>
+                        {local && " · not pushed"}
+                      </div>
+                    </div>
+                  </div>
+                  {isOpen && list === null && <div className="panel-note scm-commit-files">Loading…</div>}
+                  {isOpen && list && list.length === 0 && <div className="panel-note scm-commit-files">No file changes (a merge, or an empty commit).</div>}
+                  {isOpen && list && list.map((f) => {
+                    const kind = commitFileKind(f.status);
+                    const slash = f.rel.lastIndexOf("/");
+                    return (
+                      <div
+                        key={f.rel}
+                        className="scm-row scm-commit-file"
+                        tabIndex={0}
+                        title={`${f.rel}\n${KIND_LABEL[kind]}${f.origRel ? ` (from ${f.origRel})` : ""} in ${e.short}\nClick to see what this commit changed, double-click to open the file`}
+                        onClick={() => void openCommitFile(e, f)}
+                        onDoubleClick={() => f.status !== "D" && void openPath(f.path)}
+                        onKeyDown={(ev) => ev.key === "Enter" && void openCommitFile(e, f)}
+                      >
+                        <span className={`scm-name git-${kind}`}>{f.rel.slice(slash + 1)}</span>
+                        {slash > 0 && <span className="scm-dir">{f.rel.slice(0, slash).replace(/\//g, "\\")}</span>}
+                        <span className="grow" />
+                        <span className={`scm-letter git-${kind}`} aria-label={KIND_LABEL[kind]}>{KIND_LETTER[kind]}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+          {more && (
+            <button className="btn small scm-more" disabled={loading} onClick={() => void loadMore()}>
+              {loading ? "Loading…" : "Show more"}
+            </button>
+          )}
+        </>
       )}
     </div>
   );
@@ -376,7 +509,8 @@ export function GitPanel() {
         <Section title="Merge Changes" group="conflict" files={groups.conflict} repo={repo} />
         <Section title="Staged Changes" group="staged" files={groups.staged} repo={repo} />
         <Section title="Changes" group="changes" files={groups.changes} repo={repo} />
-        {repo.files.length === 0 && <div className="panel-note">No changes: everything is committed.</div>}
+        {repo.files.length === 0 && <div className="panel-note">No uncommitted changes.</div>}
+        <CommitsSection repo={repo} />
         <HistorySection />
         <RepoSettings repo={repo} />
       </div>
