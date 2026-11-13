@@ -10043,7 +10043,7 @@
       "title": "Go to definition, type definition and implementation",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 399,
+      "line": 401,
       "status": "draft",
       "commands": [
         "code.gotoDefinition",
@@ -10091,7 +10091,7 @@
       "title": "Find all references",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 447,
+      "line": 449,
       "status": "draft",
       "commands": [
         "code.findReferences"
@@ -10130,7 +10130,7 @@
       "title": "Rename a symbol",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 485,
+      "line": 490,
       "status": "draft",
       "commands": [
         "code.renameSymbol"
@@ -10172,7 +10172,7 @@
       "title": "Problems in the editor",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 528,
+      "line": 537,
       "status": "draft",
       "commands": [
         "code.nextProblem",
@@ -10182,6 +10182,7 @@
         "src/lib/lsp.ts",
         "src/lib/lspServers.ts",
         "src/editor/manager.ts",
+        "src/editor/cmSetup.ts",
         "src/lib/commands.ts"
       ],
       "tests": [
@@ -10222,7 +10223,7 @@
       "title": "The Problems list and counts",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 581,
+      "line": 591,
       "status": "draft",
       "commands": [
         "view.problems"
@@ -10269,7 +10270,7 @@
       "title": "Format with the language server",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 632,
+      "line": 642,
       "status": "draft",
       "commands": [
         "code.formatWithServer"
@@ -10295,6 +10296,10 @@
         {
           "id": "LSP-014.3",
           "title": "Unavailable without a ready server"
+        },
+        {
+          "id": "LSP-014.4",
+          "title": "A server that can't format"
         }
       ]
     },
@@ -10303,7 +10308,7 @@
       "title": "Every open tab stays in sync with its server",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 664,
+      "line": 681,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10349,7 +10354,7 @@
       "title": "Settings for code intelligence",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 710,
+      "line": 727,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10397,7 +10402,7 @@
       "title": "Restart, crashes and quitting",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 761,
+      "line": 778,
       "status": "draft",
       "commands": [
         "code.restartLanguageServers"
@@ -16794,6 +16799,7 @@
       "LSP-001",
       "LSP-006",
       "LSP-010",
+      "LSP-012",
       "SET-002",
       "SET-007",
       "SET-008",
