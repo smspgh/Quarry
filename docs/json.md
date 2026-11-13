@@ -42,9 +42,10 @@ Opening a JSON file shows the JSON panel when that panel is pinned (see [Window 
   - **Parsed**: valid JSON.
   - **Lenient**: parsed, but uses something JSON doesn't allow, such as comments or a trailing comma. The reason is shown.
   - **Invalid**: click the error to jump to it.
+  - **Too large**: over the size limit below, so there is no tree.
   - **Not JSON** or **Empty**.
 - **While you edit.** If the document stops being valid JSON, the last good tree stays visible, dimmed, until it parses again.
-- **Size limit.** Documents over 64 MB or 2,000,000 nodes don't get a tree.
+- **Size limit.** Documents over 64 million characters (about 64 MB of plain ASCII text) or 2,000,000 nodes don't get a tree.
 
 The tree's parser is tolerant on purpose so it keeps working while you type. It accepts `//` and `/* */` comments, trailing commas, single-quoted strings, unquoted keys, and `NaN` / `Infinity` / hex numbers. **Validate** and **Format** are strict, as described below.
 
@@ -72,7 +73,7 @@ The breadcrumb bar above the editor shows the path of the value under the cursor
 
 On an error, Quarry marks it in the editor, moves the cursor to it, and reports the line and column with a specific message: "trailing comma", "expected `,` or `}`", "key must be a string", "invalid escape", "invalid number (leading zero)", "trailing characters", and so on. The mark clears on your next edit.
 
-A leading byte-order mark is allowed. In a plain JSON file, a comment is reported as "comments are not allowed in JSON (they are in JSONC)". In a JSONC file, comments and trailing commas pass, and the result reads "Valid JSONC ✓".
+A leading byte-order mark is allowed. In a plain JSON file, a comment is reported as "comments are not allowed in JSON (they are in JSONC)". In a JSONC file, comments and trailing commas pass, and the result reads "Valid JSONC ✓" ("Valid JSON5 ✓" for a `.json5` file, which is checked the same way).
 
 ## Format and minify
 

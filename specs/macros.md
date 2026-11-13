@@ -154,7 +154,7 @@ Scenario: MACRO-003.3 Unavailable without a text tab
 - Status: draft
 - Commands: `macro.playLast`, `macro.play`
 - Files:
-  - `src/lib/commands.ts` — `macro.playLast` (`lastMacro ?? macros[0]`, `macroReady`, `dynamicTitle`), `macro.play` (hidden; id or `{ id, toEnd }`), `bindCommandRunner`, `bindAppKeyFallback`
+  - `src/lib/commands.ts` — `macro.playLast` (`getLastMacro() ?? macros[0]`: looked up by id, then path, in the current list; `macroReady`, `dynamicTitle`), `macro.play` (hidden; id or `{ id, toEnd }`), `bindCommandRunner`, `bindAppKeyFallback`
   - `src/lib/macros.ts` — `playSteps` (text via `replaceSelection`, keys via `runScopeHandlers` then the app shortcut fallback, commands via the registry), `syntheticKey`, `guarded`
   - `src/components/panels/MacrosPanel.tsx` — `play`, Play button, `canPlay`, `playTitle`
   - `src/components/StatusBar.tsx` — "PLAYING" item
@@ -207,6 +207,20 @@ Scenario: MACRO-004.7 Not while recording, playing or without a text tab
   Given the tab in front is not a text tab
   When I look at the Macros panel
   Then Play has the tooltip "Open a text document to play macros"
+
+Scenario: MACRO-004.8 Play Last plays the macro as it is now
+  Given I played "B" from the panel
+  When I delete one of its steps in the editor, or rename it to "C" and save
+  And I press Ctrl+Shift+M
+  Then the edited macro is played, under its current name in the menu item
+  And the steps it had before the edit are not played
+
+Scenario: MACRO-004.9 A deleted macro is not played
+  Given macros "A" and "B", and I played "B" from the panel
+  When I delete "B" in the Macros panel
+  Then the play item reads 'Play Macro "A"'
+  When I press Ctrl+Shift+M
+  Then "A" is played, not "B"
 ```
 
 ## MACRO-005: Play a macro N times
@@ -214,7 +228,7 @@ Scenario: MACRO-004.7 Not while recording, playing or without a text tab
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/MacrosPanel.tsx` — times input, "Play ×N" button, `play(id, n)`
+  - `src/components/panels/MacrosPanel.tsx` — times input (clamped to 1–100,000), "Play ×N" button, `play(id, n)`
   - `src/lib/macros.ts` — `playSteps(list, times)`
 - Tests: none
 - Docs: `docs/macros.md`
@@ -237,6 +251,10 @@ Scenario: MACRO-005.2 The confirmation names the count
 Scenario: MACRO-005.3 Lowest value is 1
   When I type 0 or clear the times box
   Then it shows 1
+
+Scenario: MACRO-005.4 Highest value is 100,000
+  When I type 250000 in the times box
+  Then it shows 100000
 ```
 
 ## MACRO-006: Play a macro until the end of the file
@@ -289,7 +307,7 @@ Scenario: MACRO-006.5 From the menu
 - Commands: `macro.stop`, `macro.pause`
 - Files:
   - `src/lib/macros.ts` — `stopPlayback`, `pausePlayback`, `checkpoint` (every 20 steps, and every 5 passes of To end), `PlaybackCancelled`, `guarded`
-  - `src/lib/commands.ts` — `macro.stop` (Shift+Escape), `macro.pause` (`dynamicTitle`)
+  - `src/lib/commands.ts` — `macro.stop` (Shift+Escape, no `dynamicTitle`: the menu shows its title without the "Macro: " prefix), `macro.pause` (`dynamicTitle`)
   - `src/components/StatusBar.tsx` — PLAYING / PAUSED item with pause and stop buttons
   - `src/components/panels/MacrosPanel.tsx` — Pause / Resume and Stop buttons shown while playing
 - Tests: none
@@ -328,7 +346,9 @@ Scenario: MACRO-007.4 Stop while paused
 Scenario: MACRO-007.5 Only available while playing
   Given no macro is playing
   When I open the Macros menu
-  Then "Pause Macro Playback" and "Macro: Stop Playback" are greyed out
+  Then "Pause Macro Playback" and "Stop Playback" (shortcut Shift+Esc) are greyed out
+  When a macro is playing
+  Then they read "Pause Macro Playback" (or "Resume Macro Playback" while paused) and "Stop Playback", and are enabled
 ```
 
 ## MACRO-008: A whole playback is one undo step
@@ -378,7 +398,8 @@ Scenario: MACRO-008.5 A stopped playback is still one step
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/commands.ts` — `confirmRun("macro", …)` (shared with scripts), detail text per caller
+  - `src/lib/commands.ts` — `confirmRun("macro", …)` (shared with scripts)
+  - `src/lib/macros.ts` — `playDetail`, `TO_END_DETAIL`: the detail text, shared by the panel and the commands
   - `src/components/panels/MacrosPanel.tsx` — `play`, `playUntilEnd` call `confirmRun`
   - `src/lib/dialogs.ts` — `choose`
   - `src/lib/types.ts` — `confirmRuns` setting, default `true`
@@ -412,6 +433,15 @@ Scenario: MACRO-009.5 Setting off
   Given "Confirm script & macro runs" is off
   When I press Ctrl+Shift+M
   Then the macro plays without a dialog
+
+Scenario: MACRO-009.6 Same wording wherever playback starts
+  Given "Confirm script & macro runs" is on and "Tidy" has 1 step
+  When I press Ctrl+Shift+M, or click "Play" in the Macros panel
+  Then the dialog mentions "1 recorded step."
+  When I click "Play ×5"
+  Then it mentions "1 recorded step, played 5 times in a row."
+  When I click "To end", or choose Play Until End of File from the Macros menu
+  Then it says "Repeats until the cursor reaches the last line or stops moving down."
 ```
 
 ## MACRO-010: Manage macros in the Macros panel and menu
@@ -592,6 +622,7 @@ Scenario: MACRO-012.4 Saving a renamed macro replaces its file
   Given the saved macro "Macro 1" renamed to "Quote lines"
   When I click Save
   Then "Quote lines.macro.json" exists and "Macro 1.macro.json" no longer does
+  And "Macro 1.macro.json" is deleted outright, not moved to the Recycle Bin
 
 Scenario: MACRO-012.5 Name already used by another macro
   Given "Tidy.macro.json" exists and I rename a different macro to "Tidy"
@@ -619,7 +650,7 @@ Scenario: MACRO-012.7 Save fails
 - Commands: none
 - Files:
   - `src/lib/macros.ts` — `loadMacros` (unsaved guard, `LoadReason`, skips unreadable files, sorted by name), `macrosDir`, `resolveFolder`, `cleanDirSetting`, `migrateLegacy`
-  - `src/components/panels/MacrosPanel.tsx` — `chooseFolder`, `reload`, window-focus reload
+  - `src/components/panels/MacrosPanel.tsx` — `chooseFolder`, `reload`, window-focus reload (the panel stays mounted while hidden, `Sidebar.tsx` `PanelFrame`, so this runs with the panel closed too)
   - `src/components/panels/SettingsPanel.tsx` — "Macros folder" row (`changeFolder`)
   - `src/App.tsx` — `loadMacros` at startup
 - Tests: `src/__tests__/paths.test.ts`
@@ -655,9 +686,9 @@ Scenario: MACRO-013.4 Reloading would discard unsaved macros
   Then the list is unchanged
 
 Scenario: MACRO-013.5 Changes made outside Quarry
-  Given I copy "New.macro.json" into the macros folder with File Explorer while the Macros panel is open
+  Given I copy "New.macro.json" into the macros folder with File Explorer, with the Macros panel open or closed
   When I switch back to Quarry
-  Then "New" appears in the list
+  Then "New" appears in the list, and in the Macros menu
   And this automatic reload is skipped while anything is unsaved, recording or playing
 
 Scenario: MACRO-013.6 Choose another folder from the panel

@@ -22,28 +22,9 @@ Possible bugs
 Doc / code mismatches
 - Look-around and backreferences cannot be run in any scope: `docs/find-and-replace.md:130-133` says they work with Current File / Open Files, but the panel always validates with the Rust engine and blocks the search (`SearchPanel.tsx:351-369`, `:375`, `:877`; SEARCH-004.7).
 
-## JSON tools (`json.md`)
-
-- The JSON panel's Format / Minify / Validate buttons do nothing on a non-JSON-language tab whose text parses: the panel shows them (`src/components/panels/JsonPanel.tsx:311-313`) but `json.*` commands are disabled unless the language is JSON (`src/lib/commands.ts:538`; JSON-014.5).
-- "Too large" shows as Invalid: `getJsonTree` returns an error at offset 0 (`src/lib/jsonModel.ts:16`), so the panel shows the "Invalid" chip and a "Document too large for tree view — click to jump" button that jumps to line 1.
-- `docs/json.md:47` says the tree limit is 64 MB; the check is `doc.length` in UTF-16 code units (`jsonModel.ts:16`).
-- `docs/json.md:75` mentions "Valid JSONC ✓" only; a `.json5` file reports "Valid JSON5 ✓" (`commands.ts:382`).
-
 ## Scripts (`scripting.md`)
 
-- Selection edits land on the selection at finish time, not the snapshot: `src/lib/scripting.ts:231` applies `selectionTexts` to the current ranges; moving the cursor during a slow script retargets them, and a changed range count mismatches them.
-- Awkward warning for extension-filtered scripts: `"pick" is for .csv, .tsv files documents.` (`scripting.ts:152`).
 - `docs/macros.md:106` says script runs are blocked while a macro plays; only the hidden `script.run` has that guard (`src/lib/commands.ts:1133`) and nothing calls it; `script.runActive` (`commands.ts:1096`) is not blocked while recording or playing.
-- `docs/scripting.md:145` says the console keeps the last 2,000 lines; `src/lib/store.ts:373` keeps 2,001.
-- Not determined: `script.new` seems to always create in the scripts root (`src/components/panels/ExplorerPanel.tsx:514`) while the header button uses the selected folder (SCRIPT-002.1, .3 assume this).
-
-## Macros (`macros.md`)
-
-- Play Last can play a stale or deleted macro: `lastMacro` (`src/lib/commands.ts:480`, used at `:1034`, `:1050`) is an object reference; editing or renaming creates new objects through `stageMacros`, and `deleteMacro` (`src/lib/macros.ts:431`) never clears it.
-- The macro times box is not clamped at 100,000 (`src/components/panels/MacrosPanel.tsx:151`, only `Math.max(1, …)`); the Scripts box clamps both ends (`ScriptsPanel.tsx:144`); `docs/macros.md:46` says 1 to 100,000.
-- `docs/macros.md:75` says Delete "removes the file": Delete moves it to the Recycle Bin (`macros.ts:432`), while saving a renamed macro permanently deletes the old file (`macros.ts:421`).
-- The to-end confirmation is worded differently in the panel (`MacrosPanel.tsx:52`) and the commands (`commands.ts:1052`, `:1071`).
-- Not determined: whether macros reload on window focus while the panel is hidden (`MacrosPanel.tsx:93-101`); how the menu displays `macro.stop` (no `dynamicTitle`).
 
 ## Source control (`git.md`)
 

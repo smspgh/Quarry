@@ -62,7 +62,7 @@ Scenario: SCRIPT-001.5 No scripts are built in
   - `src/lib/commands.ts` — `script.new` (shows the panel, then emits the `script.new` bus event)
   - `src/components/panels/ScriptsPanel.tsx` — `variant.newFile`, `newFileEvent`, labels "New Script" / "New Script Folder"
   - `src/lib/scripting.ts` — `newScriptFileName`, `NEW_SCRIPT_SOURCE`
-  - `src/components/panels/ExplorerPanel.tsx` — `startCreate`, `commitCreate` (writes the file and opens it)
+  - `src/components/panels/ExplorerPanel.tsx` — `startCreate` (header buttons: `targetDir()`; the `newFileEvent` bus event: the tree's root `folder`), `commitCreate` (writes the file and opens it)
   - `src/lib/bus.ts` — event bus carrying `script.new`
 - Tests: `src/__tests__/scripts.test.ts`
 - Docs: `docs/scripting.md`
@@ -74,10 +74,11 @@ Scenario: SCRIPT-001.5 No scripts are built in
 ```gherkin
 Scenario: SCRIPT-002.1 New script from the menu
   Given the Scripts panel is closed
+  And the subfolder csv was the last folder selected in its tree
   When I choose Scripts › New Script
   Then the Scripts panel opens with a name box in the tree, with the placeholder "script name"
   When I type "upper" and press Enter
-  Then the file upper.js is created in the scripts folder
+  Then the file upper.js is created at the top of the scripts folder, not in csv
   And it opens in a tab containing a short template that ends with doc.mapLines((line, i) => line);
 
 Scenario: SCRIPT-002.2 The .js extension is added only when none is typed
@@ -258,7 +259,7 @@ Scenario: SCRIPT-005.6 Setting off
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/scripting.ts` — `runScript` `onmessage` (selection changes → document text → `newSelection`; both-changed and switched-tab failures; `userEvent: "input.script"`)
+  - `src/lib/scripting.ts` — `runScript` `onmessage` (selection changes → document text → `newSelection`; both-changed, switched-tab and edited-meanwhile failures; selection changes go to the ranges captured at start; `userEvent: "input.script"`)
   - `src/lib/scriptWorker.ts` — `done` message (`text`, `selectionTexts`, `newSelection`, returned string)
   - `src/editor/manager.ts` — `replaceAll` (minimal change), `selectRange`
 - Tests: none
@@ -316,6 +317,18 @@ Scenario: SCRIPT-006.9 A script that changes nothing
   Given a script that only calls console.log
   When I run it
   Then the document is not marked modified and no undo step is added
+
+Scenario: SCRIPT-006.10 Moving the cursor during a run
+  Given two cursors each selecting a word, and a slow script that upper-cases the selection
+  When I click elsewhere in the same document before it finishes
+  Then the two words that were selected when it started are upper-cased
+  And the text at the new cursor position is unchanged
+
+Scenario: SCRIPT-006.11 Editing the document during a run
+  Given a slow script running on data.csv that changes its text or selection
+  When I type a character in data.csv before it finishes
+  Then the script's changes are not applied and my typing is kept
+  And an error reads "data.csv was edited while the script ran, so its changes were not applied."
 ```
 
 ## SCRIPT-007: Script API for the whole document (doc)
@@ -518,9 +531,12 @@ Scenario: SCRIPT-010.4 Language names are matched exactly
   Then Run is disabled
 
 Scenario: SCRIPT-010.5 Refused when started another way
-  Given flatten (JSON / YAML only) is the current script and a Markdown tab is in front
+  Given flatten (JSON / YAML only) is the current script and the Markdown tab notes.md is in front
   When I press Ctrl+Shift+Enter and confirm
-  Then the script does not run and a warning says "flatten" is for JSON / YAML documents
+  Then the script does not run and a warning reads "flatten" is for JSON / YAML only; notes.md doesn't match.
+  Given pick (// @extensions .csv, .tsv) is the current script and notes.md is in front
+  When I press Ctrl+Shift+Enter and confirm
+  Then a warning reads "pick" is for .csv, .tsv files only; notes.md doesn't match.
 
 Scenario: SCRIPT-010.6 No header means any text document
   Given a script without @languages or @extensions
@@ -637,7 +653,7 @@ Scenario: SCRIPT-012.5 Sandbox
   - `src/lib/scripting.ts` — `formatScriptError` (maps wrapper lines to script lines, drops worker frames), `runScript` error path, `store.log`
   - `src/lib/scriptWorker.ts` — `error` message with `lineOffset` (`wrapperLineOffset`)
   - `src/components/BottomPanel.tsx` — Console tab, Clear console, auto-scroll
-  - `src/lib/store.ts` — `log` / `consoleLines` (trimmed to about 2,000 lines), `clearConsole`
+  - `src/lib/store.ts` — `log` / `consoleLines` (trimmed to the last 2,000 lines), `clearConsole`
 - Tests: `src/__tests__/scripts.test.ts`
 - Docs: `docs/scripting.md`
 
@@ -673,7 +689,7 @@ Scenario: SCRIPT-013.5 Console housekeeping
   Given the Console holds output from earlier runs
   When I click "Clear console"
   Then it is emptied and reads "Script output and messages appear here."
-  And without clearing, only about the last 2,000 lines are kept
+  And without clearing, only the last 2,000 lines are kept
 ```
 
 ## SCRIPT-014: Script API Reference tab

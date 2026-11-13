@@ -149,10 +149,11 @@ export async function runScript(source: string, args?: unknown, script?: Pick<Sc
   const view = editor.view;
   if (!view || editor.currentDocId !== doc.id) return { ok: false };
   if (script && !scriptApplies(script, doc)) {
-    store.toast(`"${script.name}" is for ${describeWhen(script).replace(/ only$/, "")} documents.`, "warning");
+    store.toast(`"${script.name}" is for ${describeWhen(script)}; ${doc.name} doesn't match.`, "warning");
     return { ok: false };
   }
-  const text = view.state.doc.toString();
+  const startDoc = view.state.doc;
+  const text = startDoc.toString();
   const selections = view.state.selection.ranges.map((r) => ({ from: r.from, to: r.to }));
   let clip = "";
   try {
@@ -226,10 +227,14 @@ export async function runScript(source: string, args?: unknown, script?: Pick<Sc
           return;
         }
       } else {
-        // Apply edits as one undoable transaction.
+        // Offsets refer to the text the script saw: if it was edited meanwhile they would land in the wrong place.
+        if ((editsSelection || typeof msg.text === "string" || msg.newSelection) && cur.state.doc !== startDoc && !cur.state.doc.eq(startDoc)) {
+          fail(`${doc.name} was edited while the script ran, so its changes were not applied.`);
+          return;
+        }
+        // Apply edits as one undoable transaction, to the selections the script was given (the cursor may have moved since).
         if (editsSelection) {
-          const ranges = cur.state.selection.ranges;
-          const changes = ranges
+          const changes = selections
             .map((r, i) => (selTexts[i] !== null && selTexts[i] !== undefined ? { from: r.from, to: r.to, insert: selTexts[i] as string } : null))
             .filter((c): c is { from: number; to: number; insert: string } => !!c);
           cur.dispatch({ changes, userEvent: "input.script" });

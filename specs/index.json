@@ -9290,7 +9290,7 @@
       "title": "Copy a value or its path from the tree",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 172,
+      "line": 173,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9341,7 +9341,7 @@
       "title": "Copy the path of the value under the cursor",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 235,
+      "line": 236,
       "status": "draft",
       "commands": [
         "json.copyPath",
@@ -9385,7 +9385,7 @@
       "title": "Copy the value under the cursor",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 278,
+      "line": 279,
       "status": "draft",
       "commands": [
         "json.copyValue"
@@ -9425,7 +9425,7 @@
       "title": "Path bar above the editor",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 317,
+      "line": 318,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9468,7 +9468,7 @@
       "title": "Validate a JSON document",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 368,
+      "line": 369,
       "status": "draft",
       "commands": [
         "json.validate"
@@ -9526,7 +9526,7 @@
       "title": "Pretty-print JSON without changing its values",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 436,
+      "line": 440,
       "status": "draft",
       "commands": [
         "json.format"
@@ -9581,7 +9581,7 @@
       "title": "Minify JSON",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 503,
+      "line": 507,
       "status": "draft",
       "commands": [
         "json.minify"
@@ -9623,7 +9623,7 @@
       "title": "Convert JSON to CSV",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 546,
+      "line": 550,
       "status": "draft",
       "commands": [
         "json.toCsv"
@@ -9671,7 +9671,7 @@
       "title": "Convert CSV or TSV to JSON",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 603,
+      "line": 607,
       "status": "draft",
       "commands": [
         "json.fromCsv"
@@ -9727,7 +9727,7 @@
       "title": "Copy the top-level keys",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 676,
+      "line": 680,
       "status": "draft",
       "commands": [
         "json.copyKeys"
@@ -9766,7 +9766,7 @@
       "title": "JSON commands are offered only where they apply",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 714,
+      "line": 718,
       "status": "draft",
       "commands": [
         "json.format",
@@ -10762,6 +10762,14 @@
         {
           "id": "MACRO-004.7",
           "title": "Not while recording, playing or without a text tab"
+        },
+        {
+          "id": "MACRO-004.8",
+          "title": "Play Last plays the macro as it is now"
+        },
+        {
+          "id": "MACRO-004.9",
+          "title": "A deleted macro is not played"
         }
       ]
     },
@@ -10770,7 +10778,7 @@
       "title": "Play a macro N times",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 212,
+      "line": 226,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10793,6 +10801,10 @@
         {
           "id": "MACRO-005.3",
           "title": "Lowest value is 1"
+        },
+        {
+          "id": "MACRO-005.4",
+          "title": "Highest value is 100,000"
         }
       ]
     },
@@ -10801,7 +10813,7 @@
       "title": "Play a macro until the end of the file",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 242,
+      "line": 260,
       "status": "draft",
       "commands": [
         "macro.playToEnd",
@@ -10846,7 +10858,7 @@
       "title": "Pause and stop playback",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 286,
+      "line": 304,
       "status": "draft",
       "commands": [
         "macro.stop",
@@ -10890,7 +10902,7 @@
       "title": "A whole playback is one undo step",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 334,
+      "line": 354,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10930,11 +10942,12 @@
       "title": "Confirm before a macro plays",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 376,
+      "line": 396,
       "status": "draft",
       "commands": [],
       "files": [
         "src/lib/commands.ts",
+        "src/lib/macros.ts",
         "src/components/panels/MacrosPanel.tsx",
         "src/lib/dialogs.ts",
         "src/lib/types.ts"
@@ -10963,6 +10976,10 @@
         {
           "id": "MACRO-009.5",
           "title": "Setting off"
+        },
+        {
+          "id": "MACRO-009.6",
+          "title": "Same wording wherever playback starts"
         }
       ]
     },
@@ -10971,7 +10988,7 @@
       "title": "Manage macros in the Macros panel and menu",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 417,
+      "line": 447,
       "status": "draft",
       "commands": [
         "macro.panel",
@@ -11035,7 +11052,7 @@
       "title": "Edit a macro's steps",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 491,
+      "line": 521,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11089,7 +11106,7 @@
       "title": "Save a macro to a file",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 555,
+      "line": 585,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11140,7 +11157,7 @@
       "title": "Macros folder: loading, reloading and changing it",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 616,
+      "line": 647,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11288,7 +11305,7 @@
       "title": "Open a script to edit it",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 103,
+      "line": 104,
       "status": "draft",
       "commands": [
         "script.edit"
@@ -11326,7 +11343,7 @@
       "title": "Run a script on the document in front",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 140,
+      "line": 141,
       "status": "draft",
       "commands": [
         "script.runActive",
@@ -11386,7 +11403,7 @@
       "title": "Confirm before a script runs",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 211,
+      "line": 212,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11431,7 +11448,7 @@
       "title": "A script's result is applied as one undo step",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 256,
+      "line": 257,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11479,6 +11496,14 @@
         {
           "id": "SCRIPT-006.9",
           "title": "A script that changes nothing"
+        },
+        {
+          "id": "SCRIPT-006.10",
+          "title": "Moving the cursor during a run"
+        },
+        {
+          "id": "SCRIPT-006.11",
+          "title": "Editing the document during a run"
         }
       ]
     },
@@ -11487,7 +11512,7 @@
       "title": "Script API for the whole document (doc)",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 321,
+      "line": 334,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11530,7 +11555,7 @@
       "title": "Script API for the selection",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 373,
+      "line": 386,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11573,7 +11598,7 @@
       "title": "Script helpers, clipboard and console",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 422,
+      "line": 435,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11624,7 +11649,7 @@
       "title": "Limit a script to certain languages or file types",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 482,
+      "line": 495,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11678,7 +11703,7 @@
       "title": "Run a script several times or until nothing changes",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 541,
+      "line": 557,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11718,7 +11743,7 @@
       "title": "Cancel a running script; runaway scripts time out",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 587,
+      "line": 603,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11758,7 +11783,7 @@
       "title": "Script errors and Console output",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 632,
+      "line": 648,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11801,7 +11826,7 @@
       "title": "Script API Reference tab",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 679,
+      "line": 695,
       "status": "draft",
       "commands": [
         "help.scriptApi"
@@ -11835,7 +11860,7 @@
       "title": "Scripts folder location",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 711,
+      "line": 727,
       "status": "draft",
       "commands": [],
       "files": [
@@ -17667,6 +17692,7 @@
       "MACRO-006",
       "MACRO-007",
       "MACRO-008",
+      "MACRO-009",
       "MACRO-010",
       "MACRO-011",
       "MACRO-012",

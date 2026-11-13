@@ -29,7 +29,7 @@ The Scripts panel (**Scripts › Scripts**, or the Scripts icon in the panel rai
 | Action | How |
 | --- | --- |
 | New script | **New Script** in the panel header, or **Scripts › New Script**. Type a name; `.js` is added, and the file opens in a tab with a short starting template. |
-| New folder | **New Script Folder** in the panel header. Both go into the selected folder (or the folder of the selected script). |
+| New folder | **New Script Folder** in the panel header. From the header, both go into the selected folder (or the folder of the selected script); **Scripts › New Script** always creates at the top of the scripts folder. |
 | Run on the current document | Select the script and press **Run** below the tree, or right-click › **Run**. |
 | Edit | Double-click the script, press **Enter**, use **Edit** in the run bar, or right-click › **Edit**. It opens in a tab; edit and save it like any other file. |
 | Run several times | **×N** (1 to 100,000; each run is its own undo step, stops at the first error). |
@@ -57,7 +57,7 @@ When you run a script, Quarry takes a snapshot of the current document: its text
 
 Either way the edit is one transaction, so a single **Ctrl+Z** undoes it.
 
-If you switch to another tab while a script is running, its changes are not applied, and a message tells you so.
+If you switch to another tab, or edit the document, while a script is running, its changes are not applied, and a message tells you so. Moving the cursor is fine: selection changes go to the ranges the script was given.
 
 The script body is wrapped in an `async` function in strict mode, so top-level `await` and `return` are allowed. `doc`, `selection`, `util`, `clipboard`, `console` and `args` are its parameters.
 

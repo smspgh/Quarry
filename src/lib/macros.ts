@@ -217,6 +217,15 @@ export function shouldStopToEnd(lineBefore: number, lineAfter: number, lineCount
 /** Hard cap for "play until end of file". */
 export const PLAY_TO_END_MAX = 10_000;
 
+/** Confirmation detail for To end, the same from the panel, the menu and the palette. */
+export const TO_END_DETAIL = "Repeats until the cursor reaches the last line or stops moving down.";
+
+/** Confirmation detail for playing a macro once or `times` times in a row. */
+export function playDetail(steps: number, times = 1): string {
+  const s = `${steps} recorded step${steps === 1 ? "" : "s"}`;
+  return times === 1 ? `${s}.` : `${s}, played ${times} times in a row.`;
+}
+
 /**
  * Play until the cursor reaches the last line, stops moving down, or the cap is hit.
  * Starting on the last line plays exactly once. Returns the number of iterations played.

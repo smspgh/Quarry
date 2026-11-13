@@ -113,9 +113,9 @@ Scenario: JSON-002.6 Double-click toggles a container
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/JsonPanel.tsx` — status chip (Parsed / Lenient / Invalid / Empty document / Not JSON), `lastGood` stale tree, error button → `editor.goTo`
-  - `src/lib/jsonPath.ts` — `parseJsonTree` (tolerant parser, `lenient` reason, `maxNodes` 2,000,000, iterative so depth is not limited by the call stack)
-  - `src/lib/jsonModel.ts` — `MAX_TREE_BYTES` (64 MB) in `getJsonTree`
+  - `src/components/panels/JsonPanel.tsx` — status chip (Parsed / Lenient / Invalid / Too large / Empty document / Not JSON), `lastGood` stale tree, error button → `editor.goTo`
+  - `src/lib/jsonPath.ts` — `parseJsonTree` (tolerant parser, `lenient` reason, `maxNodes` 2,000,000 → `tooLarge`, iterative so depth is not limited by the call stack)
+  - `src/lib/jsonModel.ts` — `MAX_TREE_CHARS` (64 Mi characters, counted as UTF-16 code units, not bytes) in `getJsonTree` → `tooLarge`
 - Tests: `src/__tests__/hostile.test.ts`, `src/__tests__/text.test.ts`
 - Docs: `docs/json.md`
 
@@ -158,10 +158,11 @@ Scenario: JSON-003.5 Empty and non-JSON documents
   Then the chip reads "Invalid" and no tree is shown
 
 Scenario: JSON-003.6 Size limits
-  Given a document longer than 64 MB, or one with more than 2,000,000 values
+  Given a document longer than 64 million characters (67,108,864), or one with more than 2,000,000 values
   When I open the JSON panel
-  Then no tree is built
-  And the panel reports "Document too large for tree view"
+  Then no tree is built, and no earlier tree of that document stays visible
+  And the chip reads "Too large", not "Invalid"
+  And the panel reports "Document too large for tree view" with no button to jump to an error
 
 Scenario: JSON-003.7 Deep nesting does not crash the panel
   Given a document of 10,000 nested arrays
@@ -417,6 +418,9 @@ Scenario: JSON-008.6 JSON5 files are checked as JSONC
   When I validate
   Then the error message names the dialect JSON5
   And it adds that Quarry checks JSON5 files as JSONC: comments and trailing commas are fine, unquoted keys and single quotes are not
+  Given a tab config.json5 containing comments and a trailing comma but only quoted keys
+  When I validate
+  Then a message reads "Valid JSON5 ✓"
 
 Scenario: JSON-008.7 Byte-order mark and repeated presses
   Given a valid document that starts with a byte-order mark
@@ -718,7 +722,7 @@ Scenario: JSON-013.4 Invalid JSON
 - Files:
   - `src/lib/commands.ts` — `applyDefaultEnabled` (`json.*` → `hasJson`), `isBigJson`, `isCsvDoc`, `textDocOnly`, `runCommand` / `handleKeyEvent` (disabled commands are no-ops)
   - `src/components/MenuBar.tsx` — JSON menu items
-  - `src/components/panels/JsonPanel.tsx` — header buttons run the same commands
+  - `src/components/panels/JsonPanel.tsx` — header buttons run the same commands and are disabled when the command is (`getCommand` + `isEnabled`)
 - Tests: none
 - Docs: `docs/json.md`
 
@@ -753,6 +757,9 @@ Scenario: JSON-014.4 Large-file JSON tabs offer Validate only
 
 Scenario: JSON-014.5 Panel buttons obey the same rule
   Given a Plain Text tab whose text happens to parse as JSON, with the JSON panel open
-  When I click the panel's Format button
-  Then the document is unchanged
+  When I look at the panel header
+  Then the Format, Minify and Validate buttons are greyed out
+  And their tooltips say to set the language to JSON first
+  When I set the tab's language to JSON
+  Then the three buttons are enabled
 ```
