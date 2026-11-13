@@ -184,7 +184,6 @@ Doc / code mismatches
 ## Explorer and file operations (`explorer.md`)
 
 - The New File / New Folder name box is always drawn at the top of the tree at a fixed indent (`src/components/panels/ExplorerPanel.tsx:651-668`); `docs/editing.md:169` says items are "named inline".
-- `docs/editing.md:182-184` lists only arrows, Enter and type-ahead; the code also handles Home / End, PageUp / PageDown (15 rows), Space, F2, Delete and Ctrl+C / X / V (`ExplorerPanel.tsx:531-609`).
 - Not determined: what an open tab does after its file is deleted from the Explorer (`trashPaths`, `src/lib/fileOps.ts:72-90`, does not close or retarget tabs).
 - Expanded folders are not saved in the session; `openFolder` resets them to the root (`src/lib/actions.ts:312`).
 - EXPL-016 lists `src/__tests__/splitGit.test.ts` on the strength of a grep for `kindOf` / `KIND_LETTER` only.

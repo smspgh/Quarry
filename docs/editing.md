@@ -180,7 +180,10 @@ Files given on the command line take the place of the restored tabs.
 - **Copy, Cut and Paste** use the Windows clipboard, so you can copy files in Quarry and paste them in File Explorer, or the other way round. Paste goes into the folder you right-clicked (or the folder of the file). Nothing is overwritten: a name that's taken gets " - Copy" for a copy, as in File Explorer, or " (2)" for a move. Pasting after Cut moves the items, and open tabs follow the files they show.
 - **Find in Files** searches what you last clicked or selected here when its scope is Folder / Selection; see [Find in Files](find-and-replace.md#where-it-searches).
 - **Keyboard:**
-  - ↑/↓ move, ←/→ collapse or expand, Enter opens.
+  - ↑/↓ move, Home / End go to the first / last row, Page Up / Page Down move 15 rows.
+  - ←/→ collapse or expand a folder (→ on an open folder goes into it, ← on a file goes to its folder).
+  - Enter or Space opens a file or opens / closes a folder.
+  - F2 renames, Delete deletes, Ctrl+C / Ctrl+X / Ctrl+V copy, cut and paste.
   - Type the start of a name to jump to it.
 - **Delete** asks first, then moves the file or folder (or everything selected) to the Recycle Bin.
 - **Renaming** a file updates any open tab for it.
