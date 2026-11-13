@@ -245,7 +245,8 @@ function gaps(index) {
       if (!SOURCE_EXT.test(rel) || rel.includes("__tests__") || NO_STORY_NEEDED.has(rel)) continue;
       if (!index.files[rel]) out.push(`no story lists the file ${rel}`);
     }
-  for (const rel of walk("src/__tests__")) if (rel !== "src/__tests__/specs.test.ts" && !index.tests[rel]) out.push(`no story lists the test ${rel}`);
+  // Shared test helpers (src/__tests__/helpers/) are not tests and need no story.
+  for (const rel of walk("src/__tests__")) if (rel !== "src/__tests__/specs.test.ts" && !rel.startsWith("src/__tests__/helpers/") && !index.tests[rel]) out.push(`no story lists the test ${rel}`);
   for (const id of [...known].sort()) if (!index.commands[id]) out.push(`no story covers the command ${id}`);
   for (const id of Object.keys(index.commands))
     if (!known.has(id)) out.push(`command ${id} (${index.commands[id].join(", ")}) is not registered anywhere`);

@@ -21,7 +21,7 @@ The commit graph tab (`kind: "graph"`): a repository's history as a lane graph w
   - `src/App.tsx` — renders one `GraphView` per graph doc
   - `src/lib/store.ts` — `Doc.graph`
   - `src/lib/actions.ts` — `sessionDocs()` keeps only text and Claude tabs, so graph tabs are not saved
-- Tests: none
+- Tests: `src/__tests__/graphView.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer working in a git repository
@@ -464,7 +464,7 @@ Scenario: GRAPH-008.11 Search by branch or tag name
   - `src-tauri/src/git.rs` — `commit_detail` / `git_commit_detail` (`--shortstat --diff-merges=first-parent`), `commit_files`
   - `src/lib/gitApi.ts` — `git.commitDetail`, `GitCommitDetail`
   - `src/lib/gitStatus.ts` — `commitFileKind`, `KIND_LETTER`, `KIND_LABEL`
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git.rs`, `src/__tests__/graphView.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer inspecting a commit
@@ -574,7 +574,7 @@ Scenario: GRAPH-010.6 Open the file as it is now
   - `src/lib/git.ts` — `commitAction`, `checkoutRef`
   - `src-tauri/src/git.rs` — `commit_action` / `git_commit_action` (`branch-switch` = `switch -c`, `tag`), `valid_ref_name`, `checkout`
   - `src/lib/gitApi.ts` — `GitCommitAction`, `git.commitAction`
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitGraph.test.ts`
+- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphView.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer

@@ -8565,7 +8565,9 @@
         "src/lib/store.ts",
         "src/lib/actions.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/graphView.test.tsx"
+      ],
       "docs": [
         "docs/git.md"
       ],
@@ -8958,7 +8960,8 @@
         "src/lib/gitStatus.ts"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git.rs",
+        "src/__tests__/graphView.test.tsx"
       ],
       "docs": [
         "docs/git.md"
@@ -9061,7 +9064,8 @@
       ],
       "tests": [
         "src-tauri/src/git.rs",
-        "src/__tests__/gitGraph.test.ts"
+        "src/__tests__/gitGraph.test.ts",
+        "src/__tests__/graphView.test.tsx"
       ],
       "docs": [
         "docs/git.md"
@@ -18351,6 +18355,11 @@
     ],
     "src/__tests__/goto.test.ts": [
       "EDIT-016"
+    ],
+    "src/__tests__/graphView.test.tsx": [
+      "GRAPH-001",
+      "GRAPH-009",
+      "GRAPH-011"
     ],
     "src/__tests__/history.test.ts": [
       "FIND-007"

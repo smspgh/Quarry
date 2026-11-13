@@ -29,7 +29,6 @@ Doc / code mismatches
 ## Commit graph (`git-graph.md`)
 
 - The `"branch"` action (create without switching) exists in Rust, `GitCommitAction` and the `Naming` type, but the menu only offers `"branch-switch"` (`src/components/GraphView.tsx`, `Naming` and the "Create Branch Here…" item); the plain-branch path in `act` / the naming strip and its notification (`actionDone` in `src/lib/gitGraph.ts`) are dead UI code. It has been that way since the graph was added.
-- No test renders `GraphView.tsx` (toolbar, paging and scrolling, selection keys, menu, naming strip, details pane); the action dialogs and notifications are now tested through `actionConfirm` / `actionDone` in `src/lib/gitGraph.ts`. Rendering it needs a DOM harness (React + jsdom), which the repository does not have.
 
 ## Merge conflicts and stopped operations (`git-conflicts.md`)
 
