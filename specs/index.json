@@ -1302,7 +1302,8 @@
         "src/lib/tabLimit.ts"
       ],
       "tests": [
-        "src-tauri/src/claude.rs"
+        "src-tauri/src/claude.rs",
+        "src/__tests__/claudeSession.test.ts"
       ],
       "docs": [
         "docs/claude-code.md"
@@ -1358,7 +1359,8 @@
         "src-tauri/src/writer.rs"
       ],
       "tests": [
-        "src/__tests__/claude.test.ts"
+        "src/__tests__/claude.test.ts",
+        "src/__tests__/claudeSession.test.ts"
       ],
       "docs": [
         "docs/claude-code.md"
@@ -1604,7 +1606,8 @@
         "src/lib/types.ts"
       ],
       "tests": [
-        "src-tauri/src/claude.rs"
+        "src-tauri/src/claude.rs",
+        "src/__tests__/claudeSession.test.ts"
       ],
       "docs": [
         "docs/claude-code.md"
@@ -1895,7 +1898,9 @@
         "src/lib/commands.ts",
         "src/components/ClaudeView.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/claudeSession.test.ts"
+      ],
       "docs": [
         "docs/claude-code.md"
       ],
@@ -1935,7 +1940,8 @@
       ],
       "tests": [
         "src/__tests__/claude.test.ts",
-        "src-tauri/src/claude.rs"
+        "src-tauri/src/claude.rs",
+        "src/__tests__/claudeSession.test.ts"
       ],
       "docs": [
         "docs/claude-code.md"
@@ -2045,7 +2051,8 @@
       ],
       "tests": [
         "src/__tests__/claude.test.ts",
-        "src-tauri/src/claude.rs"
+        "src-tauri/src/claude.rs",
+        "src/__tests__/claudeSession.test.ts"
       ],
       "docs": [
         "docs/claude-code.md"
@@ -2122,7 +2129,8 @@
         "src/lib/updater.ts"
       ],
       "tests": [
-        "src/__tests__/claude.test.ts"
+        "src/__tests__/claude.test.ts",
+        "src/__tests__/claudeSession.test.ts"
       ],
       "docs": [
         "docs/claude-code.md"
@@ -14159,7 +14167,9 @@
         "src/App.tsx",
         "src/lib/store.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/claudeSession.test.ts"
+      ],
       "docs": [
         "docs/claude-code.md"
       ],
@@ -14212,7 +14222,8 @@
         "src-tauri/src/claude.rs"
       ],
       "tests": [
-        "src-tauri/src/pty.rs"
+        "src-tauri/src/pty.rs",
+        "src/__tests__/claudeSession.test.ts"
       ],
       "docs": [
         "docs/claude-code.md"
@@ -14367,7 +14378,9 @@
         "src/components/TerminalView.tsx",
         "src/lib/terminal.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/claudeSession.test.ts"
+      ],
       "docs": [
         "docs/claude-code.md"
       ],
@@ -14410,7 +14423,9 @@
         "src/lib/tabLimit.ts",
         "src/components/panels/SettingsPanel.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/claudeSession.test.ts"
+      ],
       "docs": [
         "docs/claude-code.md"
       ],
@@ -14482,7 +14497,9 @@
         "src-tauri/src/pty.rs",
         "src/lib/lspInstall.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/claudeSession.test.ts"
+      ],
       "docs": [
         "docs/code-intelligence.md"
       ],
@@ -17828,6 +17845,20 @@
       "CLAUDE-017",
       "CLAUDE-018",
       "CLAUDE-020"
+    ],
+    "src/__tests__/claudeSession.test.ts": [
+      "CLAUDE-003",
+      "CLAUDE-004",
+      "CLAUDE-009",
+      "CLAUDE-015",
+      "CLAUDE-016",
+      "CLAUDE-018",
+      "CLAUDE-020",
+      "TERM-001",
+      "TERM-002",
+      "TERM-006",
+      "TERM-007",
+      "TERM-009"
     ],
     "src/__tests__/conflicts.test.ts": [
       "CONFLICT-001",

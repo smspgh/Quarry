@@ -23,7 +23,7 @@ A Claude CLI tab (`kind: "terminal"`) runs the real `claude` command line in a W
   - `src/components/TitleBar.tsx` — tab icon
   - `src/App.tsx` — keeps every `TerminalView` mounted
   - `src/lib/store.ts` — `Doc.terminal`
-- Tests: none
+- Tests: `src/__tests__/claudeSession.test.ts`
 - Docs: `docs/claude-code.md`
 
 **As a** developer who prefers the Claude Code command line
@@ -85,7 +85,7 @@ Scenario: TERM-001.7 Hidden while the integration is off
   - `src/components/TerminalView.tsx` — `resume` passed on the first start only (`first`)
   - `src-tauri/src/pty.rs` — `claude_command`, `resume_id` (`--resume <id>` only when `claude::is_session_id` accepts it: hexadecimal digits and dashes, at most 64 characters)
   - `src-tauri/src/claude.rs` — `is_session_id` (shared with Claude tabs)
-- Tests: `src-tauri/src/pty.rs`
+- Tests: `src-tauri/src/pty.rs`, `src/__tests__/claudeSession.test.ts`
 - Docs: `docs/claude-code.md`
 
 **As a** developer continuing earlier work in the command line
@@ -240,7 +240,7 @@ Scenario: TERM-005.6 Scrollback
   - `src-tauri/src/pty.rs` — watcher thread in `spawn` (polls the child every 150 ms because ConPTY keeps the output pipe open), `pty:exit` (always with the exit code; a tab killed with `pty_kill` reports nothing)
   - `src/components/TerminalView.tsx` — `pty:exit` listener, Enter restarts (`t.reset()` + `start`)
   - `src/lib/terminal.ts` — `setTerminalPty`, `terminalPty`, `commandFinished` (code `null` only when a one-off command could not start)
-- Tests: none
+- Tests: `src/__tests__/claudeSession.test.ts`
 - Docs: `docs/claude-code.md`
 
 **As a** developer who typed /exit
@@ -285,7 +285,7 @@ Scenario: TERM-006.5 An ended terminal closes without asking
   - `src-tauri/src/pty.rs` — `pty_kill`, `pty_kill_all`, `kill` (`taskkill /T /F`)
   - `src/lib/tabLimit.ts` — `inUse` (a terminal with a running program)
   - `src/components/panels/SettingsPanel.tsx` — turning Claude Code off closes terminal tabs
-- Tests: none
+- Tests: `src/__tests__/claudeSession.test.ts`
 - Docs: `docs/claude-code.md`
 
 **As a** developer
@@ -360,7 +360,7 @@ Scenario: TERM-008.4 The folder must exist
   - `src/components/TerminalView.tsx` — `command` branch (dimmed "> command" line, Done / Failed line, no restart on Enter)
   - `src-tauri/src/pty.rs` — `pty_start` with `command` (`cmd.exe /d /s /c <line>`)
   - `src/lib/lspInstall.ts` — `installServer` (the only caller)
-- Tests: none
+- Tests: `src/__tests__/claudeSession.test.ts`
 - Docs: `docs/code-intelligence.md`
 
 **As a** developer installing a language server from Quarry

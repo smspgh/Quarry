@@ -126,7 +126,7 @@ Scenario: CLAUDE-002.6 Sending without an installation
   - `src/components/TitleBar.tsx` — tab icon (`ClaudeMark`)
   - `src/App.tsx` — keeps every `ClaudeView` mounted, `installClaudeEvents()` at start-up
   - `src/lib/tabLimit.ts` — `makeRoom`, `inUse` (a working Claude tab counts as in use)
-- Tests: `src-tauri/src/claude.rs`
+- Tests: `src-tauri/src/claude.rs`, `src/__tests__/claudeSession.test.ts`
 - Docs: `docs/claude-code.md`
 
 **As a** developer
@@ -193,7 +193,7 @@ Scenario: CLAUDE-003.8 The folder must exist
   - `src/lib/claudeProtocol.ts` — `userMessage`, `addUser`, `reduce`, `streamEvent`, `assistant`, `result`
   - `src-tauri/src/claude.rs` — `claude_send` (one JSON line to stdin), stdout lines as `claude:out`
   - `src-tauri/src/writer.rs` — `ChannelWriter` (stdin written off the UI thread)
-- Tests: `src/__tests__/claude.test.ts`
+- Tests: `src/__tests__/claude.test.ts`, `src/__tests__/claudeSession.test.ts`
 - Docs: `docs/claude-code.md`
 
 **As a** developer talking to Claude Code
@@ -444,7 +444,7 @@ Scenario: CLAUDE-008.7 Wording for other tools
   - `src/components/ClaudeView.tsx` — `.claude-mode` text in the composer, `modePending`
   - `src/lib/actions.ts` — `mergeSettings` (anything but `default` becomes `acceptEdits`)
   - `src/lib/types.ts` — `claudePermissionMode` (default `acceptEdits`)
-- Tests: `src-tauri/src/claude.rs`
+- Tests: `src-tauri/src/claude.rs`, `src/__tests__/claudeSession.test.ts`
 - Docs: `docs/claude-code.md`
 
 **As a** developer
@@ -746,7 +746,7 @@ Scenario: CLAUDE-014.7 Line breaks are kept
   - `src/lib/claude.ts` — `newClaudeSession`, `stopProc`
   - `src/lib/commands.ts` — `claude.newSession` (enabled on a Claude tab)
   - `src/components/ClaudeView.tsx` — "New conversation" header button; the other header buttons (terminal, "Show folder in the Explorer")
-- Tests: none
+- Tests: `src/__tests__/claudeSession.test.ts`
 - Docs: `docs/claude-code.md`
 
 **As a** developer who finished one topic
@@ -786,7 +786,7 @@ Scenario: CLAUDE-015.4 Other header buttons
   - `src/lib/store.ts` — `Doc.claude`
   - `src-tauri/src/claude.rs` — `build_args` (`--resume`), `is_session_id`, `claude_history`
   - `src/lib/claudeProtocol.ts` — `reduce` (`system/init`, `result` carry the session id), `historyTranscript`
-- Tests: `src/__tests__/claude.test.ts`, `src-tauri/src/claude.rs`
+- Tests: `src/__tests__/claude.test.ts`, `src-tauri/src/claude.rs`, `src/__tests__/claudeSession.test.ts`
 - Docs: `docs/claude-code.md`
 
 **As a** developer who closes Quarry in the middle of a job
@@ -901,7 +901,7 @@ Scenario: CLAUDE-017.8 What is not listed
   - `src/components/ClaudeView.tsx` — `modelLabel` chip
   - `src/lib/claudeProtocol.ts` — `reduce` (`system/init` model)
   - `src/lib/types.ts` — `claudeModel` (default empty)
-- Tests: `src/__tests__/claude.test.ts`, `src-tauri/src/claude.rs`
+- Tests: `src/__tests__/claude.test.ts`, `src-tauri/src/claude.rs`, `src/__tests__/claudeSession.test.ts`
 - Docs: `docs/claude-code.md`
 
 **As a** developer on a Claude Code plan
@@ -978,7 +978,7 @@ Scenario: CLAUDE-019.4 The tab in front has no badge
   - `src-tauri/src/claude.rs` — `claude_stop`, `claude_stop_all`, `kill_tree` (`taskkill /T /F`), stderr tail (last 4 to 8 KB), `claude:exit`, `SESSION_ENV` stripped by `command`
   - `src-tauri/src/writer.rs` — `run_all`
   - `src/lib/updater.ts` — stops Claude processes before installing an update
-- Tests: `src/__tests__/claude.test.ts`
+- Tests: `src/__tests__/claude.test.ts`, `src/__tests__/claudeSession.test.ts`
 - Docs: `docs/claude-code.md`
 
 **As a** developer
