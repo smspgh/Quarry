@@ -902,6 +902,7 @@ Scenario: SEARCH-014.3 References to groups that do not exist
   When the replacement is "$12" and then "$9"
   Then "$12" gives group 1 followed by "2"
   And "$9" stays as the text "$9"
+  And "${name}" (the Rust regex crate's form) stays as the text "${name}"
 
 Scenario: SEARCH-014.4 Plain-text mode is literal
   Given Regex is off and the replacement is "$1"

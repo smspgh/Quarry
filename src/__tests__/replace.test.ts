@@ -26,6 +26,7 @@ describe("expandReplacement", () => {
     const m = exec(/(?<k>\w+)=(\d+)/, "x key=42 y");
     expect(expandReplacement("$2:$1", m)).toBe("42:key");
     expect(expandReplacement("$<k>!", m)).toBe("key!");
+    expect(expandReplacement("${k}", m)).toBe("${k}");
     expect(expandReplacement("[$&] $$", m)).toBe("[key=42] $");
     expect(expandReplacement("$`|$'", m)).toBe("x | y");
   });

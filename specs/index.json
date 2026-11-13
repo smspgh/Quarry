@@ -12488,7 +12488,7 @@
       "title": "Replace in the open documents",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 923,
+      "line": 924,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12539,7 +12539,7 @@
       "title": "Undo Replace in Files",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 988,
+      "line": 989,
       "status": "draft",
       "commands": [
         "find.undoReplaceInFiles"

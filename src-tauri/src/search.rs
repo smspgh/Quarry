@@ -819,6 +819,8 @@ mod tests {
         assert_eq!(r("end$"), "<end$>");
         let named = regex::Regex::new(r"(?<w>\w+)").unwrap();
         assert_eq!(replace_text("hi", &named, "[$<w>|$<nope>]", false, false, &none).0, "[hi|]");
+        // Not the regex crate's `${name}`: JavaScript has no such form, so it stays as typed.
+        assert_eq!(replace_text("hi", &named, "${w}", false, false, &none).0, "${w}");
         assert_eq!(replace_text("ab-1", &re, "$1", true, false, &none).0, "$1");
     }
 
