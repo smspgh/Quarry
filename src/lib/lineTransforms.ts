@@ -28,6 +28,13 @@ export const indentToTabs = (tabSize: number): LineFn => (l) =>
   l.map((x) => x.replace(/^( {2,})/, (m) => "\t".repeat(Math.floor(m.length / tabSize)) + " ".repeat(m.length % tabSize)));
 
 /**
+ * Transform to Title Case: the first letter of every word goes upper case; the rest of the word is
+ * left alone, so acronyms stay ("HTML parser" -> "HTML Parser"). Letters are Unicode letters, and
+ * an apostrophe inside a word does not start a new one ("don't" -> "Don't").
+ */
+export const titleCase = (text: string) => text.replace(/(^|[^\p{L}\p{N}']|((^|\P{L})'))\p{L}/gmu, (m) => m.toLocaleUpperCase());
+
+/**
  * The transaction for a line command, or null when it changes nothing. With nothing selected it
  * acts on the whole document, except the empty line after a final line break (sorting would move
  * it to the top). Otherwise it acts on the lines each selection touches, leaving out a last line a

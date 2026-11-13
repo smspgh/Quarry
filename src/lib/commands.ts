@@ -784,7 +784,7 @@ export function registerAllCommands() {
     title: "Transform to Title Case",
     category: "Code",
     run: cmEdit((v) => {
-      v.dispatch(v.state.changeByRange((r) => ({ changes: { from: r.from, to: r.to, insert: v.state.sliceDoc(r.from, r.to).replace(/\b\w/g, (c) => c.toUpperCase()) }, range: r })));
+      v.dispatch(v.state.changeByRange((r) => ({ changes: { from: r.from, to: r.to, insert: lineFns.titleCase(v.state.sliceDoc(r.from, r.to)) }, range: r })));
       return true;
     }),
   });

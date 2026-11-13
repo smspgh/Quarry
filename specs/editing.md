@@ -504,8 +504,9 @@ Scenario: EDIT-009.14 A column selection is sorted as one block
 - Commands: `edit.upper`, `edit.lower`, `code.titleCase`, `edit.quoteSelections`
 - Files:
   - `src/lib/commands.ts` — the four registrations (`cmEdit`: nothing on a read-only document; `changeByRange` over every selection; `edit.quoteSelections` uses `JSON.stringify` and its own `enabled`)
+  - `src/lib/lineTransforms.ts` — `titleCase` (Unicode letters, an apostrophe inside a word does not start a new word, other letters unchanged)
   - `src/components/MenuBar.tsx` — Edit › Transform submenu
-- Tests: none
+- Tests: `src/__tests__/lineTransforms.test.ts`
 - Docs: `docs/editing.md`
 
 **As a** person editing a text file
@@ -524,6 +525,8 @@ Scenario: EDIT-010.2 Title case capitalises the first letter of each word
   Given the text "the quick fox" fully selected
   When I choose Transform to Title Case
   Then the text is "The Quick Fox"
+  And "don't stop" becomes "Don't Stop", and "élan" becomes "Élan"
+  And "HTML parser" becomes "HTML Parser": letters after the first are left as they are
 
 Scenario: EDIT-010.3 Every selection is transformed
   Given 3 selections on 3 lines

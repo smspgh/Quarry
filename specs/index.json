@@ -3830,9 +3830,12 @@
       ],
       "files": [
         "src/lib/commands.ts",
+        "src/lib/lineTransforms.ts",
         "src/components/MenuBar.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/lineTransforms.test.ts"
+      ],
       "docs": [
         "docs/editing.md"
       ],
@@ -3872,7 +3875,7 @@
       "title": "Indent, outdent and convert indentation",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 555,
+      "line": 558,
       "status": "draft",
       "commands": [
         "edit.indent",
@@ -3926,7 +3929,7 @@
       "title": "Toggle line and block comments",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 610,
+      "line": 613,
       "status": "draft",
       "commands": [
         "edit.toggleComment",
@@ -3964,7 +3967,7 @@
       "title": "Fold and unfold regions",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 649,
+      "line": 652,
       "status": "draft",
       "commands": [
         "code.fold",
@@ -4007,7 +4010,7 @@
       "title": "Right-click menu on a foldable line",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 691,
+      "line": 694,
       "status": "draft",
       "commands": [
         "code.foldLine",
@@ -4063,7 +4066,7 @@
       "title": "Brackets: matching, jumping and auto-closing",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 749,
+      "line": 752,
       "status": "draft",
       "commands": [
         "code.gotoBracket"
@@ -4103,7 +4106,7 @@
       "title": "Go to Line",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 788,
+      "line": 791,
       "status": "draft",
       "commands": [
         "goto.line"
@@ -4158,7 +4161,7 @@
       "title": "Detect a document's language",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 855,
+      "line": 858,
       "status": "draft",
       "commands": [
         "code.detectLanguage"
@@ -4215,7 +4218,7 @@
       "title": "Change the language of a document",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 927,
+      "line": 930,
       "status": "draft",
       "commands": [
         "code.setLanguage"
@@ -4264,7 +4267,7 @@
       "title": "Syntax highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 980,
+      "line": 983,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4296,7 +4299,7 @@
       "title": "Word wrap and visible whitespace",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1013,
+      "line": 1016,
       "status": "draft",
       "commands": [
         "view.toggleWrap",
@@ -4338,7 +4341,7 @@
       "title": "Zoom the editor text",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1056,
+      "line": 1059,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -4381,7 +4384,7 @@
       "title": "Let Tab leave the editor",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1098,
+      "line": 1101,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -4421,7 +4424,7 @@
       "title": "Line numbers, active line and selection-match highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1142,
+      "line": 1145,
       "status": "draft",
       "commands": [],
       "files": [
@@ -17389,6 +17392,7 @@
     ],
     "src/lib/lineTransforms.ts": [
       "EDIT-009",
+      "EDIT-010",
       "EDIT-011"
     ],
     "src/lib/lsp.ts": [
@@ -17895,7 +17899,8 @@
       "EDIT-014"
     ],
     "src/__tests__/lineTransforms.test.ts": [
-      "EDIT-009"
+      "EDIT-009",
+      "EDIT-010"
     ],
     "src/__tests__/lsp.test.ts": [
       "LSP-001",

@@ -86,6 +86,13 @@ describe("line commands: transforms", () => {
   it("joins trimmed, non-empty lines with one space", () => {
     expect(L.joinLines(["  one", "", "two  ", "three"])).toEqual(["one two three"]);
   });
+  it("title case capitalises each word, keeping apostrophes and acronyms", () => {
+    expect(L.titleCase("the quick fox")).toBe("The Quick Fox");
+    expect(L.titleCase("don't stop")).toBe("Don't Stop");
+    expect(L.titleCase("HTML parser")).toBe("HTML Parser");
+    expect(L.titleCase("élan vital, über-cool")).toBe("Élan Vital, Über-Cool");
+    expect(L.titleCase("say 'hello'\nline two")).toBe("Say 'Hello'\nLine Two");
+  });
   it("numbers lines, padded to the widest number", () => {
     const out = L.numberLines(Array.from({ length: 12 }, (_, i) => `l${i}`));
     expect(out[0]).toBe(" 1  l0");
