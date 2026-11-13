@@ -151,7 +151,7 @@ The Explorer tree also updates by itself when files are added, removed or rename
 
 ## Sessions and hot exit
 
-With **Settings › Files › Restore session on start** on (the default), Quarry reopens your folder, tabs, cursor positions and side-panel layout. Untitled tabs are restored with their contents, so you can close Quarry without saving scratch notes. Their text is written to the session file whenever you pause typing, and at least every 10 seconds while you type, so a crash loses very little.
+With **Settings › Files › Restore session on start** on (the default), Quarry reopens your folder (with the Explorer folders you had expanded, minus any that no longer exist), tabs, cursor positions and side-panel layout. Opening another folder starts with only its root expanded. Untitled tabs are restored with their contents, so you can close Quarry without saving scratch notes. Their text is written to the session file whenever you pause typing, and at least every 10 seconds while you type, so a crash loses very little.
 
 When you close the window, Quarry asks to save only what the session can't keep:
 

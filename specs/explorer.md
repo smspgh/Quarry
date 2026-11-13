@@ -13,7 +13,8 @@ The Explorer panel shows the open folder as a tree, opens files from it, and car
 - Commands: `view.explorer`, `file.openFolder`
 - Files:
   - `src/components/panels/ExplorerPanel.tsx` — `ExplorerPanel`, `FileTree` (`load`, `rows`, `toggle`, header buttons, "No folder open" state), `compareEntries`, `FileIcon`
-  - `src/lib/actions.ts` — `openFolderDialog`, `openFolder` (resets `explorerExpanded` to the root, shows the Explorer, recent folders)
+  - `src/lib/actions.ts` — `openFolderDialog`, `openFolder` (resets `explorerExpanded` to the root, or to the root plus the session's `expanded` folders that still exist; shows the Explorer, recent folders), `sessionExpanded` (`SESSION_EXPANDED_MAX` = 500), `buildSession` / `restoreSessionTabs` (`explorerExpanded` in the session)
+  - `src/App.tsx` — the store subscription saves the session when `explorerExpanded` changes
   - `src/lib/store.ts` — `folder`, `explorerExpanded`, `fileListCache`
   - `src/lib/commands.ts` — `view.explorer` (`showPanel("explorer")`), `file.openFolder`
   - `src/lib/ipc.ts` — `fs.listDir(dir, true)`
@@ -69,6 +70,23 @@ Scenario: EXPL-001.7 A path that is not a folder
   Then an error toast starts with "Could not open folder"
   And the folder is removed from the recent folders
   And the Explorer keeps what it showed before
+
+Scenario: EXPL-001.8 Expanded folders come back with the session
+  Given Restore session on start is on
+  And C:\work\site is open with "src" and "src\lib" expanded
+  When I close and restart Quarry
+  Then C:\work\site is open again with "src" and "src\lib" expanded
+
+Scenario: EXPL-001.9 Expanded folders that are gone are dropped
+  Given the session has "src" and "old" expanded for C:\work\site, and "old" has since been deleted
+  When Quarry starts
+  Then "src" is expanded, no error is shown, and "old" is no longer remembered
+
+Scenario: EXPL-001.10 Another folder starts collapsed
+  Given C:\work\site was open with "src" expanded
+  When I open C:\work\api
+  Then only its root is expanded
+  And after a restart C:\work\api comes back with only its root expanded
 ```
 
 ## EXPL-002: Single click previews a file, double-click opens it

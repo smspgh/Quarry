@@ -46,10 +46,6 @@ Doc / code mismatches
 - With global TypeScript 5 and no typescript-language-server, the install offer (status bar and Settings) runs `npm install -g typescript`; that only helps if npm's latest `typescript` is TypeScript 7 (`src/lib/lspServers.ts:34`, `src-tauri/src/lsp.rs` `typescript_setup`). Settings now reports the same choice as the status bar (LSP-003.8).
 - No tests: `LspStatus.tsx`; it needs a component test harness. `lspInstall.ts` is covered by `src/__tests__/lspInstall.test.ts`.
 
-## Explorer and file operations (`explorer.md`)
-
-- Expanded folders are not saved in the session; `openFolder` resets them to the root (`src/lib/actions.ts:313`).
-
 ## Application shell (`app-shell.md`)
 
 Possible bugs
