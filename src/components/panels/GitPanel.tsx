@@ -543,7 +543,7 @@ export function GitPanel() {
           <div className="row">
             <button
               className="btn btn-primary small grow"
-              disabled={!!busy || groups.conflict.length > 0 || (!rebasing && !message.trim() && !amend)}
+              disabled={!!busy || groups.conflict.length > 0 || (!rebasing && !message.trim() && !amend) || (!rebasing && !amend && repo.files.length === 0)}
               title={groups.conflict.length ? "Open each file under Merge Changes, fix the conflict, save, and mark it resolved with +. Then commit to finish, or Abort to go back." : undefined}
               onClick={() => void doCommit()}
             >
