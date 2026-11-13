@@ -36,7 +36,6 @@ Not verified
 
 - There is no "in selection" option anywhere (`src/components/FindBar.tsx`, `findBar` in `src/lib/store.ts:279`).
 - Alt+Enter in the find box closes the bar even with no match (`FindBar.tsx:190-193`); the `edit.selectAllMatches` command closes it only on success (`commands.ts:691-695`).
-- Not determined: F3 while focus is inside the find bar (`onBarKey` stops propagation, `FindBar.tsx:167`).
 
 ## Find in Files (`search.md`)
 

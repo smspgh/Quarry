@@ -74,6 +74,7 @@ Scenario: FIND-001.7 Opening the bar replaces Find in Files highlighting
   - `src/lib/commands.ts` — `find.next` / `find.prev` (CodeMirror `findNext` / `findPrevious`; large-file tabs get `big.findNext` / `big.findPrev`)
   - `src/lib/store.ts` — `findBar.count`
   - `src/editor/manager.ts` — `onDocUpdate` keeps the current-match index in step with the selection
+  - `src/App.tsx` — the window's capture-phase key handler lets F-keys through from text boxes, so F3 runs `find.next` before the find bar's own `onBarKey` (which stops propagation only in React's bubble phase); `cmCommand` then focuses the editor
 - Tests: none
 - Docs: `docs/find-and-replace.md`, `docs/keyboard-shortcuts.md`
 
@@ -129,6 +130,12 @@ Scenario: FIND-002.8 The count follows the cursor
   Given the count reads "1 of 3"
   When I click somewhere in the document that is not a match
   Then the count reads "? of 3"
+
+Scenario: FIND-002.9 F3 in the search box
+  Given the find bar has focus, its search box contains "foo" and the count reads "1 of 3"
+  When I press F3
+  Then the next match is selected and the count reads "2 of 3"
+  And the keyboard moves to the editor, unlike Enter, which keeps it in the search box
 ```
 
 ## FIND-003: Match Case, Whole Word, Regex and multi-line searches

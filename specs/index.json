@@ -6211,7 +6211,8 @@
         "src/components/FindBar.tsx",
         "src/lib/commands.ts",
         "src/lib/store.ts",
-        "src/editor/manager.ts"
+        "src/editor/manager.ts",
+        "src/App.tsx"
       ],
       "tests": [],
       "docs": [
@@ -6250,6 +6251,10 @@
         {
           "id": "FIND-002.8",
           "title": "The count follows the cursor"
+        },
+        {
+          "id": "FIND-002.9",
+          "title": "F3 in the search box"
         }
       ]
     },
@@ -6258,7 +6263,7 @@
       "title": "Match Case, Whole Word, Regex and multi-line searches",
       "area": "FIND",
       "spec": "specs/find.md",
-      "line": 134,
+      "line": 141,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6311,7 +6316,7 @@
       "title": "Replace the current match",
       "area": "FIND",
       "spec": "specs/find.md",
-      "line": 197,
+      "line": 204,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6356,7 +6361,7 @@
       "title": "Replace all matches in the document",
       "area": "FIND",
       "spec": "specs/find.md",
-      "line": 248,
+      "line": 255,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6397,7 +6402,7 @@
       "title": "Preserve Case when replacing",
       "area": "FIND",
       "spec": "specs/find.md",
-      "line": 292,
+      "line": 299,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6444,7 +6449,7 @@
       "title": "Find and replace history, and clearing a box",
       "area": "FIND",
       "spec": "specs/find.md",
-      "line": 344,
+      "line": 351,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6521,7 +6526,7 @@
       "title": "Turn every find match into a cursor",
       "area": "FIND",
       "spec": "specs/find.md",
-      "line": 441,
+      "line": 448,
       "status": "draft",
       "commands": [
         "edit.selectAllMatches"
@@ -6562,7 +6567,7 @@
       "title": "Select occurrences of the selected text",
       "area": "FIND",
       "spec": "specs/find.md",
-      "line": 482,
+      "line": 489,
       "status": "draft",
       "commands": [
         "edit.selectNextOccurrence",
@@ -16325,6 +16330,7 @@
       "FILE-018",
       "FILE-019",
       "FILE-020",
+      "FIND-002",
       "GIT-001",
       "GRAPH-001",
       "LSP-001",
