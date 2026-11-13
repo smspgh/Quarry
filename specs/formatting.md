@@ -92,7 +92,7 @@ Scenario: FMT-002.4 Only text tabs
 - Status: draft
 - Commands: `code.format`
 - Files:
-  - `src/lib/format.ts` — `formatDocument`, the `lang === "JSON"` branch (`jsonIndent`, tabs when `insertSpaces` is off, error toast; an error at line 0 = valid JSON whose output is too large)
+  - `src/lib/format.ts` — `formatDocument`, the `lang === "JSON"` branch (`jsonIndent`, tabs when `insertSpaces` is off, error toast and cursor to the error via `editor.goTo`; an error at line 0 = valid JSON whose output is too large)
   - `src/lib/ipc.ts` — `json.format` → Tauri `json_format`
   - `src-tauri/src/lib.rs` — `json_format`
   - `src-tauri/src/json_tools.rs` — `format` (token-preserving pretty printer: key order, number text, comments kept), `PRETTY_MIN_CAP`
@@ -130,6 +130,7 @@ Scenario: FMT-003.5 Invalid JSON is left alone
   Given a JSON tab with a missing closing brace on line 3
   When I press Shift+Alt+F
   Then the document is unchanged
+  And the cursor is moved to the place of the error on line 3
   And an error says "JSON is not valid:" followed by the parser's message and "(line 3)"
 
 Scenario: FMT-003.6 Valid JSON whose pretty-printed text would be too large

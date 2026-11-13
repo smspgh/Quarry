@@ -68,4 +68,4 @@ Quarry runs these without a console window, sends the document on standard input
 
 ## Syntax errors
 
-A formatter can't format code it can't parse. If the file has a syntax error, the document is left unchanged and the message shows where the error is, for example `2:12: expected ')', found '{'`.
+A formatter can't format code it can't parse. If the file has a syntax error, the document is left unchanged and the message shows where the error is, for example `2:12: expected ')', found '{'`. For JSON, the cursor is also moved to the error.

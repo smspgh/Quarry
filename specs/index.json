@@ -6734,7 +6734,7 @@
       "title": "Format web languages with the bundled Prettier",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 142,
+      "line": 143,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6774,7 +6774,7 @@
       "title": "Format only the selection",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 201,
+      "line": 202,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6810,7 +6810,7 @@
       "title": "Prefer the formatter installed on the machine",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 242,
+      "line": 243,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6852,7 +6852,7 @@
       "title": "Built-in formatters when the tool isn't installed",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 300,
+      "line": 301,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6893,7 +6893,7 @@
       "title": "Rust needs rustfmt",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 361,
+      "line": 362,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6922,7 +6922,7 @@
       "title": "Syntax errors leave the document unchanged",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 388,
+      "line": 389,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6954,7 +6954,7 @@
       "title": "JSON pretty-print and minify commands",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 420,
+      "line": 421,
       "status": "draft",
       "commands": [
         "json.format",
