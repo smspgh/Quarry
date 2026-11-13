@@ -899,6 +899,10 @@
         {
           "id": "BIG-014.7",
           "title": "Following replaces the external-change check"
+        },
+        {
+          "id": "BIG-014.8",
+          "title": "The palette command has the same guard as the button"
         }
       ]
     },
@@ -907,7 +911,7 @@
       "title": "CSV and TSV grid",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 863,
+      "line": 870,
       "status": "draft",
       "commands": [],
       "files": [
@@ -971,7 +975,7 @@
       "title": "JSON tree read from the file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 939,
+      "line": 946,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1041,7 +1045,7 @@
       "title": "Validate a large JSON file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1018,
+      "line": 1025,
       "status": "draft",
       "commands": [
         "json.validate"
@@ -1093,7 +1097,7 @@
       "title": "Show large-file info",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1071,
+      "line": 1078,
       "status": "draft",
       "commands": [
         "big.info"
@@ -1124,7 +1128,7 @@
       "title": "Reload when the file changes on disk",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1099,
+      "line": 1106,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1156,7 +1160,7 @@
       "title": "What large-file tabs do not offer",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1135,
+      "line": 1142,
       "status": "draft",
       "commands": [],
       "files": [

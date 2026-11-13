@@ -803,7 +803,7 @@ Scenario: BIG-013.10 UTF-16 files cannot be filtered
 - Commands: `big.follow`
 - Files:
   - `src/lib/commands.ts` — `big.follow` ("Large File: Follow (Show Lines as They Are Added)")
-  - `src/components/BigFileView.tsx` — Follow button, `canFollow`, 1 s polling, `stickToEnd`, "Following" chip, stop on edit, reload on "replaced"
+  - `src/components/BigFileView.tsx` — Follow button, `followBlocked` / `canFollow` (also guards the `big.follow` bus event), 1 s polling, `stickToEnd`, "Following" chip, stop on edit, reload on "replaced"
   - `src-tauri/src/bigfile.rs` — `follow_appended`, `remember_follow_sig` (`follow_sig`: first / last 4 KB), `extend_filter`, `Appended`
   - `src-tauri/src/lib.rs` — `big_follow`, `FollowResult`
   - `src/lib/ipc.ts` — `big.follow`
@@ -847,6 +847,7 @@ Scenario: BIG-014.5 Follow needs an unedited, indexed file
   Given a large file with unsaved changes
   When I hover the Follow button
   Then the Follow button is disabled with the tooltip "Save first: follow mode needs the file unedited"
+  And while indexing runs the tooltip is "Available once indexing finishes", and on a UTF-16 file "Follow mode works on UTF-8 files"
 
 Scenario: BIG-014.6 Editing stops follow mode
   Given follow mode is on
@@ -858,6 +859,12 @@ Scenario: BIG-014.7 Following replaces the external-change check
   Given follow mode is on and the file grew
   When the Quarry window regains focus
   Then no "changed on disk" reload or prompt appears for that tab
+
+Scenario: BIG-014.8 The palette command has the same guard as the button
+  Given a large file that is still being indexed, has unsaved changes, or is UTF-16
+  When I run "Large File: Follow (Show Lines as They Are Added)" from the command palette
+  Then follow mode does not start and no "Following" chip appears
+  And a toast gives the reason, e.g. "Available once indexing finishes" or "Follow mode works on UTF-8 files"
 ```
 
 ## BIG-015: CSV and TSV grid

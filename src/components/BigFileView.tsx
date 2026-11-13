@@ -609,7 +609,17 @@ export function BigFileView({ doc }: { doc: Doc }) {
   const [filterGrowth, setFilterGrowth] = useState<number | null>(null);
   const stickToEnd = useRef(false);
   const lastScroll = useRef({ top: 0, viewH: 0 });
-  const canFollow = indexed && !doc.dirty && doc.bigInfo?.encoding === "UTF-8";
+  // Why follow mode cannot start (null = it can); shared by the button and the palette command.
+  const followBlocked = doc.dirty
+    ? "Save first: follow mode needs the file unedited"
+    : !indexed
+      ? "Available once indexing finishes"
+      : doc.bigInfo?.encoding !== "UTF-8"
+        ? "Follow mode works on UTF-8 files"
+        : null;
+  const canFollow = followBlocked === null;
+  const followState = useRef({ following, followBlocked });
+  followState.current = { following, followBlocked };
   useEffect(() => {
     updateDoc(doc.id, { following: following || undefined });
   }, [following]);
@@ -652,7 +662,15 @@ export function BigFileView({ doc }: { doc: Doc }) {
     return () => clearInterval(t);
   }, [following, canFollow, id]);
   useEffect(() => bus.onFor(doc.id, "big.filter", () => setFilterOpen(true)), [doc.id]);
-  useEffect(() => bus.onFor(doc.id, "big.follow", () => setFollowing((f) => !f)), [doc.id]);
+  useEffect(
+    () =>
+      bus.onFor(doc.id, "big.follow", () => {
+        const { following: on, followBlocked: why } = followState.current;
+        if (!on && why) toast(why, "info", 4000);
+        else setFollowing(!on);
+      }),
+    [doc.id],
+  );
 
   // Colours: by extension, or sniffed from the first lines (once they are loaded) for e.g. .txt.
   const firstLines = cache.current.get(0);
@@ -723,7 +741,7 @@ export function BigFileView({ doc }: { doc: Doc }) {
         <button className={`btn small ${filterOpen ? "on" : ""}`} title="Show only the lines that match a search" onClick={() => setFilterOpen((o) => !o)}><ListFilter size={13} /> Filter</button>
         <button
           className={`btn small ${following ? "on" : ""}`}
-          title={canFollow ? "Follow: show lines as they are added to the file, like tail -f" : doc.dirty ? "Save first: follow mode needs the file unedited" : "Available once indexing finishes"}
+          title={followBlocked ?? "Follow: show lines as they are added to the file, like tail -f"}
           disabled={!canFollow && !following}
           aria-pressed={following}
           onClick={() => setFollowing((f) => !f)}
