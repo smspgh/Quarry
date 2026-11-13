@@ -602,33 +602,37 @@ async fn undo_replace_in_files(entries: Vec<search::UndoEntry>) -> Result<Vec<Re
     tauri::async_runtime::spawn_blocking(move || search::undo_replace(&entries)).await.map_err(|e| e.to_string())
 }
 
+/// Quick Open's file list: up to `max` files under `root` as `/`-separated relative paths. Hidden
+/// files are included; `.git`, `node_modules` and `target` are skipped, and so is whatever the
+/// repository's `.gitignore` / `.ignore` files exclude (inside a git repository).
+fn walk_files(root: &str, max: usize) -> Result<Vec<String>, String> {
+    let mut out = Vec::new();
+    let mut ob = ignore::overrides::OverrideBuilder::new(root);
+    for noise in ["!**/.git/**", "!**/node_modules/**", "!**/target/**"] {
+        ob.add(noise).ok();
+    }
+    let walk = ignore::WalkBuilder::new(root)
+        .hidden(false)
+        .overrides(ob.build().map_err(|e| e.to_string())?)
+        .build();
+    let root_path = Path::new(root);
+    for ent in walk.flatten() {
+        if out.len() >= max {
+            break;
+        }
+        if ent.file_type().map(|t| t.is_file()).unwrap_or(false) {
+            let rel = ent.path().strip_prefix(root_path).unwrap_or(ent.path());
+            out.push(rel.to_string_lossy().replace('\\', "/"));
+        }
+    }
+    Ok(out)
+}
+
 #[tauri::command]
 async fn fs_walk(root: String, max: Option<usize>) -> Result<Vec<String>, String> {
-    tauri::async_runtime::spawn_blocking(move || {
-        let max = max.unwrap_or(30_000);
-        let mut out = Vec::new();
-        let mut ob = ignore::overrides::OverrideBuilder::new(&root);
-        for noise in ["!**/.git/**", "!**/node_modules/**", "!**/target/**"] {
-            ob.add(noise).ok();
-        }
-        let walk = ignore::WalkBuilder::new(&root)
-            .hidden(false)
-            .overrides(ob.build().map_err(|e| e.to_string())?)
-            .build();
-        let root_path = Path::new(&root);
-        for ent in walk.flatten() {
-            if out.len() >= max {
-                break;
-            }
-            if ent.file_type().map(|t| t.is_file()).unwrap_or(false) {
-                let rel = ent.path().strip_prefix(root_path).unwrap_or(ent.path());
-                out.push(rel.to_string_lossy().replace('\\', "/"));
-            }
-        }
-        Ok(out)
-    })
-    .await
-    .map_err(|e| e.to_string())?
+    tauri::async_runtime::spawn_blocking(move || walk_files(&root, max.unwrap_or(30_000)))
+        .await
+        .map_err(|e| e.to_string())?
 }
 
 /// Existing paths among command-line arguments (program name already skipped). Explorer passes a
@@ -906,5 +910,22 @@ mod tests {
                 format!("{abs_sub}\\"),
             ]
         );
+    }
+
+    #[test]
+    fn walk_files_skips_noise_folders_and_gitignored_files_and_stops_at_max() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        for d in [".git", "node_modules/pkg", "target/debug", "src", "build"] {
+            std::fs::create_dir_all(root.join(d)).unwrap();
+        }
+        for f in [".git/config", "node_modules/pkg/index.js", "target/debug/app.exe", "src/main.rs", "build/out.js", ".env"] {
+            std::fs::write(root.join(f), "x").unwrap();
+        }
+        std::fs::write(root.join(".gitignore"), "build/\n").unwrap();
+        let mut got = super::walk_files(&root.to_string_lossy(), 30_000).unwrap();
+        got.sort();
+        assert_eq!(got, vec![".env", ".gitignore", "src/main.rs"]);
+        assert_eq!(super::walk_files(&root.to_string_lossy(), 2).unwrap().len(), 2);
     }
 }

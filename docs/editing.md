@@ -53,7 +53,7 @@ With no tabs open, the welcome screen offers New, Open file, Open folder, the co
 | Keys | Opens |
 | --- | --- |
 | **Ctrl+Shift+P** or **F1** | **Command palette.** Every command with its shortcut, matched fuzzily against "Category: Title", so typing `json` lists all JSON commands. With an empty box, recently used commands come first. Unavailable commands are hidden. |
-| **Ctrl+P** | **Quick Open.** Fuzzy search over the files in the open folder (up to 30,000 files; `.git`, `node_modules` and `target` skipped). With no folder, it lists open and recent files. |
+| **Ctrl+P** | **Quick Open.** Fuzzy search over the files in the open folder (up to 30,000 files; `.git`, `node_modules` and `target` skipped, and in a git repository whatever `.gitignore` excludes). With no folder, it lists open and recent files. |
 | **Ctrl+G** | **Go to Line.** Accepts `120`, `120:8` or `120,8`. The cursor previews the target as you type, and Esc puts it back. |
 | **Ctrl+K M** | **Language picker.** |
 

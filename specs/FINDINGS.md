@@ -4,15 +4,6 @@ Possible bugs, doc/code mismatches and open questions noticed while the stories 
 
 This file is not a spec: `scripts/specs-index.mjs` ignores it.
 
-## Files and sessions (`files.md`)
-
-Possible bugs
-
-Doc / code mismatches
-
-Not verified
-- Quick Open's 30,000-file cap and skipped folders (`docs/editing.md:56`) were not checked and are not in FILE-005.
-
 ## Tabs and split editor (`tabs.md`, `split.md`)
 
 - Close All is not atomic: tabs closed before a Cancel stay closed (`actions.ts:497-503`; recorded as TAB-006.5).

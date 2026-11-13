@@ -214,8 +214,8 @@ Scenario: FILE-004.6 Clear Recent Folders
   - `src/components/CommandPalette.tsx` — `files` mode: open + recent files pool (50 shown), folder file list from `fs.walk` kept in `fileListCache` (100 shown), "Indexing folder…", opens with `openPath`
   - `src/lib/fuzzy.ts` — fuzzy path matching and scoring
   - `src/lib/ipc.ts` — `fs.walk`
-  - `src-tauri/src/lib.rs` — `fs_walk`
-- Tests: none
+  - `src-tauri/src/lib.rs` — `fs_walk` / `walk_files` (30,000 files at most; hidden files kept; `.git`, `node_modules`, `target` and, inside a git repository, `.gitignore`d paths skipped)
+- Tests: `src-tauri/src/lib.rs`
 - Docs: `docs/editing.md`
 
 **As a** developer who knows roughly what a file is called
@@ -239,6 +239,14 @@ Scenario: FILE-005.3 No folder open
   When I press Ctrl+P and type "note"
   Then the box reads "Search open and recent files…"
   And only open and recent files matching "note" are listed
+
+Scenario: FILE-005.4 What the folder list leaves out
+  Given the open folder is a git repository whose ".gitignore" lists "build/"
+  And it contains "src\main.rs", ".env", "build\out.js", "node_modules\pkg\index.js" and "target\debug\app.exe"
+  When I press Ctrl+P and type "s"
+  Then "src/main.rs" and ".env" can be found
+  And nothing under "build", "node_modules", "target" or ".git" is listed
+  And in a folder of more than 30,000 files only the first 30,000 found are searched
 ```
 
 ## FILE-006: Large files open in large-file mode
