@@ -237,9 +237,9 @@ Scenario: TERM-005.6 Scrollback
 - Status: draft
 - Commands: none
 - Files:
-  - `src-tauri/src/pty.rs` — watcher thread in `spawn` (polls the child every 150 ms because ConPTY keeps the output pipe open), `pty:exit`
+  - `src-tauri/src/pty.rs` — watcher thread in `spawn` (polls the child every 150 ms because ConPTY keeps the output pipe open), `pty:exit` (always with the exit code; a tab killed with `pty_kill` reports nothing)
   - `src/components/TerminalView.tsx` — `pty:exit` listener, Enter restarts (`t.reset()` + `start`)
-  - `src/lib/terminal.ts` — `setTerminalPty`, `terminalPty`
+  - `src/lib/terminal.ts` — `setTerminalPty`, `terminalPty`, `commandFinished` (code `null` only when a one-off command could not start)
 - Tests: none
 - Docs: `docs/claude-code.md`
 

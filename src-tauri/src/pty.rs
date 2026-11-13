@@ -33,7 +33,8 @@ struct Data {
 #[derive(Clone, Serialize)]
 struct Exit {
     id: u32,
-    code: Option<u32>,
+    /// Always known: the watcher only reports a child it saw exit (a killed tab reports nothing).
+    code: u32,
 }
 
 /// Split `buf` into the longest prefix that is complete UTF-8 and the bytes of a character that
@@ -147,7 +148,7 @@ fn spawn(app: AppHandle, state: State<'_, crate::AppState>, cmd: CommandBuilder,
             drop(map);
             std::thread::sleep(std::time::Duration::from_millis(120)); // let the last output through
             terms.lock().remove(&id);
-            let _ = app.emit("pty:exit", Exit { id, code: Some(status.exit_code()) });
+            let _ = app.emit("pty:exit", Exit { id, code: status.exit_code() });
             break;
         }
     });
