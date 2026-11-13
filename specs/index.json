@@ -5335,7 +5335,8 @@
       "commands": [
         "file.openRecent",
         "file.openRecentFolder",
-        "file.clearRecent"
+        "file.clearRecent",
+        "file.clearRecentFolders"
       ],
       "files": [
         "src/lib/actions.ts",
@@ -5370,6 +5371,10 @@
         {
           "id": "FILE-004.5",
           "title": "Files that no longer exist are dropped at start"
+        },
+        {
+          "id": "FILE-004.6",
+          "title": "Clear Recent Folders"
         }
       ]
     },
@@ -5378,7 +5383,7 @@
       "title": "Quick Open a file by name",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 200,
+      "line": 207,
       "status": "draft",
       "commands": [
         "file.quickOpen"
@@ -5414,7 +5419,7 @@
       "title": "Large files open in large-file mode",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 236,
+      "line": 243,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5460,7 +5465,7 @@
       "title": "Detect encoding and line endings on open",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 285,
+      "line": 292,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5499,7 +5504,7 @@
       "title": "Choose the encoding and line endings a file is saved with",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 327,
+      "line": 334,
       "status": "draft",
       "commands": [
         "file.setEncoding",
@@ -5551,7 +5556,7 @@
       "title": "Reopen a file in another encoding",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 381,
+      "line": 388,
       "status": "draft",
       "commands": [
         "file.reopenWithEncoding"
@@ -5591,7 +5596,7 @@
       "title": "Save a document",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 424,
+      "line": 431,
       "status": "draft",
       "commands": [
         "file.save"
@@ -5655,7 +5660,7 @@
       "title": "Save a document under another name",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 500,
+      "line": 507,
       "status": "draft",
       "commands": [
         "file.saveAs"
@@ -5699,7 +5704,7 @@
       "title": "Save all changed documents",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 551,
+      "line": 558,
       "status": "draft",
       "commands": [
         "file.saveAll"
@@ -5732,7 +5737,7 @@
       "title": "Revert a file to the version on disk",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 584,
+      "line": 591,
       "status": "draft",
       "commands": [
         "file.revert"
@@ -5770,7 +5775,7 @@
       "title": "Know which documents have unsaved changes",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 624,
+      "line": 631,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5807,7 +5812,7 @@
       "title": "Notice changes made by other programs",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 663,
+      "line": 670,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5861,7 +5866,7 @@
       "title": "Restore the previous session on start",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 732,
+      "line": 739,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5919,7 +5924,7 @@
       "title": "Exit without losing work (hot exit)",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 799,
+      "line": 806,
       "status": "draft",
       "commands": [
         "app.exit"
@@ -5980,7 +5985,7 @@
       "title": "Open files by dropping them on the window",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 868,
+      "line": 875,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6017,7 +6022,7 @@
       "title": "Open files from the command line and File Explorer",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 907,
+      "line": 914,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6058,7 +6063,7 @@
       "title": "Welcome screen",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 952,
+      "line": 959,
       "status": "draft",
       "commands": [],
       "files": [
@@ -18234,6 +18239,9 @@
       "EDIT-010"
     ],
     "file.clearRecent": [
+      "FILE-004"
+    ],
+    "file.clearRecentFolders": [
       "FILE-004"
     ],
     "file.close": [

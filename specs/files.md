@@ -151,11 +151,11 @@ Scenario: FILE-003.4 A path that is a folder opens as a folder
 ## FILE-004: Recent files and folders
 
 - Status: draft
-- Commands: `file.openRecent`, `file.openRecentFolder`, `file.clearRecent`
+- Commands: `file.openRecent`, `file.openRecentFolder`, `file.clearRecent`, `file.clearRecentFolders`
 - Files:
   - `src/lib/actions.ts` — `pushRecent` (most recent first, no duplicates by `samePath`, 15 kept), `pruneExisting` at start, `openFolder` removing a missing folder
-  - `src/lib/commands.ts` — `file.openRecent`, `file.openRecentFolder` (hidden, take the path as argument), `file.clearRecent`
-  - `src/components/MenuBar.tsx` — `recentFilesMenu` (12 shown), `recentFoldersMenu` (10 shown)
+  - `src/lib/commands.ts` — `file.openRecent`, `file.openRecentFolder` (hidden, take the path as argument), `file.clearRecent`, `file.clearRecentFolders`
+  - `src/components/MenuBar.tsx` — `recentFilesMenu` (12 shown), `recentFoldersMenu` (10 shown, then Clear Recent Folders)
   - `src/components/Welcome.tsx` — `displayRecent`, the Recent list (8 shown)
   - `src/lib/store.ts` — `recentFiles`, `recentFolders`
 - Tests: `src/__tests__/paths.test.ts`
@@ -195,6 +195,13 @@ Scenario: FILE-004.5 Files that no longer exist are dropped at start
   Given "C:\work\old.txt" is in the recent files list and has been deleted
   When Quarry starts
   Then "old.txt" is not in File › Open Recent File or on the Welcome screen
+
+Scenario: FILE-004.6 Clear Recent Folders
+  Given the recent files list has 5 entries and the recent folders list has 2
+  When I choose Clear Recent Folders at the bottom of File › Open Recent Folder
+  Then the submenu shows "No recent folders", disabled
+  And the 5 recent files are still listed
+  And Clear Recent Folders is unavailable in the command palette
 ```
 
 ## FILE-005: Quick Open a file by name

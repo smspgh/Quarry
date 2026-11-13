@@ -72,7 +72,9 @@ function recentFilesMenu(): Item[] {
 function recentFoldersMenu(): Item[] {
   const s = useStore.getState();
   if (s.recentFolders.length === 0) return [{ label: "No recent folders", run: () => {}, disabled: true }];
-  return s.recentFolders.slice(0, 10).map((p) => ({ label: p, run: () => void runCommand("file.openRecentFolder", p) }));
+  const items: Item[] = s.recentFolders.slice(0, 10).map((p) => ({ label: p, run: () => void runCommand("file.openRecentFolder", p) }));
+  items.push({ sep: true }, { cmd: "file.clearRecentFolders" });
+  return items;
 }
 
 const MENUS: Menu[] = [

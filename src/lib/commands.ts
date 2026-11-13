@@ -618,6 +618,7 @@ export function registerAllCommands() {
   register({ id: "file.openRecent", title: "Open Recent File", category: "File", hidden: true, run: (args) => { if (typeof args !== "string") return false; void openPath(args); } });
   register({ id: "file.openRecentFolder", title: "Open Recent Folder", category: "File", hidden: true, run: (args) => { if (typeof args !== "string") return false; void openFolder(args); } });
   register({ id: "file.clearRecent", title: "Clear Recent Files", category: "File", enabled: () => s().recentFiles.length > 0, run: () => s().set({ recentFiles: [] }) });
+  register({ id: "file.clearRecentFolders", title: "Clear Recent Folders", category: "File", enabled: () => s().recentFolders.length > 0, run: () => s().set({ recentFolders: [] }) });
   register({ id: "file.quickOpen", title: "Quick Open File…", category: "File", keys: "Ctrl+P", run: () => s().set({ palette: "files" }) });
   register({ id: "file.nextTab", title: "Next Tab", category: "View", keys: "Ctrl+Tab", run: () => nextTab(1) });
   register({ id: "file.prevTab", title: "Previous Tab", category: "View", keys: "Ctrl+Shift+Tab", run: () => nextTab(-1) });
