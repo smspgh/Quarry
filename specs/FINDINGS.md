@@ -36,7 +36,6 @@ Not verified
 
 - Format Document on JSON too large to pretty-print shows "JSON is not valid: … (line 0)" although the JSON is valid; `jsonTransform` handles line 0 properly (`src/lib/format.ts:172-174` vs `src/lib/commands.ts:325`).
 - Format Document on JSON does not move the cursor to the error, unlike `json.format` (FMT-003.5 vs FMT-010.4).
-- Format selection: `docs/formatting.md:24` and the "Formatted selection" toast (`format.ts:165`, `:188`, `:223`) claim it for all Prettier languages; Prettier is believed to honour `rangeStart` / `rangeEnd` only for JS/TS/GraphQL-type parsers, so CSS, Markdown, YAML, HTML and XML would get the whole document formatted. Not verified; FMT-005 uses JavaScript only.
 - The `doc.language !== "JSON"` branch in `jsonTransform` is unreachable (`commands.ts:336`).
 - Not determined: whether the dotnet "missing CSharpier" pattern (`format.ts:118`) matches current dotnet output; the exact text of Prettier / wasm formatter errors.
 - No tests cover `format.ts` or `format_external`.

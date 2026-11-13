@@ -13,6 +13,11 @@ type Loader = () => Promise<unknown>;
 interface PrettierTarget {
   parser: string;
   plugins: Loader[];
+  /**
+   * Prettier honours `rangeStart` / `rangeEnd` for this parser. Only the JS, TS, GraphQL and Vue
+   * parsers do; for the others a range formats nothing, so the selection is ignored there.
+   */
+  range?: true;
 }
 
 const babel = () => import("prettier/plugins/babel");
@@ -26,19 +31,19 @@ const graphql = () => import("prettier/plugins/graphql");
 const xml = () => import("@prettier/plugin-xml");
 
 const PRETTIER: Record<string, PrettierTarget> = {
-  JavaScript: { parser: "babel", plugins: [babel, estree] },
-  JSX: { parser: "babel", plugins: [babel, estree] },
-  TypeScript: { parser: "typescript", plugins: [typescript, estree] },
-  TSX: { parser: "typescript", plugins: [typescript, estree] },
+  JavaScript: { parser: "babel", plugins: [babel, estree], range: true },
+  JSX: { parser: "babel", plugins: [babel, estree], range: true },
+  TypeScript: { parser: "typescript", plugins: [typescript, estree], range: true },
+  TSX: { parser: "typescript", plugins: [typescript, estree], range: true },
   CSS: { parser: "css", plugins: [postcss] },
   SCSS: { parser: "scss", plugins: [postcss] },
   Less: { parser: "less", plugins: [postcss] },
   HTML: { parser: "html", plugins: [html] },
-  Vue: { parser: "vue", plugins: [html, babel, estree, postcss] },
+  Vue: { parser: "vue", plugins: [html, babel, estree, postcss], range: true },
   Angular: { parser: "angular", plugins: [html] },
   Markdown: { parser: "markdown", plugins: [markdown] },
   YAML: { parser: "yaml", plugins: [yaml] },
-  GraphQL: { parser: "graphql", plugins: [graphql] },
+  GraphQL: { parser: "graphql", plugins: [graphql], range: true },
   XML: { parser: "xml", plugins: [xml] },
   SVG: { parser: "xml", plugins: [xml] },
 };
@@ -166,7 +171,7 @@ export async function formatDocument(): Promise<boolean> {
   const s = store.settings;
   const text = view.state.doc.toString();
   const sel = view.state.selection.main;
-  const hasRange = !sel.empty && lang in PRETTIER;
+  const hasRange = !sel.empty && !!PRETTIER[lang]?.range;
 
   try {
     let out: string;

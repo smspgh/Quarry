@@ -6794,6 +6794,10 @@
         {
           "id": "FMT-005.3",
           "title": "Other formatters always take the whole document"
+        },
+        {
+          "id": "FMT-005.4",
+          "title": "Prettier languages without range formatting take the whole document"
         }
       ]
     },
@@ -6802,7 +6806,7 @@
       "title": "Prefer the formatter installed on the machine",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 229,
+      "line": 236,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6844,7 +6848,7 @@
       "title": "Built-in formatters when the tool isn't installed",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 287,
+      "line": 294,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6885,7 +6889,7 @@
       "title": "Rust needs rustfmt",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 348,
+      "line": 355,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6914,7 +6918,7 @@
       "title": "Syntax errors leave the document unchanged",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 375,
+      "line": 382,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6946,7 +6950,7 @@
       "title": "JSON pretty-print and minify commands",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 407,
+      "line": 414,
       "status": "draft",
       "commands": [
         "json.format",

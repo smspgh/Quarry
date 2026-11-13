@@ -197,7 +197,7 @@ Scenario: FMT-004.5 The language of the tab decides, not the file name
 - Status: draft
 - Commands: `code.format`
 - Files:
-  - `src/lib/format.ts` — `hasRange` (non-empty main selection and a Prettier language), `rangeStart` / `rangeEnd`, "Formatted selection" toast
+  - `src/lib/format.ts` — `hasRange` (non-empty main selection and a Prettier target with `range`: the babel, typescript, graphql and vue parsers, the only ones Prettier 3 range-formats; other parsers return the text unchanged for a range), `rangeStart` / `rangeEnd`, "Formatted selection" toast
 - Tests: none
 - Docs: `docs/formatting.md`
 
@@ -224,6 +224,13 @@ Scenario: FMT-005.3 Other formatters always take the whole document
   When I press Shift+Alt+F
   Then the whole document is formatted
   And the notice names the formatter, not "Formatted selection"
+
+Scenario: FMT-005.4 Prettier languages without range formatting take the whole document
+  Given a CSS tab with two badly formatted rules and the first one selected
+  When I press Shift+Alt+F
+  Then both rules are reformatted
+  And a notice says "Formatted (CSS)"
+  And the same holds for SCSS, Less, HTML, Angular, Markdown, YAML and XML
 ```
 
 ## FMT-006: Prefer the formatter installed on the machine

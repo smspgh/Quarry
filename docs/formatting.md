@@ -21,7 +21,7 @@ Prettier is bundled and loaded the first time you format. It uses:
 - a line width of 100;
 - for XML and SVG, [`@prettier/plugin-xml`](https://github.com/prettier/plugin-xml), formatting without regard to whitespace and putting closing brackets on their own line.
 
-With a non-empty selection, only the selection is formatted.
+With a non-empty selection in JavaScript, JSX, TypeScript, TSX, GraphQL or Vue, only the selection is formatted (Prettier widens it to whole statements or elements). Prettier cannot format part of a CSS, SCSS, Less, HTML, Angular, Markdown, YAML or XML file, so there the selection is ignored and the whole document is formatted.
 
 ## Other languages: installed or built in
 
