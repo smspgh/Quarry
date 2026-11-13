@@ -341,10 +341,10 @@ function ClaudeSection({ change }: { change: <K extends keyof Settings>(key: K, 
             <TextField value={s.claudePath} placeholder="Found automatically" onCommit={(v) => change("claudePath", v.trim().replace(/^"|"$/g, ""))} />
             <button className="btn small" onClick={() => void browse()}>Browse…</button>
           </Row>
-          <Row label="Model" hint="For conversations started from now on" k="claudeModel">
+          <Row label="Model" hint="Applies the next time Claude Code starts for a tab, including when a conversation continues; a running one keeps its model" k="claudeModel">
             <Select value={s.claudeModel} options={models} title="Claude model" onChange={(v) => change("claudeModel", v)} />
           </Row>
-          <Row label="Permissions" hint={s.claudePermissionMode === "acceptEdits" ? "File edits are applied without asking; commands and web access ask first" : "Claude asks before every edit and command"} k="claudePermissionMode">
+          <Row label="Permissions" hint={`${s.claudePermissionMode === "acceptEdits" ? "File edits are applied without asking; commands and web access ask first" : "Claude asks before every edit and command"}. Open Claude tabs switch from their next message, once the current task ends`} k="claudePermissionMode">
             <Segmented items={[["acceptEdits", "Auto-accept edits"], ["default", "Ask first"]] as const} value={s.claudePermissionMode} onChange={(v) => change("claudePermissionMode", v)} />
           </Row>
         </>

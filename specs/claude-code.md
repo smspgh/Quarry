@@ -438,7 +438,7 @@ Scenario: CLAUDE-008.7 Wording for other tools
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — `ClaudeSection`: "Permissions" (`Segmented` "Auto-accept edits" / "Ask first")
+  - `src/components/panels/SettingsPanel.tsx` — `ClaudeSection`: "Permissions" (`Segmented` "Auto-accept edits" / "Ask first") and its hint
   - `src/lib/claude.ts` — `spawn` (passes `claudePermissionMode`, remembers `mode`), `applyModeWhenIdle`, settings subscription in `installClaudeEvents`
   - `src-tauri/src/claude.rs` — `build_args` (`--permission-mode`; only `default` and `acceptEdits` get through)
   - `src/components/ClaudeView.tsx` — `.claude-mode` text in the composer, `modePending`
@@ -478,6 +478,10 @@ Scenario: CLAUDE-009.4 Changing it while Claude is working
 Scenario: CLAUDE-009.5 No other mode can be started
   When the settings file names a permission mode other than "default" or "acceptEdits"
   Then Claude Code is started with "acceptEdits"
+
+Scenario: CLAUDE-009.6 The hint says open tabs switch too
+  When I look at Settings › Claude Code › Permissions
+  Then its hint describes the chosen mode and says open Claude tabs switch from their next message, once the current task ends
 ```
 
 ## CLAUDE-010: Answer Claude's questions
@@ -895,7 +899,7 @@ Scenario: CLAUDE-017.8 What is not listed
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — `CLAUDE_MODELS` (Default, Opus, Sonnet, Haiku; a stored custom value is added to the list), "Model" row
+  - `src/components/panels/SettingsPanel.tsx` — `CLAUDE_MODELS` (Default, Opus, Sonnet, Haiku; a stored custom value is added to the list), "Model" row and its hint
   - `src/lib/claude.ts` — `spawn` (passes `settings.claudeModel` on every process start)
   - `src-tauri/src/claude.rs` — `build_args` (`--model` only when not empty, trimmed)
   - `src/components/ClaudeView.tsx` — `modelLabel` chip
@@ -929,6 +933,16 @@ Scenario: CLAUDE-018.3 A running conversation keeps its model
 Scenario: CLAUDE-018.4 A model name from the settings file
   When the stored model is a name that is not in the list
   Then the Model list shows that name as an extra entry and it is used as given
+
+Scenario: CLAUDE-018.5 A continued conversation uses the new model
+  Given a Claude tab whose conversation was started with "Opus" and whose process has stopped
+  And Model is now "Sonnet"
+  When I send the next message
+  Then the conversation continues where it left off, started with the model "sonnet"
+
+Scenario: CLAUDE-018.6 The hint says when it applies
+  When I look at Settings › Claude Code › Model
+  Then its hint says it applies the next time Claude Code starts for a tab, including when a conversation continues
 ```
 
 ## CLAUDE-019: Know what background Claude tabs are doing

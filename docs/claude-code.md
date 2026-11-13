@@ -31,7 +31,7 @@ Without a folder, the commands first take the folder of the active Claude CLI ta
 
 ## Claude tabs
 
-The tab's header shows the folder, the model, and whether Claude is ready or working. It also has buttons for past conversations, a new conversation, a Claude CLI tab in the same folder, and showing the folder in the Explorer.
+The tab's header shows the folder, the model, and whether Claude is ready or working. **Settings › Claude Code › Model** picks the model; it applies the next time Claude Code starts for a tab, including when a conversation continues (after a restart of Quarry, or a past conversation), while a Claude Code process that is already running keeps its model. It also has buttons for past conversations, a new conversation, a Claude CLI tab in the same folder, and showing the folder in the Explorer.
 
 - **Replies** stream in as Claude writes them. Code blocks are highlighted and have a copy button. Links open in your browser, and file links (`src/app.ts:12`) open the file at that line.
 - **Steps.** Each tool Claude uses is a card showing the command it ran, the file it read or the search it made. Click a card for the details and output. File cards have a button that opens the file.
@@ -49,6 +49,8 @@ Closing a Claude tab while Claude is working asks first. Closing it, or quitting
 
 - **Auto-accept edits** (the default): file edits go ahead straight away. Shell commands, web access and other tools ask first.
 - **Ask first**: Claude asks before every edit too.
+
+Changing it applies to open tabs as well: an idle tab continues its conversation with the new setting from your next message, and a tab where Claude is working finishes the task first.
 
 A request shows what Claude wants to do: the command it wants to run, or a diff of the edit. **Allow** permits it once. **Allow for this conversation** stops Claude asking again for the same thing in this conversation. **Deny** refuses, and Claude is told you declined.
 

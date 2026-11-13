@@ -1661,6 +1661,10 @@
         {
           "id": "CLAUDE-009.5",
           "title": "No other mode can be started"
+        },
+        {
+          "id": "CLAUDE-009.6",
+          "title": "The hint says open tabs switch too"
         }
       ]
     },
@@ -1669,7 +1673,7 @@
       "title": "Answer Claude's questions",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 483,
+      "line": 487,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1711,7 +1715,7 @@
       "title": "Follow Claude's task list",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 529,
+      "line": 533,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1748,7 +1752,7 @@
       "title": "Attach pictures to a message",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 562,
+      "line": 566,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1802,7 +1806,7 @@
       "title": "Point Claude at files and selections",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 620,
+      "line": 624,
       "status": "draft",
       "commands": [
         "claude.addSelection",
@@ -1866,7 +1870,7 @@
       "title": "Read formatted replies",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 689,
+      "line": 693,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1917,7 +1921,7 @@
       "title": "Start a new conversation in the same folder",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 741,
+      "line": 745,
       "status": "draft",
       "commands": [
         "claude.newSession"
@@ -1957,7 +1961,7 @@
       "title": "Continue a conversation after restarting Quarry",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 779,
+      "line": 783,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2011,7 +2015,7 @@
       "title": "Browse and reopen past conversations",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 833,
+      "line": 837,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2067,7 +2071,7 @@
       "title": "Choose the model",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 893,
+      "line": 897,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2102,6 +2106,14 @@
         {
           "id": "CLAUDE-018.4",
           "title": "A model name from the settings file"
+        },
+        {
+          "id": "CLAUDE-018.5",
+          "title": "A continued conversation uses the new model"
+        },
+        {
+          "id": "CLAUDE-018.6",
+          "title": "The hint says when it applies"
         }
       ]
     },
@@ -2110,7 +2122,7 @@
       "title": "Know what background Claude tabs are doing",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 934,
+      "line": 948,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2146,7 +2158,7 @@
       "title": "Closing tabs, quitting and a process that stops",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 970,
+      "line": 984,
       "status": "draft",
       "commands": [],
       "files": [
