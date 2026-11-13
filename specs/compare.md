@@ -274,6 +274,12 @@ Scenario: DIFF-006.6 Binary
   Given the committed version is binary
   When I run Compare with Last Commit (HEAD)
   Then no tab opens and a notification says the file is a binary file
+
+Scenario: DIFF-006.7 The file is not open in a tab
+  Given "app.ts" is tracked by git and not open in any tab
+  When I run Compare with Last Commit (HEAD) on it
+  Then the right side is the file on disk, labelled "app.ts"
+  And the right side can be edited and saved, while "app.ts (HEAD)" stays read-only
 ```
 
 ## DIFF-007: Refuse what can't be compared

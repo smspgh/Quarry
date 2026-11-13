@@ -154,7 +154,6 @@ Doc / code mismatches
 
 ## Compare (`compare.md`)
 
-- `docs/git.md:13` says Compare with Last Commit shows "your tab, editable, on the right"; a tab side is always read-only (`src/lib/diff.ts:107`, `compareWithHead` at `src/lib/git.ts:718`; DIFF-006).
 - `docs/compare.md:32` says the arrows copy left into right; that holds only when the right side is editable, otherwise they copy right into left, and there are none when both sides are read-only or in Inline layout (`src/components/DiffView.tsx:71`, `:82`).
 - `docs/compare.md:31` says file sides can be edited directly; in Inline layout only the right side's editor exists (`DiffView.tsx:67-75`).
 - `docs/compare.md:27` says Reload reads the files from disk again; clipboard and git-version sides keep their stored text (`diff.ts:102`, `:224-232`; DIFF-013.5).

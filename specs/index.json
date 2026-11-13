@@ -2995,6 +2995,10 @@
         {
           "id": "DIFF-006.6",
           "title": "Binary"
+        },
+        {
+          "id": "DIFF-006.7",
+          "title": "The file is not open in a tab"
         }
       ]
     },
@@ -3003,7 +3007,7 @@
       "title": "Refuse what can't be compared",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 279,
+      "line": 285,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3037,7 +3041,7 @@
       "title": "Move between the changes",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 313,
+      "line": 319,
       "status": "draft",
       "commands": [
         "compare.nextChange",
@@ -3079,7 +3083,7 @@
       "title": "Choose the layout: side by side, inline, folded, swapped",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 356,
+      "line": 362,
       "status": "draft",
       "commands": [
         "compare.toggleInline",
@@ -3130,7 +3134,7 @@
       "title": "Edit file sides; snapshots are read-only",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 410,
+      "line": 416,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3169,7 +3173,7 @@
       "title": "Copy a change across with the arrows",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 454,
+      "line": 460,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3212,7 +3216,7 @@
       "title": "Save an edited side",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 501,
+      "line": 507,
       "status": "draft",
       "commands": [
         "file.save"
@@ -3270,7 +3274,7 @@
       "title": "Reload the compared texts",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 565,
+      "line": 571,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3317,7 +3321,7 @@
       "title": "Preview comparisons replace each other",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 617,
+      "line": 623,
       "status": "draft",
       "commands": [],
       "files": [
