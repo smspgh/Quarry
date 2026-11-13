@@ -8,6 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "specs": "node scripts/specs-index.mjs",
+    "specs:check": "node scripts/specs-index.mjs --check",
     "tauri": "tauri"
   },
   "dependencies": {
