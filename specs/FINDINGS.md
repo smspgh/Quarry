@@ -183,9 +183,8 @@ Doc / code mismatches
 
 ## Explorer and file operations (`explorer.md`)
 
-- The New File / New Folder name box is always drawn at the top of the tree at a fixed indent (`src/components/panels/ExplorerPanel.tsx:651-668`); `docs/editing.md:169` says items are "named inline".
-- Expanded folders are not saved in the session; `openFolder` resets them to the root (`src/lib/actions.ts:312`).
-- EXPL-016 lists `src/__tests__/splitGit.test.ts` on the strength of a grep for `kindOf` / `KIND_LETTER` only.
+- The New File / New Folder name box is always drawn at the top of the tree at a fixed indent (`src/components/panels/ExplorerPanel.tsx:662-680`); `docs/editing.md:169` says items are "named inline".
+- Expanded folders are not saved in the session; `openFolder` resets them to the root (`src/lib/actions.ts:313`).
 
 ## Settings (`settings.md`)
 
@@ -204,7 +203,7 @@ Doc / code mismatches
 ## Application shell (`app-shell.md`)
 
 Possible bugs
-- Collapsed state is not persisted: `src/App.tsx:172` triggers a session save when `pinnedHidden` changes, but `buildSession` (`actions.ts:812-831`) does not write it.
+- Collapsed state is not persisted: `src/App.tsx:172` triggers a session save when `pinnedHidden` changes, but `buildSession` (`actions.ts:813-832`) does not write it.
 - Bottom-panel layout is not persisted (`bottomVisible`, `bottomHeight`, `bottomTab`); it starts hidden, 220 px, on Console each time.
 
 Mismatches and notes
