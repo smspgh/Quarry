@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { commitLabel, displayUrl, gitErrorText, isMissingRepo, remoteWebUrl, repoNameFor, syncLine } from "../lib/gitStatus";
+import { commitLabel, displayUrl, gitErrorText, hasConflictMarkers, isMissingRepo, remoteWebUrl, repoNameFor, syncLine } from "../lib/gitStatus";
 
 describe("remote URLs", () => {
   it("finds the web page of https and ssh remotes", () => {
@@ -58,5 +58,20 @@ describe("git error text", () => {
   it("keeps other errors, minus hints and the Error: prefix", () => {
     expect(gitErrorText("Error: fatal: a branch named 'x' already exists\nhint: use -f")).toBe("fatal: a branch named 'x' already exists");
     expect(gitErrorText("plain")).toBe("plain");
+  });
+});
+
+describe("conflicts", () => {
+  it("spots conflict markers only when both ends start a line", () => {
+    expect(hasConflictMarkers("a\n<<<<<<< HEAD\nmine\n=======\ntheirs\n>>>>>>> 18bc71d (Experiment B)\nb")).toBe(true);
+    expect(hasConflictMarkers("a\r\n<<<<<<< HEAD\r\nx\r\n=======\r\ny\r\n>>>>>>> other\r\n")).toBe(true);
+    expect(hasConflictMarkers("resolved text")).toBe(false);
+    expect(hasConflictMarkers("a heading\n=======\n")).toBe(false);
+    expect(hasConflictMarkers("say <<<<<<< in a sentence >>>>>>> here")).toBe(false);
+    expect(hasConflictMarkers("<<<<<<<< eight is not a marker\n>>>>>>>> either")).toBe(false);
+  });
+  it("turns the commit button into what is in the way", () => {
+    expect(commitLabel(0, 3, false, 1)).toBe("Resolve 1 Conflict First");
+    expect(commitLabel(2, 3, true, 2)).toBe("Resolve 2 Conflicts First");
   });
 });

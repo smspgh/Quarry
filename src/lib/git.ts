@@ -12,7 +12,7 @@ import { setBlame, setGitBase } from "../editor/git";
 import { git, type GitBranch, type GitCommitAction, type GitCommitFile, type GitFile, type GitLogEntry, type GitIdentity, type GitRemoteOp, type GitStatus, type GithubRepo } from "./gitApi";
 import { newDocId, useStore, type Doc } from "./store";
 import { fs } from "./ipc";
-import { gitErrorText, isMissingRepo, KIND_RANK, kindOf, type GitKind } from "./gitStatus";
+import { gitErrorText, hasConflictMarkers, isMissingRepo, KIND_RANK, kindOf, type GitKind } from "./gitStatus";
 
 export { isMissingRepo, KIND_LABEL, KIND_LETTER, kindOf, type GitKind } from "./gitStatus";
 import { choose } from "./dialogs";
@@ -296,6 +296,35 @@ async function run<T>(label: string, fn: () => Promise<T>): Promise<T | undefine
 }
 
 export const stage = (root: string, paths: string[]) => run("Staging…", () => git.stage(root, paths));
+/**
+ * Mark conflicted files as resolved (stage them). A file that still contains git's conflict
+ * markers is almost certainly not resolved: ask before staging those.
+ */
+export async function resolveConflicts(root: string, paths: string[]) {
+  const marked: string[] = [];
+  for (const p of paths) {
+    try {
+      if (hasConflictMarkers((await fs.readText(p)).content)) marked.push(p);
+    } catch {
+      /* deleted on one side, binary, or too large to read as text: nothing to check */
+    }
+  }
+  if (marked.length) {
+    const names = marked.slice(0, 5).map(nameOf).join(", ") + (marked.length > 5 ? `, and ${marked.length - 5} more` : "");
+    const ok = await choose(
+      "Conflict markers are still in the file",
+      `${names} still ${marked.length === 1 ? "contains" : "contain"} the <<<<<<< / ======= / >>>>>>> lines git puts around a conflict. Marking ${marked.length === 1 ? "it" : "them"} resolved would commit those lines as they are.`,
+      [
+        { label: "Mark Resolved Anyway", kind: "danger", value: true },
+        { label: "Cancel", cancel: true, default: true, value: false },
+      ],
+      false,
+    );
+    if (!ok) return;
+  }
+  await stage(root, paths);
+}
+
 export const unstage = (root: string, paths: string[]) => run("Unstaging…", () => git.unstage(root, paths));
 
 export async function discard(root: string, files: GitFile[]): Promise<void> {
@@ -321,6 +350,12 @@ export async function commit(root: string, message: string, amend = false): Prom
   const repo = useGit.getState().repos[key(root)];
   if (!message.trim() && !amend) {
     toast("Write a commit message first.", "info");
+    return false;
+  }
+  // Never with conflicts left: git refuses anyway, and its message is less clear than this one.
+  const conflicts = repo?.files.filter((f) => f.conflicted).length ?? 0;
+  if (conflicts) {
+    toast(`${conflicts} file${conflicts === 1 ? " still has" : "s still have"} conflicts. Resolve ${conflicts === 1 ? "it" : "them"} under Merge Changes (then mark ${conflicts === 1 ? "it" : "each"} resolved with +), or abort.`, "warning", 7000);
     return false;
   }
   const staged = repo?.files.filter((f) => !f.untracked && f.index !== "." && !f.conflicted) ?? [];

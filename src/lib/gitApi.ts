@@ -30,6 +30,8 @@ export interface GitStatus {
   ahead: number;
   behind: number;
   operation: GitOperation | null;
+  /** The message git prepared for the commit that finishes the operation (a pick's original message, "Merge branch …"). */
+  operationMessage: string | null;
   files: GitFile[];
   remotes: GitRemote[];
 }

@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowUp, Check, ChevronRight, CircleDot, CloudDownload, CloudOff, FileDiff, FileText, GitBranch, GitGraph, History, Minus, Plus, RefreshCw, TriangleAlert, Undo2, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { openPath } from "../../lib/actions";
-import { abortOperation, checkRemote, isMissingRepo, commit, compareCommitWithCurrent, currentRepo, discard, moreHistory, openChange, openCommitChange, openCommitFile, openGraph, pickBranch, remote, rescanGit, stage, unstage, useGit } from "../../lib/git";
+import { abortOperation, resolveConflicts, checkRemote, isMissingRepo, commit, compareCommitWithCurrent, currentRepo, discard, moreHistory, openChange, openCommitChange, openCommitFile, openGraph, pickBranch, remote, rescanGit, stage, unstage, useGit } from "../../lib/git";
 import { commitFileKind, commitLabel, groupFiles, KIND_LABEL, KIND_LETTER, rowKind, syncLine, type Group } from "../../lib/gitStatus";
 import { git, type GitCommitFile, type GitFile, type GitLogEntry, type GitRemoteOp, type GitStatus } from "../../lib/gitApi";
 import { relativeTime } from "../../editor/git";
@@ -53,7 +53,7 @@ function FileRow({ f, repo, group }: { f: GitFile; repo: GitStatus; group: Group
             <Minus size={14} />
           </button>
         ) : (
-          <button className="icon-btn xs" title={group === "conflict" ? "Mark as resolved (stage)" : "Stage"} onClick={() => void stage(repo.root, [f.path])}>
+          <button className="icon-btn xs" title={group === "conflict" ? "Mark as resolved (stage)" : "Stage"} onClick={() => void (group === "conflict" ? resolveConflicts(repo.root, [f.path]) : stage(repo.root, [f.path]))}>
             <Plus size={14} />
           </button>
         )}
@@ -89,7 +89,7 @@ function Section({ title, group, files, repo }: { title: string; group: Group; f
               <Minus size={14} />
             </button>
           ) : (
-            <button className="icon-btn xs" title="Stage all" onClick={() => void stage(repo.root, paths)}>
+            <button className="icon-btn xs" title={group === "conflict" ? "Mark all as resolved (stage)" : "Stage all"} onClick={() => void (group === "conflict" ? resolveConflicts(repo.root, paths) : stage(repo.root, paths))}>
               <Plus size={14} />
             </button>
           )}
@@ -411,6 +411,15 @@ export function GitPanel() {
   const [amend, setAmend] = useState(false);
   const busy = g.busy;
 
+  // A stopped pick / merge / revert comes with the message git prepared: offer it once, in an empty box.
+  const offered = useRef("");
+  const opKey = repo?.operation && repo.operationMessage ? `${repo.root}|${repo.operation}|${repo.operationMessage}` : "";
+  useEffect(() => {
+    if (!opKey || offered.current === opKey) return;
+    offered.current = opKey;
+    setMessage((cur) => (cur.trim() ? cur : repo!.operationMessage!));
+  }, [opKey]);
+
   const doCommit = async () => {
     if (!repo || busy) return;
     if (await commit(repo.root, message, amend)) {
@@ -504,8 +513,13 @@ export function GitPanel() {
             }}
           />
           <div className="row">
-            <button className="btn btn-primary small grow" disabled={!!busy || (!message.trim() && !amend)} onClick={() => void doCommit()}>
-              {commitLabel(groups.staged.length, repo.files.length, amend)}
+            <button
+              className="btn btn-primary small grow"
+              disabled={!!busy || groups.conflict.length > 0 || (!message.trim() && !amend)}
+              title={groups.conflict.length ? "Open each file under Merge Changes, fix the conflict, save, and mark it resolved with +. Then commit to finish, or Abort to go back." : undefined}
+              onClick={() => void doCommit()}
+            >
+              {commitLabel(groups.staged.length, repo.files.length, amend, groups.conflict.length)}
             </button>
             <label className="check" title="Replace the last commit with this one (the message box empty keeps its message)">
               <input type="checkbox" checked={amend} disabled={!repo.head} onChange={(e) => setAmend(e.target.checked)} />

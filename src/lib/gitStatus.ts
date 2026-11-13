@@ -90,8 +90,14 @@ export function syncLine(changes: number, ahead: number, behind: number, upstrea
   return { kind: "ok", text: `Everything is committed and matches ${upstream}.` };
 }
 
-/** The Commit button: what it will take. */
-export function commitLabel(staged: number, total: number, amend: boolean): string {
+/** Does the text still hold git's conflict markers (an opening and a closing one, each starting a line)? */
+export function hasConflictMarkers(text: string): boolean {
+  return /^<{7}( |$)/m.test(text) && /^>{7}( |$)/m.test(text);
+}
+
+/** The Commit button: what it will take (or what is in the way). */
+export function commitLabel(staged: number, total: number, amend: boolean, conflicts = 0): string {
+  if (conflicts) return `Resolve ${conflicts} Conflict${conflicts === 1 ? "" : "s"} First`;
   if (amend) return "Amend Last Commit";
   if (staged) return `Commit ${staged} Staged`;
   return total ? `Commit All (${count(total, "file")})` : "Commit All";

@@ -28,6 +28,9 @@ pub struct GitStatus {
     pub behind: u32,
     /// "merge" | "rebase" | "am" | "cherry-pick" | "revert" while one is in progress.
     pub operation: Option<String>,
+    /// The message git prepared for the commit that finishes the operation (`MERGE_MSG` without
+    /// its comment lines): the picked commit's message, "Merge branch ...", "Revert ...".
+    pub operation_message: Option<String>,
     pub files: Vec<GitFile>,
     pub remotes: Vec<GitRemote>,
 }
@@ -292,6 +295,16 @@ fn operation(root: &Path) -> Option<String> {
     Some(op.to_string())
 }
 
+/// Git's prepared message for the operation in progress, without the `#` comment lines (the
+/// "# Conflicts:" list) it adds.
+fn operation_message(root: &Path) -> Option<String> {
+    let dir = run_text(root, true, &["rev-parse", "--absolute-git-dir"]).ok()?;
+    let text = std::fs::read_to_string(PathBuf::from(dir.trim().replace('/', "\\")).join("MERGE_MSG")).ok()?;
+    let msg = text.lines().filter(|l| !l.starts_with('#')).collect::<Vec<_>>().join("\n");
+    let msg = msg.trim();
+    (!msg.is_empty()).then(|| msg.to_string())
+}
+
 /// Parse `status --porcelain=v2 --branch -z`.
 fn parse_status(root: &Path, out: &[u8]) -> GitStatus {
     let text = String::from_utf8_lossy(out);
@@ -304,6 +317,7 @@ fn parse_status(root: &Path, out: &[u8]) -> GitStatus {
         ahead: 0,
         behind: 0,
         operation: None,
+        operation_message: None,
         files: Vec::new(),
         remotes: Vec::new(),
     };
@@ -375,6 +389,9 @@ fn status(path: &Path) -> Result<Option<GitStatus>, String> {
     let out = run(&root, true, &["status", "--porcelain=v2", "--branch", "-z", "--untracked-files=all"], None)?;
     let mut st = parse_status(&root, &out);
     st.operation = operation(&root);
+    if st.operation.is_some() {
+        st.operation_message = operation_message(&root);
+    }
     st.remotes = remote_list(&root)?;
     Ok(Some(st))
 }
@@ -1873,6 +1890,12 @@ mod tests {
         assert!(abort_operation(&root).is_err());
         assert!(commit_action(&root, "cherry-pick", &mine[0].sha, None).is_err());
         assert_eq!(operation(&root).as_deref(), Some("cherry-pick"));
+        // The picked commit's message is offered for the commit that finishes it, without git's comments.
+        let st = status(&root).unwrap().unwrap();
+        assert_eq!(st.operation_message.as_deref(), Some("on main"));
+        assert!(st.files.iter().any(|f| f.conflicted));
+        // git itself refuses to commit while a file is unmerged.
+        assert!(commit(&root, "too early", false).is_err());
         assert_eq!(abort_operation(&root).unwrap(), "cherry-pick");
         assert!(operation(&root).is_none());
         assert_eq!(std::fs::read_to_string(root.join("a.txt")).unwrap(), "different\n");
