@@ -474,8 +474,8 @@ async fn big_replace_all(
             dot_all: query.dot_all,
             max_results: usize::MAX,
         };
-        let rep = if query.is_regex { replacement } else { replacement.replace('$', "$$") };
-        doc.write().replace_all(&opts, &rep, query.preserve_case, emitter)
+        // `replace_all` expands `$` only in regex mode; plain text is written as typed.
+        doc.write().replace_all(&opts, &replacement, query.preserve_case, emitter)
     })
     .await
     .map_err(|e| e.to_string())?

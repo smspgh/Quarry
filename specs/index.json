@@ -507,6 +507,10 @@
         {
           "id": "BIG-007.8",
           "title": "No single replace"
+        },
+        {
+          "id": "BIG-007.9",
+          "title": "A dollar sign is literal in plain-text mode"
         }
       ]
     },
@@ -515,7 +519,7 @@
       "title": "Edit, insert and delete lines",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 432,
+      "line": 437,
       "status": "draft",
       "commands": [],
       "files": [
@@ -577,7 +581,7 @@
       "title": "Undo and redo line edits",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 504,
+      "line": 509,
       "status": "draft",
       "commands": [
         "edit.undo",
@@ -624,7 +628,7 @@
       "title": "Save and Save As",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 551,
+      "line": 556,
       "status": "draft",
       "commands": [
         "file.save",
@@ -674,7 +678,7 @@
       "title": "Encodings and line endings",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 606,
+      "line": 611,
       "status": "draft",
       "commands": [],
       "files": [
@@ -726,7 +730,7 @@
       "title": "Syntax colours for large files",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 664,
+      "line": 669,
       "status": "draft",
       "commands": [],
       "files": [
@@ -776,7 +780,7 @@
       "title": "Filter view of matching lines",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 719,
+      "line": 724,
       "status": "draft",
       "commands": [
         "big.filter"
@@ -846,7 +850,7 @@
       "title": "Follow a file as it grows",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 795,
+      "line": 800,
       "status": "draft",
       "commands": [
         "big.follow"
@@ -903,7 +907,7 @@
       "title": "CSV and TSV grid",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 858,
+      "line": 863,
       "status": "draft",
       "commands": [],
       "files": [
@@ -967,7 +971,7 @@
       "title": "JSON tree read from the file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 934,
+      "line": 939,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1037,7 +1041,7 @@
       "title": "Validate a large JSON file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1013,
+      "line": 1018,
       "status": "draft",
       "commands": [
         "json.validate"
@@ -1089,7 +1093,7 @@
       "title": "Show large-file info",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1066,
+      "line": 1071,
       "status": "draft",
       "commands": [
         "big.info"
@@ -1120,7 +1124,7 @@
       "title": "Reload when the file changes on disk",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1094,
+      "line": 1099,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1152,7 +1156,7 @@
       "title": "What large-file tabs do not offer",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1130,
+      "line": 1135,
       "status": "draft",
       "commands": [],
       "files": [

@@ -1538,6 +1538,16 @@ y
     }
 
     #[test]
+    fn plain_replace_all_keeps_dollar_literal() {
+        let (_f, mut d) = make("price x
+");
+        let opts = SearchOpts { pattern: "x", is_regex: false, case_sensitive: true, whole_word: false, dot_all: false, max_results: 10 };
+        assert_eq!(d.replace_all(&opts, "$5 $$ $1 $&", false, |_| {}).unwrap(), 1);
+        d.wait_indexed();
+        assert_eq!(all_lines(&d), vec!["price $5 $$ $1 $&", ""]);
+    }
+
+    #[test]
     fn search_and_replace_all() {
         let (_f, mut d) = make(&big_text(3000));
         let opts = SearchOpts { pattern: r"line (2\d\d\d)", is_regex: true, case_sensitive: true, whole_word: false, dot_all: false, max_results: 10 };

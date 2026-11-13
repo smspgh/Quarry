@@ -427,6 +427,11 @@ Scenario: BIG-007.8 No single replace
   Given the replace row is open on a large-file tab
   When I look at its buttons
   Then there is a "Replace All" button and no button to replace one match
+
+Scenario: BIG-007.9 A dollar sign is literal in plain-text mode
+  Given Regular Expression is off with the query "x" and the replacement "$5 $$ $1"
+  When I confirm Replace All
+  Then each "x" becomes exactly "$5 $$ $1"
 ```
 
 ## BIG-008: Edit, insert and delete lines
