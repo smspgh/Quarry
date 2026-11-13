@@ -30,6 +30,7 @@ The **Id** column is the command id used in [macro files](macros.md#file-format)
 | --- | --- | --- |
 | Ctrl+Z | Undo | `edit.undo` |
 | Ctrl+Y, Ctrl+Shift+Z | Redo | `edit.redo` |
+| Ctrl+X / Ctrl+C / Ctrl+V | Cut / Copy / Paste (with nothing selected, Cut and Copy take the whole line) | `edit.cut` / `edit.copy` / `edit.paste` |
 | Ctrl+A | Select All | `edit.selectAll` |
 | Ctrl+Shift+D | Duplicate Line Down | `edit.duplicateLine` |
 | – | Duplicate Line Up | `edit.duplicateLineUp` |

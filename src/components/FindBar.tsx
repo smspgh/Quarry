@@ -1,5 +1,4 @@
 import { closeSearchPanel, findNext, findPrevious, getSearchQuery, openSearchPanel, replaceAll, replaceNext, SearchQuery, setSearchQuery } from "@codemirror/search";
-import { selectAllFindMatches } from "../editor/bulkEdit";
 import { ALargeSmall, ArrowDown, ArrowUp, CaseSensitive, ChevronDown, ChevronRight, Regex, Replace, ReplaceAll, WholeWord, X } from "lucide-react";
 import { EditorView } from "@codemirror/view";
 import { useEffect, useRef } from "react";
@@ -175,6 +174,7 @@ export function FindBar() {
   };
   const onFindKey = (e: React.KeyboardEvent) => {
     if (openHistoryFromKey(e, "find")) return;
+    // Alt+Enter never gets here: App.tsx's capture-phase handler runs `edit.selectAllMatches` first.
     if (e.key === "Enter" && !e.altKey) {
       e.preventDefault();
       if (e.ctrlKey) {
@@ -187,10 +187,6 @@ export function FindBar() {
         return;
       }
       run(e.shiftKey ? findPrevious : findNext);
-    } else if (e.key === "Enter" && e.altKey) {
-      e.preventDefault();
-      run((v) => selectAllFindMatches(v, (m) => useStore.getState().toast(m, "warning", 4000)));
-      close();
     } else if (e.key === "Escape") {
       e.preventDefault();
       close();

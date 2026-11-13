@@ -74,6 +74,7 @@ Scenario: FIND-001.7 Opening the bar replaces Find in Files highlighting
   - `src/lib/commands.ts` — `find.next` / `find.prev` (CodeMirror `findNext` / `findPrevious`; large-file tabs get `big.findNext` / `big.findPrev`)
   - `src/lib/store.ts` — `findBar.count`
   - `src/editor/manager.ts` — `onDocUpdate` keeps the current-match index in step with the selection
+  - `src/App.tsx` — the window's capture-phase key handler lets F-keys through from text boxes, so F3 runs `find.next` before the find bar's own `onBarKey` (which stops propagation only in React's bubble phase); `cmCommand` then focuses the editor
 - Tests: none
 - Docs: `docs/find-and-replace.md`, `docs/keyboard-shortcuts.md`
 
@@ -129,6 +130,12 @@ Scenario: FIND-002.8 The count follows the cursor
   Given the count reads "1 of 3"
   When I click somewhere in the document that is not a match
   Then the count reads "? of 3"
+
+Scenario: FIND-002.9 F3 in the search box
+  Given the find bar has focus, its search box contains "foo" and the count reads "1 of 3"
+  When I press F3
+  Then the next match is selected and the count reads "2 of 3"
+  And the keyboard moves to the editor, unlike Enter, which keeps it in the search box
 ```
 
 ## FIND-003: Match Case, Whole Word, Regex and multi-line searches
@@ -348,7 +355,7 @@ Scenario: FIND-006.6 The toggle shows its state
 - Files:
   - `src/lib/searchHistory.ts` — `recordHistory`, `addEntry`, `sanitizeEntries`, `ensureHistoryLoaded` (lazy load of `search-history.json`), `removeHistoryEntry`, `clearHistory`, `applyHistoryLimit`, `MAX_ENTRY_CHARS`
   - `src/components/HistoryMenu.tsx` — `HistoryMenu` (list, pages of 100, keyboard), `ClearButton`, `openHistoryFromKey` (Alt+Down), `historyLabel`
-  - `src/components/FindBar.tsx` — `run()` records find / replace texts; boxes host the buttons
+  - `src/components/FindBar.tsx` — `run()` records find / replace texts (Enter / Shift+Enter, the Next / Previous / Replace / Replace All buttons; `find.next` / `find.prev` = F3 do not record); boxes host the buttons
   - `src/components/panels/SearchPanel.tsx` — records on Search and on Replace All; boxes host the same buttons
   - `src/components/panels/SettingsPanel.tsx` — "Find & replace history" row (`searchHistoryLimit`), clear history
   - `src/lib/ipc.ts` — `appData.read` / `appData.write`
@@ -428,6 +435,14 @@ Scenario: FIND-007.12 Multi-line and blank entries are readable
   Given history entries "a", line break, "b" and one of three spaces
   When I open the list
   Then they read "a ⏎ b" and "(3 whitespace characters)"
+
+Scenario: FIND-007.13 F3 steps without adding to the history
+  Given the history is empty and the search box contains "needle"
+  When I press F3 three times
+  Then the Search history list is still empty
+  When I click the Next Match button
+  Then "needle" is listed once
+
 ```
 
 ## FIND-008: Turn every find match into a cursor
@@ -436,7 +451,7 @@ Scenario: FIND-007.12 Multi-line and blank entries are readable
 - Commands: `edit.selectAllMatches`
 - Files:
   - `src/editor/bulkEdit.ts` — `selectAllFindMatches`, `findMatchSelection`, `MAX_OCCURRENCES` (200 000), `bulkEditing` (fast typing with many cursors)
-  - `src/components/FindBar.tsx` — Alt+Enter in the search box
+  - `src/App.tsx` — Alt+Enter in the search box: the window's capture-phase key handler runs `edit.selectAllMatches` before the find bar sees the key
   - `src/lib/commands.ts` — `edit.selectAllMatches` (closes the find bar when it selected something)
 - Tests: `src/__tests__/bulkedit.test.ts`
 - Docs: `docs/find-and-replace.md`, `docs/keyboard-shortcuts.md`
@@ -466,7 +481,7 @@ Scenario: FIND-008.3 More than 200,000 matches
 
 Scenario: FIND-008.4 No match
   Given the search has no match in the document
-  When I run "Select All Find Matches" from the menu
+  When I press Alt+Enter in the search box, or run "Select All Find Matches" from the menu
   Then the selection is unchanged
   And the find bar stays open
 ```

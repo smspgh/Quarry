@@ -13,6 +13,11 @@ type Loader = () => Promise<unknown>;
 interface PrettierTarget {
   parser: string;
   plugins: Loader[];
+  /**
+   * Prettier honours `rangeStart` / `rangeEnd` for this parser. Only the JS, TS, GraphQL and Vue
+   * parsers do; for the others a range formats nothing, so the selection is ignored there.
+   */
+  range?: true;
 }
 
 const babel = () => import("prettier/plugins/babel");
@@ -26,19 +31,19 @@ const graphql = () => import("prettier/plugins/graphql");
 const xml = () => import("@prettier/plugin-xml");
 
 const PRETTIER: Record<string, PrettierTarget> = {
-  JavaScript: { parser: "babel", plugins: [babel, estree] },
-  JSX: { parser: "babel", plugins: [babel, estree] },
-  TypeScript: { parser: "typescript", plugins: [typescript, estree] },
-  TSX: { parser: "typescript", plugins: [typescript, estree] },
+  JavaScript: { parser: "babel", plugins: [babel, estree], range: true },
+  JSX: { parser: "babel", plugins: [babel, estree], range: true },
+  TypeScript: { parser: "typescript", plugins: [typescript, estree], range: true },
+  TSX: { parser: "typescript", plugins: [typescript, estree], range: true },
   CSS: { parser: "css", plugins: [postcss] },
   SCSS: { parser: "scss", plugins: [postcss] },
   Less: { parser: "less", plugins: [postcss] },
   HTML: { parser: "html", plugins: [html] },
-  Vue: { parser: "vue", plugins: [html, babel, estree, postcss] },
+  Vue: { parser: "vue", plugins: [html, babel, estree, postcss], range: true },
   Angular: { parser: "angular", plugins: [html] },
   Markdown: { parser: "markdown", plugins: [markdown] },
   YAML: { parser: "yaml", plugins: [yaml] },
-  GraphQL: { parser: "graphql", plugins: [graphql] },
+  GraphQL: { parser: "graphql", plugins: [graphql], range: true },
   XML: { parser: "xml", plugins: [xml] },
   SVG: { parser: "xml", plugins: [xml] },
 };
@@ -158,11 +163,15 @@ export async function formatDocument(): Promise<boolean> {
   const doc = activeDoc(store);
   if (!doc || doc.kind !== "text" || !editor.view) return false;
   const view = editor.view;
+  if (view.state.readOnly) {
+    store.toast(`${doc.name} is read-only.`, "info", 2000);
+    return false;
+  }
   const lang = doc.language;
   const s = store.settings;
   const text = view.state.doc.toString();
   const sel = view.state.selection.main;
-  const hasRange = !sel.empty && lang in PRETTIER;
+  const hasRange = !sel.empty && !!PRETTIER[lang]?.range;
 
   try {
     let out: string;
@@ -170,7 +179,13 @@ export async function formatDocument(): Promise<boolean> {
     if (lang === "JSON") {
       const r = await jsonIpc.format(text, s.jsonIndent, !s.insertSpaces);
       if (!r.ok) {
-        store.toast(`JSON is not valid: ${r.error?.message ?? "parse error"} (line ${r.error?.line ?? "?"})`, "error");
+        // Line 0 means the JSON is fine but the result cannot be produced (pretty output too large).
+        if (r.error?.line === 0) store.toast(`Cannot pretty-print: ${r.error.message}`, "warning", 6000);
+        else {
+          // Like JSON: Format, put the cursor on the error (unless the user moved to another tab meanwhile).
+          if (r.error && editor.view === view) editor.goTo(r.error.line, r.error.column);
+          store.toast(`JSON is not valid: ${r.error?.message ?? "parse error"} (line ${r.error?.line ?? "?"})`, "error");
+        }
         return false;
       }
       out = r.output ?? text;

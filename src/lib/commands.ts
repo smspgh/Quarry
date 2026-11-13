@@ -21,6 +21,7 @@ import { foldAll, foldCode, unfoldAll, unfoldCode } from "@codemirror/language";
 import { EditorSelection } from "@codemirror/state";
 import { detectLanguage, sniffLanguage } from "../editor/cmSetup";
 import { formatDocument } from "./format";
+import * as lineFns from "./lineTransforms";
 import { findNext, findPrevious, selectNextOccurrence } from "@codemirror/search";
 import { MAX_OCCURRENCES, occurrenceSelection, selectAllFindMatches } from "../editor/bulkEdit";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -263,6 +264,11 @@ function cmCommand(fn: (view: NonNullable<typeof editor.view>) => boolean) {
   };
 }
 
+/** A `cmCommand` that changes the text: does nothing on a read-only document (CodeMirror's own commands check this too). */
+function cmEdit(fn: (view: NonNullable<typeof editor.view>) => boolean) {
+  return cmCommand((view) => !view.state.readOnly && fn(view));
+}
+
 /** True while the main CodeMirror view owns keyboard focus (shortcut guard for Tab, Ctrl+A, Ctrl+Z…). */
 const editorFocused = () => !!editor.view?.hasFocus;
 
@@ -333,7 +339,6 @@ async function jsonTransform(kind: "format" | "minify") {
   if (r.output !== null) {
     editor.replaceAll(doc.id, r.output);
     dropJsonTree(doc.id);
-    if (doc.language !== "JSON") editor.setLanguage(doc.id, "JSON").then((l) => s.updateDoc(doc.id, { language: l }));
     s.toast(kind === "format" ? "JSON formatted" : r.stripped ? "JSON minified (comments and trailing commas removed)" : "JSON minified", "success", r.stripped ? 3000 : 1500);
   }
   return true;
@@ -700,7 +705,7 @@ export function registerAllCommands() {
     id: "edit.upper",
     title: "Transform to Uppercase",
     category: "Edit",
-    run: cmCommand((v) => {
+    run: cmEdit((v) => {
       v.dispatch(v.state.changeByRange((r) => ({ changes: { from: r.from, to: r.to, insert: v.state.sliceDoc(r.from, r.to).toUpperCase() }, range: r })));
       return true;
     }),
@@ -709,7 +714,7 @@ export function registerAllCommands() {
     id: "edit.lower",
     title: "Transform to Lowercase",
     category: "Edit",
-    run: cmCommand((v) => {
+    run: cmEdit((v) => {
       v.dispatch(v.state.changeByRange((r) => ({ changes: { from: r.from, to: r.to, insert: v.state.sliceDoc(r.from, r.to).toLowerCase() }, range: r })));
       return true;
     }),
@@ -738,52 +743,35 @@ export function registerAllCommands() {
   register({ id: "code.foldTree", title: "Fold Region and Its Children at Line", category: "Code", hidden: true, run: foldLine(true, foldTreeSpec) });
   register({ id: "code.unfoldTree", title: "Unfold Region and Its Children at Line", category: "Code", hidden: true, run: foldLine(false, foldTreeSpec) });
   register({ id: "code.gotoBracket", title: "Go to Matching Bracket", category: "Code", keys: "Ctrl+Shift+\\", run: cmCommand(cursorMatchingBracket) });
-  const lineTransform = (title: string, id: string, fn: (lines: string[]) => string[], keys?: string, category = "Edit") =>
+  const lineTransform = (title: string, id: string, fn: () => lineFns.LineFn, keys?: string, category = "Edit") =>
     register({
       id,
       title,
       category,
       keys,
-      run: cmCommand((v) => {
-        const st = v.state;
-        const sel = st.selection.main;
-        const from = st.doc.lineAt(sel.from).from;
-        const to = sel.empty ? st.doc.length : st.doc.lineAt(sel.to).to;
-        const start = sel.empty ? 0 : from;
-        const text = st.sliceDoc(start, to);
-        const out = fn(text.split("\n")).join("\n");
-        if (out === text) return true;
-        v.dispatch({ changes: { from: start, to, insert: out }, selection: sel.empty ? undefined : { anchor: start, head: start + out.length }, userEvent: "input.transform" });
+      run: cmEdit((v) => {
+        const spec = lineFns.lineTransformSpec(v.state, fn());
+        if (spec) v.dispatch(spec);
         return true;
       }),
     });
-  const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
-  lineTransform("Sort Lines Ascending", "code.sortAsc", (l) => [...l].sort(collator.compare));
-  lineTransform("Sort Lines Descending", "code.sortDesc", (l) => [...l].sort(collator.compare).reverse());
-  lineTransform("Reverse Lines", "code.reverseLines", (l) => [...l].reverse());
-  lineTransform("Remove Duplicate Lines", "code.dedupe", (l) => l.filter((x, i) => l.indexOf(x) === i));
-  lineTransform("Delete Blank Lines", "code.removeBlank", (l) => l.filter((x) => x.trim() !== ""));
-  lineTransform("Delete Empty Lines", "code.removeEmpty", (l) => l.filter((x) => x !== ""));
-  lineTransform("Trim Trailing Whitespace", "code.trimTrailing", (l) => l.map((x) => x.replace(/[ \t]+$/, "")));
-  lineTransform("Join Lines", "code.joinLines", (l) => [l.map((x) => x.trim()).filter(Boolean).join(" ")]);
-  lineTransform("Number Lines", "edit.numberLines", (l) => {
-    const w = String(l.length).length;
-    return l.map((x, i) => String(i + 1).padStart(w, " ") + "  " + x);
-  });
-  lineTransform("Indentation: Convert to Spaces", "code.indentToSpaces", (l) => {
-    const n = s().settings.tabSize;
-    return l.map((x) => x.replace(/^\t+/, (m) => " ".repeat(m.length * n)));
-  }, undefined, "Code");
-  lineTransform("Indentation: Convert to Tabs", "code.indentToTabs", (l) => {
-    const n = s().settings.tabSize;
-    return l.map((x) => x.replace(/^( {2,})/, (m) => "\t".repeat(Math.floor(m.length / n)) + " ".repeat(m.length % n)));
-  }, undefined, "Code");
+  lineTransform("Sort Lines Ascending", "code.sortAsc", () => lineFns.sortAsc);
+  lineTransform("Sort Lines Descending", "code.sortDesc", () => lineFns.sortDesc);
+  lineTransform("Reverse Lines", "code.reverseLines", () => lineFns.reverseLines);
+  lineTransform("Remove Duplicate Lines", "code.dedupe", () => lineFns.dedupe);
+  lineTransform("Delete Blank Lines", "code.removeBlank", () => lineFns.removeBlank);
+  lineTransform("Delete Empty Lines", "code.removeEmpty", () => lineFns.removeEmpty);
+  lineTransform("Trim Trailing Whitespace", "code.trimTrailing", () => lineFns.trimTrailing);
+  lineTransform("Join Lines", "code.joinLines", () => lineFns.joinLines);
+  lineTransform("Number Lines", "edit.numberLines", () => lineFns.numberLines);
+  lineTransform("Indentation: Convert to Spaces", "code.indentToSpaces", () => lineFns.indentToSpaces(s().settings.tabSize), undefined, "Code");
+  lineTransform("Indentation: Convert to Tabs", "code.indentToTabs", () => lineFns.indentToTabs(s().settings.tabSize), undefined, "Code");
   register({
     id: "edit.quoteSelections",
     title: "Wrap Selections in Quotes",
     category: "Edit",
     enabled: () => !!editor.view && hasText() && editor.view.state.selection.ranges.some((r) => !r.empty),
-    run: cmCommand((v) => {
+    run: cmEdit((v) => {
       v.dispatch(v.state.changeByRange((r) => {
         const ins = JSON.stringify(v.state.sliceDoc(r.from, r.to));
         return { changes: { from: r.from, to: r.to, insert: ins }, range: EditorSelection.range(r.from, r.from + ins.length) };
@@ -795,8 +783,8 @@ export function registerAllCommands() {
     id: "code.titleCase",
     title: "Transform to Title Case",
     category: "Code",
-    run: cmCommand((v) => {
-      v.dispatch(v.state.changeByRange((r) => ({ changes: { from: r.from, to: r.to, insert: v.state.sliceDoc(r.from, r.to).replace(/\b\w/g, (c) => c.toUpperCase()) }, range: r })));
+    run: cmEdit((v) => {
+      v.dispatch(v.state.changeByRange((r) => ({ changes: { from: r.from, to: r.to, insert: lineFns.titleCase(v.state.sliceDoc(r.from, r.to)) }, range: r })));
       return true;
     }),
   });

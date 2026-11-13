@@ -10,39 +10,9 @@ This file is not a spec: `scripts/specs-index.mjs` ignores it.
 - Tab reordering, reopen closed tab and back/forward navigation do not exist (no stories).
 - Tab context menu items (Close, Close Others, Open to the Side, Copy Path, Show in…, Compare with Last Commit, Show File History) call action functions directly (`src/components/TitleBar.tsx:124-149`), against the rule that every user action goes through `runCommand`; the macro recorder does not see them.
 
-## Text editing (`editing.md`)
-
-Possible bugs
-- Read-only documents can be edited by commands: Format Document, the line transforms, case changes and Wrap in Quotes dispatch without a read-only check; only `edit.cut` / `edit.paste` have one (`src/lib/format.ts:222`, `src/lib/commands.ts:703`, `:712`, `:755`, `:786`, `:798`).
-- Line commands treat a trailing newline as an empty last line: sorting a whole document that ends in a newline moves that empty line to the top; Number Lines numbers it (`commands.ts:750-753`).
-- Line commands use only the main selection; other selections are ignored (`commands.ts:748`).
-- Remove Duplicate Lines is quadratic (`indexOf` inside `filter`, `commands.ts:763`).
-- Title Case uses `/\b\w/g`: "don't" becomes "Don'T", and existing capitals are not lowered (`commands.ts:798`).
-- Convert to Tabs skips a single leading space and spaces after a leading tab; Convert to Spaces only converts the run of tabs at the very start of the line (`commands.ts:774`, `:778`).
-- The status-bar language picker calls `editor.setLanguage` directly (`src/components/StatusBar.tsx:200`) instead of `runCommand("code.setLanguage", …)`; macros do not record it.
-
-Doc / code mismatches and notes
-- Language sniffing never returns "C": `#include` gives "C++" (`src/editor/cmSetup.ts:231`); `docs/editing.md:108` says "C/C++".
-- `edit.cut` / `edit.copy` / `edit.paste` are in the palette but not in the Edit menu or `docs/keyboard-shortcuts.md`.
-- `currentBlock` has two identical return branches (`src/editor/columnMode.ts:43-46`); the comment on `addCursorBelow` says "Alt+Shift+Down style" but the key is Ctrl+Alt+Down (`columnMode.ts:135`).
-- Not determined: what the right-click menu shows on non-foldable gutter lines (EDIT-014.2 only says Quarry's menu does not open).
-- No tests: column mode, add cursor above/below, `rangesInWindow`, the line transforms, Go to Line parsing (`parseGoto` is private to `CommandPalette.tsx`).
-
-## Formatting (`formatting.md`)
-
-- Format Document on JSON too large to pretty-print shows "JSON is not valid: … (line 0)" although the JSON is valid; `jsonTransform` handles line 0 properly (`src/lib/format.ts:172-174` vs `src/lib/commands.ts:325`).
-- Format Document on JSON does not move the cursor to the error, unlike `json.format` (FMT-003.5 vs FMT-010.4).
-- Format selection: `docs/formatting.md:24` and the "Formatted selection" toast (`format.ts:165`, `:188`, `:223`) claim it for all Prettier languages; Prettier is believed to honour `rangeStart` / `rangeEnd` only for JS/TS/GraphQL-type parsers, so CSS, Markdown, YAML, HTML and XML would get the whole document formatted. Not verified; FMT-005 uses JavaScript only.
-- The `doc.language !== "JSON"` branch in `jsonTransform` is unreachable (`commands.ts:336`).
-- Not determined: whether the dotnet "missing CSharpier" pattern (`format.ts:118`) matches current dotnet output; the exact text of Prettier / wasm formatter errors.
-- No tests cover `format.ts` or `format_external`.
-
 ## Find and replace in a document (`find.md`)
 
 - There is no "in selection" option anywhere (`src/components/FindBar.tsx`, `findBar` in `src/lib/store.ts:279`).
-- History is not recorded by F3: `docs/find-and-replace.md:40` says Next / Previous add an entry; the bar's buttons and Enter do, `find.next` / `find.prev` do not (`src/lib/commands.ts:869-870`).
-- Alt+Enter in the find box closes the bar even with no match (`FindBar.tsx:190-193`); the `edit.selectAllMatches` command closes it only on success (`commands.ts:691-695`).
-- Not determined: F3 while focus is inside the find bar (`onBarKey` stops propagation, `FindBar.tsx:167`).
 
 ## Find in Files (`search.md`)
 

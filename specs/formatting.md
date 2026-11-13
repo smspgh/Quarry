@@ -12,11 +12,11 @@ Format Document for text tabs: which formatter runs for which language (Quarry's
 - Status: draft
 - Commands: `code.format`
 - Files:
-  - `src/lib/format.ts` — `formatDocument` (picks the formatter from the document's language, "Already formatted", success toast), `canFormat`
+  - `src/lib/format.ts` — `formatDocument` (read-only guard, picks the formatter from the document's language, "Already formatted", success toast), `canFormat`
   - `src/lib/commands.ts` — `code.format` (`textDocOnly`, Shift+Alt+F)
   - `src/editor/manager.ts` — `replaceAll` (one transaction replacing only the part between the common prefix and suffix)
   - `src/components/MenuBar.tsx` — Code › Format Document
-- Tests: none
+- Tests: `src/__tests__/format.test.ts`
 - Docs: `docs/formatting.md`
 
 **As a** developer
@@ -41,6 +41,12 @@ Scenario: FMT-001.3 The formatter follows the tab's language
   Given the same text in two tabs, one with the language "JSON" and one with the language "YAML"
   When I press Shift+Alt+F in each
   Then the first is formatted as JSON and the second as YAML
+
+Scenario: FMT-001.4 A read-only document is not formatted
+  Given "data.json" opened read-only and badly indented
+  When I press Shift+Alt+F
+  Then the document is unchanged
+  And a notice says "data.json is read-only."
 ```
 
 ## FMT-002: Format Document is one undo step and reports when nothing changed
@@ -50,7 +56,7 @@ Scenario: FMT-001.3 The formatter follows the tab's language
 - Files:
   - `src/lib/format.ts` — `formatDocument` (`out === text` → "Already formatted"; "No formatter for …")
   - `src/editor/manager.ts` — `replaceAll`, `dispatchTo` (marks the tab changed only when the text changed)
-- Tests: none
+- Tests: `src/__tests__/format.test.ts`
 - Docs: `docs/formatting.md`
 
 **As a** developer
@@ -86,11 +92,11 @@ Scenario: FMT-002.4 Only text tabs
 - Status: draft
 - Commands: `code.format`
 - Files:
-  - `src/lib/format.ts` — `formatDocument`, the `lang === "JSON"` branch (`jsonIndent`, tabs when `insertSpaces` is off, error toast)
+  - `src/lib/format.ts` — `formatDocument`, the `lang === "JSON"` branch (`jsonIndent`, tabs when `insertSpaces` is off, error toast and cursor to the error via `editor.goTo`; an error at line 0 = valid JSON whose output is too large)
   - `src/lib/ipc.ts` — `json.format` → Tauri `json_format`
   - `src-tauri/src/lib.rs` — `json_format`
   - `src-tauri/src/json_tools.rs` — `format` (token-preserving pretty printer: key order, number text, comments kept), `PRETTY_MIN_CAP`
-- Tests: `src-tauri/src/json_tools.rs`
+- Tests: `src-tauri/src/json_tools.rs`, `src/__tests__/format.test.ts`
 - Docs: `docs/formatting.md`, `docs/json.md`
 
 **As a** person working with JSON files
@@ -124,7 +130,14 @@ Scenario: FMT-003.5 Invalid JSON is left alone
   Given a JSON tab with a missing closing brace on line 3
   When I press Shift+Alt+F
   Then the document is unchanged
+  And the cursor is moved to the place of the error on line 3
   And an error says "JSON is not valid:" followed by the parser's message and "(line 3)"
+
+Scenario: FMT-003.6 Valid JSON whose pretty-printed text would be too large
+  Given a JSON tab nested so deeply that the pretty-printed text would exceed both 64 MB and 16 times the document's size
+  When I press Shift+Alt+F
+  Then the document is unchanged
+  And a warning starts with "Cannot pretty-print:", not "JSON is not valid"
 ```
 
 ## FMT-004: Format web languages with the bundled Prettier
@@ -133,7 +146,7 @@ Scenario: FMT-003.5 Invalid JSON is left alone
 - Commands: `code.format`
 - Files:
   - `src/lib/format.ts` — `PRETTIER` table (language → parser and plugins, all loaded with dynamic `import()` on first use), Prettier options in `formatDocument` (`tabWidth`, `useTabs`, `printWidth: 100`, `endOfLine: "lf"`, `xmlWhitespaceSensitivity: "ignore"`, `bracketSameLine: false`)
-- Tests: none
+- Tests: `src/__tests__/format.test.ts`
 - Docs: `docs/formatting.md`
 
 **As a** web developer
@@ -191,8 +204,8 @@ Scenario: FMT-004.5 The language of the tab decides, not the file name
 - Status: draft
 - Commands: `code.format`
 - Files:
-  - `src/lib/format.ts` — `hasRange` (non-empty main selection and a Prettier language), `rangeStart` / `rangeEnd`, "Formatted selection" toast
-- Tests: none
+  - `src/lib/format.ts` — `hasRange` (non-empty main selection and a Prettier target with `range`: the babel, typescript, graphql and vue parsers, the only ones Prettier 3 range-formats; other parsers return the text unchanged for a range), `rangeStart` / `rangeEnd`, "Formatted selection" toast
+- Tests: `src/__tests__/format.test.ts`
 - Docs: `docs/formatting.md`
 
 **As a** developer touching one function in a file I don't own
@@ -218,6 +231,13 @@ Scenario: FMT-005.3 Other formatters always take the whole document
   When I press Shift+Alt+F
   Then the whole document is formatted
   And the notice names the formatter, not "Formatted selection"
+
+Scenario: FMT-005.4 Prettier languages without range formatting take the whole document
+  Given a CSS tab with two badly formatted rules and the first one selected
+  When I press Shift+Alt+F
+  Then both rules are reformatted
+  And a notice says "Formatted (CSS)"
+  And the same holds for SCSS, Less, HTML, Angular, Markdown, YAML and XML
 ```
 
 ## FMT-006: Prefer the formatter installed on the machine
@@ -227,8 +247,8 @@ Scenario: FMT-005.3 Other formatters always take the whole document
 - Files:
   - `src/lib/format.ts` — `CODE` table (`external`: tool, arguments, install hint, `missing` pattern), the external branch of `formatDocument` (working folder = the document's folder, "Formatted (Python, ruff)")
   - `src/lib/ipc.ts` — `sys.formatExternal`
-  - `src-tauri/src/lib.rs` — `format_external` (spawns the tool without a console window, document on stdin from a feeder thread, stdout returned, stderr or stdout as the error, `not_found`)
-- Tests: none
+  - `src-tauri/src/lib.rs` — `format_external` / `run_formatter` (spawns the tool without a console window, document on stdin from a feeder thread, stdout returned, stderr or stdout as the error, `not_found`)
+- Tests: `src/__tests__/format.test.ts`, `src-tauri/src/lib.rs`
 - Docs: `docs/formatting.md`
 
 **As a** developer whose project has its own formatter configuration
@@ -283,9 +303,9 @@ Scenario: FMT-006.5 An untitled document is formatted too
 - Status: draft
 - Commands: `code.format`
 - Files:
-  - `src/lib/format.ts` — `CODE` table (`builtin`), `clangFormat` / `clangStyle`, `sqlBuiltin`, fallback when the tool is not found or matches `missing`; each formatter is a dynamic `import()` (`@wasm-fmt/gofmt`, `@wasm-fmt/ruff_fmt`, `@wasm-fmt/clang-format`, `@wasm-fmt/shfmt`, `prettier-plugin-java`, `sql-formatter`)
+  - `src/lib/format.ts` — `CODE` table (`builtin`), `clangFormat` / `clangStyle`, `sqlBuiltin`, fallback when the tool is not found or matches `missing` (C#: dotnet with an SDK prints "Could not execute because the specified command or file was not found"; dotnet with only a runtime prints "The command could not be loaded … The application 'csharpier' does not exist"; the pattern matches both); each formatter is a dynamic `import()` (`@wasm-fmt/gofmt`, `@wasm-fmt/ruff_fmt`, `@wasm-fmt/clang-format`, `@wasm-fmt/shfmt`, `prettier-plugin-java`, `sql-formatter`)
   - `src-tauri/src/lib.rs` — `format_external` reports `not_found` when the program cannot be started
-- Tests: none
+- Tests: `src/__tests__/format.test.ts`, `src-tauri/src/lib.rs`
 - Docs: `docs/formatting.md`
 
 **As a** person on a machine without developer tools
@@ -337,6 +357,7 @@ Scenario: FMT-007.5 dotnet without CSharpier falls back
   Given dotnet is installed but the csharpier tool is not
   When I format a C# tab
   Then a notice says "Formatted (C#, built-in clang-format)"
+  And the same happens when dotnet has a runtime but no SDK
 ```
 
 ## FMT-008: Rust needs rustfmt
@@ -346,7 +367,7 @@ Scenario: FMT-007.5 dotnet without CSharpier falls back
 - Files:
   - `src/lib/format.ts` — `CODE.Rust` (external only, `install` hint), the "is not installed" warning in `formatDocument`
   - `src-tauri/src/lib.rs` — `format_external` (`not_found`)
-- Tests: none
+- Tests: `src/__tests__/format.test.ts`, `src-tauri/src/lib.rs`
 - Docs: `docs/formatting.md`
 
 **As a** person opening a Rust file without the Rust toolchain
@@ -372,7 +393,7 @@ Scenario: FMT-008.2 rustfmt is installed
 - Commands: `code.format`
 - Files:
   - `src/lib/format.ts` — `formatDocument`'s `catch` ("Format failed: " + the first line of the formatter's message, shown for 6 s; returns false)
-- Tests: none
+- Tests: `src/__tests__/format.test.ts`
 - Docs: `docs/formatting.md`
 
 **As a** developer formatting a file I'm in the middle of editing
@@ -381,21 +402,28 @@ Scenario: FMT-008.2 rustfmt is installed
 
 ```gherkin
 Scenario: FMT-009.1 Prettier cannot parse the file
-  Given a JavaScript tab with an unclosed "(" on line 2
+  Given a JavaScript tab containing "function f(a {" on line 1
   When I press Shift+Alt+F
   Then the document is unchanged
-  And an error says "Format failed:" followed by the first line of Prettier's message, which names the line and column
+  And an error says 'Format failed: Unexpected token, expected "," (1:14)'
+  And for an unclosed CSS block it says "Format failed: CssSyntaxError: Unclosed block (1:1)"
 
 Scenario: FMT-009.2 A built-in formatter cannot parse the file
   Given Go is not installed and the Go tab has a syntax error on line 2, column 12
   When I press Shift+Alt+F
   Then the document is unchanged
-  And an error says "Format failed:" followed by the position "2:12" and gofmt's message
+  And an error says "Format failed:" followed by the position "2:12" and gofmt's message, for example "Format failed: 2:12: expected '}', found 'EOF'"
 
 Scenario: FMT-009.3 Only the first line of a long message is shown
   Given a formatter fails with a message of several lines, including a code frame
   When the error is shown
   Then it contains only the first line of that message
+
+Scenario: FMT-009.4 The built-in ruff gives a byte range, not a line
+  Given ruff is not installed and a Python tab starts with "def f(:"
+  When I press Shift+Alt+F
+  Then the document is unchanged
+  And an error says "Format failed: Expected a parameter or the end of the parameter list at byte range 6..7"
 ```
 
 ## FMT-010: JSON pretty-print and minify commands

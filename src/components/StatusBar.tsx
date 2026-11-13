@@ -130,7 +130,6 @@ export function StatusBar() {
   const playing = useStore((s) => s.macroPlaying);
   const paused = useStore((s) => s.macroPaused);
   const recordingSteps = useStore((s) => s.recordingSteps);
-  const updateDoc = useStore((s) => s.updateDoc);
   const tabSize = useStore((s) => s.settings.tabSize);
   const insertSpaces = useStore((s) => s.settings.insertSpaces);
   const tabMovesFocus = useStore((s) => s.tabMovesFocus);
@@ -197,7 +196,7 @@ export function StatusBar() {
             title="Language mode"
             options={allLanguageNames}
             value={doc.language}
-            onPick={(v) => editor.setLanguage(doc.id, v).then((l) => updateDoc(doc.id, { language: l }))}
+            onPick={(v) => void runCommand("code.setLanguage", v)}
           />
         </>
       )}

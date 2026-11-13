@@ -5,7 +5,7 @@
  * Shift+Arrow keys extend the block vertically/horizontally. CodeMirror's native
  * multi-range selection then makes typing, deleting and pasting apply to every row.
  */
-import { EditorSelection, StateEffect, StateField, countColumn, findColumn, type Extension, type SelectionRange } from "@codemirror/state";
+import { EditorSelection, StateEffect, StateField, countColumn, findColumn, type EditorState, type Extension, type SelectionRange } from "@codemirror/state";
 import { EditorView, keymap, rectangularSelection, type Command } from "@codemirror/view";
 
 export const columnModeEnabled = StateField.define<boolean>({
@@ -25,29 +25,24 @@ interface Block {
   headCol: number;
 }
 
-function colOf(view: EditorView, pos: number): { line: number; col: number } {
-  const line = view.state.doc.lineAt(pos);
-  return { line: line.number, col: countColumn(line.text, view.state.tabSize, pos - line.from) };
+function colOf(state: EditorState, pos: number): { line: number; col: number } {
+  const line = state.doc.lineAt(pos);
+  return { line: line.number, col: countColumn(line.text, state.tabSize, pos - line.from) };
 }
 
 /** Derive the current block from the selection (anchor = first range, head = main range). */
-function currentBlock(view: EditorView): Block {
-  const sel = view.state.selection;
-  const ranges = sel.ranges;
-  const main = sel.main;
+function currentBlock(state: EditorState): Block {
+  const { ranges, main } = state.selection;
   const first = ranges[0];
   const last = ranges[ranges.length - 1];
   const anchorRange = main === last ? first : last;
-  const a = colOf(view, anchorRange.anchor);
-  const h = colOf(view, main.head);
-  if (ranges.length === 1) {
-    return { anchorLine: a.line, anchorCol: a.col, headLine: h.line, headCol: h.col };
-  }
+  const a = colOf(state, anchorRange.anchor);
+  const h = colOf(state, main.head);
   return { anchorLine: a.line, anchorCol: a.col, headLine: h.line, headCol: h.col };
 }
 
-export function blockSelection(view: EditorView, b: Block): EditorSelection {
-  const { doc, tabSize } = view.state;
+export function blockSelection(state: EditorState, b: Block): EditorSelection {
+  const { doc, tabSize } = state;
   const top = Math.min(b.anchorLine, b.headLine);
   const bottom = Math.max(b.anchorLine, b.headLine);
   const ranges: SelectionRange[] = [];
@@ -68,44 +63,55 @@ export function blockSelection(view: EditorView, b: Block): EditorSelection {
   return EditorSelection.create(ranges, mainIdx);
 }
 
+/** The block grown or shrunk by `dLine` rows and `dCol` columns at its head (clamped to the document). */
+export function extendBlock(state: EditorState, dLine: number, dCol: number): EditorSelection {
+  const b = currentBlock(state);
+  const headLine = Math.max(1, Math.min(state.doc.lines, b.headLine + dLine));
+  const headCol = Math.max(0, b.headCol + dCol);
+  return blockSelection(state, { ...b, headLine, headCol });
+}
+
+/** The block with its head at column 0 (Shift+Home) or at the end of its longest row (Shift+End). */
+export function blockToEdge(state: EditorState, end: boolean): EditorSelection {
+  const b = currentBlock(state);
+  let max = 0;
+  if (end) {
+    const { doc, tabSize } = state;
+    for (let ln = Math.min(b.anchorLine, b.headLine); ln <= Math.max(b.anchorLine, b.headLine); ln++) {
+      max = Math.max(max, countColumn(doc.line(ln).text, tabSize, doc.line(ln).length));
+    }
+  }
+  return blockSelection(state, { ...b, headCol: max });
+}
+
+/** A block selection collapsed into cursors (one per row) at the head column, or null for a single cursor. */
+export function cursorsOfBlock(state: EditorState): EditorSelection | null {
+  const sel = state.selection;
+  if (sel.ranges.length < 2 && sel.main.empty) return null;
+  return EditorSelection.create(sel.ranges.map((r) => EditorSelection.cursor(r.head)), sel.mainIndex);
+}
+
 function extend(dLine: number, dCol: number): Command {
   return (view) => {
-    const b = currentBlock(view);
-    const lines = view.state.doc.lines;
-    const headLine = Math.max(1, Math.min(lines, b.headLine + dLine));
-    const headCol = Math.max(0, b.headCol + dCol);
-    const sel = blockSelection(view, { ...b, headLine, headCol });
-    view.dispatch({ selection: sel, scrollIntoView: true, userEvent: "select" });
+    view.dispatch({ selection: extendBlock(view.state, dLine, dCol), scrollIntoView: true, userEvent: "select" });
     return true;
   };
 }
 
 const extendHome: Command = (view) => {
-  const b = currentBlock(view);
-  view.dispatch({ selection: blockSelection(view, { ...b, headCol: 0 }), scrollIntoView: true });
+  view.dispatch({ selection: blockToEdge(view.state, false), scrollIntoView: true });
   return true;
 };
 const extendEnd: Command = (view) => {
-  const b = currentBlock(view);
-  const { doc, tabSize } = view.state;
-  let max = 0;
-  for (let ln = Math.min(b.anchorLine, b.headLine); ln <= Math.max(b.anchorLine, b.headLine); ln++) {
-    max = Math.max(max, countColumn(doc.line(ln).text, tabSize, doc.line(ln).length));
-  }
-  view.dispatch({ selection: blockSelection(view, { ...b, headCol: max }), scrollIntoView: true });
+  view.dispatch({ selection: blockToEdge(view.state, true), scrollIntoView: true });
   return true;
 };
 
 /** Collapse a block selection into cursors (one per row) at the head column. */
 export const blockToCursors: Command = (view) => {
-  const sel = view.state.selection;
-  if (sel.ranges.length < 2 && sel.main.empty) return false;
-  view.dispatch({
-    selection: EditorSelection.create(
-      sel.ranges.map((r) => EditorSelection.cursor(r.head)),
-      sel.mainIndex,
-    ),
-  });
+  const selection = cursorsOfBlock(view.state);
+  if (!selection) return false;
+  view.dispatch({ selection });
   return true;
 };
 
@@ -132,7 +138,7 @@ export function columnModeExtensions(on: boolean): Extension {
 
 /** Always-available block commands. */
 export const blockCommands = {
-  /** Alt+Shift+Down style: add a cursor on the line below at the same column. */
+  /** Ctrl+Alt+Down: extend the block one line down (a cursor on the line below at the same column). */
   addCursorBelow: extend(1, 0),
   addCursorAbove: extend(-1, 0),
   blockToCursors,

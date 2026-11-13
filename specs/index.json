@@ -3408,13 +3408,15 @@
       "files": [
         "src/editor/lineMenu.ts",
         "src/lib/commands.ts",
-        "src/components/EditorMenu.tsx"
+        "src/components/EditorMenu.tsx",
+        "src/components/MenuBar.tsx"
       ],
       "tests": [
         "src/__tests__/lineMenu.test.ts"
       ],
       "docs": [
-        "docs/editing.md"
+        "docs/editing.md",
+        "docs/keyboard-shortcuts.md"
       ],
       "scenarios": [
         {
@@ -3440,6 +3442,10 @@
         {
           "id": "EDIT-002.6",
           "title": "A read-only document is not changed"
+        },
+        {
+          "id": "EDIT-002.7",
+          "title": "Cut, Copy and Paste in the Edit menu"
         }
       ]
     },
@@ -3448,7 +3454,7 @@
       "title": "Select all, and select occurrences of the selection",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 110,
+      "line": 119,
       "status": "draft",
       "commands": [
         "edit.selectAll",
@@ -3504,7 +3510,7 @@
       "title": "Turn every find match into a selection",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 168,
+      "line": 177,
       "status": "draft",
       "commands": [
         "edit.selectAllMatches"
@@ -3539,7 +3545,7 @@
       "title": "Add cursors above and below",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 202,
+      "line": 211,
       "status": "draft",
       "commands": [
         "selection.addCursorAbove",
@@ -3552,7 +3558,9 @@
         "src/editor/cmSetup.ts",
         "src/components/MenuBar.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/columnMode.test.ts"
+      ],
       "docs": [
         "docs/editing.md"
       ],
@@ -3588,7 +3596,7 @@
       "title": "Column (block) selection mode",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 251,
+      "line": 260,
       "status": "draft",
       "commands": [
         "selection.toggleColumnMode"
@@ -3602,7 +3610,9 @@
         "src/components/StatusBar.tsx",
         "src/styles/app.css"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/columnMode.test.ts"
+      ],
       "docs": [
         "docs/editing.md"
       ],
@@ -3646,7 +3656,7 @@
       "title": "Huge multi-cursor selections stay responsive",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 316,
+      "line": 325,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3655,7 +3665,8 @@
         "src/editor/cmSetup.ts"
       ],
       "tests": [
-        "src/__tests__/bulkedit.test.ts"
+        "src/__tests__/bulkedit.test.ts",
+        "src/__tests__/columnMode.test.ts"
       ],
       "docs": [],
       "scenarios": [
@@ -3690,7 +3701,7 @@
       "title": "Duplicate, delete and move lines",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 366,
+      "line": 375,
       "status": "draft",
       "commands": [
         "edit.duplicateLine",
@@ -3732,7 +3743,7 @@
       "title": "Sort, reverse, de-duplicate, clean up, join and number lines",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 404,
+      "line": 413,
       "status": "draft",
       "commands": [
         "code.sortAsc",
@@ -3747,9 +3758,12 @@
       ],
       "files": [
         "src/lib/commands.ts",
+        "src/lib/lineTransforms.ts",
         "src/components/MenuBar.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/lineTransforms.test.ts"
+      ],
       "docs": [
         "docs/editing.md"
       ],
@@ -3789,6 +3803,26 @@
         {
           "id": "EDIT-009.9",
           "title": "One undo step, and none when nothing changes"
+        },
+        {
+          "id": "EDIT-009.10",
+          "title": "A read-only document is not changed"
+        },
+        {
+          "id": "EDIT-009.11",
+          "title": "A final line break stays at the end"
+        },
+        {
+          "id": "EDIT-009.12",
+          "title": "A line the selection only reaches at its start is left out"
+        },
+        {
+          "id": "EDIT-009.13",
+          "title": "Every selection is transformed, each on its own"
+        },
+        {
+          "id": "EDIT-009.14",
+          "title": "A column selection is sorted as one block"
         }
       ]
     },
@@ -3797,7 +3831,7 @@
       "title": "Change case and wrap selections in quotes",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 472,
+      "line": 510,
       "status": "draft",
       "commands": [
         "edit.upper",
@@ -3807,9 +3841,12 @@
       ],
       "files": [
         "src/lib/commands.ts",
+        "src/lib/lineTransforms.ts",
         "src/components/MenuBar.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/lineTransforms.test.ts"
+      ],
       "docs": [
         "docs/editing.md"
       ],
@@ -3837,6 +3874,10 @@
         {
           "id": "EDIT-010.6",
           "title": "Wrap in Quotes needs a selection"
+        },
+        {
+          "id": "EDIT-010.7",
+          "title": "A read-only document is not changed"
         }
       ]
     },
@@ -3845,7 +3886,7 @@
       "title": "Indent, outdent and convert indentation",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 521,
+      "line": 567,
       "status": "draft",
       "commands": [
         "edit.indent",
@@ -3856,12 +3897,15 @@
       ],
       "files": [
         "src/lib/commands.ts",
+        "src/lib/lineTransforms.ts",
         "src/editor/cmSetup.ts",
         "src/editor/manager.ts",
         "src/components/StatusBar.tsx",
         "src/components/MenuBar.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/lineTransforms.test.ts"
+      ],
       "docs": [
         "docs/editing.md",
         "docs/keyboard-shortcuts.md"
@@ -3890,6 +3934,10 @@
         {
           "id": "EDIT-011.6",
           "title": "Change the tab size from the status bar"
+        },
+        {
+          "id": "EDIT-011.7",
+          "title": "Mixed indentation is converted as a whole"
         }
       ]
     },
@@ -3898,7 +3946,7 @@
       "title": "Toggle line and block comments",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 575,
+      "line": 628,
       "status": "draft",
       "commands": [
         "edit.toggleComment",
@@ -3936,7 +3984,7 @@
       "title": "Fold and unfold regions",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 614,
+      "line": 667,
       "status": "draft",
       "commands": [
         "code.fold",
@@ -3979,7 +4027,7 @@
       "title": "Right-click menu on a foldable line",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 656,
+      "line": 709,
       "status": "draft",
       "commands": [
         "code.foldLine",
@@ -3991,7 +4039,8 @@
         "src/components/CodeEditor.tsx",
         "src/components/EditorMenu.tsx",
         "src/editor/lineMenu.ts",
-        "src/lib/commands.ts"
+        "src/lib/commands.ts",
+        "src/App.tsx"
       ],
       "tests": [
         "src/__tests__/lineMenu.test.ts"
@@ -4035,7 +4084,7 @@
       "title": "Brackets: matching, jumping and auto-closing",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 714,
+      "line": 771,
       "status": "draft",
       "commands": [
         "code.gotoBracket"
@@ -4075,18 +4124,21 @@
       "title": "Go to Line",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 753,
+      "line": 810,
       "status": "draft",
       "commands": [
         "goto.line"
       ],
       "files": [
         "src/lib/commands.ts",
+        "src/lib/goto.ts",
         "src/components/CommandPalette.tsx",
         "src/editor/manager.ts",
         "src/components/StatusBar.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/goto.test.ts"
+      ],
       "docs": [
         "docs/editing.md"
       ],
@@ -4130,7 +4182,7 @@
       "title": "Detect a document's language",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 820,
+      "line": 878,
       "status": "draft",
       "commands": [
         "code.detectLanguage"
@@ -4187,7 +4239,7 @@
       "title": "Change the language of a document",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 892,
+      "line": 951,
       "status": "draft",
       "commands": [
         "code.setLanguage"
@@ -4228,6 +4280,10 @@
         {
           "id": "EDIT-018.6",
           "title": "Only for text tabs"
+        },
+        {
+          "id": "EDIT-018.7",
+          "title": "A recorded macro replays a status-bar language change"
         }
       ]
     },
@@ -4236,7 +4292,7 @@
       "title": "Syntax highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 945,
+      "line": 1010,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4268,7 +4324,7 @@
       "title": "Word wrap and visible whitespace",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 978,
+      "line": 1043,
       "status": "draft",
       "commands": [
         "view.toggleWrap",
@@ -4310,7 +4366,7 @@
       "title": "Zoom the editor text",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1021,
+      "line": 1086,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -4353,7 +4409,7 @@
       "title": "Let Tab leave the editor",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1063,
+      "line": 1128,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -4393,7 +4449,7 @@
       "title": "Line numbers, active line and selection-match highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1107,
+      "line": 1172,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6199,7 +6255,8 @@
         "src/components/FindBar.tsx",
         "src/lib/commands.ts",
         "src/lib/store.ts",
-        "src/editor/manager.ts"
+        "src/editor/manager.ts",
+        "src/App.tsx"
       ],
       "tests": [],
       "docs": [
@@ -6238,6 +6295,10 @@
         {
           "id": "FIND-002.8",
           "title": "The count follows the cursor"
+        },
+        {
+          "id": "FIND-002.9",
+          "title": "F3 in the search box"
         }
       ]
     },
@@ -6246,7 +6307,7 @@
       "title": "Match Case, Whole Word, Regex and multi-line searches",
       "area": "FIND",
       "spec": "specs/find.md",
-      "line": 134,
+      "line": 141,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6299,7 +6360,7 @@
       "title": "Replace the current match",
       "area": "FIND",
       "spec": "specs/find.md",
-      "line": 197,
+      "line": 204,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6344,7 +6405,7 @@
       "title": "Replace all matches in the document",
       "area": "FIND",
       "spec": "specs/find.md",
-      "line": 248,
+      "line": 255,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6385,7 +6446,7 @@
       "title": "Preserve Case when replacing",
       "area": "FIND",
       "spec": "specs/find.md",
-      "line": 292,
+      "line": 299,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6432,7 +6493,7 @@
       "title": "Find and replace history, and clearing a box",
       "area": "FIND",
       "spec": "specs/find.md",
-      "line": 344,
+      "line": 351,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6497,6 +6558,10 @@
         {
           "id": "FIND-007.12",
           "title": "Multi-line and blank entries are readable"
+        },
+        {
+          "id": "FIND-007.13",
+          "title": "F3 steps without adding to the history"
         }
       ]
     },
@@ -6505,14 +6570,14 @@
       "title": "Turn every find match into a cursor",
       "area": "FIND",
       "spec": "specs/find.md",
-      "line": 433,
+      "line": 448,
       "status": "draft",
       "commands": [
         "edit.selectAllMatches"
       ],
       "files": [
         "src/editor/bulkEdit.ts",
-        "src/components/FindBar.tsx",
+        "src/App.tsx",
         "src/lib/commands.ts"
       ],
       "tests": [
@@ -6546,7 +6611,7 @@
       "title": "Select occurrences of the selected text",
       "area": "FIND",
       "spec": "specs/find.md",
-      "line": 474,
+      "line": 489,
       "status": "draft",
       "commands": [
         "edit.selectNextOccurrence",
@@ -6607,7 +6672,9 @@
         "src/editor/manager.ts",
         "src/components/MenuBar.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/format.test.ts"
+      ],
       "docs": [
         "docs/formatting.md"
       ],
@@ -6623,6 +6690,10 @@
         {
           "id": "FMT-001.3",
           "title": "The formatter follows the tab's language"
+        },
+        {
+          "id": "FMT-001.4",
+          "title": "A read-only document is not formatted"
         }
       ]
     },
@@ -6631,7 +6702,7 @@
       "title": "Format Document is one undo step and reports when nothing changed",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 46,
+      "line": 52,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6640,7 +6711,9 @@
         "src/lib/format.ts",
         "src/editor/manager.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/format.test.ts"
+      ],
       "docs": [
         "docs/formatting.md"
       ],
@@ -6668,7 +6741,7 @@
       "title": "Format JSON with Quarry's own formatter",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 84,
+      "line": 90,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6680,7 +6753,8 @@
         "src-tauri/src/json_tools.rs"
       ],
       "tests": [
-        "src-tauri/src/json_tools.rs"
+        "src-tauri/src/json_tools.rs",
+        "src/__tests__/format.test.ts"
       ],
       "docs": [
         "docs/formatting.md",
@@ -6706,6 +6780,10 @@
         {
           "id": "FMT-003.5",
           "title": "Invalid JSON is left alone"
+        },
+        {
+          "id": "FMT-003.6",
+          "title": "Valid JSON whose pretty-printed text would be too large"
         }
       ]
     },
@@ -6714,7 +6792,7 @@
       "title": "Format web languages with the bundled Prettier",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 130,
+      "line": 143,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6722,7 +6800,9 @@
       "files": [
         "src/lib/format.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/format.test.ts"
+      ],
       "docs": [
         "docs/formatting.md"
       ],
@@ -6754,7 +6834,7 @@
       "title": "Format only the selection",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 189,
+      "line": 202,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6762,7 +6842,9 @@
       "files": [
         "src/lib/format.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/format.test.ts"
+      ],
       "docs": [
         "docs/formatting.md"
       ],
@@ -6778,6 +6860,10 @@
         {
           "id": "FMT-005.3",
           "title": "Other formatters always take the whole document"
+        },
+        {
+          "id": "FMT-005.4",
+          "title": "Prettier languages without range formatting take the whole document"
         }
       ]
     },
@@ -6786,7 +6872,7 @@
       "title": "Prefer the formatter installed on the machine",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 223,
+      "line": 243,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6796,7 +6882,10 @@
         "src/lib/ipc.ts",
         "src-tauri/src/lib.rs"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/format.test.ts",
+        "src-tauri/src/lib.rs"
+      ],
       "docs": [
         "docs/formatting.md"
       ],
@@ -6828,7 +6917,7 @@
       "title": "Built-in formatters when the tool isn't installed",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 281,
+      "line": 301,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6837,7 +6926,10 @@
         "src/lib/format.ts",
         "src-tauri/src/lib.rs"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/format.test.ts",
+        "src-tauri/src/lib.rs"
+      ],
       "docs": [
         "docs/formatting.md"
       ],
@@ -6869,7 +6961,7 @@
       "title": "Rust needs rustfmt",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 342,
+      "line": 363,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6878,7 +6970,10 @@
         "src/lib/format.ts",
         "src-tauri/src/lib.rs"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/format.test.ts",
+        "src-tauri/src/lib.rs"
+      ],
       "docs": [
         "docs/formatting.md"
       ],
@@ -6898,7 +6993,7 @@
       "title": "Syntax errors leave the document unchanged",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 369,
+      "line": 390,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6906,7 +7001,9 @@
       "files": [
         "src/lib/format.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/format.test.ts"
+      ],
       "docs": [
         "docs/formatting.md"
       ],
@@ -6922,6 +7019,10 @@
         {
           "id": "FMT-009.3",
           "title": "Only the first line of a long message is shown"
+        },
+        {
+          "id": "FMT-009.4",
+          "title": "The built-in ruff gives a byte range, not a line"
         }
       ]
     },
@@ -6930,7 +7031,7 @@
       "title": "JSON pretty-print and minify commands",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 401,
+      "line": 429,
       "status": "draft",
       "commands": [
         "json.format",
@@ -16301,6 +16402,7 @@
       "CLAUDE-012",
       "CLAUDE-013",
       "DIFF-001",
+      "EDIT-014",
       "EDIT-022",
       "EXPL-011",
       "FILE-015",
@@ -16308,6 +16410,8 @@
       "FILE-018",
       "FILE-019",
       "FILE-020",
+      "FIND-002",
+      "FIND-008",
       "GIT-001",
       "GRAPH-001",
       "LSP-001",
@@ -16444,8 +16548,7 @@
       "FIND-004",
       "FIND-005",
       "FIND-006",
-      "FIND-007",
-      "FIND-008"
+      "FIND-007"
     ],
     "src/components/GraphView.tsx": [
       "CONFLICT-011",
@@ -16492,6 +16595,7 @@
       "DIFF-001",
       "DIFF-006",
       "EDIT-001",
+      "EDIT-002",
       "EDIT-003",
       "EDIT-005",
       "EDIT-008",
@@ -17370,6 +17474,9 @@
       "GRAPH-009",
       "GRAPH-012"
     ],
+    "src/lib/goto.ts": [
+      "EDIT-016"
+    ],
     "src/lib/ipc.ts": [
       "BIG-001",
       "BIG-002",
@@ -17437,6 +17544,11 @@
       "JSON-005",
       "JSON-006",
       "JSON-007"
+    ],
+    "src/lib/lineTransforms.ts": [
+      "EDIT-009",
+      "EDIT-010",
+      "EDIT-011"
     ],
     "src/lib/lsp.ts": [
       "FILE-017",
@@ -17825,6 +17937,9 @@
     "src-tauri/src/lib.rs": [
       "FILE-005",
       "FILE-019",
+      "FMT-006",
+      "FMT-007",
+      "FMT-008",
       "UI-025"
     ],
     "src-tauri/src/lsp.rs": [
@@ -17888,6 +18003,11 @@
       "CLAUDE-018",
       "CLAUDE-020"
     ],
+    "src/__tests__/columnMode.test.ts": [
+      "EDIT-005",
+      "EDIT-006",
+      "EDIT-007"
+    ],
     "src/__tests__/conflicts.test.ts": [
       "CONFLICT-001",
       "CONFLICT-002",
@@ -17911,6 +18031,17 @@
       "FIND-005",
       "FIND-006"
     ],
+    "src/__tests__/format.test.ts": [
+      "FMT-001",
+      "FMT-002",
+      "FMT-003",
+      "FMT-004",
+      "FMT-005",
+      "FMT-006",
+      "FMT-007",
+      "FMT-008",
+      "FMT-009"
+    ],
     "src/__tests__/gitGraph.test.ts": [
       "GRAPH-002",
       "GRAPH-003",
@@ -17930,6 +18061,9 @@
       "GIT-022",
       "GRAPH-012"
     ],
+    "src/__tests__/goto.test.ts": [
+      "EDIT-016"
+    ],
     "src/__tests__/history.test.ts": [
       "FIND-007"
     ],
@@ -17944,6 +18078,11 @@
     "src/__tests__/lineMenu.test.ts": [
       "EDIT-002",
       "EDIT-014"
+    ],
+    "src/__tests__/lineTransforms.test.ts": [
+      "EDIT-009",
+      "EDIT-010",
+      "EDIT-011"
     ],
     "src/__tests__/lsp.test.ts": [
       "LSP-001",

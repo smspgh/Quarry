@@ -63,8 +63,9 @@ Scenario: EDIT-001.5 Not available without a file tab
   - `src/editor/lineMenu.ts` — `clipboardText` (selections, or whole lines of empty ones), `cutSpec`, `pasteSpec` (one clipboard line per cursor when the counts match)
   - `src/lib/commands.ts` — `edit.cut` / `edit.copy` / `edit.paste` (Tauri clipboard plugin, read-only guard); Ctrl+X / C / V themselves are CodeMirror's own handling
   - `src/components/EditorMenu.tsx` — Cut / Copy / Paste items, disabled for read-only documents
+  - `src/components/MenuBar.tsx` — Edit › Cut / Copy / Paste (shortcut text given in the item, Cut / Paste disabled for read-only documents)
 - Tests: `src/__tests__/lineMenu.test.ts`
-- Docs: `docs/editing.md`
+- Docs: `docs/editing.md`, `docs/keyboard-shortcuts.md`
 
 **As a** person editing a text file
 **I want** Cut, Copy and Paste to work on the selection, or on the whole line when nothing is selected
@@ -105,6 +106,14 @@ Scenario: EDIT-002.6 A read-only document is not changed
   When I right-click a line that starts a foldable region
   Then Cut and Paste are disabled in the menu
   And Copy is available
+
+Scenario: EDIT-002.7 Cut, Copy and Paste in the Edit menu
+  Given a text tab with "beta" selected
+  When I open the Edit menu
+  Then it lists Cut, Copy and Paste with the shortcuts Ctrl+X, Ctrl+C and Ctrl+V
+  When I choose Copy
+  Then the clipboard contains "beta"
+  And for a read-only document Cut and Paste are greyed out there
 ```
 
 ## EDIT-003: Select all, and select occurrences of the selection
@@ -204,11 +213,11 @@ Scenario: EDIT-004.3 The selection stops at 200 000 matches
 - Status: draft
 - Commands: `selection.addCursorAbove`, `selection.addCursorBelow`, `selection.blockToCursors`
 - Files:
-  - `src/editor/columnMode.ts` — `blockCommands` (`addCursorBelow` / `addCursorAbove` = `extend(±1, 0)`), `blockSelection` (visual columns, short rows), `blockToCursors`
+  - `src/editor/columnMode.ts` — `blockCommands` (`addCursorBelow` / `addCursorAbove` = `extend(±1, 0)` over `extendBlock`), `blockSelection` (visual columns, short rows), `blockToCursors` (`cursorsOfBlock`)
   - `src/lib/commands.ts` — the three `selection.*` registrations
   - `src/editor/cmSetup.ts` — `allowMultipleSelections`, `rectangularSelection` (Alt+drag) via `columnModeExtensions(false)`, `crosshairCursor`, Esc (`simplifySelection` in `defaultKeymap`)
   - `src/components/MenuBar.tsx` — Selection › Add Cursor Above / Below, Split Block Selection into Cursors
-- Tests: none
+- Tests: `src/__tests__/columnMode.test.ts`
 - Docs: `docs/editing.md`
 
 **As a** person editing several lines the same way
@@ -253,14 +262,14 @@ Scenario: EDIT-005.6 Escape goes back to one cursor
 - Status: draft
 - Commands: `selection.toggleColumnMode`
 - Files:
-  - `src/editor/columnMode.ts` — `columnModeExtensions`, `columnKeymap` (Shift+arrows, Home / End, Page Up / Down by 20 rows), `extend`, `extendHome`, `extendEnd`, `currentBlock`, `blockSelection`, `columnModeEnabled` / `setColumnMode`
+  - `src/editor/columnMode.ts` — `columnModeExtensions`, `columnKeymap` (Shift+arrows, Home / End, Page Up / Down by 20 rows), `extend` / `extendBlock`, `extendHome` / `extendEnd` (`blockToEdge`), `currentBlock`, `blockSelection`, `columnModeEnabled` / `setColumnMode`
   - `src/lib/commands.ts` — `selection.toggleColumnMode` (store `columnMode`, toast)
   - `src/editor/manager.ts` — `applyColumnMode` (both panes), `columnModeEffects`, re-applied in `show` when a tab is swapped in
   - `src/editor/cmSetup.ts` — `compartments.columnMode`
   - `src/lib/store.ts` — `columnMode` (starts false, not saved in the session)
   - `src/components/StatusBar.tsx` — Column / COLUMN button
   - `src/styles/app.css` — `.cm-editor.column-mode .cm-cursor`
-- Tests: none
+- Tests: `src/__tests__/columnMode.test.ts`
 - Docs: `docs/editing.md`
 
 **As a** person working with column-aligned text
@@ -321,7 +330,7 @@ Scenario: EDIT-006.8 Off when Quarry starts
   - `src/editor/bulkEdit.ts` — `bulkEditing` (input handler and Backspace / Delete keys from `BULK_MIN` = 500 ranges), `bulkReplace`, `deletionSpans`
   - `src/editor/viewportSelection.ts` — `viewportDrawSelection`, `rangesInWindow` (only ranges in the rendered viewport are measured and drawn)
   - `src/editor/cmSetup.ts` — both installed in `baseExtensions`
-- Tests: `src/__tests__/bulkedit.test.ts`
+- Tests: `src/__tests__/bulkedit.test.ts`, `src/__tests__/columnMode.test.ts`
 - Docs: none
 
 **As a** person editing a column across a very long file
@@ -406,9 +415,10 @@ Scenario: EDIT-008.4 Greyed out outside text tabs
 - Status: draft
 - Commands: `code.sortAsc`, `code.sortDesc`, `code.reverseLines`, `code.dedupe`, `code.removeBlank`, `code.removeEmpty`, `code.trimTrailing`, `code.joinLines`, `edit.numberLines`
 - Files:
-  - `src/lib/commands.ts` — `lineTransform` (whole document when the selection is empty, otherwise the lines the main selection touches; one transaction, `input.transform`) and the nine registrations after it; `Intl.Collator` with `numeric` and `sensitivity: "base"`
+  - `src/lib/commands.ts` — `lineTransform` (`cmEdit`: nothing on a read-only document) and the nine registrations after it
+  - `src/lib/lineTransforms.ts` — the line functions (`Intl.Collator` with `numeric` and `sensitivity: "base"`) and `lineTransformSpec` (whole document but the empty line after a final line break when the selection is empty, otherwise the lines each selection touches, without a last line it reaches only at column 0; selections on the same or adjacent lines merge into one block, other blocks are transformed separately; one transaction, `input.transform`)
   - `src/components/MenuBar.tsx` — Edit › Lines submenu
-- Tests: none
+- Tests: `src/__tests__/lineTransforms.test.ts`
 - Docs: `docs/editing.md`
 
 **As a** person cleaning up a list or a log excerpt
@@ -438,6 +448,7 @@ Scenario: EDIT-009.4 Remove duplicates keeps the first of each
   Given the lines "a", "b", "a", "A", "b"
   When I choose Remove Duplicate Lines
   Then the lines are "a", "b", "A"
+  And on 200,000 lines, most of them different, it finishes in well under a second
 
 Scenario: EDIT-009.5 Blank versus empty lines
   Given the lines "a", "", "   ", "b"
@@ -467,6 +478,33 @@ Scenario: EDIT-009.9 One undo step, and none when nothing changes
   When I choose Sort Lines Ascending
   Then the document is not marked as changed
   And after a sort that does change the text, one Ctrl+Z restores the previous order
+
+Scenario: EDIT-009.10 A read-only document is not changed
+  Given a file that opened read-only, with the lines "b" and "a"
+  When I choose Sort Lines Ascending
+  Then the lines are still "b", "a"
+
+Scenario: EDIT-009.11 A final line break stays at the end
+  Given the lines "c", "a", "b" followed by a line break, and nothing selected
+  When I choose Sort Lines Ascending
+  Then the document is "a", "b", "c" followed by a line break
+  And Number Lines on that document numbers 3 lines, not 4
+
+Scenario: EDIT-009.12 A line the selection only reaches at its start is left out
+  Given the lines "c", "b", "a" selected from the start of "c" to the start of "a"
+  When I choose Sort Lines Ascending
+  Then the lines are "b", "c", "a"
+
+Scenario: EDIT-009.13 Every selection is transformed, each on its own
+  Given the lines "c", "b", "m", "z", "y" with "c" to "b" selected and "z" to "y" selected
+  When I choose Sort Lines Ascending
+  Then the lines are "b", "c", "m", "y", "z"
+  And both blocks are still selected
+
+Scenario: EDIT-009.14 A column selection is sorted as one block
+  Given a column selection over the first character of the lines "c1", "b2", "a3"
+  When I choose Sort Lines Ascending
+  Then the lines are "a3", "b2", "c1"
 ```
 
 ## EDIT-010: Change case and wrap selections in quotes
@@ -474,9 +512,10 @@ Scenario: EDIT-009.9 One undo step, and none when nothing changes
 - Status: draft
 - Commands: `edit.upper`, `edit.lower`, `code.titleCase`, `edit.quoteSelections`
 - Files:
-  - `src/lib/commands.ts` — the four registrations (`changeByRange` over every selection; `edit.quoteSelections` uses `JSON.stringify` and its own `enabled`)
+  - `src/lib/commands.ts` — the four registrations (`cmEdit`: nothing on a read-only document; `changeByRange` over every selection; `edit.quoteSelections` uses `JSON.stringify` and its own `enabled`)
+  - `src/lib/lineTransforms.ts` — `titleCase` (Unicode letters, an apostrophe inside a word does not start a new word, other letters unchanged)
   - `src/components/MenuBar.tsx` — Edit › Transform submenu
-- Tests: none
+- Tests: `src/__tests__/lineTransforms.test.ts`
 - Docs: `docs/editing.md`
 
 **As a** person editing a text file
@@ -495,6 +534,8 @@ Scenario: EDIT-010.2 Title case capitalises the first letter of each word
   Given the text "the quick fox" fully selected
   When I choose Transform to Title Case
   Then the text is "The Quick Fox"
+  And "don't stop" becomes "Don't Stop", and "élan" becomes "Élan"
+  And "HTML parser" becomes "HTML Parser": letters after the first are left as they are
 
 Scenario: EDIT-010.3 Every selection is transformed
   Given 3 selections on 3 lines
@@ -516,6 +557,11 @@ Scenario: EDIT-010.6 Wrap in Quotes needs a selection
   Given a cursor with nothing selected
   When I open Edit › Transform
   Then Wrap Selections in Quotes is greyed out
+
+Scenario: EDIT-010.7 A read-only document is not changed
+  Given a file that opened read-only with "hello" selected
+  When I choose Transform to Uppercase, Transform to Title Case or Wrap Selections in Quotes
+  Then the text is still "hello"
 ```
 
 ## EDIT-011: Indent, outdent and convert indentation
@@ -523,12 +569,13 @@ Scenario: EDIT-010.6 Wrap in Quotes needs a selection
 - Status: draft
 - Commands: `edit.indent`, `edit.outdent`, `code.indentToSpaces`, `code.indentToTabs`, `view.setTabSize`
 - Files:
-  - `src/lib/commands.ts` — `edit.indent` / `edit.outdent` (`indentMore` / `indentLess`, only while the editor has focus), `code.indentToSpaces` / `code.indentToTabs` (via `lineTransform`, leading whitespace only), `view.setTabSize` (1–16, otherwise opens the status-bar picker)
+  - `src/lib/commands.ts` — `edit.indent` / `edit.outdent` (`indentMore` / `indentLess`, only while the editor has focus), `code.indentToSpaces` / `code.indentToTabs` (via `lineTransform`; `cmEdit` = nothing on a read-only document), `view.setTabSize` (1–16, otherwise opens the status-bar picker)
+  - `src/lib/lineTransforms.ts` — `indentToSpaces` / `indentToTabs` (the whole leading run of spaces and tabs, rewritten at the same width; the rest of the line untouched)
   - `src/editor/cmSetup.ts` — `compartments.indent` (`tabSize`, `indentUnit` from `insertSpaces`), `indentOnInput`, `indentWithTab`, `defaultKeymap` (Ctrl+[ / Ctrl+])
   - `src/editor/manager.ts` — `applySettings`
   - `src/components/StatusBar.tsx` — "Spaces: 4" / "Tab Size: 4" picker (2, 4, 8)
   - `src/components/MenuBar.tsx` — Edit › Indent / Outdent, Code › Indentation
-- Tests: none
+- Tests: `src/__tests__/lineTransforms.test.ts`
 - Docs: `docs/editing.md`, `docs/keyboard-shortcuts.md`
 
 **As a** developer
@@ -570,6 +617,12 @@ Scenario: EDIT-011.6 Change the tab size from the status bar
   Then the status bar shows "Spaces: 2"
   And tab characters in every open tab are drawn 2 columns wide
   And the setting is kept for the next start
+
+Scenario: EDIT-011.7 Mixed indentation is converted as a whole
+  Given Tab size 4 and a line that starts with a tab followed by 4 spaces
+  When I choose Indentation: Convert to Tabs
+  Then the line starts with 2 tabs
+  And Indentation: Convert to Spaces on a line starting with a tab, 2 spaces and a tab gives 8 spaces
 ```
 
 ## EDIT-012: Toggle line and block comments
@@ -662,6 +715,7 @@ Scenario: EDIT-013.4 Folding does not change the text
   - `src/components/EditorMenu.tsx` — the menu: Collapse or Expand, Collapse All, Expand All, Cut / Copy / Paste, Select All; arrow keys, Escape, closes on click elsewhere or window blur
   - `src/editor/lineMenu.ts` — `foldTargetAt`, `foldLineSpec`, `foldTreeSpec`
   - `src/lib/commands.ts` — `foldLine` helper and the four hidden `code.*Line` / `code.*Tree` commands (take `{ line }`)
+  - `src/App.tsx` — window `contextmenu` handler: the browser menu is blocked except in inputs, `.cm-content`, `.selectable` and `.big-text`, so the gutter of another line gets no menu
 - Tests: `src/__tests__/lineMenu.test.ts`
 - Docs: `docs/editing.md`
 
@@ -677,8 +731,11 @@ Scenario: EDIT-014.1 The menu opens on a line that starts a region
 
 Scenario: EDIT-014.2 Other lines keep the usual menu
   Given a line that neither starts a foldable region nor holds a fold
-  When I right-click it
+  When I right-click its text
   Then Quarry's fold menu does not open
+  And the WebView's own editing menu (Cut, Copy, Paste…) opens instead
+  When I right-click that line's number in the gutter
+  Then no menu opens
 
 Scenario: EDIT-014.3 Collapse the clicked line, not the cursor's
   Given the cursor is on line 20 and line 3 opens an object
@@ -756,10 +813,11 @@ Scenario: EDIT-015.4 Both can be turned off
 - Commands: `goto.line`
 - Files:
   - `src/lib/commands.ts` — `goto.line` (opens palette mode `goto`; enabled for text and large-file tabs)
-  - `src/components/CommandPalette.tsx` — `parseGoto` (`120`, `120:8`, `120,8`), live preview effect, `gotoOrigin` restored by `cancel`, `gotoHint`, out-of-range toast; a large-file tab gets `big.goto` instead
+  - `src/lib/goto.ts` — `parseGoto` (`120`, `120:8`, `120,8`)
+  - `src/components/CommandPalette.tsx` — live preview effect, `gotoOrigin` restored by `cancel`, `gotoHint`, out-of-range toast; a large-file tab gets `big.goto` instead
   - `src/editor/manager.ts` — `goTo` (clamps line and column, centres the line, `GOTO_CONTEXT` horizontal scroll)
   - `src/components/StatusBar.tsx` — "Ln, Col" button runs the command
-- Tests: none
+- Tests: `src/__tests__/goto.test.ts`
 - Docs: `docs/editing.md`
 
 **As a** person following a line number from an error message
@@ -864,6 +922,7 @@ Scenario Outline: EDIT-017.4 Content recognised at the start of the text
     | use std::fs;                            | Rust       |
     | import x from 'y'; const a: string = '' | TypeScript |
     | const a = 1;                            | JavaScript |
+    | #include <stdio.h>                      | C++        |
     | SELECT * FROM t                         | SQL        |
     | # Title                                 | Markdown   |
     | key: value                              | YAML       |
@@ -897,7 +956,7 @@ Scenario: EDIT-017.8 A short first insert is not enough
   - `src/lib/commands.ts` — `code.setLanguage` (a name argument sets it; no argument opens palette mode `language`), chord key "Ctrl+K M"
   - `src/components/CommandPalette.tsx` — `language` mode over `allLanguageNames`, current language marked
   - `src/components/MenuBar.tsx` — `languageMenu`, `COMMON_LANGUAGES`, "All languages…"
-  - `src/components/StatusBar.tsx` — language picker (calls `editor.setLanguage` directly)
+  - `src/components/StatusBar.tsx` — language picker (runs `code.setLanguage` with the name)
   - `src/editor/manager.ts` — `setLanguage` (reconfigures `compartments.language`), `effectsTo`
   - `src/editor/cmSetup.ts` — `languageByName`, `allLanguageNames` ("Plain Text" first)
 - Tests: none
@@ -940,6 +999,12 @@ Scenario: EDIT-018.6 Only for text tabs
   Given the active tab is a large-file tab
   When I open the Code menu
   Then the languages in Code › Language are greyed out
+
+Scenario: EDIT-018.7 A recorded macro replays a status-bar language change
+  Given I am recording a macro
+  When I click the language in the status bar and choose "Markdown"
+  Then the macro has a Change Language Mode step for "Markdown"
+  And playing the macro on another tab sets its language to "Markdown"
 ```
 
 ## EDIT-019: Syntax highlighting
