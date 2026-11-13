@@ -881,7 +881,7 @@ async function restoreSessionTabs() {
   store.set({
     recentFiles: await pruneExisting(session.recentFiles ?? []),
     recentFolders: await pruneExisting(session.recentFolders ?? []),
-    // Only a pinned panel reopens on start; an unpinned one would float over the editor.
+    // Only a pinned panel reopens on start; an unpinned one would float beside the editor.
     sidebarVisible: (session.sidebarVisible ?? true) && pinned.includes(panel),
     sidebarPanel: panel,
     sidebarWidth: session.sidebarWidth ?? 300,

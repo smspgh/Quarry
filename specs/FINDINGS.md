@@ -209,7 +209,6 @@ Possible bugs
 
 Mismatches and notes
 - There are no menu mnemonics: only Alt / F10, arrows, Home / End, Enter / Space and Escape (UI-004).
-- `docs/editing.md:31` says a panel opens floating over the editor; it pushes the editor over (`src/styles/app.css:105`; UI-013.3).
 - `Doc.eol` can be `"CR"` (`store.ts:18`) but the picker offers only CRLF / LF (`src/components/StatusBar.tsx:194`).
 - `view.zoomReset` hard-codes 14 (`src/lib/commands.ts:904`) rather than `DEFAULT_SETTINGS.fontSize`.
 - `matchesRegistered` in `src/App.tsx:265-267` has a redundant branch and a `void editor;`; `ui.chordPending` is a placeholder that is never registered.

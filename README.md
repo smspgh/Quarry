@@ -91,7 +91,7 @@ See [Claude Code](docs/claude-code.md).
 ### Windows 11 feel
 
 - **Look.** Mica, menus in a custom title bar with a tab row above it, and light, dark or system theme.
-- **Panels.** A rail of colour-coded icons opens Search, Explorer, JSON Tools, Scripts, Macros and Settings. A panel floats over the editor until you pin it; pinned panels stay open side by side.
+- **Panels.** A rail of colour-coded icons opens Search, Explorer, JSON Tools, Scripts, Macros and Settings. A panel floats (closing when you click back into the document) until you pin it; pinned panels stay open side by side.
 - **Accessibility.** High Contrast support, reduced motion, full keyboard access and screen-reader labels.
 - **Explorer integration.** A small, per-user installer that adds **Open with Quarry** to Explorer's right-click menu and to the **Open with** list, without changing your default apps.
 
