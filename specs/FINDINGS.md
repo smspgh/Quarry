@@ -204,7 +204,6 @@ Doc / code mismatches
 ## Application shell (`app-shell.md`)
 
 Possible bugs
-- The Explorer reopens floating on start: `src/lib/actions.ts:883-884` says only a pinned panel reopens, but restoring the session folder calls `openFolder` (`:892`), which sets `sidebarVisible: true, sidebarPanel: "explorer"` (`:312`).
 - Collapsed state is not persisted: `src/App.tsx:172` triggers a session save when `pinnedHidden` changes, but `buildSession` (`actions.ts:812-831`) does not write it.
 - Bottom-panel layout is not persisted (`bottomVisible`, `bottomHeight`, `bottomTab`); `bottomTab` defaults to `"results"` (`src/lib/store.ts:276`), which `BottomPanel` treats as Console.
 - Brand icon and Ctrl+B differ: with nothing pinned and nothing open, Ctrl+B reopens the last panel (`src/lib/panels.ts:77`), the brand icon does nothing (`src/components/TitleBar.tsx:164`; UI-014.4).

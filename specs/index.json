@@ -15139,6 +15139,10 @@
         {
           "id": "UI-013.9",
           "title": "Pins survive a restart"
+        },
+        {
+          "id": "UI-013.10",
+          "title": "Restoring the open folder does not open the Explorer"
         }
       ]
     },
@@ -15147,7 +15151,7 @@
       "title": "Collapse and restore the side panels",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 791,
+      "line": 797,
       "status": "draft",
       "commands": [
         "view.toggleSidebar"
@@ -15190,7 +15194,7 @@
       "title": "Side panel widths",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 836,
+      "line": 842,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15229,7 +15233,7 @@
       "title": "Bottom panel",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 881,
+      "line": 887,
       "status": "draft",
       "commands": [
         "view.togglePanel",
@@ -15280,7 +15284,7 @@
       "title": "Status bar position and document facts",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 938,
+      "line": 944,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15322,7 +15326,7 @@
       "title": "Status bar pickers for indentation, encoding, line endings and language",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 985,
+      "line": 991,
       "status": "draft",
       "commands": [
         "view.setTabSize",
@@ -15383,7 +15387,7 @@
       "title": "Light and dark themes",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1061,
+      "line": 1067,
       "status": "draft",
       "commands": [
         "view.toggleTheme"
@@ -15433,7 +15437,7 @@
       "title": "Zoom and editor view toggles",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1116,
+      "line": 1122,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -15491,7 +15495,7 @@
       "title": "Keyboard focus returns to the active tab",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1180,
+      "line": 1186,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15537,7 +15541,7 @@
       "title": "Tab key can leave the editor",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1231,
+      "line": 1237,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -15577,7 +15581,7 @@
       "title": "Single instance and files handed over by Windows",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1276,
+      "line": 1282,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15629,7 +15633,7 @@
       "title": "Window size and position are remembered",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1335,
+      "line": 1341,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15663,7 +15667,7 @@
       "title": "Notice after an unexpected exit",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1371,
+      "line": 1377,
       "status": "draft",
       "commands": [],
       "files": [

@@ -297,7 +297,8 @@ export async function openFolderDialog() {
   await openFolder(picked);
 }
 
-export async function openFolder(path: string) {
+/** Open `path` in the Explorer. `show: false` (session restore) leaves the panels as they are. */
+export async function openFolder(path: string, { show = true }: { show?: boolean } = {}) {
   const store = useStore.getState();
   try {
     const st = await fs.stat(path);
@@ -309,7 +310,7 @@ export async function openFolder(path: string) {
     return;
   }
   const norm = await fs.normalize(path);
-  store.set({ folder: norm, explorerExpanded: new Set([norm]), fileListCache: null, sidebarVisible: true, sidebarPanel: "explorer", pinnedHidden: false });
+  store.set({ folder: norm, explorerExpanded: new Set([norm]), fileListCache: null, ...(show ? { sidebarVisible: true, sidebarPanel: "explorer" as const, pinnedHidden: false } : {}) });
   pushRecent("recentFolders", norm);
   saveSession();
 }
@@ -889,7 +890,8 @@ async function restoreSessionTabs() {
   });
   const startup = await sys.startupPaths().catch(() => [] as string[]);
   if (session.folder && store.settings.restoreSession) {
-    if (await fs.exists(session.folder)) await openFolder(session.folder);
+    // The folder comes back without opening the Explorer: only pinned panels reopen.
+    if (await fs.exists(session.folder)) await openFolder(session.folder, { show: false });
   }
   if (store.settings.restoreSession) {
     const all: SessionDoc[] = session.docs ?? (session.openFiles ?? []).map((p) => ({ path: p }));

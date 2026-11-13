@@ -720,7 +720,7 @@ Scenario: UI-012.6 A panel keeps its contents while closed
   - `src/lib/panels.ts` — `isPinned`, `isAutoDocked`, `isDocked`, `floatingPanel`, `isPanelShown`, `setPinned`, `closePanel`
   - `src/components/Sidebar.tsx` — `PanelFrame` (pin button, close button, pin badge, dock order, Escape on a floating panel), `Sidebar` (mousedown outside closes the floating panel)
   - `src/lib/store.ts` — `pinnedPanels`, `searchDocked`, `sidebarVisible`, `sidebarPanel`
-  - `src/lib/actions.ts` — `buildSession` / `restoreSessionTabs` keep `pinnedPanels`
+  - `src/lib/actions.ts` — `buildSession` / `restoreSessionTabs` keep `pinnedPanels`; the session folder is reopened with `openFolder(..., { show: false })` so it does not show the Explorer
   - `src/styles/app.css` — `.panel-dock`, `.sidebar.floating`, `.sidebar.docked`, `.panel-pin-badge`, `.sidebar-pin`, `.sidebar-close`
 - Tests: `src/__tests__/panels.test.ts`
 - Docs: `docs/editing.md`
@@ -786,6 +786,12 @@ Scenario: UI-013.9 Pins survive a restart
   When I restart Quarry
   Then both panels are docked again in the same order
   And a panel that was open but not pinned is not reopened by the restart itself
+
+Scenario: UI-013.10 Restoring the open folder does not open the Explorer
+  Given a folder was open in the Explorer, and the Explorer is not pinned
+  When I restart Quarry with session restore on
+  Then the folder is open again in the Explorer
+  But no side panel is shown until I open one
 ```
 
 ## UI-014: Collapse and restore the side panels
