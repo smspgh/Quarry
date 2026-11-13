@@ -24,6 +24,7 @@ import { formatDocument } from "./format";
 import * as lineFns from "./lineTransforms";
 import { findNext, findPrevious, selectNextOccurrence } from "@codemirror/search";
 import { MAX_OCCURRENCES, occurrenceSelection, selectAllFindMatches } from "../editor/bulkEdit";
+import { scopeFromSelection, setFindScope } from "../editor/findScope";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { editor } from "../editor/manager";
 import { blockCommands } from "../editor/columnMode";
@@ -907,6 +908,33 @@ export function registerAllCommands() {
   register({ id: "find.replace", title: "Replace", category: "Find", keys: "Ctrl+H", run: () => { const d = activeDoc(s()); if (d?.kind === "big") { bus.emit("big.find", { replace: true }); return true; } if (!d) return false; s().setFindBar({ open: true, replace: true }); return true; } });
   register({ id: "find.next", title: "Find Next", category: "Find", keys: "F3", run: () => { const d = activeDoc(s()); if (d?.kind === "big") { bus.emit("big.findNext"); return true; } return cmCommand(findNext)(); } });
   register({ id: "find.prev", title: "Find Previous", category: "Find", keys: "Shift+F3", run: () => { const d = activeDoc(s()); if (d?.kind === "big") { bus.emit("big.findPrev"); return true; } return cmCommand(findPrevious)(); } });
+  register({
+    id: "find.toggleInSelection",
+    title: "Toggle Find in Selection",
+    category: "Find",
+    keys: "Alt+L",
+    enabled: hasText,
+    run: () => {
+      const view = editor.view;
+      if (activeDoc(s())?.kind !== "text" || !view) return false;
+      const fb = s().findBar;
+      if (fb.open && fb.inSelection) {
+        editor.clearFindScopes();
+        s().setFindBar({ inSelection: false });
+        return true;
+      }
+      // The selection's ranges, or the cursor's line when nothing is selected.
+      const spans = scopeFromSelection(view.state);
+      if (!spans) {
+        s().toast("Select the text to search in first.", "info", 2500);
+        return false;
+      }
+      editor.clearFindScopes();
+      view.dispatch({ effects: setFindScope.of(spans) });
+      s().setFindBar({ open: true, inSelection: true });
+      return true;
+    },
+  });
   register({ id: "find.inFiles", title: "Find in Files", category: "Find", keys: "Ctrl+Shift+F", run: () => { showPanelOnly("search"); bus.emit("search.focus"); } });
   register({ id: "find.replaceInFiles", title: "Replace in Files", category: "Find", keys: "Ctrl+Shift+H", run: () => { showPanelOnly("search"); s().setSearch({ showReplace: true }); bus.emit("search.focus"); } });
   // Step through Find-in-Files results; handled by SearchPanel (opened first if hidden).

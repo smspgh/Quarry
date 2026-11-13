@@ -514,7 +514,7 @@ fn search_start(app: AppHandle, state: State<'_, AppState>, search_id: u32, root
                 let _ = app.emit("search:error", serde_json::json!({ "searchId": search_id, "error": e }));
                 let _ = app.emit(
                     "search:done",
-                    SearchDone { search_id, files_searched: 0, matches: 0, truncated: false, cancelled: true },
+                    SearchDone { search_id, files_searched: 0, matches: 0, truncated: false, cancelled: true, capped_paths: Vec::new() },
                 );
             }
         }

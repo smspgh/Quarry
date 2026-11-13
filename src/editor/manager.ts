@@ -10,6 +10,7 @@
  */
 import { Annotation, countColumn, EditorState, Prec, Text, Transaction, type Extension, type StateEffect, type TransactionSpec } from "@codemirror/state";
 import { resultHighlight, resultQuery, setResultQuery } from "./resultHighlight";
+import { findScopeField, setFindScope } from "./findScope";
 import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { redo, undo } from "@codemirror/commands";
 import { setDiagnostics } from "@codemirror/lint";
@@ -503,6 +504,12 @@ class EditorManager {
   clearResultHighlights() {
     const ids = new Set([...this.states.keys(), ...this.panes.map((p) => p.docId)]);
     for (const id of ids) if (id && this.stateOf(id)?.field(resultQuery, false)) this.setResultHighlight(id, null);
+  }
+
+  /** Drop the find bar's Find in Selection ranges from every document. */
+  clearFindScopes() {
+    const ids = new Set([...this.states.keys(), ...this.panes.map((p) => p.docId)]);
+    for (const id of ids) if (id && this.stateOf(id)?.field(findScopeField, false)) this.effectsTo(id, [setFindScope.of(null)]);
   }
 
   /** How to focus tabs that are not text documents (Claude, terminal, large file, Compare). */

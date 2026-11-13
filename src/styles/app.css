@@ -1318,6 +1318,10 @@ button {
 .cm-searchMatch.cm-searchMatch-selected {
   background: var(--search-match-sel);
 }
+/* Find in Selection: the remembered ranges the find bar searches. */
+.cm-findScope {
+  background: var(--find-scope-bg);
+}
 .cm-matchingBracket,
 .cm-editor.cm-focused .cm-matchingBracket {
   background: var(--bracket-bg);
@@ -2833,6 +2837,9 @@ select optgroup {
 }
 .input-wrap.with-actions-5 .input {
   padding-right: 124px;
+}
+.input-wrap.with-actions-6 .input {
+  padding-right: 148px;
 }
 /* Find in Files search box: wraps and grows with its text (height set in SearchPanel), buttons stay top right. */
 .input.search-find {

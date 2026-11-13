@@ -119,6 +119,8 @@ export interface SearchState {
   showReplace: boolean;
   /** Set when the last search was cancelled before finishing (`SearchDone.cancelled`). */
   cancelled: boolean;
+  /** Files of the last folder search with a line that reached the per-line listing cap (`SearchDone.cappedPaths`). */
+  cappedPaths: string[];
   /** Per-file errors from the last Replace in Files, shown inline in the results list. */
   fileErrors: Record<string, string>;
   /** `path:line:col` of the result row that is selected / was last opened. */
@@ -141,6 +143,8 @@ export interface FindBarState {
   wholeWord: boolean;
   /** Replace keeps the case of each replaced text (FOO → BAR, Foo → Bar, foo → bar). */
   preserveCase: boolean;
+  /** Find in Selection (Alt+L): matches are limited to the ranges kept in the document's `findScopeField`. */
+  inSelection: boolean;
   count: { current: number; total: number } | null;
 }
 
@@ -280,6 +284,7 @@ export const useStore = create<AppState>((set, get) => ({
     open: false,
     replace: false,
     preserveCase: false,
+    inSelection: false,
     query: "",
     replaceText: "",
     regex: false,
@@ -321,6 +326,7 @@ export const useStore = create<AppState>((set, get) => ({
     collapsed: new Set(),
     showReplace: false,
     cancelled: false,
+    cappedPaths: [],
     fileErrors: {},
     activeKey: null,
     excluded: {},

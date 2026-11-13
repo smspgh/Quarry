@@ -198,6 +198,7 @@ const MENUS: Menu[] = [
       { cmd: "find.replace" },
       { cmd: "find.next" },
       { cmd: "find.prev" },
+      { cmd: "find.toggleInSelection" },
       { sep: true },
       { cmd: "find.inFiles" },
       { cmd: "find.replaceInFiles" },

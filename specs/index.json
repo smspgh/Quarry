@@ -47,7 +47,7 @@
       "prefix": "FIND",
       "title": "Find and Replace in a Document",
       "spec": "specs/find.md",
-      "stories": 9
+      "stories": 10
     },
     {
       "prefix": "FMT",
@@ -6734,6 +6734,84 @@
         }
       ]
     },
+    "FIND-010": {
+      "id": "FIND-010",
+      "title": "Find in Selection",
+      "area": "FIND",
+      "spec": "specs/find.md",
+      "line": 537,
+      "status": "draft",
+      "commands": [
+        "find.toggleInSelection"
+      ],
+      "files": [
+        "src/editor/findScope.ts",
+        "src/components/FindBar.tsx",
+        "src/lib/commands.ts",
+        "src/lib/store.ts",
+        "src/editor/manager.ts",
+        "src/editor/cmSetup.ts",
+        "src/components/MenuBar.tsx",
+        "src/styles/tokens.css"
+      ],
+      "tests": [
+        "src/__tests__/findScope.test.ts"
+      ],
+      "docs": [
+        "docs/find-and-replace.md",
+        "docs/keyboard-shortcuts.md"
+      ],
+      "scenarios": [
+        {
+          "id": "FIND-010.1",
+          "title": "Alt+L limits the search to the selection"
+        },
+        {
+          "id": "FIND-010.2",
+          "title": "Stepping stays inside the selection"
+        },
+        {
+          "id": "FIND-010.3",
+          "title": "Replace and Replace All stay inside the selection"
+        },
+        {
+          "id": "FIND-010.4",
+          "title": "Select All Find Matches stays inside the selection"
+        },
+        {
+          "id": "FIND-010.5",
+          "title": "Several selections"
+        },
+        {
+          "id": "FIND-010.6",
+          "title": "A match must lie wholly inside a range"
+        },
+        {
+          "id": "FIND-010.7",
+          "title": "The ranges follow edits"
+        },
+        {
+          "id": "FIND-010.8",
+          "title": "With nothing selected the cursor's line is used"
+        },
+        {
+          "id": "FIND-010.9",
+          "title": "Nothing to search in"
+        },
+        {
+          "id": "FIND-010.10",
+          "title": "Turning it on with the find bar closed"
+        },
+        {
+          "id": "FIND-010.11",
+          "title": "Turning it off"
+        },
+        {
+          "id": "FIND-010.12",
+          "title": "Not for other kinds of tab"
+        }
+      ]
+    },
     "FMT-001": {
       "id": "FMT-001",
       "title": "Format the current document",
@@ -12243,7 +12321,7 @@
         },
         {
           "id": "SEARCH-004.7",
-          "title": "The pattern is checked with the folder-search engine in every scope"
+          "title": "The pattern is checked with the engine that will run it"
         },
         {
           "id": "SEARCH-004.8",
@@ -12264,7 +12342,7 @@
       "title": "Filter which files are searched",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 293,
+      "line": 297,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12318,7 +12396,7 @@
       "title": "Streamed results, cancelling and limits",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 360,
+      "line": 364,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12385,7 +12463,7 @@
       "title": "Browse the results list",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 440,
+      "line": 444,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12441,7 +12519,7 @@
       "title": "Open a result in the editor",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 507,
+      "line": 512,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12498,7 +12576,7 @@
       "title": "Step through results with F4",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 572,
+      "line": 577,
       "status": "draft",
       "commands": [
         "find.nextResult",
@@ -12550,7 +12628,7 @@
       "title": "Leave results out",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 626,
+      "line": 632,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12599,7 +12677,7 @@
       "title": "File actions on result file rows",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 681,
+      "line": 687,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12650,7 +12728,7 @@
       "title": "Replace in Files on disk",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 739,
+      "line": 745,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12663,7 +12741,8 @@
       ],
       "tests": [
         "src-tauri/src/search.rs",
-        "src/__tests__/replace.test.ts"
+        "src/__tests__/replace.test.ts",
+        "src/__tests__/search-budget.test.ts"
       ],
       "docs": [
         "docs/find-and-replace.md"
@@ -12712,6 +12791,14 @@
         {
           "id": "SEARCH-012.11",
           "title": "Enter in the replace box searches"
+        },
+        {
+          "id": "SEARCH-012.12",
+          "title": "The confirmation counts matches that are not listed"
+        },
+        {
+          "id": "SEARCH-012.13",
+          "title": "The confirmation says when more may be replaced"
         }
       ]
     },
@@ -12720,7 +12807,7 @@
       "title": "Replace in Files keeps each file's encoding",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 827,
+      "line": 845,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12762,7 +12849,7 @@
       "title": "Replacement text: groups and Preserve Case",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 873,
+      "line": 891,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12809,7 +12896,7 @@
       "title": "Replace in the open documents",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 924,
+      "line": 942,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12819,7 +12906,8 @@
         "src/editor/manager.ts"
       ],
       "tests": [
-        "src/__tests__/replace.test.ts"
+        "src/__tests__/replace.test.ts",
+        "src/__tests__/search-budget.test.ts"
       ],
       "docs": [
         "docs/find-and-replace.md"
@@ -12852,6 +12940,10 @@
         {
           "id": "SEARCH-015.7",
           "title": "The status counts what was replaced"
+        },
+        {
+          "id": "SEARCH-015.8",
+          "title": "The confirmation counts the matches beyond Max"
         }
       ]
     },
@@ -12860,7 +12952,7 @@
       "title": "Undo Replace in Files",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 989,
+      "line": 1013,
       "status": "draft",
       "commands": [
         "find.undoReplaceInFiles"
@@ -16896,7 +16988,8 @@
       "FIND-004",
       "FIND-005",
       "FIND-006",
-      "FIND-007"
+      "FIND-007",
+      "FIND-010"
     ],
     "src/components/GraphView.tsx": [
       "CONFLICT-011",
@@ -16963,6 +17056,7 @@
       "FILE-001",
       "FILE-004",
       "FILE-009",
+      "FIND-010",
       "FMT-001",
       "GIT-004",
       "GIT-006",
@@ -17279,6 +17373,7 @@
       "FILE-011",
       "FIND-001",
       "FIND-009",
+      "FIND-010",
       "LSP-001",
       "LSP-006",
       "LSP-010",
@@ -17305,6 +17400,9 @@
       "FIND-004",
       "FIND-005",
       "FIND-006"
+    ],
+    "src/editor/findScope.ts": [
+      "FIND-010"
     ],
     "src/editor/git.ts": [
       "GIT-002",
@@ -17339,6 +17437,7 @@
       "FILE-016",
       "FIND-001",
       "FIND-002",
+      "FIND-010",
       "FMT-001",
       "FMT-002",
       "FMT-010",
@@ -17586,6 +17685,7 @@
       "FIND-002",
       "FIND-008",
       "FIND-009",
+      "FIND-010",
       "FMT-001",
       "FMT-010",
       "JSON-005",
@@ -18055,6 +18155,7 @@
       "FIND-001",
       "FIND-002",
       "FIND-003",
+      "FIND-010",
       "GRAPH-001",
       "MACRO-001",
       "SCRIPT-001",
@@ -18211,6 +18312,7 @@
     ],
     "src/styles/tokens.css": [
       "EDIT-019",
+      "FIND-010",
       "GIT-002",
       "GIT-027",
       "SET-006",
@@ -18435,6 +18537,9 @@
       "FIND-005",
       "FIND-006"
     ],
+    "src/__tests__/findScope.test.ts": [
+      "FIND-010"
+    ],
     "src/__tests__/format.test.ts": [
       "FMT-001",
       "FMT-002",
@@ -18577,7 +18682,9 @@
       "SCRIPT-013"
     ],
     "src/__tests__/search-budget.test.ts": [
-      "SEARCH-007"
+      "SEARCH-007",
+      "SEARCH-012",
+      "SEARCH-015"
     ],
     "src/__tests__/shell.test.ts": [
       "UI-009",
@@ -19025,6 +19132,9 @@
     ],
     "find.replaceInFiles": [
       "SEARCH-001"
+    ],
+    "find.toggleInSelection": [
+      "FIND-010"
     ],
     "find.undoReplaceInFiles": [
       "SEARCH-016"

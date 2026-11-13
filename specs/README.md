@@ -41,7 +41,7 @@ It prints each story's id, title and `spec file:line` (and, for a story id, its 
 | `EDIT` | Text Editing | [editing.md](editing.md) | 23 |
 | `EXPL` | Explorer and File Operations | [explorer.md](explorer.md) | 17 |
 | `FILE` | Files and Sessions | [files.md](files.md) | 20 |
-| `FIND` | Find and Replace in a Document | [find.md](find.md) | 9 |
+| `FIND` | Find and Replace in a Document | [find.md](find.md) | 10 |
 | `FMT` | Formatting | [formatting.md](formatting.md) | 10 |
 | `GIT` | Source Control | [git.md](git.md) | 27 |
 | `GRAPH` | Commit Graph | [git-graph.md](git-graph.md) | 14 |

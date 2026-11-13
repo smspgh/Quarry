@@ -31,6 +31,27 @@ export function buildJsRegex(q: Pick<SearchQuery, "pattern" | "isRegex" | "whole
   }
 }
 
+/** Why `buildJsRegex` refused the pattern, in the browser's words without the pattern itself. */
+export function jsRegexError(q: Pick<SearchQuery, "pattern" | "isRegex" | "wholeWord" | "caseSensitive" | "dotAll">): string | null {
+  if (buildJsRegex(q)) return null;
+  try {
+    new RegExp(q.pattern, `gm${q.caseSensitive ? "" : "i"}${q.dotAll ? "s" : ""}`);
+  } catch (e) {
+    const m = /: ([^:]*)$/.exec(String((e as Error).message));
+    if (m) return m[1].charAt(0).toLowerCase() + m[1].slice(1);
+  }
+  return "Invalid regular expression";
+}
+
+/**
+ * Pure helper (testable): which engine runs (and so checks) a regex. Current File on a text tab and
+ * Open Files search the documents in memory with JavaScript, so look-around and backreferences
+ * work there; Folder / Choose… scopes and a large-file tab are searched on disk by the Rust engine.
+ */
+export function regexEngine(scope: SearchState["scope"], activeKind: string | undefined): "js" | "rust" {
+  return scope === "open" || (scope === "doc" && activeKind === "text") ? "js" : "rust";
+}
+
 /** Characters kept from the end of a single word too long to show whole before a match. */
 const LONG_WORD_TAIL = 12;
 
@@ -176,6 +197,27 @@ export function budgetRows(files: { matches: number; collapsed: boolean }[], lim
   });
 }
 
+/** Matches a folder search lists from one line (`BLOCK_MATCH_CAP` in search.rs). */
+export const BLOCK_MATCH_CAP = 1000;
+
+/**
+ * Pure helper (testable): what Replace All's confirmation says about matches it replaces that are
+ * not listed. `hidden` = in the results but past the first `MAX_SHOWN` of their file (already in
+ * the total); `extra` = exact count of matches beyond Max that are not in the results (documents
+ * searched in memory); `maxHit` / `cappedFiles` = the search stopped at Max, or a line of that many
+ * files reached the per-line listing cap, so an unknown number more may be replaced. "" = nothing to say.
+ */
+export function unlistedNote(o: { hidden: number; extra: number; maxHit: boolean; maxResults: number; cappedFiles: number }): string {
+  const parts: string[] = [];
+  if (o.hidden > 0) parts.push(`${o.hidden.toLocaleString()} of them ${o.hidden === 1 ? "is" : "are"} not listed (only the first ${MAX_SHOWN} results of a file are) and will be replaced too.`);
+  if (o.extra > 0) parts.push(`${o.extra.toLocaleString()} more match${o.extra === 1 ? "" : "es"} that ${o.extra === 1 ? "is" : "are"} not listed (past Max, ${o.maxResults.toLocaleString()}) will also be replaced.`);
+  const why: string[] = [];
+  if (o.maxHit && o.extra === 0) why.push(`the search stopped at Max (${o.maxResults.toLocaleString()})`);
+  if (o.cappedFiles > 0) why.push(`a line in ${o.cappedFiles === 1 ? "1 file" : `${o.cappedFiles.toLocaleString()} files`} has more than ${BLOCK_MATCH_CAP.toLocaleString()} matches`);
+  if (why.length) parts.push(`More matches that are not listed may also be replaced: ${why.join(", and ")}.`);
+  return parts.join("\n\n");
+}
+
 /**
  * Pure helper (testable): the scope a search actually uses. Current File needs an open document
  * and Open Files needs open tabs; without them their buttons are hidden and the search falls back
@@ -276,6 +318,7 @@ export function SearchPanel() {
   const setSearch = useStore((s) => s.setSearch);
   const folder = useStore((s) => s.folder);
   const activeName = useStore((s) => activeDoc(s)?.name);
+  const activeKind = useStore((s) => activeDoc(s)?.kind);
   const hasDocs = useStore((s) => s.docs.length > 0);
   const toast = useStore((s) => s.toast);
   const set = useStore((s) => s.set);
@@ -372,7 +415,7 @@ export function SearchPanel() {
       searchIpc.onDone((d) => {
         const cur = useStore.getState().search;
         if (d.searchId !== cur.searchId) return;
-        setSearch({ running: false, filesSearched: d.filesSearched, truncated: d.truncated, cancelled: d.cancelled, totalMatches: Math.max(d.matches, cur.totalMatches) });
+        setSearch({ running: false, filesSearched: d.filesSearched, truncated: d.truncated, cancelled: d.cancelled, cappedPaths: d.cappedPaths ?? [], totalMatches: Math.max(d.matches, cur.totalMatches) });
       }),
     );
     un.push(searchIpc.onError(({ searchId, error }) => {
@@ -384,10 +427,13 @@ export function SearchPanel() {
     };
   }, []);
 
-  // Validate regex with the Rust engine (the one that actually runs); JS RegExp is only a fast pre-check.
+  // Validate the regex with the engine that will run it: JavaScript for text documents searched in
+  // memory (look-around and backreferences work there), else the Rust engine; JS RegExp is then
+  // only a fast pre-check.
+  const engine = regexEngine(scope, activeKind);
   const jsInvalid = q.isRegex && !buildJsRegex(q);
   useEffect(() => {
-    if (!q.isRegex || !q.pattern) {
+    if (!q.isRegex || !q.pattern || engine === "js") {
       setRegexError(null);
       return;
     }
@@ -401,9 +447,10 @@ export function SearchPanel() {
       live = false;
       window.clearTimeout(t);
     };
-  }, [q.isRegex, q.pattern, q.caseSensitive, q.wholeWord, q.dotAll]);
-  const invalidRegex = jsInvalid || regexError !== null;
-  const regexMessage = regexError ?? (jsInvalid ? "Invalid regular expression" : null);
+  }, [q.isRegex, q.pattern, q.caseSensitive, q.wholeWord, q.dotAll, engine]);
+  const rustError = engine === "rust" ? regexError : null;
+  const invalidRegex = jsInvalid || rustError !== null;
+  const regexMessage = rustError ?? (jsInvalid ? jsRegexError(q) : null);
 
   const setQ = (patch: Partial<SearchQuery>) => setSearch({ query: { ...q, ...patch } });
 
@@ -422,7 +469,7 @@ export function SearchPanel() {
     setSelFiles([]);
     setReplaceNote(null);
     setFocusKey(null);
-    setSearch({ searchId: id, files: [], totalMatches: 0, filesSearched: 0, truncated: false, cancelled: false, error: null, running: true, collapsed: new Set(), fileErrors: {}, activeKey: null, excluded: {}, leftOut: 0 });
+    setSearch({ searchId: id, files: [], totalMatches: 0, filesSearched: 0, truncated: false, cancelled: false, cappedPaths: [], error: null, running: true, collapsed: new Set(), fileErrors: {}, activeKey: null, excluded: {}, leftOut: 0 });
     const active = scope === "doc" ? activeDoc(useStore.getState()) : null;
     if (scope === "doc" && !active) {
       setSearch({ running: false });
@@ -673,6 +720,22 @@ export function SearchPanel() {
       toast(st.inMemory ? "Every matching document was edited since the search; search again." : "All matching files are open with unsaved changes; save them first.", "warning");
       return;
     }
+    // Matches that will be replaced but are not rows in the list (SEARCH-012 / SEARCH-015).
+    const kept = st.files.filter((f) => !skipped.includes(f));
+    const hidden = kept.reduce((n, f) => n + Math.max(0, f.matches.length - MAX_SHOWN), 0);
+    let extra = 0;
+    const reNow = buildJsRegex(rq);
+    if (st.inMemory && st.truncated && reNow) {
+      // Documents are replaced whole: count what lies beyond Max exactly.
+      for (const f of kept) {
+        const doc = docOfResult(f.path);
+        if (!doc) continue;
+        const all = replaceMatches(editor.textOf(doc.id), reNow, st.replacement, { isRegex: rq.isRegex, preserveCase: rq.preserveCase, skip: new Set(st.excluded[f.path]) }).count;
+        extra += Math.max(0, all - (f.matches.length - (st.excluded[f.path]?.length ?? 0)));
+      }
+    }
+    const cappedFiles = st.inMemory ? 0 : kept.filter((f) => st.cappedPaths.some((p) => p.toLowerCase() === f.path.toLowerCase())).length;
+    const unlisted = unlistedNote({ hidden, extra, maxHit: st.truncated && !st.inMemory, maxResults: rq.maxResults, cappedFiles });
     const skippedList = skipped.length
       ? `\n\nSkipped (${st.inMemory ? "edited since the search" : "open with unsaved changes"}):\n${skipped.slice(0, 8).map((f) => `• ${f.path.split(/[\\/]/).pop()} (${f.matches.length})`).join("\n")}${skipped.length > 8 ? `\n… ${skipped.length - 8} more` : ""}`
       : "";
@@ -685,6 +748,7 @@ This uses the search for "${rq.pattern}" that produced these results; search aga
             (st.leftOut ? `
 
 ${st.leftOut.toLocaleString()} result${st.leftOut === 1 ? "" : "s"} you left out will not be changed.` : "") +
+            (unlisted ? `\n\n${unlisted}` : "") +
             skippedList,
       [
         { label: "Replace", kind: "primary", value: true },

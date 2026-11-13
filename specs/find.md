@@ -5,7 +5,7 @@ prefix: FIND
 
 # Find and Replace in a Document
 
-The find bar over a text document: finding, stepping through matches, the match options, Replace / Replace All, Preserve Case, the find and replace history, and the commands that turn matches or occurrences into multiple cursors. User documentation: `docs/find-and-replace.md` (section "Find in the current file"). Large-file tabs have their own find bar (see the large-file specs); Find in Files is `specs/search.md`.
+The find bar over a text document: finding, stepping through matches, the match options, Find in Selection, Replace / Replace All, Preserve Case, the find and replace history, and the commands that turn matches or occurrences into multiple cursors. User documentation: `docs/find-and-replace.md` (section "Find in the current file"). Large-file tabs have their own find bar (see the large-file specs); Find in Files is `specs/search.md`.
 
 ## FIND-001: Open and close the find bar
 
@@ -532,4 +532,93 @@ Scenario: FIND-009.6 Nothing to select
   Given nothing is selected and the cursor is not in a word
   When I press Ctrl+Shift+L
   Then the selection is unchanged
+```
+
+## FIND-010: Find in Selection
+
+- Status: draft
+- Commands: `find.toggleInSelection`
+- Files:
+  - `src/editor/findScope.ts` — `findScopeField` (the ranges, mapped through edits, drawn as `.cm-findScope`), `setFindScope`, `scopeFromSelection` (selection ranges, or the cursors' lines), `inScope`, `scopeSpans`
+  - `src/components/FindBar.tsx` — the toggle button, `buildQuery` (`test: scopeTest` while on), skips seeding the search box when the toggle opened the bar, turns the option off on close / document switch
+  - `src/lib/commands.ts` — `find.toggleInSelection` (Alt+L)
+  - `src/lib/store.ts` — `findBar.inSelection`
+  - `src/editor/manager.ts` — `clearFindScopes`
+  - `src/editor/cmSetup.ts` — `findScopeField` in the editor extensions
+  - `src/components/MenuBar.tsx` — Find › Toggle Find in Selection
+  - `src/styles/tokens.css` — `--find-scope-bg`
+- Tests: `src/__tests__/findScope.test.ts`
+- Docs: `docs/find-and-replace.md`, `docs/keyboard-shortcuts.md`
+
+**As a** person editing one part of a long file
+**I want** to limit the find bar to the text I selected
+**So that** I can count, step through and replace matches in that part without touching the rest
+
+```gherkin
+Scenario: FIND-010.1 Alt+L limits the search to the selection
+  Given a document with "foo" on lines 1, 5, 6 and 20, and lines 4 to 8 selected
+  When I press Alt+L and type "foo" in the search box
+  Then the "Find in Selection (Alt+L)" toggle shows as pressed
+  And the selected lines get a faint background
+  And the count reads "1 of 2" and only the matches on lines 5 and 6 are highlighted
+
+Scenario: FIND-010.2 Stepping stays inside the selection
+  Given Find in Selection is on over lines 4 to 8 and the match on line 6 is selected
+  When I press Enter, or F3 in the editor
+  Then the match on line 5 is selected, not the one on line 20
+
+Scenario: FIND-010.3 Replace and Replace All stay inside the selection
+  Given Find in Selection is on over lines 4 to 8, the search is "foo" and the replace box contains "bar"
+  When I click "Replace All (Ctrl+Alt+Enter)"
+  Then the matches on lines 5 and 6 become "bar" and a message says "Replaced 2 occurrences."
+  And the matches on lines 1 and 20 are unchanged
+  And the same holds with Preserve Case on, and for Replace one match at a time
+
+Scenario: FIND-010.4 Select All Find Matches stays inside the selection
+  Given Find in Selection is on over lines 4 to 8 and the search is "foo"
+  When I press Alt+Enter in the search box
+  Then only the matches on lines 5 and 6 are selected
+
+Scenario: FIND-010.5 Several selections
+  Given the words "one" and "three" in "one two three" are selected as two selections
+  When I press Alt+L and search for "e"
+  Then the count shows 3 matches: one in "one" and two in "three"
+
+Scenario: FIND-010.6 A match must lie wholly inside a range
+  Given Find in Selection is on over "oo f" in "foo foo"
+  When I search for "foo"
+  Then the count reads "No results"
+
+Scenario: FIND-010.7 The ranges follow edits
+  Given Find in Selection is on over lines 4 to 8
+  When I insert two lines above line 4
+  Then the search is limited to the same text, now on lines 6 to 10
+  And text typed inside the ranges is searched too
+
+Scenario: FIND-010.8 With nothing selected the cursor's line is used
+  Given nothing is selected and the cursor is on line 3, which contains "foo foo"
+  When I press Alt+L and search for "foo"
+  Then the count shows 2 matches, both on line 3
+
+Scenario: FIND-010.9 Nothing to search in
+  Given nothing is selected and the cursor is on an empty line
+  When I press Alt+L
+  Then the toggle stays off
+  And a message says "Select the text to search in first."
+
+Scenario: FIND-010.10 Turning it on with the find bar closed
+  Given the find bar is closed and the word "needle" is selected
+  When I press Alt+L
+  Then the find bar opens with the toggle pressed
+  And the search box keeps its previous text instead of taking "needle"
+
+Scenario: FIND-010.11 Turning it off
+  Given Find in Selection is on
+  When I press Alt+L again, click the toggle, close the find bar or switch to another tab
+  Then the toggle is off, the faint background disappears and the whole document is searched again
+
+Scenario: FIND-010.12 Not for other kinds of tab
+  Given a large-file tab or no tab is active
+  When I look at Find › Toggle Find in Selection
+  Then it is disabled
 ```

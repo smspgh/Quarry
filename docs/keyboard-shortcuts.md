@@ -83,6 +83,7 @@ The **Id** column is the command id used in [macro files](macros.md#file-format)
 | Ctrl+F | Find | `find.open` |
 | Ctrl+H | Replace | `find.replace` |
 | F3 / Shift+F3 | Find Next / Previous | `find.next` / `find.prev` |
+| Alt+L | Toggle Find in Selection | `find.toggleInSelection` |
 | Ctrl+Shift+F | Find in Files | `find.inFiles` |
 | Ctrl+Shift+H | Replace in Files | `find.replaceInFiles` |
 | – | Undo Replace in Files | `find.undoReplaceInFiles` |

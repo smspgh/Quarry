@@ -18,6 +18,7 @@ Files open in large-file mode have their own find bar; see [Large files › Find
 | **Enter / Shift+Enter** (or **F3 / Shift+F3**) | Next / previous match. |
 | **Alt+C / Alt+W / Alt+R** | Toggle Match Case / Whole Word / Regex. |
 | **Alt+P** | Toggle Preserve Case (for Replace). |
+| **Alt+L** | Toggle Find in Selection. |
 | **Ctrl+Enter** in the search box | Insert a line break, to search across lines. |
 | **Alt+Enter** | Select every match as a separate cursor (up to 200,000), then type to edit them all. |
 | **Enter** in the replace box | Replace the current match. |
@@ -28,6 +29,7 @@ Files open in large-file mode have their own find bar; see [Large files › Find
 - A multi-line search without Regex is matched literally.
 - In regex mode the replacement can use `$1`, `$2`, … and `$&` for the whole match.
 - **Preserve Case** (the **Aa** toggle in the replace box, or **Alt+P**) matches the case of each replaced text, as in [Replace in Files](#replace-in-files): `foo` → `bar` also turns `FOO` into `BAR` and `Foo` into `Bar`.
+- **Find in Selection** (the last toggle in the search box, **Alt+L**, or **Find › Toggle Find in Selection**) limits the search to the text that was selected when you turned it on; with several selections, to all of them. Those ranges get a faint background and follow your edits. The match count, Enter / F3, Replace, Replace All and **Alt+Enter** then only see matches that lie wholly inside them. With nothing selected it takes the line the cursor is on (the lines, with several cursors); on an empty line there is nothing to search in, so it stays off. Turning it on with the find bar closed opens the bar without putting the selection in the search box. It turns off when you close the find bar, press **Alt+L** again, or switch to another document.
 - Related commands: **Ctrl+D** adds the next occurrence of the selection as a cursor, and **Ctrl+Shift+L** selects all occurrences.
 
 ## Clearing a box, and history
@@ -104,6 +106,7 @@ With the replace field shown, each result previews the change: the match struck 
 - reloads open tabs whose files it changed;
 - refuses files over 256 MB, which you can open in [large-file mode](large-files.md#replace-all) and use Replace All there;
 - changes nothing you left out of the results (see above);
+- replaces **every** match in each listed file, including matches that aren't listed: past the first 500 results of a file, past the 1,000 listed from one line, or past **Max** in the file where the search stopped. The confirmation says so: how many aren't listed when that's known ("300 of them are not listed…"; with Current File / Open Files also the exact number past Max), and "More matches that are not listed may also be replaced" when it isn't (a folder search that reached Max or the per-line limit). Files the search never reached are not changed;
 - keeps each file's encoding: a file is decoded as it would be when opened (its BOM, else the detected encoding, such as Windows-1252 or UTF-16), replaced, and written back in the same encoding with the same BOM;
 - leaves a file unchanged if its encoding can't store the result (for example, a Chinese character in a Windows-1252 file) or if it doesn't decode cleanly, and says why;
 - reports per-file failures under the file ("Replace failed: …").
@@ -130,4 +133,4 @@ Before a Replace in Files changes a file, Quarry keeps a backup copy. **Find ›
 | Find bar (current file), and Find in Files with the **Current File** and **Open Files** scopes | JavaScript `RegExp` |
 | Find in Files with the **Folder** or **Choose…** scopes, Replace in Files on disk, and large-file Find / Replace All | Rust [`regex`](https://docs.rs/regex/latest/regex/#syntax) (the engine used by ripgrep): no look-around and no backreferences, but guaranteed linear-time matching |
 
-Everyday patterns (`\d+`, `^\s*$`, `(foo|bar)`, `[A-Z]\w*`) behave the same in both. Look-around (`(?=…)`, `(?<!…)`) and backreferences (`\1`) work only in the JavaScript engine. Quarry checks a Find in Files pattern as you type and flags an invalid one.
+Everyday patterns (`\d+`, `^\s*$`, `(foo|bar)`, `[A-Z]\w*`) behave the same in both. Look-around (`(?=…)`, `(?<!…)`) and backreferences (`\1`) work only in the JavaScript engine. Quarry checks a Find in Files pattern as you type, with the engine that will run it, and flags an invalid one: with **Current File** (on a normal tab) and **Open Files** a look-around pattern is accepted, while switching to **Folder** or **Choose…**, or making a large-file tab the current file, marks it invalid with the Rust engine's message.

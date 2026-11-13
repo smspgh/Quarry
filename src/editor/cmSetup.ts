@@ -37,6 +37,7 @@ import type { Settings } from "../lib/types";
 import { columnModeEnabled, columnModeExtensions } from "./columnMode";
 import { viewportDrawSelection } from "./viewportSelection";
 import { bulkEditing } from "./bulkEdit";
+import { findScopeField } from "./findScope";
 
 export const compartments = {
   language: new Compartment(),
@@ -146,6 +147,7 @@ export function baseExtensions(settings: Settings, extra: Extension[] = []): Ext
     compartments.activeLine.of(settings.highlightActiveLine ? highlightActiveLine() : []),
     highlightSelectionMatches({ minSelectionLength: 2 }),
     search({ createPanel: hiddenSearchPanel, top: true }),
+    findScopeField, // Find in Selection ranges
     lintGutter(),
     flashField,
     columnModeEnabled,
