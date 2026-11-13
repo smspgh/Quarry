@@ -439,6 +439,7 @@ Scenario: EDIT-009.4 Remove duplicates keeps the first of each
   Given the lines "a", "b", "a", "A", "b"
   When I choose Remove Duplicate Lines
   Then the lines are "a", "b", "A"
+  And on 200,000 lines, most of them different, it finishes in well under a second
 
 Scenario: EDIT-009.5 Blank versus empty lines
   Given the lines "a", "", "   ", "b"

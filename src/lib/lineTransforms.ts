@@ -11,7 +11,10 @@ const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "bas
 export const sortAsc: LineFn = (l) => [...l].sort(collator.compare);
 export const sortDesc: LineFn = (l) => [...l].sort(collator.compare).reverse();
 export const reverseLines: LineFn = (l) => [...l].reverse();
-export const dedupe: LineFn = (l) => l.filter((x, i) => l.indexOf(x) === i);
+export const dedupe: LineFn = (l) => {
+  const seen = new Set<string>();
+  return l.filter((x) => !seen.has(x) && !!seen.add(x));
+};
 export const removeBlank: LineFn = (l) => l.filter((x) => x.trim() !== "");
 export const removeEmpty: LineFn = (l) => l.filter((x) => x !== "");
 export const trimTrailing: LineFn = (l) => l.map((x) => x.replace(/[ \t]+$/, ""));

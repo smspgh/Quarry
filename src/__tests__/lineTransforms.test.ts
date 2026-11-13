@@ -70,6 +70,12 @@ describe("line commands: transforms", () => {
   it("removes duplicates, keeping the first of each (case-sensitive)", () => {
     expect(L.dedupe(["a", "b", "a", "A", "b"])).toEqual(["a", "b", "A"]);
   });
+  it("removes duplicates from a long list in linear time", () => {
+    const many = Array.from({ length: 200_000 }, (_, i) => `line ${i % 150_000}`);
+    const t = performance.now();
+    expect(L.dedupe(many).length).toBe(150_000);
+    expect(performance.now() - t).toBeLessThan(1000);
+  });
   it("tells blank from empty lines", () => {
     expect(L.removeEmpty(["a", "", "   ", "b"])).toEqual(["a", "   ", "b"]);
     expect(L.removeBlank(["a", "", "   ", "b"])).toEqual(["a", "b"]);
