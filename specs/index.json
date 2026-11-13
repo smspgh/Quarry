@@ -10090,7 +10090,9 @@
         "src/components/StatusBar.tsx",
         "src/lib/lsp.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/lspStatus.test.tsx"
+      ],
       "docs": [
         "docs/code-intelligence.md"
       ],
@@ -10140,7 +10142,8 @@
       ],
       "tests": [
         "src-tauri/src/lsp.rs",
-        "src/__tests__/lspInstall.test.ts"
+        "src/__tests__/lspInstall.test.ts",
+        "src/__tests__/lspStatus.test.tsx"
       ],
       "docs": [
         "docs/code-intelligence.md"
@@ -18410,6 +18413,10 @@
     "src/__tests__/lspInstall.test.ts": [
       "LSP-005",
       "TERM-009"
+    ],
+    "src/__tests__/lspStatus.test.tsx": [
+      "LSP-004",
+      "LSP-005"
     ],
     "src/__tests__/panels.test.ts": [
       "EXPL-001",
