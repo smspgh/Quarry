@@ -154,7 +154,6 @@ Doc / code mismatches
 
 ## Compare (`compare.md`)
 
-- `docs/compare.md:27` says Reload reads the files from disk again; clipboard and git-version sides keep their stored text (`diff.ts:102`, `:224-232`; DIFF-013.5).
 - `compare.withSelected` does not require a text tab (`src/lib/commands.ts:1347`), unlike `compare.selectForCompare`; on a large-file tab it is enabled and then fails with "too large to compare".
 - "Revert arrows act on mousedown" comes from the project notes and @codemirror/merge; nothing in the repo's own code sets it (DIFF-011.2).
 - Not determined: the exact button labels of the save prompt when closing an edited Compare tab (`askSaveChanges`, `src/lib/actions.ts:547`; DIFF-012.7).
