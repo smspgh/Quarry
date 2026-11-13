@@ -5660,7 +5660,7 @@
       "title": "Save a document under another name",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 507,
+      "line": 508,
       "status": "draft",
       "commands": [
         "file.saveAs"
@@ -5704,7 +5704,7 @@
       "title": "Save all changed documents",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 558,
+      "line": 559,
       "status": "draft",
       "commands": [
         "file.saveAll"
@@ -5737,7 +5737,7 @@
       "title": "Revert a file to the version on disk",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 591,
+      "line": 592,
       "status": "draft",
       "commands": [
         "file.revert"
@@ -5775,7 +5775,7 @@
       "title": "Know which documents have unsaved changes",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 631,
+      "line": 632,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5812,13 +5812,14 @@
       "title": "Notice changes made by other programs",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 670,
+      "line": 671,
       "status": "draft",
       "commands": [],
       "files": [
         "src/lib/actions.ts",
         "src/App.tsx",
         "src/lib/store.ts",
+        "src/components/BigFileView.tsx",
         "src/lib/ipc.ts",
         "src-tauri/src/files.rs"
       ],
@@ -5858,6 +5859,10 @@
         {
           "id": "FILE-015.8",
           "title": "A large file in follow mode is left alone"
+        },
+        {
+          "id": "FILE-015.9",
+          "title": "Lines picked up by follow mode are not an outside change"
         }
       ]
     },
@@ -5866,7 +5871,7 @@
       "title": "Restore the previous session on start",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 739,
+      "line": 747,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5924,7 +5929,7 @@
       "title": "Exit without losing work (hot exit)",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 806,
+      "line": 814,
       "status": "draft",
       "commands": [
         "app.exit"
@@ -5985,7 +5990,7 @@
       "title": "Open files by dropping them on the window",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 875,
+      "line": 883,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6022,7 +6027,7 @@
       "title": "Open files from the command line and File Explorer",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 914,
+      "line": 922,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6063,7 +6068,7 @@
       "title": "Welcome screen",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 959,
+      "line": 967,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16293,6 +16298,7 @@
       "BIG-014",
       "BIG-015",
       "BIG-020",
+      "FILE-015",
       "UI-021"
     ],
     "src/components/BigFilterPane.tsx": [

@@ -433,7 +433,7 @@ Scenario: FILE-009.4 Only for files on disk
 - Status: draft
 - Commands: `file.save`
 - Files:
-  - `src/lib/actions.ts` — `saveDocument` (untitled → Save dialog, read-only guard, large-file mapping guard, decode-error and changed-on-disk confirmations, `parseUnmappable` fallback to UTF-8, `saving` set, `takeSnapshot`, toast, `pushRecent`), `normalizeEol`
+  - `src/lib/actions.ts` — `saveDocument` (untitled → Save dialog, read-only guard, large-file mapping guard, decode-error and changed-on-disk confirmations (the latter for text and large-file tabs), `parseUnmappable` fallback to UTF-8, `saving` set, `takeSnapshot`, toast, `pushRecent`), `normalizeEol`
   - `src/lib/commands.ts` — `file.save` and its `enabled` (text / large-file tab, or a Compare tab with changes)
   - `src/lib/ipc.ts` — `fs.writeText`, `big.save`
   - `src-tauri/src/files.rs` — `write_text` (temp file `.quarry-*.tmp` in the same folder, `sync_all`, `replace_with` via ReplaceFileW, creates missing parent folders, writes through symlinks, in-place fallback), `encode_text`, `find_unmappable`, `UNMAPPABLE_PREFIX`
@@ -467,6 +467,7 @@ Scenario: FILE-010.3 The file changed on disk since it was opened
   When I press Ctrl+S
   Then Quarry asks "notes.txt changed on disk" with Overwrite and Cancel
   And choosing Cancel writes nothing and keeps my unsaved changes
+  And a large-file tab whose file changed on disk asks the same before saving
 
 Scenario: FILE-010.4 Characters the encoding cannot represent
   Given "prices.txt" is set to save as ISO-8859-1 and contains "€" on line 3
@@ -675,6 +676,7 @@ Scenario: FILE-014.4 A new file with pasted-and-removed text
   - `src/lib/actions.ts` — `checkExternalChanges` (per text / large-file doc with a path: stat, `missingWarned`, came-back handling for text and unedited large-file tabs, reload or ask), `installExternalChangeWatch` (window `focus`, `visibilitychange`, tab activation), `reloadBig`, `revertDocument`, the `saving` set
   - `src/App.tsx` — installs the watch (`installExternalChangeWatch`)
   - `src/lib/store.ts` — `Doc.modifiedMs`, `Doc.following`
+  - `src/components/BigFileView.tsx` — follow mode keeps `Doc.modifiedMs` / `size` current as lines are appended
   - `src/lib/ipc.ts` — `fs.stat`, `big.open`, `big.close`
   - `src-tauri/src/files.rs` — `stat`, `modified_ms`
 - Tests: none
@@ -734,6 +736,12 @@ Scenario: FILE-015.8 A large file in follow mode is left alone
   Given "app.log" is open in a large-file tab with follow mode on
   When the log grows and I switch back to the Quarry window
   Then no "changed on disk" notice or question appears for it
+
+Scenario: FILE-015.9 Lines picked up by follow mode are not an outside change
+  Given "app.log" is open in a large-file tab in follow mode and has grown by 20 lines
+  When I edit a line, which stops follow mode, and switch away and back to the Quarry window
+  Then Quarry does not ask whether "app.log" changed on disk
+  And pressing Ctrl+S saves without the "changed on disk" question
 ```
 
 ## FILE-016: Restore the previous session on start

@@ -384,7 +384,7 @@ export async function saveDocument(docId?: string, saveAs = false): Promise<bool
     );
     if (!ok) return false;
   }
-  if (doc.kind === "text" && sameFile && doc.modifiedMs) {
+  if ((doc.kind === "text" || doc.kind === "big") && sameFile && doc.modifiedMs) {
     try {
       const stat = await fs.stat(target);
       if (stat.modifiedMs > doc.modifiedMs) {

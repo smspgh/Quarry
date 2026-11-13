@@ -15,7 +15,7 @@ import { BigFilterPane } from "./BigFilterPane";
 import { GridCells } from "./GridCells";
 import { growWidths, splitDelimited, type Field } from "../lib/delimited";
 import { bus } from "../lib/bus";
-import { big } from "../lib/ipc";
+import { big, fs } from "../lib/ipc";
 import { useStore, type BigFindState, type BigViewState, type Doc } from "../lib/store";
 import type { BigSearchArgs } from "../lib/types";
 import { bigLanguageOf, segments, tokenize } from "../lib/bigHighlight";
@@ -633,7 +633,9 @@ export function BigFileView({ doc }: { doc: Doc }) {
         const before = live.current.total;
         const r = await big.follow(id);
         if (r.appended === "grew") {
-          updateDoc(doc.id, { bigInfo: r.info });
+          updateDoc(doc.id, { bigInfo: r.info, size: r.info.size });
+          // The appended lines are shown: the file's new time is not an outside change to ask about later.
+          if (doc.path) fs.stat(doc.path).then((st) => updateDoc(doc.id, { modifiedMs: st.modifiedMs }), () => {});
           // The old last line may have grown, and new lines follow it: drop that chunk and refetch.
           for (let c = Math.floor(Math.max(0, before - 1) / CHUNK); c <= Math.floor(r.info.totalLines / CHUNK); c++) cache.current.delete(c);
           bump((n) => n + 1);

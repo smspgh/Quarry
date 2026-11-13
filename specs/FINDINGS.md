@@ -7,7 +7,6 @@ This file is not a spec: `scripts/specs-index.mjs` ignores it.
 ## Files and sessions (`files.md`)
 
 Possible bugs
-- Saving a large-file tab skips the "changed on disk, overwrite?" check, which is text-only (`actions.ts:383`).
 
 Doc / code mismatches
 - `docs/editing.md:44` says Open Recent keeps 12 files and 10 folders; the store keeps 15 of each (`actions.ts:347`), the menus show 12 / 10 (`src/components/MenuBar.tsx:67`, `:75`), Welcome shows 8.
