@@ -340,6 +340,7 @@ Scenario: CLAUDE-006.6 Steps cut short
 - Files:
   - `src/components/ClaudeView.tsx` — `editHunks`, `PatchView`, `ToolCard` (auto-open ≤ 30 changed lines), `EDIT_TOOLS`, `WRITE_PREVIEW_LINES` (400)
   - `src/lib/claudeProtocol.ts` — `toolResults` (`structuredPatch` from `tool_use_result`), `lineDiff` (`DIFF_CELLS`), `patchStats`, `Hunk`
+  - `src/lib/actions.ts` — `checkExternalChanges` / `installExternalChangeWatch` (nothing in the Claude code triggers a check: an edited file's tab is checked when it is activated, or when the Quarry window gets focus)
 - Tests: `src/__tests__/claude.test.ts`
 - Docs: `docs/claude-code.md`
 
@@ -374,8 +375,11 @@ Scenario: CLAUDE-007.6 A failed edit shows the error
   Then the opened card shows the attempted change and Claude Code's error text
 
 Scenario: CLAUDE-007.7 The file is open in a tab
-  When "src/app.ts" is open in a tab when Claude edits it
+  Given "src/app.ts" is open in a tab when Claude edits it
+  When I switch to that tab, or come back to the Quarry window
   Then Quarry treats it like any other change made outside the editor
+  And a tab without unsaved edits is reloaded, while a tab with unsaved edits asks first
+  And nothing happens to the tab while I stay in the Claude tab
 ```
 
 ## CLAUDE-008: Answer permission requests

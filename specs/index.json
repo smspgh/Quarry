@@ -1495,7 +1495,8 @@
       "commands": [],
       "files": [
         "src/components/ClaudeView.tsx",
-        "src/lib/claudeProtocol.ts"
+        "src/lib/claudeProtocol.ts",
+        "src/lib/actions.ts"
       ],
       "tests": [
         "src/__tests__/claude.test.ts"
@@ -1539,7 +1540,7 @@
       "title": "Answer permission requests",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 381,
+      "line": 385,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1591,7 +1592,7 @@
       "title": "Choose how much Claude may do without asking",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 432,
+      "line": 436,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1636,7 +1637,7 @@
       "title": "Answer Claude's questions",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 479,
+      "line": 483,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1678,7 +1679,7 @@
       "title": "Follow Claude's task list",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 525,
+      "line": 529,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1715,7 +1716,7 @@
       "title": "Attach pictures to a message",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 558,
+      "line": 562,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1769,7 +1770,7 @@
       "title": "Point Claude at files and selections",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 616,
+      "line": 620,
       "status": "draft",
       "commands": [
         "claude.addSelection",
@@ -1833,7 +1834,7 @@
       "title": "Read formatted replies",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 685,
+      "line": 689,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1884,7 +1885,7 @@
       "title": "Start a new conversation in the same folder",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 737,
+      "line": 741,
       "status": "draft",
       "commands": [
         "claude.newSession"
@@ -1922,7 +1923,7 @@
       "title": "Continue a conversation after restarting Quarry",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 775,
+      "line": 779,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1975,7 +1976,7 @@
       "title": "Browse and reopen past conversations",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 829,
+      "line": 833,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2031,7 +2032,7 @@
       "title": "Choose the model",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 889,
+      "line": 893,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2073,7 +2074,7 @@
       "title": "Know what background Claude tabs are doing",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 930,
+      "line": 934,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2109,7 +2110,7 @@
       "title": "Closing tabs, quitting and a process that stops",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 966,
+      "line": 970,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16879,6 +16880,7 @@
       "BIG-020",
       "CLAUDE-001",
       "CLAUDE-006",
+      "CLAUDE-007",
       "CLAUDE-009",
       "CLAUDE-016",
       "CLAUDE-020",
