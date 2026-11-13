@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { anyPanelShown, closePanel, floatingPanel, isDocked, isPanelShown, showPanel, toggleAllPanels, togglePanel } from "../lib/panels";
+import { anyPanelShown, BOTTOM_DEFAULT_HEIGHT, BOTTOM_MIN_HEIGHT, BOTTOM_ROOM_ABOVE, clampBottomHeight, closePanel, floatingPanel, isDocked, isPanelShown, showPanel, toggleAllPanels, togglePanel } from "../lib/panels";
 import { useStore } from "../lib/store";
 
 const st = () => useStore.getState();
@@ -55,5 +55,20 @@ describe("side panels", () => {
     showPanel("search");
     expect(isDocked(st(), "search")).toBe(false);
     expect(floatingPanel(st())).toBe("search");
+  });
+});
+
+describe("bottom panel height", () => {
+  it("keeps a saved height that fits, clamps one that does not, and defaults a damaged one", () => {
+    expect(clampBottomHeight(300, 900)).toBe(300);
+    expect(clampBottomHeight(20, 900)).toBe(BOTTOM_MIN_HEIGHT);
+    expect(clampBottomHeight(850, 900)).toBe(900 - BOTTOM_ROOM_ABOVE);
+    expect(clampBottomHeight(250.6, 900)).toBe(251);
+    expect(clampBottomHeight(undefined, 900)).toBe(BOTTOM_DEFAULT_HEIGHT);
+    expect(clampBottomHeight("400", 900)).toBe(BOTTOM_DEFAULT_HEIGHT);
+    expect(clampBottomHeight(Number.NaN, 900)).toBe(BOTTOM_DEFAULT_HEIGHT);
+  });
+  it("never goes under the minimum, even in a tiny window", () => {
+    expect(clampBottomHeight(300, 150)).toBe(BOTTOM_MIN_HEIGHT);
   });
 });

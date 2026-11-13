@@ -15660,11 +15660,16 @@
         "src/components/BottomPanel.tsx",
         "src/lib/commands.ts",
         "src/lib/store.ts",
+        "src/lib/panels.ts",
+        "src/lib/actions.ts",
+        "src/App.tsx",
         "src/components/LspStatus.tsx",
         "src/lib/scripting.ts",
         "src/styles/app.css"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/panels.test.ts"
+      ],
       "docs": [
         "docs/editing.md",
         "docs/keyboard-shortcuts.md"
@@ -15693,6 +15698,14 @@
         {
           "id": "UI-016.6",
           "title": "Side panels and the bottom panel are independent"
+        },
+        {
+          "id": "UI-016.7",
+          "title": "Only the height is kept across a restart"
+        },
+        {
+          "id": "UI-016.8",
+          "title": "A saved height that no longer fits"
         }
       ]
     },
@@ -15701,7 +15714,7 @@
       "title": "Status bar position and document facts",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 949,
+      "line": 964,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15743,7 +15756,7 @@
       "title": "Status bar pickers for indentation, encoding, line endings and language",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 996,
+      "line": 1011,
       "status": "draft",
       "commands": [
         "view.setTabSize",
@@ -15810,7 +15823,7 @@
       "title": "Light and dark themes",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1078,
+      "line": 1093,
       "status": "draft",
       "commands": [
         "view.toggleTheme"
@@ -15860,7 +15873,7 @@
       "title": "Zoom and editor view toggles",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1133,
+      "line": 1148,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -15918,7 +15931,7 @@
       "title": "Keyboard focus returns to the active tab",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1197,
+      "line": 1212,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15964,7 +15977,7 @@
       "title": "Tab key can leave the editor",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1248,
+      "line": 1263,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -16004,7 +16017,7 @@
       "title": "Single instance and files handed over by Windows",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1293,
+      "line": 1308,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16056,7 +16069,7 @@
       "title": "Window size and position are remembered",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1352,
+      "line": 1367,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16094,7 +16107,7 @@
       "title": "Notice after an unexpected exit",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1394,
+      "line": 1409,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16708,6 +16721,7 @@
       "UI-009",
       "UI-010",
       "UI-014",
+      "UI-016",
       "UI-019",
       "UI-022",
       "UI-023",
@@ -17373,6 +17387,7 @@
       "UI-002",
       "UI-013",
       "UI-015",
+      "UI-016",
       "UI-017",
       "UI-020",
       "UI-023",
@@ -17903,7 +17918,8 @@
       "UI-012",
       "UI-013",
       "UI-014",
-      "UI-015"
+      "UI-015",
+      "UI-016"
     ],
     "src/lib/replace.ts": [
       "FIND-006",
@@ -18425,7 +18441,8 @@
       "SEARCH-001",
       "UI-012",
       "UI-013",
-      "UI-014"
+      "UI-014",
+      "UI-016"
     ],
     "src/__tests__/paths.test.ts": [
       "BIG-016",

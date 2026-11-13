@@ -896,11 +896,14 @@ Scenario: UI-015.4 Settings always opens at 35% of the window
 - Files:
   - `src/components/BottomPanel.tsx` — `BottomPanel` (Console and Problems tabs, problem count, Clear console, close button, `startResize`, scroll to newest line)
   - `src/lib/commands.ts` — `view.togglePanel` (Ctrl+J), `view.problems` (shows the panel on the Problems tab)
-  - `src/lib/store.ts` — `bottomVisible`, `bottomTab` (`console` | `problems`, starts on `console`), `bottomHeight` (220), `consoleLines`, `log` (keeps about the last 2000 lines), `clearConsole`
+  - `src/lib/store.ts` — `bottomVisible` (starts hidden), `bottomTab` (`console` | `problems`, starts on `console`), `bottomHeight` (220), `consoleLines`, `log` (keeps about the last 2000 lines), `clearConsole`
+  - `src/lib/panels.ts` — `clampBottomHeight` (`BOTTOM_MIN_HEIGHT` 80, `BOTTOM_ROOM_ABOVE` 200, `BOTTOM_DEFAULT_HEIGHT` 220)
+  - `src/lib/actions.ts` — `buildSession` saves `bottomHeight`; `restoreSessionTabs` clamps it to the window
+  - `src/App.tsx` — the store subscription saves the session when `bottomHeight` changes
   - `src/components/LspStatus.tsx` — `ProblemsList`, `useProblemCount` shown inside the Problems tab
   - `src/lib/scripting.ts` — opens the panel on the Console tab when a script writes output
   - `src/styles/app.css` — `.bottom-panel`, `.bottom-tabs`, `.bottom-resizer`, `.console-line`
-- Tests: none
+- Tests: `src/__tests__/panels.test.ts`
 - Docs: `docs/editing.md`, `docs/keyboard-shortcuts.md`
 
 **As a** user running scripts or checking code problems
@@ -911,7 +914,7 @@ Scenario: UI-015.4 Settings always opens at 35% of the window
 Scenario: UI-016.1 Toggle with Ctrl+J
   Given the bottom panel is hidden
   When I press Ctrl+J or choose View › Toggle Bottom Panel
-  Then the bottom panel appears under the editor, 220 px high, on the Console tab
+  Then the bottom panel appears under the editor, on the Console tab, 220 px high unless I resized it before
   When I press Ctrl+J again or click its "Close panel (Ctrl+J)" button
   Then it is hidden
 
@@ -944,6 +947,18 @@ Scenario: UI-016.6 Side panels and the bottom panel are independent
   Given the bottom panel is shown
   When I press Ctrl+B
   Then the side panels collapse and the bottom panel stays
+
+Scenario: UI-016.7 Only the height is kept across a restart
+  Given I resized the bottom panel to 340 px and left it shown on the Problems tab
+  When I close and restart Quarry
+  Then the bottom panel is hidden
+  When I press Ctrl+J
+  Then it appears 340 px high on the Console tab
+
+Scenario: UI-016.8 A saved height that no longer fits
+  Given the bottom panel was 700 px high and Quarry now starts in a window 600 px high
+  When I press Ctrl+J
+  Then the bottom panel is 400 px high, leaving 200 px of the window above it
 ```
 
 ## UI-017: Status bar position and document facts

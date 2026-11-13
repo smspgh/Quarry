@@ -11,7 +11,7 @@ import { claudeBusy, disposeClaude, openClaudeTab, stopAllClaude } from "./claud
 import { disposeTerminal, terminalPty } from "./terminal";
 import { stopAllServers } from "./lsp";
 import { disposeDiff, saveDiff } from "./diff";
-import { showPanel } from "./panels";
+import { clampBottomHeight, showPanel } from "./panels";
 import { makeRoom, markUsed } from "./tabLimit";
 import { appData, big, fs, sys } from "./ipc";
 import { activeDoc, newDocId, PANELS, useStore, type Doc, type SidebarPanel } from "./store";
@@ -808,6 +808,8 @@ interface Session {
   sidebarWidth: number;
   pinnedPanels?: string[];
   panelWidths?: Partial<Record<string, number>>;
+  /** Bottom panel height in px (whether it is shown, and its tab, are not kept). */
+  bottomHeight?: number;
 }
 
 const UNTITLED_SESSION_MAX = 2 * 1024 * 1024;
@@ -871,6 +873,7 @@ function buildSession(): Session {
     pinnedPanels: s.pinnedPanels,
     // Settings always reopens at 35%, so its width is not kept.
     panelWidths: Object.fromEntries(Object.entries(s.panelWidths).filter(([p]) => p !== "settings")),
+    bottomHeight: s.bottomHeight,
   };
 }
 
@@ -930,6 +933,8 @@ async function restoreSessionTabs() {
     sidebarWidth: session.sidebarWidth ?? 300,
     pinnedPanels: pinned,
     panelWidths: Object.fromEntries(Object.entries(session.panelWidths ?? {}).filter(([p, w]) => PANELS.includes(p as SidebarPanel) && typeof w === "number" && w >= 200)),
+    // Only the height comes back; the panel itself starts hidden, on Console.
+    bottomHeight: clampBottomHeight(session.bottomHeight, window.innerHeight),
   });
   const startup = await sys.startupPaths().catch(() => [] as string[]);
   if (session.folder && store.settings.restoreSession) {

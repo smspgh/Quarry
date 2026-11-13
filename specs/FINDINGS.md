@@ -48,10 +48,6 @@ Doc / code mismatches
 
 ## Application shell (`app-shell.md`)
 
-Possible bugs
-- Bottom-panel layout is not persisted (`bottomVisible`, `bottomHeight`, `bottomTab`); it starts hidden, 220 px, on Console each time.
-
-Mismatches and notes
 - There are no menu mnemonics: only Alt / F10, arrows, Home / End, Enter / Space and Escape (UI-004).
 
 ## Wording pass
