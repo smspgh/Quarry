@@ -87,7 +87,6 @@ Not determined
 ## Large files (`large-files.md`)
 
 Possible bugs
-- Ctrl+Enter and Delete are gated differently from Enter: Enter shows a friendly toast while indexing (`BigFileView.tsx:547`), Delete does nothing (`:552`), Ctrl+Enter surfaces Rust's raw error (`:546`); on a read-only UTF-16 tab Delete and Ctrl+Enter bypass `editGate`.
 - The status bar tooltip says "Large files are read and written as UTF-8" even when the label shows UTF-16LE/BE (`src/components/StatusBar.tsx:210`).
 
 Doc / code mismatches and dead code

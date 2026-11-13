@@ -512,6 +512,19 @@ export function BigFileView({ doc }: { doc: Doc }) {
     return () => offs.forEach((f) => f());
   });
 
+  /** Edit / insert / delete keys share one gate: read-only first, then indexing. */
+  const canChange = () => {
+    if (doc.readonly) {
+      toast(doc.encoding !== "UTF-8" ? `${doc.encoding} large files are read-only.` : "This document is read-only.", "warning", 5000);
+      return false;
+    }
+    if (!indexed) {
+      toast("Editing is enabled once indexing completes.", "info");
+      return false;
+    }
+    return true;
+  };
+
   const onKey = async (e: React.KeyboardEvent) => {
     if (editing) return;
     const ext = e.shiftKey;
@@ -543,13 +556,13 @@ export function BigFileView({ doc }: { doc: Doc }) {
       case "Enter":
       case "F2": {
         e.preventDefault();
+        if (!canChange()) break;
         if (e.ctrlKey) { await insertLine(cursor + 1); break; }
-        if (!indexed) { toast("Editing is enabled once indexing completes.", "info"); break; }
         const t = lineText(cursor);
         if (t !== null) await beginEdit(cursor, t);
         break;
       }
-      case "Delete": e.preventDefault(); if (indexed) await deleteSelected(); break;
+      case "Delete": e.preventDefault(); if (canChange()) await deleteSelected(); break;
       case "a": if (e.ctrlKey) { e.preventDefault(); setAnchor(0); setCursor(total - 1); } break;
       case "c": if (e.ctrlKey) { e.preventDefault(); await copySelected(); } break;
       case "z": if (e.ctrlKey) { e.preventDefault(); await undoRedo(false); } break;
@@ -840,8 +853,7 @@ export function BigFileView({ doc }: { doc: Doc }) {
                   onMouseDown={(e) => onRowMouseDown(n, e)}
                   onMouseEnter={() => onRowMouseEnter(n)}
                   onDoubleClick={() => {
-                    if (!indexed) return;
-                    if (text !== null) void beginEdit(n, text);
+                    if (text !== null && canChange()) void beginEdit(n, text);
                   }}
                 >
                   <span className="big-ln" style={{ width: `${lnWidth}ch` }}>{(n + 1).toLocaleString()}</span>

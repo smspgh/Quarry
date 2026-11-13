@@ -447,7 +447,7 @@ Scenario: BIG-007.9 A dollar sign is literal in plain-text mode
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/BigFileView.tsx` — `beginEdit`, `editGate`, `commitEdit`, `insertLine`, `deleteSelected`, the `.big-edit` input
+  - `src/components/BigFileView.tsx` — `canChange` (one gate for Enter / F2 / double-click / Ctrl+Enter / Delete), `beginEdit`, `editGate`, `commitEdit`, `insertLine`, `deleteSelected`, the `.big-edit` input
   - `src-tauri/src/bigfile.rs` — piece table (`Piece`, `replace_range`, `split_at`), `replace_line`, `insert_lines`, `delete_lines`, `ensure_editable`, `MAX_READ_BYTES`
   - `src-tauri/src/lib.rs` — `big_replace_line`, `big_insert_lines`, `big_delete_lines`
   - `src/lib/ipc.ts` — `big.replaceLine`, `big.insertLines`, `big.deleteLines`
@@ -495,7 +495,7 @@ Scenario: BIG-008.6 Editing waits for indexing
   Given a large file is still being indexed
   When I press Enter on a line
   Then a toast says "Editing is enabled once indexing completes."
-  And double-clicking a row or pressing Delete does nothing
+  And F2, a double-click on a row, Ctrl+Enter and Delete show the same toast and change nothing
 
 Scenario: BIG-008.7 A line longer than 16 MB cannot be edited
   Given line 3 is longer than 16 MB
@@ -644,7 +644,8 @@ Scenario: BIG-011.2 A read-only file refuses edits
   Given a UTF-16 large-file tab
   When I press Enter on a line
   Then a warning says "UTF-16LE large files are read-only."
-  And Replace All, Delete and Ctrl+Enter report that the file is read-only instead of changing it
+  And F2, a double-click, Delete and Ctrl+Enter show the same warning and change nothing
+  And Replace All reports that the file is read-only instead of changing it
 
 Scenario: BIG-011.3 Find works on UTF-16 files
   Given a UTF-16 large-file tab
