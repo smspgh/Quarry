@@ -131,3 +131,13 @@ describe("tree parser flags what strict JSON rejects", () => {
     }
   });
 });
+
+describe("parseJsonTree node limit", () => {
+  it("reports a document over the limit as too large, not as invalid", () => {
+    const r = parseJsonTree("[1, 2, 3, 4]", 3);
+    expect(r.root).toBeNull();
+    expect(r.error).toBeNull();
+    expect(r.tooLarge).toBe(true);
+    expect(parseJsonTree("[1, 2]", 3).tooLarge).toBeUndefined();
+  });
+});

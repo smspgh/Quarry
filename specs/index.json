@@ -9116,7 +9116,7 @@
       "title": "Copy a value or its path from the tree",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 172,
+      "line": 173,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9167,7 +9167,7 @@
       "title": "Copy the path of the value under the cursor",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 235,
+      "line": 236,
       "status": "draft",
       "commands": [
         "json.copyPath",
@@ -9211,7 +9211,7 @@
       "title": "Copy the value under the cursor",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 278,
+      "line": 279,
       "status": "draft",
       "commands": [
         "json.copyValue"
@@ -9251,7 +9251,7 @@
       "title": "Path bar above the editor",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 317,
+      "line": 318,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9294,7 +9294,7 @@
       "title": "Validate a JSON document",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 368,
+      "line": 369,
       "status": "draft",
       "commands": [
         "json.validate"
@@ -9352,7 +9352,7 @@
       "title": "Pretty-print JSON without changing its values",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 436,
+      "line": 437,
       "status": "draft",
       "commands": [
         "json.format"
@@ -9407,7 +9407,7 @@
       "title": "Minify JSON",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 503,
+      "line": 504,
       "status": "draft",
       "commands": [
         "json.minify"
@@ -9449,7 +9449,7 @@
       "title": "Convert JSON to CSV",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 546,
+      "line": 547,
       "status": "draft",
       "commands": [
         "json.toCsv"
@@ -9497,7 +9497,7 @@
       "title": "Convert CSV or TSV to JSON",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 603,
+      "line": 604,
       "status": "draft",
       "commands": [
         "json.fromCsv"
@@ -9553,7 +9553,7 @@
       "title": "Copy the top-level keys",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 676,
+      "line": 677,
       "status": "draft",
       "commands": [
         "json.copyKeys"
@@ -9592,7 +9592,7 @@
       "title": "JSON commands are offered only where they apply",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 714,
+      "line": 715,
       "status": "draft",
       "commands": [
         "json.format",

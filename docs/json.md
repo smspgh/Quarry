@@ -42,6 +42,7 @@ Opening a JSON file shows the JSON panel when that panel is pinned (see [Window 
   - **Parsed**: valid JSON.
   - **Lenient**: parsed, but uses something JSON doesn't allow, such as comments or a trailing comma. The reason is shown.
   - **Invalid**: click the error to jump to it.
+  - **Too large**: over the size limit below, so there is no tree.
   - **Not JSON** or **Empty**.
 - **While you edit.** If the document stops being valid JSON, the last good tree stays visible, dimmed, until it parses again.
 - **Size limit.** Documents over 64 MB or 2,000,000 nodes don't get a tree.

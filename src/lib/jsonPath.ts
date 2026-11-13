@@ -27,6 +27,8 @@ export interface ParseOutcome {
   error: { offset: number; message: string } | null;
   /** First construct the tolerant parser accepted that strict JSON (and Validate / Format) rejects. */
   lenient?: { offset: number; reason: string } | null;
+  /** Over the size or node limit: no tree, and no error either (the text may well be valid). */
+  tooLarge?: boolean;
 }
 
 const STRICT_NUMBER = /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][-+]?\d+)?$/;
@@ -35,6 +37,7 @@ export function parseJsonTree(text: string, maxNodes = 2_000_000): ParseOutcome 
   let i = 0;
   const n = text.length;
   let count = 0;
+  let tooLarge = false;
   let lenient: { offset: number; reason: string } | null = null;
   const loose = (offset: number, reason: string) => {
     if (!lenient) lenient = { offset, reason };
@@ -109,7 +112,10 @@ export function parseJsonTree(text: string, maxNodes = 2_000_000): ParseOutcome 
 
   /** One value at `i`. Containers come back open (children still to read) unless they are empty. */
   const readValue = (key: string | number | null, parent: JsonNode | null, depth: number, keyFrom?: number, keyTo?: number): { node: JsonNode; open: boolean } => {
-    if (++count > maxNodes) fail("Document too large for tree view");
+    if (++count > maxNodes) {
+      tooLarge = true;
+      fail("Document too large for tree view");
+    }
     skipWs();
     if (i >= n) fail("Unexpected end of input");
     const c = text[i];
@@ -223,6 +229,7 @@ export function parseJsonTree(text: string, maxNodes = 2_000_000): ParseOutcome 
     if (i < n) fail("Unexpected trailing content");
     return { root, error: null, lenient };
   } catch (e) {
+    if (tooLarge) return { root: null, error: null, tooLarge: true };
     const err = e as { offset: number; message: string };
     return { root: null, error: { offset: err.offset ?? i, message: err.message ?? String(e) } };
   }

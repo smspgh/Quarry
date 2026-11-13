@@ -13,7 +13,7 @@ export function getJsonTree(docId: string): ParseOutcome | null {
   if (!doc) return null;
   const hit = cache.get(docId);
   if (hit && hit.doc === doc) return hit.outcome;
-  if (doc.length > MAX_TREE_BYTES) return { root: null, error: { offset: 0, message: "Document too large for tree view" } };
+  if (doc.length > MAX_TREE_BYTES) return { root: null, error: null, tooLarge: true };
   const outcome = parseJsonTree(doc.toString());
   cache.set(docId, { doc, outcome });
   return outcome;

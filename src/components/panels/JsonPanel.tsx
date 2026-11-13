@@ -86,7 +86,8 @@ export function JsonPanel() {
 
   // While the document is mid-edit (invalid), keep showing the last tree that parsed, dimmed.
   if (outcome?.root && doc) lastGood.current = { docId: doc.id, outcome };
-  const shown = outcome?.root ? outcome : lastGood.current && lastGood.current.docId === doc?.id ? lastGood.current.outcome : null;
+  // A document over the size limit shows no tree at all, not the last one that fitted.
+  const shown = outcome?.root ? outcome : outcome?.tooLarge ? null : lastGood.current && lastGood.current.docId === doc?.id ? lastGood.current.outcome : null;
   const stale = !!shown && shown !== outcome;
 
   const updateCursor = () => {
@@ -319,6 +320,8 @@ export function JsonPanel() {
         <div className="row">
           {err ? (
             <span className="chip danger" title={err.message}><XCircle size={12} /> Invalid</span>
+          ) : outcome?.tooLarge ? (
+            <span className="chip" title="Over 64 MB or 2,000,000 values: no tree is built. Validate and Format still work.">Too large</span>
           ) : outcome?.root && outcome.lenient ? (
             <span className="chip warning" title={`Parsed leniently: ${outcome.lenient.reason} at line ${lineAt(outcome.lenient.offset)}. Validate and Format need strict JSON.`}><AlertTriangle size={12} /> Lenient</span>
           ) : outcome?.root ? (
@@ -346,6 +349,7 @@ export function JsonPanel() {
             {err.message} — click to jump
           </button>
         )}
+        {outcome?.tooLarge && <div className="panel-note" style={{ padding: 0 }}>Document too large for tree view (over 64 MB or 2,000,000 values).</div>}
       </div>
       <div
         className={`panel-body json-tree ${stale ? "stale" : ""}`}
