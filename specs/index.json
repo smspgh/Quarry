@@ -6035,7 +6035,9 @@
         "src/lib/actions.ts",
         "src/lib/ipc.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src-tauri/src/lib.rs"
+      ],
       "docs": [
         "docs/editing.md"
       ],
@@ -6059,6 +6061,10 @@
         {
           "id": "FILE-019.5",
           "title": "Arguments that are not existing paths are ignored"
+        },
+        {
+          "id": "FILE-019.6",
+          "title": "A quoted folder path ending in a backslash"
         }
       ]
     },
@@ -6067,7 +6073,7 @@
       "title": "Welcome screen",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 967,
+      "line": 973,
       "status": "draft",
       "commands": [],
       "files": [
@@ -17761,6 +17767,7 @@
       "BIG-016"
     ],
     "src-tauri/src/lib.rs": [
+      "FILE-019",
       "UI-025"
     ],
     "src-tauri/src/lsp.rs": [

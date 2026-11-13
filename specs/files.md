@@ -928,7 +928,7 @@ Scenario: FILE-018.4 A large file dropped on the window
   - `src/App.tsx` — `open-paths` listener
   - `src/lib/actions.ts` — `restoreSessionTabs`: startup paths replace the session's file tabs (untitled text still restored), then `openPath` for each
   - `src/lib/ipc.ts` — `sys.startupPaths`
-- Tests: none
+- Tests: `src-tauri/src/lib.rs`
 - Docs: `docs/editing.md`
 
 **As a** person who double-clicks files or types `quarry file.txt`
@@ -962,6 +962,12 @@ Scenario: FILE-019.5 Arguments that are not existing paths are ignored
   Given Quarry is not running
   When I run `quarry.exe --flag C:\missing.txt`
   Then Quarry starts with its restored session and no error
+
+Scenario: FILE-019.6 A quoted folder path ending in a backslash
+  Given Quarry is not running
+  When I run `quarry.exe "C:\"` or `quarry.exe "C:\work\"`
+  Then Quarry opens the folder "C:\" or "C:\work\" in the Explorer
+  And the stray quote Windows leaves at the end of the argument is not part of the path
 ```
 
 ## FILE-020: Welcome screen

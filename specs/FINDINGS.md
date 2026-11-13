@@ -11,7 +11,6 @@ Possible bugs
 Doc / code mismatches
 
 Not verified
-- `cli_paths` (`src-tauri/src/lib.rs:638`) has no unit test (FILE-019), including the drive-root `C:"` repair and relative paths.
 - Quick Open's 30,000-file cap and skipped folders (`docs/editing.md:56`) were not checked and are not in FILE-005.
 
 ## Tabs and split editor (`tabs.md`, `split.md`)

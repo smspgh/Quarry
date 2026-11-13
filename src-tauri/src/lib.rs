@@ -880,4 +880,31 @@ mod tests {
         assert!(log.contains("crash-log probe"), "{log}");
         assert!(log.contains(env!("CARGO_PKG_VERSION")));
     }
+
+    #[test]
+    fn cli_paths_keeps_existing_paths_resolves_relative_ones_and_repairs_quoted_roots() {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::write(dir.path().join("notes.txt"), "x").unwrap();
+        std::fs::create_dir(dir.path().join("sub")).unwrap();
+        let abs_sub = dir.path().join("sub").to_string_lossy().into_owned();
+        let args = [
+            "--flag".to_string(),
+            "notes.txt".to_string(),
+            abs_sub.clone(),
+            "missing.txt".to_string(),
+            // `quarry.exe "C:\"` arrives as `C:"`; `"C:\work\"` as `C:\work"`.
+            "C:\"".to_string(),
+            format!("{abs_sub}\""),
+        ];
+        let got = super::cli_paths(args.into_iter(), dir.path());
+        assert_eq!(
+            got,
+            vec![
+                dir.path().join("notes.txt").to_string_lossy().into_owned(),
+                abs_sub.clone(),
+                "C:\\".to_string(),
+                format!("{abs_sub}\\"),
+            ]
+        );
+    }
 }
