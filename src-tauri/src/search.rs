@@ -105,6 +105,9 @@ pub fn validate_regex(pattern: &str, case_sensitive: bool, whole_word: bool, dot
 /// Flush a partial batch when it is large enough or has been pending for a while, so a single
 /// huge file streams progressively instead of jumping from 0 to its full count at the end.
 pub const BATCH_MAX: usize = 200;
+/// Matches listed from one matching block (a line, or the lines one multi-line match spans), so a
+/// minified one-line file cannot flood the results; the rest of that block is not listed or counted.
+pub const BLOCK_MATCH_CAP: usize = 1000;
 pub const BATCH_INTERVAL: Duration = Duration::from_millis(100);
 
 pub fn should_flush(len: usize, since_last: Duration) -> bool {
@@ -193,7 +196,7 @@ impl Sink for CollectSink<'_, '_> {
             });
             self.count.fetch_add(1, Ordering::Relaxed);
             seen += 1;
-            seen < 1000
+            seen < BLOCK_MATCH_CAP
         });
         if !found_any {
             // Shouldn't happen, but keep the line as a match so nothing is silently lost.
@@ -716,6 +719,24 @@ mod tests {
         assert!(batches.len() >= 5, "expected several partial batches, got {batches:?}");
         assert_eq!(batches.iter().sum::<usize>(), 1000);
         assert!(batches.iter().all(|n| *n <= BATCH_MAX));
+    }
+
+    #[test]
+    fn one_line_lists_at_most_block_match_cap_matches() {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::write(dir.path().join("min.js"), format!("{}\n{}\n", "ab ".repeat(1500), "ab ".repeat(10))).unwrap();
+        let roots = vec![dir.path().to_string_lossy().into_owned()];
+        for regex in [false, true] {
+            let mut c = q("ab", regex);
+            c.multiline = regex;
+            let found = Mutex::new(Vec::new());
+            let done = search_paths(1, &roots, &c, Arc::new(AtomicBool::new(false)), |b| found.lock().unwrap().extend(b)).unwrap();
+            let found = found.into_inner().unwrap();
+            assert_eq!(found.iter().filter(|m| m.line == 1).count(), BLOCK_MATCH_CAP);
+            assert_eq!(found.iter().filter(|m| m.line == 2).count(), 10);
+            assert_eq!(done.matches, BLOCK_MATCH_CAP + 10);
+            assert!(!done.truncated);
+        }
     }
 
     #[test]

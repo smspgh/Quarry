@@ -12044,6 +12044,10 @@
         {
           "id": "SEARCH-006.10",
           "title": "A search error is shown"
+        },
+        {
+          "id": "SEARCH-006.11",
+          "title": "At most 1,000 results of one line"
         }
       ]
     },
@@ -12052,7 +12056,7 @@
       "title": "Browse the results list",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 423,
+      "line": 429,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12108,7 +12112,7 @@
       "title": "Open a result in the editor",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 490,
+      "line": 496,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12165,7 +12169,7 @@
       "title": "Step through results with F4",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 555,
+      "line": 561,
       "status": "draft",
       "commands": [
         "find.nextResult",
@@ -12217,7 +12221,7 @@
       "title": "Leave results out",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 609,
+      "line": 615,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12266,7 +12270,7 @@
       "title": "File actions on result file rows",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 664,
+      "line": 670,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12311,7 +12315,7 @@
       "title": "Replace in Files on disk",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 714,
+      "line": 720,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12381,7 +12385,7 @@
       "title": "Replace in Files keeps each file's encoding",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 802,
+      "line": 808,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12423,7 +12427,7 @@
       "title": "Replacement text: groups and Preserve Case",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 848,
+      "line": 854,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12470,7 +12474,7 @@
       "title": "Replace in the open documents",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 898,
+      "line": 904,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12512,7 +12516,7 @@
       "title": "Undo Replace in Files",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 945,
+      "line": 951,
       "status": "draft",
       "commands": [
         "find.undoReplaceInFiles"

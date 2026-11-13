@@ -79,9 +79,6 @@ Doc / code mismatches
 - Look-around and backreferences cannot be run in any scope: `docs/find-and-replace.md:130-133` says they work with Current File / Open Files, but the panel always validates with the Rust engine and blocks the search (`SearchPanel.tsx:351-369`, `:375`, `:877`; SEARCH-004.7).
 - `docs/find-and-replace.md:113` says Rust replacement syntax with `${name}`; the code uses JavaScript rules (`$<name>`, `$&`, `$$`) and `${name}` comes out literally (`src-tauri/src/search.rs:395-452`).
 
-Not determined
-- A match block is capped at 1,000 matches (`search.rs:186`); undocumented, no scenario.
-
 ## Large files (`large-files.md`)
 
 Possible bugs

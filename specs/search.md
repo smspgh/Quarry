@@ -354,7 +354,7 @@ Scenario: SEARCH-005.8 File filters do not apply to Current File and Open Files
   - `src/components/panels/SearchPanel.tsx` — `run()`, `cancel()`, `onResults` / `onDone` / `onError` listeners (stale `searchId` ignored), `status`, "Max" field (1 to 1,000,000)
   - `src/lib/ipc.ts` — `search.start`, `search.cancel`, `onResults`, `onDone`, `onError`
   - `src-tauri/src/lib.rs` — `search_start`, `search_cancel`, `AppState.searches`
-  - `src-tauri/src/search.rs` — `search_paths`, `Batcher`, `should_flush` (`BATCH_MAX` 200, `BATCH_INTERVAL` 100 ms), `CollectSink` (`max_results`, UTF-16 columns, legacy encodings), `SearchDone`
+  - `src-tauri/src/search.rs` — `search_paths`, `Batcher`, `should_flush` (`BATCH_MAX` 200, `BATCH_INTERVAL` 100 ms), `CollectSink` (`max_results`, `BLOCK_MATCH_CAP` 1,000 per line, UTF-16 columns, legacy encodings), `SearchDone`
 - Tests: `src-tauri/src/search.rs`
 - Docs: `docs/find-and-replace.md`
 
@@ -418,6 +418,12 @@ Scenario: SEARCH-006.10 A search error is shown
   When I click Search
   Then the error is shown in the status line in the danger colour
   And the Search button is available again
+
+Scenario: SEARCH-006.11 At most 1,000 results of one line
+  Given a folder search and a minified file whose first line has 1,500 matches and whose second line has 10
+  When the search ends
+  Then 1,010 results are listed for the file: the first 1,000 of line 1 and all 10 of line 2
+  And the status counts 1,010 results and does not say "(limit reached)"
 ```
 
 ## SEARCH-007: Browse the results list
