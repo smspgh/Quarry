@@ -567,7 +567,11 @@ Scenario: DIFF-012.6 Other tabs notice
 Scenario: DIFF-012.7 Closing with unsaved edits asks
   Given a side is edited
   When I close the Compare tab
-  Then I am asked whether to save the changes first, and cancelling keeps the tab open
+  Then a dialog "Save changes to <tab name>?" says "Your changes will be lost if you don't save them."
+  And it offers "Save" (default), "Don't Save" and "Cancel"
+  And "Save" saves the edited sides and closes the tab, unless a save fails or is cancelled
+  And "Don't Save" closes the tab without writing anything
+  And "Cancel" or Escape keeps the tab open
 
 Scenario: DIFF-012.8 Nothing to save
   Given no side is edited

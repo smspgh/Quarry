@@ -154,7 +154,6 @@ Doc / code mismatches
 
 ## Compare (`compare.md`)
 
-- Not determined: the exact button labels of the save prompt when closing an edited Compare tab (`askSaveChanges`, `src/lib/actions.ts:547`; DIFF-012.7).
 - No test exercises `DiffView.tsx` or `openCompare` / `saveDiff` / `reloadDiff`.
 
 ## Claude Code tabs and terminals (`claude-code.md`, `terminal.md`)

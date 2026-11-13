@@ -3278,7 +3278,7 @@
       "title": "Reload the compared texts",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 578,
+      "line": 582,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3325,7 +3325,7 @@
       "title": "Preview comparisons replace each other",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 630,
+      "line": 634,
       "status": "draft",
       "commands": [],
       "files": [
