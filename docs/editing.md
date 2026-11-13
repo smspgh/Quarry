@@ -85,6 +85,7 @@ In every list, ↑/↓ or Tab/Shift+Tab move, Page Up/Down jump 10, Enter runs a
 
 From the **Edit** menu or the palette. With no selection, the **Lines** commands work on the whole document (a final line break stays at the end). With a selection, they work on the lines it touches (with several selections, each block of lines on its own; selections on neighbouring lines, such as a column selection, count as one block); a line the selection reaches only at its start is not included.
 
+- **Cut / Copy / Paste** (**Ctrl+X / C / V**): with nothing selected, Cut and Copy take the whole line.
 - **Line:** Duplicate Line Down (**Ctrl+Shift+D**) / Up, Delete Line (**Ctrl+Shift+K**), Move Line Up / Down (**Alt+↑ / ↓**).
 - **Lines:** Sort Ascending / Descending (natural order, case-insensitive, so `file2` sorts before `file10`), Reverse, Remove Duplicates, Delete Blank Lines (whitespace-only lines too), Delete Empty Lines, Trim Trailing Whitespace, Join Lines, Number Lines.
 - **Transform:** Uppercase, Lowercase, Title Case, Wrap Selections in Quotes.

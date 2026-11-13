@@ -50,8 +50,10 @@ function macrosMenu(): Item[] {
   return items;
 }
 
+const readOnlyDoc = () => !!activeDoc(useStore.getState())?.readonly;
+
 type Item =
-  | { cmd: string; label?: string; disabled?: boolean }
+  | { cmd: string; label?: string; disabled?: boolean; /** Shortcut shown when the key is not the command's own (Ctrl+X / C / V are CodeMirror's). */ keys?: string }
   | { sep: true }
   | { label: string; sub?: string; submenu: () => Item[] }
   | { label: string; run: () => void; keys?: string; sub?: string; disabled?: boolean };
@@ -109,6 +111,10 @@ const MENUS: Menu[] = [
     items: () => [
       { cmd: "edit.undo" },
       { cmd: "edit.redo" },
+      { sep: true },
+      { cmd: "edit.cut", keys: "Ctrl+X", disabled: readOnlyDoc() },
+      { cmd: "edit.copy", keys: "Ctrl+C" },
+      { cmd: "edit.paste", keys: "Ctrl+V", disabled: readOnlyDoc() },
       { sep: true },
       { cmd: "edit.selectAll" },
       { sep: true },
@@ -325,7 +331,7 @@ function resolve(item: Item): Resolved | null {
     if (!c) return null;
     const title = item.label ?? bareTitle(c.dynamicTitle ? c.dynamicTitle() : c.title);
     const noText = !c.enabled && TEXT_CATEGORY.test(c.id) && activeDoc(useStore.getState())?.kind !== "text";
-    return { label: title, keys: c.keys ? prettyKeys(c.keys) : undefined, run: () => void runCommand(item.cmd), disabled: item.disabled || noText || !isEnabled(c) };
+    return { label: title, keys: item.keys ?? (c.keys ? prettyKeys(c.keys) : undefined), run: () => void runCommand(item.cmd), disabled: item.disabled || noText || !isEnabled(c) };
   }
   if ("submenu" in item) {
     // A submenu whose every entry is disabled is greyed out itself (e.g. Edit › Line with no document).

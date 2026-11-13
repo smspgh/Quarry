@@ -3408,13 +3408,15 @@
       "files": [
         "src/editor/lineMenu.ts",
         "src/lib/commands.ts",
-        "src/components/EditorMenu.tsx"
+        "src/components/EditorMenu.tsx",
+        "src/components/MenuBar.tsx"
       ],
       "tests": [
         "src/__tests__/lineMenu.test.ts"
       ],
       "docs": [
-        "docs/editing.md"
+        "docs/editing.md",
+        "docs/keyboard-shortcuts.md"
       ],
       "scenarios": [
         {
@@ -3440,6 +3442,10 @@
         {
           "id": "EDIT-002.6",
           "title": "A read-only document is not changed"
+        },
+        {
+          "id": "EDIT-002.7",
+          "title": "Cut, Copy and Paste in the Edit menu"
         }
       ]
     },
@@ -3448,7 +3454,7 @@
       "title": "Select all, and select occurrences of the selection",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 110,
+      "line": 119,
       "status": "draft",
       "commands": [
         "edit.selectAll",
@@ -3504,7 +3510,7 @@
       "title": "Turn every find match into a selection",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 168,
+      "line": 177,
       "status": "draft",
       "commands": [
         "edit.selectAllMatches"
@@ -3539,7 +3545,7 @@
       "title": "Add cursors above and below",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 202,
+      "line": 211,
       "status": "draft",
       "commands": [
         "selection.addCursorAbove",
@@ -3588,7 +3594,7 @@
       "title": "Column (block) selection mode",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 251,
+      "line": 260,
       "status": "draft",
       "commands": [
         "selection.toggleColumnMode"
@@ -3646,7 +3652,7 @@
       "title": "Huge multi-cursor selections stay responsive",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 316,
+      "line": 325,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3690,7 +3696,7 @@
       "title": "Duplicate, delete and move lines",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 366,
+      "line": 375,
       "status": "draft",
       "commands": [
         "edit.duplicateLine",
@@ -3732,7 +3738,7 @@
       "title": "Sort, reverse, de-duplicate, clean up, join and number lines",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 404,
+      "line": 413,
       "status": "draft",
       "commands": [
         "code.sortAsc",
@@ -3820,7 +3826,7 @@
       "title": "Change case and wrap selections in quotes",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 501,
+      "line": 510,
       "status": "draft",
       "commands": [
         "edit.upper",
@@ -3875,7 +3881,7 @@
       "title": "Indent, outdent and convert indentation",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 558,
+      "line": 567,
       "status": "draft",
       "commands": [
         "edit.indent",
@@ -3935,7 +3941,7 @@
       "title": "Toggle line and block comments",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 619,
+      "line": 628,
       "status": "draft",
       "commands": [
         "edit.toggleComment",
@@ -3973,7 +3979,7 @@
       "title": "Fold and unfold regions",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 658,
+      "line": 667,
       "status": "draft",
       "commands": [
         "code.fold",
@@ -4016,7 +4022,7 @@
       "title": "Right-click menu on a foldable line",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 700,
+      "line": 709,
       "status": "draft",
       "commands": [
         "code.foldLine",
@@ -4072,7 +4078,7 @@
       "title": "Brackets: matching, jumping and auto-closing",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 758,
+      "line": 767,
       "status": "draft",
       "commands": [
         "code.gotoBracket"
@@ -4112,7 +4118,7 @@
       "title": "Go to Line",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 797,
+      "line": 806,
       "status": "draft",
       "commands": [
         "goto.line"
@@ -4167,7 +4173,7 @@
       "title": "Detect a document's language",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 864,
+      "line": 873,
       "status": "draft",
       "commands": [
         "code.detectLanguage"
@@ -4224,7 +4230,7 @@
       "title": "Change the language of a document",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 937,
+      "line": 946,
       "status": "draft",
       "commands": [
         "code.setLanguage"
@@ -4277,7 +4283,7 @@
       "title": "Syntax highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 996,
+      "line": 1005,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4309,7 +4315,7 @@
       "title": "Word wrap and visible whitespace",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1029,
+      "line": 1038,
       "status": "draft",
       "commands": [
         "view.toggleWrap",
@@ -4351,7 +4357,7 @@
       "title": "Zoom the editor text",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1072,
+      "line": 1081,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -4394,7 +4400,7 @@
       "title": "Let Tab leave the editor",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1114,
+      "line": 1123,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -4434,7 +4440,7 @@
       "title": "Line numbers, active line and selection-match highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1158,
+      "line": 1167,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16456,6 +16462,7 @@
       "DIFF-001",
       "DIFF-006",
       "EDIT-001",
+      "EDIT-002",
       "EDIT-003",
       "EDIT-005",
       "EDIT-008",

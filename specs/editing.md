@@ -63,8 +63,9 @@ Scenario: EDIT-001.5 Not available without a file tab
   - `src/editor/lineMenu.ts` — `clipboardText` (selections, or whole lines of empty ones), `cutSpec`, `pasteSpec` (one clipboard line per cursor when the counts match)
   - `src/lib/commands.ts` — `edit.cut` / `edit.copy` / `edit.paste` (Tauri clipboard plugin, read-only guard); Ctrl+X / C / V themselves are CodeMirror's own handling
   - `src/components/EditorMenu.tsx` — Cut / Copy / Paste items, disabled for read-only documents
+  - `src/components/MenuBar.tsx` — Edit › Cut / Copy / Paste (shortcut text given in the item, Cut / Paste disabled for read-only documents)
 - Tests: `src/__tests__/lineMenu.test.ts`
-- Docs: `docs/editing.md`
+- Docs: `docs/editing.md`, `docs/keyboard-shortcuts.md`
 
 **As a** person editing a text file
 **I want** Cut, Copy and Paste to work on the selection, or on the whole line when nothing is selected
@@ -105,6 +106,14 @@ Scenario: EDIT-002.6 A read-only document is not changed
   When I right-click a line that starts a foldable region
   Then Cut and Paste are disabled in the menu
   And Copy is available
+
+Scenario: EDIT-002.7 Cut, Copy and Paste in the Edit menu
+  Given a text tab with "beta" selected
+  When I open the Edit menu
+  Then it lists Cut, Copy and Paste with the shortcuts Ctrl+X, Ctrl+C and Ctrl+V
+  When I choose Copy
+  Then the clipboard contains "beta"
+  And for a read-only document Cut and Paste are greyed out there
 ```
 
 ## EDIT-003: Select all, and select occurrences of the selection
