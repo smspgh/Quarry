@@ -130,7 +130,7 @@ Doc / code mismatches and dead code
 
 ## Merge conflicts and stopped operations (`git-conflicts.md`)
 
-- An `am` operation is treated as a rebase: the button reads "Continue Rebase" and calls `continueOperation(root, "rebase", …)` (`src/components/panels/GitPanel.tsx:440-445`); Abort's confirm button would read "Abort Am" (`src/lib/git.ts:853`). No scenarios were written for `am`.
+- An `am` operation is labelled as a rebase: the Commit button reads "Continue Rebase" and the message box says a rebase keeps each commit's message (`src/components/panels/GitPanel.tsx`, `rebasing`); the notifications say "the am" and Abort's confirm button reads "Abort Am" (`src/lib/git.ts`, `continueOperation` / `abortOperation`). The git side is right: `continue_operation` / `abort_operation` in `git.rs` detect the operation themselves and run `git am --continue` / `--skip` / `--abort`, so only the wording is off. No scenarios were written for `am`.
 
 ## Compare (`compare.md`)
 
