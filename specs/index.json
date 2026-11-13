@@ -11114,7 +11114,7 @@
       "title": "Open a script to edit it",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 103,
+      "line": 104,
       "status": "draft",
       "commands": [
         "script.edit"
@@ -11152,7 +11152,7 @@
       "title": "Run a script on the document in front",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 140,
+      "line": 141,
       "status": "draft",
       "commands": [
         "script.runActive",
@@ -11212,7 +11212,7 @@
       "title": "Confirm before a script runs",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 211,
+      "line": 212,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11257,7 +11257,7 @@
       "title": "A script's result is applied as one undo step",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 256,
+      "line": 257,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11321,7 +11321,7 @@
       "title": "Script API for the whole document (doc)",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 333,
+      "line": 334,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11364,7 +11364,7 @@
       "title": "Script API for the selection",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 385,
+      "line": 386,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11407,7 +11407,7 @@
       "title": "Script helpers, clipboard and console",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 434,
+      "line": 435,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11458,7 +11458,7 @@
       "title": "Limit a script to certain languages or file types",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 494,
+      "line": 495,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11512,7 +11512,7 @@
       "title": "Run a script several times or until nothing changes",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 556,
+      "line": 557,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11552,7 +11552,7 @@
       "title": "Cancel a running script; runaway scripts time out",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 602,
+      "line": 603,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11592,7 +11592,7 @@
       "title": "Script errors and Console output",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 647,
+      "line": 648,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11635,7 +11635,7 @@
       "title": "Script API Reference tab",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 694,
+      "line": 695,
       "status": "draft",
       "commands": [
         "help.scriptApi"
@@ -11669,7 +11669,7 @@
       "title": "Scripts folder location",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 726,
+      "line": 727,
       "status": "draft",
       "commands": [],
       "files": [

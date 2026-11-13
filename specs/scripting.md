@@ -62,7 +62,7 @@ Scenario: SCRIPT-001.5 No scripts are built in
   - `src/lib/commands.ts` — `script.new` (shows the panel, then emits the `script.new` bus event)
   - `src/components/panels/ScriptsPanel.tsx` — `variant.newFile`, `newFileEvent`, labels "New Script" / "New Script Folder"
   - `src/lib/scripting.ts` — `newScriptFileName`, `NEW_SCRIPT_SOURCE`
-  - `src/components/panels/ExplorerPanel.tsx` — `startCreate`, `commitCreate` (writes the file and opens it)
+  - `src/components/panels/ExplorerPanel.tsx` — `startCreate` (header buttons: `targetDir()`; the `newFileEvent` bus event: the tree's root `folder`), `commitCreate` (writes the file and opens it)
   - `src/lib/bus.ts` — event bus carrying `script.new`
 - Tests: `src/__tests__/scripts.test.ts`
 - Docs: `docs/scripting.md`
@@ -74,10 +74,11 @@ Scenario: SCRIPT-001.5 No scripts are built in
 ```gherkin
 Scenario: SCRIPT-002.1 New script from the menu
   Given the Scripts panel is closed
+  And the subfolder csv was the last folder selected in its tree
   When I choose Scripts › New Script
   Then the Scripts panel opens with a name box in the tree, with the placeholder "script name"
   When I type "upper" and press Enter
-  Then the file upper.js is created in the scripts folder
+  Then the file upper.js is created at the top of the scripts folder, not in csv
   And it opens in a tab containing a short template that ends with doc.mapLines((line, i) => line);
 
 Scenario: SCRIPT-002.2 The .js extension is added only when none is typed
