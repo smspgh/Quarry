@@ -346,6 +346,44 @@ function resolve(item: Item): Resolved | null {
 
 const ITEM_SELECTOR = ".menu-item:not(:disabled)";
 
+/**
+ * Alt+letter for each top-level menu; the letter is underlined while Alt is held. Unique, and kept
+ * clear of the plain Alt+letter shortcuts: Alt+Z (word wrap), Alt+L / Alt+U (CodeMirror select line /
+ * redo selection) and the find bar's Alt+C / W / R / P. That is why Code is O, Find is N and Scripts is I.
+ */
+export const MENU_MNEMONICS: Record<string, string> = {
+  File: "f", Edit: "e", Code: "o", Selection: "s", Find: "n", View: "v", Git: "g", JSON: "j", Scripts: "i", Macros: "m", Tools: "t", Help: "h",
+};
+
+/** Index of the menu whose mnemonic is `letter` (any case), or null. Pure so it can be unit-tested. */
+export function menuForMnemonic(letter: string, labels: string[] = MENUS.map((m) => m.label)): number | null {
+  if (letter.length !== 1) return null;
+  const l = letter.toLowerCase();
+  const i = labels.findIndex((label) => MENU_MNEMONICS[label] === l);
+  return i < 0 ? null : i;
+}
+
+/** The letter an Alt+key press stands for: from the physical key (`KeyF`), so it works on any layout. */
+export function mnemonicKey(e: { key: string; code: string; altKey: boolean; ctrlKey: boolean; shiftKey: boolean; metaKey: boolean }): string | null {
+  if (!e.altKey || e.ctrlKey || e.shiftKey || e.metaKey) return null;
+  const m = /^Key([A-Z])$/.exec(e.code);
+  if (m) return m[1].toLowerCase();
+  return /^[a-z]$/i.test(e.key) ? e.key.toLowerCase() : null;
+}
+
+/** A menu label split around its mnemonic letter (the first occurrence, any case). */
+export function splitMnemonic(label: string, letter: string | undefined): [string, string, string] | null {
+  if (!letter) return null;
+  const i = label.toLowerCase().indexOf(letter.toLowerCase());
+  return i < 0 ? null : [label.slice(0, i), label[i], label.slice(i + 1)];
+}
+
+function MenuLabel({ label }: { label: string }) {
+  const parts = splitMnemonic(label, MENU_MNEMONICS[label]);
+  if (!parts) return <>{label}</>;
+  return <>{parts[0]}<span className="mnemonic">{parts[1]}</span>{parts[2]}</>;
+}
+
 /** Index of the item to focus after a keyboard move; wraps around. Pure so it can be unit-tested. */
 export function nextMenuIndex(current: number, count: number, key: "ArrowDown" | "ArrowUp" | "Home" | "End"): number {
   if (count <= 0) return -1;
@@ -454,6 +492,8 @@ function MenuList({ items, onDone, onClose, depth = 0, autoFocus = false }: { it
 export function MenuBar({ inline = false, overlay = false }: { inline?: boolean; overlay?: boolean }) {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   const [byKeyboard, setByKeyboard] = useState(false);
+  /** Alt is down: the mnemonic letters are underlined (also while a menu is open from the keyboard). */
+  const [altHeld, setAltHeld] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   // Subscribe to the bits that drive enabled/disabled state so an open menu re-renders live.
   useStore((st) => `${st.activeId}|${st.docs.length}|${st.recording}|${st.macroPlaying}|${st.macroPaused}|${st.macros.length}|${st.activeScriptId}`);
@@ -503,40 +543,56 @@ export function MenuBar({ inline = false, overlay = false }: { inline?: boolean;
     first?.focus();
   }, [openIdx, byKeyboard]);
 
-  // A lone Alt press (no other key while held) or F10 opens the first menu, like classic Win32 apps.
+  // A lone Alt press (no other key while held) or F10 opens the first menu, like classic Win32 apps;
+  // Alt+letter opens the menu with that mnemonic (letters are underlined while Alt is held).
   // Not while a modal dialog is open: it owns the keyboard, as in App.tsx's shortcut guard.
   useEffect(() => {
     let altOnly = false;
     const down = (e: KeyboardEvent) => {
       if (useStore.getState().dialog) {
         altOnly = false;
+        setAltHeld(false);
         return;
       }
       altOnly = e.key === "Alt" && !e.ctrlKey && !e.shiftKey;
+      if (e.key === "Alt") setAltHeld(!e.ctrlKey && !e.shiftKey && !e.metaKey);
       if (e.key === "F10" && !e.ctrlKey && !e.altKey && !e.shiftKey) {
         e.preventDefault();
         openWithKeyboard(openIdx === null ? 0 : null);
+        return;
       }
+      // Keys already handled (CodeMirror's Alt+L, …) and a terminal's own Alt keys are left alone.
+      const letter = mnemonicKey(e);
+      if (letter === null || e.defaultPrevented || (e.target as HTMLElement | null)?.closest?.(".terminal-view")) return;
+      const i = menuForMnemonic(letter);
+      if (i === null) return;
+      e.preventDefault();
+      e.stopPropagation();
+      openWithKeyboard(i);
     };
     const up = (e: KeyboardEvent) => {
+      if (e.key === "Alt") setAltHeld(false);
       if (e.key === "Alt" && altOnly && !useStore.getState().dialog) {
         e.preventDefault();
         openWithKeyboard(openIdx === null ? 0 : null);
       }
       altOnly = false;
     };
+    const blur = () => setAltHeld(false);
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
+    window.addEventListener("blur", blur);
     return () => {
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
+      window.removeEventListener("blur", blur);
     };
   }, [openIdx]);
 
   if (overlay && openIdx === null) return null;
 
   return (
-    <div ref={rootRef} className={`menubar ${inline ? "inline" : ""} ${overlay ? "overlay-bar" : ""}`} role="menubar" aria-label="Application menu">
+    <div ref={rootRef} className={`menubar ${inline ? "inline" : ""} ${overlay ? "overlay-bar" : ""} ${altHeld || (openIdx !== null && byKeyboard) ? "show-mnemonics" : ""}`} role="menubar" aria-label="Application menu">
       {MENUS.map((m, i) => (
         <div key={m.label} className="menu-root">
           <button
@@ -551,8 +607,9 @@ export function MenuBar({ inline = false, overlay = false }: { inline?: boolean;
               setOpenIdx(openIdx === i ? null : i);
             }}
             onMouseEnter={() => openIdx !== null && openIdx !== i && setOpenIdx(i)}
+            aria-keyshortcuts={MENU_MNEMONICS[m.label] ? `Alt+${MENU_MNEMONICS[m.label].toUpperCase()}` : undefined}
           >
-            {m.label}
+            <MenuLabel label={m.label} />
           </button>
           {openIdx === i && <MenuList items={m.items()} onDone={() => { setOpenIdx(null); editor.focus(); }} />}
         </div>

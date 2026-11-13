@@ -15061,6 +15061,7 @@
       "commands": [],
       "files": [
         "src/components/MenuBar.tsx",
+        "src/styles/app.css",
         "src/editor/manager.ts"
       ],
       "tests": [
@@ -15102,6 +15103,26 @@
         {
           "id": "UI-004.8",
           "title": "Alt and F10 do nothing while a dialog is open"
+        },
+        {
+          "id": "UI-004.9",
+          "title": "Alt+letter opens that menu"
+        },
+        {
+          "id": "UI-004.10",
+          "title": "Each menu has its own letter"
+        },
+        {
+          "id": "UI-004.11",
+          "title": "The letters are underlined while Alt is held"
+        },
+        {
+          "id": "UI-004.12",
+          "title": "Mnemonics leave other Alt shortcuts alone"
+        },
+        {
+          "id": "UI-004.13",
+          "title": "Hidden menu bar"
         }
       ]
     },
@@ -15110,7 +15131,7 @@
       "title": "Command palette",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 249,
+      "line": 300,
       "status": "draft",
       "commands": [
         "view.commandPalette",
@@ -15166,7 +15187,7 @@
       "title": "Quick Open a file by name",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 315,
+      "line": 366,
       "status": "draft",
       "commands": [
         "file.quickOpen"
@@ -15212,7 +15233,7 @@
       "title": "Go to Line from the palette",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 365,
+      "line": 416,
       "status": "draft",
       "commands": [
         "goto.line"
@@ -15265,7 +15286,7 @@
       "title": "One command registry behind menus, shortcuts and the palette",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 429,
+      "line": 480,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15302,7 +15323,7 @@
       "title": "Global keyboard shortcuts",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 474,
+      "line": 525,
       "status": "draft",
       "commands": [
         "ui.escape"
@@ -15362,7 +15383,7 @@
       "title": "Modal dialogs",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 554,
+      "line": 605,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15408,7 +15429,7 @@
       "title": "Notifications",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 616,
+      "line": 667,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15443,7 +15464,7 @@
       "title": "Panel rail",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 656,
+      "line": 707,
       "status": "draft",
       "commands": [
         "view.explorer",
@@ -15500,7 +15521,7 @@
       "title": "Floating and pinned side panels",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 715,
+      "line": 766,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15564,7 +15585,7 @@
       "title": "Collapse and restore the side panels",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 797,
+      "line": 848,
       "status": "draft",
       "commands": [
         "view.toggleSidebar"
@@ -15611,7 +15632,7 @@
       "title": "Side panel widths",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 847,
+      "line": 898,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15650,7 +15671,7 @@
       "title": "Bottom panel",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 892,
+      "line": 943,
       "status": "draft",
       "commands": [
         "view.togglePanel",
@@ -15714,7 +15735,7 @@
       "title": "Status bar position and document facts",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 964,
+      "line": 1015,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15756,7 +15777,7 @@
       "title": "Status bar pickers for indentation, encoding, line endings and language",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1011,
+      "line": 1062,
       "status": "draft",
       "commands": [
         "view.setTabSize",
@@ -15823,7 +15844,7 @@
       "title": "Light and dark themes",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1093,
+      "line": 1144,
       "status": "draft",
       "commands": [
         "view.toggleTheme"
@@ -15873,7 +15894,7 @@
       "title": "Zoom and editor view toggles",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1148,
+      "line": 1199,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -15931,7 +15952,7 @@
       "title": "Keyboard focus returns to the active tab",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1212,
+      "line": 1263,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15977,7 +15998,7 @@
       "title": "Tab key can leave the editor",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1263,
+      "line": 1314,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -16017,7 +16038,7 @@
       "title": "Single instance and files handed over by Windows",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1308,
+      "line": 1359,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16069,7 +16090,7 @@
       "title": "Window size and position are remembered",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1367,
+      "line": 1418,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16107,7 +16128,7 @@
       "title": "Notice after an unexpected exit",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1409,
+      "line": 1460,
       "status": "draft",
       "commands": [],
       "files": [
@@ -18129,6 +18150,7 @@
       "UI-001",
       "UI-002",
       "UI-003",
+      "UI-004",
       "UI-005",
       "UI-010",
       "UI-011",

@@ -16,7 +16,7 @@
 
 ## Window layout
 
-- **Title bar.** By default it holds the Quarry mark and the menus (File, Edit, View, …). **Alt** or **F10** opens the menus from the keyboard.
+- **Title bar.** By default it holds the Quarry mark and the menus (File, Edit, View, …). **Alt** or **F10** opens the menus from the keyboard, and **Alt+letter** opens one menu directly: hold Alt and each menu's letter is underlined (**Alt+F** File, **Alt+E** Edit, **Alt+O** Code, **Alt+N** Find, **Alt+I** Scripts, …).
 - **Tabs.** Once a document is open, its tab appears in a row above the title bar. The active tab is always highlighted with an accent bar and bold name. Right-click a tab for Close, Close Others, Copy Path, **Show in Quarry Explorer** and **Show in Windows Explorer** (the last three for saved files only).
   - **More tabs than fit** wrap onto another row below, starting under the first tab, so every tab stays visible. The tab area grows a row at a time.
   - **New files** are named Untitled-1, Untitled-2, … using the lowest number no open tab has, so closing Untitled-1 makes the next new file Untitled-1 again.
@@ -25,7 +25,7 @@
   - **Show in Quarry Explorer** opens the Explorer panel, expands the tree down to the file, selects it and puts keyboard focus on it. If the file isn't inside the folder open in the Explorer, its own folder is opened there.
   - **Show in Windows Explorer** opens Windows File Explorer at the file's folder with the file selected.
   - Both are also in the **File** menu and the command palette, for the active document. New documents come from **File › New**, **Ctrl+N** or the welcome screen.
-- **Menu position.** **Settings › Appearance › Menu bar** can instead put the menus on their own row (**Top**) or hide them (**Hidden**, shown with Alt or F10). In both of those, the tabs share the title bar.
+- **Menu position.** **Settings › Appearance › Menu bar** can instead put the menus on their own row (**Top**) or hide them (**Hidden**, shown with Alt, F10 or an Alt+letter). In both of those, the tabs share the title bar.
 - **Quarry mark.** Clicking the icon at the left of the title bar collapses every open side panel. Clicking it again brings back the pinned ones. Collapsing lasts until you restart: pinned panels always come back expanded on start.
 - **Panel rail and side panels.** A strip of coloured icons on the left edge opens the panels: Search, Explorer, Source Control ([Git](git.md)), JSON Tools, Scripts, Macros and, at the bottom, Settings. Hover an icon to see its name ("Explorer Panel", …); click it to open the panel, and click it again to close it. The panels are also in **View › Panels**. **Ctrl+B** collapses the open panels, or brings them back; with nothing pinned it reopens the panel you had open last (the Quarry mark only brings back pinned panels).
   - **Floating or pinned.** A panel opens floating: it pushes the editor over (it never covers the document) and closes when you click back into the document (or press **Escape**). Click the pin button at the top of a panel to keep it open beside the editor. Pinned panels stay visible together, side by side in the order you pinned them, and a panel you open next floats just to their right. A pinned panel has a pin in its top-left corner, in the panel's colour, and a dot on its rail icon. Click the pin button again to unpin it; the panel-close button unpins and closes it. Only pinned panels reopen when Quarry starts.

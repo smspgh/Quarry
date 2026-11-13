@@ -180,13 +180,14 @@ Scenario: UI-003.7 Help menu
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/MenuBar.tsx` — `MenuBar` (lone Alt / F10 listener, ignored while `store.dialog` is set, Left / Right between menus, Escape, `openWithKeyboard`), `MenuList.onKeyDown` (Up / Down / Home / End, Right / Enter / Space into a submenu, Left out of it, Tab kept inside), `nextMenuIndex`, `ITEM_SELECTOR` (disabled items are skipped)
+  - `src/components/MenuBar.tsx` — `MenuBar` (lone Alt / F10 / Alt+letter listener, ignored while `store.dialog` is set, Left / Right between menus, Escape, `openWithKeyboard`, `altHeld` → `show-mnemonics`), `MENU_MNEMONICS`, `menuForMnemonic`, `mnemonicKey` (letter from `KeyboardEvent.code`), `splitMnemonic` / `MenuLabel`, `MenuList.onKeyDown` (Up / Down / Home / End, Right / Enter / Space into a submenu, Left out of it, Tab kept inside), `nextMenuIndex`, `ITEM_SELECTOR` (disabled items are skipped)
+  - `src/styles/app.css` — `.menubar.show-mnemonics .mnemonic` (underline)
   - `src/editor/manager.ts` — `editor.focus()` when the menu closes
 - Tests: `src/__tests__/ui.test.ts`
 - Docs: `docs/keyboard-shortcuts.md`, `docs/editing.md`
 
 **As a** keyboard user
-**I want** to open and walk the menus with Alt, F10 and the arrow keys
+**I want** to open and walk the menus with Alt, F10, Alt+letter and the arrow keys
 **So that** I can reach every menu command without the mouse
 
 ```gherkin
@@ -241,9 +242,59 @@ Scenario: UI-004.7 Escape closes the whole menu
 
 Scenario: UI-004.8 Alt and F10 do nothing while a dialog is open
   Given a dialog asks whether to save "notes.txt"
-  When I press and release Alt, or press F10
+  When I press and release Alt, press F10, or press Alt+F
   Then no menu opens
   And the dialog keeps the keyboard focus
+
+Scenario: UI-004.9 Alt+letter opens that menu
+  Given no menu is open and the menu bar is in the title bar or on its own row
+  When I press Alt+V
+  Then the View menu opens with its first enabled item focused
+  When I press Alt+E
+  Then the Edit menu is open instead
+
+Scenario Outline: UI-004.10 Each menu has its own letter
+  When I press Alt+<letter>
+  Then the <menu> menu opens
+
+  Examples:
+    | letter | menu      |
+    | F      | File      |
+    | E      | Edit      |
+    | O      | Code      |
+    | S      | Selection |
+    | N      | Find      |
+    | V      | View      |
+    | G      | Git       |
+    | J      | JSON      |
+    | I      | Scripts   |
+    | M      | Macros    |
+    | T      | Tools     |
+    | H      | Help      |
+
+Scenario: UI-004.11 The letters are underlined while Alt is held
+  Given no menu is open
+  When I hold Alt
+  Then the "F" of File, the "o" of Code and the "i" of Scripts are underlined
+  When I release Alt
+  Then the File menu opens and the letters stay underlined while it is open
+  And the letters are not underlined when a menu is opened with the mouse
+
+Scenario: UI-004.12 Mnemonics leave other Alt shortcuts alone
+  Given the editor has focus
+  When I press Alt+L
+  Then the line is selected and no menu opens
+  Given the find bar has focus
+  When I press Alt+C
+  Then Match Case is toggled and no menu opens
+  Given a Claude CLI terminal tab has focus
+  When I press Alt+F
+  Then the key goes to the terminal and no menu opens
+
+Scenario: UI-004.13 Hidden menu bar
+  Given Settings › Appearance › Menu bar is Hidden
+  When I press Alt+G
+  Then the menu bar appears with the Git menu open
 ```
 
 ## UI-005: Command palette

@@ -108,6 +108,7 @@ Inside the find bar: **Enter / Shift+Enter** next / previous, **Alt+C / Alt+W / 
 | Ctrl+M | Toggle Tab Key Moves Focus | `view.toggleTabFocus` |
 | Ctrl+= / Ctrl+- / Ctrl+0 | Zoom In / Out / Reset | `view.zoomIn` / `view.zoomOut` / `view.zoomReset` |
 | Alt, F10 | Open the menu bar | – |
+| Alt+F / E / O / S / N / V / G / J / I / M / T / H | Open File / Edit / Code / Selection / Find / View / Git / JSON / Scripts / Macros / Tools / Help (the letter is underlined while Alt is held) | – |
 
 ## JSON
 
