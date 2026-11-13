@@ -45,11 +45,13 @@ Large files are coloured as you scroll: only the lines on screen are coloured, s
 
 | Files | Colours |
 | --- | --- |
-| `.json`, `.jsonl`, `.ndjson`, `.geojson`, `.har` | keys, strings, numbers, `true` / `false` / `null` |
-| `.log` (and `.txt` files that look like logs) | timestamps, the log level (ERROR and FATAL in red, WARN in amber, DEBUG and TRACE dimmed), `[tags]`, `key=` names and numbers |
-| `.csv`, `.tsv` | one colour per column, so a row is easy to follow; quoted fields stay in one column |
-| `.xml`, `.html`, `.svg` | tags, attributes, values and comments |
+| `.json`, `.jsonc`, `.json5`, `.jsonl`, `.ndjson`, `.geojson`, `.har` | keys, strings, numbers, `true` / `false` / `null` |
+| `.log`, `.out`, `.err` | timestamps, the log level (ERROR and FATAL in red, WARN in amber, DEBUG and TRACE dimmed), `[tags]`, `key=` names and numbers |
+| `.csv`, `.tsv`, `.tab` | one colour per column, so a row is easy to follow; quoted fields stay in one column |
+| `.xml`, `.html`, `.htm`, `.xhtml`, `.svg`, `.plist`, `.xsd`, `.kml`, `.gpx` | tags, attributes, values and comments |
 | `.sql` | keywords, strings, numbers and comments |
+
+A file with any other extension (`.txt`, say) is coloured as a log, JSON or XML when its first 40 non-empty lines look like one; otherwise it stays plain.
 
 Each line is coloured on its own, so something that spans lines (an XML comment, say) is coloured only on its first line. Lines are coloured up to 4,000 characters. Turn it off with **Settings › Files › Colours in large-file mode**.
 

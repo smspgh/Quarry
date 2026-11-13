@@ -776,6 +776,10 @@
         {
           "id": "BIG-012.6",
           "title": "Colours can be turned off"
+        },
+        {
+          "id": "BIG-012.7",
+          "title": "Every coloured extension and the sniffed formats"
         }
       ]
     },
@@ -784,7 +788,7 @@
       "title": "Filter view of matching lines",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 734,
+      "line": 741,
       "status": "draft",
       "commands": [
         "big.filter"
@@ -854,7 +858,7 @@
       "title": "Follow a file as it grows",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 810,
+      "line": 817,
       "status": "draft",
       "commands": [
         "big.follow"
@@ -915,7 +919,7 @@
       "title": "CSV and TSV grid",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 880,
+      "line": 887,
       "status": "draft",
       "commands": [],
       "files": [
@@ -979,7 +983,7 @@
       "title": "JSON tree read from the file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 956,
+      "line": 963,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1049,7 +1053,7 @@
       "title": "Validate a large JSON file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1035,
+      "line": 1042,
       "status": "draft",
       "commands": [
         "json.validate"
@@ -1101,7 +1105,7 @@
       "title": "Show large-file info",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1088,
+      "line": 1095,
       "status": "draft",
       "commands": [
         "big.info"
@@ -1132,7 +1136,7 @@
       "title": "Reload when the file changes on disk",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1116,
+      "line": 1123,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1164,7 +1168,7 @@
       "title": "What large-file tabs do not offer",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1152,
+      "line": 1159,
       "status": "draft",
       "commands": [],
       "files": [

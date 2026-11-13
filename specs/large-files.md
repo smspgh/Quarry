@@ -729,6 +729,13 @@ Scenario: BIG-012.6 Colours can be turned off
   When I open a large log
   Then large-file tabs show plain text
   And the filter pane no longer offers the Errors and Warnings buttons
+
+Scenario: BIG-012.7 Every coloured extension and the sniffed formats
+  Given large files named "a.json", "a.jsonc", "a.json5", "a.jsonl", "a.ndjson", "a.geojson", "a.har", "a.log", "a.out", "a.err", "a.csv", "a.tsv", "a.tab", "a.xml", "a.html", "a.htm", "a.xhtml", "a.svg", "a.plist", "a.xsd", "a.kml", "a.gpx" and "a.sql"
+  When I open each one
+  Then each is coloured as JSON, log, CSV, TSV, XML or SQL by its extension
+  And a file with another extension whose first lines start with "{" or "[" and hold "key": pairs is coloured as JSON
+  And one whose first lines mostly start with "<" is coloured as XML
 ```
 
 ## BIG-013: Filter view of matching lines

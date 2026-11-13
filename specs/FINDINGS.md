@@ -89,7 +89,6 @@ Not determined
 Possible bugs
 
 Doc / code mismatches and dead code
-- `docs/large-files.md:48-52` omits extensions that are coloured (`src/lib/bigHighlight.ts:21-27`): `.out`, `.err`, `.jsonc`, `.json5`, `.tab`, `.htm`, `.xhtml`, `.plist`, `.xsd`, `.kml`, `.gpx`; sniffing also detects JSON and XML.
 - `.jsonl` / `.ndjson` get colours but no JSON tree or Validate (`isBigJson`, `src/lib/commands.ts:343`); probably intended, stated nowhere.
 - The filter pane always sends `dotAll: false` (`src/components/BigFilterPane.tsx:73`); filtered rows are cut at 2,000 characters (20,000 in grid mode) with no "more" marker (`:247-250`).
 - `big_filter_position` (`src-tauri/src/lib.rs:338`) has no wrapper or caller; `BottomTab` still includes `"bigsearch"` (`src/lib/store.ts:7`).
