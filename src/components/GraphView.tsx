@@ -368,6 +368,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
     window.addEventListener("mouseup", up);
   };
 
+  const conflicts = repo?.files.filter((f) => f.conflicted).length ?? 0;
   const sel = index >= 0 ? commits[index] : picked && picked.sha === selected ? picked : null;
   const item = (label: string, Icon: typeof Copy, run: () => void, title?: string, danger = false) => (
     <button className={`palette-item ${danger ? "danger" : ""}`} role="menuitem" title={title} onClick={() => { setMenu(null); run(); }}>
@@ -426,7 +427,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
         <div className="graph-strip warn" role="status">
           <TriangleAlert size={14} />
           <span className="grow">
-            A {repo.operation} stopped part-way{repo.files.some((f) => f.conflicted) ? `: ${repo.files.filter((f) => f.conflicted).length} file(s) have conflicts` : ""}. Resolve them in Source Control and commit, or abort to go back to how things were.
+            A {repo.operation} stopped part-way{conflicts ? `: ${conflicts} file${conflicts === 1 ? " has" : "s have"} conflicts` : ""}. Resolve them in Source Control and commit, or abort to go back to how things were.
           </span>
           <button className="btn small" onClick={() => showPanel("git")}>Open Source Control</button>
           <button className="btn small" disabled={!!busy} onClick={() => void abortOperation(root, repo.operation!)}>Abort</button>
