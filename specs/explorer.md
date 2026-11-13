@@ -386,7 +386,7 @@ Scenario: EXPL-007.6 The watcher cannot start
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/ExplorerPanel.tsx` — `startCreate`, `targetDir`, `commitCreate` (once-only guard `committingCreate`), `fileNameProblem`, the name box row
+  - `src/components/panels/ExplorerPanel.tsx` — `startCreate`, `targetDir`, `commitCreate` (once-only guard `committingCreate`; `createClosed` stops a blur after Escape or a finished commit from committing again), `fileNameProblem`, the name box row
   - `src/lib/ipc.ts` — `fs.exists`, `fs.createDir`, `fs.writeText`
   - `src-tauri/src/lib.rs` — `fs_create_dir`, `fs_exists`
 - Tests: `src/__tests__/paths.test.ts`
@@ -417,6 +417,8 @@ Scenario: EXPL-008.3 Escape or an empty name creates nothing
   Given the name box is open
   When I press Escape, or press Enter with the box empty
   Then the name box closes and nothing is created
+  When I type "x.txt" in a new name box and press Escape
+  Then no file "x.txt" is created, even though the box loses focus as it closes
 
 Scenario: EXPL-008.4 A name Windows refuses is rejected
   Given the name box is open
@@ -448,7 +450,7 @@ Scenario: EXPL-008.6 An existing name is never overwritten
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/ExplorerPanel.tsx` — `startRename`, `commitRename` (open tabs follow, `explorerExpanded` follows a renamed folder, case-only rename allowed), rename input (`onFocus` selects the name without its extension), "Rename" menu item, F2
+  - `src/components/panels/ExplorerPanel.tsx` — `startRename`, `commitRename` (runs once per box: `renameClosed` is set by Escape and by the first commit, so the blur as the box is removed does nothing; open tabs follow, `explorerExpanded` follows a renamed folder, case-only rename allowed), rename input (`onFocus` selects the name without its extension), "Rename" menu item, F2
   - `src/lib/ipc.ts` — `fs.rename`
   - `src-tauri/src/lib.rs` — `fs_rename`
 - Tests: `src/__tests__/paths.test.ts`
@@ -479,9 +481,10 @@ Scenario: EXPL-009.3 Tabs follow a renamed folder
   And the folder "app" is still expanded
 
 Scenario: EXPL-009.4 Escape cancels
-  Given I am renaming "notes.md"
+  Given I am renaming "notes.md" and have typed "todo.md"
   When I press Escape
   Then the file is still called "notes.md"
+  And no error toast is shown
 
 Scenario: EXPL-009.5 A taken name is refused
   Given "a.txt" and "b.txt" are in the same folder
@@ -503,6 +506,12 @@ Scenario: EXPL-009.8 Rename is for one item
   Given "a.txt" and "b.txt" are selected
   When I right-click "a.txt"
   Then the menu does not offer "Rename"
+
+Scenario: EXPL-009.9 Enter renames once
+  Given I am renaming "notes.md"
+  When I type "todo.md" and press Enter
+  Then the file is renamed to "todo.md"
+  And no "already exists" error follows when the box closes
 ```
 
 ## EXPL-010: Delete files and folders to the Recycle Bin
