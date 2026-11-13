@@ -83,7 +83,7 @@ src/
 - **Large-file tabs** are `kind: "big"` documents rendered by `BigFileView.tsx`. The UI never holds their text. Commands reach them through events on `src/lib/bus.ts` (`big.find`, `big.goto`, …).
 - **JSON tree.** The tree uses the tolerant parser in `src/lib/jsonPath.ts`, so it keeps working on half-typed JSON. Validate and Format use the strict Rust code.
 - **Claude Code.** Claude tabs are `kind: "claude"` documents:
-  - `claude.rs` runs `claude -p --input-format stream-json --output-format stream-json --include-partial-messages --permission-prompt-tool stdio` in the tab's folder and forwards each stdout line as a `claude:out` event.
+  - `claude.rs` runs `claude -p --input-format stream-json --output-format stream-json --verbose --include-partial-messages --permission-prompt-tool stdio` (plus `--permission-mode`, `--model` and `--resume` when set; `--verbose` is required for stream-json output with `-p`) in the tab's folder and forwards each stdout line as a `claude:out` event.
   - `src/lib/claudeProtocol.ts` is pure and unit-tested. It folds those events into a transcript, and builds what goes to stdin: user messages with images, `interrupt`, and answers to `can_use_tool` permission requests. AskUserQuestion is answered by allowing it with `answers`; **Allow for this conversation** sends back the suggested rules with `destination: "session"`.
   - `src/lib/claude.ts` keeps each tab's session, `ClaudeView.tsx` draws it, and `Markdown.tsx` renders replies through the parser in `src/lib/markdown.ts` as React elements, never as HTML.
   - Past conversations are read from Claude Code's JSONL transcripts (`claude_conversations`, `claude_history`) and replayed through the same reducer.

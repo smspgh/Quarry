@@ -160,7 +160,6 @@ Doc / code mismatches
 
 - The model setting applies on every process start, not only new conversations: the hint says "For conversations started from now on" (`src/components/panels/SettingsPanel.tsx:344`, `docs/settings.md:91`), but `spawn` passes `claudeModel` on resumes too (`src/lib/claude.ts:188`; CLAUDE-018.3).
 - Terminal resume has no UI entry point: `claude.openTerminal` accepts `{ folder, resume }` and `pty_start` honours it (`src/lib/commands.ts:1199`, `src-tauri/src/pty.rs:101`), but no caller passes `resume` (TERM-002).
-- `build_args` also passes `--verbose` (`claude.rs:73`), which the project notes omit.
 - Ctrl+Shift+C with no selection is swallowed, neither copied nor sent to the program (`src/components/TerminalView.tsx:106`; TERM-004.3). Probably intended.
 - `pty:exit` always carries a code; the UI's null handling is only reached on a start failure (`TerminalView.tsx:83`).
 - CLAUDE-007.7 (external-change handling of files Claude edits) is taken from the docs.
