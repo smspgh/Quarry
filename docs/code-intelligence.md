@@ -36,8 +36,8 @@ JSON keeps Quarry's own [JSON tools](json.md). Files in [large-file mode](large-
 | **Ctrl+Shift+Space** | Parameter hints for the call you're typing (they also appear by themselves after `(` and `,`) |
 | **F12** | Go to Definition, in another tab if it's in another file |
 | **Ctrl+F12** | Go to Implementation |
-| **Shift+F12** | Find All References, listed in a panel under the editor (Esc closes it) |
-| **F2** | Rename Symbol across the project's open files |
+| **Shift+F12** | Find All References, listed in a panel under the editor that takes the keyboard: ↑ / ↓ and Enter go to a reference, Esc or × closes it |
+| **F2** | Rename Symbol across the project's open files: type the new name and press Enter (Esc cancels). Each changed tab undoes its part with Ctrl+Z |
 | **F8** / **Shift+F8** | Next / previous problem |
 
 All of these are also in the **Code** category of the command palette, along with **Go to Type Definition**, **Format Document with Language Server** and **Restart Language Servers**. Quarry's own **Format Document** (Shift+Alt+F) is unchanged.

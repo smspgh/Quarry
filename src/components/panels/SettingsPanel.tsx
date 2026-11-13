@@ -361,13 +361,19 @@ function CodeIntelSection({ change }: { change: <K extends keyof Settings>(key: 
   const [found, setFound] = React.useState<Record<string, string | null>>({});
   const [busy, setBusy] = React.useState(false);
 
+  const folder = useStore((st) => st.folder);
   const detect = React.useCallback(() => {
     for (const def of SERVERS) {
       const override = s.lspCommands[def.id]?.trim();
       const program = override ? splitCommand(override)[0] : def.command;
-      invoke<string | null>("lsp_which", { command: program }).then((p) => setFound((f) => ({ ...f, [def.id]: p })), () => setFound((f) => ({ ...f, [def.id]: null })));
+      // TypeScript: the server lib/lsp.ts would really start (TypeScript 7's tsc, or
+      // typescript-language-server for 5 / 6), not just any tsc on PATH.
+      const where = !override && def.id === "typescript"
+        ? invoke<{ command: string } | null>("lsp_typescript", { root: folder ?? "" }).then((ts) => ts?.command ?? null)
+        : invoke<string | null>("lsp_which", { command: program });
+      where.then((p) => setFound((f) => ({ ...f, [def.id]: p })), () => setFound((f) => ({ ...f, [def.id]: null })));
     }
-  }, [s.lspCommands]);
+  }, [s.lspCommands, folder]);
   React.useEffect(() => { if (isOpen && s.lspEnabled) detect(); }, [isOpen, s.lspEnabled, detect]);
   // Installing happens in a terminal tab; look again when coming back to Settings.
   React.useEffect(() => {

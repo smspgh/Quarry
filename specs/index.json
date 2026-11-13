@@ -1331,7 +1331,8 @@
         "src/lib/tabLimit.ts"
       ],
       "tests": [
-        "src-tauri/src/claude.rs"
+        "src-tauri/src/claude.rs",
+        "src/__tests__/claudeSession.test.ts"
       ],
       "docs": [
         "docs/claude-code.md"
@@ -1387,7 +1388,8 @@
         "src-tauri/src/writer.rs"
       ],
       "tests": [
-        "src/__tests__/claude.test.ts"
+        "src/__tests__/claude.test.ts",
+        "src/__tests__/claudeSession.test.ts"
       ],
       "docs": [
         "docs/claude-code.md"
@@ -1524,7 +1526,8 @@
       "commands": [],
       "files": [
         "src/components/ClaudeView.tsx",
-        "src/lib/claudeProtocol.ts"
+        "src/lib/claudeProtocol.ts",
+        "src/lib/actions.ts"
       ],
       "tests": [
         "src/__tests__/claude.test.ts"
@@ -1568,7 +1571,7 @@
       "title": "Answer permission requests",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 381,
+      "line": 385,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1620,7 +1623,7 @@
       "title": "Choose how much Claude may do without asking",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 432,
+      "line": 436,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1632,7 +1635,8 @@
         "src/lib/types.ts"
       ],
       "tests": [
-        "src-tauri/src/claude.rs"
+        "src-tauri/src/claude.rs",
+        "src/__tests__/claudeSession.test.ts"
       ],
       "docs": [
         "docs/claude-code.md"
@@ -1665,7 +1669,7 @@
       "title": "Answer Claude's questions",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 479,
+      "line": 483,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1707,7 +1711,7 @@
       "title": "Follow Claude's task list",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 525,
+      "line": 529,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1744,7 +1748,7 @@
       "title": "Attach pictures to a message",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 558,
+      "line": 562,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1798,7 +1802,7 @@
       "title": "Point Claude at files and selections",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 616,
+      "line": 620,
       "status": "draft",
       "commands": [
         "claude.addSelection",
@@ -1862,7 +1866,7 @@
       "title": "Read formatted replies",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 685,
+      "line": 689,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1913,7 +1917,7 @@
       "title": "Start a new conversation in the same folder",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 737,
+      "line": 741,
       "status": "draft",
       "commands": [
         "claude.newSession"
@@ -1923,7 +1927,9 @@
         "src/lib/commands.ts",
         "src/components/ClaudeView.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/claudeSession.test.ts"
+      ],
       "docs": [
         "docs/claude-code.md"
       ],
@@ -1951,7 +1957,7 @@
       "title": "Continue a conversation after restarting Quarry",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 775,
+      "line": 779,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1963,7 +1969,8 @@
       ],
       "tests": [
         "src/__tests__/claude.test.ts",
-        "src-tauri/src/claude.rs"
+        "src-tauri/src/claude.rs",
+        "src/__tests__/claudeSession.test.ts"
       ],
       "docs": [
         "docs/claude-code.md"
@@ -2004,7 +2011,7 @@
       "title": "Browse and reopen past conversations",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 829,
+      "line": 833,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2060,7 +2067,7 @@
       "title": "Choose the model",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 889,
+      "line": 893,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2073,7 +2080,8 @@
       ],
       "tests": [
         "src/__tests__/claude.test.ts",
-        "src-tauri/src/claude.rs"
+        "src-tauri/src/claude.rs",
+        "src/__tests__/claudeSession.test.ts"
       ],
       "docs": [
         "docs/claude-code.md"
@@ -2102,7 +2110,7 @@
       "title": "Know what background Claude tabs are doing",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 930,
+      "line": 934,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2138,7 +2146,7 @@
       "title": "Closing tabs, quitting and a process that stops",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 966,
+      "line": 970,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2150,7 +2158,8 @@
         "src/lib/updater.ts"
       ],
       "tests": [
-        "src/__tests__/claude.test.ts"
+        "src/__tests__/claude.test.ts",
+        "src/__tests__/claudeSession.test.ts"
       ],
       "docs": [
         "docs/claude-code.md"
@@ -2790,7 +2799,8 @@
         "src/styles/app.css"
       ],
       "tests": [
-        "src/__tests__/diff.test.ts"
+        "src/__tests__/diff.test.ts",
+        "src/__tests__/diffSession.test.ts"
       ],
       "docs": [
         "docs/compare.md"
@@ -2867,6 +2877,10 @@
         {
           "id": "DIFF-002.6",
           "title": "Untitled tabs can't be selected"
+        },
+        {
+          "id": "DIFF-002.7",
+          "title": "Only a text tab is compared with the selected file"
         }
       ]
     },
@@ -2875,7 +2889,7 @@
       "title": "Compare the active tab with a file",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 118,
+      "line": 124,
       "status": "draft",
       "commands": [
         "compare.activeWith"
@@ -2912,7 +2926,7 @@
       "title": "Compare unsaved edits with the saved file",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 156,
+      "line": 162,
       "status": "draft",
       "commands": [
         "compare.withSaved"
@@ -2946,7 +2960,7 @@
       "title": "Compare the active tab with the clipboard",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 190,
+      "line": 196,
       "status": "draft",
       "commands": [
         "compare.withClipboard"
@@ -2957,7 +2971,8 @@
         "src/lib/diff.ts"
       ],
       "tests": [
-        "src/__tests__/diff.test.ts"
+        "src/__tests__/diff.test.ts",
+        "src/__tests__/diffSession.test.ts"
       ],
       "docs": [
         "docs/compare.md"
@@ -2986,7 +3001,7 @@
       "title": "Compare a file with its last commit",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 228,
+      "line": 234,
       "status": "draft",
       "commands": [
         "git.compareWithHead"
@@ -3029,6 +3044,10 @@
         {
           "id": "DIFF-006.6",
           "title": "Binary"
+        },
+        {
+          "id": "DIFF-006.7",
+          "title": "The file is not open in a tab"
         }
       ]
     },
@@ -3037,13 +3056,15 @@
       "title": "Refuse what can't be compared",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 279,
+      "line": 291,
       "status": "draft",
       "commands": [],
       "files": [
         "src/lib/diff.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/diffSession.test.ts"
+      ],
       "docs": [
         "docs/compare.md"
       ],
@@ -3071,7 +3092,7 @@
       "title": "Move between the changes",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 313,
+      "line": 325,
       "status": "draft",
       "commands": [
         "compare.nextChange",
@@ -3113,7 +3134,7 @@
       "title": "Choose the layout: side by side, inline, folded, swapped",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 356,
+      "line": 368,
       "status": "draft",
       "commands": [
         "compare.toggleInline",
@@ -3124,7 +3145,9 @@
         "src/lib/diff.ts",
         "src/lib/commands.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/diffSession.test.ts"
+      ],
       "docs": [
         "docs/compare.md"
       ],
@@ -3164,14 +3187,16 @@
       "title": "Edit file sides; snapshots are read-only",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 410,
+      "line": 422,
       "status": "draft",
       "commands": [],
       "files": [
         "src/lib/diff.ts",
         "src/components/DiffView.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/diffSession.test.ts"
+      ],
       "docs": [
         "docs/compare.md"
       ],
@@ -3203,7 +3228,7 @@
       "title": "Copy a change across with the arrows",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 454,
+      "line": 466,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3246,7 +3271,7 @@
       "title": "Save an edited side",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 501,
+      "line": 514,
       "status": "draft",
       "commands": [
         "file.save"
@@ -3259,7 +3284,8 @@
         "src/lib/dialogs.ts"
       ],
       "tests": [
-        "src/__tests__/diff.test.ts"
+        "src/__tests__/diff.test.ts",
+        "src/__tests__/diffSession.test.ts"
       ],
       "docs": [
         "docs/compare.md"
@@ -3304,14 +3330,16 @@
       "title": "Reload the compared texts",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 565,
+      "line": 582,
       "status": "draft",
       "commands": [],
       "files": [
         "src/lib/diff.ts",
         "src/components/DiffView.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/diffSession.test.ts"
+      ],
       "docs": [
         "docs/compare.md"
       ],
@@ -3351,7 +3379,7 @@
       "title": "Preview comparisons replace each other",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 617,
+      "line": 634,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3359,7 +3387,9 @@
         "src/lib/git.ts",
         "src/components/TitleBar.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/diffSession.test.ts"
+      ],
       "docs": [
         "docs/git.md"
       ],
@@ -9985,7 +10015,8 @@
       "files": [
         "src-tauri/src/lsp.rs",
         "src/lib/lsp.ts",
-        "src/lib/lspServers.ts"
+        "src/lib/lspServers.ts",
+        "src/components/panels/SettingsPanel.tsx"
       ],
       "tests": [
         "src-tauri/src/lsp.rs"
@@ -10021,6 +10052,10 @@
         {
           "id": "LSP-003.7",
           "title": "My own command wins"
+        },
+        {
+          "id": "LSP-003.8",
+          "title": "Settings reports the same choice"
         }
       ]
     },
@@ -10029,7 +10064,7 @@
       "title": "Server status in the status bar",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 166,
+      "line": 175,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10073,7 +10108,7 @@
       "title": "Offer to install a missing language server",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 221,
+      "line": 230,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10086,7 +10121,8 @@
         "src-tauri/src/lsp.rs"
       ],
       "tests": [
-        "src-tauri/src/lsp.rs"
+        "src-tauri/src/lsp.rs",
+        "src/__tests__/lspInstall.test.ts"
       ],
       "docs": [
         "docs/code-intelligence.md"
@@ -10127,7 +10163,7 @@
       "title": "Suggestions while typing",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 281,
+      "line": 290,
       "status": "draft",
       "commands": [
         "code.triggerSuggest"
@@ -10172,7 +10208,7 @@
       "title": "Documentation on hover",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 325,
+      "line": 334,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10209,7 +10245,7 @@
       "title": "Parameter hints",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 359,
+      "line": 368,
       "status": "draft",
       "commands": [
         "code.signatureHelp"
@@ -10242,7 +10278,7 @@
       "title": "Go to definition, type definition and implementation",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 390,
+      "line": 401,
       "status": "draft",
       "commands": [
         "code.gotoDefinition",
@@ -10290,7 +10326,7 @@
       "title": "Find all references",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 438,
+      "line": 449,
       "status": "draft",
       "commands": [
         "code.findReferences"
@@ -10329,7 +10365,7 @@
       "title": "Rename a symbol",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 476,
+      "line": 490,
       "status": "draft",
       "commands": [
         "code.renameSymbol"
@@ -10371,7 +10407,7 @@
       "title": "Problems in the editor",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 519,
+      "line": 537,
       "status": "draft",
       "commands": [
         "code.nextProblem",
@@ -10381,6 +10417,7 @@
         "src/lib/lsp.ts",
         "src/lib/lspServers.ts",
         "src/editor/manager.ts",
+        "src/editor/cmSetup.ts",
         "src/lib/commands.ts"
       ],
       "tests": [
@@ -10421,7 +10458,7 @@
       "title": "The Problems list and counts",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 572,
+      "line": 591,
       "status": "draft",
       "commands": [
         "view.problems"
@@ -10468,7 +10505,7 @@
       "title": "Format with the language server",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 623,
+      "line": 642,
       "status": "draft",
       "commands": [
         "code.formatWithServer"
@@ -10494,6 +10531,10 @@
         {
           "id": "LSP-014.3",
           "title": "Unavailable without a ready server"
+        },
+        {
+          "id": "LSP-014.4",
+          "title": "A server that can't format"
         }
       ]
     },
@@ -10502,7 +10543,7 @@
       "title": "Every open tab stays in sync with its server",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 655,
+      "line": 681,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10548,7 +10589,7 @@
       "title": "Settings for code intelligence",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 701,
+      "line": 727,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10596,7 +10637,7 @@
       "title": "Restart, crashes and quitting",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 752,
+      "line": 778,
       "status": "draft",
       "commands": [
         "code.restartLanguageServers"
@@ -14462,7 +14503,9 @@
         "src/App.tsx",
         "src/lib/store.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/claudeSession.test.ts"
+      ],
       "docs": [
         "docs/claude-code.md"
       ],
@@ -14511,9 +14554,13 @@
         "src/lib/commands.ts",
         "src/lib/terminal.ts",
         "src/components/TerminalView.tsx",
-        "src-tauri/src/pty.rs"
+        "src-tauri/src/pty.rs",
+        "src-tauri/src/claude.rs"
       ],
-      "tests": [],
+      "tests": [
+        "src-tauri/src/pty.rs",
+        "src/__tests__/claudeSession.test.ts"
+      ],
       "docs": [
         "docs/claude-code.md"
       ],
@@ -14541,7 +14588,7 @@
       "title": "Keys go to the program",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 112,
+      "line": 113,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14578,7 +14625,7 @@
       "title": "Copy and paste in the terminal",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 153,
+      "line": 154,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14612,7 +14659,7 @@
       "title": "The terminal fits the tab and follows the theme",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 189,
+      "line": 190,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14659,7 +14706,7 @@
       "title": "When the program ends",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 234,
+      "line": 235,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14667,7 +14714,9 @@
         "src/components/TerminalView.tsx",
         "src/lib/terminal.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/claudeSession.test.ts"
+      ],
       "docs": [
         "docs/claude-code.md"
       ],
@@ -14699,7 +14748,7 @@
       "title": "Closing terminal tabs",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 276,
+      "line": 277,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14710,7 +14759,9 @@
         "src/lib/tabLimit.ts",
         "src/components/panels/SettingsPanel.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/claudeSession.test.ts"
+      ],
       "docs": [
         "docs/claude-code.md"
       ],
@@ -14738,7 +14789,7 @@
       "title": "A clean environment for the program",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 320,
+      "line": 321,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14773,7 +14824,7 @@
       "title": "One-off command terminals",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 353,
+      "line": 354,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14782,7 +14833,10 @@
         "src-tauri/src/pty.rs",
         "src/lib/lspInstall.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/claudeSession.test.ts",
+        "src/__tests__/lspInstall.test.ts"
+      ],
       "docs": [
         "docs/code-intelligence.md"
       ],
@@ -16372,6 +16426,7 @@
       "CLAUDE-018",
       "CLAUDE-020",
       "TERM-001",
+      "TERM-002",
       "TERM-008"
     ],
     "src-tauri/src/fileops.rs": [
@@ -17030,6 +17085,7 @@
       "FILE-006",
       "FILE-016",
       "FIND-007",
+      "LSP-003",
       "LSP-005",
       "LSP-016",
       "LSP-017",
@@ -17083,6 +17139,7 @@
       "LSP-001",
       "LSP-006",
       "LSP-010",
+      "LSP-012",
       "SET-002",
       "SET-007",
       "SET-008",
@@ -17193,6 +17250,7 @@
       "BIG-020",
       "CLAUDE-001",
       "CLAUDE-006",
+      "CLAUDE-007",
       "CLAUDE-009",
       "CLAUDE-016",
       "CLAUDE-020",
@@ -18107,6 +18165,7 @@
       "LSP-005"
     ],
     "src-tauri/src/pty.rs": [
+      "TERM-002",
       "TERM-005"
     ],
     "src-tauri/src/search.rs": [
@@ -18161,6 +18220,20 @@
       "CLAUDE-018",
       "CLAUDE-020"
     ],
+    "src/__tests__/claudeSession.test.ts": [
+      "CLAUDE-003",
+      "CLAUDE-004",
+      "CLAUDE-009",
+      "CLAUDE-015",
+      "CLAUDE-016",
+      "CLAUDE-018",
+      "CLAUDE-020",
+      "TERM-001",
+      "TERM-002",
+      "TERM-006",
+      "TERM-007",
+      "TERM-009"
+    ],
     "src/__tests__/columnMode.test.ts": [
       "EDIT-005",
       "EDIT-006",
@@ -18188,6 +18261,16 @@
       "DIFF-001",
       "DIFF-005",
       "DIFF-012"
+    ],
+    "src/__tests__/diffSession.test.ts": [
+      "DIFF-001",
+      "DIFF-005",
+      "DIFF-007",
+      "DIFF-009",
+      "DIFF-010",
+      "DIFF-012",
+      "DIFF-013",
+      "DIFF-014"
     ],
     "src/__tests__/findReplace.test.ts": [
       "FIND-003",
@@ -18266,6 +18349,10 @@
       "LSP-012",
       "LSP-015",
       "LSP-016"
+    ],
+    "src/__tests__/lspInstall.test.ts": [
+      "LSP-005",
+      "TERM-009"
     ],
     "src/__tests__/panels.test.ts": [
       "EXPL-001",

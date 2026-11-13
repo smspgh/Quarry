@@ -21,7 +21,7 @@ Compare tabs (`kind: "diff"`): two texts side by side or inline, opened from fil
   - `src/App.tsx` — renders one `DiffView` per Compare doc
   - `src/lib/actions.ts` — `sessionDocs()` keeps only text and Claude tabs, so Compare tabs are not saved
   - `src/styles/app.css` — `.diff-*` (colours from `--diff-*` in `src/styles/tokens.css`)
-- Tests: `src/__tests__/diff.test.ts`
+- Tests: `src/__tests__/diff.test.ts`, `src/__tests__/diffSession.test.ts`
 - Docs: `docs/compare.md`
 
 **As a** developer with two versions of a file
@@ -69,7 +69,7 @@ Scenario: DIFF-001.6 Not restored after a restart
 - Commands: `compare.selectForCompare`, `compare.withSelected`
 - Files:
   - `src/lib/diff.ts` — `selectForCompare`, `compareWithSelected`, `compareCandidate` (one remembered path, in memory only)
-  - `src/lib/commands.ts` — `compare.selectForCompare`, `compare.withSelected` (`enabled` needs a candidate that is not the active file)
+  - `src/lib/commands.ts` — `compare.selectForCompare`, `compare.withSelected` (`enabled` needs a candidate and an active text tab with a different path)
   - `src/components/FileMenu.tsx` — "Select for Compare", "Compare with “name”" (Explorer and Find in Files file rows)
   - `src/components/TitleBar.tsx` — tab menu "Select for Compare" / "Compare with Selected"
 - Tests: none
@@ -113,6 +113,12 @@ Scenario: DIFF-002.6 Untitled tabs can't be selected
   Given the active tab is an untitled document
   When I open the File › Compare menu
   Then "Select Active File for Compare" is greyed out
+
+Scenario: DIFF-002.7 Only a text tab is compared with the selected file
+  Given "old.ts" is selected for compare
+  And the active tab is a large-file, terminal, Claude or Compare tab
+  When I open the File › Compare menu
+  Then "Compare Active File with Selected" is greyed out
 ```
 
 ## DIFF-003: Compare the active tab with a file
@@ -195,7 +201,7 @@ Scenario: DIFF-004.3 Untitled
   - `src/lib/commands.ts` — `compare.withClipboard` (clipboard text = left `text` source labelled "Clipboard")
   - `src/components/TitleBar.tsx` — tab menu "Compare with Clipboard" (activates the command for the active tab)
   - `src/lib/diff.ts` — `load` for `text` sources (read-only, line endings normalised)
-- Tests: `src/__tests__/diff.test.ts`
+- Tests: `src/__tests__/diff.test.ts`, `src/__tests__/diffSession.test.ts`
 - Docs: `docs/compare.md`
 
 **As a** developer who copied a snippet or another version of a text
@@ -274,6 +280,12 @@ Scenario: DIFF-006.6 Binary
   Given the committed version is binary
   When I run Compare with Last Commit (HEAD)
   Then no tab opens and a notification says the file is a binary file
+
+Scenario: DIFF-006.7 The file is not open in a tab
+  Given "app.ts" is tracked by git and not open in any tab
+  When I run Compare with Last Commit (HEAD) on it
+  Then the right side is the file on disk, labelled "app.ts"
+  And the right side can be edited and saved, while "app.ts (HEAD)" stays read-only
 ```
 
 ## DIFF-007: Refuse what can't be compared
@@ -282,7 +294,7 @@ Scenario: DIFF-006.6 Binary
 - Commands: none
 - Files:
   - `src/lib/diff.ts` — `load` (folder, size ≥ `settings.largeFileThresholdMb`, `looksBinary`, non-text tab), `openCompare` error toast
-- Tests: none
+- Tests: `src/__tests__/diffSession.test.ts`
 - Docs: `docs/compare.md`
 
 **As a** developer
@@ -361,7 +373,7 @@ Scenario: DIFF-008.5 Only on a Compare tab
   - `src/components/DiffView.tsx` — layout switch (`unifiedMergeView` for inline), fold button (`collapseUnchanged: { margin: 3, minSize: 6 }`), rebuild effect on `version` / `inline` / `collapse`, `settingsReconfigure` on settings changes
   - `src/lib/diff.ts` — `DiffSession.inline` / `collapse` / `version`, `swapDiff`, `captureSideTexts`, `patchDiff`
   - `src/lib/commands.ts` — `compare.toggleInline`, `compare.swap` (disabled while the tab has unsaved edits)
-- Tests: none
+- Tests: `src/__tests__/diffSession.test.ts`
 - Docs: `docs/compare.md`
 
 **As a** developer reading a comparison
@@ -414,7 +426,7 @@ Scenario: DIFF-009.7 Editor settings apply
 - Files:
   - `src/lib/diff.ts` — `Side.editable` (file not read-only on disk → true; `tab` and `text` sources → false), `markSideEdited`, `syncDirty`, `sideText`, `diffViews`
   - `src/components/DiffView.tsx` — `EditorState.readOnly` per side, "read-only" / "edited" tags, update listener
-- Tests: none
+- Tests: `src/__tests__/diffSession.test.ts`
 - Docs: `docs/compare.md`
 
 **As a** developer comparing files
@@ -458,6 +470,7 @@ Scenario: DIFF-010.5 Inline layout edits the right side
 - Files:
   - `src/components/DiffView.tsx` — `revertControls`: `"a-to-b"` when the right side is editable, else `"b-to-a"` when the left is, else none; `mergeControls: false` inline
   - `src/styles/app.css` — `.cm-merge-revert`
+  - Library behaviour, not set in this repo: @codemirror/merge (6.12.3) listens for `mousedown` on its `.cm-merge-revert` gutter (`MergeView.setupRevertControls` → `revertClicked`), so an arrow acts when the button goes down (DIFF-011.2)
 - Tests: none
 - Docs: `docs/compare.md`
 
@@ -508,7 +521,7 @@ Scenario: DIFF-011.6 Undo
   - `src/lib/commands.ts` — `file.save` enabled on a Compare tab with unsaved edits
   - `src/components/DiffView.tsx` — "Save" button (only while a side is edited)
   - `src/lib/dialogs.ts` — `choose`
-- Tests: `src/__tests__/diff.test.ts`
+- Tests: `src/__tests__/diff.test.ts`, `src/__tests__/diffSession.test.ts`
 - Docs: `docs/compare.md`
 
 **As a** developer who edited a file inside a comparison
@@ -554,7 +567,11 @@ Scenario: DIFF-012.6 Other tabs notice
 Scenario: DIFF-012.7 Closing with unsaved edits asks
   Given a side is edited
   When I close the Compare tab
-  Then I am asked whether to save the changes first, and cancelling keeps the tab open
+  Then a dialog "Save changes to <tab name>?" says "Your changes will be lost if you don't save them."
+  And it offers "Save" (default), "Don't Save" and "Cancel"
+  And "Save" saves the edited sides and closes the tab, unless a save fails or is cancelled
+  And "Don't Save" closes the tab without writing anything
+  And "Cancel" or Escape keeps the tab open
 
 Scenario: DIFF-012.8 Nothing to save
   Given no side is edited
@@ -569,7 +586,7 @@ Scenario: DIFF-012.8 Nothing to save
 - Files:
   - `src/lib/diff.ts` — `reloadDiff` (files from disk, tab snapshots from the tab, a closed tab keeps its snapshot, `text` sources keep their text, folder labels kept)
   - `src/components/DiffView.tsx` — "Reload the files from disk" button, disabled while edited
-- Tests: none
+- Tests: `src/__tests__/diffSession.test.ts`
 - Docs: `docs/compare.md`
 
 **As a** developer whose compared files changed outside the comparison
@@ -622,7 +639,7 @@ Scenario: DIFF-013.7 A file that can no longer be read
   - `src/lib/diff.ts` — `openCompare(a, b, { preview: true })`: closes the previous Compare tab that is `preview` and not dirty
   - `src/lib/git.ts` — `openCommitFile`, `compareSides` open with `preview: true`
   - `src/components/TitleBar.tsx` — double-click on a tab clears `Doc.preview`
-- Tests: none
+- Tests: `src/__tests__/diffSession.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer clicking through a commit's files or a file's conflicts

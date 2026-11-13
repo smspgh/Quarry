@@ -76,7 +76,7 @@ export function TerminalView({ doc, visible }: { doc: Doc; visible: boolean }) {
     const unData = listen<{ id: number; data: string }>("pty:data", (e) => {
       if (e.payload.id === pty) t.write(e.payload.data);
     });
-    const unExit = listen<{ id: number; code: number | null }>("pty:exit", (e) => {
+    const unExit = listen<{ id: number; code: number }>("pty:exit", (e) => {
       if (e.payload.id !== pty) return;
       pty = null;
       setTerminalPty(doc.id, null);

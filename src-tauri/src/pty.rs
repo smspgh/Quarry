@@ -33,7 +33,8 @@ struct Data {
 #[derive(Clone, Serialize)]
 struct Exit {
     id: u32,
-    code: Option<u32>,
+    /// Always known: the watcher only reports a child it saw exit (a killed tab reports nothing).
+    code: u32,
 }
 
 /// Split `buf` into the longest prefix that is complete UTF-8 and the bytes of a character that
@@ -98,10 +99,15 @@ fn claude_command(exe: &str, resume: Option<String>) -> Result<CommandBuilder, S
     } else {
         CommandBuilder::new(&exe)
     };
-    if let Some(id) = resume.filter(|s| !s.is_empty() && s.len() <= 64 && s.chars().all(|c| c.is_ascii_hexdigit() || c == '-')) {
+    if let Some(id) = resume_id(resume) {
         cmd.args(["--resume", &id]);
     }
     Ok(cmd)
+}
+
+/// The conversation to resume, when it is a session id (the same check as Claude tabs).
+fn resume_id(resume: Option<String>) -> Option<String> {
+    resume.filter(|s| crate::claude::is_session_id(s))
 }
 
 fn spawn(app: AppHandle, state: State<'_, crate::AppState>, cmd: CommandBuilder, cols: u16, rows: u16) -> Result<u32, String> {
@@ -142,7 +148,7 @@ fn spawn(app: AppHandle, state: State<'_, crate::AppState>, cmd: CommandBuilder,
             drop(map);
             std::thread::sleep(std::time::Duration::from_millis(120)); // let the last output through
             terms.lock().remove(&id);
-            let _ = app.emit("pty:exit", Exit { id, code: Some(status.exit_code()) });
+            let _ = app.emit("pty:exit", Exit { id, code: status.exit_code() });
             break;
         }
     });
@@ -215,5 +221,15 @@ mod tests {
         let mut bad = vec![b'x', 0xff, b'y'];
         assert_eq!(take_utf8(&mut bad), "x\u{fffd}y");
         assert!(bad.is_empty());
+    }
+
+    #[test]
+    fn only_session_ids_are_resumed() {
+        let id = "8a472df2-81a0-47b8-8720-b17e2df22a0d";
+        assert_eq!(resume_id(Some(id.into())).as_deref(), Some(id));
+        assert_eq!(resume_id(Some("--dangerously-skip-permissions".into())), None);
+        assert_eq!(resume_id(Some(String::new())), None);
+        assert_eq!(resume_id(Some("a".repeat(65))), None);
+        assert_eq!(resume_id(None), None);
     }
 }

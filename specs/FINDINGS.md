@@ -37,32 +37,18 @@ Doc / code mismatches
 
 ## Compare (`compare.md`)
 
-- `docs/git.md:13` says Compare with Last Commit shows "your tab, editable, on the right"; a tab side is always read-only (`src/lib/diff.ts:107`, `compareWithHead` at `src/lib/git.ts:718`; DIFF-006).
-- `docs/compare.md:32` says the arrows copy left into right; that holds only when the right side is editable, otherwise they copy right into left, and there are none when both sides are read-only or in Inline layout (`src/components/DiffView.tsx:71`, `:82`).
-- `docs/compare.md:31` says file sides can be edited directly; in Inline layout only the right side's editor exists (`DiffView.tsx:67-75`).
-- `docs/compare.md:27` says Reload reads the files from disk again; clipboard and git-version sides keep their stored text (`diff.ts:102`, `:224-232`; DIFF-013.5).
-- `compare.withSelected` does not require a text tab (`src/lib/commands.ts:1347`), unlike `compare.selectForCompare`; on a large-file tab it is enabled and then fails with "too large to compare".
-- "Revert arrows act on mousedown" comes from the project notes and @codemirror/merge; nothing in the repo's own code sets it (DIFF-011.2).
-- Not determined: the exact button labels of the save prompt when closing an edited Compare tab (`askSaveChanges`, `src/lib/actions.ts:547`; DIFF-012.7).
-- No test exercises `DiffView.tsx` or `openCompare` / `saveDiff` / `reloadDiff`.
+- No test exercises `DiffView.tsx` (the editors, arrows, layout switch); it needs a component test harness. `openCompare` / `saveDiff` / `reloadDiff` / `swapDiff` are covered by `src/__tests__/diffSession.test.ts`.
 
 ## Claude Code tabs and terminals (`claude-code.md`, `terminal.md`)
 
 - The model setting applies on every process start, not only new conversations: the hint says "For conversations started from now on" (`src/components/panels/SettingsPanel.tsx:344`, `docs/settings.md:91`), but `spawn` passes `claudeModel` on resumes too (`src/lib/claude.ts:188`; CLAUDE-018.3).
 - Terminal resume has no UI entry point: `claude.openTerminal` accepts `{ folder, resume }` and `pty_start` honours it (`src/lib/commands.ts:1199`, `src-tauri/src/pty.rs:101`), but no caller passes `resume` (TERM-002).
-- The resume-id check is duplicated inline in `pty.rs:101` instead of using `claude::is_session_id` (`src-tauri/src/claude.rs:97`).
-- Folder fallback order differs from `docs/claude-code.md:30`: `claude.openHere` tries the active Claude CLI tab's folder first, `claude.openTerminal` the active Claude tab's (`commands.ts:1179`, `:1201`).
-- `build_args` also passes `--verbose` (`claude.rs:73`), which the project notes omit.
-- Ctrl+Shift+C with no selection is swallowed, neither copied nor sent to the program (`src/components/TerminalView.tsx:106`; TERM-004.3). Probably intended.
-- `pty:exit` always carries a code; the UI's null handling is only reached on a start failure (`TerminalView.tsx:83`).
-- CLAUDE-007.7 (external-change handling of files Claude edits) is taken from the docs.
-- No tests: `terminal.ts`, `TerminalView.tsx`, the session plumbing in `claude.ts`.
+- No tests: `TerminalView.tsx` (xterm.js keys, restart, exit lines); it needs a component test harness. `terminal.ts` and the session plumbing in `claude.ts` are covered by `src/__tests__/claudeSession.test.ts`.
 
 ## Code intelligence (`code-intelligence.md`)
 
-- Settings can show TypeScript as "Installed" while the status bar offers to install it: Settings only checks `tsc` on PATH (`src/components/panels/SettingsPanel.tsx:367`), the real choice needs TypeScript 7 or typescript-language-server (`src-tauri/src/lsp.rs:156`); with TypeScript 5 the install offer runs `npm install -g typescript`, which may not help.
-- The references panel, rename box, signature tooltip and gutter marker come from `@codemirror/lsp-client` / `@codemirror/lint`; LSP-008, 010, 011, 012.1 and 014 follow `docs/code-intelligence.md` for them. Rename undo (LSP-011.3) and LSP-014.1 are inferred.
-- No tests: `LspStatus.tsx`, `lspInstall.ts`.
+- With global TypeScript 5 and no typescript-language-server, the install offer (status bar and Settings) runs `npm install -g typescript`; that only helps if npm's latest `typescript` is TypeScript 7 (`src/lib/lspServers.ts:34`, `src-tauri/src/lsp.rs` `typescript_setup`). Settings now reports the same choice as the status bar (LSP-003.8).
+- No tests: `LspStatus.tsx`; it needs a component test harness. `lspInstall.ts` is covered by `src/__tests__/lspInstall.test.ts`.
 
 ## Explorer and file operations (`explorer.md`)
 

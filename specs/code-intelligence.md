@@ -119,6 +119,7 @@ Scenario: LSP-002.7 Hovering shows the project
   - `src-tauri/src/lsp.rs` — `typescript_setup`, `lsp_typescript` (`tsserver.js` = TypeScript 5 / 6, `getExePath.js` = TypeScript 7; global package in `%APPDATA%\npm\node_modules\typescript`)
   - `src/lib/lsp.ts` — `launchOf` (TypeScript branch, `tsserver.fallbackPath`; a custom command from Settings bypasses the choice)
   - `src/lib/lspServers.ts` — the `typescript` entry (`tsc --lsp --stdio`, `npm install -g typescript`)
+  - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection` detection asks `lsp_typescript` (root = the open folder, or empty for global only) for TypeScript without a custom command
 - Tests: `src-tauri/src/lsp.rs`
 - Docs: `docs/code-intelligence.md`
 
@@ -161,6 +162,14 @@ Scenario: LSP-003.7 My own command wins
   Given Settings has a command line for TypeScript / JavaScript
   When I open a .ts file
   Then that command is started and no version check is made
+
+Scenario: LSP-003.8 Settings reports the same choice
+  Given only TypeScript 5 is installed globally, with "tsc" on PATH, and typescript-language-server is not
+  When I open Settings › Code intelligence
+  Then the TypeScript / JavaScript row says "Not installed · needs Node.js" and has an "Install…" button
+  Given instead TypeScript 7 or typescript-language-server would be started
+  Then the row says "Installed · <path of the program that would be started>"
+  And with no folder open only the global installation is looked at
 ```
 
 ## LSP-004: Server status in the status bar
@@ -225,12 +234,12 @@ Scenario: LSP-004.6 A custom command that is not found
 - Files:
   - `src/lib/lspInstall.ts` — `installServer` (terminal tab, toasts, `restartServers` on success)
   - `src/components/LspStatus.tsx` — "Install … support" button (status `missing`, no custom command)
-  - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection`: "Installed · path" / "Not installed · needs …", "Install…" button, re-detect on window focus (`lsp_which`)
+  - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection`: "Installed · path" / "Not installed · needs …", "Install…" button, re-detect on window focus (`lsp_which`; `lsp_typescript` for TypeScript)
   - `src/lib/lspServers.ts` — `install`, `needs`
   - `src/lib/lsp.ts` — `launch` (`missing` when the program is not installed / not found)
   - `src/lib/terminal.ts` — `openCommandTerminal`
   - `src-tauri/src/lsp.rs` — `lsp_which`, `which` (also looks in npm, cargo, go and dotnet tool folders)
-- Tests: `src-tauri/src/lsp.rs`
+- Tests: `src-tauri/src/lsp.rs`, `src/__tests__/lspInstall.test.ts`
 - Docs: `docs/code-intelligence.md`
 
 **As a** developer opening a language for the first time
@@ -363,6 +372,7 @@ Scenario: LSP-007.4 Other links do nothing
 - Files:
   - `src/lib/lsp.ts` — `signatureHelp()` in `makeClient`, `lspCommands.signature` (`showSignatureHelp`)
   - `src/lib/commands.ts` — `code.signatureHelp` (Ctrl+Shift+Space, `lspReady`)
+  - Library behaviour (@codemirror/lsp-client 6.3.0, `signatureHelp` / `signaturePlugin`): a request is made when typed text contains one of the server's `signatureHelpProvider.triggerCharacters` (or, while a hint shows, its `retriggerCharacters`); the tooltip is `.cm-lsp-signature-tooltip`
 - Tests: none
 - Docs: `docs/code-intelligence.md`
 
@@ -374,7 +384,8 @@ Scenario: LSP-007.4 Other links do nothing
 Scenario: LSP-008.1 Hints appear by themselves
   Given a tab connected to a ready server
   When I type "(" after a function name, or "," between arguments
-  Then a hint shows the function's parameters
+  Then a hint shows the function's parameters, with the current parameter highlighted
+  And the characters that open or update the hint are the ones the server declares (for TypeScript "(" and ",")
 
 Scenario: LSP-008.2 Ask for them
   Given the cursor is inside a call's arguments
@@ -444,6 +455,7 @@ Scenario: LSP-009.6 Keys need the editor
   - `src/lib/commands.ts` — `code.findReferences` (Shift+F12)
   - `src/editor/cmSetup.ts` — theme rule that hides `.cm-panels` except LSP panels
   - `src/styles/app.css` — the same `:has(.cm-lsp-reference-panel, …)` rule
+  - Library behaviour (@codemirror/lsp-client 6.3.0, `findReferences` / `createReferencePanel`): the panel takes the focus when it opens; rows are grouped under a file header (the path after the files' common prefix) and show "line: text" with the symbol in bold; ↑ / ↓ / Home / End / Page keys move, Enter or a click goes to the reference (`Workspace.displayFile` for another file); Escape inside the panel or its × closes it. Quarry does not install `findReferencesKeymap`, so Escape in the editor leaves the panel open
 - Tests: none
 - Docs: `docs/code-intelligence.md`
 
@@ -455,17 +467,19 @@ Scenario: LSP-009.6 Keys need the editor
 Scenario: LSP-010.1 List references
   Given the cursor is on a function used in 3 files
   When I press Shift+F12
-  Then a panel under the editor lists the references with their file and line text
+  Then a panel under the editor lists the references grouped by file, each with its line number and line text
+  And the panel has the keyboard focus, and Enter or a click on a row goes to that reference
 
 Scenario: LSP-010.2 Files that are not open
   Given some references are in files that are not open in tabs
   When the list is shown
-  Then those references are listed with their text and no tab is opened for them until I pick one
+  Then those references are listed with their text, read from disk
+  And no tab is opened for them until I pick one, which opens the file at that reference
 
 Scenario: LSP-010.3 Close the panel
-  Given the references panel is open
-  When I press Esc
-  Then the panel closes
+  Given the references panel is open and has the focus
+  When I press Esc, or click its × button
+  Then the panel closes and the editor has the focus
 
 Scenario: LSP-010.4 Unavailable without a ready server
   Given the active tab has no ready language server
@@ -480,7 +494,8 @@ Scenario: LSP-010.4 Unavailable without a ready server
 - Files:
   - `src/lib/lsp.ts` — `lspCommands.rename` (`renameSymbol`), `QuarryWorkspace.updateFile` (edits only files open in tabs, through `editor.dispatchTo`), `openDoc` (background tabs are open on the server too)
   - `src/lib/commands.ts` — `code.renameSymbol` (F2)
-  - `src/editor/manager.ts` — `dispatchTo`
+  - `src/editor/manager.ts` — `dispatchTo` (an ordinary transaction on the view or the stored state, so it goes into that document's undo history)
+  - Library behaviour (@codemirror/lsp-client 6.3.0, `renameSymbol` / `doRename`): F2 needs the cursor on a word and a server with `renameProvider`; it shows a "New name" box (`.cm-lsp-rename-panel`, the word preselected, a "rename" button); Enter confirms and Escape cancels. Only `WorkspaceEdit.changes` is applied (the client does not announce `documentChanges`), one `userEvent: "rename"` transaction per file, and only for files the workspace has open (`getFile`)
 - Tests: none
 - Docs: `docs/code-intelligence.md`
 
@@ -491,7 +506,9 @@ Scenario: LSP-010.4 Unavailable without a ready server
 ```gherkin
 Scenario: LSP-011.1 Rename across open tabs
   Given "total" is used in "a.ts" and "b.ts", both open in tabs, and "a.ts" is in front
-  When I press F2 on "total", type "sum" and confirm
+  When I press F2 on "total"
+  Then a "New name" box opens under the editor with "total" selected
+  When I type "sum" and press Enter
   Then every use in "a.ts" and in the background tab "b.ts" becomes "sum"
   And both tabs are marked as changed and nothing is saved
 
@@ -501,9 +518,10 @@ Scenario: LSP-011.2 Files that are not open are left alone
   Then "c.ts" on disk is unchanged
 
 Scenario: LSP-011.3 Undo
-  Given a rename changed a file
-  When I press Ctrl+Z in that file
-  Then its rename edits are undone
+  Given a rename changed "a.ts" and the background tab "b.ts"
+  When I press Ctrl+Z in "a.ts"
+  Then the rename edits in "a.ts" are undone in one step
+  And "b.ts" keeps its edits until I undo in that tab too
 
 Scenario: LSP-011.4 Cancel
   Given the rename box is open
@@ -524,6 +542,7 @@ Scenario: LSP-011.5 Unavailable without a ready server
   - `src/lib/lsp.ts` — `applyDiagnostics`, `publishDiagnostics` handler, `QuarryWorkspace.pullSoon` / `pull` (pull diagnostics 400 ms after a change, for every open file; `workspace/diagnostic/refresh`), `orphanDocs`
   - `src/lib/lspServers.ts` — `offsetOf` (positions clamped to the line), `severityOf`
   - `src/editor/manager.ts` — `setLspDiagnostics` (sets them on a document's state, on screen or not)
+  - `src/editor/cmSetup.ts` — `lintGutter()` (the gutter marks); @codemirror/lint draws the underlines and the hover tooltip with the message
   - `src/lib/commands.ts` — `code.nextProblem` (F8), `code.prevProblem` (Shift+F8), `problemsHere`
 - Tests: `src/__tests__/lsp.test.ts`
 - Docs: `docs/code-intelligence.md`
@@ -628,6 +647,7 @@ Scenario: LSP-013.6 Closing a tab removes its problems
   - `src/lib/lsp.ts` — `lspCommands.format` (the library's `formatDocument`)
   - `src/lib/commands.ts` — `code.formatWithServer` (no key, `lspReady`)
   - `src/lib/lspServers.ts` — `provideFormatter` in the CSS and HTML servers' `initializationOptions`
+  - Library behaviour (@codemirror/lsp-client 6.3.0, `formatDocument`): sends `textDocument/formatting` with the editor's indent unit, applies the reply as one `userEvent: "format"` transaction, drops it if I edited inside a changed range meanwhile, and shows "Formatting request failed: …" (`.cm-lsp-message`) when the server refuses
 - Tests: none
 - Docs: `docs/code-intelligence.md`
 
@@ -639,7 +659,8 @@ Scenario: LSP-013.6 Closing a tab removes its problems
 Scenario: LSP-014.1 Format with the server
   Given a tab connected to a ready server that can format
   When I run "Code: Format Document with Language Server"
-  Then the document is reformatted by the server as an edit I can undo
+  Then the document is reformatted by the server, using the editor's indentation settings
+  And one Ctrl+Z undoes the whole reformat
 
 Scenario: LSP-014.2 Format Document is unchanged
   Given a tab connected to a ready server
@@ -650,6 +671,11 @@ Scenario: LSP-014.3 Unavailable without a ready server
   Given the active tab has no ready language server
   When I open the command palette
   Then "Format Document with Language Server" is not offered
+
+Scenario: LSP-014.4 A server that can't format
+  Given a tab connected to a ready server without a formatter
+  When I run "Format Document with Language Server"
+  Then a message "Formatting request failed: …" is shown above the editor and the text is unchanged
 ```
 
 ## LSP-015: Every open tab stays in sync with its server
@@ -703,7 +729,7 @@ Scenario: LSP-015.6 Edits made while off screen
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection` (`apply` = change + `restartServers`, per-server switch, command box, detection with `lsp_which`)
+  - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection` (`apply` = change + `restartServers`, per-server switch, command box, detection with `lsp_which`, or `lsp_typescript` for TypeScript)
   - `src/lib/lsp.ts` — `attachDoc` (honours `lspEnabled`, `lspDisabled`), `launchOf` (`lspCommands` override), `restartServers`, `stopAllServers`
   - `src/lib/lspServers.ts` — `serverFor(path, disabled)`, `splitCommand`
   - `src/lib/actions.ts` — `mergeSettings` (`lspEnabled`, `lspDisabled`, `lspCommands`)

@@ -10,7 +10,7 @@ A repository is picked up when the open folder, or any open file, is inside one.
 - **Peek and revert.** Click a marker to see the committed text of that change. The peek has **↑ / ↓** to move between changes, **Revert** to put the committed lines back (one undo step), and **✕** or **Escape** to close it.
 - **Keyboard.** **Alt+F5** / **Shift+Alt+F5** go to the next / previous change and open its peek. **Git › Show Change at Cursor** and **Git › Revert Change at Cursor** act on the change under the cursor.
 - **Line blame.** **Git › Show Line Blame** shows who last changed the cursor line, when, and the commit summary, at the end of the line; hover it for the commit id, e-mail and date. Lines you have changed show *not committed yet*. Blame follows unsaved edits (it is asked again a moment after you stop typing). The same command hides it.
-- **Compare with Last Commit** (Git menu, tab right-click menu) opens a [Compare](compare.md) tab with the HEAD version on the left and your tab, editable, on the right.
+- **Compare with Last Commit** (Git menu, tab right-click menu) opens a [Compare](compare.md) tab with the HEAD version on the left and your tab's current text (unsaved edits included) on the right. Both sides are read-only; when the file isn't open in a tab, the right side is the file on disk and can be edited and saved.
 
 ## Source Control panel
 
