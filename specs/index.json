@@ -11305,6 +11305,14 @@
         {
           "id": "SCRIPT-006.9",
           "title": "A script that changes nothing"
+        },
+        {
+          "id": "SCRIPT-006.10",
+          "title": "Moving the cursor during a run"
+        },
+        {
+          "id": "SCRIPT-006.11",
+          "title": "Editing the document during a run"
         }
       ]
     },
@@ -11313,7 +11321,7 @@
       "title": "Script API for the whole document (doc)",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 321,
+      "line": 333,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11356,7 +11364,7 @@
       "title": "Script API for the selection",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 373,
+      "line": 385,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11399,7 +11407,7 @@
       "title": "Script helpers, clipboard and console",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 422,
+      "line": 434,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11450,7 +11458,7 @@
       "title": "Limit a script to certain languages or file types",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 482,
+      "line": 494,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11504,7 +11512,7 @@
       "title": "Run a script several times or until nothing changes",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 541,
+      "line": 553,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11544,7 +11552,7 @@
       "title": "Cancel a running script; runaway scripts time out",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 587,
+      "line": 599,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11584,7 +11592,7 @@
       "title": "Script errors and Console output",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 632,
+      "line": 644,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11627,7 +11635,7 @@
       "title": "Script API Reference tab",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 679,
+      "line": 691,
       "status": "draft",
       "commands": [
         "help.scriptApi"
@@ -11661,7 +11669,7 @@
       "title": "Scripts folder location",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 711,
+      "line": 723,
       "status": "draft",
       "commands": [],
       "files": [

@@ -258,7 +258,7 @@ Scenario: SCRIPT-005.6 Setting off
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/scripting.ts` — `runScript` `onmessage` (selection changes → document text → `newSelection`; both-changed and switched-tab failures; `userEvent: "input.script"`)
+  - `src/lib/scripting.ts` — `runScript` `onmessage` (selection changes → document text → `newSelection`; both-changed, switched-tab and edited-meanwhile failures; selection changes go to the ranges captured at start; `userEvent: "input.script"`)
   - `src/lib/scriptWorker.ts` — `done` message (`text`, `selectionTexts`, `newSelection`, returned string)
   - `src/editor/manager.ts` — `replaceAll` (minimal change), `selectRange`
 - Tests: none
@@ -316,6 +316,18 @@ Scenario: SCRIPT-006.9 A script that changes nothing
   Given a script that only calls console.log
   When I run it
   Then the document is not marked modified and no undo step is added
+
+Scenario: SCRIPT-006.10 Moving the cursor during a run
+  Given two cursors each selecting a word, and a slow script that upper-cases the selection
+  When I click elsewhere in the same document before it finishes
+  Then the two words that were selected when it started are upper-cased
+  And the text at the new cursor position is unchanged
+
+Scenario: SCRIPT-006.11 Editing the document during a run
+  Given a slow script running on data.csv that changes its text or selection
+  When I type a character in data.csv before it finishes
+  Then the script's changes are not applied and my typing is kept
+  And an error reads "data.csv was edited while the script ran, so its changes were not applied."
 ```
 
 ## SCRIPT-007: Script API for the whole document (doc)

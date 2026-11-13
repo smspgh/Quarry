@@ -57,7 +57,7 @@ When you run a script, Quarry takes a snapshot of the current document: its text
 
 Either way the edit is one transaction, so a single **Ctrl+Z** undoes it.
 
-If you switch to another tab while a script is running, its changes are not applied, and a message tells you so.
+If you switch to another tab, or edit the document, while a script is running, its changes are not applied, and a message tells you so. Moving the cursor is fine: selection changes go to the ranges the script was given.
 
 The script body is wrapped in an `async` function in strict mode, so top-level `await` and `return` are allowed. `doc`, `selection`, `util`, `clipboard`, `console` and `args` are its parameters.
 

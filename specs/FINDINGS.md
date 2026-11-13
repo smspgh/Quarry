@@ -102,7 +102,6 @@ Doc / code mismatches and dead code
 
 ## Scripts (`scripting.md`)
 
-- Selection edits land on the selection at finish time, not the snapshot: `src/lib/scripting.ts:231` applies `selectionTexts` to the current ranges; moving the cursor during a slow script retargets them, and a changed range count mismatches them.
 - Awkward warning for extension-filtered scripts: `"pick" is for .csv, .tsv files documents.` (`scripting.ts:152`).
 - `docs/macros.md:106` says script runs are blocked while a macro plays; only the hidden `script.run` has that guard (`src/lib/commands.ts:1133`) and nothing calls it; `script.runActive` (`commands.ts:1096`) is not blocked while recording or playing.
 - `docs/scripting.md:145` says the console keeps the last 2,000 lines; `src/lib/store.ts:373` keeps 2,001.
