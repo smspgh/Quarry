@@ -303,7 +303,7 @@ Scenario: FMT-006.5 An untitled document is formatted too
 - Status: draft
 - Commands: `code.format`
 - Files:
-  - `src/lib/format.ts` — `CODE` table (`builtin`), `clangFormat` / `clangStyle`, `sqlBuiltin`, fallback when the tool is not found or matches `missing`; each formatter is a dynamic `import()` (`@wasm-fmt/gofmt`, `@wasm-fmt/ruff_fmt`, `@wasm-fmt/clang-format`, `@wasm-fmt/shfmt`, `prettier-plugin-java`, `sql-formatter`)
+  - `src/lib/format.ts` — `CODE` table (`builtin`), `clangFormat` / `clangStyle`, `sqlBuiltin`, fallback when the tool is not found or matches `missing` (C#: dotnet with an SDK prints "Could not execute because the specified command or file was not found"; dotnet with only a runtime prints "The command could not be loaded … The application 'csharpier' does not exist"; the pattern matches both); each formatter is a dynamic `import()` (`@wasm-fmt/gofmt`, `@wasm-fmt/ruff_fmt`, `@wasm-fmt/clang-format`, `@wasm-fmt/shfmt`, `prettier-plugin-java`, `sql-formatter`)
   - `src-tauri/src/lib.rs` — `format_external` reports `not_found` when the program cannot be started
 - Tests: none
 - Docs: `docs/formatting.md`
@@ -357,6 +357,7 @@ Scenario: FMT-007.5 dotnet without CSharpier falls back
   Given dotnet is installed but the csharpier tool is not
   When I format a C# tab
   Then a notice says "Formatted (C#, built-in clang-format)"
+  And the same happens when dotnet has a runtime but no SDK
 ```
 
 ## FMT-008: Rust needs rustfmt
@@ -401,21 +402,28 @@ Scenario: FMT-008.2 rustfmt is installed
 
 ```gherkin
 Scenario: FMT-009.1 Prettier cannot parse the file
-  Given a JavaScript tab with an unclosed "(" on line 2
+  Given a JavaScript tab containing "function f(a {" on line 1
   When I press Shift+Alt+F
   Then the document is unchanged
-  And an error says "Format failed:" followed by the first line of Prettier's message, which names the line and column
+  And an error says 'Format failed: Unexpected token, expected "," (1:14)'
+  And for an unclosed CSS block it says "Format failed: CssSyntaxError: Unclosed block (1:1)"
 
 Scenario: FMT-009.2 A built-in formatter cannot parse the file
   Given Go is not installed and the Go tab has a syntax error on line 2, column 12
   When I press Shift+Alt+F
   Then the document is unchanged
-  And an error says "Format failed:" followed by the position "2:12" and gofmt's message
+  And an error says "Format failed:" followed by the position "2:12" and gofmt's message, for example "Format failed: 2:12: expected '}', found 'EOF'"
 
 Scenario: FMT-009.3 Only the first line of a long message is shown
   Given a formatter fails with a message of several lines, including a code frame
   When the error is shown
   Then it contains only the first line of that message
+
+Scenario: FMT-009.4 The built-in ruff gives a byte range, not a line
+  Given ruff is not installed and a Python tab starts with "def f(:"
+  When I press Shift+Alt+F
+  Then the document is unchanged
+  And an error says "Format failed: Expected a parameter or the end of the parameter list at byte range 6..7"
 ```
 
 ## FMT-010: JSON pretty-print and minify commands

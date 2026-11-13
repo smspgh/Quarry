@@ -34,7 +34,6 @@ Not verified
 
 ## Formatting (`formatting.md`)
 
-- Not determined: whether the dotnet "missing CSharpier" pattern (`format.ts:118`) matches current dotnet output; the exact text of Prettier / wasm formatter errors.
 - No tests cover `format.ts` or `format_external`.
 
 ## Find and replace in a document (`find.md`)

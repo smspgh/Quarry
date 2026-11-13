@@ -6893,7 +6893,7 @@
       "title": "Rust needs rustfmt",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 362,
+      "line": 363,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6922,7 +6922,7 @@
       "title": "Syntax errors leave the document unchanged",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 389,
+      "line": 390,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6946,6 +6946,10 @@
         {
           "id": "FMT-009.3",
           "title": "Only the first line of a long message is shown"
+        },
+        {
+          "id": "FMT-009.4",
+          "title": "The built-in ruff gives a byte range, not a line"
         }
       ]
     },
@@ -6954,7 +6958,7 @@
       "title": "JSON pretty-print and minify commands",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 421,
+      "line": 429,
       "status": "draft",
       "commands": [
         "json.format",
