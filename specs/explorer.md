@@ -399,7 +399,9 @@ Scenario: EXPL-007.6 The watcher cannot start
 ```gherkin
 Scenario: EXPL-008.1 New File in the selected folder
   Given the folder "src" is the selected row
-  When I click "New File" in the Explorer header, type "util.ts" and press Enter
+  When I click "New File" in the Explorer header
+  Then a name box appears at the top of the tree, above the first row, whatever folder is selected
+  When I type "util.ts" and press Enter
   Then the empty file "src\util.ts" is created
   And "src" is expanded and lists "util.ts"
   And "util.ts" opens in a tab

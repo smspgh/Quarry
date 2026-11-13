@@ -167,7 +167,7 @@ Files given on the command line take the place of the restored tabs.
 
 **Ctrl+Shift+E** shows the Explorer for the open folder.
 
-- **Toolbar:** New File, New Folder, Refresh, Close Folder. The tree follows the active tab, and a tab's **Show in Quarry Explorer** finds its file in the tree. New items are named inline, and a new file opens straight away.
+- **Toolbar:** New File, New Folder, Refresh, Close Folder. The tree follows the active tab, and a tab's **Show in Quarry Explorer** finds its file in the tree. New File and New Folder show a name box at the top of the tree; the item is created in the selected folder (or next to the selected file, or at the top level when nothing is selected), and a new file opens straight away.
 - **Mouse:** click a file to open it; keyboard focus stays in the tree, so Ctrl+C, Ctrl+X and Delete act on that file. **Double-click** opens it and moves you into the editor. **Ctrl+click** adds a file or folder to the selection (or takes it out), and **Shift+click** selects every row from the last one you clicked; neither opens anything.
 - **Right-click** a file or folder (or a selection of several) for:
   - on a folder, **Expand** (when it's closed) and **Expand All** (when it has folders inside; opens it and every folder below it, up to 500, passing over `.git` and `node_modules`), or **Collapse** (when it's open) and **Collapse All** (when folders inside it are open too; closes them all);

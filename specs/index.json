@@ -4918,7 +4918,7 @@
       "title": "Rename a file or folder",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 448,
+      "line": 450,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4976,7 +4976,7 @@
       "title": "Delete files and folders to the Recycle Bin",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 517,
+      "line": 519,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5023,7 +5023,7 @@
       "title": "Cut, copy and paste files through the Windows clipboard",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 574,
+      "line": 576,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5093,7 +5093,7 @@
       "title": "Copy a path or a name as text",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 670,
+      "line": 672,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5124,7 +5124,7 @@
       "title": "Show a file in Windows File Explorer",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 704,
+      "line": 706,
       "status": "draft",
       "commands": [
         "file.showInWindowsExplorer"
@@ -5159,7 +5159,7 @@
       "title": "Open all files of a folder or a selection",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 738,
+      "line": 740,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5199,7 +5199,7 @@
       "title": "Start Find in Files from the Explorer",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 780,
+      "line": 782,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5236,7 +5236,7 @@
       "title": "Git status in the tree",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 817,
+      "line": 819,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5271,7 +5271,7 @@
       "title": "The file right-click menu",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 858,
+      "line": 860,
       "status": "draft",
       "commands": [],
       "files": [

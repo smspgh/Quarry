@@ -48,7 +48,6 @@ Doc / code mismatches
 
 ## Explorer and file operations (`explorer.md`)
 
-- The New File / New Folder name box is always drawn at the top of the tree at a fixed indent (`src/components/panels/ExplorerPanel.tsx:662-680`); `docs/editing.md:169` says items are "named inline".
 - Expanded folders are not saved in the session; `openFolder` resets them to the root (`src/lib/actions.ts:313`).
 
 ## Application shell (`app-shell.md`)
