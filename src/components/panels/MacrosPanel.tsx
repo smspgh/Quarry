@@ -3,7 +3,7 @@ import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { useEffect, useState } from "react";
 import { confirmDelete, persistSettings } from "../../lib/actions";
 import { confirmRun, runCommand, setLastMacro } from "../../lib/commands";
-import { deleteMacro, displayPath, guarded, loadMacros, macroFileName, macrosDir, pausePlayback, playSteps, playToEnd, saveMacro, stageMacros, stopPlayback } from "../../lib/macros";
+import { deleteMacro, displayPath, guarded, loadMacros, macroFileName, macrosDir, pausePlayback, playDetail, playSteps, playToEnd, saveMacro, stageMacros, stopPlayback, TO_END_DETAIL } from "../../lib/macros";
 import { useActiveDoc, useStore } from "../../lib/store";
 import { ItemList } from "./ItemList";
 import { MacroSteps } from "./MacroSteps";
@@ -43,13 +43,13 @@ export function MacrosPanel() {
     const m = macros.find((x) => x.id === id);
     if (!m) return;
     setLastMacro(m);
-    if (!(await confirmRun("macro", m, n === 1 ? `${m.steps.length} recorded step${m.steps.length === 1 ? "" : "s"}.` : `${m.steps.length} recorded step${m.steps.length === 1 ? "" : "s"}, played ${n} times in a row.`))) return;
+    if (!(await confirmRun("macro", m, playDetail(m.steps.length, n)))) return;
     await guarded(() => playSteps(m.steps, n));
   };
   const playUntilEnd = async () => {
     if (!sel) return;
     setLastMacro(sel);
-    if (!(await confirmRun("macro", sel, "Repeats until the cursor reaches the last line or stops moving down."))) return;
+    if (!(await confirmRun("macro", sel, TO_END_DETAIL))) return;
     const n = await guarded(() => playToEnd(sel.steps));
     if (n !== undefined) toast(`Played ${n} time${n === 1 ? "" : "s"}`, "success");
   };

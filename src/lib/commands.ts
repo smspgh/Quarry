@@ -60,7 +60,7 @@ import { copyJsonPath, copyJsonValue, dropJsonTree } from "./jsonModel";
 import { csvToJson, jsonToCsv, topLevelKeys } from "./convert";
 import { readText as readClipboardText, writeText as writeClipboardText } from "@tauri-apps/plugin-clipboard-manager";
 import { clipboardText, cutSpec, foldLineSpec, foldTreeSpec, pasteSpec } from "../editor/lineMenu";
-import { bindAppKeyFallback, bindCommandRunner, guarded, pausePlayback, playSteps, playToEnd, recordCommand, stageMacros, startRecording, stopPlayback, stopRecording } from "./macros";
+import { bindAppKeyFallback, bindCommandRunner, guarded, pausePlayback, playDetail, playSteps, playToEnd, recordCommand, stageMacros, startRecording, stopPlayback, stopRecording, TO_END_DETAIL } from "./macros";
 import { readScript, runScript, runScriptTimes, runScriptToEnd, scriptNameOf, SCRIPT_API_HELP } from "./scripting";
 import { activeDoc, useStore, type SidebarPanel } from "./store";
 import type { Macro, Script } from "./types";
@@ -1046,7 +1046,7 @@ export function registerAllCommands() {
         s().toast("No macro recorded yet. Press Ctrl+Shift+R to start recording.", "info");
         return;
       }
-      if (!(await confirmRun("macro", m, `${m.steps.length} recorded steps.`))) return false;
+      if (!(await confirmRun("macro", m, playDetail(m.steps.length)))) return false;
       await guarded(() => playSteps(m.steps, 1));
     },
   });
@@ -1059,7 +1059,7 @@ export function registerAllCommands() {
     run: async () => {
       const m = getLastMacro() ?? s().macros[0];
       if (!m) return;
-      if (!(await confirmRun("macro", m, "Repeats until the cursor stops moving or reaches the end of the file."))) return false;
+      if (!(await confirmRun("macro", m, TO_END_DETAIL))) return false;
       const n = await guarded(() => playToEnd(m.steps));
       if (n !== undefined) s().toast(`Played ${n} time${n === 1 ? "" : "s"}`, "success");
     },
@@ -1078,7 +1078,7 @@ export function registerAllCommands() {
       if (!m) return false;
       setLastMacro(m);
       s().set({ activeMacroId: m.id });
-      if (!(await confirmRun("macro", m, toEnd ? "Repeats until the cursor stops moving or reaches the end of the file." : `${m.steps.length} recorded steps.`))) return false;
+      if (!(await confirmRun("macro", m, toEnd ? TO_END_DETAIL : playDetail(m.steps.length)))) return false;
       if (toEnd) {
         const n = await guarded(() => playToEnd(m.steps));
         if (n !== undefined) s().toast(`Played ${n} time${n === 1 ? "" : "s"}`, "success");

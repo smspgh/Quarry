@@ -106,7 +106,6 @@ Doc / code mismatches and dead code
 
 ## Macros (`macros.md`)
 
-- The to-end confirmation is worded differently in the panel (`MacrosPanel.tsx:52`) and the commands (`commands.ts:1052`, `:1071`).
 - Not determined: whether macros reload on window focus while the panel is hidden (`MacrosPanel.tsx:93-101`); how the menu displays `macro.stop` (no `dynamicTitle`).
 
 ## Source control (`git.md`)

@@ -396,7 +396,8 @@ Scenario: MACRO-008.5 A stopped playback is still one step
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/commands.ts` — `confirmRun("macro", …)` (shared with scripts), detail text per caller
+  - `src/lib/commands.ts` — `confirmRun("macro", …)` (shared with scripts)
+  - `src/lib/macros.ts` — `playDetail`, `TO_END_DETAIL`: the detail text, shared by the panel and the commands
   - `src/components/panels/MacrosPanel.tsx` — `play`, `playUntilEnd` call `confirmRun`
   - `src/lib/dialogs.ts` — `choose`
   - `src/lib/types.ts` — `confirmRuns` setting, default `true`
@@ -430,6 +431,15 @@ Scenario: MACRO-009.5 Setting off
   Given "Confirm script & macro runs" is off
   When I press Ctrl+Shift+M
   Then the macro plays without a dialog
+
+Scenario: MACRO-009.6 Same wording wherever playback starts
+  Given "Confirm script & macro runs" is on and "Tidy" has 1 step
+  When I press Ctrl+Shift+M, or click "Play" in the Macros panel
+  Then the dialog mentions "1 recorded step."
+  When I click "Play ×5"
+  Then it mentions "1 recorded step, played 5 times in a row."
+  When I click "To end", or choose Play Until End of File from the Macros menu
+  Then it says "Repeats until the cursor reaches the last line or stops moving down."
 ```
 
 ## MACRO-010: Manage macros in the Macros panel and menu
