@@ -90,9 +90,13 @@ export function syncLine(changes: number, ahead: number, behind: number, upstrea
   return { kind: "ok", text: `Everything is committed and matches ${upstream}.` };
 }
 
-/** Does the text still hold git's conflict markers (an opening and a closing one, each starting a line)? */
+/**
+ * Does the text still hold one of git's conflict marker lines? Either end counts, so a block that
+ * was only half cleaned up (the `>>>>>>>` line left behind) is caught too. A lone `=======` is not
+ * taken as one: it is also how a heading is underlined.
+ */
 export function hasConflictMarkers(text: string): boolean {
-  return /^<{7}( |$)/m.test(text) && /^>{7}( |$)/m.test(text);
+  return /^<{7}( |\r?$)/m.test(text) || /^>{7}( |\r?$)/m.test(text);
 }
 
 /** The Commit button: what it will take (or what is in the way). */

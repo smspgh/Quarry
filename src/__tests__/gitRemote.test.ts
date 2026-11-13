@@ -62,7 +62,11 @@ describe("git error text", () => {
 });
 
 describe("conflicts", () => {
-  it("spots conflict markers only when both ends start a line", () => {
+  it("spots a marker line at either end of a block", () => {
+    // Half cleaned up: one end deleted by hand, the other left behind.
+    expect(hasConflictMarkers("mine\ntheirs\n>>>>>>> 18bc71d (Experiment B)\n")).toBe(true);
+    expect(hasConflictMarkers("<<<<<<< HEAD\nmine\n")).toBe(true);
+    expect(hasConflictMarkers("x\r\n>>>>>>>\r\ny")).toBe(true);
     expect(hasConflictMarkers("a\n<<<<<<< HEAD\nmine\n=======\ntheirs\n>>>>>>> 18bc71d (Experiment B)\nb")).toBe(true);
     expect(hasConflictMarkers("a\r\n<<<<<<< HEAD\r\nx\r\n=======\r\ny\r\n>>>>>>> other\r\n")).toBe(true);
     expect(hasConflictMarkers("resolved text")).toBe(false);

@@ -5,7 +5,7 @@ import { accept, acceptAll, conflictAtCursor, conflictsOf, gotoConflict } from "
 import type { ConflictChoice } from "./conflicts";
 import type { EditorView } from "@codemirror/view";
 import { register } from "./commands";
-import { compareWithHead, currentRepo, checkout, openGraph, fileStatus, pickBranch, refreshGit, remote, repoOf, showAddRemote, showHistory, stage, toggleBlame, unstage, useGit } from "./git";
+import { compareWithHead, currentRepo, checkout, openGraph, resolveConflicts, fileStatus, pickBranch, refreshGit, remote, repoOf, showAddRemote, showHistory, stage, toggleBlame, unstage, useGit } from "./git";
 import { showPanel } from "./panels";
 import { activeDoc, useStore } from "./store";
 
@@ -93,7 +93,10 @@ export function registerGitCommands() {
     enabled: () => !!fileStatus(repoFile()?.path),
     run: () => {
       const f = repoFile();
-      if (f) void stage(f.root, [f.path]);
+      if (!f) return;
+      // A conflicted file goes the careful way: its tab is saved and leftover markers are asked about.
+      if (fileStatus(f.path)?.conflicted) void resolveConflicts(f.root, [f.path]);
+      else void stage(f.root, [f.path]);
     },
   });
   register({

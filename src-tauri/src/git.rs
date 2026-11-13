@@ -1992,6 +1992,26 @@ mod tests {
         git_ok(&root, &["reset", "-q", "--hard", "HEAD~1"]);
         assert_eq!(std::fs::read_to_string(root.join("a.txt")).unwrap(), "different\n");
 
+        // The other way round: changed on our side, deleted by the commit coming in.
+        // Ours keeps our text; theirs deletes the file.
+        git_ok(&root, &["switch", "-qc", "dropper", &mine[1].sha]);
+        git_ok(&root, &["rm", "-q", "a.txt"]);
+        git_ok(&root, &["commit", "-qm", "drop a on the other side"]);
+        let drop = graph(&root, false, 0, 1).unwrap().remove(0).sha;
+        git_ok(&root, &["switch", "-q", "clash"]);
+        assert!(commit_action(&root, "cherry-pick", &drop, None).is_err());
+        assert!(status(&root).unwrap().unwrap().files.iter().any(|f| f.conflicted));
+        assert_eq!(resolve_side(&root, &a, "ours").unwrap(), "kept");
+        assert_eq!(std::fs::read_to_string(root.join("a.txt")).unwrap(), "different\n");
+        assert!(!status(&root).unwrap().unwrap().files.iter().any(|f| f.conflicted));
+        abort_operation(&root).unwrap();
+        assert!(commit_action(&root, "cherry-pick", &drop, None).is_err());
+        assert_eq!(resolve_side(&root, &a, "theirs").unwrap(), "deleted");
+        assert!(!root.join("a.txt").exists());
+        assert!(!status(&root).unwrap().unwrap().files.iter().any(|f| f.conflicted));
+        abort_operation(&root).unwrap();
+        assert_eq!(std::fs::read_to_string(root.join("a.txt")).unwrap(), "different\n");
+
         // A rebase that stops on a conflict: progress is reported, Continue is refused until the
         // file is resolved, then it finishes; Skip leaves the commit out instead.
         assert!(continue_operation(&root, "continue").is_err());
