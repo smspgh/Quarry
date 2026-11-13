@@ -228,7 +228,7 @@ Scenario: MACRO-004.9 A deleted macro is not played
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/MacrosPanel.tsx` — times input, "Play ×N" button, `play(id, n)`
+  - `src/components/panels/MacrosPanel.tsx` — times input (clamped to 1–100,000), "Play ×N" button, `play(id, n)`
   - `src/lib/macros.ts` — `playSteps(list, times)`
 - Tests: none
 - Docs: `docs/macros.md`
@@ -251,6 +251,10 @@ Scenario: MACRO-005.2 The confirmation names the count
 Scenario: MACRO-005.3 Lowest value is 1
   When I type 0 or clear the times box
   Then it shows 1
+
+Scenario: MACRO-005.4 Highest value is 100,000
+  When I type 250000 in the times box
+  Then it shows 100000
 ```
 
 ## MACRO-006: Play a macro until the end of the file

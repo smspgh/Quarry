@@ -148,7 +148,7 @@ export function MacrosPanel() {
               <button className="icon-btn xs" title="Delete macro file" onClick={() => void remove()}><Trash2 size={13} /></button>
             </div>
             <div className="row">
-              <input className="input" type="number" min={1} max={100000} style={{ width: 80, height: 26, fontSize: 12 }} value={times} title="How many times to play" onChange={(e) => setTimes(Math.max(1, Number(e.target.value) || 1))} />
+              <input className="input" type="number" min={1} max={100000} style={{ width: 80, height: 26, fontSize: 12 }} value={times} title="How many times to play" onChange={(e) => setTimes(Math.max(1, Math.min(100000, Number(e.target.value) || 1)))} />
               <button className="btn small" disabled={!canPlay} title="Play the macro this many times in a row" onClick={() => void play(sel.id, times)}><Repeat size={13} /> Play ×{times}</button>
               <button className="btn small" disabled={!canPlay} title="Repeat until the cursor reaches the last line or stops moving down" onClick={() => void playUntilEnd()}><FastForward size={13} /> To end</button>
             </div>

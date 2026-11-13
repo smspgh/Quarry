@@ -10627,6 +10627,10 @@
         {
           "id": "MACRO-005.3",
           "title": "Lowest value is 1"
+        },
+        {
+          "id": "MACRO-005.4",
+          "title": "Highest value is 100,000"
         }
       ]
     },
@@ -10635,7 +10639,7 @@
       "title": "Play a macro until the end of the file",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 256,
+      "line": 260,
       "status": "draft",
       "commands": [
         "macro.playToEnd",
@@ -10680,7 +10684,7 @@
       "title": "Pause and stop playback",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 300,
+      "line": 304,
       "status": "draft",
       "commands": [
         "macro.stop",
@@ -10724,7 +10728,7 @@
       "title": "A whole playback is one undo step",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 348,
+      "line": 352,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10764,7 +10768,7 @@
       "title": "Confirm before a macro plays",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 390,
+      "line": 394,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10805,7 +10809,7 @@
       "title": "Manage macros in the Macros panel and menu",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 431,
+      "line": 435,
       "status": "draft",
       "commands": [
         "macro.panel",
@@ -10869,7 +10873,7 @@
       "title": "Edit a macro's steps",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 505,
+      "line": 509,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10923,7 +10927,7 @@
       "title": "Save a macro to a file",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 569,
+      "line": 573,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10974,7 +10978,7 @@
       "title": "Macros folder: loading, reloading and changing it",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 630,
+      "line": 634,
       "status": "draft",
       "commands": [],
       "files": [
