@@ -170,7 +170,6 @@ Doc / code mismatches
 
 ## Settings (`settings.md`)
 
-- "Check for updates on start" is missing from `docs/settings.md` (`SettingsPanel.tsx:526`).
 - `InfoTip` is not used in Settings; its only use is `src/components/panels/SearchPanel.tsx:739`.
 - No settings migration code exists (nothing mentions the old ShiEdit id); loading is merge-over-defaults plus `sanitizeSettings` and the `.bak` fallback (`src/lib/actions.ts:673-718`; SET-003).
 - `sanitizeSettings` does not type-check `fontFamily`, `mica`, `restoreSession`, `confirmRuns` or the Editor switches (`actions.ts:694-718`).
