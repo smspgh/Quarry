@@ -214,7 +214,7 @@ Scenario: GRAPH-004.3 A branch with no remote branch
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — `load()`, `PAGE` = 300, `SLOW_PAGE_MS` = 400, `MAX_PAGE` = 4800, `generation` guard, windowed rows (`first` / `last`, 8 rows of overscan), next page when within 40 rows of the end
+  - `src/components/GraphView.tsx` — `load()`, `PAGE` = 300, `SLOW_PAGE_MS` = 400, `MAX_PAGE` = 4800, `generation` guard, reload on the `stamp` (head, branch, ahead / behind, upstream, operation) keeping `selected` and the scroll offset, windowed rows (`first` / `last`, 8 rows of overscan), next page when within 40 rows of the end
   - `src/lib/gitGraph.ts` — `GraphState` carried from page to page
   - `src-tauri/src/git.rs` — `graph` (`--skip`, `--max-count` clamped to 5000; no commits before the first commit)
 - Tests: `src/__tests__/gitGraph.test.ts`, `src-tauri/src/git.rs`
@@ -269,6 +269,12 @@ Scenario: GRAPH-005.8 A reload discards late pages
   Given a page is still being loaded
   When the graph is reloaded
   Then the late page's commits are not added to the new list
+
+Scenario: GRAPH-005.9 What a reload keeps
+  Given commit 150 of the list is selected and on screen
+  When the repository changes (a commit, pull, push, checkout, a fetch that moves the upstream, or an operation starting or ending) and the graph reloads from the first page
+  Then the scroll position, the selected commit and its details pane are kept
+  And a selected commit beyond the first page (300 rows, or the grown page size) is no longer shown: its details pane closes and the list is left at the end of the first page, where scrolling loads the next page
 ```
 
 ## GRAPH-006: Speed up a very large history

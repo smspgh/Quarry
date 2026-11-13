@@ -126,7 +126,6 @@ Doc / code mismatches and dead code
 ## Commit graph (`git-graph.md`)
 
 - The `"branch"` action (create without switching) exists in Rust, `GitCommitAction` and the `Naming` type, but the menu only offers `"branch-switch"` (`src/components/GraphView.tsx:76`, `:628`); the plain-branch path and its toast (`:330`) are dead UI code.
-- The graph reloads from page one on every change to head, branch, ahead/behind, upstream or operation (`GraphView.tsx:178-183`); whether scroll position and selection survive was not determined.
 - No test exercises `GraphView.tsx`.
 
 ## Merge conflicts and stopped operations (`git-conflicts.md`)

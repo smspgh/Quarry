@@ -8562,6 +8562,10 @@
         {
           "id": "GRAPH-005.8",
           "title": "A reload discards late pages"
+        },
+        {
+          "id": "GRAPH-005.9",
+          "title": "What a reload keeps"
         }
       ]
     },
@@ -8570,7 +8574,7 @@
       "title": "Speed up a very large history",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 274,
+      "line": 280,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8616,7 +8620,7 @@
       "title": "Find among the loaded commits",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 325,
+      "line": 331,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8661,7 +8665,7 @@
       "title": "Search the whole history and go to a result",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 376,
+      "line": 382,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8727,7 +8731,7 @@
       "title": "See a commit's details",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 452,
+      "line": 458,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8782,7 +8786,7 @@
       "title": "Open what a commit changed in a file",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 512,
+      "line": 518,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8828,7 +8832,7 @@
       "title": "Copy, switch, branch and tag from a commit's right-click menu",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 561,
+      "line": 567,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8883,7 +8887,7 @@
       "title": "Check out, cherry-pick or revert a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 624,
+      "line": 630,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8936,7 +8940,7 @@
       "title": "Reset the branch to a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 682,
+      "line": 688,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8978,7 +8982,7 @@
       "title": "See uncommitted work and a stopped operation above the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 727,
+      "line": 733,
       "status": "draft",
       "commands": [],
       "files": [
