@@ -1130,7 +1130,7 @@ Scenario: UI-019.6 Windows accessibility settings
 - Status: draft
 - Commands: `view.zoomIn`, `view.zoomInPlus`, `view.zoomOut`, `view.zoomReset`, `view.toggleWrap`, `view.toggleWhitespace`
 - Files:
-  - `src/lib/commands.ts` — `view.zoomIn` (Ctrl+=), `view.zoomInPlus` (Ctrl+Plus, hidden duplicate), `view.zoomOut` (Ctrl+-), `view.zoomReset` (Ctrl+0), `view.toggleWrap` (Alt+Z), `view.toggleWhitespace`; each updates the setting, applies it and saves it
+  - `src/lib/commands.ts` — `view.zoomIn` (Ctrl+=), `view.zoomInPlus` (Ctrl+Plus, hidden duplicate), `view.zoomOut` (Ctrl+-), `view.zoomReset` (Ctrl+0, back to `DEFAULT_SETTINGS.fontSize`), `view.toggleWrap` (Alt+Z), `view.toggleWhitespace`; each updates the setting, applies it and saves it
   - `src/lib/actions.ts` — `persistSettings`
   - `src/editor/manager.ts` — `editor.applySettings`
   - `src/lib/types.ts` — `Settings.fontSize` (14), `Settings.wordWrap`, `Settings.renderWhitespace`
@@ -1162,7 +1162,7 @@ Scenario: UI-020.2 Zoom limits
 Scenario: UI-020.3 Reset zoom
   Given the editor font size is 22
   When I press Ctrl+0
-  Then the editor font size is 14
+  Then the editor font size is 14, the default font size
 
 Scenario: UI-020.4 Zoom is remembered
   Given I zoomed to font size 18

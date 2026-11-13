@@ -63,7 +63,7 @@ import { clipboardText, cutSpec, foldLineSpec, foldTreeSpec, pasteSpec } from ".
 import { bindAppKeyFallback, bindCommandRunner, guarded, pausePlayback, playSteps, playToEnd, recordCommand, stageMacros, startRecording, stopPlayback, stopRecording } from "./macros";
 import { readScript, runScript, runScriptTimes, runScriptToEnd, scriptNameOf, SCRIPT_API_HELP } from "./scripting";
 import { activeDoc, useStore, type SidebarPanel } from "./store";
-import type { Macro, Script } from "./types";
+import { DEFAULT_SETTINGS, type Macro, type Script } from "./types";
 import { undoReplaceInFiles } from "./replaceUndo";
 import { focusPane, toggleSplit } from "./split";
 import { registerGitCommands } from "./gitCommands";
@@ -902,7 +902,7 @@ export function registerAllCommands() {
   register({ id: "view.zoomIn", title: "Zoom In", category: "View", keys: "Ctrl+=", run: () => { s().updateSettings({ fontSize: Math.min(40, s().settings.fontSize + 1) }); editor.applySettings(s().settings); persistSettings(); } });
   register({ id: "view.zoomInPlus", title: "Zoom In", category: "View", keys: "Ctrl+Plus", hidden: true, run: () => runCommand("view.zoomIn") });
   register({ id: "view.zoomOut", title: "Zoom Out", category: "View", keys: "Ctrl+-", run: () => { s().updateSettings({ fontSize: Math.max(8, s().settings.fontSize - 1) }); editor.applySettings(s().settings); persistSettings(); } });
-  register({ id: "view.zoomReset", title: "Reset Zoom", category: "View", keys: "Ctrl+0", run: () => { s().updateSettings({ fontSize: 14 }); editor.applySettings(s().settings); persistSettings(); } });
+  register({ id: "view.zoomReset", title: "Reset Zoom", category: "View", keys: "Ctrl+0", run: () => { s().updateSettings({ fontSize: DEFAULT_SETTINGS.fontSize }); editor.applySettings(s().settings); persistSettings(); } });
   register({
     id: "view.toggleTheme",
     title: "Toggle Light/Dark Theme",
