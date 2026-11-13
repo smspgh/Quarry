@@ -11512,7 +11512,7 @@
       "title": "Run a script several times or until nothing changes",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 553,
+      "line": 556,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11552,7 +11552,7 @@
       "title": "Cancel a running script; runaway scripts time out",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 599,
+      "line": 602,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11592,7 +11592,7 @@
       "title": "Script errors and Console output",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 644,
+      "line": 647,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11635,7 +11635,7 @@
       "title": "Script API Reference tab",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 691,
+      "line": 694,
       "status": "draft",
       "commands": [
         "help.scriptApi"
@@ -11669,7 +11669,7 @@
       "title": "Scripts folder location",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 723,
+      "line": 726,
       "status": "draft",
       "commands": [],
       "files": [

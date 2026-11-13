@@ -149,7 +149,7 @@ export async function runScript(source: string, args?: unknown, script?: Pick<Sc
   const view = editor.view;
   if (!view || editor.currentDocId !== doc.id) return { ok: false };
   if (script && !scriptApplies(script, doc)) {
-    store.toast(`"${script.name}" is for ${describeWhen(script).replace(/ only$/, "")} documents.`, "warning");
+    store.toast(`"${script.name}" is for ${describeWhen(script)}; ${doc.name} doesn't match.`, "warning");
     return { ok: false };
   }
   const startDoc = view.state.doc;

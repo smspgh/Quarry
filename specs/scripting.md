@@ -530,9 +530,12 @@ Scenario: SCRIPT-010.4 Language names are matched exactly
   Then Run is disabled
 
 Scenario: SCRIPT-010.5 Refused when started another way
-  Given flatten (JSON / YAML only) is the current script and a Markdown tab is in front
+  Given flatten (JSON / YAML only) is the current script and the Markdown tab notes.md is in front
   When I press Ctrl+Shift+Enter and confirm
-  Then the script does not run and a warning says "flatten" is for JSON / YAML documents
+  Then the script does not run and a warning reads "flatten" is for JSON / YAML only; notes.md doesn't match.
+  Given pick (// @extensions .csv, .tsv) is the current script and notes.md is in front
+  When I press Ctrl+Shift+Enter and confirm
+  Then a warning reads "pick" is for .csv, .tsv files only; notes.md doesn't match.
 
 Scenario: SCRIPT-010.6 No header means any text document
   Given a script without @languages or @extensions
