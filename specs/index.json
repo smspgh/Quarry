@@ -4265,6 +4265,10 @@
         {
           "id": "EDIT-018.6",
           "title": "Only for text tabs"
+        },
+        {
+          "id": "EDIT-018.7",
+          "title": "A recorded macro replays a status-bar language change"
         }
       ]
     },
@@ -4273,7 +4277,7 @@
       "title": "Syntax highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 989,
+      "line": 995,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4305,7 +4309,7 @@
       "title": "Word wrap and visible whitespace",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1022,
+      "line": 1028,
       "status": "draft",
       "commands": [
         "view.toggleWrap",
@@ -4347,7 +4351,7 @@
       "title": "Zoom the editor text",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1065,
+      "line": 1071,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -4390,7 +4394,7 @@
       "title": "Let Tab leave the editor",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1107,
+      "line": 1113,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -4430,7 +4434,7 @@
       "title": "Line numbers, active line and selection-match highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1151,
+      "line": 1157,
       "status": "draft",
       "commands": [],
       "files": [

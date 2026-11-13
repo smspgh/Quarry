@@ -941,7 +941,7 @@ Scenario: EDIT-017.8 A short first insert is not enough
   - `src/lib/commands.ts` — `code.setLanguage` (a name argument sets it; no argument opens palette mode `language`), chord key "Ctrl+K M"
   - `src/components/CommandPalette.tsx` — `language` mode over `allLanguageNames`, current language marked
   - `src/components/MenuBar.tsx` — `languageMenu`, `COMMON_LANGUAGES`, "All languages…"
-  - `src/components/StatusBar.tsx` — language picker (calls `editor.setLanguage` directly)
+  - `src/components/StatusBar.tsx` — language picker (runs `code.setLanguage` with the name)
   - `src/editor/manager.ts` — `setLanguage` (reconfigures `compartments.language`), `effectsTo`
   - `src/editor/cmSetup.ts` — `languageByName`, `allLanguageNames` ("Plain Text" first)
 - Tests: none
@@ -984,6 +984,12 @@ Scenario: EDIT-018.6 Only for text tabs
   Given the active tab is a large-file tab
   When I open the Code menu
   Then the languages in Code › Language are greyed out
+
+Scenario: EDIT-018.7 A recorded macro replays a status-bar language change
+  Given I am recording a macro
+  When I click the language in the status bar and choose "Markdown"
+  Then the macro has a Change Language Mode step for "Markdown"
+  And playing the macro on another tab sets its language to "Markdown"
 ```
 
 ## EDIT-019: Syntax highlighting

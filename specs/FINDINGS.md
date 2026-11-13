@@ -35,7 +35,6 @@ Not verified
 ## Text editing (`editing.md`)
 
 Possible bugs
-- The status-bar language picker calls `editor.setLanguage` directly (`src/components/StatusBar.tsx:200`) instead of `runCommand("code.setLanguage", …)`; macros do not record it.
 
 Doc / code mismatches and notes
 - Language sniffing never returns "C": `#include` gives "C++" (`src/editor/cmSetup.ts:231`); `docs/editing.md:108` says "C/C++".
