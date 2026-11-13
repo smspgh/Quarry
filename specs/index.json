@@ -13591,7 +13591,9 @@
         "src/lib/commands.ts",
         "src/lib/split.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/splitHistory.test.ts"
+      ],
       "docs": [
         "docs/editing.md"
       ],
@@ -17983,6 +17985,9 @@
       "SPLIT-002",
       "SPLIT-004",
       "SPLIT-007"
+    ],
+    "src/__tests__/splitHistory.test.ts": [
+      "SPLIT-005"
     ],
     "src/__tests__/tabLimit.test.ts": [
       "SET-010",

@@ -198,7 +198,7 @@ Scenario: SPLIT-004.3 Picking a non-text tab from the left pane
   - `src/editor/manager.ts` — `show` (the second pane gets a copy of the state; hands the undo history over when the owning pane leaves the document), `dispatchIn` and the `paneSync` annotation (copies edits across, into the owner's history), `owner`, `historyView`, the Undo / Redo key bindings routed `viaOwner`, `onUpdate` ignoring copied edits
   - `src/lib/commands.ts` — `cmCommand` runs `edit.undo` / `edit.redo` on `editor.historyView(editor.view)`
   - `src/lib/split.ts` — `toggleSplit` puts the same document in both panes
-- Tests: none
+- Tests: `src/__tests__/splitHistory.test.ts`
 - Docs: `docs/editing.md`
 
 **As a** developer editing a long file
