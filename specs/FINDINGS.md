@@ -30,10 +30,6 @@ Doc / code mismatches
 
 - No test renders `GraphView.tsx` (toolbar, paging and scrolling, selection keys, menu, naming strip, details pane); the action dialogs and notifications are now tested through `actionConfirm` / `actionDone` in `src/lib/gitGraph.ts`. Rendering it needs a DOM harness (React + jsdom), which the repository does not have.
 
-## Merge conflicts and stopped operations (`git-conflicts.md`)
-
-- An `am` operation is labelled as a rebase: the Commit button reads "Continue Rebase" and the message box says a rebase keeps each commit's message (`src/components/panels/GitPanel.tsx`, `rebasing`); the notifications say "the am" and Abort's confirm button reads "Abort Am" (`src/lib/git.ts`, `continueOperation` / `abortOperation`). The git side is right: `continue_operation` / `abort_operation` in `git.rs` detect the operation themselves and run `git am --continue` / `--skip` / `--abort`, so only the wording is off. No scenarios were written for `am`.
-
 ## Compare (`compare.md`)
 
 - No test exercises `DiffView.tsx` (the editors, arrows, layout switch); it needs a component test harness. `openCompare` / `saveDiff` / `reloadDiff` / `swapDiff` are covered by `src/__tests__/diffSession.test.ts`.

@@ -15,7 +15,7 @@ import type { EditorView } from "@codemirror/view";
 import { git, type GitBranch, type GitCommitAction, type GitCommitFile, type GitFile, type GitLogEntry, type GitIdentity, type GitRemoteOp, type GitStatus, type GithubRepo } from "./gitApi";
 import { newDocId, useStore, type Doc } from "./store";
 import { fs } from "./ipc";
-import { displayUrl, gitErrorText, hasConflictMarkers, isMissingRepo, KIND_RANK, kindOf, type GitKind } from "./gitStatus";
+import { displayUrl, gitErrorText, hasConflictMarkers, isMissingRepo, KIND_RANK, kindOf, operationDone, operationWords, type GitKind } from "./gitStatus";
 
 export { isMissingRepo, KIND_LABEL, KIND_LETTER, kindOf, type GitKind } from "./gitStatus";
 import { choose } from "./dialogs";
@@ -273,7 +273,10 @@ export function installGit(): () => void {
     cleared: (view) => void conflictsCleared(view),
     compare: (view, block, n) => void compareSides(view, block, n),
     // In a rebase the sides are the reverse of what people expect: say which is which.
-    note: () => (currentRepo()?.operation === "rebase" ? "Rebasing: Current is the branch you are rebasing onto, Incoming is your own commit." : ""),
+    note: () => {
+      const op = currentRepo()?.operation;
+      return op ? operationWords(op).sidesNote : "";
+    },
   });
   const unsub = useStore.subscribe((s, prev) => {
     if (s.folder !== prev.folder) {
@@ -420,7 +423,8 @@ async function compareSides(view: EditorView, block: ConflictBlock, n: number) {
 export async function continueOperation(root: string, operation: string, how: "continue" | "skip") {
   const { askDialog, checkExternalChanges } = await import("./actions");
   if (how === "skip") {
-    const ok = await askDialog(`Skip this commit?`, `The commit the ${operation} stopped on is left out: its changes will not be on the branch. The ${operation} then carries on with the rest.`, "Skip Commit");
+    const w = operationWords(operation);
+    const ok = await askDialog(`Skip this ${w.item}?`, `The ${w.item} ${w.noun} stopped on is left out: its changes will not be on the branch. ${w.noun[0].toUpperCase()}${w.noun.slice(1)} then carries on with the rest.`, `Skip ${w.item[0].toUpperCase()}${w.item.slice(1)}`);
     if (!ok) return;
   }
   const out = await run(how === "skip" ? "Skipping…" : "Continuing…", () => git.continueOp(root, how));
@@ -428,7 +432,7 @@ export async function continueOperation(root: string, operation: string, how: "c
   if (out === undefined) return;
   // Status is refreshed by run(); a rebase that is still going shows its next step there.
   const still = await git.status(root).catch(() => null);
-  toast(still?.operation ? `${how === "skip" ? "Skipped that commit" : "Continued"}: the ${out} is on its next commit.` : `The ${out} is finished.`, "success", 3500);
+  toast(operationDone(out || operation, how, !!still?.operation), "success", 3500);
 }
 
 /** The last conflict of a document was just resolved in the editor: offer to finish the file. */
@@ -443,7 +447,7 @@ async function conflictsCleared(view: EditorView) {
   const left = repo.files.filter((f) => f.conflicted).length - 1;
   const ok = await choose(
     `No conflicts left in ${name}`,
-    `Save ${name} and mark it resolved?${left > 0 ? ` ${left} other file${left === 1 ? " still has" : "s still have"} conflicts.` : repo.operation === "rebase" ? " It is the last file: after this, Continue Rebase carries on." : " It is the last file: after this you can commit to finish."}\n\nYou can keep editing instead, and mark it resolved later with + under Merge Changes.`,
+    `Save ${name} and mark it resolved?${left > 0 ? ` ${left} other file${left === 1 ? " still has" : "s still have"} conflicts.` : repo.operation && operationWords(repo.operation).continueLabel ? ` It is the last file: after this, ${operationWords(repo.operation).continueLabel} carries on.` : " It is the last file: after this you can commit to finish."}\n\nYou can keep editing instead, and mark it resolved later with + under Merge Changes.`,
     [
       { label: "Save and Mark Resolved", kind: "primary", default: true, value: true },
       { label: "Keep Editing", cancel: true, value: false },
@@ -869,11 +873,12 @@ export async function commitAction(root: string, action: GitCommitAction, sha: s
 /** Abandon the operation in progress (a stopped merge, rebase, cherry-pick or revert), after asking. */
 export async function abortOperation(root: string, operation: string) {
   const { askDialog, checkExternalChanges } = await import("./actions");
-  const ok = await askDialog(`Abort the ${operation}?`, `Everything goes back to how it was before the ${operation} started. Conflict resolutions made so far are discarded.`, `Abort ${operation[0].toUpperCase()}${operation.slice(1)}`);
+  const w = operationWords(operation);
+  const ok = await askDialog(`Abort ${w.noun}?`, `Everything goes back to how it was before ${w.noun} started. Conflict resolutions made so far are discarded.`, w.abortLabel);
   if (!ok) return;
   const out = await run("Aborting…", () => git.abort(root));
   if (out === undefined) return;
-  toast(`Aborted the ${out}.`, "info", 3000);
+  toast(operationDone(out || operation, "abort"), "info", 3000);
   void checkExternalChanges();
 }
 

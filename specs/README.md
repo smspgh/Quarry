@@ -36,7 +36,7 @@ It prints each story's id, title and `spec file:line` (and, for a story id, its 
 | --- | --- | --- | --- |
 | `BIG` | Large Files | [large-files.md](large-files.md) | 20 |
 | `CLAUDE` | Claude Code Tabs | [claude-code.md](claude-code.md) | 20 |
-| `CONFLICT` | Merge Conflicts and Stopped Operations | [git-conflicts.md](git-conflicts.md) | 13 |
+| `CONFLICT` | Merge Conflicts and Stopped Operations | [git-conflicts.md](git-conflicts.md) | 14 |
 | `DIFF` | Compare | [compare.md](compare.md) | 14 |
 | `EDIT` | Text Editing | [editing.md](editing.md) | 23 |
 | `EXPL` | Explorer and File Operations | [explorer.md](explorer.md) | 17 |

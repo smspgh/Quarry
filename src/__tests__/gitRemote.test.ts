@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { commitLabel, displayUrl, gitErrorText, hasConflictMarkers, isMissingRepo, remoteWebUrl, repoNameFor, syncLine } from "../lib/gitStatus";
+import { commitLabel, displayUrl, gitErrorText, hasConflictMarkers, isMissingRepo, operationDone, operationWords, remoteWebUrl, repoNameFor, syncLine } from "../lib/gitStatus";
 
 describe("remote URLs", () => {
   it("finds the web page of https and ssh remotes", () => {
@@ -85,5 +85,36 @@ describe("commit button during a rebase", () => {
     expect(commitLabel(0, 0, false, 0, "rebase")).toBe("Continue Rebase");
     expect(commitLabel(1, 1, false, 2, "rebase")).toBe("Resolve 2 Conflicts First");
     expect(commitLabel(1, 1, false, 0, "cherry-pick")).toBe("Commit 1 Staged");
+  });
+});
+
+describe("operation wording", () => {
+  it("talks about a patch series during git am, never a rebase", () => {
+    expect(commitLabel(0, 0, false, 0, "am")).toBe("Continue Applying Patches");
+    expect(commitLabel(0, 1, false, 1, "am")).toBe("Resolve 1 Conflict First");
+    const w = operationWords("am");
+    expect(w).toMatchObject({ badge: "Applying patches", noun: "the patch series", item: "patch", abortLabel: "Abort Applying Patches" });
+    expect(w.placeholder).toBe("Each patch keeps its own message: resolve the conflicts, then Continue Applying Patches");
+    expect(w.sidesNote).toBe("Applying patches: Current is your branch, Incoming is the patch.");
+    for (const text of [w.badge, w.noun, w.placeholder!, w.sidesNote, operationDone("am", "continue", true), operationDone("am", "skip", true), operationDone("am", "continue"), operationDone("am", "abort")]) {
+      expect(text).not.toMatch(/rebas|\bam\b/i);
+    }
+  });
+
+  it("says what Continue, Skip and Abort did", () => {
+    expect(operationDone("am", "continue", true)).toBe("Continued: the patch series is on its next patch.");
+    expect(operationDone("am", "skip", true)).toBe("Skipped that patch: the patch series is on its next patch.");
+    expect(operationDone("am", "continue")).toBe("The patch series is finished.");
+    expect(operationDone("am", "abort")).toBe("Aborted the patch series.");
+    expect(operationDone("rebase", "skip", true)).toBe("Skipped that commit: the rebase is on its next commit.");
+    expect(operationDone("rebase", "continue")).toBe("The rebase is finished.");
+    expect(operationDone("cherry-pick", "abort")).toBe("Aborted the cherry-pick.");
+  });
+
+  it("keeps the other operations' labels", () => {
+    expect(operationWords("cherry-pick")).toMatchObject({ badge: "Cherry-picking", abortLabel: "Abort Cherry-pick", continueLabel: null, sidesNote: "" });
+    expect(operationWords("rebase")).toMatchObject({ continueLabel: "Continue Rebase", abortLabel: "Abort Rebase" });
+    expect(operationWords("merge").abortLabel).toBe("Abort Merge");
+    expect(operationWords("bisect")).toMatchObject({ badge: "bisect", noun: "the bisect", abortLabel: "Abort Bisect" });
   });
 });

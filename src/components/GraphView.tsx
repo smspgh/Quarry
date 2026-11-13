@@ -9,7 +9,7 @@ import { abortOperation, checkoutRef, commitAction, openCommitFile, remote, useG
 import { isPanelShown, showPanel } from "../lib/panels";
 import { git, type GitCommitAction, type GitCommitDetail, type GitCommitFile, type GitGraphCommit } from "../lib/gitApi";
 import { actionConfirm, actionDone, commitMatches, layoutGraph, newGraphState, refLabels, type GraphRow, type RefLabel } from "../lib/gitGraph";
-import { commitFileKind, KIND_LABEL, KIND_LETTER } from "../lib/gitStatus";
+import { commitFileKind, KIND_LABEL, KIND_LETTER, operationWords } from "../lib/gitStatus";
 import { useStore, type Doc } from "../lib/store";
 
 const PAGE = 300;
@@ -428,7 +428,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
         <div className="graph-strip warn" role="status">
           <TriangleAlert size={14} />
           <span className="grow">
-            A {repo.operation} stopped part-way{conflicts ? `: ${conflicts} file${conflicts === 1 ? " has" : "s have"} conflicts` : ""}. Resolve them in Source Control and commit, or abort to go back to how things were.
+            {stoppedNoun(repo.operation)} stopped part-way{conflicts ? `: ${conflicts} file${conflicts === 1 ? " has" : "s have"} conflicts` : ""}. Resolve them in Source Control and commit, or abort to go back to how things were.
           </span>
           {/* With the panel already open the button would do nothing visible: it is only offered when it is closed. */}
           {!gitShown && <button className="btn small" onClick={openSourceControl}>Open Source Control</button>}
@@ -631,6 +631,12 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
       )}
     </div>
   );
+}
+
+/** "The rebase", "The patch series": the strip's subject. */
+function stoppedNoun(operation: string): string {
+  const n = operationWords(operation).noun;
+  return n[0].toUpperCase() + n.slice(1);
 }
 
 function DetailFile({ file, commit }: { file: GitCommitFile; commit: GitGraphCommit }) {

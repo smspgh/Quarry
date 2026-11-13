@@ -2,7 +2,7 @@ import { ArrowDown, ArrowUp, Check, ChevronRight, CircleDot, CloudDownload, Clou
 import { useEffect, useRef, useState } from "react";
 import { openPath } from "../../lib/actions";
 import { abortOperation, continueOperation, resolveConflicts, takeSide, checkRemote, isMissingRepo, commit, compareCommitWithCurrent, currentRepo, discard, moreHistory, openChange, openCommitChange, openCommitFile, openGraph, pickBranch, remote, rescanGit, stage, unstage, useGit } from "../../lib/git";
-import { commitFileKind, commitLabel, gitErrorText, groupFiles, KIND_LABEL, KIND_LETTER, rowKind, syncLine, type Group } from "../../lib/gitStatus";
+import { commitFileKind, commitLabel, gitErrorText, groupFiles, KIND_LABEL, KIND_LETTER, operationWords, rowKind, syncLine, type Group } from "../../lib/gitStatus";
 import { git, type GitCommitFile, type GitFile, type GitLogEntry, type GitRemoteOp, type GitStatus } from "../../lib/gitApi";
 import { relativeTime } from "../../editor/git";
 import { useStore } from "../../lib/store";
@@ -411,7 +411,6 @@ function SyncStatus({ repo }: { repo: GitStatus }) {
   );
 }
 
-const OPERATION: Record<string, string> = { merge: "Merging", rebase: "Rebasing", am: "Applying patches", "cherry-pick": "Cherry-picking", revert: "Reverting" };
 
 /** Source Control panel: branch, commit box, changed files (staged / not), file history. */
 export function GitPanel() {
@@ -433,16 +432,18 @@ export function GitPanel() {
     }
     if (offered.current === opKey) return;
     offered.current = opKey;
-    // (Not for a rebase: its commits keep their own messages.)
-    if (repo!.operation === "rebase" || repo!.operation === "am") return;
+    // (Not for a rebase or am: its commits / patches keep their own messages.)
+    if (operationWords(repo!.operation!).continueLabel) return;
     setMessage((cur) => (cur.trim() ? cur : repo!.operationMessage!));
   }, [opKey]);
 
-  const rebasing = repo?.operation === "rebase" || repo?.operation === "am";
+  const opWords = repo?.operation ? operationWords(repo.operation) : null;
+  // A rebase or am is continued by the main button instead of committed.
+  const rebasing = !!opWords?.continueLabel;
   const doCommit = async () => {
     if (!repo || busy) return;
     if (rebasing) {
-      await continueOperation(repo.root, "rebase", "continue");
+      await continueOperation(repo.root, repo.operation!, "continue");
       return;
     }
     if (await commit(repo.root, message, amend)) {
@@ -519,14 +520,14 @@ export function GitPanel() {
               <button className="btn small" title="Switch branch or create one" disabled={!!busy} onClick={() => void pickBranch()}>
                 <GitBranch size={13} /> <span className="truncate">{branchLabel}</span>
               </button>
-              {repo.operation && <span className="scm-op" title="Stopped part-way, usually on a conflict: resolve the files under Merge Changes and commit, or abort">{OPERATION[repo.operation] ?? repo.operation}{repo.operationStep ? ` ${repo.operationStep[0]} of ${repo.operationStep[1]}` : ""}</span>}
+              {repo.operation && <span className="scm-op" title="Stopped part-way, usually on a conflict: resolve the files under Merge Changes and commit, or abort">{opWords!.badge}{repo.operationStep ? ` ${repo.operationStep[0]} of ${repo.operationStep[1]}` : ""}</span>}
               {repo.operation && repo.operation !== "merge" && (
-                <button className="btn small" disabled={!!busy || groups.conflict.length > 0} title={groups.conflict.length ? "Resolve the conflicts first (or Abort)" : `Leave out the commit the ${repo.operation} stopped on and carry on`} onClick={() => void continueOperation(repo.root, repo.operation!, "skip")}>
+                <button className="btn small" disabled={!!busy || groups.conflict.length > 0} title={groups.conflict.length ? "Resolve the conflicts first (or Abort)" : `Leave out the ${opWords!.item} ${opWords!.noun} stopped on and carry on`} onClick={() => void continueOperation(repo.root, repo.operation!, "skip")}>
                   Skip
                 </button>
               )}
               {repo.operation && (
-                <button className="btn small" disabled={!!busy} title={`Give up the ${repo.operation} and go back to how things were before it`} onClick={() => void abortOperation(repo.root, repo.operation!)}>
+                <button className="btn small" disabled={!!busy} title={`Give up ${opWords!.noun} and go back to how things were before it`} onClick={() => void abortOperation(repo.root, repo.operation!)}>
                   Abort
                 </button>
               )}
@@ -536,7 +537,7 @@ export function GitPanel() {
           </div>
           <textarea
             className="input scm-message"
-            placeholder={rebasing ? "A rebase keeps each commit's own message: resolve the conflicts, then Continue Rebase" : `Message (Ctrl+Enter to commit${target})`}
+            placeholder={rebasing ? opWords!.placeholder! : `Message (Ctrl+Enter to commit${target})`}
             disabled={rebasing}
             aria-label="Commit message"
             value={message}
@@ -576,7 +577,7 @@ export function GitPanel() {
         {repo.files.length === 0 && (
           <div className="panel-note">
             {repo.operation && !rebasing
-              ? `Nothing is left to commit for this ${repo.operation}: its changes are already on the branch. ${repo.operation === "merge" ? "Abort to end it." : "Press Skip to move on, or Abort."}`
+              ? `Nothing is left to commit for ${opWords!.noun.replace(/^the /, "this ")}: its changes are already on the branch. ${repo.operation === "merge" ? "Abort to end it." : "Press Skip to move on, or Abort."}`
               : "No uncommitted changes."}
           </div>
         )}

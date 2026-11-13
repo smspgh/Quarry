@@ -621,3 +621,60 @@ Scenario: CONFLICT-013.6 The sides are explained
   Then each conflict bar also says "Rebasing: Current is the branch you are rebasing onto, Incoming is your own commit."
   And outside a rebase the bars carry no such note
 ```
+
+## CONFLICT-014: Carry on with a patch series (git am)
+
+- Status: draft
+- Commands: none
+- Files:
+  - `src/components/panels/GitPanel.tsx` — badge, Skip / Abort tooltips, disabled message box and its placeholder, `doCommit` → `continueOperation`
+  - `src/components/GraphView.tsx` — stopped-operation strip (`stoppedNoun`)
+  - `src/lib/gitStatus.ts` — `operationWords("am")` (badge, button labels, placeholder, sides note), `operationDone` (notifications), `commitLabel(..., "am")`
+  - `src/lib/git.ts` — `continueOperation`, `abortOperation`, `note` hook in `installGit`, `conflictsCleared`
+  - `src-tauri/src/git.rs` — `operation` (rebase-apply with `applying`), `operation_step` (next / last), `continue_operation` (`am --continue` / `--skip`), `abort_operation` (`am --abort`)
+- Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git.rs`
+- Docs: `docs/git.md`
+
+**As a** developer applying a patch series with `git am` that stopped on a patch
+**I want** the panel to name it as applying patches and carry it on with the main button
+**So that** I am not told I am in a rebase I never started
+
+```gherkin
+Scenario: CONFLICT-014.1 Progress
+  Given `git am` of 5 patches stopped on the second
+  When I open the Source Control panel
+  Then the badge beside the branch reads "Applying patches 2 of 5"
+  And the graph tab's strip says "The patch series stopped part-way"
+
+Scenario: CONFLICT-014.2 The main button continues
+  Given every conflicted file has been marked resolved
+  When I look at the commit box
+  Then the message box is disabled and its placeholder says "Each patch keeps its own message: resolve the conflicts, then Continue Applying Patches"
+  And the main button reads "Continue Applying Patches" and is enabled without a message
+  When I click it
+  Then the next patch is applied, each keeping its own message
+  And a notification says "Continued: the patch series is on its next patch." when it stops again, or "The patch series is finished." when it is done
+
+Scenario: CONFLICT-014.3 The sides are explained
+  Given a patch series is stopped and I open a conflicted file
+  When I look at its conflict bars
+  Then each conflict bar also says "Applying patches: Current is your branch, Incoming is the patch."
+
+Scenario: CONFLICT-014.4 Skip a patch
+  Given no file is in conflict
+  When I click "Skip"
+  Then a dialog "Skip this patch?" says the patch's changes will not be on the branch
+  When I confirm with "Skip Patch"
+  Then that patch is left out and a notification says "Skipped that patch: the patch series is on its next patch." or "The patch series is finished."
+
+Scenario: CONFLICT-014.5 Abort
+  When I click "Abort"
+  Then a dialog "Abort the patch series?" asks first and its confirm button reads "Abort Applying Patches"
+  When I confirm
+  Then the branch is back where it was before the patch series and a notification says "Aborted the patch series."
+
+Scenario: CONFLICT-014.6 Never called a rebase
+  Given a patch series is stopped
+  When I look at the panel, the dialogs and the notifications
+  Then none of them mentions a rebase or "the am"
+```

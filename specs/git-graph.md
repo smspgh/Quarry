@@ -766,7 +766,7 @@ Scenario: GRAPH-014.1 Uncommitted changes
 Scenario: GRAPH-014.2 A stopped operation
   Given a cherry-pick stopped with 1 conflicted file
   When I look at the graph tab
-  Then a warning strip says "A cherry-pick stopped part-way: 1 file has conflicts. Resolve them in Source Control and commit, or abort to go back to how things were."
+  Then a warning strip says "The cherry-pick stopped part-way: 1 file has conflicts. Resolve them in Source Control and commit, or abort to go back to how things were."
   And it has an "Abort" button
   And the uncommitted-changes strip is not shown at the same time
 

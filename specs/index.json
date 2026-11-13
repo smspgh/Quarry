@@ -17,7 +17,7 @@
       "prefix": "CONFLICT",
       "title": "Merge Conflicts and Stopped Operations",
       "spec": "specs/git-conflicts.md",
-      "stories": 13
+      "stories": 14
     },
     {
       "prefix": "DIFF",
@@ -2774,6 +2774,55 @@
         {
           "id": "CONFLICT-013.6",
           "title": "The sides are explained"
+        }
+      ]
+    },
+    "CONFLICT-014": {
+      "id": "CONFLICT-014",
+      "title": "Carry on with a patch series (git am)",
+      "area": "CONFLICT",
+      "spec": "specs/git-conflicts.md",
+      "line": 625,
+      "status": "draft",
+      "commands": [],
+      "files": [
+        "src/components/panels/GitPanel.tsx",
+        "src/components/GraphView.tsx",
+        "src/lib/gitStatus.ts",
+        "src/lib/git.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/gitRemote.test.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "CONFLICT-014.1",
+          "title": "Progress"
+        },
+        {
+          "id": "CONFLICT-014.2",
+          "title": "The main button continues"
+        },
+        {
+          "id": "CONFLICT-014.3",
+          "title": "The sides are explained"
+        },
+        {
+          "id": "CONFLICT-014.4",
+          "title": "Skip a patch"
+        },
+        {
+          "id": "CONFLICT-014.5",
+          "title": "Abort"
+        },
+        {
+          "id": "CONFLICT-014.6",
+          "title": "Never called a rebase"
         }
       ]
     },
@@ -16485,6 +16534,7 @@
       "CONFLICT-011",
       "CONFLICT-012",
       "CONFLICT-013",
+      "CONFLICT-014",
       "DIFF-006",
       "GIT-001",
       "GIT-002",
@@ -16792,6 +16842,7 @@
     ],
     "src/components/GraphView.tsx": [
       "CONFLICT-011",
+      "CONFLICT-014",
       "GRAPH-001",
       "GRAPH-002",
       "GRAPH-003",
@@ -17020,6 +17071,7 @@
       "CONFLICT-011",
       "CONFLICT-012",
       "CONFLICT-013",
+      "CONFLICT-014",
       "GIT-001",
       "GIT-007",
       "GIT-008",
@@ -17626,6 +17678,7 @@
       "CONFLICT-011",
       "CONFLICT-012",
       "CONFLICT-013",
+      "CONFLICT-014",
       "DIFF-006",
       "DIFF-014",
       "EXPL-016",
@@ -17707,6 +17760,7 @@
       "CONFLICT-009",
       "CONFLICT-010",
       "CONFLICT-013",
+      "CONFLICT-014",
       "EXPL-016",
       "GIT-004",
       "GIT-008",
@@ -18142,6 +18196,7 @@
       "CONFLICT-011",
       "CONFLICT-012",
       "CONFLICT-013",
+      "CONFLICT-014",
       "DIFF-006",
       "GIT-001",
       "GIT-002",
@@ -18344,6 +18399,7 @@
       "CONFLICT-007",
       "CONFLICT-010",
       "CONFLICT-013",
+      "CONFLICT-014",
       "GIT-008",
       "GIT-009",
       "GIT-013",
