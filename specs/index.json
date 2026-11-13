@@ -13129,6 +13129,14 @@
         {
           "id": "SET-011.4",
           "title": "Changing the macros folder reloads the macros"
+        },
+        {
+          "id": "SET-011.5",
+          "title": "A folder that can't be used falls back to the default"
+        },
+        {
+          "id": "SET-011.6",
+          "title": "Cancelling a macros folder change keeps the previous folder"
         }
       ]
     },
@@ -13137,7 +13145,7 @@
       "title": "Find and replace history size",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 608,
+      "line": 620,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13174,7 +13182,7 @@
       "title": "Confirmation and update-check switches",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 649,
+      "line": 661,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13203,7 +13211,7 @@
       "title": "Code intelligence settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 681,
+      "line": 693,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13251,7 +13259,7 @@
       "title": "Claude Code settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 732,
+      "line": 744,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13305,7 +13313,7 @@
       "title": "JSON pretty-print indent",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 792,
+      "line": 804,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13333,7 +13341,7 @@
       "title": "Themed dropdown lists",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 819,
+      "line": 831,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13384,7 +13392,7 @@
       "title": "Help \"i\" icons",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 885,
+      "line": 897,
       "status": "draft",
       "commands": [],
       "files": [

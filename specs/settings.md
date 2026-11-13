@@ -571,7 +571,7 @@ Scenario: SET-010.4 Restore session on start
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — `FolderRow` (shows the folder in use, default path typed back in stores empty, "Browse…", hint suffix "· default folder"), `changeFolder`
   - `src/lib/scripting.ts` — `scriptsDir` (resolves and reports an unusable folder)
-  - `src/lib/macros.ts` — `loadMacros("switch")` (unsaved-macros guard, may undo the change)
+  - `src/lib/macros.ts` — `resolveFolder` (creates a missing folder; one that can't be created resets the setting to empty with a warning), `loadMacros("switch")` (unsaved-macros guard; Cancel puts back the folder loaded before)
   - `src/lib/ipc.ts` — `appData.path`
   - `src/lib/actions.ts` — `sanitizeSettings` (folder values)
 - Tests: `src/__tests__/paths.test.ts`
@@ -603,6 +603,18 @@ Scenario: SET-011.4 Changing the macros folder reloads the macros
   Given the Macros panel lists the macros of the default folder
   When I set "Macros folder" to D:\team-macros
   Then the Macros panel lists the .macro.json files of D:\team-macros
+
+Scenario: SET-011.5 A folder that can't be used falls back to the default
+  Given Z: is not a drive on this PC
+  When I set "Scripts folder" to Z:\scripts
+  Then the setting goes back to empty and the field shows the default scripts folder
+  And a warning says 'Scripts folder "Z:\scripts" is not usable (…). The setting was reset to the default folder.'
+
+Scenario: SET-011.6 Cancelling a macros folder change keeps the previous folder
+  Given the Macros folder is D:\macros and the Macros panel has 1 unsaved macro
+  When I set "Macros folder" to D:\team-macros and answer Cancel to "Switch macros folder?"
+  Then the Macros folder is D:\macros again, not the default
+  And a notice says "Macros folder change cancelled."
 ```
 
 ## SET-012: Find and replace history size
