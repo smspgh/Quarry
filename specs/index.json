@@ -2168,7 +2168,8 @@
         "src/styles/app.css"
       ],
       "tests": [
-        "src/__tests__/conflicts.test.ts"
+        "src/__tests__/conflicts.test.ts",
+        "src/__tests__/conflictsEditor.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -2223,7 +2224,8 @@
         "src/components/MenuBar.tsx"
       ],
       "tests": [
-        "src/__tests__/conflicts.test.ts"
+        "src/__tests__/conflicts.test.ts",
+        "src/__tests__/conflictsEditor.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -2276,7 +2278,8 @@
         "src/lib/conflicts.ts"
       ],
       "tests": [
-        "src/__tests__/conflicts.test.ts"
+        "src/__tests__/conflicts.test.ts",
+        "src/__tests__/conflictsEditor.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -2315,7 +2318,9 @@
         "src/editor/conflicts.ts",
         "src/lib/gitCommands.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/conflictsEditor.test.ts"
+      ],
       "docs": [
         "docs/git.md"
       ],
@@ -17865,6 +17870,12 @@
       "CONFLICT-001",
       "CONFLICT-002",
       "CONFLICT-003"
+    ],
+    "src/__tests__/conflictsEditor.test.ts": [
+      "CONFLICT-001",
+      "CONFLICT-002",
+      "CONFLICT-003",
+      "CONFLICT-004"
     ],
     "src/__tests__/csv-hostile.test.ts": [
       "JSON-011",

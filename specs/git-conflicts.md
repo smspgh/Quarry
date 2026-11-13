@@ -16,7 +16,7 @@ Resolving git conflicts in the editor and in the Source Control panel, and carry
   - `src/editor/conflicts.ts` — `conflictField` (StateField), `scan` (`MAX_SCAN` = 4,000,000 characters), `mayAddConflict`, `build` (line decorations), `BarWidget`, `conflictExtensions`
   - `src/editor/manager.ts` — adds `conflictExtensions()` to every text document
   - `src/styles/app.css` — `.cm-conflict-*`
-- Tests: `src/__tests__/conflicts.test.ts`
+- Tests: `src/__tests__/conflicts.test.ts`, `src/__tests__/conflictsEditor.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer whose merge left conflicts in a file
@@ -70,11 +70,11 @@ Scenario: CONFLICT-001.7 Very large documents are not scanned
 - Status: draft
 - Commands: `git.acceptCurrent`, `git.acceptIncoming`, `git.acceptBoth`
 - Files:
-  - `src/editor/conflicts.ts` — `accept` (one transaction, `userEvent: "input.conflict"`), `conflictAtCursor`, bar buttons (mousedown keeps editor focus)
+  - `src/editor/conflicts.ts` — `resolveChange` (the edit for one block), `accept` (one transaction, `userEvent: "input.conflict"`), `conflictAtCursor`, bar buttons (mousedown keeps editor focus)
   - `src/lib/conflicts.ts` — `resolvedLines`
   - `src/lib/gitCommands.ts` — `acceptHere`, `withConflicts`, `hasConflicts`
   - `src/components/MenuBar.tsx` — Git › Conflicts submenu
-- Tests: `src/__tests__/conflicts.test.ts`
+- Tests: `src/__tests__/conflicts.test.ts`, `src/__tests__/conflictsEditor.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer resolving a conflict
@@ -127,7 +127,7 @@ Scenario: CONFLICT-002.7 No conflicts in the file
   - `src/editor/conflicts.ts` — `acceptAll` (all blocks in one transaction)
   - `src/lib/gitCommands.ts` — `acceptEvery`
   - `src/lib/conflicts.ts` — `resolveAll`, `resolvedLines`
-- Tests: `src/__tests__/conflicts.test.ts`
+- Tests: `src/__tests__/conflicts.test.ts`, `src/__tests__/conflictsEditor.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer who knows one side is right for a whole file
@@ -161,9 +161,9 @@ Scenario: CONFLICT-003.4 Disabled without conflicts
 - Status: draft
 - Commands: `git.nextConflict`, `git.prevConflict`
 - Files:
-  - `src/editor/conflicts.ts` — `gotoConflict` (wraps, centres the block)
+  - `src/editor/conflicts.ts` — `nextConflict` (which block, wrapping), `gotoConflict` (centres it)
   - `src/lib/gitCommands.ts` — registrations with `Alt+F6` / `Shift+Alt+F6`
-- Tests: none
+- Tests: `src/__tests__/conflictsEditor.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer working through a conflicted file

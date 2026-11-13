@@ -131,7 +131,6 @@ Doc / code mismatches and dead code
 ## Merge conflicts and stopped operations (`git-conflicts.md`)
 
 - An `am` operation is treated as a rebase: the button reads "Continue Rebase" and calls `continueOperation(root, "rebase", …)` (`src/components/panels/GitPanel.tsx:440-445`); Abort's confirm button would read "Abort Am" (`src/lib/git.ts:853`). No scenarios were written for `am`.
-- No test exercises `src/editor/conflicts.ts`.
 
 ## Compare (`compare.md`)
 
