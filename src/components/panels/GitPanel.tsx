@@ -178,7 +178,8 @@ function CommitsSection({ repo }: { repo: GitStatus }) {
           <ChevronRight size={14} />
         </span>
         <span>Commits</span>
-        {unpushed.size > 0 && <span className="scm-count" title={`${unpushed.size} not on ${repo.upstream} yet`}>{unpushed.size} to push</span>}
+        {/* git's ahead count, not the marked commits: those stop at 500. */}
+        {tracked && repo.ahead > 0 && <span className="scm-count" title={`${repo.ahead} not on ${repo.upstream} yet`}>{repo.ahead} to push</span>}
         {repo.behind > 0 && <span className="scm-count" title={`${repo.behind} on ${repo.upstream} that you don't have yet: open the graph to see them`}>{repo.behind} to pull</span>}
         <span className="grow" />
         <span className="scm-actions always" onClick={(e) => e.stopPropagation()}>

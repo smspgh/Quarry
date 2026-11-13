@@ -916,7 +916,7 @@ Scenario: GIT-016.5 The warning clears when the remote is changed
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/GitPanel.tsx` — `CommitsSection` (`COMMITS_PAGE` = 30, "N to push" / "N to pull" counts, expand to files, "Show more", graph button)
+  - `src/components/panels/GitPanel.tsx` — `CommitsSection` (`COMMITS_PAGE` = 30, "N to push" (the status's ahead count) / "N to pull" counts, expand to files, "Show more", graph button)
   - `src/lib/git.ts` — `openCommitFile` (parent vs commit, `preview` Compare tab)
   - `src/lib/gitStatus.ts` — `commitFileKind`
   - `src/editor/git.ts` — `relativeTime`
@@ -980,6 +980,11 @@ Scenario: GIT-017.9 No commits yet
   Given a repository with no commits
   When I look at Source Control
   Then there is no Commits section
+
+Scenario: GIT-017.10 A long run of unpushed commits is counted in full
+  Given branch "main" has 750 commits origin/main does not have
+  When I look at the Commits heading
+  Then it shows "750 to push", the same count as the status line
 ```
 
 ## GIT-018: File history
