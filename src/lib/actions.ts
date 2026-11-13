@@ -943,13 +943,14 @@ async function restoreSessionTabs() {
  * Hot exit: an untitled buffer that the session will bring back on the next start is not worth a
  * "Save changes?" prompt when the app closes. Prompt for dirty file-backed documents (their file
  * would diverge), for untitled buffers too large for the session, and for everything when session
- * restore is off. Pure so it can be unit-tested.
+ * restore is off. An empty untitled buffer has nothing to lose. Pure so it can be unit-tested.
  */
 export function needsSavePromptOnExit(doc: Pick<Doc, "dirty" | "path" | "kind">, textLength: number, restoreSession: boolean): boolean {
   if (!doc.dirty) return false;
   if (doc.path || doc.kind !== "text") return true;
   if (!restoreSession) return true;
-  return textLength === 0 || textLength > UNTITLED_SESSION_MAX;
+  // An empty one is not kept by the session either, but it holds nothing to lose.
+  return textLength > UNTITLED_SESSION_MAX;
 }
 
 export function installCloseGuard() {

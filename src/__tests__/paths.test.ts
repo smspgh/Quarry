@@ -77,10 +77,10 @@ describe("needsSavePromptOnExit (hot exit)", () => {
     expect(needsSavePromptOnExit(file, 0, true)).toBe(true);
     expect(needsSavePromptOnExit({ dirty: true, path: "C:\\big.log", kind: "big" }, 0, true)).toBe(true);
   });
-  it("skips untitled buffers the session will restore, but not oversized or empty ones", () => {
+  it("skips untitled buffers the session will restore and empty ones, but not oversized ones", () => {
     expect(needsSavePromptOnExit(untitled, 100, true)).toBe(false);
     expect(needsSavePromptOnExit(untitled, 2 * 1024 * 1024 + 1, true)).toBe(true);
-    expect(needsSavePromptOnExit(untitled, 0, true)).toBe(true);
+    expect(needsSavePromptOnExit(untitled, 0, true)).toBe(false);
   });
   it("prompts for untitled buffers when session restore is off", () => {
     expect(needsSavePromptOnExit(untitled, 100, false)).toBe(true);

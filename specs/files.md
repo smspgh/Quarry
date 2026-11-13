@@ -849,6 +849,13 @@ Scenario: FILE-017.7 The session cannot be written
   Given "Untitled-1" contains unsaved text and the session file cannot be written
   When I close the window
   Then Quarry asks whether to save "Untitled-1" instead of closing silently
+
+Scenario: FILE-017.8 An emptied untitled document is not asked about
+  Given Restore session on start is on
+  And "Untitled-2" was created with text that I then deleted, so it is empty but marked as changed
+  When I close the window
+  Then Quarry closes without asking about "Untitled-2"
+  And "Untitled-2" is not brought back on the next start
 ```
 
 ## FILE-018: Open files by dropping them on the window

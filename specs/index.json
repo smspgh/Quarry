@@ -5963,6 +5963,10 @@
         {
           "id": "FILE-017.7",
           "title": "The session cannot be written"
+        },
+        {
+          "id": "FILE-017.8",
+          "title": "An emptied untitled document is not asked about"
         }
       ]
     },
@@ -5971,7 +5975,7 @@
       "title": "Open files by dropping them on the window",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 854,
+      "line": 861,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6008,7 +6012,7 @@
       "title": "Open files from the command line and File Explorer",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 893,
+      "line": 900,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6049,7 +6053,7 @@
       "title": "Welcome screen",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 938,
+      "line": 945,
       "status": "draft",
       "commands": [],
       "files": [
