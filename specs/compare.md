@@ -470,6 +470,7 @@ Scenario: DIFF-010.5 Inline layout edits the right side
 - Files:
   - `src/components/DiffView.tsx` — `revertControls`: `"a-to-b"` when the right side is editable, else `"b-to-a"` when the left is, else none; `mergeControls: false` inline
   - `src/styles/app.css` — `.cm-merge-revert`
+  - Library behaviour, not set in this repo: @codemirror/merge (6.12.3) listens for `mousedown` on its `.cm-merge-revert` gutter (`MergeView.setupRevertControls` → `revertClicked`), so an arrow acts when the button goes down (DIFF-011.2)
 - Tests: none
 - Docs: `docs/compare.md`
 

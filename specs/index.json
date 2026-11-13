@@ -3220,7 +3220,7 @@
       "title": "Save an edited side",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 513,
+      "line": 514,
       "status": "draft",
       "commands": [
         "file.save"
@@ -3278,7 +3278,7 @@
       "title": "Reload the compared texts",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 577,
+      "line": 578,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3325,7 +3325,7 @@
       "title": "Preview comparisons replace each other",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 629,
+      "line": 630,
       "status": "draft",
       "commands": [],
       "files": [
