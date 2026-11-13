@@ -141,6 +141,8 @@ export interface FindBarState {
   wholeWord: boolean;
   /** Replace keeps the case of each replaced text (FOO → BAR, Foo → Bar, foo → bar). */
   preserveCase: boolean;
+  /** Find in Selection (Alt+L): matches are limited to the ranges kept in the document's `findScopeField`. */
+  inSelection: boolean;
   count: { current: number; total: number } | null;
 }
 
@@ -280,6 +282,7 @@ export const useStore = create<AppState>((set, get) => ({
     open: false,
     replace: false,
     preserveCase: false,
+    inSelection: false,
     query: "",
     replaceText: "",
     regex: false,

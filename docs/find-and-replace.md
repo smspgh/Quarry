@@ -18,6 +18,7 @@ Files open in large-file mode have their own find bar; see [Large files › Find
 | **Enter / Shift+Enter** (or **F3 / Shift+F3**) | Next / previous match. |
 | **Alt+C / Alt+W / Alt+R** | Toggle Match Case / Whole Word / Regex. |
 | **Alt+P** | Toggle Preserve Case (for Replace). |
+| **Alt+L** | Toggle Find in Selection. |
 | **Ctrl+Enter** in the search box | Insert a line break, to search across lines. |
 | **Alt+Enter** | Select every match as a separate cursor (up to 200,000), then type to edit them all. |
 | **Enter** in the replace box | Replace the current match. |
@@ -28,6 +29,7 @@ Files open in large-file mode have their own find bar; see [Large files › Find
 - A multi-line search without Regex is matched literally.
 - In regex mode the replacement can use `$1`, `$2`, … and `$&` for the whole match.
 - **Preserve Case** (the **Aa** toggle in the replace box, or **Alt+P**) matches the case of each replaced text, as in [Replace in Files](#replace-in-files): `foo` → `bar` also turns `FOO` into `BAR` and `Foo` into `Bar`.
+- **Find in Selection** (the last toggle in the search box, **Alt+L**, or **Find › Toggle Find in Selection**) limits the search to the text that was selected when you turned it on; with several selections, to all of them. Those ranges get a faint background and follow your edits. The match count, Enter / F3, Replace, Replace All and **Alt+Enter** then only see matches that lie wholly inside them. With nothing selected it takes the line the cursor is on (the lines, with several cursors); on an empty line there is nothing to search in, so it stays off. Turning it on with the find bar closed opens the bar without putting the selection in the search box. It turns off when you close the find bar, press **Alt+L** again, or switch to another document.
 - Related commands: **Ctrl+D** adds the next occurrence of the selection as a cursor, and **Ctrl+Shift+L** selects all occurrences.
 
 ## Clearing a box, and history

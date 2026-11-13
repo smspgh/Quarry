@@ -1,8 +1,11 @@
 import { closeSearchPanel, findNext, findPrevious, getSearchQuery, openSearchPanel, replaceAll, replaceNext, SearchQuery, setSearchQuery } from "@codemirror/search";
-import { ALargeSmall, ArrowDown, ArrowUp, CaseSensitive, ChevronDown, ChevronRight, Regex, Replace, ReplaceAll, WholeWord, X } from "lucide-react";
+import { ALargeSmall, ArrowDown, ArrowUp, CaseSensitive, ChevronDown, ChevronRight, Regex, Replace, ReplaceAll, TextSelect, WholeWord, X } from "lucide-react";
+import type { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { useEffect, useRef } from "react";
 import { replaceAllSpec, replaceNextSpec } from "../editor/findReplace";
+import { inScope, scopeSpans } from "../editor/findScope";
+import { runCommand } from "../lib/commands";
 import { editor } from "../editor/manager";
 import { recordHistory } from "../lib/searchHistory";
 import { useStore } from "../lib/store";
@@ -13,7 +16,13 @@ export function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
 }
 
-export function buildQuery(f: { query: string; replaceText: string; regex: boolean; caseSensitive: boolean; wholeWord: boolean }): SearchQuery {
+/**
+ * Find in Selection filter. A module constant so `SearchQuery.eq` sees the same test; it reads the
+ * store so a query left in another document's state stops filtering once the option is off.
+ */
+const scopeTest = (_match: string, state: EditorState, from: number, to: number) => !useStore.getState().findBar.inSelection || inScope(state, from, to);
+
+export function buildQuery(f: { query: string; replaceText: string; regex: boolean; caseSensitive: boolean; wholeWord: boolean; inSelection?: boolean }): SearchQuery {
   // Literal multi-line searches are expressed as an escaped regex so "\n" in the box matches newlines.
   const multiline = !f.regex && f.query.includes("\n");
   return new SearchQuery({
@@ -23,6 +32,7 @@ export function buildQuery(f: { query: string; replaceText: string; regex: boole
     caseSensitive: f.caseSensitive,
     wholeWord: f.wholeWord,
     literal: !f.regex && !multiline,
+    test: f.inSelection ? scopeTest : undefined,
   });
 }
 
@@ -39,7 +49,11 @@ export function FindBar() {
     const view = editor.view;
     if (!fb.open || !view) return;
     const sel = view.state.selection.main;
-    if (!sel.empty && sel.to - sel.from < 500) {
+    // Find in Selection (Alt+L) opened the bar: the selection is the scope, not the search text.
+    if (fb.inSelection && !scopeSpans(view.state)) {
+      editor.clearFindScopes();
+      setFindBar({ inSelection: false });
+    } else if (!fb.inSelection && !sel.empty && sel.to - sel.from < 500) {
       const text = view.state.sliceDoc(sel.from, sel.to);
       if (!text.includes("\n")) setFindBar({ query: text });
     }
@@ -52,8 +66,25 @@ export function FindBar() {
     }, 0);
     return () => {
       if (editor.view) closeSearchPanel(editor.view);
+      // Closing the bar (not just moving it to the other pane) ends Find in Selection.
+      if (!useStore.getState().findBar.open) {
+        editor.clearFindScopes();
+        if (useStore.getState().findBar.inSelection) setFindBar({ inSelection: false });
+      }
     };
   }, [fb.open]);
+
+  // Find in Selection belongs to the document it was turned on in: switching documents ends it.
+  const activeId = useStore((s) => s.activeId);
+  const shownId = useRef(activeId);
+  useEffect(() => {
+    if (shownId.current === activeId) return;
+    shownId.current = activeId;
+    if (useStore.getState().findBar.inSelection) {
+      editor.clearFindScopes();
+      setFindBar({ inSelection: false });
+    }
+  }, [activeId]);
 
   useEffect(() => {
     if (fb.open && fb.replace) setTimeout(() => replaceRef.current?.focus(), 0);
@@ -88,7 +119,7 @@ export function FindBar() {
       }
     }
     setFindBar({ count: fb.query ? { current, total } : null });
-  }, [fb.open, fb.query, fb.regex, fb.caseSensitive, fb.wholeWord, fb.replaceText]);
+  }, [fb.open, fb.query, fb.regex, fb.caseSensitive, fb.wholeWord, fb.replaceText, fb.inSelection]);
 
   // Keep the current-match index updated when the selection moves.
   useEffect(() => {
@@ -113,7 +144,7 @@ export function FindBar() {
       }
       setFindBar({ count: { current, total } });
     });
-  }, [fb.open, fb.query]);
+  }, [fb.open, fb.query, fb.inSelection]);
 
   if (!fb.open) return null;
 
@@ -211,7 +242,7 @@ export function FindBar() {
         <button className="icon-btn toggle-col" title={fb.replace ? "Hide replace" : "Show replace (Ctrl+H)"} onClick={() => setFindBar({ replace: !fb.replace })}>
           {fb.replace ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         </button>
-        <div ref={findWrapRef} className="input-wrap with-actions-5 grow">
+        <div ref={findWrapRef} className="input-wrap with-actions-6 grow">
           <textarea
             ref={inputRef}
             className={`input mono ${invalid ? "invalid" : ""}`}
@@ -234,6 +265,9 @@ export function FindBar() {
             </button>
             <button className={`icon-btn xs ${fb.regex ? "on" : ""}`} aria-pressed={!!fb.regex} title="Use Regular Expression (Alt+R)" onMouseDown={(e) => e.preventDefault()} onClick={() => setFindBar({ regex: !fb.regex })}>
               <Regex size={14} />
+            </button>
+            <button className={`icon-btn xs ${fb.inSelection ? "on" : ""}`} aria-pressed={!!fb.inSelection} title={"Find in Selection (Alt+L)\nWith nothing selected: the cursor's line"} onMouseDown={(e) => e.preventDefault()} onClick={() => void runCommand("find.toggleInSelection")}>
+              <TextSelect size={14} />
             </button>
           </div>
         </div>
