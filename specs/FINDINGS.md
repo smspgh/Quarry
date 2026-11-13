@@ -126,7 +126,6 @@ Doc / code mismatches and dead code
 ## Source control (`git.md`)
 
 Possible bugs
-- Background check: a failed check also counts toward the once-a-minute limit (`git.ts:542`); it runs `fetch --prune` without `--all` (`git.rs:939`), so only the default remote is checked.
 - `git_unpushed` stops at 500 (`git.rs:1187`), so "N to push" in the Commits heading tops out there while the status line uses the real ahead count.
 - Grammar in the discard dialog: "(1 untracked file go to the Recycle Bin)" (`git.ts:446`; quoted as is in GIT-012.5).
 

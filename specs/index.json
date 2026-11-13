@@ -7662,6 +7662,14 @@
         {
           "id": "GIT-014.6",
           "title": "Not while another git action runs"
+        },
+        {
+          "id": "GIT-014.7",
+          "title": "A failed check also waits a minute"
+        },
+        {
+          "id": "GIT-014.8",
+          "title": "Only the branch's remote is checked"
         }
       ]
     },
@@ -7670,7 +7678,7 @@
       "title": "Fetch, pull, push and publish a branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 791,
+      "line": 803,
       "status": "draft",
       "commands": [
         "git.fetch",
@@ -7732,7 +7740,7 @@
       "title": "Recover when the remote repository is gone",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 858,
+      "line": 870,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7775,7 +7783,7 @@
       "title": "Commits of the current branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 902,
+      "line": 914,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7836,7 +7844,7 @@
       "title": "File history",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 973,
+      "line": 985,
       "status": "draft",
       "commands": [
         "git.fileHistory"
@@ -7890,7 +7898,7 @@
       "title": "Commit identity (name and email)",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1028,
+      "line": 1040,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7937,7 +7945,7 @@
       "title": "Add a remote by URL",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1079,
+      "line": 1091,
       "status": "draft",
       "commands": [
         "git.addRemote"
@@ -7986,7 +7994,7 @@
       "title": "See, open and change remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1131,
+      "line": 1143,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8038,7 +8046,7 @@
       "title": "Create a repository on GitHub and push to it",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1190,
+      "line": 1202,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8095,7 +8103,7 @@
       "title": "GitHub accounts",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1257,
+      "line": 1269,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8142,7 +8150,7 @@
       "title": "Private / Public badge on GitHub remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1309,
+      "line": 1321,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8184,7 +8192,7 @@
       "title": "Work with more than one repository",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1353,
+      "line": 1365,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8225,7 +8233,7 @@
       "title": "Branch in the status bar",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1398,
+      "line": 1410,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8268,7 +8276,7 @@
       "title": "Git decorations in the Explorer",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1448,
+      "line": 1460,
       "status": "draft",
       "commands": [],
       "files": [

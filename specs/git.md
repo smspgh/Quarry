@@ -740,9 +740,9 @@ Scenario: GIT-013.9 No line without a remote or a branch
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/git.ts` — `checkRemote` (`CHECK_EVERY` = 60 s, skipped while busy / already checking / no remote), `markChecked`, `remoteCheck` state
+  - `src/lib/git.ts` — `checkRemote` (`CHECK_EVERY` = 60 s counted from the last check, failed or not; skipped while busy / already checking / no remote), `markChecked`, `remoteCheck` state
   - `src/components/panels/GitPanel.tsx` — `SyncStatus` effect (on mount and window focus), ↻ "Check the remote now" button, "Couldn't check the remote" row with Fetch
-  - `src-tauri/src/git.rs` — `remote_op` "check" (`fetch --prune --quiet`, `GCM_INTERACTIVE=never`), `quiet_options` (BatchMode ssh, HTTP low-speed limits), `GIT_TERMINAL_PROMPT=0` in `git()`
+  - `src-tauri/src/git.rs` — `remote_op` "check" (`fetch --prune --quiet`, no `--all`: git fetches the branch's remote, else origin; `GCM_INTERACTIVE=never`), `quiet_options` (BatchMode ssh, HTTP low-speed limits), `GIT_TERMINAL_PROMPT=0` in `git()`
   - `src/lib/gitApi.ts` — `GitRemoteOp` "check"
 - Tests: `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
@@ -786,6 +786,18 @@ Scenario: GIT-014.6 Not while another git action runs
   When Quarry gets focus
   Then no background check is started
   And the status line's action buttons are disabled while a check or another action is running
+
+Scenario: GIT-014.7 A failed check also waits a minute
+  Given the last background check failed 20 seconds ago because the network is down
+  When Quarry gets focus
+  Then no new check is made (an offline machine is not asked again on every focus)
+  And the ↻ button or Fetch still tries at once
+
+Scenario: GIT-014.8 Only the branch's remote is checked
+  Given the repository has remotes "origin" (the branch's upstream) and "backup"
+  When the background check runs
+  Then only "origin" is fetched, since the status line is about the upstream
+  And the header's Fetch button fetches every remote
 ```
 
 ## GIT-015: Fetch, pull, push and publish a branch
