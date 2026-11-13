@@ -15,7 +15,7 @@ import type { EditorView } from "@codemirror/view";
 import { git, type GitBranch, type GitCommitAction, type GitCommitFile, type GitFile, type GitLogEntry, type GitIdentity, type GitRemoteOp, type GitStatus, type GithubRepo } from "./gitApi";
 import { newDocId, useStore, type Doc } from "./store";
 import { fs } from "./ipc";
-import { gitErrorText, hasConflictMarkers, isMissingRepo, KIND_RANK, kindOf, type GitKind } from "./gitStatus";
+import { displayUrl, gitErrorText, hasConflictMarkers, isMissingRepo, KIND_RANK, kindOf, type GitKind } from "./gitStatus";
 
 export { isMissingRepo, KIND_LABEL, KIND_LETTER, kindOf, type GitKind } from "./gitStatus";
 import { choose } from "./dialogs";
@@ -586,7 +586,7 @@ export async function saveRemote(root: string, name: string, url: string, opts: 
   if (!ok) return false;
   useGit.setState({ addingRemote: false });
   noteRemote(root, n, u);
-  toast(opts.replace ? `Remote ${n} now points to ${u}.` : `Added remote ${n}.`, "success", 3000);
+  toast(opts.replace ? `Remote ${n} now points to ${displayUrl(u)}.` : `Added remote ${n}.`, "success", 3000);
   // What the last check said was about the old URL.
   markChecked(root, null);
   if (opts.push) await remote(root, "push");

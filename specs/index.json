@@ -8026,6 +8026,10 @@
         {
           "id": "GIT-021.6",
           "title": "Cancel a change"
+        },
+        {
+          "id": "GIT-021.7",
+          "title": "A token in the URL stays hidden when changing it"
         }
       ]
     },
@@ -8034,7 +8038,7 @@
       "title": "Create a repository on GitHub and push to it",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1184,
+      "line": 1190,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8091,7 +8095,7 @@
       "title": "GitHub accounts",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1251,
+      "line": 1257,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8138,7 +8142,7 @@
       "title": "Private / Public badge on GitHub remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1303,
+      "line": 1309,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8180,7 +8184,7 @@
       "title": "Work with more than one repository",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1347,
+      "line": 1353,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8221,7 +8225,7 @@
       "title": "Branch in the status bar",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1392,
+      "line": 1398,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8264,7 +8268,7 @@
       "title": "Git decorations in the Explorer",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1442,
+      "line": 1448,
       "status": "draft",
       "commands": [],
       "files": [

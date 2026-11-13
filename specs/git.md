@@ -1133,9 +1133,9 @@ Scenario: GIT-020.6 A name and a URL are required
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/GitRepoSettings.tsx` — remote rows (name, short URL, Open, Change), `RemoteForm` with `change` ("Save and Push" / "Save"), `shortUrl`
+  - `src/components/panels/GitRepoSettings.tsx` — remote rows (name, short URL, Open, Change), `RemoteForm` with `change` ("Save and Push" / "Save"; URL prefilled through `displayUrl`), `shortUrl`
   - `src/lib/gitStatus.ts` — `remoteWebUrl`, `displayUrl`
-  - `src/lib/git.ts` — `saveRemote` with `replace`, `markChecked`, `checkRemote(root, true)`
+  - `src/lib/git.ts` — `saveRemote` with `replace` (toast via `displayUrl`), `markChecked`, `checkRemote(root, true)`
   - `src-tauri/src/git.rs` — `git_set_remote_url` (`remote set-url`, then drops `refs/remotes/<name>/*` with `update-ref --no-deref --stdin`)
 - Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
@@ -1179,6 +1179,12 @@ Scenario: GIT-021.6 Cancel a change
   Given the Change form is open
   When I press Escape in a field or click ✕
   Then the form closes and the remote is unchanged
+
+Scenario: GIT-021.7 A token in the URL stays hidden when changing it
+  Given remote "origin" is "https://ada:ghp_secret@github.com/ada/demo.git"
+  When I open its Change form
+  Then the URL field shows "https://github.com/ada/demo.git" and Save is disabled
+  And after saving "https://ada:ghp_new@github.com/ada/other.git" the message reads "Remote origin now points to https://github.com/ada/other.git."
 ```
 
 ## GIT-022: Create a repository on GitHub and push to it
