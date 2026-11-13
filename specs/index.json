@@ -6509,6 +6509,10 @@
         {
           "id": "FIND-007.12",
           "title": "Multi-line and blank entries are readable"
+        },
+        {
+          "id": "FIND-007.13",
+          "title": "F3 steps without adding to the history"
         }
       ]
     },
@@ -6517,7 +6521,7 @@
       "title": "Turn every find match into a cursor",
       "area": "FIND",
       "spec": "specs/find.md",
-      "line": 433,
+      "line": 441,
       "status": "draft",
       "commands": [
         "edit.selectAllMatches"
@@ -6558,7 +6562,7 @@
       "title": "Select occurrences of the selected text",
       "area": "FIND",
       "spec": "specs/find.md",
-      "line": 474,
+      "line": 482,
       "status": "draft",
       "commands": [
         "edit.selectNextOccurrence",

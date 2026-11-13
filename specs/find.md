@@ -348,7 +348,7 @@ Scenario: FIND-006.6 The toggle shows its state
 - Files:
   - `src/lib/searchHistory.ts` — `recordHistory`, `addEntry`, `sanitizeEntries`, `ensureHistoryLoaded` (lazy load of `search-history.json`), `removeHistoryEntry`, `clearHistory`, `applyHistoryLimit`, `MAX_ENTRY_CHARS`
   - `src/components/HistoryMenu.tsx` — `HistoryMenu` (list, pages of 100, keyboard), `ClearButton`, `openHistoryFromKey` (Alt+Down), `historyLabel`
-  - `src/components/FindBar.tsx` — `run()` records find / replace texts; boxes host the buttons
+  - `src/components/FindBar.tsx` — `run()` records find / replace texts (Enter / Shift+Enter, the Next / Previous / Replace / Replace All buttons; `find.next` / `find.prev` = F3 do not record); boxes host the buttons
   - `src/components/panels/SearchPanel.tsx` — records on Search and on Replace All; boxes host the same buttons
   - `src/components/panels/SettingsPanel.tsx` — "Find & replace history" row (`searchHistoryLimit`), clear history
   - `src/lib/ipc.ts` — `appData.read` / `appData.write`
@@ -428,6 +428,14 @@ Scenario: FIND-007.12 Multi-line and blank entries are readable
   Given history entries "a", line break, "b" and one of three spaces
   When I open the list
   Then they read "a ⏎ b" and "(3 whitespace characters)"
+
+Scenario: FIND-007.13 F3 steps without adding to the history
+  Given the history is empty and the search box contains "needle"
+  When I press F3 three times
+  Then the Search history list is still empty
+  When I click the Next Match button
+  Then "needle" is listed once
+
 ```
 
 ## FIND-008: Turn every find match into a cursor

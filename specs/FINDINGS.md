@@ -35,7 +35,6 @@ Not verified
 ## Find and replace in a document (`find.md`)
 
 - There is no "in selection" option anywhere (`src/components/FindBar.tsx`, `findBar` in `src/lib/store.ts:279`).
-- History is not recorded by F3: `docs/find-and-replace.md:40` says Next / Previous add an entry; the bar's buttons and Enter do, `find.next` / `find.prev` do not (`src/lib/commands.ts:869-870`).
 - Alt+Enter in the find box closes the bar even with no match (`FindBar.tsx:190-193`); the `edit.selectAllMatches` command closes it only on success (`commands.ts:691-695`).
 - Not determined: F3 while focus is inside the find bar (`onBarKey` stops propagation, `FindBar.tsx:167`).
 
