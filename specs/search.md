@@ -917,7 +917,8 @@ Scenario: SEARCH-014.6 Preserve Case can be changed after the search
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SearchPanel.tsx` — `replaceAllInResults` (`st.inMemory` branch), `buildJsRegex`
+  - `src/components/panels/SearchPanel.tsx` — `replaceAllInResults` (`st.inMemory` branch, `editedSince`, count of what was replaced), `searchedText` (each document's text as the search read it, from `searchOpenDocs`), `buildJsRegex`
+  - `src/editor/manager.ts` — `editor.docOf(docId)`
   - `src/lib/replace.ts` — `replaceMatches` (`skip` set of `line:col`), `expandReplacement`, `preserveCase`
   - `src/editor/manager.ts` — `editor.replaceAll(docId, text)` (one undoable change per document)
 - Tests: `src/__tests__/replace.test.ts`
@@ -956,7 +957,24 @@ Scenario: SEARCH-015.4 Left-out results are kept
 Scenario: SEARCH-015.5 Results become stale
   Given the replace has finished
   When I look at the result list
-  Then every listed result is shown as stale
+  Then every result of a document it changed is shown as stale
+
+Scenario: SEARCH-015.6 A document edited since the search is left alone
+  Given an Open Files search found 3 matches in "a.txt" and 2 in "b.txt"
+  And I have typed in "b.txt" since the search
+  When I click "Replace All in results"
+  Then the dialog asks "Replace 3 occurrences in 1 file?" and lists "b.txt (2)" under "Skipped (edited since the search)"
+  When I choose "Replace"
+  Then only "a.txt" is changed
+  And the status reads "Replaced 3 occurrence(s) in 1 open document(s)"
+  When every matching document was edited since the search
+  Then nothing is replaced and a warning says to search again
+
+Scenario: SEARCH-015.7 The status counts what was replaced
+  Given "Max" is 4 and an Open Files search listed 4 of the 6 matches in one document
+  When I replace all
+  Then all 6 matches in the document are replaced, as Replace in Files does on disk
+  And the status reads "Replaced 6 occurrence(s) in 1 open document(s)"
 ```
 
 ## SEARCH-016: Undo Replace in Files

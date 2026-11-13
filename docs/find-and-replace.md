@@ -112,7 +112,7 @@ With the replace field shown, each result previews the change: the match struck 
 
 In regex mode the replacement uses Rust syntax: `$1` or `${name}` for groups, and `$$` for a literal `$`. In plain-text mode, `$` is literal.
 
-With the **Current File** and **Open Files** scopes, Replace All edits the open documents in the editor instead of the files on disk. Each document can then be undone with **Ctrl+Z**, and the changes are saved when you save.
+With the **Current File** and **Open Files** scopes, Replace All edits the open documents in the editor instead of the files on disk. Each document can then be undone with **Ctrl+Z**, and the changes are saved when you save. A document you edited after the search is skipped and listed, as a file changed on disk since the search is; search again to include it.
 
 ## Undo Replace in Files
 

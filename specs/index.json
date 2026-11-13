@@ -12487,6 +12487,7 @@
       "commands": [],
       "files": [
         "src/components/panels/SearchPanel.tsx",
+        "src/editor/manager.ts",
         "src/lib/replace.ts",
         "src/editor/manager.ts"
       ],
@@ -12516,6 +12517,14 @@
         {
           "id": "SEARCH-015.5",
           "title": "Results become stale"
+        },
+        {
+          "id": "SEARCH-015.6",
+          "title": "A document edited since the search is left alone"
+        },
+        {
+          "id": "SEARCH-015.7",
+          "title": "The status counts what was replaced"
         }
       ]
     },
@@ -12524,7 +12533,7 @@
       "title": "Undo Replace in Files",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 962,
+      "line": 980,
       "status": "draft",
       "commands": [
         "find.undoReplaceInFiles"
