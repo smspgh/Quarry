@@ -205,7 +205,7 @@ Doc / code mismatches
 
 Possible bugs
 - Collapsed state is not persisted: `src/App.tsx:172` triggers a session save when `pinnedHidden` changes, but `buildSession` (`actions.ts:812-831`) does not write it.
-- Bottom-panel layout is not persisted (`bottomVisible`, `bottomHeight`, `bottomTab`); `bottomTab` defaults to `"results"` (`src/lib/store.ts:276`), which `BottomPanel` treats as Console.
+- Bottom-panel layout is not persisted (`bottomVisible`, `bottomHeight`, `bottomTab`); it starts hidden, 220 px, on Console each time.
 - Brand icon and Ctrl+B differ: with nothing pinned and nothing open, Ctrl+B reopens the last panel (`src/lib/panels.ts:77`), the brand icon does nothing (`src/components/TitleBar.tsx:164`; UI-014.4).
 
 Mismatches and notes

@@ -891,7 +891,7 @@ Scenario: UI-015.4 Settings always opens at 35% of the window
 - Files:
   - `src/components/BottomPanel.tsx` — `BottomPanel` (Console and Problems tabs, problem count, Clear console, close button, `startResize`, scroll to newest line)
   - `src/lib/commands.ts` — `view.togglePanel` (Ctrl+J), `view.problems` (shows the panel on the Problems tab)
-  - `src/lib/store.ts` — `bottomVisible`, `bottomTab`, `bottomHeight` (220), `consoleLines`, `log` (keeps about the last 2000 lines), `clearConsole`
+  - `src/lib/store.ts` — `bottomVisible`, `bottomTab` (`console` | `problems`, starts on `console`), `bottomHeight` (220), `consoleLines`, `log` (keeps about the last 2000 lines), `clearConsole`
   - `src/components/LspStatus.tsx` — `ProblemsList`, `useProblemCount` shown inside the Problems tab
   - `src/lib/scripting.ts` — opens the panel on the Console tab when a script writes output
   - `src/styles/app.css` — `.bottom-panel`, `.bottom-tabs`, `.bottom-resizer`, `.console-line`

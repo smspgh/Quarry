@@ -4,7 +4,7 @@ import { DEFAULT_SETTINGS } from "./types";
 
 export type SidebarPanel = "explorer" | "search" | "git" | "json" | "macros" | "scripts" | "settings";
 export const PANELS: readonly SidebarPanel[] = ["search", "explorer", "git", "json", "scripts", "macros", "settings"];
-export type BottomTab = "results" | "console" | "bigsearch" | "problems";
+export type BottomTab = "console" | "problems";
 export type PaletteMode = "commands" | "files" | "goto" | "language" | "encoding" | "branch" | null;
 
 export interface Doc {
@@ -273,7 +273,7 @@ export const useStore = create<AppState>((set, get) => ({
   searchDocked: false,
   panelWidths: {},
   bottomVisible: false,
-  bottomTab: "results",
+  bottomTab: "console",
   bottomHeight: 220,
   palette: null,
   findBar: {
