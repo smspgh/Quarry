@@ -670,46 +670,49 @@ struct ExternalFormatResult {
 /// `cwd` is the document's folder, so the tool finds project config files (rustfmt.toml, ...).
 #[tauri::command]
 async fn format_external(tool: String, args: Vec<String>, text: String, cwd: Option<String>) -> ExternalFormatResult {
+    tauri::async_runtime::spawn_blocking(move || run_formatter(&tool, &args, text, cwd.as_deref()))
+        .await
+        .unwrap_or_else(|e| ExternalFormatResult { ok: false, output: String::new(), error: e.to_string(), not_found: false })
+}
+
+/// The blocking part of `format_external`.
+fn run_formatter(tool: &str, args: &[String], text: String, cwd: Option<&str>) -> ExternalFormatResult {
     use std::io::Write;
     use std::process::{Command, Stdio};
-    tauri::async_runtime::spawn_blocking(move || {
-        let mut cmd = Command::new(&tool);
-        cmd.args(&args).stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped());
-        if let Some(dir) = cwd.as_deref().map(Path::new).filter(|d| d.is_dir()) {
-            cmd.current_dir(dir);
+    let mut cmd = Command::new(tool);
+    cmd.args(args).stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped());
+    if let Some(dir) = cwd.map(Path::new).filter(|d| d.is_dir()) {
+        cmd.current_dir(dir);
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x0800_0000); // CREATE_NO_WINDOW
+    }
+    let mut child = match cmd.spawn() {
+        Ok(c) => c,
+        Err(e) => {
+            return ExternalFormatResult { ok: false, output: String::new(), error: e.to_string(), not_found: e.kind() == std::io::ErrorKind::NotFound };
         }
-        #[cfg(windows)]
-        {
-            use std::os::windows::process::CommandExt;
-            cmd.creation_flags(0x0800_0000); // CREATE_NO_WINDOW
+    };
+    // Feed stdin from another thread: a tool that writes output before it has read all of its
+    // input would otherwise fill the stdout pipe and deadlock with us on large documents.
+    let feeder = child.stdin.take().map(|mut stdin| std::thread::spawn(move || {
+        let _ = stdin.write_all(text.as_bytes());
+    }));
+    let output = child.wait_with_output();
+    if let Some(f) = feeder {
+        let _ = f.join();
+    }
+    match output {
+        Ok(out) if out.status.success() => ExternalFormatResult { ok: true, output: String::from_utf8_lossy(&out.stdout).into_owned(), error: String::new(), not_found: false },
+        Ok(out) => {
+            // Some tools (dotnet) report failures on stdout; fall back to it when stderr is empty.
+            let err = if out.stderr.iter().all(u8::is_ascii_whitespace) { &out.stdout } else { &out.stderr };
+            ExternalFormatResult { ok: false, output: String::new(), error: String::from_utf8_lossy(err).into_owned(), not_found: false }
         }
-        let mut child = match cmd.spawn() {
-            Ok(c) => c,
-            Err(e) => {
-                return ExternalFormatResult { ok: false, output: String::new(), error: e.to_string(), not_found: e.kind() == std::io::ErrorKind::NotFound };
-            }
-        };
-        // Feed stdin from another thread: a tool that writes output before it has read all of its
-        // input would otherwise fill the stdout pipe and deadlock with us on large documents.
-        let feeder = child.stdin.take().map(|mut stdin| std::thread::spawn(move || {
-            let _ = stdin.write_all(text.as_bytes());
-        }));
-        let output = child.wait_with_output();
-        if let Some(f) = feeder {
-            let _ = f.join();
-        }
-        match output {
-            Ok(out) if out.status.success() => ExternalFormatResult { ok: true, output: String::from_utf8_lossy(&out.stdout).into_owned(), error: String::new(), not_found: false },
-            Ok(out) => {
-                // Some tools (dotnet) report failures on stdout; fall back to it when stderr is empty.
-                let err = if out.stderr.iter().all(u8::is_ascii_whitespace) { &out.stdout } else { &out.stderr };
-                ExternalFormatResult { ok: false, output: String::new(), error: String::from_utf8_lossy(err).into_owned(), not_found: false }
-            }
-            Err(e) => ExternalFormatResult { ok: false, output: String::new(), error: e.to_string(), not_found: false },
-        }
-    })
-    .await
-    .unwrap_or_else(|e| ExternalFormatResult { ok: false, output: String::new(), error: e.to_string(), not_found: false })
+        Err(e) => ExternalFormatResult { ok: false, output: String::new(), error: e.to_string(), not_found: false },
+    }
 }
 
 /// Release builds abort on panic; record what happened in `<app log dir>/crash.log` first so a
@@ -875,6 +878,47 @@ pub fn run() {
 
 #[cfg(test)]
 mod tests {
+    use super::run_formatter;
+
+    fn args(a: &[&str]) -> Vec<String> {
+        a.iter().map(|s| s.to_string()).collect()
+    }
+
+    #[test]
+    fn formatter_output_is_its_stdout_even_for_large_input() {
+        // findstr echoes every line of stdin; 4 MB is far more than a pipe buffer holds.
+        let text = "line of text\r\n".repeat(300_000);
+        let r = run_formatter("findstr", &args(&["^"]), text.clone(), None);
+        assert!(r.ok, "{}", r.error);
+        assert_eq!(r.output.len(), text.len());
+    }
+
+    #[test]
+    fn a_missing_formatter_is_reported_as_not_found() {
+        let r = run_formatter("quarry-no-such-formatter", &[], String::new(), None);
+        assert!(!r.ok);
+        assert!(r.not_found);
+    }
+
+    #[test]
+    fn a_failing_formatter_reports_stderr_or_else_stdout() {
+        let r = run_formatter("cmd", &args(&["/C", "echo bad input 1>&2 & exit 1"]), String::new(), None);
+        assert!(!r.ok && !r.not_found);
+        assert_eq!(r.error.trim(), "bad input");
+        let r = run_formatter("cmd", &args(&["/C", "echo said on stdout & exit 2"]), String::new(), None);
+        assert!(!r.ok);
+        assert_eq!(r.error.trim(), "said on stdout");
+    }
+
+    #[test]
+    fn the_formatter_runs_in_the_given_folder() {
+        let dir = tempfile::tempdir().unwrap();
+        let r = run_formatter("cmd", &args(&["/C", "cd"]), String::new(), dir.path().to_str());
+        assert!(r.ok);
+        let shown = std::path::PathBuf::from(r.output.trim()).canonicalize().unwrap();
+        assert_eq!(shown, dir.path().canonicalize().unwrap());
+    }
+
     #[test]
     fn panics_are_written_to_the_crash_log() {
         let dir = tempfile::tempdir().unwrap();

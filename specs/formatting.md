@@ -16,7 +16,7 @@ Format Document for text tabs: which formatter runs for which language (Quarry's
   - `src/lib/commands.ts` — `code.format` (`textDocOnly`, Shift+Alt+F)
   - `src/editor/manager.ts` — `replaceAll` (one transaction replacing only the part between the common prefix and suffix)
   - `src/components/MenuBar.tsx` — Code › Format Document
-- Tests: none
+- Tests: `src/__tests__/format.test.ts`
 - Docs: `docs/formatting.md`
 
 **As a** developer
@@ -56,7 +56,7 @@ Scenario: FMT-001.4 A read-only document is not formatted
 - Files:
   - `src/lib/format.ts` — `formatDocument` (`out === text` → "Already formatted"; "No formatter for …")
   - `src/editor/manager.ts` — `replaceAll`, `dispatchTo` (marks the tab changed only when the text changed)
-- Tests: none
+- Tests: `src/__tests__/format.test.ts`
 - Docs: `docs/formatting.md`
 
 **As a** developer
@@ -96,7 +96,7 @@ Scenario: FMT-002.4 Only text tabs
   - `src/lib/ipc.ts` — `json.format` → Tauri `json_format`
   - `src-tauri/src/lib.rs` — `json_format`
   - `src-tauri/src/json_tools.rs` — `format` (token-preserving pretty printer: key order, number text, comments kept), `PRETTY_MIN_CAP`
-- Tests: `src-tauri/src/json_tools.rs`
+- Tests: `src-tauri/src/json_tools.rs`, `src/__tests__/format.test.ts`
 - Docs: `docs/formatting.md`, `docs/json.md`
 
 **As a** person working with JSON files
@@ -146,7 +146,7 @@ Scenario: FMT-003.6 Valid JSON whose pretty-printed text would be too large
 - Commands: `code.format`
 - Files:
   - `src/lib/format.ts` — `PRETTIER` table (language → parser and plugins, all loaded with dynamic `import()` on first use), Prettier options in `formatDocument` (`tabWidth`, `useTabs`, `printWidth: 100`, `endOfLine: "lf"`, `xmlWhitespaceSensitivity: "ignore"`, `bracketSameLine: false`)
-- Tests: none
+- Tests: `src/__tests__/format.test.ts`
 - Docs: `docs/formatting.md`
 
 **As a** web developer
@@ -205,7 +205,7 @@ Scenario: FMT-004.5 The language of the tab decides, not the file name
 - Commands: `code.format`
 - Files:
   - `src/lib/format.ts` — `hasRange` (non-empty main selection and a Prettier target with `range`: the babel, typescript, graphql and vue parsers, the only ones Prettier 3 range-formats; other parsers return the text unchanged for a range), `rangeStart` / `rangeEnd`, "Formatted selection" toast
-- Tests: none
+- Tests: `src/__tests__/format.test.ts`
 - Docs: `docs/formatting.md`
 
 **As a** developer touching one function in a file I don't own
@@ -247,8 +247,8 @@ Scenario: FMT-005.4 Prettier languages without range formatting take the whole d
 - Files:
   - `src/lib/format.ts` — `CODE` table (`external`: tool, arguments, install hint, `missing` pattern), the external branch of `formatDocument` (working folder = the document's folder, "Formatted (Python, ruff)")
   - `src/lib/ipc.ts` — `sys.formatExternal`
-  - `src-tauri/src/lib.rs` — `format_external` (spawns the tool without a console window, document on stdin from a feeder thread, stdout returned, stderr or stdout as the error, `not_found`)
-- Tests: none
+  - `src-tauri/src/lib.rs` — `format_external` / `run_formatter` (spawns the tool without a console window, document on stdin from a feeder thread, stdout returned, stderr or stdout as the error, `not_found`)
+- Tests: `src/__tests__/format.test.ts`, `src-tauri/src/lib.rs`
 - Docs: `docs/formatting.md`
 
 **As a** developer whose project has its own formatter configuration
@@ -305,7 +305,7 @@ Scenario: FMT-006.5 An untitled document is formatted too
 - Files:
   - `src/lib/format.ts` — `CODE` table (`builtin`), `clangFormat` / `clangStyle`, `sqlBuiltin`, fallback when the tool is not found or matches `missing` (C#: dotnet with an SDK prints "Could not execute because the specified command or file was not found"; dotnet with only a runtime prints "The command could not be loaded … The application 'csharpier' does not exist"; the pattern matches both); each formatter is a dynamic `import()` (`@wasm-fmt/gofmt`, `@wasm-fmt/ruff_fmt`, `@wasm-fmt/clang-format`, `@wasm-fmt/shfmt`, `prettier-plugin-java`, `sql-formatter`)
   - `src-tauri/src/lib.rs` — `format_external` reports `not_found` when the program cannot be started
-- Tests: none
+- Tests: `src/__tests__/format.test.ts`, `src-tauri/src/lib.rs`
 - Docs: `docs/formatting.md`
 
 **As a** person on a machine without developer tools
@@ -367,7 +367,7 @@ Scenario: FMT-007.5 dotnet without CSharpier falls back
 - Files:
   - `src/lib/format.ts` — `CODE.Rust` (external only, `install` hint), the "is not installed" warning in `formatDocument`
   - `src-tauri/src/lib.rs` — `format_external` (`not_found`)
-- Tests: none
+- Tests: `src/__tests__/format.test.ts`, `src-tauri/src/lib.rs`
 - Docs: `docs/formatting.md`
 
 **As a** person opening a Rust file without the Rust toolchain
@@ -393,7 +393,7 @@ Scenario: FMT-008.2 rustfmt is installed
 - Commands: `code.format`
 - Files:
   - `src/lib/format.ts` — `formatDocument`'s `catch` ("Format failed: " + the first line of the formatter's message, shown for 6 s; returns false)
-- Tests: none
+- Tests: `src/__tests__/format.test.ts`
 - Docs: `docs/formatting.md`
 
 **As a** developer formatting a file I'm in the middle of editing

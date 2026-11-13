@@ -6619,7 +6619,9 @@
         "src/editor/manager.ts",
         "src/components/MenuBar.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/format.test.ts"
+      ],
       "docs": [
         "docs/formatting.md"
       ],
@@ -6656,7 +6658,9 @@
         "src/lib/format.ts",
         "src/editor/manager.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/format.test.ts"
+      ],
       "docs": [
         "docs/formatting.md"
       ],
@@ -6696,7 +6700,8 @@
         "src-tauri/src/json_tools.rs"
       ],
       "tests": [
-        "src-tauri/src/json_tools.rs"
+        "src-tauri/src/json_tools.rs",
+        "src/__tests__/format.test.ts"
       ],
       "docs": [
         "docs/formatting.md",
@@ -6742,7 +6747,9 @@
       "files": [
         "src/lib/format.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/format.test.ts"
+      ],
       "docs": [
         "docs/formatting.md"
       ],
@@ -6782,7 +6789,9 @@
       "files": [
         "src/lib/format.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/format.test.ts"
+      ],
       "docs": [
         "docs/formatting.md"
       ],
@@ -6820,7 +6829,10 @@
         "src/lib/ipc.ts",
         "src-tauri/src/lib.rs"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/format.test.ts",
+        "src-tauri/src/lib.rs"
+      ],
       "docs": [
         "docs/formatting.md"
       ],
@@ -6861,7 +6873,10 @@
         "src/lib/format.ts",
         "src-tauri/src/lib.rs"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/format.test.ts",
+        "src-tauri/src/lib.rs"
+      ],
       "docs": [
         "docs/formatting.md"
       ],
@@ -6902,7 +6917,10 @@
         "src/lib/format.ts",
         "src-tauri/src/lib.rs"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/format.test.ts",
+        "src-tauri/src/lib.rs"
+      ],
       "docs": [
         "docs/formatting.md"
       ],
@@ -6930,7 +6948,9 @@
       "files": [
         "src/lib/format.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/format.test.ts"
+      ],
       "docs": [
         "docs/formatting.md"
       ],
@@ -17820,6 +17840,9 @@
       "BIG-016"
     ],
     "src-tauri/src/lib.rs": [
+      "FMT-006",
+      "FMT-007",
+      "FMT-008",
       "UI-025"
     ],
     "src-tauri/src/lsp.rs": [
@@ -17910,6 +17933,17 @@
       "FIND-004",
       "FIND-005",
       "FIND-006"
+    ],
+    "src/__tests__/format.test.ts": [
+      "FMT-001",
+      "FMT-002",
+      "FMT-003",
+      "FMT-004",
+      "FMT-005",
+      "FMT-006",
+      "FMT-007",
+      "FMT-008",
+      "FMT-009"
     ],
     "src/__tests__/gitGraph.test.ts": [
       "GRAPH-002",

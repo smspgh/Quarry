@@ -32,10 +32,6 @@ Not verified
 - SPLIT-005 (one undo history, handover between panes) is written from reading `src/editor/manager.ts:150-225`; no test covers it.
 - Tab Moves Focus is set only on the focused pane's view, so the other pane probably still indents on Tab (`src/lib/commands.ts:858`, `src/App.tsx:99`).
 
-## Formatting (`formatting.md`)
-
-- No tests cover `format.ts` or `format_external`.
-
 ## Find and replace in a document (`find.md`)
 
 - There is no "in selection" option anywhere (`src/components/FindBar.tsx`, `findBar` in `src/lib/store.ts:279`).
