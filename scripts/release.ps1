@@ -34,6 +34,11 @@ if ($null -eq $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD) { $env:TAURI_SIGNING_PRIV
 if ($Publish) {
   gh release view "v$version" --repo $Repo 2>$null | Out-Null
   if ($LASTEXITCODE -eq 0) { throw "Release v$version already exists in $Repo. Bump the version." }
+  # Installed copies ignore a release that is not newer than the one they have.
+  $latest = gh release view --repo $Repo --json tagName -q .tagName 2>$null
+  if ($LASTEXITCODE -eq 0 -and $latest -and ([version]($latest -replace '^v', '') -ge [version]$version)) {
+    throw "Version $version is not higher than the latest release $latest in $Repo. Bump the version."
+  }
   $global:LASTEXITCODE = 0
 }
 

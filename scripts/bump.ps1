@@ -2,6 +2,9 @@
 param([Parameter(Mandatory)][ValidatePattern('^\d+\.\d+\.\d+$')][string]$Version)
 $ErrorActionPreference = "Stop"
 Set-Location (Split-Path -Parent $PSScriptRoot)
+# The updater only installs a higher version, so a release must never go backwards or repeat.
+$current = (Get-Content "src-tauri/tauri.conf.json" -Raw | ConvertFrom-Json).version
+if ([version]$Version -le [version]$current) { throw "Version $Version is not higher than the current $current." }
 function Edit($path, $pattern, $replacement) {
   $text = [IO.File]::ReadAllText((Resolve-Path $path))
   $new = [regex]::Replace($text, $pattern, $replacement, 'Multiline')

@@ -253,7 +253,7 @@ Scenario: UPD-005.4 An equal or older version is not offered
 - Status: draft
 - Commands: none
 - Files:
-  - `scripts/release.ps1` — version check across the three files, signing key (`~/.tauri/quarry.key` or `$env:QUARRY_SIGNING_KEY`), `pnpm tauri build`, `release-out/` (installer, `.sig`, `latest.json`), `-Notes`, `-Publish` (`gh release create` in `smspgh/quarry-releases`, refuses an existing tag), `-Repo`
+  - `scripts/release.ps1` — version check across the three files, signing key (`~/.tauri/quarry.key` or `$env:QUARRY_SIGNING_KEY`), `pnpm tauri build`, `release-out/` (installer, `.sig`, `latest.json`), `-Notes`, `-Publish` (`gh release create` in `smspgh/quarry-releases`, refuses an existing tag or a version not higher than the latest release), `-Repo`
   - `src-tauri/tauri.conf.json` — `version`, `bundle.createUpdaterArtifacts`
   - `package.json` — `version`
   - `src-tauri/Cargo.toml` — `version`
@@ -308,6 +308,11 @@ Scenario: UPD-006.8 Uncommitted changes only warn
   Given the working tree has uncommitted changes
   When I run .\scripts\release.ps1
   Then it warns that the release will include them and continues
+
+Scenario: UPD-006.9 A version older than the latest release is refused
+  Given the latest release in smspgh/quarry-releases is v0.1.8 and the version files say 0.1.6
+  When I run .\scripts\release.ps1 -Publish
+  Then it stops with "Version 0.1.6 is not higher than the latest release v0.1.8" before building
 ```
 
 ## UPD-007: Set the version number everywhere
@@ -315,7 +320,7 @@ Scenario: UPD-006.8 Uncommitted changes only warn
 - Status: draft
 - Commands: none
 - Files:
-  - `scripts/bump.ps1` — rewrites `"version"` in `package.json` and `src-tauri/tauri.conf.json`, the first `version =` in `src-tauri/Cargo.toml`, then `cargo update -p quarry --offline` for `Cargo.lock`; files written as UTF-8 without BOM
+  - `scripts/bump.ps1` — refuses a version not higher than the one in `tauri.conf.json`; rewrites `"version"` in `package.json` and `src-tauri/tauri.conf.json`, the first `version =` in `src-tauri/Cargo.toml`, then `cargo update -p quarry --offline` for `Cargo.lock`; files written as UTF-8 without BOM
   - `package.json` — `version`
   - `src-tauri/tauri.conf.json` — `version`
   - `src-tauri/Cargo.toml` — package `version`
@@ -347,4 +352,9 @@ Scenario: UPD-007.4 The release script accepts the result
   Given I ran .\scripts\bump.ps1 0.1.8
   When I run .\scripts\release.ps1
   Then its version check passes
+
+Scenario: UPD-007.5 The version must go up
+  Given every version file says 0.1.7
+  When I run .\scripts\bump.ps1 0.1.7 or .\scripts\bump.ps1 0.1.6
+  Then it stops with "Version 0.1.6 is not higher than the current 0.1.7" (or 0.1.7) and no file is changed
 ```

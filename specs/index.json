@@ -16020,6 +16020,10 @@
         {
           "id": "UPD-006.8",
           "title": "Uncommitted changes only warn"
+        },
+        {
+          "id": "UPD-006.9",
+          "title": "A version older than the latest release is refused"
         }
       ]
     },
@@ -16028,7 +16032,7 @@
       "title": "Set the version number everywhere",
       "area": "UPD",
       "spec": "specs/updates.md",
-      "line": 313,
+      "line": 318,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16057,6 +16061,10 @@
         {
           "id": "UPD-007.4",
           "title": "The release script accepts the result"
+        },
+        {
+          "id": "UPD-007.5",
+          "title": "The version must go up"
         }
       ]
     }

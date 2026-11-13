@@ -13,7 +13,7 @@ Source lives in the private repo `smspgh/Quarry`. Installers are published to th
 ```powershell
 cd C:\coding_projects\Quarry
 
-# 1. Set the new version everywhere (package.json, Cargo.toml, tauri.conf.json, Cargo.lock). Must be higher than the last release.
+# 1. Set the new version everywhere (package.json, Cargo.toml, tauri.conf.json, Cargo.lock). Must be higher than the current version; the script refuses anything else.
 .\scripts\bump.ps1 0.1.2
 
 # 2. Commit (push to the private repo whenever you like)
@@ -31,7 +31,7 @@ git push
 ```
 Check it landed: `gh release view v0.1.2 --repo smspgh/quarry-releases`, and open
 `https://github.com/smspgh/quarry-releases/releases/latest/download/latest.json` (its `version` must be the new one).
-The script refuses to publish a version that already exists in the releases repo. To retract a bad release:
+The script refuses to publish a version that already exists in the releases repo, or one that is not higher than its latest release. To retract a bad release:
 `gh release delete v0.1.2 --repo smspgh/quarry-releases --cleanup-tag --yes` (copies that already updated keep the new version).
 
 Installed copies check shortly after launch (Settings > Check for updates on start) or via Help > Check for Updates.

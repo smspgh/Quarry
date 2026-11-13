@@ -173,10 +173,6 @@ Doc / code mismatches
 - `InfoTip` is not used in Settings; its only use is `src/components/panels/SearchPanel.tsx:739`.
 - No settings migration code exists (nothing mentions the old ShiEdit id); loading is merge-over-defaults plus `sanitizeSettings` and the `.bak` fallback (`src/lib/actions.ts:673-718`; SET-003).
 
-## Updates and releases (`updates.md`)
-
-- "Versions must increase" is not enforced: `scripts/release.ps1:26` checks only that the three versions match, `:35-36` refuses an already-published tag under `-Publish`; `bump.ps1` accepts any `x.y.z`.
-
 ## Application shell (`app-shell.md`)
 
 Possible bugs
