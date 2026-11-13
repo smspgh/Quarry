@@ -10728,7 +10728,7 @@
       "title": "A whole playback is one undo step",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 352,
+      "line": 354,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10768,7 +10768,7 @@
       "title": "Confirm before a macro plays",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 394,
+      "line": 396,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10814,7 +10814,7 @@
       "title": "Manage macros in the Macros panel and menu",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 445,
+      "line": 447,
       "status": "draft",
       "commands": [
         "macro.panel",
@@ -10878,7 +10878,7 @@
       "title": "Edit a macro's steps",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 519,
+      "line": 521,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10932,7 +10932,7 @@
       "title": "Save a macro to a file",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 583,
+      "line": 585,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10983,7 +10983,7 @@
       "title": "Macros folder: loading, reloading and changing it",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 645,
+      "line": 647,
       "status": "draft",
       "commands": [],
       "files": [

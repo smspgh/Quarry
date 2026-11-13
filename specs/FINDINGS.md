@@ -104,10 +104,6 @@ Doc / code mismatches and dead code
 
 - `docs/macros.md:106` says script runs are blocked while a macro plays; only the hidden `script.run` has that guard (`src/lib/commands.ts:1133`) and nothing calls it; `script.runActive` (`commands.ts:1096`) is not blocked while recording or playing.
 
-## Macros (`macros.md`)
-
-- Not determined: whether macros reload on window focus while the panel is hidden (`MacrosPanel.tsx:93-101`); how the menu displays `macro.stop` (no `dynamicTitle`).
-
 ## Source control (`git.md`)
 
 Possible bugs

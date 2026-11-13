@@ -307,7 +307,7 @@ Scenario: MACRO-006.5 From the menu
 - Commands: `macro.stop`, `macro.pause`
 - Files:
   - `src/lib/macros.ts` — `stopPlayback`, `pausePlayback`, `checkpoint` (every 20 steps, and every 5 passes of To end), `PlaybackCancelled`, `guarded`
-  - `src/lib/commands.ts` — `macro.stop` (Shift+Escape), `macro.pause` (`dynamicTitle`)
+  - `src/lib/commands.ts` — `macro.stop` (Shift+Escape, no `dynamicTitle`: the menu shows its title without the "Macro: " prefix), `macro.pause` (`dynamicTitle`)
   - `src/components/StatusBar.tsx` — PLAYING / PAUSED item with pause and stop buttons
   - `src/components/panels/MacrosPanel.tsx` — Pause / Resume and Stop buttons shown while playing
 - Tests: none
@@ -346,7 +346,9 @@ Scenario: MACRO-007.4 Stop while paused
 Scenario: MACRO-007.5 Only available while playing
   Given no macro is playing
   When I open the Macros menu
-  Then "Pause Macro Playback" and "Macro: Stop Playback" are greyed out
+  Then "Pause Macro Playback" and "Stop Playback" (shortcut Shift+Esc) are greyed out
+  When a macro is playing
+  Then they read "Pause Macro Playback" (or "Resume Macro Playback" while paused) and "Stop Playback", and are enabled
 ```
 
 ## MACRO-008: A whole playback is one undo step
@@ -648,7 +650,7 @@ Scenario: MACRO-012.7 Save fails
 - Commands: none
 - Files:
   - `src/lib/macros.ts` — `loadMacros` (unsaved guard, `LoadReason`, skips unreadable files, sorted by name), `macrosDir`, `resolveFolder`, `cleanDirSetting`, `migrateLegacy`
-  - `src/components/panels/MacrosPanel.tsx` — `chooseFolder`, `reload`, window-focus reload
+  - `src/components/panels/MacrosPanel.tsx` — `chooseFolder`, `reload`, window-focus reload (the panel stays mounted while hidden, `Sidebar.tsx` `PanelFrame`, so this runs with the panel closed too)
   - `src/components/panels/SettingsPanel.tsx` — "Macros folder" row (`changeFolder`)
   - `src/App.tsx` — `loadMacros` at startup
 - Tests: `src/__tests__/paths.test.ts`
@@ -684,9 +686,9 @@ Scenario: MACRO-013.4 Reloading would discard unsaved macros
   Then the list is unchanged
 
 Scenario: MACRO-013.5 Changes made outside Quarry
-  Given I copy "New.macro.json" into the macros folder with File Explorer while the Macros panel is open
+  Given I copy "New.macro.json" into the macros folder with File Explorer, with the Macros panel open or closed
   When I switch back to Quarry
-  Then "New" appears in the list
+  Then "New" appears in the list, and in the Macros menu
   And this automatic reload is skipped while anything is unsaved, recording or playing
 
 Scenario: MACRO-013.6 Choose another folder from the panel
