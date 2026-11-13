@@ -499,17 +499,49 @@ export async function closeDocument(docId?: string, force = false): Promise<bool
   return true;
 }
 
-export async function closeAll(): Promise<boolean> {
-  const ids = useStore.getState().docs.map((d) => d.id);
-  for (const id of ids) {
-    if (!(await closeDocument(id))) return false;
+/**
+ * The one question Close All / Close Others asks about the tabs with unsaved changes. Pure so it can
+ * be unit-tested.
+ */
+export function closeManyQuestion(names: string[]): { title: string; message: string; save: string } {
+  const lost = "Your changes will be lost if you don't save them.";
+  if (names.length === 1) return { title: `Save changes to ${names[0]}?`, message: lost, save: "Save" };
+  const shown = names.slice(0, 8).join(", ") + (names.length > 8 ? ` and ${names.length - 8} more` : "");
+  return { title: `Save changes to ${names.length} files?`, message: `${shown}. ${lost}`, save: "Save All" };
+}
+
+/**
+ * Close several tabs as one step: one Save / Don't Save / Cancel for every tab with unsaved changes
+ * and one confirmation for tabs with something running, both asked before anything closes, so a
+ * Cancel (or a save that does not happen) leaves every tab open.
+ */
+async function closeMany(ids: string[]): Promise<boolean> {
+  const docs = useStore.getState().docs.filter((d) => ids.includes(d.id));
+  const dirty = docs.filter((d) => d.dirty);
+  if (dirty.length > 0) {
+    const q = closeManyQuestion(dirty.map((d) => d.name));
+    const choice = await askSaveChanges(q.title, q.message, q.save);
+    if (choice === "cancel") return false;
+    if (choice === "save") {
+      for (const d of dirty) if (!(await saveDocument(d.id))) return false;
+    }
   }
+  const running = docs.filter((d) => (d.kind === "claude" && claudeBusy(d.id)) || (d.kind === "terminal" && terminalPty(d.id) !== null));
+  if (running.length > 0) {
+    const title = running.length === 1 ? `Stop ${running[0].name.replace(/^Claude · /, "")}?` : `Stop ${running.length} running tabs?`;
+    const message = running.length === 1 ? "Something is still running in this tab. Closing it stops it." : `${running.map((d) => d.name).join(", ")} still have something running. Closing them stops it.`;
+    if (!(await askDialog(title, message, running.length === 1 ? "Close tab" : "Close tabs"))) return false;
+  }
+  for (const d of docs) await closeDocument(d.id, true);
   return true;
 }
 
-export async function closeOthers(keepId: string) {
-  const ids = useStore.getState().docs.filter((d) => d.id !== keepId).map((d) => d.id);
-  for (const id of ids) if (!(await closeDocument(id))) return;
+export async function closeAll(): Promise<boolean> {
+  return closeMany(useStore.getState().docs.map((d) => d.id));
+}
+
+export async function closeOthers(keepId: string): Promise<boolean> {
+  return closeMany(useStore.getState().docs.filter((d) => d.id !== keepId).map((d) => d.id));
 }
 
 export async function revertDocument(docId?: string, opts: { confirm?: boolean; silent?: boolean; encoding?: string } = {}) {
@@ -549,12 +581,12 @@ export function askDialog(title: string, message: string, confirmLabel: string, 
 }
 
 /** Save / Don't Save / Cancel. */
-function askSaveChanges(title: string): Promise<"save" | "discard" | "cancel"> {
+function askSaveChanges(title: string, message = "Your changes will be lost if you don't save them.", saveLabel = "Save"): Promise<"save" | "discard" | "cancel"> {
   return choose<"save" | "discard" | "cancel">(
     title,
-    "Your changes will be lost if you don't save them.",
+    message,
     [
-      { label: "Save", kind: "primary", default: true, value: "save" },
+      { label: saveLabel, kind: "primary", default: true, value: "save" },
       { label: "Don't Save", kind: "danger", value: "discard" },
       { label: "Cancel", cancel: true, value: "cancel" },
     ],

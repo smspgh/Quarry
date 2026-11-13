@@ -256,11 +256,11 @@ Scenario: TAB-005.7 Ctrl+F4 also closes
 - Status: draft
 - Commands: `file.closeOthers`, `file.closeAll`
 - Files:
-  - `src/lib/actions.ts` — `closeOthers`, `closeAll` (tab order, each through `closeDocument`, stop at the first Cancel)
+  - `src/lib/actions.ts` — `closeOthers`, `closeAll` → `closeMany` (one `askSaveChanges` for every dirty tab and one `askDialog` for running Claude / terminal tabs, both before anything closes; then `closeDocument(id, true)`), `closeManyQuestion` (pure: title, up to 8 names, Save / Save All)
   - `src/lib/commands.ts` — `file.closeOthers`, `file.closeAll`; default `enabled` (`docOnly`)
   - `src/components/TitleBar.tsx` — "Close Others" in the tab menu
   - `src/components/MenuBar.tsx` — File › Close Other Tabs / Close All Tabs
-- Tests: none
+- Tests: `src/__tests__/tabs.test.ts`
 - Docs: `docs/editing.md`, `docs/keyboard-shortcuts.md`
 
 **As a** person with many tabs open
@@ -283,21 +283,35 @@ Scenario: TAB-006.3 Close All Tabs
   When I choose File › Close All Tabs
   Then no tabs are open and the Welcome screen is shown
 
-Scenario: TAB-006.4 Each tab with unsaved changes is asked about
-  Given tabs "a.txt", "b.txt", "c.txt" are open and "b.txt" has unsaved changes
+Scenario: TAB-006.4 One question for all the unsaved tabs
+  Given tabs "a.txt", "b.txt", "c.txt" are open and "b.txt" and "c.txt" have unsaved changes
   When I choose File › Close All Tabs
-  Then "a.txt" closes and Quarry asks "Save changes to b.txt?"
+  Then before any tab closes Quarry asks once "Save changes to 2 files?", naming "b.txt" and "c.txt", with Save All, Don't Save and Cancel
+  And Save All writes both files and closes every tab
+  And Don't Save closes every tab without writing
+  And with only "b.txt" unsaved the question is "Save changes to b.txt?" with Save, Don't Save and Cancel
 
-Scenario: TAB-006.5 Cancel stops the rest
+Scenario: TAB-006.5 Cancel closes nothing
   Given tabs "a.txt", "b.txt", "c.txt" are open and "b.txt" has unsaved changes
-  When I choose File › Close All Tabs and answer Cancel for "b.txt"
-  Then "b.txt" and "c.txt" stay open
-  And "a.txt", closed before the question, stays closed
+  When I choose File › Close All Tabs and answer Cancel
+  Then "a.txt", "b.txt" and "c.txt" all stay open
+  And the same holds when I choose Save All and then cancel the "Save" file dialog for an untitled tab
 
 Scenario: TAB-006.6 Unavailable with no tabs
   Given no tabs are open
   When I open the File menu
   Then Close Tab, Close Other Tabs and Close All Tabs are disabled
+
+Scenario: TAB-006.7 Close Others asks the same way
+  Given tabs "a.txt", "b.txt", "c.txt" are open and "a.txt" and "c.txt" have unsaved changes
+  When I right-click "b.txt", choose Close Others and answer Cancel to "Save changes to 2 files?"
+  Then all three tabs stay open
+
+Scenario: TAB-006.8 Running tabs are confirmed once, before anything closes
+  Given a Claude Code tab is still working and a terminal tab has a program running
+  When I choose File › Close All Tabs
+  Then Quarry asks once "Stop 2 running tabs?" with "Close tabs" and Cancel
+  And Cancel leaves every tab open
 ```
 
 ## TAB-007: Act on a tab from its right-click menu

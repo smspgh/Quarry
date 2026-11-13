@@ -14275,7 +14275,9 @@
         "src/components/TitleBar.tsx",
         "src/components/MenuBar.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/tabs.test.ts"
+      ],
       "docs": [
         "docs/editing.md",
         "docs/keyboard-shortcuts.md"
@@ -14295,15 +14297,23 @@
         },
         {
           "id": "TAB-006.4",
-          "title": "Each tab with unsaved changes is asked about"
+          "title": "One question for all the unsaved tabs"
         },
         {
           "id": "TAB-006.5",
-          "title": "Cancel stops the rest"
+          "title": "Cancel closes nothing"
         },
         {
           "id": "TAB-006.6",
           "title": "Unavailable with no tabs"
+        },
+        {
+          "id": "TAB-006.7",
+          "title": "Close Others asks the same way"
+        },
+        {
+          "id": "TAB-006.8",
+          "title": "Running tabs are confirmed once, before anything closes"
         }
       ]
     },
@@ -14312,7 +14322,7 @@
       "title": "Act on a tab from its right-click menu",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 303,
+      "line": 317,
       "status": "draft",
       "commands": [
         "file.showInQuarryExplorer",
@@ -14374,7 +14384,7 @@
       "title": "Preview tabs while browsing the Explorer",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 367,
+      "line": 381,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14427,7 +14437,7 @@
       "title": "Limit how many tabs are open",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 427,
+      "line": 441,
       "status": "draft",
       "commands": [],
       "files": [
@@ -18468,6 +18478,9 @@
     "src/__tests__/tabLimit.test.ts": [
       "SET-010",
       "TAB-009"
+    ],
+    "src/__tests__/tabs.test.ts": [
+      "TAB-006"
     ],
     "src/__tests__/text.test.ts": [
       "EDIT-017",

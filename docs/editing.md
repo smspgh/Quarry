@@ -18,6 +18,7 @@
 
 - **Title bar.** By default it holds the Quarry mark and the menus (File, Edit, View, …). **Alt** or **F10** opens the menus from the keyboard.
 - **Tabs.** Once a document is open, its tab appears in a row above the title bar. The active tab is always highlighted with an accent bar and bold name. Right-click a tab for Close, Close Others, Copy Path, **Show in Quarry Explorer** and **Show in Windows Explorer** (the last three for saved files only).
+  - **Close All Tabs / Close Others** ask once, before anything closes: "Save changes to 3 files?" with Save All, Don't Save and Cancel (and one "Stop … running tabs?" for Claude or terminal tabs still working). Cancel leaves every tab open.
   - **More tabs than fit** wrap onto another row below, starting under the first tab, so every tab stays visible. The tab area grows a row at a time.
   - **New files** are named Untitled-1, Untitled-2, … using the lowest number no open tab has, so closing Untitled-1 makes the next new file Untitled-1 again.
   - **Preview tabs.** A file you single-click in the Explorer opens in a *preview* tab, with its name in italics. Clicking another file in the Explorer replaces it, so browsing the tree doesn't pile up tabs. The tab is kept once you edit the file, double-click its tab, or double-click the file in the Explorer.
