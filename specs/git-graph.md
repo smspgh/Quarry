@@ -570,10 +570,11 @@ Scenario: GRAPH-010.6 Open the file as it is now
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — `GraphMenu` (kept inside the window; closes on outside click, Escape, window blur), naming strip (`Naming`, `commitNaming`), `act`
+  - `src/lib/gitGraph.ts` — `actionDone` (success notifications)
   - `src/lib/git.ts` — `commitAction`, `checkoutRef`
   - `src-tauri/src/git.rs` — `commit_action` / `git_commit_action` (`branch-switch` = `switch -c`, `tag`), `valid_ref_name`, `checkout`
   - `src/lib/gitApi.ts` — `GitCommitAction`, `git.commitAction`
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitGraph.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer
@@ -632,12 +633,13 @@ Scenario: GRAPH-011.8 Invalid name
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — `act()` confirmations and success notifications
+  - `src/components/GraphView.tsx` — `act()`
+  - `src/lib/gitGraph.ts` — `actionConfirm` (the dialogs), `actionDone` (success notifications)
   - `src/lib/git.ts` — `commitAction` (busy label, error via `gitErrorText`, `checkExternalChanges`)
   - `src/lib/gitStatus.ts` — `gitErrorText` ("Stopped on a conflict…")
   - `src/lib/actions.ts` — `askDialog`
   - `src-tauri/src/git.rs` — `commit_action` (`checkout --detach`, `cherry-pick`, `revert --no-edit`; merges with `-m 1`; `GIT_EDITOR=true`)
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitRemote.test.ts`
+- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitRemote.test.ts`, `src/__tests__/gitGraph.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer
@@ -690,10 +692,11 @@ Scenario: GRAPH-012.7 Detached HEAD wording
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — Reset menu entries (hard one styled as dangerous), `act()` dialogs
+  - `src/components/GraphView.tsx` — Reset menu entries (hard one styled as dangerous), `act()`
+  - `src/lib/gitGraph.ts` — `actionConfirm` (the dialogs; the hard reset counts the changes it loses)
   - `src/lib/git.ts` — `commitAction`
   - `src-tauri/src/git.rs` — `commit_action` (`reset --soft` / `--mixed` / `--hard`)
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitGraph.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer who wants to take commits back

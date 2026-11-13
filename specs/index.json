@@ -8837,12 +8837,14 @@
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
+        "src/lib/gitGraph.ts",
         "src/lib/git.ts",
         "src-tauri/src/git.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git.rs",
+        "src/__tests__/gitGraph.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -8887,11 +8889,12 @@
       "title": "Check out, cherry-pick or revert a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 630,
+      "line": 631,
       "status": "draft",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
+        "src/lib/gitGraph.ts",
         "src/lib/git.ts",
         "src/lib/gitStatus.ts",
         "src/lib/actions.ts",
@@ -8899,7 +8902,8 @@
       ],
       "tests": [
         "src-tauri/src/git.rs",
-        "src/__tests__/gitRemote.test.ts"
+        "src/__tests__/gitRemote.test.ts",
+        "src/__tests__/gitGraph.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -8940,16 +8944,18 @@
       "title": "Reset the branch to a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 688,
+      "line": 690,
       "status": "draft",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
+        "src/lib/gitGraph.ts",
         "src/lib/git.ts",
         "src-tauri/src/git.rs"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git.rs",
+        "src/__tests__/gitGraph.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -8982,7 +8988,7 @@
       "title": "See uncommitted work and a stopped operation above the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 733,
+      "line": 736,
       "status": "draft",
       "commands": [],
       "files": [
@@ -17315,7 +17321,10 @@
       "GRAPH-002",
       "GRAPH-003",
       "GRAPH-005",
-      "GRAPH-007"
+      "GRAPH-007",
+      "GRAPH-011",
+      "GRAPH-012",
+      "GRAPH-013"
     ],
     "src/lib/gitStatus.ts": [
       "CONFLICT-007",
@@ -17879,7 +17888,10 @@
       "GRAPH-002",
       "GRAPH-003",
       "GRAPH-005",
-      "GRAPH-007"
+      "GRAPH-007",
+      "GRAPH-011",
+      "GRAPH-012",
+      "GRAPH-013"
     ],
     "src/__tests__/gitNav.test.ts": [
       "GIT-004",

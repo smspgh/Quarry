@@ -8,7 +8,7 @@ import { askDialog, openPath } from "../lib/actions";
 import { abortOperation, checkoutRef, commitAction, openCommitFile, remote, useGit } from "../lib/git";
 import { isPanelShown, showPanel } from "../lib/panels";
 import { git, type GitCommitAction, type GitCommitDetail, type GitCommitFile, type GitGraphCommit } from "../lib/gitApi";
-import { commitMatches, layoutGraph, newGraphState, refLabels, type GraphRow, type RefLabel } from "../lib/gitGraph";
+import { actionConfirm, actionDone, commitMatches, layoutGraph, newGraphState, refLabels, type GraphRow, type RefLabel } from "../lib/gitGraph";
 import { commitFileKind, KIND_LABEL, KIND_LETTER } from "../lib/gitStatus";
 import { useStore, type Doc } from "../lib/store";
 
@@ -315,20 +315,10 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
 
   /** Run an action from the menu, after asking when it changes the branch or the files. */
   const act = async (action: GitCommitAction, c: GitGraphCommit, name?: string) => {
-    const on = branch ? `"${branch}"` : "the current commit (not on a branch)";
-    const what = `${c.short} "${c.summary}"`;
-    const dirty = repo?.files.length ?? 0;
-    let ok = true;
-    if (action === "cherry-pick") ok = await askDialog("Cherry-pick this commit?", `Copies the changes of ${what} onto ${on} as a new commit. If they conflict, the pick stops and Source Control shows the files to resolve.`, "Cherry-pick", "primary");
-    else if (action === "revert") ok = await askDialog("Revert this commit?", `Adds a new commit on ${on} that undoes ${what}. History is kept; nothing is deleted.`, "Revert", "primary");
-    else if (action === "reset-soft") ok = await askDialog("Reset (soft)?", `Moves ${on} back to ${what}. The commits after it leave the branch, but all their changes stay staged, ready to commit again. Your files are not touched.`, "Reset (Soft)", "primary");
-    else if (action === "reset-mixed") ok = await askDialog("Reset (mixed)?", `Moves ${on} back to ${what}. The commits after it leave the branch; their changes stay in your files, unstaged.`, "Reset (Mixed)", "primary");
-    else if (action === "reset-hard") ok = await askDialog("Reset (hard) and discard changes?", `Moves ${on} back to ${what} and makes every tracked file match it. The commits after it leave the branch${dirty ? `, and your ${dirty} uncommitted change${dirty === 1 ? "" : "s"} to tracked files ${dirty === 1 ? "is" : "are"} lost` : ""}. This can't be undone from Quarry.`, "Reset and Discard");
-    else if (action === "checkout") ok = await askDialog("Check out this commit?", `Your files become ${what}, and you are no longer on a branch ("detached"). Commits made here belong to no branch until you create one. Switch back with the branch button.`, "Check Out", "primary");
-    if (!ok) return;
+    const ask = actionConfirm(action, c, branch, repo?.files.length ?? 0);
+    if (ask && !(await askDialog(ask.title, ask.text, ask.ok, ask.kind))) return;
     if (await commitAction(root, action, c.sha, name)) {
-      const done: Record<GitCommitAction, string> = { checkout: `Checked out ${c.short}`, branch: `Created branch ${name}`, "branch-switch": `On new branch ${name}`, tag: `Created tag ${name}`, "cherry-pick": `Cherry-picked ${c.short}`, revert: `Reverted ${c.short}`, "reset-soft": `Reset to ${c.short}`, "reset-mixed": `Reset to ${c.short}`, "reset-hard": `Reset to ${c.short}` };
-      toast(done[action], "success", 3000);
+      toast(actionDone(action, c.short, name), "success", 3000);
       // Branches and tags do not change the status the reload effect watches.
       if (action === "branch" || action === "tag") void load(true);
     }
