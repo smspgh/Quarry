@@ -861,6 +861,9 @@ pub fn run() {
             git::git_unpushed,
             git::git_abort,
             git::git_graph,
+            git::git_graph_search,
+            git::git_graph_indexed,
+            git::git_graph_index,
             git::git_commit_detail,
             git::git_commit_action,
         ])

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { commitMatches, layoutGraph, refLabels, type Lanes } from "../lib/gitGraph";
+import { commitMatches, layoutGraph, newGraphState, refLabels } from "../lib/gitGraph";
 
 const c = (sha: string, ...parents: string[]) => ({ sha, parents });
 
@@ -7,9 +7,9 @@ describe("commit graph layout", () => {
   it("keeps a straight history in one lane", () => {
     const rows = layoutGraph([c("c", "b"), c("b", "a"), c("a")]);
     expect(rows.map((r) => r.col)).toEqual([0, 0, 0]);
-    expect(rows[0]).toEqual({ col: 0, into: [], through: [], out: [0], width: 1 });
-    expect(rows[1]).toEqual({ col: 0, into: [0], through: [], out: [0], width: 1 });
-    expect(rows[2]).toEqual({ col: 0, into: [0], through: [], out: [], width: 1 });
+    expect(rows[0]).toEqual({ col: 0, into: [], through: [], out: [0], cut: [], from: [], width: 1 });
+    expect(rows[1]).toEqual({ col: 0, into: [0], through: [], out: [0], cut: [], from: [], width: 1 });
+    expect(rows[2]).toEqual({ col: 0, into: [0], through: [], out: [], cut: [], from: [], width: 1 });
   });
 
   it("draws a branch and its merge in a second lane, then frees it", () => {
@@ -48,9 +48,36 @@ describe("commit graph layout", () => {
   it("continues across pages with the carried lanes", () => {
     const all = [c("m", "b", "f"), c("f", "a"), c("b", "a"), c("a")];
     const whole = layoutGraph(all);
-    const lanes: Lanes = [];
-    const paged = [...layoutGraph(all.slice(0, 2), lanes), ...layoutGraph(all.slice(2), lanes)];
+    const state = newGraphState();
+    const paged = [...layoutGraph(all.slice(0, 2), state), ...layoutGraph(all.slice(2), state)];
     expect(paged).toEqual(whole);
+  });
+
+  it("cuts a line that runs too long and brings it back in at its commit", () => {
+    // A merge whose side branch forked from `old`, six trunk commits further down.
+    const trunk = ["t1", "t2", "t3", "t4", "t5", "t6"];
+    const commits = [c("m", "t1", "side"), c("side", "old"), ...trunk.map((t, i) => c(t, trunk[i + 1] ?? "old")), c("old")];
+    const rows = layoutGraph(commits, newGraphState(), 3);
+    // side's line to `old` starts at row 1 and is cut three rows later, freeing lane 1.
+    expect(rows[1]).toMatchObject({ col: 1, out: [1] });
+    expect(rows[3]).toMatchObject({ through: [1], cut: [] });
+    expect(rows[4]).toMatchObject({ col: 0, through: [], cut: [1], width: 2 });
+    expect(rows[5]).toMatchObject({ col: 0, width: 1, cut: [] });
+    // `old` shows where the cut line came from (row 1), and nothing is left waiting.
+    expect(rows[8]).toMatchObject({ col: 0, into: [0], from: [1], width: 1 });
+    // The same history without cutting keeps lane 1 all the way down.
+    expect(layoutGraph(commits, newGraphState(), 1000).every((r, i) => i === 0 || i === 8 || r.width === 2)).toBe(true);
+  });
+
+  it("never cuts lane 0 and gives the same result when paged", () => {
+    const chain = Array.from({ length: 30 }, (_, i) => c(`n${i}`, `n${i + 1}`));
+    const commits = [c("tip", "far"), c("other", "n0", "x"), c("x", "far"), ...chain, c("n30", "far"), c("far")];
+    const whole = layoutGraph(commits, newGraphState(), 5);
+    // The first branch's line (lane 0) is still there at the end although it ran 34 rows.
+    expect(whole[whole.length - 1].into).toContain(0);
+    expect(whole.some((r) => r.cut.includes(0))).toBe(false);
+    const state = newGraphState();
+    expect([...layoutGraph(commits.slice(0, 7), state, 5), ...layoutGraph(commits.slice(7), state, 5)]).toEqual(whole);
   });
 });
 

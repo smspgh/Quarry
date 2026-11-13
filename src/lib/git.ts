@@ -653,7 +653,7 @@ export async function openCommitFile(entry: GitLogEntry, f: GitCommitFile) {
     return;
   }
   const name = nameOf(f.rel.replace(/\//g, "\\"));
-  await openCompare({ kind: "text", label: `${name} @ ${entry.short}^`, text: a?.text ?? "" }, { kind: "text", label: `${name} @ ${entry.short}`, text: b?.text ?? "" });
+  await openCompare({ kind: "text", label: `${name} @ ${entry.short}^`, text: a?.text ?? "" }, { kind: "text", label: `${name} @ ${entry.short}`, text: b?.text ?? "" }, { preview: true });
 }
 
 // ---------- commit graph ----------

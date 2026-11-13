@@ -212,6 +212,12 @@ export const git = {
   /** One page of the commit graph (children before parents). `all`: every branch and tag, else the
    *  current branch and its upstream. */
   graph: (root: string, all: boolean, skip: number, limit: number) => invoke<GitGraphCommit[]>("git_graph", { root, all, skip, limit }),
+  /** Search the whole history (message, author, or an id), newest first. */
+  graphSearch: (root: string, all: boolean, query: string, limit = 200) => invoke<GitGraphCommit[]>("git_graph_search", { root, all, query, limit }),
+  /** Has git's commit-graph file been written (pages of a large history are then fast)? */
+  graphIndexed: (root: string) => invoke<boolean>("git_graph_indexed", { root }),
+  /** Write git's commit-graph file (`git commit-graph write --reachable`). */
+  graphIndex: (root: string) => invoke<void>("git_graph_index", { root }),
   commitDetail: (root: string, sha: string) => invoke<GitCommitDetail>("git_commit_detail", { root, sha }),
   commitAction: (root: string, action: GitCommitAction, sha: string, name?: string) => invoke<string>("git_commit_action", { root, action, sha, name: name ?? null }),
   /** Abandon the merge / rebase / cherry-pick / revert in progress; resolves with its name. */

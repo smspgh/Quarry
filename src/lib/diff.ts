@@ -117,7 +117,7 @@ async function load(src: Source): Promise<Side> {
 }
 
 /** Open a Compare tab for two sources (left = older / original, right = newer). */
-export async function openCompare(a: Source, b: Source): Promise<Doc | null> {
+export async function openCompare(a: Source, b: Source, opts: { preview?: boolean } = {}): Promise<Doc | null> {
   const store = useStore.getState();
   let left: Side;
   let right: Side;
@@ -140,9 +140,17 @@ export async function openCompare(a: Source, b: Source): Promise<Doc | null> {
     language: "Compare",
     readonly: false,
     modifiedMs: 0,
+    preview: opts.preview || undefined,
   };
+  // A preview Compare tab is replaced by the next one (clicking through a commit's files), unless
+  // it was kept with a double-click on its tab or edited.
+  const oldPreview = opts.preview ? store.docs.find((d) => d.kind === "diff" && d.preview && !d.dirty) : undefined;
   useDiff.setState((st) => ({ sessions: { ...st.sessions, [doc.id]: { left, right, inline: false, collapse: true, version: 0 } } }));
   store.addDoc(doc, true);
+  if (oldPreview) {
+    disposeDiff(oldPreview.id);
+    useStore.getState().removeDoc(oldPreview.id);
+  }
   if (left.text === right.text) store.toast("The two are identical.", "info", 3000);
   return doc;
 }

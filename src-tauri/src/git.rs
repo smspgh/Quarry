@@ -1183,25 +1183,79 @@ fn parse_graph(out: &[u8]) -> Vec<GitGraphCommit> {
     list
 }
 
-/// One page of the commit graph, children before parents, newest first. `all`: every branch and
+/// One page of the commit graph, children before parents. `all`: every branch and
 /// tag; otherwise the current branch and its upstream (so commits to pull show too).
 fn graph(root: &Path, all: bool, skip: u32, limit: u32) -> Result<Vec<GitGraphCommit>, String> {
     if !has_head(root) {
         return Ok(Vec::new());
     }
     let skip_arg = format!("--skip={skip}");
-    let limit_arg = format!("--max-count={}", limit.clamp(1, 2000));
-    let mut args = vec!["log", "-z", "--date-order", "--decorate=full", "--format=%x1e%H%x00%h%x00%P%x00%an%x00%ae%x00%at%x00%D%x00%s", &skip_arg, &limit_arg];
-    if all {
-        args.extend(["--exclude=refs/stash", "--all", "HEAD"]);
-    } else {
-        args.push("HEAD");
-        if run(root, true, &["rev-parse", "--verify", "--quiet", "@{upstream}"], None).is_ok() {
-            args.push("@{upstream}");
-        }
-    }
+    let limit_arg = format!("--max-count={}", limit.clamp(1, 5000));
+    // Topological order: a branch's commits stay together, which keeps the graph several times
+    // narrower than date order on histories with many merged branches.
+    let mut args = vec!["log", "-z", "--topo-order", "--decorate=full", GRAPH_FORMAT, &skip_arg, &limit_arg];
+    args.extend(graph_scope(root, all));
     let out = run(root, true, &args, None)?;
     Ok(parse_graph(&out))
+}
+
+const GRAPH_FORMAT: &str = "--format=%x1e%H%x00%h%x00%P%x00%an%x00%ae%x00%at%x00%D%x00%s";
+
+/// The revisions the graph covers: everything, or the current branch and its upstream.
+fn graph_scope(root: &Path, all: bool) -> Vec<&'static str> {
+    if all {
+        return vec!["--exclude=refs/stash", "--all", "HEAD"];
+    }
+    let mut v = vec!["HEAD"];
+    if run(root, true, &["rev-parse", "--verify", "--quiet", "@{upstream}"], None).is_ok() {
+        v.push("@{upstream}");
+    }
+    v
+}
+
+/// Search the whole history (not just the pages loaded): commits whose message or author
+/// contains `query` (ignoring case), or the commit `query` is an id of. Newest first.
+fn graph_search(root: &Path, all: bool, query: &str, limit: u32) -> Result<Vec<GitGraphCommit>, String> {
+    let q = query.trim();
+    if q.is_empty() || !has_head(root) {
+        return Ok(Vec::new());
+    }
+    let limit_arg = format!("--max-count={}", limit.clamp(1, 1000));
+    let scope = graph_scope(root, all);
+    let mut found: Vec<GitGraphCommit> = Vec::new();
+    for filter in [format!("--grep={q}"), format!("--author={q}")] {
+        let mut args = vec!["log", "-z", "--decorate=full", GRAPH_FORMAT, &limit_arg, "-i", "--fixed-strings", &filter];
+        args.extend(scope.iter().copied());
+        found.extend(parse_graph(&run(root, true, &args, None)?));
+    }
+    if (4..=64).contains(&q.len()) && q.bytes().all(|b| b.is_ascii_hexdigit()) {
+        let spec = format!("{q}^{{commit}}");
+        if let Ok(sha) = run_text(root, true, &["rev-parse", "--verify", "--quiet", &spec]) {
+            let sha = sha.trim().to_string();
+            if let Ok(out) = run(root, true, &["log", "-z", "--decorate=full", GRAPH_FORMAT, "-1", &sha], None) {
+                found.extend(parse_graph(&out));
+            }
+        }
+    }
+    found.sort_by(|a, b| b.time.cmp(&a.time));
+    let mut seen = std::collections::HashSet::new();
+    found.retain(|c| seen.insert(c.sha.clone()));
+    found.truncate(limit.clamp(1, 1000) as usize);
+    Ok(found)
+}
+
+/// Has git written its commit-graph file for this repository? With it, a page of the graph costs
+/// the same however deep the history; without it, git walks the whole history for every page.
+fn has_commit_graph(root: &Path) -> bool {
+    let Ok(dir) = run_text(root, true, &["rev-parse", "--git-common-dir"]) else { return false };
+    let dir = root.join(dir.trim().replace('/', "\\"));
+    let info = dir.join("objects").join("info");
+    info.join("commit-graph").is_file() || info.join("commit-graphs").join("commit-graph-chain").is_file()
+}
+
+/// Write git's commit-graph file (what `git gc` does): an index of the history inside `.git`.
+fn write_commit_graph(root: &Path) -> Result<(), String> {
+    run(root, false, &["commit-graph", "write", "--reachable"], None).map(|_| ())
 }
 
 /// Everything the details pane shows for one commit.
@@ -1420,6 +1474,21 @@ pub async fn git_commit_files(root: String, sha: String) -> Result<Vec<GitCommit
 #[tauri::command]
 pub async fn git_graph(root: String, all: bool, skip: u32, limit: u32) -> Result<Vec<GitGraphCommit>, String> {
     blocking(move || graph(Path::new(&root), all, skip, limit)).await
+}
+
+#[tauri::command]
+pub async fn git_graph_search(root: String, all: bool, query: String, limit: u32) -> Result<Vec<GitGraphCommit>, String> {
+    blocking(move || graph_search(Path::new(&root), all, &query, limit)).await
+}
+
+#[tauri::command]
+pub async fn git_graph_indexed(root: String) -> Result<bool, String> {
+    blocking(move || Ok(has_commit_graph(Path::new(&root)))).await
+}
+
+#[tauri::command]
+pub async fn git_graph_index(root: String) -> Result<(), String> {
+    blocking(move || write_commit_graph(Path::new(&root))).await
 }
 
 #[tauri::command]
@@ -1754,6 +1823,19 @@ mod tests {
         let feature = all.iter().find(|c| c.summary == "on feature").unwrap();
         assert_eq!(feature.refs, ["refs/heads/feature"]);
         assert_eq!(graph(&root, true, 1, 1).unwrap().len(), 1);
+
+        // Whole-history search: message (any case), author, and an id prefix.
+        let hits = |q: &str, all: bool| graph_search(&root, all, q, 50).unwrap().into_iter().map(|c| c.summary).collect::<Vec<_>>();
+        assert_eq!(hits("ON FEATURE", true), ["on feature"]);
+        assert!(hits("on feature", false).is_empty()); // not on the current branch
+        assert_eq!(hits("test user", true).len(), 3);
+        assert_eq!(hits(&feature.sha[..8], false), ["on feature"]);
+        assert!(hits("no such thing", true).is_empty());
+        assert!(hits("  ", true).is_empty());
+        assert!(!has_commit_graph(&root));
+        write_commit_graph(&root).unwrap();
+        assert!(has_commit_graph(&root));
+        assert_eq!(graph(&root, true, 0, 50).unwrap().len(), 3);
 
         let d = commit_detail(&root, &feature.sha).unwrap();
         assert_eq!(d.message, "on feature\n\nA body line.");
