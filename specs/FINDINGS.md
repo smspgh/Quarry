@@ -34,7 +34,6 @@ Not verified
 
 ## Formatting (`formatting.md`)
 
-- Format Document on JSON too large to pretty-print shows "JSON is not valid: … (line 0)" although the JSON is valid; `jsonTransform` handles line 0 properly (`src/lib/format.ts:172-174` vs `src/lib/commands.ts:325`).
 - Format Document on JSON does not move the cursor to the error, unlike `json.format` (FMT-003.5 vs FMT-010.4).
 - The `doc.language !== "JSON"` branch in `jsonTransform` is unreachable (`commands.ts:336`).
 - Not determined: whether the dotnet "missing CSharpier" pattern (`format.ts:118`) matches current dotnet output; the exact text of Prettier / wasm formatter errors.

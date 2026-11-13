@@ -179,7 +179,9 @@ export async function formatDocument(): Promise<boolean> {
     if (lang === "JSON") {
       const r = await jsonIpc.format(text, s.jsonIndent, !s.insertSpaces);
       if (!r.ok) {
-        store.toast(`JSON is not valid: ${r.error?.message ?? "parse error"} (line ${r.error?.line ?? "?"})`, "error");
+        // Line 0 means the JSON is fine but the result cannot be produced (pretty output too large).
+        if (r.error?.line === 0) store.toast(`Cannot pretty-print: ${r.error.message}`, "warning", 6000);
+        else store.toast(`JSON is not valid: ${r.error?.message ?? "parse error"} (line ${r.error?.line ?? "?"})`, "error");
         return false;
       }
       out = r.output ?? text;

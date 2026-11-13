@@ -6722,6 +6722,10 @@
         {
           "id": "FMT-003.5",
           "title": "Invalid JSON is left alone"
+        },
+        {
+          "id": "FMT-003.6",
+          "title": "Valid JSON whose pretty-printed text would be too large"
         }
       ]
     },
@@ -6730,7 +6734,7 @@
       "title": "Format web languages with the bundled Prettier",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 136,
+      "line": 142,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6770,7 +6774,7 @@
       "title": "Format only the selection",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 195,
+      "line": 201,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6806,7 +6810,7 @@
       "title": "Prefer the formatter installed on the machine",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 236,
+      "line": 242,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6848,7 +6852,7 @@
       "title": "Built-in formatters when the tool isn't installed",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 294,
+      "line": 300,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6889,7 +6893,7 @@
       "title": "Rust needs rustfmt",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 355,
+      "line": 361,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6918,7 +6922,7 @@
       "title": "Syntax errors leave the document unchanged",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 382,
+      "line": 388,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6950,7 +6954,7 @@
       "title": "JSON pretty-print and minify commands",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 414,
+      "line": 420,
       "status": "draft",
       "commands": [
         "json.format",
