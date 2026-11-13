@@ -32,6 +32,9 @@ interface GitState {
   available: boolean | null;
   /** Status per repository, keyed by lower-case root. */
   repos: Record<string, GitStatus>;
+  /** Why git could not read a place in view that is not under a known repository (for example
+   *  "dubious ownership"). Not cached: the next refresh asks again. */
+  statusErrors: { path: string; error: string }[];
   /** The repository the Source Control panel shows (lower-case root). */
   current: string | null;
   /** Lower-case path → status of changed files (all repositories). */
@@ -65,6 +68,7 @@ interface GitState {
 export const useGit = create<GitState>(() => ({
   available: null,
   repos: {},
+  statusErrors: [],
   current: null,
   files: {},
   dirs: {},
@@ -154,11 +158,24 @@ async function doRefresh() {
     .map((r) => r.root)
     .filter((root) => want.some((p) => under(p, root) || under(root, p)));
   const lookups = want.filter((p) => !roots.some((r) => under(p, r)) && !notRepo.has(key(p)));
-  const results = await Promise.all([...roots, ...new Set(lookups)].map((p) => git.status(p).then((st) => ({ p, st })).catch(() => ({ p, st: null }))));
+  const prev = useGit.getState().repos;
+  const results = await Promise.all(
+    [...roots, ...new Set(lookups)].map((p) =>
+      git
+        .status(p)
+        .then((st) => ({ p, st, error: null as string | null }))
+        .catch((e) => ({ p, st: null, error: String(e) })),
+    ),
+  );
   const repos: Record<string, GitStatus> = {};
-  for (const { p, st } of results) {
+  const statusErrors: GitState["statusErrors"] = [];
+  for (const { p, st, error } of results) {
     if (st) repos[key(st.root)] = st;
-    else notRepo.add(key(p));
+    else if (error === null) notRepo.add(key(p)); // git answered: not a repository
+    // git failed (dubious ownership, a lock, ...): keep a known repository's last status, and
+    // report a new place instead of remembering it as "not a repository".
+    else if (prev[key(p)]) repos[key(p)] = prev[key(p)];
+    else statusErrors.push({ path: p, error });
   }
   const files: Record<string, GitFile> = {};
   const dirs: Record<string, GitKind> = {};
@@ -181,7 +198,7 @@ async function doRefresh() {
   const folder = useStore.getState().folder;
   const folderRepo = folder ? Object.keys(repos).find((k) => under(folder, repos[k].root)) : undefined;
   const current = cur && repos[cur] ? cur : folderRepo || Object.keys(repos)[0] || null;
-  useGit.setState({ repos, files, dirs, current });
+  useGit.setState({ repos, statusErrors, files, dirs, current });
   void syncBases();
 }
 

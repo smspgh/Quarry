@@ -12,13 +12,13 @@ Git in the editor (change markers, peek / revert, line blame), the Source Contro
 - Status: draft
 - Commands: `git.refresh`
 - Files:
-  - `src/lib/git.ts` — `installGit`, `refreshGit` (debounce), `doRefresh`, `rescanGit` (clears `notRepo`, re-checks a missing git), `interesting`, `notRepo`, `repoOf`, `currentRepo`, `fileStatus`
+  - `src/lib/git.ts` — `installGit`, `refreshGit` (debounce), `doRefresh` (a git failure goes to `statusErrors`, never `notRepo`; a known repository keeps its last status), `rescanGit` (clears `notRepo`, re-checks a missing git), `interesting`, `notRepo`, `repoOf`, `currentRepo`, `fileStatus`
   - `src/lib/gitApi.ts` — `git.available`, `git.status`, `GitStatus` / `GitFile`
   - `src-tauri/src/git.rs` — `git_available`, `git_status`, `find_root`, `parse_status`, `git()` (`--no-optional-locks`, `GIT_TERMINAL_PROMPT=0`)
-  - `src/components/panels/GitPanel.tsx` — header Refresh button (`rescanGit`), "Git was not found" / "not in a git repository" notes
+  - `src/components/panels/GitPanel.tsx` — header Refresh button (`rescanGit`), "Git was not found" / "not in a git repository" / "Git could not read" notes
   - `src/lib/gitCommands.ts` — `git.refresh` (runs `rescanGit`, like the panel's Refresh button)
   - `src/App.tsx` — calls `installGit()` at start-up
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitRefresh.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer who opens folders and files that live in git repositories
@@ -69,6 +69,17 @@ Scenario: GIT-001.8 Refresh looks for git again
   And git can now be run with Quarry's PATH (for example a broken install was repaired)
   When I click the Refresh button in the Source Control header, or choose Git › Refresh Git Status
   Then Quarry looks for git again and shows the repository
+
+Scenario: GIT-001.9 Git fails to read a folder
+  Given the open folder is in a repository git refuses to read ("detected dubious ownership")
+  When the status is read
+  Then the Source Control panel says "Git could not read the open folder:" followed by git's message
+  And the folder is not remembered as "not a repository": the next refresh asks git again
+
+Scenario: GIT-001.10 A failed read keeps the last status
+  Given a repository is shown
+  When one status read fails (for example a git lock held by another program)
+  Then the panel keeps showing the repository's last status instead of dropping it
 ```
 
 ## GIT-002: Change markers in the gutter

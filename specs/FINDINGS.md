@@ -126,7 +126,6 @@ Doc / code mismatches and dead code
 ## Source control (`git.md`)
 
 Possible bugs
-- Status errors are swallowed: `find_root` returns an error for "dubious ownership" (`src-tauri/src/git.rs:219-232`), but `doRefresh` turns any rejection into "not a repository" and caches it (`git.ts:157-161`); a transient `git status` failure may be cached the same way.
 - Ctrl+Enter in the message box ignores the Commit button's disabled state (`GitPanel.tsx:535-540`); it ends in a toast, not a bad commit.
 - A token in a remote URL can be shown: the toast "Remote origin now points to <url>" uses the raw URL (`git.ts:570`) and the Change form prefills it (`GitRepoSettings.tsx:74`); only the remote row uses `displayUrl`.
 - Background check: a failed check also counts toward the once-a-minute limit (`git.ts:542`); it runs `fetch --prune` without `--all` (`git.rs:939`), so only the default remote is checked.

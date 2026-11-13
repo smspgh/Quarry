@@ -2,7 +2,7 @@ import { ArrowDown, ArrowUp, Check, ChevronRight, CircleDot, CloudDownload, Clou
 import { useEffect, useRef, useState } from "react";
 import { openPath } from "../../lib/actions";
 import { abortOperation, continueOperation, resolveConflicts, takeSide, checkRemote, isMissingRepo, commit, compareCommitWithCurrent, currentRepo, discard, moreHistory, openChange, openCommitChange, openCommitFile, openGraph, pickBranch, remote, rescanGit, stage, unstage, useGit } from "../../lib/git";
-import { commitFileKind, commitLabel, groupFiles, KIND_LABEL, KIND_LETTER, rowKind, syncLine, type Group } from "../../lib/gitStatus";
+import { commitFileKind, commitLabel, gitErrorText, groupFiles, KIND_LABEL, KIND_LETTER, rowKind, syncLine, type Group } from "../../lib/gitStatus";
 import { git, type GitCommitFile, type GitFile, type GitLogEntry, type GitRemoteOp, type GitStatus } from "../../lib/gitApi";
 import { relativeTime } from "../../editor/git";
 import { useStore } from "../../lib/store";
@@ -482,10 +482,19 @@ export function GitPanel() {
     );
   }
   if (!repo) {
+    const isFolder = (p: string) => !!folder && p.toLowerCase() === folder.toLowerCase();
+    const failed = g.statusErrors.find((e) => isFolder(e.path)) ?? g.statusErrors[0];
     return (
       <>
         {header}
-        <div className="panel-note">{folder ? "The open folder is not in a git repository." : "Open a folder (or a file) in a git repository to see its changes here."}</div>
+        {failed ? (
+          <div className="panel-note scm-status-error">
+            Git could not read {isFolder(failed.path) ? "the open folder" : failed.path}:{"\n"}
+            {gitErrorText(failed.error)}
+          </div>
+        ) : (
+          <div className="panel-note">{folder ? "The open folder is not in a git repository." : "Open a folder (or a file) in a git repository to see its changes here."}</div>
+        )}
         <HistorySection />
       </>
     );
