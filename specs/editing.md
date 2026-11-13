@@ -407,7 +407,7 @@ Scenario: EDIT-008.4 Greyed out outside text tabs
 - Commands: `code.sortAsc`, `code.sortDesc`, `code.reverseLines`, `code.dedupe`, `code.removeBlank`, `code.removeEmpty`, `code.trimTrailing`, `code.joinLines`, `edit.numberLines`
 - Files:
   - `src/lib/commands.ts` — `lineTransform` (`cmEdit`: nothing on a read-only document) and the nine registrations after it
-  - `src/lib/lineTransforms.ts` — the line functions (`Intl.Collator` with `numeric` and `sensitivity: "base"`) and `lineTransformSpec` (whole document but the empty line after a final line break when the selection is empty, otherwise the lines the main selection touches, without a last line it reaches only at column 0; one transaction, `input.transform`)
+  - `src/lib/lineTransforms.ts` — the line functions (`Intl.Collator` with `numeric` and `sensitivity: "base"`) and `lineTransformSpec` (whole document but the empty line after a final line break when the selection is empty, otherwise the lines each selection touches, without a last line it reaches only at column 0; selections on the same or adjacent lines merge into one block, other blocks are transformed separately; one transaction, `input.transform`)
   - `src/components/MenuBar.tsx` — Edit › Lines submenu
 - Tests: `src/__tests__/lineTransforms.test.ts`
 - Docs: `docs/editing.md`
@@ -484,6 +484,17 @@ Scenario: EDIT-009.12 A line the selection only reaches at its start is left out
   Given the lines "c", "b", "a" selected from the start of "c" to the start of "a"
   When I choose Sort Lines Ascending
   Then the lines are "b", "c", "a"
+
+Scenario: EDIT-009.13 Every selection is transformed, each on its own
+  Given the lines "c", "b", "m", "z", "y" with "c" to "b" selected and "z" to "y" selected
+  When I choose Sort Lines Ascending
+  Then the lines are "b", "c", "m", "y", "z"
+  And both blocks are still selected
+
+Scenario: EDIT-009.14 A column selection is sorted as one block
+  Given a column selection over the first character of the lines "c1", "b2", "a3"
+  When I choose Sort Lines Ascending
+  Then the lines are "a3", "b2", "c1"
 ```
 
 ## EDIT-010: Change case and wrap selections in quotes

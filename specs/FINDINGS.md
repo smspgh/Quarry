@@ -35,7 +35,6 @@ Not verified
 ## Text editing (`editing.md`)
 
 Possible bugs
-- Line commands use only the main selection; other selections are ignored (`commands.ts:748`).
 - Remove Duplicate Lines is quadratic (`indexOf` inside `filter`, `commands.ts:763`).
 - Title Case uses `/\b\w/g`: "don't" becomes "Don'T", and existing capitals are not lowered (`commands.ts:798`).
 - Convert to Tabs skips a single leading space and spaces after a leading tab; Convert to Spaces only converts the run of tabs at the very start of the line (`commands.ts:774`, `:778`).

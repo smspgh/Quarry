@@ -13,6 +13,13 @@ const run = (doc: string, fn: L.LineFn, sel: [number, number] | number = 0) => {
   return { text: next.doc.toString(), changed: true, sel: spec.selection ? next.sliceDoc(m.from, m.to) : null };
 };
 
+const multi = (doc: string, ranges: [number, number][], main: number) =>
+  EditorState.create({
+    doc,
+    selection: EditorSelection.create(ranges.map(([a, h]) => EditorSelection.range(a, h)), main),
+    extensions: EditorState.allowMultipleSelections.of(true),
+  });
+
 describe("line commands: which lines", () => {
   it("acts on the whole document when nothing is selected", () => {
     expect(run("c\na\nb", L.sortAsc, 2).text).toBe("a\nb\nc");
@@ -34,6 +41,20 @@ describe("line commands: which lines", () => {
     const r = run("c\nb\na", L.sortAsc, [0, 4]);
     expect(r.text).toBe("b\nc\na");
     expect(r.sel).toBe("b\nc");
+  });
+  it("transforms the lines of every selection, each block on its own", () => {
+    // Blocks "c","b" (lines 1-2) and "z","y" (lines 4-5); "m" in between is untouched.
+    const st = multi("c\nb\nm\nz\ny", [[0, 3], [6, 9]], 1);
+    const next = st.update(L.lineTransformSpec(st, L.sortAsc)!).state;
+    expect(next.doc.toString()).toBe("b\nc\nm\ny\nz");
+    expect(next.selection.ranges.map((r) => next.sliceDoc(r.from, r.to))).toEqual(["b\nc", "y\nz"]);
+    expect(next.selection.mainIndex).toBe(1);
+  });
+  it("treats selections on adjacent lines (a column selection) as one block", () => {
+    const st = multi("c1\nb2\na3", [[0, 1], [3, 4], [6, 7]], 2);
+    const next = st.update(L.lineTransformSpec(st, L.sortAsc)!).state;
+    expect(next.doc.toString()).toBe("a3\nb2\nc1");
+    expect(next.selection.ranges.length).toBe(1);
   });
   it("reports no change when the text would stay the same", () => {
     expect(run("a\nb\nc", L.sortAsc).changed).toBe(false);

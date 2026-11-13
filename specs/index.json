@@ -3804,6 +3804,14 @@
         {
           "id": "EDIT-009.12",
           "title": "A line the selection only reaches at its start is left out"
+        },
+        {
+          "id": "EDIT-009.13",
+          "title": "Every selection is transformed, each on its own"
+        },
+        {
+          "id": "EDIT-009.14",
+          "title": "A column selection is sorted as one block"
         }
       ]
     },
@@ -3812,7 +3820,7 @@
       "title": "Change case and wrap selections in quotes",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 489,
+      "line": 500,
       "status": "draft",
       "commands": [
         "edit.upper",
@@ -3864,7 +3872,7 @@
       "title": "Indent, outdent and convert indentation",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 543,
+      "line": 554,
       "status": "draft",
       "commands": [
         "edit.indent",
@@ -3918,7 +3926,7 @@
       "title": "Toggle line and block comments",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 598,
+      "line": 609,
       "status": "draft",
       "commands": [
         "edit.toggleComment",
@@ -3956,7 +3964,7 @@
       "title": "Fold and unfold regions",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 637,
+      "line": 648,
       "status": "draft",
       "commands": [
         "code.fold",
@@ -3999,7 +4007,7 @@
       "title": "Right-click menu on a foldable line",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 679,
+      "line": 690,
       "status": "draft",
       "commands": [
         "code.foldLine",
@@ -4055,7 +4063,7 @@
       "title": "Brackets: matching, jumping and auto-closing",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 737,
+      "line": 748,
       "status": "draft",
       "commands": [
         "code.gotoBracket"
@@ -4095,7 +4103,7 @@
       "title": "Go to Line",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 776,
+      "line": 787,
       "status": "draft",
       "commands": [
         "goto.line"
@@ -4150,7 +4158,7 @@
       "title": "Detect a document's language",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 843,
+      "line": 854,
       "status": "draft",
       "commands": [
         "code.detectLanguage"
@@ -4207,7 +4215,7 @@
       "title": "Change the language of a document",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 915,
+      "line": 926,
       "status": "draft",
       "commands": [
         "code.setLanguage"
@@ -4256,7 +4264,7 @@
       "title": "Syntax highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 968,
+      "line": 979,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4288,7 +4296,7 @@
       "title": "Word wrap and visible whitespace",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1001,
+      "line": 1012,
       "status": "draft",
       "commands": [
         "view.toggleWrap",
@@ -4330,7 +4338,7 @@
       "title": "Zoom the editor text",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1044,
+      "line": 1055,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -4373,7 +4381,7 @@
       "title": "Let Tab leave the editor",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1086,
+      "line": 1097,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -4413,7 +4421,7 @@
       "title": "Line numbers, active line and selection-match highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1130,
+      "line": 1141,
       "status": "draft",
       "commands": [],
       "files": [
