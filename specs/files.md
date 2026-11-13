@@ -178,6 +178,7 @@ Scenario: FILE-004.2 How many are shown
   Then the file submenu shows the 12 most recent files, each with its folder beside the name
   And the folder submenu shows the 10 most recent folders
   And the Welcome screen shows the 8 most recent files
+  And Quick Open with no folder open offers the 15 most recent files
 
 Scenario: FILE-004.3 Open a recent file
   Given "C:\work\a.txt" is in the recent files list and is not open

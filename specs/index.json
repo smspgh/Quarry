@@ -5383,7 +5383,7 @@
       "title": "Quick Open a file by name",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 207,
+      "line": 208,
       "status": "draft",
       "commands": [
         "file.quickOpen"
@@ -5419,7 +5419,7 @@
       "title": "Large files open in large-file mode",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 243,
+      "line": 244,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5465,7 +5465,7 @@
       "title": "Detect encoding and line endings on open",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 292,
+      "line": 293,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5504,7 +5504,7 @@
       "title": "Choose the encoding and line endings a file is saved with",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 334,
+      "line": 335,
       "status": "draft",
       "commands": [
         "file.setEncoding",
@@ -5556,7 +5556,7 @@
       "title": "Reopen a file in another encoding",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 388,
+      "line": 389,
       "status": "draft",
       "commands": [
         "file.reopenWithEncoding"
@@ -5596,7 +5596,7 @@
       "title": "Save a document",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 431,
+      "line": 432,
       "status": "draft",
       "commands": [
         "file.save"
@@ -5660,7 +5660,7 @@
       "title": "Save a document under another name",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 508,
+      "line": 509,
       "status": "draft",
       "commands": [
         "file.saveAs"
@@ -5704,7 +5704,7 @@
       "title": "Save all changed documents",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 559,
+      "line": 560,
       "status": "draft",
       "commands": [
         "file.saveAll"
@@ -5737,7 +5737,7 @@
       "title": "Revert a file to the version on disk",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 592,
+      "line": 593,
       "status": "draft",
       "commands": [
         "file.revert"
@@ -5775,7 +5775,7 @@
       "title": "Know which documents have unsaved changes",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 632,
+      "line": 633,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5812,7 +5812,7 @@
       "title": "Notice changes made by other programs",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 671,
+      "line": 672,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5871,7 +5871,7 @@
       "title": "Restore the previous session on start",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 747,
+      "line": 748,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5929,7 +5929,7 @@
       "title": "Exit without losing work (hot exit)",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 814,
+      "line": 815,
       "status": "draft",
       "commands": [
         "app.exit"
@@ -5990,7 +5990,7 @@
       "title": "Open files by dropping them on the window",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 883,
+      "line": 884,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6027,7 +6027,7 @@
       "title": "Open files from the command line and File Explorer",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 922,
+      "line": 923,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6068,7 +6068,7 @@
       "title": "Welcome screen",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 967,
+      "line": 968,
       "status": "draft",
       "commands": [],
       "files": [

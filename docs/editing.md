@@ -41,7 +41,7 @@ With no tabs open, the welcome screen offers New, Open file, Open folder, the co
 
 ## Opening files and folders
 
-- **Ctrl+O / Ctrl+Shift+O** open a file / folder. **File › Open Recent** keeps the last 12 files and 10 folders.
+- **Ctrl+O / Ctrl+Shift+O** open a file / folder. **File › Open Recent File / Open Recent Folder** list the last 12 files and 10 folders (Quarry remembers 15 of each; Quick Open with no folder lists all 15 files, the welcome screen the last 8). Each submenu ends with a Clear command.
 - Drop files anywhere on the window to open them. Dropping a folder opens it in the Explorer.
 - In File Explorer, right-click any file and choose **Open with Quarry**, or any folder and choose **Open folder in Quarry**. On Windows 11 these are under **Show more options**. Quarry is also listed in **Open with** for common text, data and code files. The installer adds these entries without changing your default apps.
 - `quarry.exe <path> [<path> …]` opens files or a folder from the command line. Quarry runs as a single instance, so opening a file while it's running sends the file to the existing window.

@@ -9,7 +9,6 @@ This file is not a spec: `scripts/specs-index.mjs` ignores it.
 Possible bugs
 
 Doc / code mismatches
-- `docs/editing.md:44` says Open Recent keeps 12 files and 10 folders; the store keeps 15 of each (`actions.ts:347`), the menus show 12 / 10 (`src/components/MenuBar.tsx:67`, `:75`), Welcome shows 8.
 - `docs/keyboard-shortcuts.md:20` lists Ctrl+F4 under `file.close`; it is a separate hidden command, `file.closeF4`.
 - Unused Rust threshold: `sys.largeFileThreshold` (`src/lib/ipc.ts:121`), the `large_file_threshold` command (`src-tauri/src/lib.rs:656`) and `LARGE_FILE_THRESHOLD` (`src-tauri/src/files.rs:11`) have no caller; only `settings.largeFileThresholdMb` decides (`actions.ts:149`).
 
