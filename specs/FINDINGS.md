@@ -168,11 +168,6 @@ Doc / code mismatches
 - Expanded folders are not saved in the session; `openFolder` resets them to the root (`src/lib/actions.ts:312`).
 - EXPL-016 lists `src/__tests__/splitGit.test.ts` on the strength of a grep for `kindOf` / `KIND_LETTER` only.
 
-## Settings (`settings.md`)
-
-- `InfoTip` is not used in Settings; its only use is `src/components/panels/SearchPanel.tsx:739`.
-- No settings migration code exists (nothing mentions the old ShiEdit id); loading is merge-over-defaults plus `sanitizeSettings` and the `.bak` fallback (`src/lib/actions.ts:673-718`; SET-003).
-
 ## Application shell (`app-shell.md`)
 
 Possible bugs
