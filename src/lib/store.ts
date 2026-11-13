@@ -370,7 +370,7 @@ export const useStore = create<AppState>((set, get) => ({
   dismissToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
   log: (text, kind = "log") =>
     set((s) => ({
-      consoleLines: [...s.consoleLines.slice(-2000), { id: consoleSeq++, kind, text, ts: Date.now() }],
+      consoleLines: [...s.consoleLines.slice(-1999), { id: consoleSeq++, kind, text, ts: Date.now() }],
     })),
   clearConsole: () => set({ consoleLines: [] }),
   setSearch: (patch) => set((s) => ({ search: { ...s.search, ...patch } })),

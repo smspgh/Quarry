@@ -103,7 +103,6 @@ Doc / code mismatches and dead code
 ## Scripts (`scripting.md`)
 
 - `docs/macros.md:106` says script runs are blocked while a macro plays; only the hidden `script.run` has that guard (`src/lib/commands.ts:1133`) and nothing calls it; `script.runActive` (`commands.ts:1096`) is not blocked while recording or playing.
-- `docs/scripting.md:145` says the console keeps the last 2,000 lines; `src/lib/store.ts:373` keeps 2,001.
 - Not determined: `script.new` seems to always create in the scripts root (`src/components/panels/ExplorerPanel.tsx:514`) while the header button uses the selected folder (SCRIPT-002.1, .3 assume this).
 
 ## Macros (`macros.md`)

@@ -652,7 +652,7 @@ Scenario: SCRIPT-012.5 Sandbox
   - `src/lib/scripting.ts` — `formatScriptError` (maps wrapper lines to script lines, drops worker frames), `runScript` error path, `store.log`
   - `src/lib/scriptWorker.ts` — `error` message with `lineOffset` (`wrapperLineOffset`)
   - `src/components/BottomPanel.tsx` — Console tab, Clear console, auto-scroll
-  - `src/lib/store.ts` — `log` / `consoleLines` (trimmed to about 2,000 lines), `clearConsole`
+  - `src/lib/store.ts` — `log` / `consoleLines` (trimmed to the last 2,000 lines), `clearConsole`
 - Tests: `src/__tests__/scripts.test.ts`
 - Docs: `docs/scripting.md`
 
@@ -688,7 +688,7 @@ Scenario: SCRIPT-013.5 Console housekeeping
   Given the Console holds output from earlier runs
   When I click "Clear console"
   Then it is emptied and reads "Script output and messages appear here."
-  And without clearing, only about the last 2,000 lines are kept
+  And without clearing, only the last 2,000 lines are kept
 ```
 
 ## SCRIPT-014: Script API Reference tab
