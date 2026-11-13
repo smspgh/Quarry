@@ -519,8 +519,8 @@ Scenario: EXPL-009.9 Enter renames once
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/fileOps.ts` — `trashPaths` (one confirmation for the whole selection, per-item error toasts, `explorer.reload`)
-  - `src/lib/actions.ts` — `confirmDelete` (Delete / Cancel, Cancel is the default)
+  - `src/lib/fileOps.ts` — `trashPaths` (one confirmation for the whole selection, per-item error toasts, `explorer.reload`, then `checkExternalChanges` so open tabs of deleted files are flagged at once)
+  - `src/lib/actions.ts` — `confirmDelete` (Delete / Cancel, Cancel is the default), `checkExternalChanges` (missing file: tab kept, marked unsaved, warned once)
   - `src/components/FileMenu.tsx` — "Delete" / "Delete N items"
   - `src/components/panels/ExplorerPanel.tsx` — `deleteSelection` (Delete key), `afterDelete` (selection moves to the parent folder)
   - `src/lib/ipc.ts` — `fs.trash`
@@ -563,6 +563,12 @@ Scenario: EXPL-010.5 An item that cannot be deleted does not stop the others
   Then "a.txt" is in the Recycle Bin
   And an error toast starts with "locked.txt:"
   And "locked.txt" is still listed
+
+Scenario: EXPL-010.6 An open tab of a deleted file stays open
+  Given "notes.md" is open in a tab
+  When I delete "notes.md" (or a folder containing it) from the Explorer
+  Then the tab stays open with its text and is marked as having unsaved changes
+  And a warning says "notes.md was deleted or moved on disk. Saving will recreate it."
 ```
 
 ## EXPL-011: Cut, copy and paste files through the Windows clipboard

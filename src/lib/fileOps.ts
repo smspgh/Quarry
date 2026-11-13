@@ -4,7 +4,7 @@
  * Delete to the Recycle Bin. Every action takes a list, so a multi-selection works the same way.
  */
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
-import { confirmDelete, dirName, isInside, samePath } from "./actions";
+import { checkExternalChanges, confirmDelete, dirName, isInside, samePath } from "./actions";
 import { bus } from "./bus";
 import { fs } from "./ipc";
 import { useStore } from "./store";
@@ -86,5 +86,7 @@ export async function trashPaths(paths: string[], isDir: (p: string) => boolean)
   }
   useStore.getState().set({ fileListCache: null });
   bus.emit("explorer.reload", deleted.map(dirName));
+  // Open tabs of what was deleted stay open (unsaved, "Saving will recreate it") and are flagged now.
+  if (deleted.length) void checkExternalChanges();
   return deleted;
 }

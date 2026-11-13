@@ -4891,6 +4891,10 @@
         {
           "id": "EXPL-010.5",
           "title": "An item that cannot be deleted does not stop the others"
+        },
+        {
+          "id": "EXPL-010.6",
+          "title": "An open tab of a deleted file stays open"
         }
       ]
     },
@@ -4899,7 +4903,7 @@
       "title": "Cut, copy and paste files through the Windows clipboard",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 568,
+      "line": 574,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4969,7 +4973,7 @@
       "title": "Copy a path or a name as text",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 664,
+      "line": 670,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5000,7 +5004,7 @@
       "title": "Show a file in Windows File Explorer",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 698,
+      "line": 704,
       "status": "draft",
       "commands": [
         "file.showInWindowsExplorer"
@@ -5035,7 +5039,7 @@
       "title": "Open all files of a folder or a selection",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 732,
+      "line": 738,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5075,7 +5079,7 @@
       "title": "Start Find in Files from the Explorer",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 774,
+      "line": 780,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5112,7 +5116,7 @@
       "title": "Git status in the tree",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 811,
+      "line": 817,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5147,7 +5151,7 @@
       "title": "The file right-click menu",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 852,
+      "line": 858,
       "status": "draft",
       "commands": [],
       "files": [
