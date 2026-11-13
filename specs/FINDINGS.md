@@ -209,7 +209,6 @@ Possible bugs
 
 Mismatches and notes
 - There are no menu mnemonics: only Alt / F10, arrows, Home / End, Enter / Space and Escape (UI-004).
-- No tests: `resolveStroke` / `normalizeKeys` / `eventToKeys`, `dialogDefaultAction` / `dialogCancelAction`, `placePopup`, the dialog queue.
 
 ## Wording pass
 

@@ -14903,7 +14903,9 @@
         "src/lib/commands.ts",
         "src/lib/bus.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/shell.test.ts"
+      ],
       "docs": [
         "docs/keyboard-shortcuts.md"
       ],
@@ -14961,7 +14963,9 @@
         "src/lib/store.ts",
         "src/styles/app.css"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/shell.test.ts"
+      ],
       "docs": [],
       "scenarios": [
         {
@@ -15342,7 +15346,9 @@
         "src/editor/cmSetup.ts",
         "src/styles/app.css"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/shell.test.ts"
+      ],
       "docs": [
         "docs/editing.md",
         "docs/settings.md"
@@ -17946,6 +17952,11 @@
     ],
     "src/__tests__/search-budget.test.ts": [
       "SEARCH-007"
+    ],
+    "src/__tests__/shell.test.ts": [
+      "UI-009",
+      "UI-010",
+      "UI-018"
     ],
     "src/__tests__/splitGit.test.ts": [
       "CONFLICT-009",

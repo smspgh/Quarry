@@ -479,7 +479,7 @@ Scenario: UI-008.4 Commands that are always available
   - `src/App.tsx` — capture-phase `onKey` handler (field, terminal, tab strip, Explorer tree and history-menu exceptions), `matchesRegistered` (which keys are swallowed)
   - `src/lib/commands.ts` — `handleKeyEvent`, `resolveStroke`, `normalizeKeys`, `eventToKeys` (physical key for letters and digits), `getCommandsForKeys`, `Command.when`, chord state (`CHORD_TIMEOUT_MS` 1500, `chordPrefixes`), `ui.escape`
   - `src/lib/bus.ts` — `palette.cancel` emitted by `ui.escape`
-- Tests: none
+- Tests: `src/__tests__/shell.test.ts`
 - Docs: `docs/keyboard-shortcuts.md`
 
 **As a** keyboard-driven user
@@ -561,7 +561,7 @@ Scenario: UI-009.9 Browser context menu is suppressed
   - `src/App.tsx` — `onKey` returns early while `store.dialog` is set, so no shortcut runs behind a dialog
   - `src/lib/store.ts` — `dialog`, `DialogAction`
   - `src/styles/app.css` — `.overlay`, `.dialog`, `.btn-primary`, `.btn-danger`
-- Tests: none
+- Tests: `src/__tests__/shell.test.ts`
 - Docs: none
 
 **As a** user being asked to confirm something
@@ -1000,7 +1000,7 @@ Scenario: UI-017.5 No document
   - `src/editor/manager.ts` — `editor.setLanguage`, `editor.applySettings`
   - `src/editor/cmSetup.ts` — `allLanguageNames` for the language picker
   - `src/styles/app.css` — `.status-popup`, `.status-item.clickable`
-- Tests: none
+- Tests: `src/__tests__/shell.test.ts`
 - Docs: `docs/editing.md`, `docs/settings.md`
 
 **As a** user
