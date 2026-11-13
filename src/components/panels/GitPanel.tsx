@@ -477,7 +477,7 @@ export function GitPanel() {
     return (
       <>
         {header}
-        <div className="panel-note">Git was not found. Install Git for Windows (git-scm.com) and make sure <span className="kbd">git</span> is on PATH, then click Refresh.</div>
+        <div className="panel-note">Git was not found. Install Git for Windows (git-scm.com) and make sure <span className="kbd">git</span> is on PATH, then click Refresh (after installing it, restart Quarry first: a running program keeps its old PATH).</div>
       </>
     );
   }

@@ -185,9 +185,11 @@ async function doRefresh() {
   void syncBases();
 }
 
-/** Forget the "not a repository" answers (a folder may have become one: git init, clone). */
+/** Forget the "not a repository" answers (a folder may have become one: git init, clone), and
+ *  look for git again if it wasn't found (it may have been installed since). */
 export function rescanGit() {
   notRepo.clear();
+  if (useGit.getState().available === false) useGit.setState({ available: null });
   refreshGit(0);
 }
 

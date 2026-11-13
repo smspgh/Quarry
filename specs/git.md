@@ -12,7 +12,7 @@ Git in the editor (change markers, peek / revert, line blame), the Source Contro
 - Status: draft
 - Commands: `git.refresh`
 - Files:
-  - `src/lib/git.ts` — `installGit`, `refreshGit` (debounce), `doRefresh`, `rescanGit`, `interesting`, `notRepo`, `repoOf`, `currentRepo`, `fileStatus`
+  - `src/lib/git.ts` — `installGit`, `refreshGit` (debounce), `doRefresh`, `rescanGit` (clears `notRepo`, re-checks a missing git), `interesting`, `notRepo`, `repoOf`, `currentRepo`, `fileStatus`
   - `src/lib/gitApi.ts` — `git.available`, `git.status`, `GitStatus` / `GitFile`
   - `src-tauri/src/git.rs` — `git_available`, `git_status`, `find_root`, `parse_status`, `git()` (`--no-optional-locks`, `GIT_TERMINAL_PROMPT=0`)
   - `src/components/panels/GitPanel.tsx` — header Refresh button (`rescanGit`), "Git was not found" / "not in a git repository" notes
@@ -50,7 +50,7 @@ Scenario: GIT-001.4 Refresh after git init in a terminal
 Scenario: GIT-001.5 Git is not installed
   Given git cannot be run
   When I open the Source Control panel
-  Then it says "Git was not found. Install Git for Windows (git-scm.com) and make sure git is on PATH, then click Refresh."
+  Then it says "Git was not found. Install Git for Windows (git-scm.com) and make sure git is on PATH, then click Refresh (after installing it, restart Quarry first: a running program keeps its old PATH)."
   And no repository features are shown
 
 Scenario: GIT-001.6 No repository
@@ -63,6 +63,12 @@ Scenario: GIT-001.7 Untracked files are listed one by one
   Given a repository with a new folder holding 3 new files
   When the status is read
   Then each of the 3 files is listed as untracked, not just the folder
+
+Scenario: GIT-001.8 Refresh looks for git again
+  Given the Source Control panel says "Git was not found"
+  And git can now be run with Quarry's PATH (for example a broken install was repaired)
+  When I click the Refresh button in the Source Control header, or choose Git › Refresh Git Status
+  Then Quarry looks for git again and shows the repository
 ```
 
 ## GIT-002: Change markers in the gutter

@@ -6989,6 +6989,10 @@
         {
           "id": "GIT-001.7",
           "title": "Untracked files are listed one by one"
+        },
+        {
+          "id": "GIT-001.8",
+          "title": "Refresh looks for git again"
         }
       ]
     },
@@ -6997,7 +7001,7 @@
       "title": "Change markers in the gutter",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 68,
+      "line": 74,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7043,7 +7047,7 @@
       "title": "Peek at a change and revert it",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 115,
+      "line": 121,
       "status": "draft",
       "commands": [
         "git.peekChange",
@@ -7096,7 +7100,7 @@
       "title": "Jump to the next or previous change",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 171,
+      "line": 177,
       "status": "draft",
       "commands": [
         "git.nextChange",
@@ -7139,7 +7143,7 @@
       "title": "Line blame",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 213,
+      "line": 219,
       "status": "draft",
       "commands": [
         "git.toggleBlame"
@@ -7190,7 +7194,7 @@
       "title": "Compare a file with the last commit",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 266,
+      "line": 272,
       "status": "draft",
       "commands": [
         "git.compareWithHead"
@@ -7237,7 +7241,7 @@
       "title": "Switch and create branches",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 310,
+      "line": 316,
       "status": "draft",
       "commands": [
         "git.switchBranch",
@@ -7293,7 +7297,7 @@
       "title": "Commit from the Source Control panel",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 371,
+      "line": 377,
       "status": "draft",
       "commands": [
         "git.showPanel"
@@ -7349,7 +7353,7 @@
       "title": "Amend the last commit",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 433,
+      "line": 439,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7388,7 +7392,7 @@
       "title": "See the changed files and open their changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 472,
+      "line": 478,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7445,7 +7449,7 @@
       "title": "Stage and unstage files",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 537,
+      "line": 543,
       "status": "draft",
       "commands": [
         "git.stageFile",
@@ -7499,7 +7503,7 @@
       "title": "Discard changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 593,
+      "line": 599,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7546,7 +7550,7 @@
       "title": "Status line: where the branch stands against its remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 645,
+      "line": 651,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7606,7 +7610,7 @@
       "title": "Background check of the remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 714,
+      "line": 720,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7653,7 +7657,7 @@
       "title": "Fetch, pull, push and publish a branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 767,
+      "line": 773,
       "status": "draft",
       "commands": [
         "git.fetch",
@@ -7715,7 +7719,7 @@
       "title": "Recover when the remote repository is gone",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 834,
+      "line": 840,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7758,7 +7762,7 @@
       "title": "Commits of the current branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 878,
+      "line": 884,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7819,7 +7823,7 @@
       "title": "File history",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 949,
+      "line": 955,
       "status": "draft",
       "commands": [
         "git.fileHistory"
@@ -7873,7 +7877,7 @@
       "title": "Commit identity (name and email)",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1004,
+      "line": 1010,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7920,7 +7924,7 @@
       "title": "Add a remote by URL",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1055,
+      "line": 1061,
       "status": "draft",
       "commands": [
         "git.addRemote"
@@ -7969,7 +7973,7 @@
       "title": "See, open and change remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1107,
+      "line": 1113,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8017,7 +8021,7 @@
       "title": "Create a repository on GitHub and push to it",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1160,
+      "line": 1166,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8074,7 +8078,7 @@
       "title": "GitHub accounts",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1227,
+      "line": 1233,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8121,7 +8125,7 @@
       "title": "Private / Public badge on GitHub remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1279,
+      "line": 1285,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8163,7 +8167,7 @@
       "title": "Work with more than one repository",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1323,
+      "line": 1329,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8204,7 +8208,7 @@
       "title": "Branch in the status bar",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1368,
+      "line": 1374,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8247,7 +8251,7 @@
       "title": "Git decorations in the Explorer",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1418,
+      "line": 1424,
       "status": "draft",
       "commands": [],
       "files": [
