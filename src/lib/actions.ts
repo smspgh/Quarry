@@ -595,14 +595,19 @@ export async function checkExternalChanges(onlyDocId?: string): Promise<void> {
       // The document as it is now (a save may have finished while earlier files were checked).
       const cur = useStore.getState().docs.find((d) => d.id === doc.id);
       if (!cur || saving.has(doc.id)) continue;
-      if (cameBack && cur.kind === "text") {
+      if (cameBack) {
         // The file is back (a branch switch, a tool rewriting it). Going missing marked the tab
         // dirty; if it wasn't edited since, that flag means nothing: clear it, or reload if newer.
-        const snap = snapshots.get(doc.id);
-        const now = editor.docOf(doc.id);
-        if (snap && now && now.eq(snap.doc)) {
+        let unedited = false;
+        if (cur.kind === "text") {
+          const snap = snapshots.get(doc.id);
+          const now = editor.docOf(doc.id);
+          unedited = !!snap && !!now && now.eq(snap.doc);
+        } else unedited = !cur.bigInfo?.dirty;
+        if (unedited) {
           if (cur.modifiedMs && stat.modifiedMs > cur.modifiedMs) {
-            await revertDocument(doc.id, { confirm: false, silent: true });
+            if (cur.kind === "big") await reloadBig(doc.id);
+            else await revertDocument(doc.id, { confirm: false, silent: true });
             store.toast(`${doc.name} is back on disk and was reloaded.`, "info", 4000);
           } else store.updateDoc(doc.id, { dirty: false });
           continue;

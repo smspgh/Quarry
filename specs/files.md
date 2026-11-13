@@ -658,7 +658,7 @@ Scenario: FILE-014.4 A new file with pasted-and-removed text
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/actions.ts` — `checkExternalChanges` (per text / large-file doc with a path: stat, `missingWarned`, came-back handling, reload or ask), `installExternalChangeWatch` (window `focus`, `visibilitychange`, tab activation), `reloadBig`, `revertDocument`, the `saving` set
+  - `src/lib/actions.ts` — `checkExternalChanges` (per text / large-file doc with a path: stat, `missingWarned`, came-back handling for text and unedited large-file tabs, reload or ask), `installExternalChangeWatch` (window `focus`, `visibilitychange`, tab activation), `reloadBig`, `revertDocument`, the `saving` set
   - `src/App.tsx` — installs the watch (`installExternalChangeWatch`)
   - `src/lib/store.ts` — `Doc.modifiedMs`, `Doc.following`
   - `src/lib/ipc.ts` — `fs.stat`, `big.open`, `big.close`
@@ -703,6 +703,7 @@ Scenario: FILE-015.5 A deleted file comes back
   When the file reappears with newer content and I switch back to the Quarry window
   Then the tab shows the new content with no unsaved-changes marker
   And a notice says "notes.txt is back on disk and was reloaded."
+  And the same holds for an unedited large-file tab: back unchanged, it loses the marker; back newer, it is reopened from disk
 
 Scenario: FILE-015.6 Switching to a tab checks that tab
   Given "a.txt" is open in a background tab with no unsaved changes

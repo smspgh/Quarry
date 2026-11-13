@@ -5856,7 +5856,7 @@
       "title": "Restore the previous session on start",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 724,
+      "line": 725,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5914,7 +5914,7 @@
       "title": "Exit without losing work (hot exit)",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 791,
+      "line": 792,
       "status": "draft",
       "commands": [
         "app.exit"
@@ -5971,7 +5971,7 @@
       "title": "Open files by dropping them on the window",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 853,
+      "line": 854,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6008,7 +6008,7 @@
       "title": "Open files from the command line and File Explorer",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 892,
+      "line": 893,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6049,7 +6049,7 @@
       "title": "Welcome screen",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 937,
+      "line": 938,
       "status": "draft",
       "commands": [],
       "files": [
