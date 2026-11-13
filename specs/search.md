@@ -215,7 +215,7 @@ Scenario: SEARCH-003.9 No folder to search
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SearchPanel.tsx` — Match Case / Whole Word / Regex toggles, Ctrl+Enter, "Dot matches newline", debounced `validateRegex` (150 ms), `invalidRegex`, `regexMessage`, `multiline` flag sent with the query
+  - `src/components/panels/SearchPanel.tsx` — Match Case / Whole Word / Regex toggles, Ctrl+Enter, "Dot matches newline", `regexEngine` (JavaScript-only check for Current File on a text tab and Open Files), debounced `validateRegex` (150 ms, Rust scopes only), `jsRegexError`, `invalidRegex`, `regexMessage`, `multiline` flag sent with the query
   - `src/lib/ipc.ts` — `search.validateRegex`
   - `src-tauri/src/lib.rs` — `validate_regex` command
   - `src-tauri/src/search.rs` — `pattern_source` (plain-text line break → `\r?\n`), `build_matcher`, `validate_regex`, `one_line_regex_error`, `build_searcher` (multi-line), Whole Word in `replace_in_files` (`\b{start-half}` / `\b{end-half}`, as `RegexMatcherBuilder::word`)
@@ -265,10 +265,14 @@ Scenario: SEARCH-004.6 An invalid pattern is flagged while typing
   Then the box is marked invalid and the message "unclosed group" appears under it
   And the Search button is disabled and Enter does not start a search
 
-Scenario: SEARCH-004.7 The pattern is checked with the folder-search engine in every scope
-  Given Regex is on and the scope is Current File
-  When I type the look-ahead pattern "foo(?=bar)"
-  Then the box is marked invalid with the engine's message
+Scenario: SEARCH-004.7 The pattern is checked with the engine that will run it
+  Given Regex is on, the scope is Current File and the active tab is a normal text tab containing "foobar foobaz"
+  When I type the look-ahead pattern "foo(?=bar)" and search
+  Then the box is not marked invalid
+  And one result is found, the "foo" of "foobar"
+  And the same holds for Open Files, and for a backreference such as "(\w)\1"
+  When I switch the scope to Folder, or the current file is a large-file tab
+  Then the box is marked invalid with the folder-search engine's message
   And the Search button is disabled
 
 Scenario: SEARCH-004.8 Empty search

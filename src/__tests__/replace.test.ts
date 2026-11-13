@@ -1,8 +1,36 @@
 import { describe, expect, it } from "vitest";
 import { expandReplacement, preserveCase, replaceMatches } from "../lib/replace";
-import { activeFilterCount, buildJsRegex, deletedPatch, effectiveScope, folderLabel, explorerRoots, leaveOutPatch, searchTexts, targetSummary } from "../components/panels/SearchPanel";
+import { activeFilterCount, buildJsRegex, deletedPatch, effectiveScope, folderLabel, explorerRoots, jsRegexError, leaveOutPatch, regexEngine, searchTexts, targetSummary } from "../components/panels/SearchPanel";
 import { DEFAULT_SEARCH_QUERY } from "../lib/store";
 import type { FileMatch } from "../lib/types";
+
+describe("which engine checks a Find in Files regex", () => {
+  it("is JavaScript for text documents searched in memory, Rust on disk", () => {
+    expect(regexEngine("doc", "text")).toBe("js");
+    expect(regexEngine("open", "text")).toBe("js");
+    expect(regexEngine("open", "big")).toBe("js"); // Open Files skips large-file tabs
+    expect(regexEngine("doc", "big")).toBe("rust");
+    expect(regexEngine("folder", "text")).toBe("rust");
+    expect(regexEngine("custom", undefined)).toBe("rust");
+  });
+
+  it("look-around and backreferences run in the Current File / Open Files scopes", () => {
+    const q = { ...DEFAULT_SEARCH_QUERY, isRegex: true, maxResults: 100 };
+    const ahead = searchTexts({ ...q, pattern: "foo(?=bar)" }, [{ path: "a", text: "foobar foobaz" }]);
+    expect(ahead.files[0].matches.map((m) => m.col)).toEqual([0]);
+    const behind = searchTexts({ ...q, pattern: "(?<=\\$)\\d+" }, [{ path: "a", text: "1 $2 3" }]);
+    expect(behind.files[0].matches.map((m) => [m.col, m.len])).toEqual([[3, 1]]);
+    const backref = searchTexts({ ...q, pattern: "(\\w)\\1" }, [{ path: "a", text: "abba cd" }]);
+    expect(backref.files[0].matches.map((m) => m.col)).toEqual([1]);
+    expect(jsRegexError({ ...q, pattern: "foo(?=bar)" })).toBeNull();
+  });
+
+  it("explains a pattern JavaScript refuses", () => {
+    const q = { ...DEFAULT_SEARCH_QUERY, isRegex: true };
+    expect(jsRegexError({ ...q, pattern: "(" })).toMatch(/^[a-z]/);
+    expect(jsRegexError({ ...q, pattern: "(" })).not.toContain("/(/");
+  });
+});
 
 describe("preserveCase", () => {
   it("follows all-caps, lower case and a leading capital", () => {

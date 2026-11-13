@@ -31,6 +31,27 @@ export function buildJsRegex(q: Pick<SearchQuery, "pattern" | "isRegex" | "whole
   }
 }
 
+/** Why `buildJsRegex` refused the pattern, in the browser's words without the pattern itself. */
+export function jsRegexError(q: Pick<SearchQuery, "pattern" | "isRegex" | "wholeWord" | "caseSensitive" | "dotAll">): string | null {
+  if (buildJsRegex(q)) return null;
+  try {
+    new RegExp(q.pattern, `gm${q.caseSensitive ? "" : "i"}${q.dotAll ? "s" : ""}`);
+  } catch (e) {
+    const m = /: ([^:]*)$/.exec(String((e as Error).message));
+    if (m) return m[1].charAt(0).toLowerCase() + m[1].slice(1);
+  }
+  return "Invalid regular expression";
+}
+
+/**
+ * Pure helper (testable): which engine runs (and so checks) a regex. Current File on a text tab and
+ * Open Files search the documents in memory with JavaScript, so look-around and backreferences
+ * work there; Folder / Choose… scopes and a large-file tab are searched on disk by the Rust engine.
+ */
+export function regexEngine(scope: SearchState["scope"], activeKind: string | undefined): "js" | "rust" {
+  return scope === "open" || (scope === "doc" && activeKind === "text") ? "js" : "rust";
+}
+
 /** Characters kept from the end of a single word too long to show whole before a match. */
 const LONG_WORD_TAIL = 12;
 
@@ -297,6 +318,7 @@ export function SearchPanel() {
   const setSearch = useStore((s) => s.setSearch);
   const folder = useStore((s) => s.folder);
   const activeName = useStore((s) => activeDoc(s)?.name);
+  const activeKind = useStore((s) => activeDoc(s)?.kind);
   const hasDocs = useStore((s) => s.docs.length > 0);
   const toast = useStore((s) => s.toast);
   const set = useStore((s) => s.set);
@@ -405,10 +427,13 @@ export function SearchPanel() {
     };
   }, []);
 
-  // Validate regex with the Rust engine (the one that actually runs); JS RegExp is only a fast pre-check.
+  // Validate the regex with the engine that will run it: JavaScript for text documents searched in
+  // memory (look-around and backreferences work there), else the Rust engine; JS RegExp is then
+  // only a fast pre-check.
+  const engine = regexEngine(scope, activeKind);
   const jsInvalid = q.isRegex && !buildJsRegex(q);
   useEffect(() => {
-    if (!q.isRegex || !q.pattern) {
+    if (!q.isRegex || !q.pattern || engine === "js") {
       setRegexError(null);
       return;
     }
@@ -422,9 +447,10 @@ export function SearchPanel() {
       live = false;
       window.clearTimeout(t);
     };
-  }, [q.isRegex, q.pattern, q.caseSensitive, q.wholeWord, q.dotAll]);
-  const invalidRegex = jsInvalid || regexError !== null;
-  const regexMessage = regexError ?? (jsInvalid ? "Invalid regular expression" : null);
+  }, [q.isRegex, q.pattern, q.caseSensitive, q.wholeWord, q.dotAll, engine]);
+  const rustError = engine === "rust" ? regexError : null;
+  const invalidRegex = jsInvalid || rustError !== null;
+  const regexMessage = rustError ?? (jsInvalid ? jsRegexError(q) : null);
 
   const setQ = (patch: Partial<SearchQuery>) => setSearch({ query: { ...q, ...patch } });
 
