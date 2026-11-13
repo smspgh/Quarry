@@ -105,7 +105,7 @@ Quarry picks the language from the file extension. For untitled files and unknow
 
 - JSON, XML/SVG, HTML and PHP;
 - shebang scripts (Node, Python, shell);
-- YAML, Rust, TypeScript, JavaScript, Go, C/C++, C#, Java and Python;
+- YAML, Rust, TypeScript, JavaScript, Go, C++ (C code starting with `#include` is shown as C++ too; pick C under Code › Language if you need it), C#, Java and Python;
 - SQL, CSS and Markdown.
 
 Text pasted into an empty untitled tab is checked again, so pasting JSON into a new tab gives you JSON highlighting and the JSON tools straight away.

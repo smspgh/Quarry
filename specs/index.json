@@ -4224,7 +4224,7 @@
       "title": "Change the language of a document",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 936,
+      "line": 937,
       "status": "draft",
       "commands": [
         "code.setLanguage"
@@ -4277,7 +4277,7 @@
       "title": "Syntax highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 995,
+      "line": 996,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4309,7 +4309,7 @@
       "title": "Word wrap and visible whitespace",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1028,
+      "line": 1029,
       "status": "draft",
       "commands": [
         "view.toggleWrap",
@@ -4351,7 +4351,7 @@
       "title": "Zoom the editor text",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1071,
+      "line": 1072,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -4394,7 +4394,7 @@
       "title": "Let Tab leave the editor",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1113,
+      "line": 1114,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -4434,7 +4434,7 @@
       "title": "Line numbers, active line and selection-match highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1157,
+      "line": 1158,
       "status": "draft",
       "commands": [],
       "files": [

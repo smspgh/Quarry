@@ -908,6 +908,7 @@ Scenario Outline: EDIT-017.4 Content recognised at the start of the text
     | use std::fs;                            | Rust       |
     | import x from 'y'; const a: string = '' | TypeScript |
     | const a = 1;                            | JavaScript |
+    | #include <stdio.h>                      | C++        |
     | SELECT * FROM t                         | SQL        |
     | # Title                                 | Markdown   |
     | key: value                              | YAML       |

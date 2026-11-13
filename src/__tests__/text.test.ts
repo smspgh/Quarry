@@ -54,6 +54,7 @@ describe("sniffLanguage", () => {
     ["use std::fs;\nfn main() {}", "Rust"],
     ["import x from 'y';\nconst a: string = '';", "TypeScript"],
     ["const a = 1;", "JavaScript"],
+    ["#include <stdio.h>\nint main() {}", "C++"], // C is detected as C++ too
     ["SELECT * FROM t", "SQL"],
     ["# Title\ntext", "Markdown"],
     ["key: value\nother: 2", "YAML"],

@@ -34,10 +34,6 @@ Not verified
 
 ## Text editing (`editing.md`)
 
-Possible bugs
-
-Doc / code mismatches and notes
-- Language sniffing never returns "C": `#include` gives "C++" (`src/editor/cmSetup.ts:231`); `docs/editing.md:108` says "C/C++".
 - `edit.cut` / `edit.copy` / `edit.paste` are in the palette but not in the Edit menu or `docs/keyboard-shortcuts.md`.
 - `currentBlock` has two identical return branches (`src/editor/columnMode.ts:43-46`); the comment on `addCursorBelow` says "Alt+Shift+Down style" but the key is Ctrl+Alt+Down (`columnMode.ts:135`).
 - Not determined: what the right-click menu shows on non-foldable gutter lines (EDIT-014.2 only says Quarry's menu does not open).
