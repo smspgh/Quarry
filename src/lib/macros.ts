@@ -49,11 +49,23 @@ function push(step: MacroStep) {
   useStore.getState().set({ recordingSteps: steps.length });
 }
 
+/** Commands a recording never captures: macro commands, and script runs (refused while a macro records or plays). */
+export function isUnrecordable(id: string): boolean {
+  return id.startsWith("macro.") || id === "script.runActive" || id === "script.run";
+}
+
 /** Called by the command registry when a command executes. */
 export function recordCommand(id: string, args?: unknown) {
   if (!isRecording()) return;
-  if (id.startsWith("macro.")) return;
+  if (isUnrecordable(id)) return;
   push({ type: "command", id, args });
+}
+
+/** Why a script can't run right now because of a macro, or null. */
+export function scriptBlockedByMacro(st: { recording: boolean; macroPlaying: boolean }): string | null {
+  if (st.recording) return "Scripts can't run while a macro is recording. Stop recording first (Ctrl+Shift+R).";
+  if (st.macroPlaying) return "Scripts can't run while a macro is playing.";
+  return null;
 }
 
 export function startRecording(targetId: string | null = null) {

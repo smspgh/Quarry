@@ -44,7 +44,7 @@ A script that is open in a tab runs as it is in the tab, unsaved changes include
 
 By default, a script first asks **Run / Review first / Cancel**. **Review first** opens the script in a tab without running it. Turn the prompt off with **Settings › Confirm script & macro runs**.
 
-Scripts run on regular text tabs only, not on files open in [large-file mode](large-files.md). Only one script runs at a time.
+Scripts run on regular text tabs only, not on files open in [large-file mode](large-files.md). Only one script runs at a time, and none runs while a [macro](macros.md) is recording or playing: the Run buttons are disabled and **Ctrl+Shift+Enter** shows a message saying why.
 
 ## How a script runs
 

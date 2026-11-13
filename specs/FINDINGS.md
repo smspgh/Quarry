@@ -22,10 +22,6 @@ Possible bugs
 Doc / code mismatches
 - Look-around and backreferences cannot be run in any scope: `docs/find-and-replace.md:130-133` says they work with Current File / Open Files, but the panel always validates with the Rust engine and blocks the search (`SearchPanel.tsx:351-369`, `:375`, `:877`; SEARCH-004.7).
 
-## Scripts (`scripting.md`)
-
-- `docs/macros.md:106` says script runs are blocked while a macro plays; only the hidden `script.run` has that guard (`src/lib/commands.ts:1133`) and nothing calls it; `script.runActive` (`commands.ts:1096`) is not blocked while recording or playing.
-
 ## Commit graph (`git-graph.md`)
 
 - The `"branch"` action (create without switching) exists in Rust, `GitCommitAction` and the `Naming` type, but the menu only offers `"branch-switch"` (`src/components/GraphView.tsx`, `Naming` and the "Create Branch Here…" item); the plain-branch path in `act` / the naming strip and its notification (`actionDone` in `src/lib/gitGraph.ts`) are dead UI code. It has been that way since the graph was added.

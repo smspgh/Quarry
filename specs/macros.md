@@ -69,11 +69,11 @@ Scenario: MACRO-001.6 No recording during playback
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/macros.ts` — `installRecorderHooks` (`onKeydown`, `onInput`, `IGNORED_KEYS`), `recordCommand` (skips `macro.*`), `push`
+  - `src/lib/macros.ts` — `installRecorderHooks` (`onKeydown`, `onInput`, `IGNORED_KEYS`), `recordCommand` (skips `isUnrecordable`: `macro.*`, `script.runActive`, `script.run`), `push`
   - `src/editor/manager.ts` — `hooks.onKeydown` (highest-precedence keydown handler), `hooks.onInput` (input handler)
   - `src/lib/commands.ts` — `runCommand` and `handleKeyEvent` call `recordCommand`
   - `src/lib/types.ts` — `MacroStep`
-- Tests: none
+- Tests: `src/__tests__/scripts.test.ts`
 - Docs: `docs/macros.md`
 
 **As a** developer recording a macro
@@ -111,6 +111,12 @@ Scenario: MACRO-002.6 Mouse and other input boxes are not recorded
   Given recording is on
   When I click in the editor, select text with the mouse, or type into the find bar
   Then no step is recorded for any of those
+
+Scenario: MACRO-002.7 Script runs are refused and never recorded
+  Given recording is on and a script is the current script
+  When I press Ctrl+Shift+Enter
+  Then the script does not run and a warning says scripts can't run while a macro is recording
+  And no step is recorded
 ```
 
 ## MACRO-003: Record more steps into an existing macro

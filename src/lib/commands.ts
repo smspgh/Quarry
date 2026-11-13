@@ -61,7 +61,7 @@ import { copyJsonPath, copyJsonValue, dropJsonTree } from "./jsonModel";
 import { csvToJson, jsonToCsv, topLevelKeys } from "./convert";
 import { readText as readClipboardText, writeText as writeClipboardText } from "@tauri-apps/plugin-clipboard-manager";
 import { clipboardText, cutSpec, foldLineSpec, foldTreeSpec, pasteSpec } from "../editor/lineMenu";
-import { bindAppKeyFallback, bindCommandRunner, guarded, pausePlayback, playDetail, playSteps, playToEnd, recordCommand, stageMacros, startRecording, stopPlayback, stopRecording, TO_END_DETAIL } from "./macros";
+import { bindAppKeyFallback, bindCommandRunner, guarded, pausePlayback, playDetail, playSteps, playToEnd, recordCommand, scriptBlockedByMacro, stageMacros, startRecording, stopPlayback, stopRecording, TO_END_DETAIL } from "./macros";
 import { readScript, runScript, runScriptTimes, runScriptToEnd, scriptNameOf, SCRIPT_API_HELP } from "./scripting";
 import { activeDoc, useStore, type SidebarPanel } from "./store";
 import { DEFAULT_SETTINGS, type Macro, type Script } from "./types";
@@ -442,6 +442,11 @@ export type ScriptRunHow = "once" | "toEnd" | { times: number };
  */
 export async function runScriptPath(path: string, how: ScriptRunHow = "once"): Promise<boolean> {
   const st = useStore.getState();
+  const blocked = scriptBlockedByMacro(st);
+  if (blocked) {
+    st.toast(blocked, "warning");
+    return false;
+  }
   const doc = activeDoc(st);
   if (doc?.path && samePath(doc.path, path)) {
     st.toast("This tab is the script itself. Go to the document it should change, then run it.", "warning");
@@ -1132,7 +1137,8 @@ export function registerAllCommands() {
     title: "Script: Run Script by Path",
     category: "Scripts",
     hidden: true,
-    enabled: () => hasText() && !s().recording && !s().macroPlaying,
+    // Not greyed out while a macro records or plays: runScriptPath refuses with a message instead.
+    enabled: hasText,
     run: (args?: unknown) => (typeof args === "string" ? runScriptPath(args) : false),
   });
 

@@ -15,6 +15,7 @@ import {
   useScriptRunState,
 } from "../../lib/scripting";
 import { editor } from "../../editor/manager";
+import { scriptBlockedByMacro } from "../../lib/macros";
 import { isPanelShown } from "../../lib/panels";
 import { useActiveDoc, useStore } from "../../lib/store";
 import type { DirEntry, Script } from "../../lib/types";
@@ -52,6 +53,8 @@ export function ScriptsPanel() {
   const set = useStore((s) => s.set);
   const doc = useActiveDoc();
   const run = useScriptRunState();
+  const recording = useStore((s) => s.recording);
+  const macroPlaying = useStore((s) => s.macroPlaying);
   const [root, setRoot] = useState<string | null>(null);
   const [times, setTimes] = useState(1);
   /** The current script as last read (for its `@languages` / `@extensions` filter). */
@@ -82,8 +85,10 @@ export function ScriptsPanel() {
   const known = info && current && info.id === current ? info : null;
   const applies = !known || scriptApplies(known, doc);
   const self = !!current && !!doc?.path && doc.path.toLowerCase() === current.toLowerCase();
+  const macroBlock = scriptBlockedByMacro({ recording, macroPlaying });
   const why = (path: string) =>
     !isText ? "Open a text document to run scripts"
+    : macroBlock ? macroBlock
     : run.running ? "A script is running"
     : doc?.path?.toLowerCase() === path.toLowerCase() ? "This tab is the script itself: go to the document it should change"
     : known && known.id === path && !applies ? `This script is for ${describeWhen(known)}`
@@ -122,7 +127,7 @@ export function ScriptsPanel() {
       },
     };
     // `why` and `start` only read the values listed here.
-  }, [root, isText, run.running, doc?.path, doc?.name, known, applies]);
+  }, [root, isText, macroBlock, run.running, doc?.path, doc?.name, known, applies]);
 
   const blocked = current ? why(current) : "Select a script";
 

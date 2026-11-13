@@ -10757,7 +10757,9 @@
         "src/lib/commands.ts",
         "src/lib/types.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/scripts.test.ts"
+      ],
       "docs": [
         "docs/macros.md"
       ],
@@ -10785,6 +10787,10 @@
         {
           "id": "MACRO-002.6",
           "title": "Mouse and other input boxes are not recorded"
+        },
+        {
+          "id": "MACRO-002.7",
+          "title": "Script runs are refused and never recorded"
         }
       ]
     },
@@ -10793,7 +10799,7 @@
       "title": "Record more steps into an existing macro",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 116,
+      "line": 122,
       "status": "draft",
       "commands": [
         "macro.recordInto"
@@ -10827,7 +10833,7 @@
       "title": "Play a macro once",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 152,
+      "line": 158,
       "status": "draft",
       "commands": [
         "macro.playLast",
@@ -10887,7 +10893,7 @@
       "title": "Play a macro N times",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 226,
+      "line": 232,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10922,7 +10928,7 @@
       "title": "Play a macro until the end of the file",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 260,
+      "line": 266,
       "status": "draft",
       "commands": [
         "macro.playToEnd",
@@ -10967,7 +10973,7 @@
       "title": "Pause and stop playback",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 304,
+      "line": 310,
       "status": "draft",
       "commands": [
         "macro.stop",
@@ -11011,7 +11017,7 @@
       "title": "A whole playback is one undo step",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 354,
+      "line": 360,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11051,7 +11057,7 @@
       "title": "Confirm before a macro plays",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 396,
+      "line": 402,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11097,7 +11103,7 @@
       "title": "Manage macros in the Macros panel and menu",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 447,
+      "line": 453,
       "status": "draft",
       "commands": [
         "macro.panel",
@@ -11161,7 +11167,7 @@
       "title": "Edit a macro's steps",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 521,
+      "line": 527,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11215,7 +11221,7 @@
       "title": "Save a macro to a file",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 585,
+      "line": 591,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11266,7 +11272,7 @@
       "title": "Macros folder: loading, reloading and changing it",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 647,
+      "line": 653,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11460,11 +11466,14 @@
       ],
       "files": [
         "src/lib/commands.ts",
+        "src/lib/macros.ts",
         "src/lib/scripting.ts",
         "src/lib/scriptWorker.ts",
         "src/components/panels/ScriptsPanel.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/scripts.test.ts"
+      ],
       "docs": [
         "docs/scripting.md"
       ],
@@ -11504,6 +11513,14 @@
         {
           "id": "SCRIPT-004.9",
           "title": "Top-level await and return"
+        },
+        {
+          "id": "SCRIPT-004.10",
+          "title": "No scripts while a macro records"
+        },
+        {
+          "id": "SCRIPT-004.11",
+          "title": "No scripts while a macro plays"
         }
       ]
     },
@@ -11512,7 +11529,7 @@
       "title": "Confirm before a script runs",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 212,
+      "line": 226,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11557,7 +11574,7 @@
       "title": "A script's result is applied as one undo step",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 257,
+      "line": 271,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11621,7 +11638,7 @@
       "title": "Script API for the whole document (doc)",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 334,
+      "line": 348,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11664,7 +11681,7 @@
       "title": "Script API for the selection",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 386,
+      "line": 400,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11707,7 +11724,7 @@
       "title": "Script helpers, clipboard and console",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 435,
+      "line": 449,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11758,7 +11775,7 @@
       "title": "Limit a script to certain languages or file types",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 495,
+      "line": 509,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11812,7 +11829,7 @@
       "title": "Run a script several times or until nothing changes",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 557,
+      "line": 571,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11852,7 +11869,7 @@
       "title": "Cancel a running script; runaway scripts time out",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 603,
+      "line": 617,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11892,7 +11909,7 @@
       "title": "Script errors and Console output",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 648,
+      "line": 662,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11935,7 +11952,7 @@
       "title": "Script API Reference tab",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 695,
+      "line": 709,
       "status": "draft",
       "commands": [
         "help.scriptApi"
@@ -11969,7 +11986,7 @@
       "title": "Scripts folder location",
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
-      "line": 727,
+      "line": 741,
       "status": "draft",
       "commands": [],
       "files": [
@@ -17850,6 +17867,7 @@
       "MACRO-011",
       "MACRO-012",
       "MACRO-013",
+      "SCRIPT-004",
       "SCRIPT-015",
       "SET-005",
       "SET-011",
@@ -18433,10 +18451,12 @@
       "SEARCH-015"
     ],
     "src/__tests__/scripts.test.ts": [
+      "MACRO-002",
       "MACRO-006",
       "MACRO-008",
       "SCRIPT-001",
       "SCRIPT-002",
+      "SCRIPT-004",
       "SCRIPT-010",
       "SCRIPT-013"
     ],

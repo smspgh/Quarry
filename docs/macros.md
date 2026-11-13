@@ -36,6 +36,7 @@ A registered shortcut is recorded as its **command**, not as a key. For example,
 - Mouse clicks and mouse selections.
 - Text typed into the find bar, the palette or other input boxes. A recorded Find opens the find bar and steps to the next match, but the search term is not stored. Type the term in the find bar before recording, and record only **F3** (Find Next).
 - Macro commands themselves, so a macro can't start another macro.
+- Script runs. Scripts can't run while a macro is recording or playing; trying shows a message instead.
 
 ## Playing
 
@@ -103,6 +104,6 @@ The example above comments out a line and moves down. Played with **To end**, it
 
 - For **To end**, the macro must finish each pass at least one line lower than it started, usually by ending with **↓** or **Home ↓**. Otherwise it stops after one pass.
 - Commands that aren't available at that moment (for example, a JSON command in a non-JSON file) are skipped.
-- Running a script by name from a menu doesn't work inside a macro, because script runs are blocked while a macro plays.
+- A macro can't run a script: script runs are not recorded, and they are refused while a macro records or plays.
 - Macros run only on regular text tabs, not on files open in [large-file mode](large-files.md).
 - If a macro switches tabs, the single-undo grouping may not apply.

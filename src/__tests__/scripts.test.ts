@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canGroupUndo, shouldStopToEnd } from "../lib/macros";
+import { canGroupUndo, isUnrecordable, scriptBlockedByMacro, shouldStopToEnd } from "../lib/macros";
 import { describeWhen, formatScriptError, isScriptPath, newScriptFileName, scriptApplies, scriptNameOf } from "../lib/scripting";
 
 describe("macro play-to-end", () => {
@@ -15,6 +15,21 @@ describe("macro play-to-end", () => {
     expect(canGroupUndo([cmd("edit.upper"), cmd("edit.indent")])).toBe(true);
     expect(canGroupUndo([cmd("edit.upper"), cmd("edit.undo")])).toBe(false);
     expect(canGroupUndo([])).toBe(true);
+  });
+});
+
+describe("scripts and macros", () => {
+  it("refuses script runs while a macro records or plays", () => {
+    expect(scriptBlockedByMacro({ recording: false, macroPlaying: false })).toBeNull();
+    expect(scriptBlockedByMacro({ recording: true, macroPlaying: false })).toMatch(/recording/);
+    expect(scriptBlockedByMacro({ recording: false, macroPlaying: true })).toMatch(/playing/);
+  });
+  it("never records macro commands or script runs", () => {
+    expect(isUnrecordable("macro.toggleRecord")).toBe(true);
+    expect(isUnrecordable("script.runActive")).toBe(true);
+    expect(isUnrecordable("script.run")).toBe(true);
+    expect(isUnrecordable("script.panel")).toBe(false);
+    expect(isUnrecordable("edit.upper")).toBe(false);
   });
 });
 
