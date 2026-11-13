@@ -4034,7 +4034,8 @@
         "src/components/CodeEditor.tsx",
         "src/components/EditorMenu.tsx",
         "src/editor/lineMenu.ts",
-        "src/lib/commands.ts"
+        "src/lib/commands.ts",
+        "src/App.tsx"
       ],
       "tests": [
         "src/__tests__/lineMenu.test.ts"
@@ -4078,7 +4079,7 @@
       "title": "Brackets: matching, jumping and auto-closing",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 767,
+      "line": 771,
       "status": "draft",
       "commands": [
         "code.gotoBracket"
@@ -4118,7 +4119,7 @@
       "title": "Go to Line",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 806,
+      "line": 810,
       "status": "draft",
       "commands": [
         "goto.line"
@@ -4173,7 +4174,7 @@
       "title": "Detect a document's language",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 873,
+      "line": 877,
       "status": "draft",
       "commands": [
         "code.detectLanguage"
@@ -4230,7 +4231,7 @@
       "title": "Change the language of a document",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 946,
+      "line": 950,
       "status": "draft",
       "commands": [
         "code.setLanguage"
@@ -4283,7 +4284,7 @@
       "title": "Syntax highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1005,
+      "line": 1009,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4315,7 +4316,7 @@
       "title": "Word wrap and visible whitespace",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1038,
+      "line": 1042,
       "status": "draft",
       "commands": [
         "view.toggleWrap",
@@ -4357,7 +4358,7 @@
       "title": "Zoom the editor text",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1081,
+      "line": 1085,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -4400,7 +4401,7 @@
       "title": "Let Tab leave the editor",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1123,
+      "line": 1127,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -4440,7 +4441,7 @@
       "title": "Line numbers, active line and selection-match highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1167,
+      "line": 1171,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16272,6 +16273,7 @@
       "CLAUDE-012",
       "CLAUDE-013",
       "DIFF-001",
+      "EDIT-014",
       "EDIT-022",
       "EXPL-011",
       "FILE-015",

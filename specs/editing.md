@@ -715,6 +715,7 @@ Scenario: EDIT-013.4 Folding does not change the text
   - `src/components/EditorMenu.tsx` — the menu: Collapse or Expand, Collapse All, Expand All, Cut / Copy / Paste, Select All; arrow keys, Escape, closes on click elsewhere or window blur
   - `src/editor/lineMenu.ts` — `foldTargetAt`, `foldLineSpec`, `foldTreeSpec`
   - `src/lib/commands.ts` — `foldLine` helper and the four hidden `code.*Line` / `code.*Tree` commands (take `{ line }`)
+  - `src/App.tsx` — window `contextmenu` handler: the browser menu is blocked except in inputs, `.cm-content`, `.selectable` and `.big-text`, so the gutter of another line gets no menu
 - Tests: `src/__tests__/lineMenu.test.ts`
 - Docs: `docs/editing.md`
 
@@ -730,8 +731,11 @@ Scenario: EDIT-014.1 The menu opens on a line that starts a region
 
 Scenario: EDIT-014.2 Other lines keep the usual menu
   Given a line that neither starts a foldable region nor holds a fold
-  When I right-click it
+  When I right-click its text
   Then Quarry's fold menu does not open
+  And the WebView's own editing menu (Cut, Copy, Paste…) opens instead
+  When I right-click that line's number in the gutter
+  Then no menu opens
 
 Scenario: EDIT-014.3 Collapse the clicked line, not the cursor's
   Given the cursor is on line 20 and line 3 opens an object
