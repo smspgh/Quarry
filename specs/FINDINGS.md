@@ -36,7 +36,6 @@ Doc / code mismatches
 
 ## Claude Code tabs and terminals (`claude-code.md`, `terminal.md`)
 
-- Terminal resume has no UI entry point: `claude.openTerminal` accepts `{ folder, resume }` and `pty_start` honours it (`src/lib/commands.ts:1199`, `src-tauri/src/pty.rs:101`), but no caller passes `resume` (TERM-002).
 - No tests: `TerminalView.tsx` (xterm.js keys, restart, exit lines); it needs a component test harness. `terminal.ts` and the session plumbing in `claude.ts` are covered by `src/__tests__/claudeSession.test.ts`.
 
 ## Code intelligence (`code-intelligence.md`)

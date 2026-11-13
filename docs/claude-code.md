@@ -67,7 +67,7 @@ Your own Claude Code permission rules (`settings.json`) still apply: anything th
 Claude Code keeps every conversation, and Quarry reads its history from there:
 
 - A Claude tab that is restored after you restart Quarry shows its earlier messages again, and your next message continues that conversation.
-- The **history** button in the tab lists the folder's conversations, newest first. Pick one to show it and continue it.
+- The **history** button in the tab lists the folder's conversations, newest first. Pick one to show it and continue it. The terminal button at the end of a row, **Continue in Terminal**, continues that conversation in a new Claude CLI tab instead (`claude --resume`), leaving the Claude tab as it is; it is not offered for the conversation the tab has open, since two Claude Code processes would both write to it.
 - A new conversation's empty page lists the four most recent ones.
 
 Very long conversations show only their most recent messages.

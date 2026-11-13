@@ -839,7 +839,7 @@ Scenario: CLAUDE-016.7 Only a real conversation id is resumed
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/ClaudeView.tsx` — `HistoryMenu`, `Empty` ("Continue a conversation", 4 most recent), `ago`
+  - `src/components/ClaudeView.tsx` — `HistoryMenu` (row = continue here; terminal button = "Continue in Terminal"), `Empty` ("Continue a conversation", 4 most recent), `ago`
   - `src/lib/claude.ts` — `listConversations`, `resumeConversation`, `loadHistory` ("Older messages are not shown.")
   - `src/lib/claudeProtocol.ts` — `historyTranscript` (replays JSONL lines through `reduce`; skips sidechain / meta lines and `<…>` system text)
   - `src-tauri/src/claude.rs` — `claude_conversations` (newest 60 files, `TITLE_SCAN`, title ≤ 160 characters), `prompt_text`, `project_slug`, `config_dir` (`CLAUDE_CONFIG_DIR` or `~/.claude`), `claude_history` (`HISTORY_MAX` 24 MB, fallback search in other project folders)
@@ -892,6 +892,11 @@ Scenario: CLAUDE-017.8 What is not listed
   Then conversations without any prompt of mine are left out
   And only the 60 most recently used conversations are considered
   And stopped requests appear in a replayed conversation as "Stopped."
+
+Scenario: CLAUDE-017.9 Continue in a terminal instead
+  Given the history list is open
+  When I click a row's "Continue in Terminal" button instead of the row
+  Then the conversation continues in a new Claude CLI tab for the folder (see TERM-002), and this tab is left as it was
 ```
 
 ## CLAUDE-018: Choose the model

@@ -216,6 +216,7 @@ export function ClaudeView({ doc, visible }: { doc: Doc; visible: boolean }) {
           anchor={historyBtn.current}
           onClose={() => setHistoryOpen(false)}
           onPick={(id) => { setHistoryOpen(false); stick.current = true; void resumeConversation(doc.id, id); }}
+          onTerminal={(id) => { setHistoryOpen(false); void runCommand("claude.openTerminal", { folder: cwd, resume: id }); }}
         />
       )}
 
@@ -353,8 +354,9 @@ export function ago(ms: number, now = Date.now()): string {
   return new Date(ms).toLocaleDateString(undefined, { day: "numeric", month: "short", year: new Date(ms).getFullYear() === new Date(now).getFullYear() ? undefined : "numeric" });
 }
 
-/** The folder's past conversations (Claude Code's history); picking one continues it in this tab. */
-function HistoryMenu({ cwd, current, anchor, onClose, onPick }: { cwd: string; current: string | null; anchor: HTMLElement | null; onClose: () => void; onPick: (id: string) => void }) {
+/** The folder's past conversations (Claude Code's history); picking one continues it in this tab,
+ *  its terminal button continues it in a new Claude CLI tab instead. */
+function HistoryMenu({ cwd, current, anchor, onClose, onPick, onTerminal }: { cwd: string; current: string | null; anchor: HTMLElement | null; onClose: () => void; onPick: (id: string) => void; onTerminal: (id: string) => void }) {
   const [list, setList] = useState<Conversation[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
@@ -378,10 +380,23 @@ function HistoryMenu({ cwd, current, anchor, onClose, onPick }: { cwd: string; c
       {!error && list === null && <div className="claude-history-empty">Loading…</div>}
       {list?.length === 0 && <div className="claude-history-empty">No earlier conversations here yet.</div>}
       {list?.map((c) => (
-        <button key={c.id} className={`palette-item claude-history-item ${c.id === current ? "current" : ""}`} role="menuitem" title={c.title} onClick={() => onPick(c.id)}>
-          <span className="title">{c.title}</span>
-          <span className="claude-history-when">{c.id === current ? "open" : ago(c.modifiedMs)}</span>
-        </button>
+        <div key={c.id} className="claude-history-row">
+          <button className={`palette-item claude-history-item ${c.id === current ? "current" : ""}`} role="menuitem" title={c.title} onClick={() => onPick(c.id)}>
+            <span className="title">{c.title}</span>
+            <span className="claude-history-when">{c.id === current ? "open" : ago(c.modifiedMs)}</span>
+          </button>
+          {/* Two Claude Code processes on one conversation would both write to it: not for the open one. */}
+          <button
+            className="icon-btn"
+            role="menuitem"
+            aria-label="Continue in Terminal"
+            title={c.id === current ? "Open in this tab: start a new conversation here first to continue this one in a terminal" : "Continue in Terminal: this conversation in a new Claude CLI tab"}
+            disabled={c.id === current}
+            onClick={() => onTerminal(c.id)}
+          >
+            <SquareTerminal size={14} />
+          </button>
+        </div>
       ))}
     </div>,
     document.body,

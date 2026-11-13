@@ -2063,6 +2063,10 @@
         {
           "id": "CLAUDE-017.8",
           "title": "What is not listed"
+        },
+        {
+          "id": "CLAUDE-017.9",
+          "title": "Continue in a terminal instead"
         }
       ]
     },
@@ -2071,7 +2075,7 @@
       "title": "Choose the model",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 897,
+      "line": 902,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2122,7 +2126,7 @@
       "title": "Know what background Claude tabs are doing",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 948,
+      "line": 953,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2158,7 +2162,7 @@
       "title": "Closing tabs, quitting and a process that stops",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 984,
+      "line": 989,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14624,6 +14628,7 @@
         "claude.openTerminal"
       ],
       "files": [
+        "src/components/ClaudeView.tsx",
         "src/lib/commands.ts",
         "src/lib/terminal.ts",
         "src/components/TerminalView.tsx",
@@ -14652,7 +14657,15 @@
         },
         {
           "id": "TERM-002.4",
-          "title": "No built-in entry point passes a conversation"
+          "title": "The other entry points start a fresh session"
+        },
+        {
+          "id": "TERM-002.5",
+          "title": "Continue a past conversation in a terminal"
+        },
+        {
+          "id": "TERM-002.6",
+          "title": "Not for the conversation open in the tab"
         }
       ]
     },
@@ -14661,7 +14674,7 @@
       "title": "Keys go to the program",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 113,
+      "line": 125,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14698,7 +14711,7 @@
       "title": "Copy and paste in the terminal",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 154,
+      "line": 166,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14732,7 +14745,7 @@
       "title": "The terminal fits the tab and follows the theme",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 190,
+      "line": 202,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14779,7 +14792,7 @@
       "title": "When the program ends",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 235,
+      "line": 247,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14821,7 +14834,7 @@
       "title": "Closing terminal tabs",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 277,
+      "line": 289,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14862,7 +14875,7 @@
       "title": "A clean environment for the program",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 321,
+      "line": 333,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14897,7 +14910,7 @@
       "title": "One-off command terminals",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 354,
+      "line": 366,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16797,6 +16810,7 @@
       "CLAUDE-017",
       "CLAUDE-018",
       "TERM-001",
+      "TERM-002",
       "UI-021"
     ],
     "src/components/CodeEditor.tsx": [
