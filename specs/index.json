@@ -9781,7 +9781,8 @@
       "files": [
         "src-tauri/src/lsp.rs",
         "src/lib/lsp.ts",
-        "src/lib/lspServers.ts"
+        "src/lib/lspServers.ts",
+        "src/components/panels/SettingsPanel.tsx"
       ],
       "tests": [
         "src-tauri/src/lsp.rs"
@@ -9817,6 +9818,10 @@
         {
           "id": "LSP-003.7",
           "title": "My own command wins"
+        },
+        {
+          "id": "LSP-003.8",
+          "title": "Settings reports the same choice"
         }
       ]
     },
@@ -9825,7 +9830,7 @@
       "title": "Server status in the status bar",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 166,
+      "line": 175,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9869,7 +9874,7 @@
       "title": "Offer to install a missing language server",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 221,
+      "line": 230,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9923,7 +9928,7 @@
       "title": "Suggestions while typing",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 281,
+      "line": 290,
       "status": "draft",
       "commands": [
         "code.triggerSuggest"
@@ -9968,7 +9973,7 @@
       "title": "Documentation on hover",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 325,
+      "line": 334,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10005,7 +10010,7 @@
       "title": "Parameter hints",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 359,
+      "line": 368,
       "status": "draft",
       "commands": [
         "code.signatureHelp"
@@ -10038,7 +10043,7 @@
       "title": "Go to definition, type definition and implementation",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 390,
+      "line": 399,
       "status": "draft",
       "commands": [
         "code.gotoDefinition",
@@ -10086,7 +10091,7 @@
       "title": "Find all references",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 438,
+      "line": 447,
       "status": "draft",
       "commands": [
         "code.findReferences"
@@ -10125,7 +10130,7 @@
       "title": "Rename a symbol",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 476,
+      "line": 485,
       "status": "draft",
       "commands": [
         "code.renameSymbol"
@@ -10167,7 +10172,7 @@
       "title": "Problems in the editor",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 519,
+      "line": 528,
       "status": "draft",
       "commands": [
         "code.nextProblem",
@@ -10217,7 +10222,7 @@
       "title": "The Problems list and counts",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 572,
+      "line": 581,
       "status": "draft",
       "commands": [
         "view.problems"
@@ -10264,7 +10269,7 @@
       "title": "Format with the language server",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 623,
+      "line": 632,
       "status": "draft",
       "commands": [
         "code.formatWithServer"
@@ -10298,7 +10303,7 @@
       "title": "Every open tab stays in sync with its server",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 655,
+      "line": 664,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10344,7 +10349,7 @@
       "title": "Settings for code intelligence",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 701,
+      "line": 710,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10392,7 +10397,7 @@
       "title": "Restart, crashes and quitting",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 752,
+      "line": 761,
       "status": "draft",
       "commands": [
         "code.restartLanguageServers"
@@ -16735,6 +16740,7 @@
       "FILE-006",
       "FILE-016",
       "FIND-007",
+      "LSP-003",
       "LSP-005",
       "LSP-016",
       "LSP-017",

@@ -165,7 +165,7 @@ Doc / code mismatches
 
 ## Code intelligence (`code-intelligence.md`)
 
-- Settings can show TypeScript as "Installed" while the status bar offers to install it: Settings only checks `tsc` on PATH (`src/components/panels/SettingsPanel.tsx:367`), the real choice needs TypeScript 7 or typescript-language-server (`src-tauri/src/lsp.rs:156`); with TypeScript 5 the install offer runs `npm install -g typescript`, which may not help.
+- With global TypeScript 5 and no typescript-language-server, the install offer (status bar and Settings) runs `npm install -g typescript`; that only helps if npm's latest `typescript` is TypeScript 7 (`src/lib/lspServers.ts:34`, `src-tauri/src/lsp.rs` `typescript_setup`). Settings now reports the same choice as the status bar (LSP-003.8).
 - The references panel, rename box, signature tooltip and gutter marker come from `@codemirror/lsp-client` / `@codemirror/lint`; LSP-008, 010, 011, 012.1 and 014 follow `docs/code-intelligence.md` for them. Rename undo (LSP-011.3) and LSP-014.1 are inferred.
 - No tests: `LspStatus.tsx`, `lspInstall.ts`.
 

@@ -119,6 +119,7 @@ Scenario: LSP-002.7 Hovering shows the project
   - `src-tauri/src/lsp.rs` — `typescript_setup`, `lsp_typescript` (`tsserver.js` = TypeScript 5 / 6, `getExePath.js` = TypeScript 7; global package in `%APPDATA%\npm\node_modules\typescript`)
   - `src/lib/lsp.ts` — `launchOf` (TypeScript branch, `tsserver.fallbackPath`; a custom command from Settings bypasses the choice)
   - `src/lib/lspServers.ts` — the `typescript` entry (`tsc --lsp --stdio`, `npm install -g typescript`)
+  - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection` detection asks `lsp_typescript` (root = the open folder, or empty for global only) for TypeScript without a custom command
 - Tests: `src-tauri/src/lsp.rs`
 - Docs: `docs/code-intelligence.md`
 
@@ -161,6 +162,14 @@ Scenario: LSP-003.7 My own command wins
   Given Settings has a command line for TypeScript / JavaScript
   When I open a .ts file
   Then that command is started and no version check is made
+
+Scenario: LSP-003.8 Settings reports the same choice
+  Given only TypeScript 5 is installed globally, with "tsc" on PATH, and typescript-language-server is not
+  When I open Settings › Code intelligence
+  Then the TypeScript / JavaScript row says "Not installed · needs Node.js" and has an "Install…" button
+  Given instead TypeScript 7 or typescript-language-server would be started
+  Then the row says "Installed · <path of the program that would be started>"
+  And with no folder open only the global installation is looked at
 ```
 
 ## LSP-004: Server status in the status bar
@@ -225,7 +234,7 @@ Scenario: LSP-004.6 A custom command that is not found
 - Files:
   - `src/lib/lspInstall.ts` — `installServer` (terminal tab, toasts, `restartServers` on success)
   - `src/components/LspStatus.tsx` — "Install … support" button (status `missing`, no custom command)
-  - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection`: "Installed · path" / "Not installed · needs …", "Install…" button, re-detect on window focus (`lsp_which`)
+  - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection`: "Installed · path" / "Not installed · needs …", "Install…" button, re-detect on window focus (`lsp_which`; `lsp_typescript` for TypeScript)
   - `src/lib/lspServers.ts` — `install`, `needs`
   - `src/lib/lsp.ts` — `launch` (`missing` when the program is not installed / not found)
   - `src/lib/terminal.ts` — `openCommandTerminal`
@@ -703,7 +712,7 @@ Scenario: LSP-015.6 Edits made while off screen
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection` (`apply` = change + `restartServers`, per-server switch, command box, detection with `lsp_which`)
+  - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection` (`apply` = change + `restartServers`, per-server switch, command box, detection with `lsp_which`, or `lsp_typescript` for TypeScript)
   - `src/lib/lsp.ts` — `attachDoc` (honours `lspEnabled`, `lspDisabled`), `launchOf` (`lspCommands` override), `restartServers`, `stopAllServers`
   - `src/lib/lspServers.ts` — `serverFor(path, disabled)`, `splitCommand`
   - `src/lib/actions.ts` — `mergeSettings` (`lspEnabled`, `lspDisabled`, `lspCommands`)

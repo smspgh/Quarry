@@ -152,19 +152,22 @@ pub struct TsSetup {
 
 /// How to run TypeScript's language server for a project. TypeScript 7 (the native compiler) has
 /// one built in (`tsc --lsp --stdio`); earlier versions need typescript-language-server, which
-/// drives their `tsserver.js`. The project's own TypeScript wins over the global one.
+/// drives their `tsserver.js`. The project's own TypeScript wins over the global one; an empty
+/// `root` (Settings with no folder open) looks at the global one only.
 pub fn typescript_setup(root: &Path, global: Option<&Path>, tsls: Option<PathBuf>) -> Option<TsSetup> {
     let tsls_with = |tsserver: Option<&Path>| {
         tsls.as_ref().map(|p| TsSetup { command: p.to_string_lossy().into_owned(), args: vec!["--stdio".into()], tsserver: tsserver.map(|t| t.to_string_lossy().into_owned()) })
     };
     let native = |tsc: PathBuf| TsSetup { command: tsc.to_string_lossy().into_owned(), args: vec!["--lsp".into(), "--stdio".into()], tsserver: None };
+    let has_root = !root.as_os_str().is_empty();
     let local = root.join("node_modules").join("typescript").join("lib");
-    if local.join("tsserver.js").is_file()
+    if has_root
+        && local.join("tsserver.js").is_file()
         && let Some(s) = tsls_with(None)
     {
         return Some(s);
     }
-    if local.join("getExePath.js").is_file() {
+    if has_root && local.join("getExePath.js").is_file() {
         let bin = root.join("node_modules").join(".bin");
         if let Some(tsc) = ["tsc.cmd", "tsc.exe"].iter().map(|n| bin.join(n)).find(|p| p.is_file()) {
             return Some(native(tsc));
@@ -376,6 +379,10 @@ mod tests {
         let s = typescript_setup(&proj, Some(&global), tsls).unwrap();
         assert!(s.command.ends_with("tsc.cmd"));
         assert_eq!(s.args, vec!["--lsp", "--stdio"]);
+        // No project (Settings without a folder): only the global installation counts.
+        assert_eq!(typescript_setup(Path::new(""), Some(&global), None), None);
+        assert!(typescript_setup(Path::new(""), Some(&global), Some(PathBuf::from(r"C:
+pm	ypescript-language-server.cmd"))).is_some());
     }
 
     #[test]
