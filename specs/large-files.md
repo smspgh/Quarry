@@ -746,8 +746,8 @@ Scenario: BIG-012.7 Every coloured extension and the sniffed formats
   - `src/lib/commands.ts` — `big.filter` ("Large File: Filter Lines") emits `big.filter` for the active big tab
   - `src/components/BigFilterPane.tsx` — the pane: query, options (`dotAll` always off: `.` stays within a line), `LEVEL_FILTERS`, long-row "more chars" marker, paging by 200 (`big.filterLines`), keyboard and click navigation, status text, re-run on `version`
   - `src/components/BigFileView.tsx` — Filter banner button, `filterOpen`, `onJump`, `filterClear` on close
-  - `src-tauri/src/bigfile.rs` — `filter_lines`, `scan_lines`, `LineFilter` (`opts`: `dot_all` off), `LineSet` (bitset with a count per 512 lines, `line_at`, `position_of`)
-  - `src-tauri/src/lib.rs` — `big_filter`, `big_filter_lines` (at most 1,000 per call), `big_filter_clear`, `big_filter_position`, `AppState.filters`
+  - `src-tauri/src/bigfile.rs` — `filter_lines`, `scan_lines`, `LineFilter` (`opts`: `dot_all` off), `LineSet` (bitset with a count per 512 lines, `line_at`)
+  - `src-tauri/src/lib.rs` — `big_filter`, `big_filter_lines` (at most 1,000 per call), `big_filter_clear`, `AppState.filters`
   - `src/lib/ipc.ts` — `big.filter`, `big.filterLines`, `big.filterClear`
   - `src/lib/bigGeometry.ts` — scaled scrolling for millions of filtered lines
   - `src/styles/app.css` — `.big-filter`, `.big-filter-bar`, `.big-filter-list`

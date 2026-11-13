@@ -1154,21 +1154,6 @@ impl LineSet {
         None
     }
 
-    /// How many lines of the set come before `line` (= the position of `line`, or of the next
-    /// line in the set after it).
-    pub fn position_of(&self, line: u64) -> u64 {
-        let w = (line / 64) as usize;
-        if w >= self.words.len() {
-            return self.total;
-        }
-        let b = w / BLOCK;
-        let mut n = self.cum[b];
-        for &x in &self.words[b * BLOCK..w] {
-            n += x.count_ones() as u64;
-        }
-        n + (self.words[w] & ((1u64 << (line % 64)) - 1)).count_ones() as u64
-    }
-
     /// Drop every line from `line` on (before re-scanning a file's last, possibly incomplete, line).
     fn truncate_from(&mut self, line: u64) {
         let w = (line / 64) as usize;
@@ -1485,10 +1470,8 @@ y
         assert_eq!(set.total(), plain.len() as u64);
         for (k, &line) in plain.iter().enumerate() {
             assert_eq!(set.line_at(k as u64), Some(line), "k = {k}");
-            assert_eq!(set.position_of(line), k as u64);
         }
         assert_eq!(set.line_at(plain.len() as u64), None);
-        assert_eq!(set.position_of(64), 2); // 0 and 63 come before line 64; 64 itself is in the set
         set.truncate_from(600);
         // 0, 63, 64, 100, 511, 512, 513 remain.
         assert_eq!(set.total(), 7);
@@ -1501,7 +1484,6 @@ y
         let f = d.filter_lines("ERROR", false, true, false, false).unwrap();
         assert_eq!(f.lines.total(), 3);
         assert_eq!((0..3).map(|k| f.lines.line_at(k).unwrap()).collect::<Vec<_>>(), vec![0, 2, 3]);
-        assert_eq!(f.lines.position_of(1), 1);
         let inv = d.filter_lines("ERROR", false, true, false, true).unwrap();
         // Lines 1, 4 and the empty last line 5.
         assert_eq!((0..inv.lines.total()).map(|k| inv.lines.line_at(k).unwrap()).collect::<Vec<_>>(), vec![1, 4, 5]);

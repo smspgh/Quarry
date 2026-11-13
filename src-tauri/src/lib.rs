@@ -333,12 +333,6 @@ async fn big_filter_lines(app: AppHandle, id: u32, start: u64, count: u64) -> Re
     .map_err(|e| e.to_string())?
 }
 
-/// Position in the filter view of the first filtered line at or after file line `line`.
-#[tauri::command]
-fn big_filter_position(state: State<'_, AppState>, id: u32, line: u64) -> Option<u64> {
-    state.filters.lock().get(&id).map(|f| f.lines.position_of(line))
-}
-
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct FollowResult {
@@ -785,7 +779,6 @@ pub fn run() {
             big_filter,
             big_filter_clear,
             big_filter_lines,
-            big_filter_position,
             big_follow,
             big_json_root,
             big_json_children,

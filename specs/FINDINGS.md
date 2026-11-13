@@ -89,7 +89,6 @@ Not determined
 Possible bugs
 
 Doc / code mismatches and dead code
-- `big_filter_position` (`src-tauri/src/lib.rs:338`) has no wrapper or caller; `BottomTab` still includes `"bigsearch"` (`src/lib/store.ts:7`).
 - Not determined: whether a big tab's view state survives a restart.
 
 ## JSON tools (`json.md`)
