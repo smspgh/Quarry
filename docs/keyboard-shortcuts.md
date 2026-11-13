@@ -17,11 +17,11 @@ The **Id** column is the command id used in [macro files](macros.md#file-format)
 | Ctrl+S | Save | `file.save` |
 | Ctrl+Shift+S | Save As | `file.saveAs` |
 | Ctrl+Alt+S | Save All | `file.saveAll` |
-| Ctrl+W, Ctrl+F4 | Close Tab | `file.close` |
+| Ctrl+W, Ctrl+F4 | Close Tab | `file.close` (Ctrl+F4: `file.closeF4`) |
 | – | Close Other Tabs / Close All Tabs | `file.closeOthers` / `file.closeAll` |
 | – | Revert File | `file.revert` |
-| Ctrl+Tab, Ctrl+Page Down | Next Tab | `file.nextTab` |
-| Ctrl+Shift+Tab, Ctrl+Page Up | Previous Tab | `file.prevTab` |
+| Ctrl+Tab, Ctrl+Page Down | Next Tab | `file.nextTab` (Ctrl+Page Down: `file.nextTabPg`) |
+| Ctrl+Shift+Tab, Ctrl+Page Up | Previous Tab | `file.prevTab` (Ctrl+Page Up: `file.prevTabPg`) |
 | Alt+F4 | Exit | `app.exit` |
 
 ## Edit

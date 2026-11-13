@@ -9,7 +9,6 @@ This file is not a spec: `scripts/specs-index.mjs` ignores it.
 Possible bugs
 
 Doc / code mismatches
-- `docs/keyboard-shortcuts.md:20` lists Ctrl+F4 under `file.close`; it is a separate hidden command, `file.closeF4`.
 - Unused Rust threshold: `sys.largeFileThreshold` (`src/lib/ipc.ts:121`), the `large_file_threshold` command (`src-tauri/src/lib.rs:656`) and `LARGE_FILE_THRESHOLD` (`src-tauri/src/files.rs:11`) have no caller; only `settings.largeFileThresholdMb` decides (`actions.ts:149`).
 
 Not verified
