@@ -154,7 +154,7 @@ Doc / code mismatches
 
 ## Compare (`compare.md`)
 
-- No test exercises `DiffView.tsx` or `openCompare` / `saveDiff` / `reloadDiff`.
+- No test exercises `DiffView.tsx` (the editors, arrows, layout switch); it needs a component test harness. `openCompare` / `saveDiff` / `reloadDiff` / `swapDiff` are covered by `src/__tests__/diffSession.test.ts`.
 
 ## Claude Code tabs and terminals (`claude-code.md`, `terminal.md`)
 

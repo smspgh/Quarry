@@ -2756,7 +2756,8 @@
         "src/styles/app.css"
       ],
       "tests": [
-        "src/__tests__/diff.test.ts"
+        "src/__tests__/diff.test.ts",
+        "src/__tests__/diffSession.test.ts"
       ],
       "docs": [
         "docs/compare.md"
@@ -2927,7 +2928,8 @@
         "src/lib/diff.ts"
       ],
       "tests": [
-        "src/__tests__/diff.test.ts"
+        "src/__tests__/diff.test.ts",
+        "src/__tests__/diffSession.test.ts"
       ],
       "docs": [
         "docs/compare.md"
@@ -3017,7 +3019,9 @@
       "files": [
         "src/lib/diff.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/diffSession.test.ts"
+      ],
       "docs": [
         "docs/compare.md"
       ],
@@ -3098,7 +3102,9 @@
         "src/lib/diff.ts",
         "src/lib/commands.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/diffSession.test.ts"
+      ],
       "docs": [
         "docs/compare.md"
       ],
@@ -3145,7 +3151,9 @@
         "src/lib/diff.ts",
         "src/components/DiffView.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/diffSession.test.ts"
+      ],
       "docs": [
         "docs/compare.md"
       ],
@@ -3233,7 +3241,8 @@
         "src/lib/dialogs.ts"
       ],
       "tests": [
-        "src/__tests__/diff.test.ts"
+        "src/__tests__/diff.test.ts",
+        "src/__tests__/diffSession.test.ts"
       ],
       "docs": [
         "docs/compare.md"
@@ -3285,7 +3294,9 @@
         "src/lib/diff.ts",
         "src/components/DiffView.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/diffSession.test.ts"
+      ],
       "docs": [
         "docs/compare.md"
       ],
@@ -3333,7 +3344,9 @@
         "src/lib/git.ts",
         "src/components/TitleBar.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/diffSession.test.ts"
+      ],
       "docs": [
         "docs/git.md"
       ],
@@ -17825,6 +17838,16 @@
       "DIFF-001",
       "DIFF-005",
       "DIFF-012"
+    ],
+    "src/__tests__/diffSession.test.ts": [
+      "DIFF-001",
+      "DIFF-005",
+      "DIFF-007",
+      "DIFF-009",
+      "DIFF-010",
+      "DIFF-012",
+      "DIFF-013",
+      "DIFF-014"
     ],
     "src/__tests__/findReplace.test.ts": [
       "FIND-003",
