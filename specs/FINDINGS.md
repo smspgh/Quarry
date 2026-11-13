@@ -209,7 +209,6 @@ Possible bugs
 
 Mismatches and notes
 - There are no menu mnemonics: only Alt / F10, arrows, Home / End, Enter / Space and Escape (UI-004).
-- Window state (UI-024) rests on `tauri_plugin_window_state` defaults (`src-tauri/src/lib.rs:755`); the scenarios describe the plugin's defaults.
 - No tests: `resolveStroke` / `normalizeKeys` / `eventToKeys`, `dialogDefaultAction` / `dialogCancelAction`, `placePopup`, the dialog queue.
 
 ## Wording pass

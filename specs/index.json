@@ -15663,6 +15663,10 @@
         {
           "id": "UI-024.4",
           "title": "Minimum size"
+        },
+        {
+          "id": "UI-024.5",
+          "title": "A monitor that is gone"
         }
       ]
     },
@@ -15671,7 +15675,7 @@
       "title": "Notice after an unexpected exit",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1383,
+      "line": 1389,
       "status": "draft",
       "commands": [],
       "files": [

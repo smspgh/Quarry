@@ -1349,7 +1349,7 @@ Scenario: UI-023.7 Drop files on the window
 - Status: draft
 - Commands: none
 - Files:
-  - `src-tauri/src/lib.rs` — `run` registers `tauri_plugin_window_state` with its default settings
+  - `src-tauri/src/lib.rs` — `run` registers `tauri_plugin_window_state` with its default settings (plugin 2.5: every `StateFlags` flag, saved on close and on exit to `.window-state.json` in the app config folder; a saved position is applied only if it overlaps a connected monitor)
   - `src-tauri/capabilities/default.json` — `window-state:default` permission
   - `src-tauri/tauri.conf.json` — first-run window: 1280 x 820, centred, minimum 720 x 400
 - Tests: none
@@ -1378,6 +1378,12 @@ Scenario: UI-024.3 Maximized state comes back
 Scenario: UI-024.4 Minimum size
   When I drag the window smaller
   Then it cannot become smaller than 720 x 400
+
+Scenario: UI-024.5 A monitor that is gone
+  Given I closed Quarry with its window on a second monitor
+  And that monitor is no longer connected
+  When I start Quarry
+  Then the window keeps its saved size but is placed on a connected screen
 ```
 
 ## UI-025: Notice after an unexpected exit
