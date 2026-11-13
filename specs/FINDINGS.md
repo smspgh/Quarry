@@ -126,7 +126,6 @@ Doc / code mismatches and dead code
 ## Source control (`git.md`)
 
 Possible bugs
-- Grammar in the discard dialog: "(1 untracked file go to the Recycle Bin)" (`git.ts:446`; quoted as is in GIT-012.5).
 
 Doc / code mismatches
 - `docs/git.md:102` says file history is at the bottom of the panel; it sits above the Repository section (`GitPanel.tsx:574-575`).

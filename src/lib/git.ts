@@ -462,7 +462,7 @@ export async function discard(root: string, files: GitFile[]): Promise<void> {
   const msg =
     untracked === files.length
       ? `${name} ${files.length === 1 ? "is" : "are"} not tracked by git and will be moved to the Recycle Bin.`
-      : `Your changes to ${name} will be lost${untracked ? ` (${untracked} untracked file${untracked === 1 ? "" : "s"} go to the Recycle Bin)` : ""}. Open tabs reload the committed text.`;
+      : `Your changes to ${name} will be lost${untracked ? ` (${untracked} untracked file${untracked === 1 ? " goes" : "s go"} to the Recycle Bin)` : ""}. Open tabs reload the committed text.`;
   const ok = await choose("Discard changes?", msg, [
     { label: "Discard", kind: "danger", value: true },
     { label: "Cancel", cancel: true, default: true, value: false },

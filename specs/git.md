@@ -657,7 +657,7 @@ Scenario: GIT-012.4 An untracked file goes to the Recycle Bin
 Scenario: GIT-012.5 Discard all
   Given 4 files under Changes, 1 of them untracked
   When I click "Discard all changes" on the Changes heading
-  Then the dialog says "Your changes to 4 files will be lost (1 untracked file go to the Recycle Bin). Open tabs reload the committed text."
+  Then the dialog says "Your changes to 4 files will be lost (1 untracked file goes to the Recycle Bin). Open tabs reload the committed text."
   And nothing happens unless I click "Discard"
 
 Scenario: GIT-012.6 No discard for staged rows
