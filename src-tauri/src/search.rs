@@ -54,8 +54,18 @@ pub struct SearchDone {
     pub cancelled: bool,
 }
 
+/// The regex source of the query. In plain-text mode a line break (typed with Ctrl+Enter) matches
+/// both LF and CRLF line ends, so a multi-line search finds its text in Windows files too.
+fn pattern_source(q: &SearchQuery) -> String {
+    if q.is_regex {
+        q.pattern.clone()
+    } else {
+        regex::escape(&q.pattern.replace("\r\n", "\n")).replace('\n', r"\r?\n")
+    }
+}
+
 pub fn build_matcher(q: &SearchQuery) -> Result<grep_regex::RegexMatcher, String> {
-    let pattern = if q.is_regex { q.pattern.clone() } else { regex::escape(&q.pattern) };
+    let pattern = pattern_source(q);
     RegexMatcherBuilder::new()
         .case_insensitive(!q.case_sensitive)
         .word(q.whole_word)
@@ -95,6 +105,9 @@ pub fn validate_regex(pattern: &str, case_sensitive: bool, whole_word: bool, dot
 /// Flush a partial batch when it is large enough or has been pending for a while, so a single
 /// huge file streams progressively instead of jumping from 0 to its full count at the end.
 pub const BATCH_MAX: usize = 200;
+/// Matches listed from one matching block (a line, or the lines one multi-line match spans), so a
+/// minified one-line file cannot flood the results; the rest of that block is not listed or counted.
+pub const BLOCK_MATCH_CAP: usize = 1000;
 pub const BATCH_INTERVAL: Duration = Duration::from_millis(100);
 
 pub fn should_flush(len: usize, since_last: Duration) -> bool {
@@ -183,7 +196,7 @@ impl Sink for CollectSink<'_, '_> {
             });
             self.count.fetch_add(1, Ordering::Relaxed);
             seen += 1;
-            seen < 1000
+            seen < BLOCK_MATCH_CAP
         });
         if !found_any {
             // Shouldn't happen, but keep the line as a match so nothing is silently lost.
@@ -533,8 +546,10 @@ fn encode_error(e: String) -> String {
 /// is left unchanged and reported. With a `backup_dir`, the original of every changed file is
 /// copied there first so `undo_replace` can restore it.
 pub fn replace_in_files(targets: &[ReplaceTarget], q: &SearchQuery, replacement: &str, backup_dir: Option<&Path>) -> Result<Vec<ReplaceFileResult>, String> {
-    let pattern = if q.is_regex { q.pattern.clone() } else { regex::escape(&q.pattern) };
-    let pattern = if q.whole_word { format!(r"\b(?:{pattern})\b") } else { pattern };
+    let pattern = pattern_source(q);
+    // The search's Whole Word rule (`RegexMatcherBuilder::word`): no word character just before or
+    // after the match. Plain `\b` misses "-2" in "x -2 y", which the search lists.
+    let pattern = if q.whole_word { format!(r"\b{{start-half}}(?:{pattern})\b{{end-half}}") } else { pattern };
     let re = regex::RegexBuilder::new(&pattern)
         .case_insensitive(!q.case_sensitive)
         .multi_line(true)
@@ -707,6 +722,24 @@ mod tests {
     }
 
     #[test]
+    fn one_line_lists_at_most_block_match_cap_matches() {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::write(dir.path().join("min.js"), format!("{}\n{}\n", "ab ".repeat(1500), "ab ".repeat(10))).unwrap();
+        let roots = vec![dir.path().to_string_lossy().into_owned()];
+        for regex in [false, true] {
+            let mut c = q("ab", regex);
+            c.multiline = regex;
+            let found = Mutex::new(Vec::new());
+            let done = search_paths(1, &roots, &c, Arc::new(AtomicBool::new(false)), |b| found.lock().unwrap().extend(b)).unwrap();
+            let found = found.into_inner().unwrap();
+            assert_eq!(found.iter().filter(|m| m.line == 1).count(), BLOCK_MATCH_CAP);
+            assert_eq!(found.iter().filter(|m| m.line == 2).count(), 10);
+            assert_eq!(done.matches, BLOCK_MATCH_CAP + 10);
+            assert!(!done.truncated);
+        }
+    }
+
+    #[test]
     fn roots_can_mix_files_and_folders() {
         // The Explorer's selection: one file and one folder (a sibling file is not picked).
         let dir = tempfile::tempdir().unwrap();
@@ -786,7 +819,49 @@ mod tests {
         assert_eq!(r("end$"), "<end$>");
         let named = regex::Regex::new(r"(?<w>\w+)").unwrap();
         assert_eq!(replace_text("hi", &named, "[$<w>|$<nope>]", false, false, &none).0, "[hi|]");
+        // Not the regex crate's `${name}`: JavaScript has no such form, so it stays as typed.
+        assert_eq!(replace_text("hi", &named, "${w}", false, false, &none).0, "${w}");
         assert_eq!(replace_text("ab-1", &re, "$1", true, false, &none).0, "$1");
+    }
+
+    #[test]
+    fn whole_word_replace_matches_what_the_search_finds() {
+        let dir = tempfile::tempdir().unwrap();
+        let f = dir.path().join("a.txt");
+        let text = "x -2 y a-2 -2b\ncat category cat.\n";
+        let roots = vec![dir.path().to_string_lossy().into_owned()];
+        for (pat, hits, out) in [("-2", 1, "x z y a-2 -2b\ncat category cat.\n"), ("cat", 2, "x -2 y a-2 -2b\nz category z.\n")] {
+            std::fs::write(&f, text).unwrap();
+            let mut ww = q(pat, false);
+            ww.whole_word = true;
+            let found = Mutex::new(Vec::new());
+            search_paths(1, &roots, &ww, Arc::new(AtomicBool::new(false)), |b| found.lock().unwrap().extend(b)).unwrap();
+            assert_eq!(found.into_inner().unwrap().len(), hits, "{pat}");
+            let res = replace_in_files(&targets(&[&f]), &ww, "z", None).unwrap();
+            assert_eq!(res[0].replaced, hits, "{pat}");
+            assert_eq!(std::fs::read_to_string(&f).unwrap(), out);
+        }
+    }
+
+    #[test]
+    fn multi_line_plain_text_matches_crlf_and_lf_files() {
+        let dir = tempfile::tempdir().unwrap();
+        let crlf = dir.path().join("crlf.txt");
+        let lf = dir.path().join("lf.txt");
+        std::fs::write(&crlf, "x\r\nfoo\r\nbar\r\n").unwrap();
+        std::fs::write(&lf, "foo\nbar\n").unwrap();
+        let mut ml = q("foo\nbar", false);
+        ml.multiline = true;
+        let found = Mutex::new(Vec::new());
+        let roots = vec![dir.path().to_string_lossy().into_owned()];
+        search_paths(1, &roots, &ml, Arc::new(AtomicBool::new(false)), |b| found.lock().unwrap().extend(b)).unwrap();
+        let mut found: Vec<(bool, u64, u64)> = found.into_inner().unwrap().iter().map(|m| (m.path.ends_with("crlf.txt"), m.line, m.col)).collect();
+        found.sort();
+        assert_eq!(found, vec![(false, 1, 0), (true, 2, 0)]);
+        let res = replace_in_files(&targets(&[&crlf, &lf]), &ml, "z", None).unwrap();
+        assert_eq!(res.iter().map(|r| r.replaced).collect::<Vec<_>>(), vec![1, 1]);
+        assert_eq!(std::fs::read_to_string(&crlf).unwrap(), "x\r\nz\r\n");
+        assert_eq!(std::fs::read_to_string(&lf).unwrap(), "z\n");
     }
 
     #[test]

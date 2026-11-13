@@ -1,4 +1,5 @@
 import { ALargeSmall, ArrowDown, ArrowUp, CaseSensitive, ChevronDown, ChevronRight, ListFilter, Regex, ReplaceAll, Search as SearchIcon, WholeWord, X } from "lucide-react";
+import type { Text } from "@codemirror/state";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { editor } from "../../editor/manager";
 import { dirName, isInside, openPath, samePath } from "../../lib/actions";
@@ -18,10 +19,12 @@ import { choose } from "../../lib/dialogs";
 
 let seq = 1;
 
-function buildJsRegex(q: SearchQuery): RegExp | null {
+/** The search as a JavaScript regex (open documents, the replace preview). Whole Word follows the
+ *  folder search's rule: no word character just before or after the match ("-2" in "x -2 y"). */
+export function buildJsRegex(q: Pick<SearchQuery, "pattern" | "isRegex" | "wholeWord" | "caseSensitive" | "dotAll">): RegExp | null {
   try {
     let src = q.isRegex ? q.pattern : q.pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    if (q.wholeWord) src = `\\b(?:${src})\\b`;
+    if (q.wholeWord) src = `(?<!\\w)(?:${src})(?!\\w)`;
     return new RegExp(src, `gm${q.caseSensitive ? "" : "i"}${q.dotAll ? "s" : ""}`);
   } catch {
     return null;
@@ -89,19 +92,22 @@ export function locateMatch(text: string, m: FileMatch, radius = 5): { line: num
   return null;
 }
 
-/** Search the text of open documents in memory: all of them, or only the one with id `onlyId`. */
-function searchOpenDocs(q: SearchQuery, onlyId?: string): SearchResultsFile[] {
+/**
+ * Pure helper (testable): search document texts in memory. "Max" (`q.maxResults`) caps the total
+ * across all of them, as it does for a folder search; `truncated` = the limit was reached.
+ */
+export function searchTexts(q: SearchQuery, docs: { path: string; text: string }[]): { files: SearchResultsFile[]; truncated: boolean } {
   const re = buildJsRegex(q);
-  if (!re) return [];
+  if (!re) return { files: [], truncated: false };
   const out: SearchResultsFile[] = [];
-  for (const d of useStore.getState().docs) {
-    if (d.kind !== "text" || (onlyId !== undefined && d.id !== onlyId)) continue;
-    const text = editor.textOf(d.id);
+  let total = 0;
+  for (const { path, text } of docs) {
+    if (total >= q.maxResults) break;
     const matches: FileMatch[] = [];
     re.lastIndex = 0;
     let m: RegExpExecArray | null;
     let lineStarts: number[] | null = null;
-    while ((m = re.exec(text)) && matches.length < q.maxResults) {
+    while (total < q.maxResults && (m = re.exec(text))) {
       if (m[0].length === 0) re.lastIndex++;
       if (!lineStarts) {
         lineStarts = [0];
@@ -119,11 +125,20 @@ function searchOpenDocs(q: SearchQuery, onlyId?: string): SearchResultsFile[] {
       if (le < 0) le = text.length;
       const pstart = m.index - ls > 40 ? m.index - 40 : ls;
       const preview = text.slice(pstart, Math.min(le, pstart + 400)).replace(/\r$/, "");
-      matches.push({ path: d.path ?? d.name, line: lo + 1, col: m.index - ls, len: m[0].length, preview, previewCol: m.index - pstart, previewCut: pstart > ls });
+      matches.push({ path, line: lo + 1, col: m.index - ls, len: m[0].length, preview, previewCol: m.index - pstart, previewCut: pstart > ls });
+      total++;
     }
-    if (matches.length) out.push({ path: d.path ?? d.name, matches });
+    if (matches.length) out.push({ path, matches });
   }
-  return out;
+  return { files: out, truncated: total >= q.maxResults };
+}
+
+/** Search the text of open documents in memory: all of them, or only the one with id `onlyId`.
+ *  `searched` counts the text documents only (large-file and other tabs are not searched). */
+function searchOpenDocs(q: SearchQuery, onlyId?: string): { files: SearchResultsFile[]; truncated: boolean; searched: Map<string, Text | null> } {
+  const docs = useStore.getState().docs.filter((d) => d.kind === "text" && (onlyId === undefined || d.id === onlyId));
+  const searched = new Map(docs.map((d) => [d.id, editor.docOf(d.id)]));
+  return { ...searchTexts(q, docs.map((d) => ({ path: d.path ?? d.name, text: editor.textOf(d.id) }))), searched };
 }
 
 const SEARCH_TIP = [
@@ -237,6 +252,25 @@ export function leaveOutPatch(st: Pick<SearchState, "files" | "excluded" | "tota
   };
 }
 
+/**
+ * Pure helper (testable): the search-state change when files are deleted from the results menu.
+ * Their results leave the list, along with what was left out of them and the current result.
+ */
+export function deletedPatch(st: Pick<SearchState, "files" | "excluded" | "totalMatches" | "leftOut" | "activeKey">, deleted: string[]): Partial<SearchState> {
+  const gone = new Set(deleted);
+  const removed = st.files.filter((x) => gone.has(x.path)).reduce((n, x) => n + x.matches.length, 0);
+  const excluded = Object.fromEntries(Object.entries(st.excluded).filter(([p]) => !gone.has(p)));
+  const leftOut = deleted.reduce((n, p) => n - (st.excluded[p]?.length ?? 0), st.leftOut);
+  const activeGone = st.activeKey !== null && deleted.some((p) => st.activeKey!.startsWith(`${p}:`));
+  return {
+    files: st.files.filter((x) => !gone.has(x.path)),
+    totalMatches: Math.max(0, st.totalMatches - removed),
+    excluded,
+    leftOut: Math.max(0, leftOut),
+    ...(activeGone ? { activeKey: null } : {}),
+  };
+}
+
 export function SearchPanel() {
   const st = useStore((s) => s.search);
   const setSearch = useStore((s) => s.setSearch);
@@ -251,6 +285,8 @@ export function SearchPanel() {
   const ranQuery = useRef<SearchQuery | null>(null);
   /** When the search behind the results started: Replace in Files leaves files changed since. */
   const searchedAt = useRef<number | undefined>(undefined);
+  /** The text of each open document an in-memory search read: Replace All leaves documents edited since. */
+  const searchedText = useRef<Map<string, Text | null>>(new Map());
   /** The editor selection made by opening a result, so reopening the panel does not take it as a new search term. */
   const resultSel = useRef<{ docId: string; from: number; to: number } | null>(null);
   const findWrapRef = useRef<HTMLDivElement>(null);
@@ -394,8 +430,9 @@ export function SearchPanel() {
       return;
     }
     if (scope === "open" || active?.kind === "text") {
-      const files = searchOpenDocs(q, active?.id);
-      setSearch({ running: false, inMemory: true, files, totalMatches: files.reduce((n, f) => n + f.matches.length, 0), filesSearched: active ? 1 : useStore.getState().docs.length });
+      const { files, truncated, searched } = searchOpenDocs(q, active?.id);
+      searchedText.current = searched;
+      setSearch({ running: false, inMemory: true, files, truncated, totalMatches: files.reduce((n, f) => n + f.matches.length, 0), filesSearched: searched.size });
       return;
     }
     // A large-file document is searched on disk like a one-file folder.
@@ -613,7 +650,16 @@ export function SearchPanel() {
     const skipped: SearchResultsFile[] = [];
     const targets: { path: string; skip: [number, number][]; searchedMs?: number }[] = [];
     const skipOf = (path: string) => (st.excluded[path] ?? []).map((k) => k.split(":").map(Number) as [number, number]);
-    if (!st.inMemory) {
+    // An open document edited since the search is left alone, like a file changed on disk since:
+    // its results (and the positions left out) may no longer be where they were.
+    const docOfResult = (path: string) => docs.find((d) => (d.path ?? d.name) === path && d.kind === "text");
+    const editedSince = (docId: string) => editor.docOf(docId) !== searchedText.current.get(docId);
+    if (st.inMemory) {
+      for (const f of st.files) {
+        const doc = docOfResult(f.path);
+        if (doc && editedSince(doc.id)) skipped.push(f);
+      }
+    } else {
       for (const f of st.files) {
         const open = docs.find((d) => d.path && d.path.toLowerCase() === f.path.toLowerCase());
         if (open?.dirty) skipped.push(f);
@@ -624,11 +670,11 @@ export function SearchPanel() {
     const total = st.totalMatches - skippedCount;
     const nFiles = st.files.length - skipped.length;
     if (nFiles === 0) {
-      toast("All matching files are open with unsaved changes; save them first.", "warning");
+      toast(st.inMemory ? "Every matching document was edited since the search; search again." : "All matching files are open with unsaved changes; save them first.", "warning");
       return;
     }
     const skippedList = skipped.length
-      ? `\n\nSkipped (open with unsaved changes):\n${skipped.slice(0, 8).map((f) => `• ${f.path.split(/[\\/]/).pop()} (${f.matches.length})`).join("\n")}${skipped.length > 8 ? `\n… ${skipped.length - 8} more` : ""}`
+      ? `\n\nSkipped (${st.inMemory ? "edited since the search" : "open with unsaved changes"}):\n${skipped.slice(0, 8).map((f) => `• ${f.path.split(/[\\/]/).pop()} (${f.matches.length})`).join("\n")}${skipped.length > 8 ? `\n… ${skipped.length - 8} more` : ""}`
       : "";
     const ok = await choose(
       `Replace ${total.toLocaleString()} occurrence${total === 1 ? "" : "s"} in ${nFiles} file${nFiles === 1 ? "" : "s"}?`,
@@ -652,18 +698,28 @@ ${st.leftOut.toLocaleString()} result${st.leftOut === 1 ? "" : "s"} you left out
     if (st.inMemory) {
       if (!re) return;
       let n = 0;
+      let replaced = 0;
+      let notDone = 0;
+      const done = new Set<string>();
       for (const f of st.files) {
-        const doc = docs.find((d) => (d.path ?? d.name) === f.path && d.kind === "text");
+        const doc = docOfResult(f.path);
         if (!doc) continue;
+        if (editedSince(doc.id)) {
+          notDone++;
+          continue;
+        }
         const r = replaceMatches(editor.textOf(doc.id), re, st.replacement, { isRegex: rq.isRegex, preserveCase: rq.preserveCase, skip: new Set(st.excluded[f.path]) });
         if (r.count === 0) continue;
         editor.replaceAll(doc.id, r.text);
+        searchedText.current.delete(doc.id);
+        done.add(f.path);
+        replaced += r.count;
         n++;
       }
-      const note = `Replaced ${total.toLocaleString()} occurrence(s) in ${n} open document(s)`;
-      toast(note, "success");
+      const note = `Replaced ${replaced.toLocaleString()} occurrence(s) in ${n} open document(s)${notDone ? `; skipped ${notDone} edited since the search` : ""}`;
+      toast(note, notDone ? "warning" : "success");
       setReplaceNote(note);
-      setStale(new Set(allMatches.map(keyOf)));
+      setStale(new Set(allMatches.filter((m) => done.has(m.path)).map(keyOf)));
       return;
     }
     try {
@@ -992,11 +1048,8 @@ ${st.leftOut.toLocaleString()} result${st.leftOut === 1 ? "" : "s"} you left out
             onClose={() => setFileMenu(null)}
             onDeleted={(deleted) => {
               // Deleted files leave the results.
-              const cur = useStore.getState().search;
-              const gone = new Set(deleted);
-              const removed = cur.files.filter((x) => gone.has(x.path)).reduce((n, x) => n + x.matches.length, 0);
-              setSearch({ files: cur.files.filter((x) => !gone.has(x.path)), totalMatches: Math.max(0, cur.totalMatches - removed) });
-              setSelFiles((sel) => sel.filter((p) => !gone.has(p)));
+              setSearch(deletedPatch(useStore.getState().search, deleted));
+              setSelFiles((sel) => sel.filter((p) => !deleted.includes(p)));
             }}
           />
         );

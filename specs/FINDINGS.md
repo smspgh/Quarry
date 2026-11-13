@@ -17,20 +17,10 @@ This file is not a spec: `scripts/specs-index.mjs` ignores it.
 ## Find in Files (`search.md`)
 
 Possible bugs
-- Open Files scope: "Max" is applied per document and `truncated` is never set, so "(limit reached)" never shows (`src/components/panels/SearchPanel.tsx:104`, `:398`).
-- "No results in N files" counts every open tab, including large-file and non-text tabs that were not searched (`SearchPanel.tsx:398`).
-- Replace All in open documents re-matches the current text, so left-out positions from search time can point at the wrong match after an edit (`SearchPanel.tsx:652-667`; the disk path guards with `searchedMs`); its status note reports the search-time total, not what was replaced (`:663`).
 - Results past the first 500 of a file cannot be opened, stepped to with F4 or left out individually, yet Replace All still replaces them (`SearchPanel.tsx:140`, `:467`, `:472`, `:973`; SEARCH-007.6, SEARCH-009.7).
-- Deleting a file from the results menu leaves `excluded`, `leftOut` and `activeKey` for it (`SearchPanel.tsx:993-1000`).
 
 Doc / code mismatches
 - Look-around and backreferences cannot be run in any scope: `docs/find-and-replace.md:130-133` says they work with Current File / Open Files, but the panel always validates with the Rust engine and blocks the search (`SearchPanel.tsx:351-369`, `:375`, `:877`; SEARCH-004.7).
-- `docs/find-and-replace.md:113` says Rust replacement syntax with `${name}`; the code uses JavaScript rules (`$<name>`, `$&`, `$$`) and `${name}` comes out literally (`src-tauri/src/search.rs:395-452`).
-
-Not determined
-- Whole Word may differ between search (`.word(true)`, `search.rs:61`), disk replace (`\b(?:…)\b`, `search.rs:537`) and the preview (JavaScript `\b`) for patterns starting or ending with non-word characters.
-- Multi-line plain-text search on CRLF files: a pattern typed with Ctrl+Enter contains `\n` only.
-- A match block is capped at 1,000 matches (`search.rs:186`); undocumented, no scenario.
 
 ## Large files (`large-files.md`)
 

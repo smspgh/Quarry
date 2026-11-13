@@ -68,8 +68,8 @@ Find in Files starts on **Current File** each time Quarry opens. A scope you pic
 - `.git`, `node_modules` and `target` folders are skipped, unless you give an include pattern.
 - Hidden files are searched. Symbolic links are not followed.
 - Binary files (any containing a NUL byte) are not searched past that byte.
-- A pattern that contains a line break, or any regex, can match across lines.
-- **Max** (results) defaults to 20,000 (adjustable up to 1,000,000). The status line says "(limit reached)" when the limit was hit.
+- A pattern that contains a line break, or any regex, can match across lines. Without Regex, a line break (**Ctrl+Enter**) matches both Windows (CRLF) and Unix (LF) line ends; in a regex searched on disk, `\n` is only the LF, so write `\r?\n` to match either (Current File and Open Files see every line end as `\n`).
+- **Max** (results) defaults to 20,000 (adjustable up to 1,000,000). The status line says "(limit reached)" when the limit was hit. A folder search also lists at most 1,000 matches of any one line (a minified file, say); the rest of that line is not listed.
 
 Results stream in as they are found, grouped by file, and you can cancel a running search. While there are results, the Search panel sits beside the editor instead of floating over it, so the documents you open from it stay fully visible; see [Window layout](editing.md#window-layout). Long searches show the first 1,500 rows; **Show more results** adds more.
 
@@ -110,9 +110,9 @@ With the replace field shown, each result previews the change: the match struck 
 
 **Preserve Case** (the **Aa** toggle in the replace box) matches the case of each replaced text: replacing `foo` with `bar` turns `FOO` into `BAR`, `Foo` into `Bar` and `foo` into `bar`. Mixed case such as `fOO` gets the replacement as typed. The preview in the results shows the result.
 
-In regex mode the replacement uses Rust syntax: `$1` or `${name}` for groups, and `$$` for a literal `$`. In plain-text mode, `$` is literal.
+In regex mode the replacement follows JavaScript's rules in every scope, on disk too: `$1` … `$99` or `$<name>` for groups, `$&` for the whole match, `` $` `` and `$'` for the text before and after it, and `$$` for a literal `$`. A reference to a group that doesn't exist, and `${name}`, stay as typed. In plain-text mode, `$` is literal.
 
-With the **Current File** and **Open Files** scopes, Replace All edits the open documents in the editor instead of the files on disk. Each document can then be undone with **Ctrl+Z**, and the changes are saved when you save.
+With the **Current File** and **Open Files** scopes, Replace All edits the open documents in the editor instead of the files on disk. Each document can then be undone with **Ctrl+Z**, and the changes are saved when you save. A document you edited after the search is skipped and listed, as a file changed on disk since the search is; search again to include it.
 
 ## Undo Replace in Files
 

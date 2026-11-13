@@ -72,7 +72,7 @@ Scenario: SEARCH-001.7 A long search text stays visible
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SearchPanel.tsx` — `effectiveScope`, `searchOpenDocs`, `buildJsRegex`, `run()` (in-memory branch, large-file branch), scope buttons
+  - `src/components/panels/SearchPanel.tsx` — `effectiveScope`, `searchOpenDocs`, `searchTexts` ("Max" across all documents, `truncated`), `buildJsRegex`, `run()` (in-memory branch, large-file branch), scope buttons
   - `src/lib/store.ts` — `search.scope` (default `"doc"`), `search.inMemory`
   - `src/editor/manager.ts` — `editor.textOf(docId)`
 - Tests: `src/__tests__/replace.test.ts`
@@ -124,6 +124,17 @@ Scenario: SEARCH-002.7 These scopes use JavaScript regular expressions
   When I search for "ne+dle"
   Then the pattern is run by the JavaScript engine against the document text
   And the files on disk are not read
+
+Scenario: SEARCH-002.8 The result limit covers all open documents
+  Given "Max" is 4 and two open tabs each contain "x" 3 times
+  When I search for "x" with the Open Files scope
+  Then 4 results are listed in total, 3 in the first tab and 1 in the second
+  And the status ends with "(limit reached)"
+
+Scenario: SEARCH-002.9 Nothing found counts only the documents searched
+  Given 2 text tabs, a large-file tab and a Compare tab are open, none containing "needle"
+  When I search for "needle" with the Open Files scope
+  Then the status reads "No results in 2 files"
 ```
 
 ## SEARCH-003: Search a folder, the Explorer selection or chosen folders
@@ -207,9 +218,10 @@ Scenario: SEARCH-003.9 No folder to search
   - `src/components/panels/SearchPanel.tsx` — Match Case / Whole Word / Regex toggles, Ctrl+Enter, "Dot matches newline", debounced `validateRegex` (150 ms), `invalidRegex`, `regexMessage`, `multiline` flag sent with the query
   - `src/lib/ipc.ts` — `search.validateRegex`
   - `src-tauri/src/lib.rs` — `validate_regex` command
-  - `src-tauri/src/search.rs` — `build_matcher`, `validate_regex`, `one_line_regex_error`, `build_searcher` (multi-line)
+  - `src-tauri/src/search.rs` — `pattern_source` (plain-text line break → `\r?\n`), `build_matcher`, `validate_regex`, `one_line_regex_error`, `build_searcher` (multi-line), Whole Word in `replace_in_files` (`\b{start-half}` / `\b{end-half}`, as `RegexMatcherBuilder::word`)
+  - `src/components/panels/SearchPanel.tsx` — `buildJsRegex` (Whole Word as `(?<!\w)` / `(?!\w)` for open documents and the replace preview)
   - `src/lib/types.ts` — `SearchQuery`
-- Tests: `src-tauri/src/search.rs`
+- Tests: `src-tauri/src/search.rs`, `src/__tests__/replace.test.ts`
 - Docs: `docs/find-and-replace.md`
 
 **As a** person searching files
@@ -263,6 +275,19 @@ Scenario: SEARCH-004.8 Empty search
   Given the search box is empty
   When I look at the panel
   Then the Search button is disabled
+
+Scenario: SEARCH-004.9 Whole Word around a pattern that starts or ends with a non-word character
+  Given a file containing "x -2 y a-2 -2b"
+  When I search for "-2" with Match Whole Word on
+  Then only the "-2" between spaces is found
+  And Replace All replaces exactly that one match, in any scope, and the preview shows it
+
+Scenario: SEARCH-004.10 A multi-line plain-text search finds Windows line ends
+  Given the scope is Folder, Regex is off, and one file has "foo" and "bar" on consecutive lines with CRLF line ends and another with LF
+  When I type "foo", press Ctrl+Enter, type "bar" and search
+  Then both files are listed, each at the line where "foo" is
+  And Replace All replaces the two lines in both files and keeps each file's line ends elsewhere
+  And with Regex on, "foo\nbar" finds only the LF file ("foo\r?\nbar" finds both)
 ```
 
 ## SEARCH-005: Filter which files are searched
@@ -340,7 +365,7 @@ Scenario: SEARCH-005.8 File filters do not apply to Current File and Open Files
   - `src/components/panels/SearchPanel.tsx` — `run()`, `cancel()`, `onResults` / `onDone` / `onError` listeners (stale `searchId` ignored), `status`, "Max" field (1 to 1,000,000)
   - `src/lib/ipc.ts` — `search.start`, `search.cancel`, `onResults`, `onDone`, `onError`
   - `src-tauri/src/lib.rs` — `search_start`, `search_cancel`, `AppState.searches`
-  - `src-tauri/src/search.rs` — `search_paths`, `Batcher`, `should_flush` (`BATCH_MAX` 200, `BATCH_INTERVAL` 100 ms), `CollectSink` (`max_results`, UTF-16 columns, legacy encodings), `SearchDone`
+  - `src-tauri/src/search.rs` — `search_paths`, `Batcher`, `should_flush` (`BATCH_MAX` 200, `BATCH_INTERVAL` 100 ms), `CollectSink` (`max_results`, `BLOCK_MATCH_CAP` 1,000 per line, UTF-16 columns, legacy encodings), `SearchDone`
 - Tests: `src-tauri/src/search.rs`
 - Docs: `docs/find-and-replace.md`
 
@@ -404,6 +429,12 @@ Scenario: SEARCH-006.10 A search error is shown
   When I click Search
   Then the error is shown in the status line in the danger colour
   And the Search button is available again
+
+Scenario: SEARCH-006.11 At most 1,000 results of one line
+  Given a folder search and a minified file whose first line has 1,500 matches and whose second line has 10
+  When the search ends
+  Then 1,010 results are listed for the file: the first 1,000 of line 1 and all 10 of line 2
+  And the status counts 1,010 results and does not say "(limit reached)"
 ```
 
 ## SEARCH-007: Browse the results list
@@ -652,11 +683,11 @@ Scenario: SEARCH-010.7 The × explains what it does
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SearchPanel.tsx` — `selFiles`, `fileAnchor`, `fileMenu`, `onDeleted` (deleted files leave the results)
+  - `src/components/panels/SearchPanel.tsx` — `selFiles`, `fileAnchor`, `fileMenu`, `onDeleted` + `deletedPatch` (deleted files leave the results, with their left-out results and the current result)
   - `src/components/FileMenu.tsx` — the shared file menu (specified with the Explorer)
   - `src/lib/fileOps.ts` — the actions behind the menu
   - `src/components/panels/ExplorerPanel.tsx` — `rangeOf`, `toggleIn` selection helpers reused here
-- Tests: none
+- Tests: `src/__tests__/replace.test.ts`
 - Docs: `docs/find-and-replace.md`
 
 **As a** person looking at the files a search found
@@ -695,6 +726,14 @@ Scenario: SEARCH-011.6 A plain click still collapses
   Given two file rows are selected
   When I click a file row without Ctrl or Shift
   Then the selection is cleared and that file's results collapse or expand
+
+Scenario: SEARCH-011.7 Results left out of a deleted file are forgotten
+  Given 12 results in 3 files, and I left out 2 results of "a.ts" and 1 of "b.ts"
+  And the current result (F4) is in "a.ts"
+  When I delete "a.ts" from its menu
+  Then the status ends with "· 1 left out"
+  And the Replace All dialog mentions 1 left-out result
+  And F4 starts again from the first result
 ```
 
 ## SEARCH-012: Replace in Files on disk
@@ -863,6 +902,7 @@ Scenario: SEARCH-014.3 References to groups that do not exist
   When the replacement is "$12" and then "$9"
   Then "$12" gives group 1 followed by "2"
   And "$9" stays as the text "$9"
+  And "${name}" (the Rust regex crate's form) stays as the text "${name}"
 
 Scenario: SEARCH-014.4 Plain-text mode is literal
   Given Regex is off and the replacement is "$1"
@@ -886,7 +926,8 @@ Scenario: SEARCH-014.6 Preserve Case can be changed after the search
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SearchPanel.tsx` — `replaceAllInResults` (`st.inMemory` branch), `buildJsRegex`
+  - `src/components/panels/SearchPanel.tsx` — `replaceAllInResults` (`st.inMemory` branch, `editedSince`, count of what was replaced), `searchedText` (each document's text as the search read it, from `searchOpenDocs`), `buildJsRegex`
+  - `src/editor/manager.ts` — `editor.docOf(docId)`
   - `src/lib/replace.ts` — `replaceMatches` (`skip` set of `line:col`), `expandReplacement`, `preserveCase`
   - `src/editor/manager.ts` — `editor.replaceAll(docId, text)` (one undoable change per document)
 - Tests: `src/__tests__/replace.test.ts`
@@ -925,7 +966,24 @@ Scenario: SEARCH-015.4 Left-out results are kept
 Scenario: SEARCH-015.5 Results become stale
   Given the replace has finished
   When I look at the result list
-  Then every listed result is shown as stale
+  Then every result of a document it changed is shown as stale
+
+Scenario: SEARCH-015.6 A document edited since the search is left alone
+  Given an Open Files search found 3 matches in "a.txt" and 2 in "b.txt"
+  And I have typed in "b.txt" since the search
+  When I click "Replace All in results"
+  Then the dialog asks "Replace 3 occurrences in 1 file?" and lists "b.txt (2)" under "Skipped (edited since the search)"
+  When I choose "Replace"
+  Then only "a.txt" is changed
+  And the status reads "Replaced 3 occurrence(s) in 1 open document(s)"
+  When every matching document was edited since the search
+  Then nothing is replaced and a warning says to search again
+
+Scenario: SEARCH-015.7 The status counts what was replaced
+  Given "Max" is 4 and an Open Files search listed 4 of the 6 matches in one document
+  When I replace all
+  Then all 6 matches in the document are replaced, as Replace in Files does on disk
+  And the status reads "Replaced 6 occurrence(s) in 1 open document(s)"
 ```
 
 ## SEARCH-016: Undo Replace in Files

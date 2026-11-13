@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { expandReplacement, preserveCase, replaceMatches } from "../lib/replace";
-import { activeFilterCount, effectiveScope, folderLabel, explorerRoots, leaveOutPatch, targetSummary } from "../components/panels/SearchPanel";
+import { activeFilterCount, buildJsRegex, deletedPatch, effectiveScope, folderLabel, explorerRoots, leaveOutPatch, searchTexts, targetSummary } from "../components/panels/SearchPanel";
 import { DEFAULT_SEARCH_QUERY } from "../lib/store";
 import type { FileMatch } from "../lib/types";
 
@@ -26,6 +26,7 @@ describe("expandReplacement", () => {
     const m = exec(/(?<k>\w+)=(\d+)/, "x key=42 y");
     expect(expandReplacement("$2:$1", m)).toBe("42:key");
     expect(expandReplacement("$<k>!", m)).toBe("key!");
+    expect(expandReplacement("${k}", m)).toBe("${k}");
     expect(expandReplacement("[$&] $$", m)).toBe("[key=42] $");
     expect(expandReplacement("$`|$'", m)).toBe("x | y");
   });
@@ -103,5 +104,42 @@ describe("Find in Files panel helpers", () => {
     expect([p.totalMatches, p.leftOut]).toEqual([1, 2]);
     expect(leaveOutPatch(st, "b", b1)!.files!.map((f) => f.path)).toEqual(["a"]);
     expect(leaveOutPatch(st, "zzz")).toBeNull();
+  });
+  it("deletedPatch drops a deleted file's results, left-out positions and current result", () => {
+    const cur = { ...st, excluded: { a: ["9:9"], b: ["5:5", "6:6"] }, leftOut: 3, activeKey: "b:1:0" };
+    const p = deletedPatch(cur, ["b"]);
+    expect(p.files!.map((f) => f.path)).toEqual(["a"]);
+    expect(p.excluded).toEqual({ a: ["9:9"] });
+    expect([p.totalMatches, p.leftOut, p.activeKey]).toEqual([2, 1, null]);
+    expect("activeKey" in deletedPatch({ ...cur, activeKey: "a:1:0" }, ["b"])).toBe(false);
+  });
+});
+
+describe("buildJsRegex", () => {
+  const ww = (pattern: string) => buildJsRegex({ pattern, isRegex: false, wholeWord: true, caseSensitive: false, dotAll: false })!;
+  it("Whole Word wants no word character beside the match, like the folder search", () => {
+    expect("x -2 y a-2 -2b".match(ww("-2"))).toEqual(["-2"]);
+    expect("cat category cat.".match(ww("cat"))).toEqual(["cat", "cat"]);
+    // The replace preview runs the regex on the hit alone.
+    expect(ww("-2").test("-2")).toBe(true);
+  });
+});
+
+describe("searchTexts", () => {
+  const docs = [
+    { path: "a", text: "x x\nx" },
+    { path: "b", text: "x x" },
+  ];
+  const q = (maxResults: number) => ({ ...DEFAULT_SEARCH_QUERY, pattern: "x", maxResults });
+  it("Max caps the total across documents and reports the limit", () => {
+    const r = searchTexts(q(4), docs);
+    expect(r.files.map((f) => [f.path, f.matches.length])).toEqual([["a", 3], ["b", 1]]);
+    expect(r.truncated).toBe(true);
+    expect(searchTexts(q(2), docs).files.map((f) => f.path)).toEqual(["a"]);
+  });
+  it("is not truncated under the limit", () => {
+    const r = searchTexts(q(10), docs);
+    expect(r.files.reduce((n, f) => n + f.matches.length, 0)).toBe(5);
+    expect(r.truncated).toBe(false);
   });
 });
