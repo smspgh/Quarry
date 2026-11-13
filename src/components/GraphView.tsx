@@ -6,7 +6,7 @@ import { editor } from "../editor/manager";
 import { relativeTime } from "../editor/git";
 import { askDialog, openPath } from "../lib/actions";
 import { abortOperation, checkoutRef, commitAction, openCommitFile, remote, useGit } from "../lib/git";
-import { showPanel } from "../lib/panels";
+import { isPanelShown, showPanel } from "../lib/panels";
 import { git, type GitCommitAction, type GitCommitDetail, type GitCommitFile, type GitGraphCommit } from "../lib/gitApi";
 import { commitMatches, layoutGraph, newGraphState, refLabels, type GraphRow, type RefLabel } from "../lib/gitGraph";
 import { commitFileKind, KIND_LABEL, KIND_LETTER } from "../lib/gitStatus";
@@ -85,6 +85,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   const root = doc.graph!.root;
   const repo = useGit((s) => s.repos[root.toLowerCase()]);
   const busy = useGit((s) => s.busy);
+  const gitShown = useStore((s) => isPanelShown(s, "git"));
   const toast = useStore((s) => s.toast);
   const [all, setAll] = useState(false);
   /** Commits loaded so far and their rows; laid out page by page, carrying the lanes over. */
@@ -369,6 +370,16 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   };
 
   const conflicts = repo?.files.filter((f) => f.conflicted).length ?? 0;
+  /** Open Source Control and land on the first file that needs attention (a conflict, else a change). */
+  const openSourceControl = () => {
+    showPanel("git");
+    requestAnimationFrame(() => {
+      const panel = document.querySelector('.sidebar[data-panel="git"]');
+      const row = panel?.querySelector<HTMLElement>('[aria-label="Merge Changes"] .scm-row') ?? panel?.querySelector<HTMLElement>(".scm-row");
+      row?.focus();
+      row?.scrollIntoView({ block: "nearest" });
+    });
+  };
   const sel = index >= 0 ? commits[index] : picked && picked.sha === selected ? picked : null;
   const item = (label: string, Icon: typeof Copy, run: () => void, title?: string, danger = false) => (
     <button className={`palette-item ${danger ? "danger" : ""}`} role="menuitem" title={title} onClick={() => { setMenu(null); run(); }}>
@@ -429,7 +440,8 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
           <span className="grow">
             A {repo.operation} stopped part-way{conflicts ? `: ${conflicts} file${conflicts === 1 ? " has" : "s have"} conflicts` : ""}. Resolve them in Source Control and commit, or abort to go back to how things were.
           </span>
-          <button className="btn small" onClick={() => showPanel("git")}>Open Source Control</button>
+          {/* With the panel already open the button would do nothing visible: it is only offered when it is closed. */}
+          {!gitShown && <button className="btn small" onClick={openSourceControl}>Open Source Control</button>}
           <button className="btn small" disabled={!!busy} onClick={() => void abortOperation(root, repo.operation!)}>Abort</button>
         </div>
       )}
@@ -437,7 +449,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
         <div className="graph-strip" role="status">
           <CircleDot size={13} className="muted" />
           <span className="grow">{repo.files.length} uncommitted change{repo.files.length === 1 ? "" : "s"}{repo.branch ? ` on ${repo.branch}` : ""}: not in the graph until committed.</span>
-          <button className="btn small" onClick={() => showPanel("git")}>Open Source Control</button>
+          {!gitShown && <button className="btn small" onClick={openSourceControl}>Open Source Control</button>}
         </div>
       )}
       {slowMs > 0 && indexed === false && !hideSpeedUp && (

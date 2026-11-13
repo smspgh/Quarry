@@ -27,7 +27,7 @@ function FileRow({ f, repo, group }: { f: GitFile; repo: GitStatus; group: Group
       className="scm-row"
       role="listitem"
       tabIndex={0}
-      title={`${f.path}\n${KIND_LABEL[kind]}${f.origPath ? ` (from ${nameOf(f.origPath)})` : ""}${staged ? ", staged" : ""}\nClick to see the change, double-click to open the file`}
+      title={`${f.path}\n${KIND_LABEL[kind]}${f.origPath ? ` (from ${nameOf(f.origPath)})` : ""}${staged ? ", staged" : ""}\n${group === "conflict" ? "Click to open the file and resolve the conflict, then mark it resolved with +" : "Click to see the change, double-click to open the file"}`}
       onClick={() => void openChange(f, staged)}
       onDoubleClick={() => void openPath(f.path)}
       onKeyDown={(e) => {

@@ -616,8 +616,11 @@ export async function openChange(f: GitFile, staged: boolean) {
   const { openCompare } = await import("./diff");
   const { openPath } = await import("./actions");
   const kind = kindOf(f);
-  if (kind === "untracked" || (kind === "added" && !staged)) {
-    void openPath(f.path);
+  // A conflicted file has no single "before" to compare with: open the file itself, where git's
+  // conflict markers show both sides to choose from.
+  if (kind === "untracked" || (kind === "added" && !staged) || kind === "conflict") {
+    if (kind !== "conflict" || (await fs.exists(f.path))) void openPath(f.path);
+    else toast(`${nameOf(f.path)} was deleted on one side and is not in the folder. Mark it resolved with + to keep it deleted, or abort.`, "info", 7000);
     return;
   }
   const show = (rev: string, path = f.path) => git.show(path, rev).catch(() => null);
