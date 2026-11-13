@@ -1373,8 +1373,9 @@ Scenario: GIT-024.5 A repository created from Quarry is badged at once
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/GitPanel.tsx` — repository `Select` (shown when more than one repository is known)
-  - `src/lib/git.ts` — `current`, `currentRepo`, `doRefresh` (default = the open folder's repository), `installGit` (reset on folder change), `repoOf` (deepest repository wins)
+  - `src/components/panels/GitPanel.tsx` — repository `Select` (shown when more than one repository is known; "Show a repository…" when the open folder is not in one), `context` line under the header
+  - `src/styles/app.css` — `.scm-context`, `.scm-context-name`, `.scm-context-path`
+  - `src/lib/git.ts` — `current`, `currentRepo` (none while a folder that is not in a repository is open and nothing is picked), `doRefresh` (default = the open folder's deepest repository; `followFolder` only settles once a refresh has looked at the new folder, so one already running can't put the previous folder's repository back), `followOpenFolder` (called by `installGit` on a folder change), `repoKeyOf`, `repoOf` (deepest repository wins)
   - `src/components/StatusBar.tsx` — `GitStatusItem` sets `current` on click
   - `src/components/Select.tsx` — the picker
 - Tests: `src/__tests__/gitRefresh.test.ts`
@@ -1411,6 +1412,79 @@ Scenario: GIT-025.5 Nested repositories
   Given a repository inside another repository's folder
   When I open a file from the inner one
   Then its markers, blame and status come from the inner repository
+
+Scenario: GIT-025.6 The previous folder's repository does not come back
+  Given the folder "quarry" (a repository) is open and a file from it is still open in a tab
+  When I open the folder "site", another repository, while git status of "quarry" is still being read
+  Then the panel shows "site"
+  And "quarry" is only offered in the repository picker, for the tab that is still open
+
+Scenario: GIT-025.7 Opening a folder that is not a repository
+  Given the panel shows the repository "quarry" and a file from it is still open in a tab
+  When I open the folder "C:\scratch", which is not in a repository
+  Then the panel says "The open folder is not in a git repository."
+  And a "Show a repository…" picker lists "quarry"
+  And the tab's change markers still come from "quarry"
+
+Scenario: GIT-025.8 The panel names its folder under the buttons
+  Given the panel shows the repository at "C:\work\a-rather-long-project-name"
+  When I open Source Control in a narrow side panel
+  Then a line under the Fetch / Pull / Push / Refresh buttons shows "a-rather-long-project-name" in bold with "C:\work\a-rather-long-project-name" below it
+  And both wrap onto further lines instead of being cut off
+  Given the open folder is not in a repository
+  When I open Source Control
+  Then that line names the open folder
+
+```
+
+## GIT-028: Set a folder as the Source Control context
+
+- Status: draft
+- Commands: `git.setContext`
+- Files:
+  - `src/lib/git.ts` — `setSourceControlContext` (asks git for the folder's repository, makes it `current`, keeps the folder in view as `contextPlace` until another folder opens, opens the panel), `interesting`, `followOpenFolder` (drops it)
+  - `src/lib/gitCommands.ts` — `git.setContext` (`{ path }`, else the open folder), `pathArg` (pure)
+  - `src/components/FileMenu.tsx` — "Set as Source Control Context" on one folder
+  - `src/lib/panels.ts` — `showPanel`
+- Tests: `src/__tests__/gitRefresh.test.ts`
+- Docs: `docs/git.md`, `docs/editing.md`
+
+**As a** developer whose folder holds more than one repository, or who wants another repository in view
+**I want** to point Source Control at any folder from the Explorer
+**So that** I can commit there without reopening folders
+
+```gherkin
+Scenario: GIT-028.1 Set a folder from the Explorer
+  Given the open folder is "C:\work" and "C:\work\api" is a repository inside it
+  When I right-click the folder "api" and choose "Set as Source Control Context"
+  Then the Source Control panel opens and shows the repository "api"
+  And the Git menu's Fetch, Pull, Push and Switch Branch… act on "api"
+
+Scenario: GIT-028.2 A folder inside a repository
+  When I right-click "C:\work\api\src" and choose "Set as Source Control Context"
+  Then the panel shows the repository "api" that holds it
+
+Scenario: GIT-028.3 It lasts until another folder opens
+  Given I set "api" as the Source Control context
+  When the status refreshes (a save, window focus, Refresh)
+  Then the panel still shows "api"
+  When I open another folder
+  Then the panel follows the new folder (GIT-025.4)
+
+Scenario: GIT-028.4 A folder outside any repository
+  When I choose "Set as Source Control Context" on a folder that is not in a repository
+  Then a message says "<folder name> is not in a git repository."
+  And the panel keeps showing what it showed
+
+Scenario: GIT-028.5 From the palette
+  Given a folder is open
+  When I run "Set Folder as Source Control Context" from the command palette
+  Then the panel shows the open folder's repository again
+
+Scenario: GIT-028.6 Git missing or failing
+  Given git is not installed, or cannot read the folder (for example "dubious ownership")
+  When I choose "Set as Source Control Context"
+  Then a message says so and nothing changes
 ```
 
 ## GIT-026: Branch in the status bar

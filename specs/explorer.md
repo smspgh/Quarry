@@ -880,7 +880,7 @@ Scenario: EXPL-016.3 Unchanged files and non-repositories show nothing
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/FileMenu.tsx` — `FileMenu` (item order, labels for one / several items, compare items for 1 or 2 files, clamped to the window, closes on outside mouse-down, Escape or window blur)
+  - `src/components/FileMenu.tsx` — `FileMenu` (item order, labels for one / several items, compare items for 1 or 2 files, Set as Source Control Context on one folder via `runCommand("git.setContext", { path })`, clamped to the window, closes on outside mouse-down, Escape or window blur)
   - `src/components/panels/ExplorerPanel.tsx` — `menu` state, `lead` items (Expand…, Open All Files, Claude Code items when `claudeEnabled`, Find in…, Rename), blank-space menu
   - `src/lib/diff.ts` — `selectForCompare`, `compareWithSelected`, `compareCandidate`, `openCompare`
   - `src/styles/app.css` — `.ctx-menu`, `.file-menu`
@@ -927,4 +927,10 @@ Scenario: EXPL-017.6 The menu closes without acting
 Scenario: EXPL-017.7 The menu stays inside the window
   When I right-click a row at the bottom-right corner of the window
   Then the whole menu is visible, at least 4 px from the window edges
+
+Scenario: EXPL-017.8 Set a folder as the Source Control context
+  When I right-click the folder "src"
+  Then the menu ends with "Set as Source Control Context" (GIT-028)
+  When I right-click a file, or select several items and right-click one of them
+  Then the menu has no "Set as Source Control Context"
 ```

@@ -1,4 +1,5 @@
-import { ClipboardPaste, Copy, FileDiff, FileText, FolderOpen, FolderTree, Scissors, Trash2 } from "lucide-react";
+import { ClipboardPaste, Copy, FileDiff, FileText, FolderOpen, FolderTree, GitBranch, Scissors, Trash2 } from "lucide-react";
+import { runCommand } from "../lib/commands";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { showInExplorerPanel, showInWindowsExplorer } from "../lib/actions";
@@ -103,6 +104,11 @@ export function FileMenu({ x, y, paths, isDir, pasteDir, onClose, lead, showInQu
           <div className="menu-sep" />
           {showInQuarry && <button className="palette-item" role="menuitem" onClick={run(() => showInExplorerPanel(paths[0]))}><FolderTree size={13} /><span className="title">Show in Quarry Explorer</span></button>}
           <button className="palette-item" role="menuitem" onClick={run(() => showInWindowsExplorer(paths[0]))}><FolderOpen size={13} /><span className="title">Show in Windows Explorer</span></button>
+          {isDir(paths[0]) && (
+            <button className="palette-item" role="menuitem" title="Show this folder's git repository in the Source Control panel" onClick={run(() => runCommand("git.setContext", { path: paths[0] }))}>
+              <GitBranch size={13} /><span className="title">Set as Source Control Context</span>
+            </button>
+          )}
         </>
       )}
     </div>,

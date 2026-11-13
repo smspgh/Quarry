@@ -5,10 +5,16 @@ import { accept, acceptAll, conflictAtCursor, conflictsOf, gotoConflict } from "
 import type { ConflictChoice } from "./conflicts";
 import type { EditorView } from "@codemirror/view";
 import { register, targetDoc } from "./commands";
-import { compareWithHead, currentRepo, checkout, openGraph, resolveConflicts, fileStatus, pickBranch, remote, repoOf, rescanGit, showAddRemote, showHistory, stage, toggleBlame, unstage, useGit } from "./git";
+import { compareWithHead, currentRepo, checkout, openGraph, resolveConflicts, fileStatus, pickBranch, remote, repoOf, rescanGit, setSourceControlContext, showAddRemote, showHistory, stage, toggleBlame, unstage, useGit } from "./git";
 import { nextChangeIndex } from "./gitStatus";
 import { showPanel } from "./panels";
 import { activeDoc, useStore } from "./store";
+
+/** The `path` of a command's `{ path }` argument, if any. Pure. */
+export function pathArg(args: unknown): string | null {
+  const p = args && typeof args === "object" ? (args as { path?: unknown }).path : undefined;
+  return typeof p === "string" && p ? p : null;
+}
 
 const s = () => useStore.getState();
 
@@ -80,6 +86,17 @@ export function registerGitCommands() {
   register({ id: "git.showPanel", title: "Show Source Control", category: "Git", keys: "Ctrl+Shift+G", run: () => showPanel("git") });
   register({ id: "git.graph", title: "Show Commit Graph", category: "Git", enabled: hasRepo, run: () => openGraph() });
   register({ id: "git.refresh", title: "Refresh Git Status", category: "Git", run: rescanGit });
+  // `{ path }` = a folder (the Explorer's right-click menu); without one, the open folder.
+  register({
+    id: "git.setContext",
+    title: "Set Folder as Source Control Context",
+    category: "Git",
+    enabled: (args) => !!pathArg(args) || !!useStore.getState().folder,
+    run: (args) => {
+      const path = pathArg(args) ?? useStore.getState().folder;
+      if (path) void setSourceControlContext(path);
+    },
+  });
   register({ id: "git.switchBranch", title: "Switch Branch…", category: "Git", enabled: hasRepo, run: () => void pickBranch() });
   register({ id: "git.checkoutTo", title: "Switch to Branch", category: "Git", hidden: true, run: (name) => void (typeof name === "string" && checkout(name)) });
   register({ id: "git.createBranch", title: "Create Branch", category: "Git", hidden: true, run: (name) => void (typeof name === "string" && checkout(name, true)) });

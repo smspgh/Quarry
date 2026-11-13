@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, Check, ChevronRight, CircleDot, CloudDownload, CloudOff, FileDiff, FileText, GitBranch, GitGraph, History, Minus, Plus, RefreshCw, TriangleAlert, Undo2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, ChevronRight, CircleDot, CloudDownload, CloudOff, FileDiff, FileText, Folder, GitBranch, GitGraph, History, Minus, Plus, RefreshCw, TriangleAlert, Undo2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { openPath } from "../../lib/actions";
 import { abortOperation, continueOperation, resolveConflicts, takeSide, checkRemote, isMissingRepo, commit, compareCommitWithCurrent, currentRepo, discard, moreHistory, openChange, openCommitChange, openCommitFile, openGraph, pickBranch, remote, rescanGit, stage, unstage, useGit } from "../../lib/git";
@@ -474,6 +474,15 @@ export function GitPanel() {
       </button>
     </div>
   );
+  // The folder the panel is about, on its own line under the buttons (the header cuts names off).
+  const contextRoot = repo?.root ?? folder;
+  const context = contextRoot && (
+    <div className="scm-context" title={contextRoot}>
+      <Folder size={13} />
+      <span className="scm-context-name">{nameOf(contextRoot) || contextRoot}</span>
+      <span className="scm-context-path">{contextRoot}</span>
+    </div>
+  );
 
   if (g.available === false) {
     return (
@@ -486,9 +495,16 @@ export function GitPanel() {
   if (!repo) {
     const isFolder = (p: string) => !!folder && p.toLowerCase() === folder.toLowerCase();
     const failed = g.statusErrors.find((e) => isFolder(e.path)) ?? g.statusErrors[0];
+    const others = Object.entries(g.repos);
     return (
       <>
         {header}
+        {context}
+        {others.length > 0 && (
+          <div className="panel-section">
+            <Select size="sm" value="" placeholder="Show a repository…" options={others.map(([k, r]) => ({ value: k, label: nameOf(r.root), hint: r.root }))} onChange={(v) => useGit.setState({ current: v })} title="Repository" />
+          </div>
+        )}
         {failed ? (
           <div className="panel-note scm-status-error">
             Git could not read {isFolder(failed.path) ? "the open folder" : failed.path}:{"\n"}
@@ -511,6 +527,7 @@ export function GitPanel() {
   return (
     <>
       {header}
+      {context}
       <div className="panel-body">
         <div className="panel-section scm-top">
           {repos.length > 1 && <Select size="sm" value={g.current ?? ""} options={repos.map(([k, r]) => ({ value: k, label: nameOf(r.root), hint: r.root }))} onChange={(v) => useGit.setState({ current: v })} title="Repository" />}

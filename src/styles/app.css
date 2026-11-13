@@ -5029,3 +5029,9 @@ select optgroup {
 .cm-conflict-btn.incoming { border-color: var(--accent); }
 .scm-side { height: 20px; padding: 0 6px; font-size: 11px; }
 .cm-conflict-note { margin-left: 8px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+
+/* Source Control: the folder the panel is about, under the header buttons; wraps instead of cutting off. */
+.scm-context { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; padding: 6px 12px 2px; min-width: 0; color: var(--text-2); }
+.scm-context svg { flex-shrink: 0; align-self: center; color: var(--text-3); }
+.scm-context-name { font-weight: 600; color: var(--text); overflow-wrap: anywhere; }
+.scm-context-path { flex-basis: 100%; font-size: 11px; color: var(--text-3); overflow-wrap: anywhere; }

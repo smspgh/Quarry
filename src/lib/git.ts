@@ -19,6 +19,7 @@ import { displayUrl, gitErrorText, hasConflictMarkers, isMissingRepo, KIND_RANK,
 
 export { isMissingRepo, KIND_LABEL, KIND_LETTER, kindOf, type GitKind } from "./gitStatus";
 import { choose } from "./dialogs";
+import { showPanel } from "./panels";
 
 export interface FileHistory {
   path: string;
@@ -110,7 +111,10 @@ export function repoOf(path: string | null | undefined): GitStatus | null {
 
 /** The repository the Source Control panel and status bar show. */
 export function currentRepo(s: GitState = useGit.getState()): GitStatus | null {
-  return (s.current && s.repos[s.current]) || Object.values(s.repos)[0] || null;
+  if (s.current) return s.repos[s.current] ?? null;
+  // Nothing chosen: with a folder open that is not in a repository, show none (not some open
+  // file's repository); with no folder open, the first repository known.
+  return useStore.getState().folder ? null : Object.values(s.repos)[0] ?? null;
 }
 
 // ---------- status ----------
@@ -118,10 +122,17 @@ export function currentRepo(s: GitState = useGit.getState()): GitStatus | null {
 /** Folders known not to be in a repository (so they aren't asked again). */
 const notRepo = new Set<string>();
 
+/** A newly opened folder whose repository the panel switches to once a refresh has looked at that
+ *  folder (a refresh already running when the folder changed has not). */
+let followFolder: string | null = null;
+/** A folder chosen with Set as Source Control Context: kept in view until another folder opens. */
+let contextPlace: string | null = null;
+
 function interesting(): string[] {
   const s = useStore.getState();
   const out: string[] = [];
   if (s.folder) out.push(s.folder);
+  if (contextPlace) out.push(contextPlace);
   for (const d of s.docs) if (d.path && (d.kind === "text" || d.kind === "big")) out.push(parentOf(d.path));
   return out;
 }
@@ -152,6 +163,7 @@ async function doRefresh() {
   const g = useGit.getState();
   if (g.available === null) useGit.setState({ available: (await git.available().catch(() => null)) !== null });
   if (!useGit.getState().available) return;
+  const startFolder = useStore.getState().folder;
   const want = interesting();
   // Known repositories still in view, plus a lookup for each place not under one yet.
   const roots = Object.values(useGit.getState().repos)
@@ -196,10 +208,57 @@ async function doRefresh() {
   }
   const cur = useGit.getState().current;
   const folder = useStore.getState().folder;
-  const folderRepo = folder ? Object.keys(repos).find((k) => under(folder, repos[k].root)) : undefined;
-  const current = cur && repos[cur] ? cur : folderRepo || Object.keys(repos)[0] || null;
+  let current: string | null;
+  if (followFolder !== null) {
+    // The open folder changed: show its repository (or none), never the previous folder's.
+    current = folder === startFolder && followFolder === folder ? (repoKeyOf(repos, folder) ?? null) : null;
+    if (folder === startFolder && followFolder === folder) followFolder = null;
+  } else if (cur && repos[cur]) current = cur;
+  else current = folder ? (repoKeyOf(repos, folder) ?? null) : (Object.keys(repos)[0] ?? null);
   useGit.setState({ repos, statusErrors, files, dirs, current });
   void syncBases();
+}
+
+/** Key of the deepest repository in `repos` holding `path`. Pure. */
+function repoKeyOf(repos: Record<string, GitStatus>, path: string): string | undefined {
+  let best: string | undefined;
+  for (const [k, r] of Object.entries(repos)) if (under(path, r.root) && (!best || r.root.length > repos[best].root.length)) best = k;
+  return best;
+}
+
+/** The open folder changed: the Source Control panel moves to its repository (or to none). */
+export function followOpenFolder(folder: string | null) {
+  followFolder = folder;
+  contextPlace = null;
+  useGit.setState({ current: null });
+  rescanGit();
+}
+
+/** Make the repository holding `path` (a folder) the one Source Control shows, and open the panel. */
+export async function setSourceControlContext(path: string) {
+  if (useGit.getState().available === false) {
+    toast("Git was not found. Install Git for Windows and make sure git is on PATH.", "error", 6000);
+    return;
+  }
+  let st: GitStatus | null;
+  try {
+    st = await git.status(path);
+  } catch (e) {
+    toast(`Git could not read ${path}:
+${gitErrorText(String(e))}`, "error", 8000);
+    return;
+  }
+  if (!st) {
+    toast(`${nameOf(path)} is not in a git repository.`, "info");
+    return;
+  }
+  const status = st;
+  contextPlace = path;
+  followFolder = null;
+  const k = key(status.root);
+  useGit.setState((g) => ({ repos: { ...g.repos, [k]: status }, current: k }));
+  showPanel("git");
+  refreshGit(0);
 }
 
 /** Forget the "not a repository" answers (a folder may have become one: git init, clone), and
@@ -279,11 +338,7 @@ export function installGit(): () => void {
     },
   });
   const unsub = useStore.subscribe((s, prev) => {
-    if (s.folder !== prev.folder) {
-      // The panel follows the newly opened folder's repository.
-      useGit.setState({ current: null });
-      rescanGit();
-    }
+    if (s.folder !== prev.folder) followOpenFolder(s.folder); // the panel follows the newly opened folder
     else if (s.docs !== prev.docs) {
       // A save (dirty → clean), a new tab, a closed tab.
       const saved = s.docs.some((d) => !d.dirty && prev.docs.find((p) => p.id === d.id)?.dirty);

@@ -43,7 +43,7 @@ It prints each story's id, title and `spec file:line` (and, for a story id, its 
 | `FILE` | Files and Sessions | [files.md](files.md) | 20 |
 | `FIND` | Find and Replace in a Document | [find.md](find.md) | 10 |
 | `FMT` | Formatting | [formatting.md](formatting.md) | 10 |
-| `GIT` | Source Control | [git.md](git.md) | 27 |
+| `GIT` | Source Control | [git.md](git.md) | 28 |
 | `GRAPH` | Commit Graph | [git-graph.md](git-graph.md) | 14 |
 | `JSON` | JSON Tools | [json.md](json.md) | 14 |
 | `LSP` | Code Intelligence | [code-intelligence.md](code-intelligence.md) | 17 |

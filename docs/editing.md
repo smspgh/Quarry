@@ -177,7 +177,8 @@ Files given on the command line take the place of the restored tabs.
   - **Find in File** / **Find in Folder** / **Find in Selected**, and **Rename** (**F2**);
   - **Cut** (**Ctrl+X**), **Copy** (**Ctrl+C**), **Paste** (**Ctrl+V**) and **Delete** (**Del**);
   - **Copy Path** and **Copy File Name** (one per line for several);
-  - **Show in Windows Explorer**.
+  - **Show in Windows Explorer**;
+  - on a folder, **Set as Source Control Context**: the Source Control panel opens on the git repository that folder is in (see [Git](git.md)).
 
   Right-click on the blank space below the rows to paste into the open folder itself.
 - **Copy, Cut and Paste** use the Windows clipboard, so you can copy files in Quarry and paste them in File Explorer, or the other way round. Paste goes into the folder you right-clicked (or the folder of the file). Nothing is overwritten: a name that's taken gets " - Copy" for a copy, as in File Explorer, or " (2)" for a move. Pasting after Cut moves the items, and open tabs follow the files they show.

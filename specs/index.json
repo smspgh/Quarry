@@ -59,7 +59,7 @@
       "prefix": "GIT",
       "title": "Source Control",
       "spec": "specs/git.md",
-      "stories": 27
+      "stories": 28
     },
     {
       "prefix": "GRAPH",
@@ -5396,6 +5396,10 @@
         {
           "id": "EXPL-017.7",
           "title": "The menu stays inside the window"
+        },
+        {
+          "id": "EXPL-017.8",
+          "title": "Set a folder as the Source Control context"
         }
       ]
     },
@@ -8583,6 +8587,7 @@
       "commands": [],
       "files": [
         "src/components/panels/GitPanel.tsx",
+        "src/styles/app.css",
         "src/lib/git.ts",
         "src/components/StatusBar.tsx",
         "src/components/Select.tsx"
@@ -8613,6 +8618,18 @@
         {
           "id": "GIT-025.5",
           "title": "Nested repositories"
+        },
+        {
+          "id": "GIT-025.6",
+          "title": "The previous folder's repository does not come back"
+        },
+        {
+          "id": "GIT-025.7",
+          "title": "Opening a folder that is not a repository"
+        },
+        {
+          "id": "GIT-025.8",
+          "title": "The panel names its folder under the buttons"
         }
       ]
     },
@@ -8621,7 +8638,7 @@
       "title": "Branch in the status bar",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1416,
+      "line": 1490,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8667,7 +8684,7 @@
       "title": "Git decorations in the Explorer",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1467,
+      "line": 1541,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8703,6 +8720,56 @@
         {
           "id": "GIT-027.5",
           "title": "Unchanged and ignored files are plain"
+        }
+      ]
+    },
+    "GIT-028": {
+      "id": "GIT-028",
+      "title": "Set a folder as the Source Control context",
+      "area": "GIT",
+      "spec": "specs/git.md",
+      "line": 1440,
+      "status": "draft",
+      "commands": [
+        "git.setContext"
+      ],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/gitCommands.ts",
+        "src/components/FileMenu.tsx",
+        "src/lib/panels.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitRefresh.test.ts"
+      ],
+      "docs": [
+        "docs/git.md",
+        "docs/editing.md"
+      ],
+      "scenarios": [
+        {
+          "id": "GIT-028.1",
+          "title": "Set a folder from the Explorer"
+        },
+        {
+          "id": "GIT-028.2",
+          "title": "A folder inside a repository"
+        },
+        {
+          "id": "GIT-028.3",
+          "title": "It lasts until another folder opens"
+        },
+        {
+          "id": "GIT-028.4",
+          "title": "A folder outside any repository"
+        },
+        {
+          "id": "GIT-028.5",
+          "title": "From the palette"
+        },
+        {
+          "id": "GIT-028.6",
+          "title": "Git missing or failing"
         }
       ]
     },
@@ -17138,6 +17205,7 @@
       "EXPL-012",
       "EXPL-013",
       "EXPL-017",
+      "GIT-028",
       "SEARCH-011"
     ],
     "src/components/FindBar.tsx": [
@@ -18032,6 +18100,7 @@
       "GIT-025",
       "GIT-026",
       "GIT-027",
+      "GIT-028",
       "GRAPH-001",
       "GRAPH-010",
       "GRAPH-011",
@@ -18070,6 +18139,7 @@
       "GIT-015",
       "GIT-018",
       "GIT-020",
+      "GIT-028",
       "GRAPH-001",
       "TAB-007"
     ],
@@ -18248,6 +18318,7 @@
     ],
     "src/lib/panels.ts": [
       "EXPL-015",
+      "GIT-028",
       "GRAPH-014",
       "SEARCH-001",
       "SET-001",
@@ -18446,6 +18517,7 @@
       "GIT-005",
       "GIT-010",
       "GIT-013",
+      "GIT-025",
       "GIT-027",
       "GRAPH-002",
       "JSON-007",
@@ -18736,7 +18808,8 @@
     ],
     "src/__tests__/gitRefresh.test.ts": [
       "GIT-001",
-      "GIT-025"
+      "GIT-025",
+      "GIT-028"
     ],
     "src/__tests__/gitRemote.test.ts": [
       "CONFLICT-007",
@@ -19381,6 +19454,9 @@
     ],
     "git.revertChange": [
       "GIT-003"
+    ],
+    "git.setContext": [
+      "GIT-028"
     ],
     "git.showPanel": [
       "GIT-008"
