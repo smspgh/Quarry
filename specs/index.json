@@ -7117,10 +7117,13 @@
       ],
       "files": [
         "src/lib/gitCommands.ts",
+        "src/lib/gitStatus.ts",
         "src/editor/git.ts",
         "src/components/MenuBar.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/gitNav.test.ts"
+      ],
       "docs": [
         "docs/git.md"
       ],
@@ -7152,7 +7155,7 @@
       "title": "Line blame",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 230,
+      "line": 231,
       "status": "draft",
       "commands": [
         "git.toggleBlame"
@@ -7203,7 +7206,7 @@
       "title": "Compare a file with the last commit",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 283,
+      "line": 284,
       "status": "draft",
       "commands": [
         "git.compareWithHead"
@@ -7250,7 +7253,7 @@
       "title": "Switch and create branches",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 327,
+      "line": 328,
       "status": "draft",
       "commands": [
         "git.switchBranch",
@@ -7306,7 +7309,7 @@
       "title": "Commit from the Source Control panel",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 388,
+      "line": 389,
       "status": "draft",
       "commands": [
         "git.showPanel"
@@ -7366,7 +7369,7 @@
       "title": "Amend the last commit",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 457,
+      "line": 458,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7405,7 +7408,7 @@
       "title": "See the changed files and open their changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 496,
+      "line": 497,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7462,7 +7465,7 @@
       "title": "Stage and unstage files",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 561,
+      "line": 562,
       "status": "draft",
       "commands": [
         "git.stageFile",
@@ -7516,7 +7519,7 @@
       "title": "Discard changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 617,
+      "line": 618,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7563,7 +7566,7 @@
       "title": "Status line: where the branch stands against its remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 669,
+      "line": 670,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7623,7 +7626,7 @@
       "title": "Background check of the remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 738,
+      "line": 739,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7678,7 +7681,7 @@
       "title": "Fetch, pull, push and publish a branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 803,
+      "line": 804,
       "status": "draft",
       "commands": [
         "git.fetch",
@@ -7740,7 +7743,7 @@
       "title": "Recover when the remote repository is gone",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 870,
+      "line": 871,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7783,7 +7786,7 @@
       "title": "Commits of the current branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 914,
+      "line": 915,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7848,7 +7851,7 @@
       "title": "File history",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 990,
+      "line": 991,
       "status": "draft",
       "commands": [
         "git.fileHistory"
@@ -7902,7 +7905,7 @@
       "title": "Commit identity (name and email)",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1045,
+      "line": 1046,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7949,7 +7952,7 @@
       "title": "Add a remote by URL",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1096,
+      "line": 1097,
       "status": "draft",
       "commands": [
         "git.addRemote"
@@ -7998,7 +8001,7 @@
       "title": "See, open and change remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1148,
+      "line": 1149,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8050,7 +8053,7 @@
       "title": "Create a repository on GitHub and push to it",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1207,
+      "line": 1208,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8107,7 +8110,7 @@
       "title": "GitHub accounts",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1274,
+      "line": 1275,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8154,7 +8157,7 @@
       "title": "Private / Public badge on GitHub remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1326,
+      "line": 1327,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8196,7 +8199,7 @@
       "title": "Work with more than one repository",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1370,
+      "line": 1371,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8205,7 +8208,9 @@
         "src/components/StatusBar.tsx",
         "src/components/Select.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/gitRefresh.test.ts"
+      ],
       "docs": [
         "docs/git.md"
       ],
@@ -8237,14 +8242,17 @@
       "title": "Branch in the status bar",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1415,
+      "line": 1416,
       "status": "draft",
       "commands": [],
       "files": [
         "src/components/StatusBar.tsx",
+        "src/lib/gitStatus.ts",
         "src/lib/git.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/gitNav.test.ts"
+      ],
       "docs": [
         "docs/git.md"
       ],
@@ -8280,7 +8288,7 @@
       "title": "Git decorations in the Explorer",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1465,
+      "line": 1467,
       "status": "draft",
       "commands": [],
       "files": [
@@ -17307,6 +17315,7 @@
       "CONFLICT-010",
       "CONFLICT-013",
       "EXPL-016",
+      "GIT-004",
       "GIT-008",
       "GIT-009",
       "GIT-010",
@@ -17316,6 +17325,7 @@
       "GIT-017",
       "GIT-021",
       "GIT-022",
+      "GIT-026",
       "GIT-027",
       "GRAPH-009",
       "GRAPH-012"
@@ -17863,8 +17873,13 @@
       "GRAPH-005",
       "GRAPH-007"
     ],
+    "src/__tests__/gitNav.test.ts": [
+      "GIT-004",
+      "GIT-026"
+    ],
     "src/__tests__/gitRefresh.test.ts": [
-      "GIT-001"
+      "GIT-001",
+      "GIT-025"
     ],
     "src/__tests__/gitRemote.test.ts": [
       "CONFLICT-007",

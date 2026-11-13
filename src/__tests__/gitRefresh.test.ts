@@ -7,11 +7,12 @@ const api = vi.hoisted(() => ({
 }));
 vi.mock("../lib/gitApi", () => ({ git: { available: api.available, status: api.status, show: vi.fn(async () => null) } }));
 
-import { refreshGit, rescanGit, useGit } from "../lib/git";
+import { currentRepo, refreshGit, repoOf, rescanGit, useGit } from "../lib/git";
 import { useStore } from "../lib/store";
+import type { GitStatus } from "../lib/gitApi";
 
 const FOLDER = "C:\\work\\proj";
-const status = (root: string) => ({ root, branch: "main", head: "abc", upstream: null, ahead: 0, behind: 0, files: [], operation: null, remotes: [] });
+const status = (root: string): GitStatus => ({ root, branch: "main", head: "abc", upstream: null, upstreamGone: false, ahead: 0, behind: 0, files: [], operation: null, operationMessage: null, operationStep: null, remotes: [] });
 
 async function settle(run: () => void) {
   vi.useFakeTimers();
@@ -72,5 +73,33 @@ describe("refreshing git status", () => {
     await settle(rescanGit);
     expect(useGit.getState().available).toBe(true);
     expect(Object.keys(useGit.getState().repos)).toEqual([FOLDER.toLowerCase()]);
+  });
+});
+
+describe("more than one repository", () => {
+  const NOTES = "C:\\notes";
+  beforeEach(async () => {
+    api.available.mockReset().mockResolvedValue("git version 2.53.0");
+    api.status.mockReset().mockImplementation(async (p: string) => status(p.startsWith(NOTES) ? NOTES : FOLDER));
+    useGit.setState({ available: null, repos: {}, statusErrors: [], current: null });
+    const doc = { id: "n", kind: "text" as const, path: `${NOTES}\\todo.md`, name: "todo.md", dirty: false, encoding: "UTF-8", bom: false, eol: "LF" as const, language: "Markdown", readonly: false, modifiedMs: 0 };
+    useStore.setState({ folder: FOLDER, docs: [doc] });
+    await settle(rescanGit);
+  });
+
+  it("shows the open folder's repository by default and keeps a picked one", async () => {
+    expect(Object.keys(useGit.getState().repos).sort()).toEqual([NOTES.toLowerCase(), FOLDER.toLowerCase()].sort());
+    expect(currentRepo()?.root).toBe(FOLDER);
+    useGit.setState({ current: NOTES.toLowerCase() });
+    await settle(() => refreshGit(0));
+    expect(currentRepo()?.root).toBe(NOTES);
+  });
+
+  it("gives a file the deepest repository that holds it", () => {
+    const inner = status(`${FOLDER}\\vendor\\lib`);
+    useGit.setState((g) => ({ repos: { ...g.repos, [inner.root.toLowerCase()]: inner } }));
+    expect(repoOf(`${FOLDER}\\vendor\\lib\\x.c`)?.root).toBe(inner.root);
+    expect(repoOf(`${FOLDER}\\src\\y.c`)?.root).toBe(FOLDER);
+    expect(repoOf("D:\\elsewhere\\z.c")).toBeNull();
   });
 });

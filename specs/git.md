@@ -190,10 +190,11 @@ Scenario: GIT-003.7 Revert at cursor on an unchanged line
 - Status: draft
 - Commands: `git.nextChange`, `git.prevChange`
 - Files:
-  - `src/lib/gitCommands.ts` — `jumpChange` (wrap-around, opens the peek)
+  - `src/lib/gitCommands.ts` — `jumpChange` (opens the peek)
+  - `src/lib/gitStatus.ts` — `nextChangeIndex` (which change, wrap-around)
   - `src/editor/git.ts` — `changesOf`, `changeRows`, `setPeek`
   - `src/components/MenuBar.tsx` — Git menu entries
-- Tests: none
+- Tests: `src/__tests__/gitNav.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer reviewing my edits before committing
@@ -1376,7 +1377,7 @@ Scenario: GIT-024.5 A repository created from Quarry is badged at once
   - `src/lib/git.ts` — `current`, `currentRepo`, `doRefresh` (default = the open folder's repository), `installGit` (reset on folder change), `repoOf` (deepest repository wins)
   - `src/components/StatusBar.tsx` — `GitStatusItem` sets `current` on click
   - `src/components/Select.tsx` — the picker
-- Tests: none
+- Tests: `src/__tests__/gitRefresh.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer with a project folder open and a file from another repository in a tab
@@ -1417,9 +1418,10 @@ Scenario: GIT-025.5 Nested repositories
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/StatusBar.tsx` — `GitStatusItem` (branch, `*`, ↓ / ↑ counts, busy label, tooltip, click = `pickBranch`)
+  - `src/components/StatusBar.tsx` — `GitStatusItem` (click = `pickBranch`)
+  - `src/lib/gitStatus.ts` — `statusBarBranch` (branch, `*`, ↓ / ↑ counts, busy label, tooltip)
   - `src/lib/git.ts` — `repoOf`, `currentRepo`, `pickBranch`, `busy`
-- Tests: none
+- Tests: `src/__tests__/gitNav.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer editing a file

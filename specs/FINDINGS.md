@@ -123,10 +123,6 @@ Doc / code mismatches and dead code
 - The to-end confirmation is worded differently in the panel (`MacrosPanel.tsx:52`) and the commands (`commands.ts:1052`, `:1071`).
 - Not determined: whether macros reload on window focus while the panel is hidden (`MacrosPanel.tsx:93-101`); how the menu displays `macro.stop` (no `dynamicTitle`).
 
-## Source control (`git.md`)
-
-- No tests: GIT-004 (next / previous change), GIT-025 (repository picker), GIT-026 (status bar branch).
-
 ## Commit graph (`git-graph.md`)
 
 - The `"branch"` action (create without switching) exists in Rust, `GitCommitAction` and the `Naming` type, but the menu only offers `"branch-switch"` (`src/components/GraphView.tsx:76`, `:628`); the plain-branch path and its toast (`:330`) are dead UI code.

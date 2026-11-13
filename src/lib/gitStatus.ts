@@ -1,5 +1,5 @@
 /** Pure helpers over `git status` entries (gitApi.ts): what a file's change is, and how the Source Control panel groups them. */
-import type { GitFile } from "./gitApi";
+import type { GitFile, GitStatus } from "./gitApi";
 
 export type GitKind = "modified" | "added" | "deleted" | "renamed" | "untracked" | "conflict";
 
@@ -127,4 +127,25 @@ export function gitErrorText(raw: string): string {
     return `Stopped on a conflict. Resolve the files under Merge Changes in Source Control and commit, or press Abort to go back.\n\n${shown}`;
   }
   return lines.join("\n");
+}
+
+/** Next / Previous Change: the index in `starts` (first line of each change, ascending) to go to
+ *  from the cursor's `line`, wrapping around at either end; -1 when there are no changes. */
+export function nextChangeIndex(starts: number[], line: number, dir: 1 | -1): number {
+  if (!starts.length) return -1;
+  let i = -1;
+  if (dir === 1) i = starts.findIndex((n) => n > line);
+  else for (let k = starts.length - 1; k >= 0 && i === -1; k--) if (starts[k] < line) i = k;
+  return i === -1 ? (dir === 1 ? 0 : starts.length - 1) : i;
+}
+
+/** The status bar's branch item: its text and tooltip. */
+export function statusBarBranch(repo: Pick<GitStatus, "root" | "branch" | "head" | "upstream" | "ahead" | "behind" | "files">, busy: string | null): { text: string; title: string } {
+  const branch = repo.branch ?? (repo.head ? `${repo.head} (detached)` : "no commits");
+  const sync = `${repo.behind ? ` ↓${repo.behind}` : ""}${repo.ahead ? ` ↑${repo.ahead}` : ""}`;
+  const n = repo.files.length;
+  return {
+    text: `${branch}${n ? "*" : ""}${sync}${busy ? ` · ${busy}` : ""}`,
+    title: `${repo.root}\nBranch ${branch}${repo.upstream ? `, tracking ${repo.upstream}` : ""}${sync ? ` (${repo.ahead} to push, ${repo.behind} to pull)` : ""}${n ? `\n${n} changed file${n === 1 ? "" : "s"}` : ""}\nClick to switch branch`,
+  };
 }
