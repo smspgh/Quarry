@@ -52,6 +52,9 @@ pub struct SearchDone {
     pub matches: usize,
     pub truncated: bool,
     pub cancelled: bool,
+    /// Files with a block that reached `BLOCK_MATCH_CAP`: matches after it are not listed, but a
+    /// Replace All of the file replaces them too.
+    pub capped_paths: Vec<String>,
 }
 
 /// The regex source of the query. In plain-text mode a line break (typed with Ctrl+Enter) matches
@@ -152,6 +155,8 @@ struct CollectSink<'a, 'b> {
     out: &'a mut Batcher<'b>,
     count: &'a AtomicUsize,
     max: usize,
+    /// Set when a block stopped listing at `BLOCK_MATCH_CAP`.
+    capped: bool,
 }
 
 impl Sink for CollectSink<'_, '_> {
@@ -196,7 +201,11 @@ impl Sink for CollectSink<'_, '_> {
             });
             self.count.fetch_add(1, Ordering::Relaxed);
             seen += 1;
-            seen < BLOCK_MATCH_CAP
+            if seen >= BLOCK_MATCH_CAP {
+                self.capped = true;
+                return false;
+            }
+            true
         });
         if !found_any {
             // Shouldn't happen, but keep the line as a match so nothing is silently lost.
@@ -285,6 +294,7 @@ where
     let mut files = 0usize;
     let mut batch = Batcher { buf: Vec::new(), last_flush: Instant::now(), emit: &emit };
     let mut cancelled = false;
+    let mut capped_paths = Vec::new();
     for ent in walker(roots, q)? {
         if cancel.load(Ordering::Relaxed) {
             cancelled = true;
@@ -302,12 +312,15 @@ where
         }
         files += 1;
         let path_str = ent.path().to_string_lossy().into_owned();
-        let sink = CollectSink { matcher: &matcher, path: path_str, legacy: None, out: &mut batch, count: &count, max: q.max_results };
-        let _ = searcher.search_path(&matcher, ent.path(), sink);
+        let mut sink = CollectSink { matcher: &matcher, path: path_str, legacy: None, out: &mut batch, count: &count, max: q.max_results, capped: false };
+        let _ = searcher.search_path(&matcher, ent.path(), &mut sink);
+        if sink.capped {
+            capped_paths.push(sink.path);
+        }
     }
     batch.flush();
     let matches = count.load(Ordering::Relaxed);
-    Ok(SearchDone { search_id, files_searched: files, matches, truncated: matches >= q.max_results, cancelled })
+    Ok(SearchDone { search_id, files_searched: files, matches, truncated: matches >= q.max_results, cancelled, capped_paths })
 }
 
 #[derive(Serialize)]
@@ -716,6 +729,7 @@ mod tests {
         assert_eq!(done.matches, 1000);
         assert_eq!(done.files_searched, 1);
         assert!(!done.cancelled && !done.truncated);
+        assert!(done.capped_paths.is_empty());
         assert!(batches.len() >= 5, "expected several partial batches, got {batches:?}");
         assert_eq!(batches.iter().sum::<usize>(), 1000);
         assert!(batches.iter().all(|n| *n <= BATCH_MAX));
@@ -736,6 +750,7 @@ mod tests {
             assert_eq!(found.iter().filter(|m| m.line == 2).count(), 10);
             assert_eq!(done.matches, BLOCK_MATCH_CAP + 10);
             assert!(!done.truncated);
+            assert_eq!(done.capped_paths.len(), 1);
         }
     }
 

@@ -106,6 +106,7 @@ With the replace field shown, each result previews the change: the match struck 
 - reloads open tabs whose files it changed;
 - refuses files over 256 MB, which you can open in [large-file mode](large-files.md#replace-all) and use Replace All there;
 - changes nothing you left out of the results (see above);
+- replaces **every** match in each listed file, including matches that aren't listed: past the first 500 results of a file, past the 1,000 listed from one line, or past **Max** in the file where the search stopped. The confirmation says so: how many aren't listed when that's known ("300 of them are not listed…"; with Current File / Open Files also the exact number past Max), and "More matches that are not listed may also be replaced" when it isn't (a folder search that reached Max or the per-line limit). Files the search never reached are not changed;
 - keeps each file's encoding: a file is decoded as it would be when opened (its BOM, else the detected encoding, such as Windows-1252 or UTF-16), replaced, and written back in the same encoding with the same BOM;
 - leaves a file unchanged if its encoding can't store the result (for example, a Chinese character in a Windows-1252 file) or if it doesn't decode cleanly, and says why;
 - reports per-file failures under the file ("Replace failed: …").

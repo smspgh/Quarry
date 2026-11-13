@@ -119,6 +119,8 @@ export interface SearchState {
   showReplace: boolean;
   /** Set when the last search was cancelled before finishing (`SearchDone.cancelled`). */
   cancelled: boolean;
+  /** Files of the last folder search with a line that reached the per-line listing cap (`SearchDone.cappedPaths`). */
+  cappedPaths: string[];
   /** Per-file errors from the last Replace in Files, shown inline in the results list. */
   fileErrors: Record<string, string>;
   /** `path:line:col` of the result row that is selected / was last opened. */
@@ -324,6 +326,7 @@ export const useStore = create<AppState>((set, get) => ({
     collapsed: new Set(),
     showReplace: false,
     cancelled: false,
+    cappedPaths: [],
     fileErrors: {},
     activeKey: null,
     excluded: {},

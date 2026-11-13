@@ -12,10 +12,6 @@ This file is not a spec: `scripts/specs-index.mjs` ignores it.
 
 ## Find in Files (`search.md`)
 
-Possible bugs
-- Results past the first 500 of a file cannot be opened, stepped to with F4 or left out individually, yet Replace All still replaces them (`SearchPanel.tsx:140`, `:467`, `:472`, `:973`; SEARCH-007.6, SEARCH-009.7).
-
-Doc / code mismatches
 - Look-around and backreferences cannot be run in any scope: `docs/find-and-replace.md:130-133` says they work with Current File / Open Files, but the panel always validates with the Rust engine and blocks the search (`SearchPanel.tsx:351-369`, `:375`, `:877`; SEARCH-004.7).
 
 ## Scripts (`scripting.md`)

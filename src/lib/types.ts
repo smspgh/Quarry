@@ -136,6 +136,8 @@ export interface SearchDone {
   matches: number;
   truncated: boolean;
   cancelled: boolean;
+  /** Files where a line reached the per-line listing cap (`BLOCK_MATCH_CAP`). */
+  cappedPaths: string[];
 }
 
 export interface ReplaceFileResult {

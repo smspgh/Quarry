@@ -12506,7 +12506,7 @@
       "title": "Open a result in the editor",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 507,
+      "line": 508,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12563,7 +12563,7 @@
       "title": "Step through results with F4",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 572,
+      "line": 573,
       "status": "draft",
       "commands": [
         "find.nextResult",
@@ -12615,7 +12615,7 @@
       "title": "Leave results out",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 626,
+      "line": 628,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12664,7 +12664,7 @@
       "title": "File actions on result file rows",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 681,
+      "line": 683,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12715,7 +12715,7 @@
       "title": "Replace in Files on disk",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 739,
+      "line": 741,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12728,7 +12728,8 @@
       ],
       "tests": [
         "src-tauri/src/search.rs",
-        "src/__tests__/replace.test.ts"
+        "src/__tests__/replace.test.ts",
+        "src/__tests__/search-budget.test.ts"
       ],
       "docs": [
         "docs/find-and-replace.md"
@@ -12777,6 +12778,14 @@
         {
           "id": "SEARCH-012.11",
           "title": "Enter in the replace box searches"
+        },
+        {
+          "id": "SEARCH-012.12",
+          "title": "The confirmation counts matches that are not listed"
+        },
+        {
+          "id": "SEARCH-012.13",
+          "title": "The confirmation says when more may be replaced"
         }
       ]
     },
@@ -12785,7 +12794,7 @@
       "title": "Replace in Files keeps each file's encoding",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 827,
+      "line": 841,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12827,7 +12836,7 @@
       "title": "Replacement text: groups and Preserve Case",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 873,
+      "line": 887,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12874,7 +12883,7 @@
       "title": "Replace in the open documents",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 924,
+      "line": 938,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12884,7 +12893,8 @@
         "src/editor/manager.ts"
       ],
       "tests": [
-        "src/__tests__/replace.test.ts"
+        "src/__tests__/replace.test.ts",
+        "src/__tests__/search-budget.test.ts"
       ],
       "docs": [
         "docs/find-and-replace.md"
@@ -12917,6 +12927,10 @@
         {
           "id": "SEARCH-015.7",
           "title": "The status counts what was replaced"
+        },
+        {
+          "id": "SEARCH-015.8",
+          "title": "The confirmation counts the matches beyond Max"
         }
       ]
     },
@@ -12925,7 +12939,7 @@
       "title": "Undo Replace in Files",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 989,
+      "line": 1009,
       "status": "draft",
       "commands": [
         "find.undoReplaceInFiles"
@@ -18532,7 +18546,9 @@
       "SCRIPT-013"
     ],
     "src/__tests__/search-budget.test.ts": [
-      "SEARCH-007"
+      "SEARCH-007",
+      "SEARCH-012",
+      "SEARCH-015"
     ],
     "src/__tests__/shell.test.ts": [
       "UI-009",

@@ -1,5 +1,27 @@
 import { describe, expect, it } from "vitest";
-import { budgetRows } from "../components/panels/SearchPanel";
+import { budgetRows, unlistedNote } from "../components/panels/SearchPanel";
+
+describe("Replace All: matches that are not listed", () => {
+  const base = { hidden: 0, extra: 0, maxHit: false, maxResults: 20_000, cappedFiles: 0 };
+  it("says nothing when every match is listed", () => {
+    expect(unlistedNote(base)).toBe("");
+  });
+  it("counts results past the first 500 of a file", () => {
+    expect(unlistedNote({ ...base, hidden: 300 })).toBe("300 of them are not listed (only the first 500 results of a file are) and will be replaced too.");
+    expect(unlistedNote({ ...base, hidden: 1 })).toContain("1 of them is not listed");
+  });
+  it("gives the exact number beyond Max when it is known", () => {
+    expect(unlistedNote({ ...base, extra: 1200 })).toBe("1,200 more matches that are not listed (past Max, 20,000) will also be replaced.");
+    expect(unlistedNote({ ...base, extra: 1 })).toContain("1 more match that is not listed");
+  });
+  it("says 'may' when the number is not known", () => {
+    expect(unlistedNote({ ...base, maxHit: true })).toBe("More matches that are not listed may also be replaced: the search stopped at Max (20,000).");
+    expect(unlistedNote({ ...base, cappedFiles: 2 })).toBe("More matches that are not listed may also be replaced: a line in 2 files has more than 1,000 matches.");
+    expect(unlistedNote({ ...base, hidden: 5, maxHit: true, cappedFiles: 1 })).toBe(
+      "5 of them are not listed (only the first 500 results of a file are) and will be replaced too.\n\nMore matches that are not listed may also be replaced: the search stopped at Max (20,000), and a line in 1 file has more than 1,000 matches.",
+    );
+  });
+});
 
 describe("search results row budget", () => {
   it("renders headers and matches until the budget is spent", () => {

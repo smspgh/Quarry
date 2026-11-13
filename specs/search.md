@@ -490,6 +490,7 @@ Scenario: SEARCH-007.6 At most 500 results of one file are listed
   Given one file with 800 matches
   When I look at its results
   Then 500 are listed, followed by "… 300 more in this file"
+  And Replace All still replaces all 800, and its confirmation says the 300 that are not listed will be replaced too
 
 Scenario: SEARCH-007.7 Long result lists are shown in parts
   Given a search found 1 match in each of 5,000 files
@@ -621,6 +622,7 @@ Scenario: SEARCH-009.7 Results beyond the first 500 of a file are skipped
   Given one file with 800 matches
   When I step with F4
   Then stepping covers that file's first 500 results and the position reads "… of 500"
+  And the other 300 cannot be stepped to, though Replace All replaces them (SEARCH-012.12)
 ```
 
 ## SEARCH-010: Leave results out
@@ -741,13 +743,13 @@ Scenario: SEARCH-011.7 Results left out of a deleted file are forgotten
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SearchPanel.tsx` — `replaceAllInResults` (targets, dirty-tab skip, confirmation, `searchedAt`, `replaceNote`, `fileErrors`), `previewReplacement`, Replace All button
+  - `src/components/panels/SearchPanel.tsx` — `replaceAllInResults` (targets, dirty-tab skip, confirmation, `searchedAt`, `replaceNote`, `fileErrors`), `unlistedNote` (matches replaced but not listed: past 500 of a file, past Max, past the per-line cap), `previewReplacement`, Replace All button
   - `src/lib/dialogs.ts` — `choose()` confirmation
   - `src/lib/ipc.ts` — `search.replaceInFiles`
   - `src/lib/replaceUndo.ts` — `reloadOpenDocs` (clean open tabs show the new contents), `undoEntriesOf`
   - `src-tauri/src/lib.rs` — `replace_in_files` command
-  - `src-tauri/src/search.rs` — `replace_in_files`, `ReplaceTarget` (`skip`, `searched_ms`), `replace_text`, `write_atomic`, `REPLACE_MAX_BYTES` (256 MB)
-- Tests: `src-tauri/src/search.rs`, `src/__tests__/replace.test.ts`
+  - `src-tauri/src/search.rs` — `replace_in_files`, `ReplaceTarget` (`skip`, `searched_ms`), `replace_text`, `write_atomic`, `REPLACE_MAX_BYTES` (256 MB); `SearchDone.capped_paths` (files with a line at `BLOCK_MATCH_CAP`)
+- Tests: `src-tauri/src/search.rs`, `src/__tests__/replace.test.ts`, `src/__tests__/search-budget.test.ts`
 - Docs: `docs/find-and-replace.md`
 
 **As a** developer renaming something across a project
@@ -822,6 +824,18 @@ Scenario: SEARCH-012.11 Enter in the replace box searches
   Given the replace box has focus
   When I press Enter
   Then the search runs and nothing is replaced
+
+Scenario: SEARCH-012.12 The confirmation counts matches that are not listed
+  Given a folder search listed 800 matches in one file, of which 500 are shown
+  When I click "Replace All in results"
+  Then the dialog asks "Replace 800 occurrences in 1 file?"
+  And it says "300 of them are not listed (only the first 500 results of a file are) and will be replaced too."
+
+Scenario: SEARCH-012.13 The confirmation says when more may be replaced
+  Given a folder search stopped at "Max" 20,000, or a line of a matching file had more than 1,000 matches
+  When I click "Replace All in results"
+  Then the dialog says "More matches that are not listed may also be replaced:" followed by "the search stopped at Max (20,000)" or "a line in 1 file has more than 1,000 matches"
+  And choosing "Replace" replaces every match in the listed files, including those
 ```
 
 ## SEARCH-013: Replace in Files keeps each file's encoding
@@ -926,11 +940,11 @@ Scenario: SEARCH-014.6 Preserve Case can be changed after the search
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SearchPanel.tsx` — `replaceAllInResults` (`st.inMemory` branch, `editedSince`, count of what was replaced), `searchedText` (each document's text as the search read it, from `searchOpenDocs`), `buildJsRegex`
+  - `src/components/panels/SearchPanel.tsx` — `replaceAllInResults` (`st.inMemory` branch, `editedSince`, count of what was replaced, exact count beyond Max for `unlistedNote`), `searchedText` (each document's text as the search read it, from `searchOpenDocs`), `buildJsRegex`
   - `src/editor/manager.ts` — `editor.docOf(docId)`
   - `src/lib/replace.ts` — `replaceMatches` (`skip` set of `line:col`), `expandReplacement`, `preserveCase`
   - `src/editor/manager.ts` — `editor.replaceAll(docId, text)` (one undoable change per document)
-- Tests: `src/__tests__/replace.test.ts`
+- Tests: `src/__tests__/replace.test.ts`, `src/__tests__/search-budget.test.ts`
 - Docs: `docs/find-and-replace.md`
 
 **As a** person with several files open
@@ -984,6 +998,12 @@ Scenario: SEARCH-015.7 The status counts what was replaced
   When I replace all
   Then all 6 matches in the document are replaced, as Replace in Files does on disk
   And the status reads "Replaced 6 occurrence(s) in 1 open document(s)"
+
+Scenario: SEARCH-015.8 The confirmation counts the matches beyond Max
+  Given "Max" is 4 and an Open Files search listed 4 of the 6 matches in one document
+  When I click "Replace All in results"
+  Then the dialog asks "Replace 4 occurrences in 1 file?"
+  And it says "2 more matches that are not listed (past Max, 4) will also be replaced."
 ```
 
 ## SEARCH-016: Undo Replace in Files
