@@ -27,7 +27,7 @@ Install Claude Code and sign in once from a terminal (`claude`, then follow the 
 | Explorer, right-click a folder (or blank space, for the open folder) | **Work with Claude Code Here** / **Claude Code Terminal Here** |
 | Tools menu, command palette | **Work with Claude Code Here**, **Work with Claude Code in Folder…**, **Open Claude Code Terminal Here** |
 
-Without a folder, the commands use the open folder, then the active file's folder, and otherwise ask. Each folder has one Claude tab: opening it again switches to the tab that's already open.
+Without a folder, the commands first take the folder of the active Claude CLI tab (for **Work with Claude Code Here**) or Claude tab (for **Open Claude Code Terminal Here**), so you can switch between the two in the same folder; then the open folder, then the active file's folder, and otherwise ask. Each folder has one Claude tab: opening it again switches to the tab that's already open.
 
 ## Claude tabs
 
