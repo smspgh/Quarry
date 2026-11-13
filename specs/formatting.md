@@ -12,7 +12,7 @@ Format Document for text tabs: which formatter runs for which language (Quarry's
 - Status: draft
 - Commands: `code.format`
 - Files:
-  - `src/lib/format.ts` — `formatDocument` (picks the formatter from the document's language, "Already formatted", success toast), `canFormat`
+  - `src/lib/format.ts` — `formatDocument` (read-only guard, picks the formatter from the document's language, "Already formatted", success toast), `canFormat`
   - `src/lib/commands.ts` — `code.format` (`textDocOnly`, Shift+Alt+F)
   - `src/editor/manager.ts` — `replaceAll` (one transaction replacing only the part between the common prefix and suffix)
   - `src/components/MenuBar.tsx` — Code › Format Document
@@ -41,6 +41,12 @@ Scenario: FMT-001.3 The formatter follows the tab's language
   Given the same text in two tabs, one with the language "JSON" and one with the language "YAML"
   When I press Shift+Alt+F in each
   Then the first is formatted as JSON and the second as YAML
+
+Scenario: FMT-001.4 A read-only document is not formatted
+  Given "data.json" opened read-only and badly indented
+  When I press Shift+Alt+F
+  Then the document is unchanged
+  And a notice says "data.json is read-only."
 ```
 
 ## FMT-002: Format Document is one undo step and reports when nothing changed

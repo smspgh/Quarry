@@ -158,6 +158,10 @@ export async function formatDocument(): Promise<boolean> {
   const doc = activeDoc(store);
   if (!doc || doc.kind !== "text" || !editor.view) return false;
   const view = editor.view;
+  if (view.state.readOnly) {
+    store.toast(`${doc.name} is read-only.`, "info", 2000);
+    return false;
+  }
   const lang = doc.language;
   const s = store.settings;
   const text = view.state.doc.toString();

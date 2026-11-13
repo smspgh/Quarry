@@ -263,6 +263,11 @@ function cmCommand(fn: (view: NonNullable<typeof editor.view>) => boolean) {
   };
 }
 
+/** A `cmCommand` that changes the text: does nothing on a read-only document (CodeMirror's own commands check this too). */
+function cmEdit(fn: (view: NonNullable<typeof editor.view>) => boolean) {
+  return cmCommand((view) => !view.state.readOnly && fn(view));
+}
+
 /** True while the main CodeMirror view owns keyboard focus (shortcut guard for Tab, Ctrl+A, Ctrl+Z…). */
 const editorFocused = () => !!editor.view?.hasFocus;
 
@@ -699,7 +704,7 @@ export function registerAllCommands() {
     id: "edit.upper",
     title: "Transform to Uppercase",
     category: "Edit",
-    run: cmCommand((v) => {
+    run: cmEdit((v) => {
       v.dispatch(v.state.changeByRange((r) => ({ changes: { from: r.from, to: r.to, insert: v.state.sliceDoc(r.from, r.to).toUpperCase() }, range: r })));
       return true;
     }),
@@ -708,7 +713,7 @@ export function registerAllCommands() {
     id: "edit.lower",
     title: "Transform to Lowercase",
     category: "Edit",
-    run: cmCommand((v) => {
+    run: cmEdit((v) => {
       v.dispatch(v.state.changeByRange((r) => ({ changes: { from: r.from, to: r.to, insert: v.state.sliceDoc(r.from, r.to).toLowerCase() }, range: r })));
       return true;
     }),
@@ -743,7 +748,7 @@ export function registerAllCommands() {
       title,
       category,
       keys,
-      run: cmCommand((v) => {
+      run: cmEdit((v) => {
         const st = v.state;
         const sel = st.selection.main;
         const from = st.doc.lineAt(sel.from).from;
@@ -782,7 +787,7 @@ export function registerAllCommands() {
     title: "Wrap Selections in Quotes",
     category: "Edit",
     enabled: () => !!editor.view && hasText() && editor.view.state.selection.ranges.some((r) => !r.empty),
-    run: cmCommand((v) => {
+    run: cmEdit((v) => {
       v.dispatch(v.state.changeByRange((r) => {
         const ins = JSON.stringify(v.state.sliceDoc(r.from, r.to));
         return { changes: { from: r.from, to: r.to, insert: ins }, range: EditorSelection.range(r.from, r.from + ins.length) };
@@ -794,7 +799,7 @@ export function registerAllCommands() {
     id: "code.titleCase",
     title: "Transform to Title Case",
     category: "Code",
-    run: cmCommand((v) => {
+    run: cmEdit((v) => {
       v.dispatch(v.state.changeByRange((r) => ({ changes: { from: r.from, to: r.to, insert: v.state.sliceDoc(r.from, r.to).replace(/\b\w/g, (c) => c.toUpperCase()) }, range: r })));
       return true;
     }),

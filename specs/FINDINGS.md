@@ -35,7 +35,6 @@ Not verified
 ## Text editing (`editing.md`)
 
 Possible bugs
-- Read-only documents can be edited by commands: Format Document, the line transforms, case changes and Wrap in Quotes dispatch without a read-only check; only `edit.cut` / `edit.paste` have one (`src/lib/format.ts:222`, `src/lib/commands.ts:703`, `:712`, `:755`, `:786`, `:798`).
 - Line commands treat a trailing newline as an empty last line: sorting a whole document that ends in a newline moves that empty line to the top; Number Lines numbers it (`commands.ts:750-753`).
 - Line commands use only the main selection; other selections are ignored (`commands.ts:748`).
 - Remove Duplicate Lines is quadratic (`indexOf` inside `filter`, `commands.ts:763`).

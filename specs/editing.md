@@ -406,7 +406,7 @@ Scenario: EDIT-008.4 Greyed out outside text tabs
 - Status: draft
 - Commands: `code.sortAsc`, `code.sortDesc`, `code.reverseLines`, `code.dedupe`, `code.removeBlank`, `code.removeEmpty`, `code.trimTrailing`, `code.joinLines`, `edit.numberLines`
 - Files:
-  - `src/lib/commands.ts` — `lineTransform` (whole document when the selection is empty, otherwise the lines the main selection touches; one transaction, `input.transform`) and the nine registrations after it; `Intl.Collator` with `numeric` and `sensitivity: "base"`
+  - `src/lib/commands.ts` — `lineTransform` (`cmEdit`: nothing on a read-only document; whole document when the selection is empty, otherwise the lines the main selection touches; one transaction, `input.transform`) and the nine registrations after it; `Intl.Collator` with `numeric` and `sensitivity: "base"`
   - `src/components/MenuBar.tsx` — Edit › Lines submenu
 - Tests: none
 - Docs: `docs/editing.md`
@@ -467,6 +467,11 @@ Scenario: EDIT-009.9 One undo step, and none when nothing changes
   When I choose Sort Lines Ascending
   Then the document is not marked as changed
   And after a sort that does change the text, one Ctrl+Z restores the previous order
+
+Scenario: EDIT-009.10 A read-only document is not changed
+  Given a file that opened read-only, with the lines "b" and "a"
+  When I choose Sort Lines Ascending
+  Then the lines are still "b", "a"
 ```
 
 ## EDIT-010: Change case and wrap selections in quotes
@@ -474,7 +479,7 @@ Scenario: EDIT-009.9 One undo step, and none when nothing changes
 - Status: draft
 - Commands: `edit.upper`, `edit.lower`, `code.titleCase`, `edit.quoteSelections`
 - Files:
-  - `src/lib/commands.ts` — the four registrations (`changeByRange` over every selection; `edit.quoteSelections` uses `JSON.stringify` and its own `enabled`)
+  - `src/lib/commands.ts` — the four registrations (`cmEdit`: nothing on a read-only document; `changeByRange` over every selection; `edit.quoteSelections` uses `JSON.stringify` and its own `enabled`)
   - `src/components/MenuBar.tsx` — Edit › Transform submenu
 - Tests: none
 - Docs: `docs/editing.md`
@@ -516,6 +521,11 @@ Scenario: EDIT-010.6 Wrap in Quotes needs a selection
   Given a cursor with nothing selected
   When I open Edit › Transform
   Then Wrap Selections in Quotes is greyed out
+
+Scenario: EDIT-010.7 A read-only document is not changed
+  Given a file that opened read-only with "hello" selected
+  When I choose Transform to Uppercase, Transform to Title Case or Wrap Selections in Quotes
+  Then the text is still "hello"
 ```
 
 ## EDIT-011: Indent, outdent and convert indentation
@@ -523,7 +533,7 @@ Scenario: EDIT-010.6 Wrap in Quotes needs a selection
 - Status: draft
 - Commands: `edit.indent`, `edit.outdent`, `code.indentToSpaces`, `code.indentToTabs`, `view.setTabSize`
 - Files:
-  - `src/lib/commands.ts` — `edit.indent` / `edit.outdent` (`indentMore` / `indentLess`, only while the editor has focus), `code.indentToSpaces` / `code.indentToTabs` (via `lineTransform`, leading whitespace only), `view.setTabSize` (1–16, otherwise opens the status-bar picker)
+  - `src/lib/commands.ts` — `edit.indent` / `edit.outdent` (`indentMore` / `indentLess`, only while the editor has focus), `code.indentToSpaces` / `code.indentToTabs` (via `lineTransform`, leading whitespace only; `cmEdit` = nothing on a read-only document), `view.setTabSize` (1–16, otherwise opens the status-bar picker)
   - `src/editor/cmSetup.ts` — `compartments.indent` (`tabSize`, `indentUnit` from `insertSpaces`), `indentOnInput`, `indentWithTab`, `defaultKeymap` (Ctrl+[ / Ctrl+])
   - `src/editor/manager.ts` — `applySettings`
   - `src/components/StatusBar.tsx` — "Spaces: 4" / "Tab Size: 4" picker (2, 4, 8)

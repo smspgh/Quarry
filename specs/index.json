@@ -3789,6 +3789,10 @@
         {
           "id": "EDIT-009.9",
           "title": "One undo step, and none when nothing changes"
+        },
+        {
+          "id": "EDIT-009.10",
+          "title": "A read-only document is not changed"
         }
       ]
     },
@@ -3797,7 +3801,7 @@
       "title": "Change case and wrap selections in quotes",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 472,
+      "line": 477,
       "status": "draft",
       "commands": [
         "edit.upper",
@@ -3837,6 +3841,10 @@
         {
           "id": "EDIT-010.6",
           "title": "Wrap in Quotes needs a selection"
+        },
+        {
+          "id": "EDIT-010.7",
+          "title": "A read-only document is not changed"
         }
       ]
     },
@@ -3845,7 +3853,7 @@
       "title": "Indent, outdent and convert indentation",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 521,
+      "line": 531,
       "status": "draft",
       "commands": [
         "edit.indent",
@@ -3898,7 +3906,7 @@
       "title": "Toggle line and block comments",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 575,
+      "line": 585,
       "status": "draft",
       "commands": [
         "edit.toggleComment",
@@ -3936,7 +3944,7 @@
       "title": "Fold and unfold regions",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 614,
+      "line": 624,
       "status": "draft",
       "commands": [
         "code.fold",
@@ -3979,7 +3987,7 @@
       "title": "Right-click menu on a foldable line",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 656,
+      "line": 666,
       "status": "draft",
       "commands": [
         "code.foldLine",
@@ -4035,7 +4043,7 @@
       "title": "Brackets: matching, jumping and auto-closing",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 714,
+      "line": 724,
       "status": "draft",
       "commands": [
         "code.gotoBracket"
@@ -4075,7 +4083,7 @@
       "title": "Go to Line",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 753,
+      "line": 763,
       "status": "draft",
       "commands": [
         "goto.line"
@@ -4130,7 +4138,7 @@
       "title": "Detect a document's language",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 820,
+      "line": 830,
       "status": "draft",
       "commands": [
         "code.detectLanguage"
@@ -4187,7 +4195,7 @@
       "title": "Change the language of a document",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 892,
+      "line": 902,
       "status": "draft",
       "commands": [
         "code.setLanguage"
@@ -4236,7 +4244,7 @@
       "title": "Syntax highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 945,
+      "line": 955,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4268,7 +4276,7 @@
       "title": "Word wrap and visible whitespace",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 978,
+      "line": 988,
       "status": "draft",
       "commands": [
         "view.toggleWrap",
@@ -4310,7 +4318,7 @@
       "title": "Zoom the editor text",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1021,
+      "line": 1031,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -4353,7 +4361,7 @@
       "title": "Let Tab leave the editor",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1063,
+      "line": 1073,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -4393,7 +4401,7 @@
       "title": "Line numbers, active line and selection-match highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1107,
+      "line": 1117,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6579,6 +6587,10 @@
         {
           "id": "FMT-001.3",
           "title": "The formatter follows the tab's language"
+        },
+        {
+          "id": "FMT-001.4",
+          "title": "A read-only document is not formatted"
         }
       ]
     },
@@ -6587,7 +6599,7 @@
       "title": "Format Document is one undo step and reports when nothing changed",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 46,
+      "line": 52,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6624,7 +6636,7 @@
       "title": "Format JSON with Quarry's own formatter",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 84,
+      "line": 90,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6670,7 +6682,7 @@
       "title": "Format web languages with the bundled Prettier",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 130,
+      "line": 136,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6710,7 +6722,7 @@
       "title": "Format only the selection",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 189,
+      "line": 195,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6742,7 +6754,7 @@
       "title": "Prefer the formatter installed on the machine",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 223,
+      "line": 229,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6784,7 +6796,7 @@
       "title": "Built-in formatters when the tool isn't installed",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 281,
+      "line": 287,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6825,7 +6837,7 @@
       "title": "Rust needs rustfmt",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 342,
+      "line": 348,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6854,7 +6866,7 @@
       "title": "Syntax errors leave the document unchanged",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 369,
+      "line": 375,
       "status": "draft",
       "commands": [
         "code.format"
@@ -6886,7 +6898,7 @@
       "title": "JSON pretty-print and minify commands",
       "area": "FMT",
       "spec": "specs/formatting.md",
-      "line": 401,
+      "line": 407,
       "status": "draft",
       "commands": [
         "json.format",
