@@ -80,7 +80,6 @@ Doc / code mismatches
 - `docs/find-and-replace.md:113` says Rust replacement syntax with `${name}`; the code uses JavaScript rules (`$<name>`, `$&`, `$$`) and `${name}` comes out literally (`src-tauri/src/search.rs:395-452`).
 
 Not determined
-- Multi-line plain-text search on CRLF files: a pattern typed with Ctrl+Enter contains `\n` only.
 - A match block is capped at 1,000 matches (`search.rs:186`); undocumented, no scenario.
 
 ## Large files (`large-files.md`)

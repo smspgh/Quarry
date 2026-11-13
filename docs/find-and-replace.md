@@ -68,7 +68,7 @@ Find in Files starts on **Current File** each time Quarry opens. A scope you pic
 - `.git`, `node_modules` and `target` folders are skipped, unless you give an include pattern.
 - Hidden files are searched. Symbolic links are not followed.
 - Binary files (any containing a NUL byte) are not searched past that byte.
-- A pattern that contains a line break, or any regex, can match across lines.
+- A pattern that contains a line break, or any regex, can match across lines. Without Regex, a line break (**Ctrl+Enter**) matches both Windows (CRLF) and Unix (LF) line ends; in a regex searched on disk, `\n` is only the LF, so write `\r?\n` to match either (Current File and Open Files see every line end as `\n`).
 - **Max** (results) defaults to 20,000 (adjustable up to 1,000,000). The status line says "(limit reached)" when the limit was hit.
 
 Results stream in as they are found, grouped by file, and you can cancel a running search. While there are results, the Search panel sits beside the editor instead of floating over it, so the documents you open from it stay fully visible; see [Window layout](editing.md#window-layout). Long searches show the first 1,500 rows; **Show more results** adds more.

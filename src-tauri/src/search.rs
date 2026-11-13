@@ -54,8 +54,18 @@ pub struct SearchDone {
     pub cancelled: bool,
 }
 
+/// The regex source of the query. In plain-text mode a line break (typed with Ctrl+Enter) matches
+/// both LF and CRLF line ends, so a multi-line search finds its text in Windows files too.
+fn pattern_source(q: &SearchQuery) -> String {
+    if q.is_regex {
+        q.pattern.clone()
+    } else {
+        regex::escape(&q.pattern.replace("\r\n", "\n")).replace('\n', r"\r?\n")
+    }
+}
+
 pub fn build_matcher(q: &SearchQuery) -> Result<grep_regex::RegexMatcher, String> {
-    let pattern = if q.is_regex { q.pattern.clone() } else { regex::escape(&q.pattern) };
+    let pattern = pattern_source(q);
     RegexMatcherBuilder::new()
         .case_insensitive(!q.case_sensitive)
         .word(q.whole_word)
@@ -533,7 +543,7 @@ fn encode_error(e: String) -> String {
 /// is left unchanged and reported. With a `backup_dir`, the original of every changed file is
 /// copied there first so `undo_replace` can restore it.
 pub fn replace_in_files(targets: &[ReplaceTarget], q: &SearchQuery, replacement: &str, backup_dir: Option<&Path>) -> Result<Vec<ReplaceFileResult>, String> {
-    let pattern = if q.is_regex { q.pattern.clone() } else { regex::escape(&q.pattern) };
+    let pattern = pattern_source(q);
     // The search's Whole Word rule (`RegexMatcherBuilder::word`): no word character just before or
     // after the match. Plain `\b` misses "-2" in "x -2 y", which the search lists.
     let pattern = if q.whole_word { format!(r"\b{{start-half}}(?:{pattern})\b{{end-half}}") } else { pattern };
@@ -808,6 +818,27 @@ mod tests {
             assert_eq!(res[0].replaced, hits, "{pat}");
             assert_eq!(std::fs::read_to_string(&f).unwrap(), out);
         }
+    }
+
+    #[test]
+    fn multi_line_plain_text_matches_crlf_and_lf_files() {
+        let dir = tempfile::tempdir().unwrap();
+        let crlf = dir.path().join("crlf.txt");
+        let lf = dir.path().join("lf.txt");
+        std::fs::write(&crlf, "x\r\nfoo\r\nbar\r\n").unwrap();
+        std::fs::write(&lf, "foo\nbar\n").unwrap();
+        let mut ml = q("foo\nbar", false);
+        ml.multiline = true;
+        let found = Mutex::new(Vec::new());
+        let roots = vec![dir.path().to_string_lossy().into_owned()];
+        search_paths(1, &roots, &ml, Arc::new(AtomicBool::new(false)), |b| found.lock().unwrap().extend(b)).unwrap();
+        let mut found: Vec<(bool, u64, u64)> = found.into_inner().unwrap().iter().map(|m| (m.path.ends_with("crlf.txt"), m.line, m.col)).collect();
+        found.sort();
+        assert_eq!(found, vec![(false, 1, 0), (true, 2, 0)]);
+        let res = replace_in_files(&targets(&[&crlf, &lf]), &ml, "z", None).unwrap();
+        assert_eq!(res.iter().map(|r| r.replaced).collect::<Vec<_>>(), vec![1, 1]);
+        assert_eq!(std::fs::read_to_string(&crlf).unwrap(), "x\r\nz\r\n");
+        assert_eq!(std::fs::read_to_string(&lf).unwrap(), "z\n");
     }
 
     #[test]

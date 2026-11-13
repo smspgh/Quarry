@@ -11923,6 +11923,10 @@
         {
           "id": "SEARCH-004.9",
           "title": "Whole Word around a pattern that starts or ends with a non-word character"
+        },
+        {
+          "id": "SEARCH-004.10",
+          "title": "A multi-line plain-text search finds Windows line ends"
         }
       ]
     },
@@ -11931,7 +11935,7 @@
       "title": "Filter which files are searched",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 275,
+      "line": 282,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11985,7 +11989,7 @@
       "title": "Streamed results, cancelling and limits",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 342,
+      "line": 349,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12048,7 +12052,7 @@
       "title": "Browse the results list",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 416,
+      "line": 423,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12104,7 +12108,7 @@
       "title": "Open a result in the editor",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 483,
+      "line": 490,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12161,7 +12165,7 @@
       "title": "Step through results with F4",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 548,
+      "line": 555,
       "status": "draft",
       "commands": [
         "find.nextResult",
@@ -12213,7 +12217,7 @@
       "title": "Leave results out",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 602,
+      "line": 609,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12262,7 +12266,7 @@
       "title": "File actions on result file rows",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 657,
+      "line": 664,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12307,7 +12311,7 @@
       "title": "Replace in Files on disk",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 707,
+      "line": 714,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12377,7 +12381,7 @@
       "title": "Replace in Files keeps each file's encoding",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 795,
+      "line": 802,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12419,7 +12423,7 @@
       "title": "Replacement text: groups and Preserve Case",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 841,
+      "line": 848,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12466,7 +12470,7 @@
       "title": "Replace in the open documents",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 891,
+      "line": 898,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12508,7 +12512,7 @@
       "title": "Undo Replace in Files",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 938,
+      "line": 945,
       "status": "draft",
       "commands": [
         "find.undoReplaceInFiles"

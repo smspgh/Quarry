@@ -207,7 +207,7 @@ Scenario: SEARCH-003.9 No folder to search
   - `src/components/panels/SearchPanel.tsx` — Match Case / Whole Word / Regex toggles, Ctrl+Enter, "Dot matches newline", debounced `validateRegex` (150 ms), `invalidRegex`, `regexMessage`, `multiline` flag sent with the query
   - `src/lib/ipc.ts` — `search.validateRegex`
   - `src-tauri/src/lib.rs` — `validate_regex` command
-  - `src-tauri/src/search.rs` — `build_matcher`, `validate_regex`, `one_line_regex_error`, `build_searcher` (multi-line), Whole Word in `replace_in_files` (`\b{start-half}` / `\b{end-half}`, as `RegexMatcherBuilder::word`)
+  - `src-tauri/src/search.rs` — `pattern_source` (plain-text line break → `\r?\n`), `build_matcher`, `validate_regex`, `one_line_regex_error`, `build_searcher` (multi-line), Whole Word in `replace_in_files` (`\b{start-half}` / `\b{end-half}`, as `RegexMatcherBuilder::word`)
   - `src/components/panels/SearchPanel.tsx` — `buildJsRegex` (Whole Word as `(?<!\w)` / `(?!\w)` for open documents and the replace preview)
   - `src/lib/types.ts` — `SearchQuery`
 - Tests: `src-tauri/src/search.rs`, `src/__tests__/replace.test.ts`
@@ -270,6 +270,13 @@ Scenario: SEARCH-004.9 Whole Word around a pattern that starts or ends with a no
   When I search for "-2" with Match Whole Word on
   Then only the "-2" between spaces is found
   And Replace All replaces exactly that one match, in any scope, and the preview shows it
+
+Scenario: SEARCH-004.10 A multi-line plain-text search finds Windows line ends
+  Given the scope is Folder, Regex is off, and one file has "foo" and "bar" on consecutive lines with CRLF line ends and another with LF
+  When I type "foo", press Ctrl+Enter, type "bar" and search
+  Then both files are listed, each at the line where "foo" is
+  And Replace All replaces the two lines in both files and keeps each file's line ends elsewhere
+  And with Regex on, "foo\nbar" finds only the LF file ("foo\r?\nbar" finds both)
 ```
 
 ## SEARCH-005: Filter which files are searched
