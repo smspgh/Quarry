@@ -94,7 +94,7 @@ pub fn build_args(a: &StartArgs) -> Vec<String> {
 }
 
 /// Session ids are UUIDs; anything else is not passed on the command line.
-fn is_session_id(s: &str) -> bool {
+pub(crate) fn is_session_id(s: &str) -> bool {
     !s.is_empty() && s.len() <= 64 && s.chars().all(|c| c.is_ascii_hexdigit() || c == '-')
 }
 

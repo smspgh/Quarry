@@ -83,8 +83,9 @@ Scenario: TERM-001.7 Hidden while the integration is off
   - `src/lib/commands.ts` — `claude.openTerminal` accepts `{ folder, resume }`
   - `src/lib/terminal.ts` — `openClaudeTerminal(folder, resume)`
   - `src/components/TerminalView.tsx` — `resume` passed on the first start only (`first`)
-  - `src-tauri/src/pty.rs` — `claude_command` (`--resume <id>`, only for an id of hexadecimal digits and dashes, at most 64 characters)
-- Tests: none
+  - `src-tauri/src/pty.rs` — `claude_command`, `resume_id` (`--resume <id>` only when `claude::is_session_id` accepts it: hexadecimal digits and dashes, at most 64 characters)
+  - `src-tauri/src/claude.rs` — `is_session_id` (shared with Claude tabs)
+- Tests: `src-tauri/src/pty.rs`
 - Docs: `docs/claude-code.md`
 
 **As a** developer continuing earlier work in the command line

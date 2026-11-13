@@ -14207,9 +14207,12 @@
         "src/lib/commands.ts",
         "src/lib/terminal.ts",
         "src/components/TerminalView.tsx",
+        "src-tauri/src/pty.rs",
+        "src-tauri/src/claude.rs"
+      ],
+      "tests": [
         "src-tauri/src/pty.rs"
       ],
-      "tests": [],
       "docs": [
         "docs/claude-code.md"
       ],
@@ -14237,7 +14240,7 @@
       "title": "Keys go to the program",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 112,
+      "line": 113,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14274,7 +14277,7 @@
       "title": "Copy and paste in the terminal",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 153,
+      "line": 154,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14308,7 +14311,7 @@
       "title": "The terminal fits the tab and follows the theme",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 189,
+      "line": 190,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14355,7 +14358,7 @@
       "title": "When the program ends",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 234,
+      "line": 235,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14395,7 +14398,7 @@
       "title": "Closing terminal tabs",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 276,
+      "line": 277,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14434,7 +14437,7 @@
       "title": "A clean environment for the program",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 320,
+      "line": 321,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14469,7 +14472,7 @@
       "title": "One-off command terminals",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 353,
+      "line": 354,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16060,6 +16063,7 @@
       "CLAUDE-018",
       "CLAUDE-020",
       "TERM-001",
+      "TERM-002",
       "TERM-008"
     ],
     "src-tauri/src/fileops.rs": [
@@ -17768,6 +17772,7 @@
       "LSP-005"
     ],
     "src-tauri/src/pty.rs": [
+      "TERM-002",
       "TERM-005"
     ],
     "src-tauri/src/search.rs": [
