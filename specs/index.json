@@ -2833,6 +2833,10 @@
         {
           "id": "DIFF-002.6",
           "title": "Untitled tabs can't be selected"
+        },
+        {
+          "id": "DIFF-002.7",
+          "title": "Only a text tab is compared with the selected file"
         }
       ]
     },
@@ -2841,7 +2845,7 @@
       "title": "Compare the active tab with a file",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 118,
+      "line": 124,
       "status": "draft",
       "commands": [
         "compare.activeWith"
@@ -2878,7 +2882,7 @@
       "title": "Compare unsaved edits with the saved file",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 156,
+      "line": 162,
       "status": "draft",
       "commands": [
         "compare.withSaved"
@@ -2912,7 +2916,7 @@
       "title": "Compare the active tab with the clipboard",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 190,
+      "line": 196,
       "status": "draft",
       "commands": [
         "compare.withClipboard"
@@ -2952,7 +2956,7 @@
       "title": "Compare a file with its last commit",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 228,
+      "line": 234,
       "status": "draft",
       "commands": [
         "git.compareWithHead"
@@ -3007,7 +3011,7 @@
       "title": "Refuse what can't be compared",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 285,
+      "line": 291,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3041,7 +3045,7 @@
       "title": "Move between the changes",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 319,
+      "line": 325,
       "status": "draft",
       "commands": [
         "compare.nextChange",
@@ -3083,7 +3087,7 @@
       "title": "Choose the layout: side by side, inline, folded, swapped",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 362,
+      "line": 368,
       "status": "draft",
       "commands": [
         "compare.toggleInline",
@@ -3134,7 +3138,7 @@
       "title": "Edit file sides; snapshots are read-only",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 416,
+      "line": 422,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3173,7 +3177,7 @@
       "title": "Copy a change across with the arrows",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 460,
+      "line": 466,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3216,7 +3220,7 @@
       "title": "Save an edited side",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 507,
+      "line": 513,
       "status": "draft",
       "commands": [
         "file.save"
@@ -3274,7 +3278,7 @@
       "title": "Reload the compared texts",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 571,
+      "line": 577,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3321,7 +3325,7 @@
       "title": "Preview comparisons replace each other",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 623,
+      "line": 629,
       "status": "draft",
       "commands": [],
       "files": [

@@ -69,7 +69,7 @@ Scenario: DIFF-001.6 Not restored after a restart
 - Commands: `compare.selectForCompare`, `compare.withSelected`
 - Files:
   - `src/lib/diff.ts` — `selectForCompare`, `compareWithSelected`, `compareCandidate` (one remembered path, in memory only)
-  - `src/lib/commands.ts` — `compare.selectForCompare`, `compare.withSelected` (`enabled` needs a candidate that is not the active file)
+  - `src/lib/commands.ts` — `compare.selectForCompare`, `compare.withSelected` (`enabled` needs a candidate and an active text tab with a different path)
   - `src/components/FileMenu.tsx` — "Select for Compare", "Compare with “name”" (Explorer and Find in Files file rows)
   - `src/components/TitleBar.tsx` — tab menu "Select for Compare" / "Compare with Selected"
 - Tests: none
@@ -113,6 +113,12 @@ Scenario: DIFF-002.6 Untitled tabs can't be selected
   Given the active tab is an untitled document
   When I open the File › Compare menu
   Then "Select Active File for Compare" is greyed out
+
+Scenario: DIFF-002.7 Only a text tab is compared with the selected file
+  Given "old.ts" is selected for compare
+  And the active tab is a large-file, terminal, Claude or Compare tab
+  When I open the File › Compare menu
+  Then "Compare Active File with Selected" is greyed out
 ```
 
 ## DIFF-003: Compare the active tab with a file

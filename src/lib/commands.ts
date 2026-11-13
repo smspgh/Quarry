@@ -1344,8 +1344,9 @@ export function registerAllCommands() {
     id: "compare.withSelected",
     title: "Compare Active File with Selected",
     category: "Compare",
-    enabled: () => { const c = compareCandidate(); const p = activeDoc(s())?.path; return !!c && !!p && !samePath(c, p); },
-    run: (args) => { const p = typeof args === "string" ? args : activeDoc(s())?.path; if (!p) return false; compareWithSelected(p); },
+    // Like Select for Compare, only a text tab: a large file can't be compared.
+    enabled: () => { const c = compareCandidate(); const d = activeDoc(s()); return !!c && d?.kind === "text" && !!d.path && !samePath(c, d.path); },
+    run: (args) => { const d = activeDoc(s()); const p = typeof args === "string" ? args : d?.kind === "text" ? d.path : null; if (!p) return false; compareWithSelected(p); },
   });
   register({ id: "compare.nextChange", title: "Next Change", category: "Compare", keys: "F7", enabled: () => !!activeDiff(), run: () => { const d = activeDiff(); return d ? stepChange(d.id, 1) : false; } });
   register({ id: "compare.prevChange", title: "Previous Change", category: "Compare", keys: "Shift+F7", enabled: () => !!activeDiff(), run: () => { const d = activeDiff(); return d ? stepChange(d.id, -1) : false; } });
