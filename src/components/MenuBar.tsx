@@ -250,6 +250,8 @@ const MENUS: Menu[] = [
       { cmd: "git.peekChange" },
       { cmd: "git.revertChange" },
       { sep: true },
+      { label: "Conflicts", submenu: () => [{ cmd: "git.nextConflict" }, { cmd: "git.prevConflict" }, { sep: true }, { cmd: "git.acceptCurrent" }, { cmd: "git.acceptIncoming" }, { cmd: "git.acceptBoth" }, { sep: true }, { cmd: "git.acceptAllCurrent" }, { cmd: "git.acceptAllIncoming" }] },
+      { sep: true },
       { cmd: "git.stageFile" },
       { cmd: "git.unstageFile" },
       { sep: true },

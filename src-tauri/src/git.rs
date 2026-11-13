@@ -435,6 +435,30 @@ fn stage(root: &Path, paths: &[String]) -> Result<(), String> {
     run(root, false, &["add", "-A", "--pathspec-from-file=-", "--pathspec-file-nul"], Some(nul_list(&rels))).map(|_| ())
 }
 
+/// Resolve a conflicted file by taking one whole side: "ours" (the branch you are on) or
+/// "theirs" (what is being merged / picked in). When that side deleted the file, it is deleted.
+/// Returns "kept" or "deleted".
+fn resolve_side(root: &Path, path: &str, side: &str) -> Result<String, String> {
+    let flag = match side {
+        "ours" => "--ours",
+        "theirs" => "--theirs",
+        _ => return Err(format!("unknown side {side}")),
+    };
+    let rel = rel_path(root, path)?;
+    // Stage 2 is ours, 3 is theirs: is the file there on that side?
+    let stage = if side == "ours" { "2" } else { "3" };
+    let listed = run_text(root, true, &["ls-files", "-u", "--", &rel])?;
+    let has_side = listed.lines().any(|l| l.split_whitespace().nth(2) == Some(stage));
+    if has_side {
+        run(root, false, &["checkout", flag, "--", &rel], None)?;
+        run(root, false, &["add", "--", &rel], None)?;
+        Ok("kept".into())
+    } else {
+        run(root, false, &["rm", "-f", "--quiet", "--", &rel], None)?;
+        Ok("deleted".into())
+    }
+}
+
 fn unstage(root: &Path, paths: &[String]) -> Result<(), String> {
     let rels = rels(root, paths)?;
     if rels.is_empty() {
@@ -1524,6 +1548,11 @@ pub async fn git_abort(root: String) -> Result<String, String> {
 }
 
 #[tauri::command]
+pub async fn git_resolve_side(root: String, path: String, side: String) -> Result<String, String> {
+    blocking(move || resolve_side(Path::new(&root), &path, &side)).await
+}
+
+#[tauri::command]
 pub async fn git_unpushed(root: String) -> Result<Vec<String>, String> {
     blocking(move || Ok(unpushed(Path::new(&root)))).await
 }
@@ -1898,6 +1927,32 @@ mod tests {
         assert!(commit(&root, "too early", false).is_err());
         assert_eq!(abort_operation(&root).unwrap(), "cherry-pick");
         assert!(operation(&root).is_none());
+
+        // Taking a whole side resolves the file: ours keeps the branch's text, theirs the picked one.
+        let a = root.join("a.txt").to_string_lossy().into_owned();
+        assert!(commit_action(&root, "cherry-pick", &mine[0].sha, None).is_err());
+        assert!(resolve_side(&root, &a, "sideways").is_err());
+        assert_eq!(resolve_side(&root, &a, "ours").unwrap(), "kept");
+        assert_eq!(std::fs::read_to_string(root.join("a.txt")).unwrap(), "different\n");
+        assert!(!status(&root).unwrap().unwrap().files.iter().any(|f| f.conflicted));
+        abort_operation(&root).unwrap();
+        assert!(commit_action(&root, "cherry-pick", &mine[0].sha, None).is_err());
+        assert_eq!(resolve_side(&root, &a, "theirs").unwrap(), "kept");
+        assert_eq!(std::fs::read_to_string(root.join("a.txt")).unwrap(), "1\n2\n");
+        abort_operation(&root).unwrap();
+
+        // Deleted on our side, changed on theirs: ours deletes it, theirs brings it back.
+        git_ok(&root, &["rm", "-q", "a.txt"]);
+        git_ok(&root, &["commit", "-qm", "drop a"]);
+        assert!(commit_action(&root, "cherry-pick", &mine[0].sha, None).is_err());
+        assert_eq!(resolve_side(&root, &a, "ours").unwrap(), "deleted");
+        assert!(!root.join("a.txt").exists());
+        abort_operation(&root).unwrap();
+        assert!(commit_action(&root, "cherry-pick", &mine[0].sha, None).is_err());
+        assert_eq!(resolve_side(&root, &a, "theirs").unwrap(), "kept");
+        assert_eq!(std::fs::read_to_string(root.join("a.txt")).unwrap(), "1\n2\n");
+        abort_operation(&root).unwrap();
+        git_ok(&root, &["reset", "-q", "--hard", "HEAD~1"]);
         assert_eq!(std::fs::read_to_string(root.join("a.txt")).unwrap(), "different\n");
         git_ok(&root, &["switch", "-q", "main"]);
 

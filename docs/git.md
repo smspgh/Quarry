@@ -71,7 +71,19 @@ Right-click a commit for the actions:
 | Revert This Commit… | Adds a commit that undoes it; history is kept. |
 | Reset *branch* to Here (Soft / Mixed / Hard)… | Moves your branch back to that commit. **Soft** keeps the later changes staged, **Mixed** keeps them in your files unstaged, **Hard** discards them along with uncommitted changes to tracked files. |
 
-Everything that moves your branch or files asks first and says what will happen. A cherry-pick or revert that hits a conflict stops part-way: Source Control shows the operation (**Cherry-picking**) with the conflicted files under **Merge Changes**. The graph tab shows the same thing in a strip at its top. Resolve and commit them, or press **Abort** (in the strip, or beside the branch in Source Control) to go back to how things were. Abort also works for a merge or rebase that stopped. While any file is still in conflict, the Commit button is disabled and reads **Resolve 1 Conflict First**. The message box is filled in with the message git prepared (the picked commit's own message, or "Merge branch …"), unless you had already typed one. Marking a file resolved (**+** under Merge Changes) checks it first: if it still contains git's `<<<<<<<` / `>>>>>>>` conflict lines, Quarry asks before staging it.
+Everything that moves your branch or files asks first and says what will happen. A cherry-pick or revert that hits a conflict stops part-way: Source Control shows the operation (**Cherry-picking**) with the conflicted files under **Merge Changes**. The graph tab shows the same thing in a strip at its top. Resolve and commit them, or press **Abort** (in the strip, or beside the branch in Source Control) to go back to how things were. Abort also works for a merge or rebase that stopped. 
+
+### Resolving a conflict
+
+Click the file under **Merge Changes**: it opens in the editor with each conflict marked.
+
+- **In the editor.** Your branch's side (*current*, under `<<<<<<<`) is tinted green and the side coming in (*incoming*, above `>>>>>>>`) blue. A bar above each conflict says **Conflict 1 of 2** and offers **Accept Current**, **Accept Incoming** and **Accept Both** (current first). Each is one undo step, so **Ctrl+Z** brings the conflict back. You can also just edit the text and delete the marker lines yourself.
+- **From the keyboard / menu.** **Git › Conflicts** has Next / Previous Conflict (**Alt+F6** / **Shift+Alt+F6**), the three Accept commands for the conflict at the cursor, and **Accept All Current / Incoming in This File**.
+- **When the last conflict in a file is gone**, Quarry offers **Save and Mark Resolved**; **Keep Editing** leaves that for later (the **+** on the file does the same, and saves the tab first).
+- **The whole file at once.** **Current** and **Incoming** on the file's row under Merge Changes take that side's version of the entire file. This is also how to settle a file that one side deleted: the side that deleted it removes the file, the other keeps it.
+- **Then commit.** With every file resolved, the Commit button comes back and the message box already holds the message git prepared.
+
+While any file is still in conflict, the Commit button is disabled and reads **Resolve 1 Conflict First**. The message box is filled in with the message git prepared (the picked commit's own message, or "Merge branch …"), unless you had already typed one. Marking a file resolved (**+** under Merge Changes) checks it first: if it still contains git's `<<<<<<<` / `>>>>>>>` conflict lines, Quarry asks before staging it.
 
 Not in the graph: dropping a commit from the middle of a branch and interactive rebase.
 

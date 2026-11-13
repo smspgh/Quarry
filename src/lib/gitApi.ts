@@ -222,6 +222,9 @@ export const git = {
   graphIndex: (root: string) => invoke<void>("git_graph_index", { root }),
   commitDetail: (root: string, sha: string) => invoke<GitCommitDetail>("git_commit_detail", { root, sha }),
   commitAction: (root: string, action: GitCommitAction, sha: string, name?: string) => invoke<string>("git_commit_action", { root, action, sha, name: name ?? null }),
+  /** Resolve a conflicted file by taking one whole side ("ours": your branch; "theirs": what comes in).
+   *  Resolves with "kept", or "deleted" when that side had deleted the file. */
+  resolveSide: (root: string, path: string, side: "ours" | "theirs") => invoke<"kept" | "deleted">("git_resolve_side", { root, path, side }),
   /** Abandon the merge / rebase / cherry-pick / revert in progress; resolves with its name. */
   abort: (root: string) => invoke<string>("git_abort", { root }),
   /** Ids of the current branch's commits its upstream does not have yet (none without an upstream). */

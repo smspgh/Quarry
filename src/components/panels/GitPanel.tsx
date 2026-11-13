@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowUp, Check, ChevronRight, CircleDot, CloudDownload, CloudOff, FileDiff, FileText, GitBranch, GitGraph, History, Minus, Plus, RefreshCw, TriangleAlert, Undo2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { openPath } from "../../lib/actions";
-import { abortOperation, resolveConflicts, checkRemote, isMissingRepo, commit, compareCommitWithCurrent, currentRepo, discard, moreHistory, openChange, openCommitChange, openCommitFile, openGraph, pickBranch, remote, rescanGit, stage, unstage, useGit } from "../../lib/git";
+import { abortOperation, resolveConflicts, takeSide, checkRemote, isMissingRepo, commit, compareCommitWithCurrent, currentRepo, discard, moreHistory, openChange, openCommitChange, openCommitFile, openGraph, pickBranch, remote, rescanGit, stage, unstage, useGit } from "../../lib/git";
 import { commitFileKind, commitLabel, groupFiles, KIND_LABEL, KIND_LETTER, rowKind, syncLine, type Group } from "../../lib/gitStatus";
 import { git, type GitCommitFile, type GitFile, type GitLogEntry, type GitRemoteOp, type GitStatus } from "../../lib/gitApi";
 import { relativeTime } from "../../editor/git";
@@ -47,6 +47,16 @@ function FileRow({ f, repo, group }: { f: GitFile; repo: GitStatus; group: Group
           <button className="icon-btn xs" title={f.untracked ? "Delete (to the Recycle Bin)" : "Discard changes"} onClick={() => void discard(repo.root, [f])}>
             <Undo2 size={14} />
           </button>
+        )}
+        {group === "conflict" && (
+          <>
+            <button className="btn small scm-side" title="Resolve by taking your branch's version of the whole file (deletes it if your branch deleted it)" onClick={() => void takeSide(repo.root, f, "ours")}>
+              Current
+            </button>
+            <button className="btn small scm-side" title="Resolve by taking the incoming version of the whole file (deletes it if the incoming side deleted it)" onClick={() => void takeSide(repo.root, f, "theirs")}>
+              Incoming
+            </button>
+          </>
         )}
         {staged ? (
           <button className="icon-btn xs" title="Unstage" onClick={() => void unstage(repo.root, [f.path])}>
@@ -415,7 +425,12 @@ export function GitPanel() {
   const offered = useRef("");
   const opKey = repo?.operation && repo.operationMessage ? `${repo.root}|${repo.operation}|${repo.operationMessage}` : "";
   useEffect(() => {
-    if (!opKey || offered.current === opKey) return;
+    if (!opKey) {
+      // The operation ended: the next one gets its message offered again, even an identical one.
+      offered.current = "";
+      return;
+    }
+    if (offered.current === opKey) return;
     offered.current = opKey;
     setMessage((cur) => (cur.trim() ? cur : repo!.operationMessage!));
   }, [opKey]);

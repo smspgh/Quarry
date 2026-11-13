@@ -18,6 +18,7 @@ import type { Settings } from "../lib/types";
 import { baseExtensions, compartments, detectLanguage, flashRange, languageByName, settingsReconfigure, sniffLanguage } from "./cmSetup";
 import { columnModeExtensions, setColumnMode } from "./columnMode";
 import { gitExtensions } from "./git";
+import { conflictExtensions } from "./conflicts";
 
 export interface RecorderHooks {
   onKeydown?: (e: KeyboardEvent) => void;
@@ -229,6 +230,7 @@ class EditorManager {
     return baseExtensions(settings, [
       resultHighlight(),
       gitExtensions(),
+      conflictExtensions(),
       EditorView.updateListener.of((u) => this.onUpdate(u)),
       // Highest precedence so the macro recorder sees keys before keymaps consume them.
       Prec.highest(

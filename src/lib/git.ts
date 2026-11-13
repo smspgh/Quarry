@@ -9,6 +9,8 @@ import { Text } from "@codemirror/state";
 import { create } from "zustand";
 import { editor } from "../editor/manager";
 import { setBlame, setGitBase } from "../editor/git";
+import { onConflictsCleared } from "../editor/conflicts";
+import type { EditorView } from "@codemirror/view";
 import { git, type GitBranch, type GitCommitAction, type GitCommitFile, type GitFile, type GitLogEntry, type GitIdentity, type GitRemoteOp, type GitStatus, type GithubRepo } from "./gitApi";
 import { newDocId, useStore, type Doc } from "./store";
 import { fs } from "./ipc";
@@ -247,6 +249,7 @@ export function toggleBlame() {
 
 export function installGit(): () => void {
   refreshGit(0);
+  onConflictsCleared((view) => void conflictsCleared(view));
   const unsub = useStore.subscribe((s, prev) => {
     if (s.folder !== prev.folder) {
       // The panel follows the newly opened folder's repository.
@@ -301,6 +304,14 @@ export const stage = (root: string, paths: string[]) => run("Staging…", () => 
  * markers is almost certainly not resolved: ask before staging those.
  */
 export async function resolveConflicts(root: string, paths: string[]) {
+  // What gets staged is the file on disk: save open tabs of these files first.
+  for (const p of paths) {
+    const open = useStore.getState().docs.find((d) => d.kind === "text" && d.dirty && d.path && key(d.path) === key(p));
+    if (open) {
+      const { saveDocument } = await import("./actions");
+      if (!(await saveDocument(open.id))) return;
+    }
+  }
   const marked: string[] = [];
   for (const p of paths) {
     try {
@@ -323,6 +334,62 @@ export async function resolveConflicts(root: string, paths: string[]) {
     if (!ok) return;
   }
   await stage(root, paths);
+}
+
+/**
+ * Resolve a conflicted file by taking one side whole: "ours" is the branch you are on (Current),
+ * "theirs" what is being merged or picked in (Incoming). An open tab of it is reloaded.
+ */
+export async function takeSide(root: string, f: GitFile, side: "ours" | "theirs") {
+  const name = nameOf(f.path);
+  const open = useStore.getState().docs.find((d) => d.kind === "text" && d.dirty && d.path && key(d.path) === key(f.path));
+  if (open) {
+    const ok = await choose(
+      `Replace your edits to ${name}?`,
+      `${name} has unsaved changes in its tab. Taking ${side === "ours" ? "the current" : "the incoming"} version replaces the file and discards them.`,
+      [
+        { label: "Replace", kind: "danger", value: true },
+        { label: "Cancel", cancel: true, default: true, value: false },
+      ],
+      false,
+    );
+    if (!ok) return;
+  }
+  const out = await run("Resolving…", () => git.resolveSide(root, f.path, side));
+  if (out === undefined) return;
+  const which = side === "ours" ? "current" : "incoming";
+  toast(out === "deleted" ? `${name}: deleted (the ${which} side had deleted it).` : `${name}: took the ${which} version.`, "success", 3500);
+  const st = useStore.getState();
+  const doc = st.docs.find((d) => d.kind === "text" && d.path && key(d.path) === key(f.path));
+  if (doc) {
+    const { revertDocument, closeDocument } = await import("./actions");
+    if (out === "deleted") {
+      st.updateDoc(doc.id, { dirty: false });
+      await closeDocument(doc.id);
+    } else await revertDocument(doc.id, { confirm: false, silent: true });
+  }
+}
+
+/** The last conflict of a document was just resolved in the editor: offer to finish the file. */
+async function conflictsCleared(view: EditorView) {
+  const st = useStore.getState();
+  const doc = st.docs.find((d) => d.kind === "text" && editor.viewOf(d.id) === view) ?? st.docs.find((d) => d.id === st.activeId);
+  if (!doc?.path) return;
+  const repo = repoOf(doc.path);
+  const file = repo?.files.find((f) => f.conflicted && key(f.path) === key(doc.path!));
+  if (!repo || !file) return;
+  const name = nameOf(doc.path);
+  const left = repo.files.filter((f) => f.conflicted).length - 1;
+  const ok = await choose(
+    `No conflicts left in ${name}`,
+    `Save ${name} and mark it resolved?${left > 0 ? ` ${left} other file${left === 1 ? " still has" : "s still have"} conflicts.` : " It is the last file: after this you can commit to finish."}\n\nYou can keep editing instead, and mark it resolved later with + under Merge Changes.`,
+    [
+      { label: "Save and Mark Resolved", kind: "primary", default: true, value: true },
+      { label: "Keep Editing", cancel: true, value: false },
+    ],
+    false,
+  );
+  if (ok) await resolveConflicts(repo.root, [doc.path]);
 }
 
 export const unstage = (root: string, paths: string[]) => run("Unstaging…", () => git.unstage(root, paths));

@@ -178,6 +178,9 @@ These need the file's [language server](code-intelligence.md).
 | – | Compare with Last Commit (HEAD) | `git.compareWithHead` |
 | – | Show File History | `git.fileHistory` |
 | – | Show Commit Graph | `git.graph` |
+| Alt+F6 / Shift+Alt+F6 | Next / Previous Conflict | `git.nextConflict` / `git.prevConflict` |
+| – | Accept Current / Incoming / Both (conflict at cursor) | `git.acceptCurrent` / `git.acceptIncoming` / `git.acceptBoth` |
+| – | Accept All Current / Incoming in This File | `git.acceptAllCurrent` / `git.acceptAllIncoming` |
 | – | Show / Hide Line Blame | `git.toggleBlame` |
 | – | Stage / Unstage Current File | `git.stageFile` / `git.unstageFile` |
 | – | Switch Branch… | `git.switchBranch` |

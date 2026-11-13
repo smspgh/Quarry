@@ -1,6 +1,9 @@
 /** Git commands (category "Git"); the work is in lib/git.ts, the editor side in editor/git.ts. */
 import { editor } from "../editor/manager";
 import { changeAtLine, changeRows, changesOf, revertChange, setPeek } from "../editor/git";
+import { accept, acceptAll, conflictAtCursor, conflictsOf, gotoConflict } from "../editor/conflicts";
+import type { ConflictChoice } from "./conflicts";
+import type { EditorView } from "@codemirror/view";
 import { register } from "./commands";
 import { compareWithHead, currentRepo, checkout, openGraph, fileStatus, pickBranch, refreshGit, remote, repoOf, showAddRemote, showHistory, stage, toggleBlame, unstage, useGit } from "./git";
 import { showPanel } from "./panels";
@@ -46,8 +49,33 @@ function changeAtCursor() {
   return c ? { view, c } : null;
 }
 
+/** Run `fn` on the focused editor when its document has conflicts; say so when it has none. */
+function withConflicts(fn: (view: EditorView) => void): boolean {
+  const view = editor.view;
+  if (!view || activeDoc(useStore.getState())?.kind !== "text") return false;
+  if (!conflictsOf(view.state).length) {
+    useStore.getState().toast("There are no conflicts in this file.", "info", 1800);
+    return true;
+  }
+  fn(view);
+  return true;
+}
+
 export function registerGitCommands() {
   const hasRepo = () => !!currentRepo();
+  const hasConflicts = () => !!editor.view && activeDoc(useStore.getState())?.kind === "text" && conflictsOf(editor.view.state).length > 0;
+  const acceptHere = (choice: ConflictChoice) => () => withConflicts((view) => {
+    const b = conflictAtCursor(view.state);
+    if (b) accept(view, b, choice);
+  });
+  const acceptEvery = (choice: ConflictChoice) => () => withConflicts((view) => void acceptAll(view, choice));
+  register({ id: "git.nextConflict", title: "Next Conflict", category: "Git", keys: "Alt+F6", enabled: hasConflicts, run: () => withConflicts((v) => void gotoConflict(v, 1)) });
+  register({ id: "git.prevConflict", title: "Previous Conflict", category: "Git", keys: "Shift+Alt+F6", enabled: hasConflicts, run: () => withConflicts((v) => void gotoConflict(v, -1)) });
+  register({ id: "git.acceptCurrent", title: "Accept Current (Conflict at Cursor)", category: "Git", enabled: hasConflicts, run: acceptHere("current") });
+  register({ id: "git.acceptIncoming", title: "Accept Incoming (Conflict at Cursor)", category: "Git", enabled: hasConflicts, run: acceptHere("incoming") });
+  register({ id: "git.acceptBoth", title: "Accept Both (Conflict at Cursor)", category: "Git", enabled: hasConflicts, run: acceptHere("both") });
+  register({ id: "git.acceptAllCurrent", title: "Accept All Current in This File", category: "Git", enabled: hasConflicts, run: acceptEvery("current") });
+  register({ id: "git.acceptAllIncoming", title: "Accept All Incoming in This File", category: "Git", enabled: hasConflicts, run: acceptEvery("incoming") });
   register({ id: "git.showPanel", title: "Show Source Control", category: "Git", keys: "Ctrl+Shift+G", run: () => showPanel("git") });
   register({ id: "git.graph", title: "Show Commit Graph", category: "Git", enabled: hasRepo, run: () => openGraph() });
   register({ id: "git.refresh", title: "Refresh Git Status", category: "Git", run: () => refreshGit(0) });

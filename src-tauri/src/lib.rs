@@ -859,6 +859,7 @@ pub fn run() {
             git::git_log,
             git::git_commit_files,
             git::git_unpushed,
+            git::git_resolve_side,
             git::git_abort,
             git::git_graph,
             git::git_graph_search,
