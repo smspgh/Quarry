@@ -850,6 +850,14 @@
         {
           "id": "BIG-013.10",
           "title": "UTF-16 files cannot be filtered"
+        },
+        {
+          "id": "BIG-013.11",
+          "title": "A dot never matches a line break"
+        },
+        {
+          "id": "BIG-013.12",
+          "title": "Long filtered lines say how much is cut"
         }
       ]
     },
@@ -858,7 +866,7 @@
       "title": "Follow a file as it grows",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 817,
+      "line": 829,
       "status": "draft",
       "commands": [
         "big.follow"
@@ -919,7 +927,7 @@
       "title": "CSV and TSV grid",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 887,
+      "line": 899,
       "status": "draft",
       "commands": [],
       "files": [
@@ -983,7 +991,7 @@
       "title": "JSON tree read from the file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 963,
+      "line": 975,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1053,7 +1061,7 @@
       "title": "Validate a large JSON file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1043,
+      "line": 1055,
       "status": "draft",
       "commands": [
         "json.validate"
@@ -1105,7 +1113,7 @@
       "title": "Show large-file info",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1097,
+      "line": 1109,
       "status": "draft",
       "commands": [
         "big.info"
@@ -1136,7 +1144,7 @@
       "title": "Reload when the file changes on disk",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1125,
+      "line": 1137,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1168,7 +1176,7 @@
       "title": "What large-file tabs do not offer",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1161,
+      "line": 1173,
       "status": "draft",
       "commands": [],
       "files": [

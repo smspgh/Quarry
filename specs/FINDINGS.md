@@ -89,7 +89,6 @@ Not determined
 Possible bugs
 
 Doc / code mismatches and dead code
-- The filter pane always sends `dotAll: false` (`src/components/BigFilterPane.tsx:73`); filtered rows are cut at 2,000 characters (20,000 in grid mode) with no "more" marker (`:247-250`).
 - `big_filter_position` (`src-tauri/src/lib.rs:338`) has no wrapper or caller; `BottomTab` still includes `"bigsearch"` (`src/lib/store.ts:7`).
 - Not determined: whether a big tab's view state survives a restart.
 

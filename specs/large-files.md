@@ -744,9 +744,9 @@ Scenario: BIG-012.7 Every coloured extension and the sniffed formats
 - Commands: `big.filter`
 - Files:
   - `src/lib/commands.ts` — `big.filter` ("Large File: Filter Lines") emits `big.filter` for the active big tab
-  - `src/components/BigFilterPane.tsx` — the pane: query, options, `LEVEL_FILTERS`, paging by 200 (`big.filterLines`), keyboard and click navigation, status text, re-run on `version`
+  - `src/components/BigFilterPane.tsx` — the pane: query, options (`dotAll` always off: `.` stays within a line), `LEVEL_FILTERS`, long-row "more chars" marker, paging by 200 (`big.filterLines`), keyboard and click navigation, status text, re-run on `version`
   - `src/components/BigFileView.tsx` — Filter banner button, `filterOpen`, `onJump`, `filterClear` on close
-  - `src-tauri/src/bigfile.rs` — `filter_lines`, `scan_lines`, `LineFilter`, `LineSet` (bitset with a count per 512 lines, `line_at`, `position_of`)
+  - `src-tauri/src/bigfile.rs` — `filter_lines`, `scan_lines`, `LineFilter` (`opts`: `dot_all` off), `LineSet` (bitset with a count per 512 lines, `line_at`, `position_of`)
   - `src-tauri/src/lib.rs` — `big_filter`, `big_filter_lines` (at most 1,000 per call), `big_filter_clear`, `big_filter_position`, `AppState.filters`
   - `src/lib/ipc.ts` — `big.filter`, `big.filterLines`, `big.filterClear`
   - `src/lib/bigGeometry.ts` — scaled scrolling for millions of filtered lines
@@ -812,6 +812,18 @@ Scenario: BIG-013.10 UTF-16 files cannot be filtered
   Given a UTF-16 large-file tab
   When I enter a filter
   Then the status says filtering works on UTF-8 files
+
+Scenario: BIG-013.11 A dot never matches a line break
+  Given Regular Expression is on
+  When I filter by "start.*end"
+  Then only lines that contain both "start" and a later "end" are listed
+  And a "start" on one line and an "end" on the next do not match together
+
+Scenario: BIG-013.12 Long filtered lines say how much is cut
+  Given a matching line of 5,000 characters
+  When it is listed in the filter pane
+  Then its first 2,000 characters are shown, followed by "… (3,000 more chars)"
+  And in grid mode a row is cut at 20,000 characters the same way
 ```
 
 ## BIG-014: Follow a file as it grows

@@ -78,10 +78,11 @@ A large `.csv`, `.tsv` or `.tab` file opens as a grid: each field in its own col
 
 **Filter** in the large-file banner (or **Large File: Filter Lines** in the command palette) opens a pane under the file that shows only the lines matching a search: every one of them, however many, scrolled like the file itself.
 
-- Type a search and press **Enter**. Match Case, Whole Word and Regex work as in Find.
+- Type a search and press **Enter**. Match Case, Whole Word and Regex work as in Find, except that `.` never matches a line break (there is no option for it): a line is listed when a match starts on it.
 - **Hide matching lines** (the crossed-out eye) shows the opposite: every line *without* a match, for example to hide all DEBUG lines.
 - For logs, **Errors** and **Warnings** filter by log level in one click.
 - Click a line, or move with the arrow keys, to show it in context in the file above. Each line shows its line number in the file.
+- Long lines are shown up to 2,000 characters (20,000 in the grid), followed by "… (N more chars)"; click the line to see it in the file view.
 - The filter runs once the file is fully indexed (a few seconds per gigabyte); until then it says it is waiting and runs by itself. It re-runs after you edit the file.
 - Speed on the benchmark machine ([bench/RESULTS.md](../bench/RESULTS.md)): keeping the ERROR lines of a 5 GB log (7.4 million of 59 million) takes 0.6 s; hiding its DEBUG lines (44 million left) 1.0 s. The filter needs one bit per line of the file: about 7 MB for 60 million lines.
 
