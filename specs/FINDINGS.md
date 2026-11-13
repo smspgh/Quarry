@@ -69,7 +69,6 @@ Doc / code mismatches and notes
 ## Find in Files (`search.md`)
 
 Possible bugs
-- "No results in N files" counts every open tab, including large-file and non-text tabs that were not searched (`SearchPanel.tsx:398`).
 - Replace All in open documents re-matches the current text, so left-out positions from search time can point at the wrong match after an edit (`SearchPanel.tsx:652-667`; the disk path guards with `searchedMs`); its status note reports the search-time total, not what was replaced (`:663`).
 - Results past the first 500 of a file cannot be opened, stepped to with F4 or left out individually, yet Replace All still replaces them (`SearchPanel.tsx:140`, `:467`, `:472`, `:973`; SEARCH-007.6, SEARCH-009.7).
 - Deleting a file from the results menu leaves `excluded`, `leftOut` and `activeKey` for it (`SearchPanel.tsx:993-1000`).

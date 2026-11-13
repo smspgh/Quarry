@@ -132,10 +132,11 @@ export function searchTexts(q: SearchQuery, docs: { path: string; text: string }
   return { files: out, truncated: total >= q.maxResults };
 }
 
-/** Search the text of open documents in memory: all of them, or only the one with id `onlyId`. */
-function searchOpenDocs(q: SearchQuery, onlyId?: string): { files: SearchResultsFile[]; truncated: boolean } {
+/** Search the text of open documents in memory: all of them, or only the one with id `onlyId`.
+ *  `searched` counts the text documents only (large-file and other tabs are not searched). */
+function searchOpenDocs(q: SearchQuery, onlyId?: string): { files: SearchResultsFile[]; truncated: boolean; searched: number } {
   const docs = useStore.getState().docs.filter((d) => d.kind === "text" && (onlyId === undefined || d.id === onlyId));
-  return searchTexts(q, docs.map((d) => ({ path: d.path ?? d.name, text: editor.textOf(d.id) })));
+  return { ...searchTexts(q, docs.map((d) => ({ path: d.path ?? d.name, text: editor.textOf(d.id) }))), searched: docs.length };
 }
 
 const SEARCH_TIP = [
@@ -406,8 +407,8 @@ export function SearchPanel() {
       return;
     }
     if (scope === "open" || active?.kind === "text") {
-      const { files, truncated } = searchOpenDocs(q, active?.id);
-      setSearch({ running: false, inMemory: true, files, truncated, totalMatches: files.reduce((n, f) => n + f.matches.length, 0), filesSearched: active ? 1 : useStore.getState().docs.length });
+      const { files, truncated, searched } = searchOpenDocs(q, active?.id);
+      setSearch({ running: false, inMemory: true, files, truncated, totalMatches: files.reduce((n, f) => n + f.matches.length, 0), filesSearched: searched });
       return;
     }
     // A large-file document is searched on disk like a one-file folder.

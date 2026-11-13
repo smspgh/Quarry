@@ -130,6 +130,11 @@ Scenario: SEARCH-002.8 The result limit covers all open documents
   When I search for "x" with the Open Files scope
   Then 4 results are listed in total, 3 in the first tab and 1 in the second
   And the status ends with "(limit reached)"
+
+Scenario: SEARCH-002.9 Nothing found counts only the documents searched
+  Given 2 text tabs, a large-file tab and a Compare tab are open, none containing "needle"
+  When I search for "needle" with the Open Files scope
+  Then the status reads "No results in 2 files"
 ```
 
 ## SEARCH-003: Search a folder, the Explorer selection or chosen folders
