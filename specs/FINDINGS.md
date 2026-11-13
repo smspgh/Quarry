@@ -154,7 +154,6 @@ Doc / code mismatches
 
 ## Compare (`compare.md`)
 
-- `docs/compare.md:32` says the arrows copy left into right; that holds only when the right side is editable, otherwise they copy right into left, and there are none when both sides are read-only or in Inline layout (`src/components/DiffView.tsx:71`, `:82`).
 - `docs/compare.md:31` says file sides can be edited directly; in Inline layout only the right side's editor exists (`DiffView.tsx:67-75`).
 - `docs/compare.md:27` says Reload reads the files from disk again; clipboard and git-version sides keep their stored text (`diff.ts:102`, `:224-232`; DIFF-013.5).
 - `compare.withSelected` does not require a text tab (`src/lib/commands.ts:1347`), unlike `compare.selectForCompare`; on a large-file tab it is enabled and then fails with "too large to compare".

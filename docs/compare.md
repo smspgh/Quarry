@@ -29,7 +29,7 @@ The first file is the left (original) side and the second the right (changed) si
 ## Editing and saving
 
 - **What you can edit.** Sides that are files can be edited directly. The other kinds are read-only snapshots: a tab's unsaved text, and the clipboard.
-- **Copying a change across.** The arrows between the two sides copy a change from the left side into the right one.
+- **Copying a change across.** In side-by-side layout, the arrows between the two sides copy a change from the left side into the right one. When the right side is read-only and the left one is a file, they copy from right to left instead. There are no arrows when both sides are read-only, or in Inline layout.
 - **Saving.** An edited side is tagged **edited**. Save with **Ctrl+S** or the **Save** button. Each file keeps its encoding, byte order mark and line-ending style.
 - **Closing.** Closing a compare with unsaved edits asks first.
 - **Other tabs.** If the file is also open in a normal tab, that tab notices the change like any other change made outside it.
