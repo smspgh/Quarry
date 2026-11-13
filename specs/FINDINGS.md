@@ -49,7 +49,6 @@ Doc / code mismatches
 ## Application shell (`app-shell.md`)
 
 Possible bugs
-- Collapsed state is not persisted: `src/App.tsx:172` triggers a session save when `pinnedHidden` changes, but `buildSession` (`actions.ts:813-832`) does not write it.
 - Bottom-panel layout is not persisted (`bottomVisible`, `bottomHeight`, `bottomTab`); it starts hidden, 220 px, on Console each time.
 
 Mismatches and notes

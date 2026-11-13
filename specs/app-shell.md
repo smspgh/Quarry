@@ -802,8 +802,8 @@ Scenario: UI-013.10 Restoring the open folder does not open the Explorer
   - `src/lib/panels.ts` — `toggleAllPanels`, `collapsePanels`, `anyPanelShown`
   - `src/components/TitleBar.tsx` — `Brand` button (labels "Collapse side panels" / "Show pinned panels" / "Quarry"; deliberately inert with nothing pinned or open, where Ctrl+B reopens the last panel)
   - `src/lib/commands.ts` — `view.toggleSidebar` (Ctrl+B, "Collapse / Restore Side Panels")
-  - `src/App.tsx` — store subscription: asking for a panel clears `pinnedHidden`
-  - `src/lib/store.ts` — `pinnedHidden`
+  - `src/App.tsx` — store subscription: asking for a panel clears `pinnedHidden`; a change of `pinnedHidden` alone does not save the session
+  - `src/lib/store.ts` — `pinnedHidden` (starts false; not in the session)
 - Tests: `src/__tests__/panels.test.ts`
 - Docs: `docs/editing.md`, `docs/keyboard-shortcuts.md`
 
@@ -837,6 +837,11 @@ Scenario: UI-014.4 Nothing pinned and nothing open
   Then the panel that was open last is shown again, floating
   When no panel is pinned and none is open and I click the Quarry mark
   Then nothing happens and its tooltip is "Quarry"
+
+Scenario: UI-014.5 Collapsing is not kept across a restart
+  Given Explorer and Source Control are pinned and the panels are collapsed
+  When I close and restart Quarry
+  Then Explorer and Source Control are docked and shown again
 ```
 
 ## UI-015: Side panel widths

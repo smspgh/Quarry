@@ -15599,6 +15599,10 @@
         {
           "id": "UI-014.4",
           "title": "Nothing pinned and nothing open"
+        },
+        {
+          "id": "UI-014.5",
+          "title": "Collapsing is not kept across a restart"
         }
       ]
     },
@@ -15607,7 +15611,7 @@
       "title": "Side panel widths",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 842,
+      "line": 847,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15646,7 +15650,7 @@
       "title": "Bottom panel",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 887,
+      "line": 892,
       "status": "draft",
       "commands": [
         "view.togglePanel",
@@ -15697,7 +15701,7 @@
       "title": "Status bar position and document facts",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 944,
+      "line": 949,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15739,7 +15743,7 @@
       "title": "Status bar pickers for indentation, encoding, line endings and language",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 991,
+      "line": 996,
       "status": "draft",
       "commands": [
         "view.setTabSize",
@@ -15806,7 +15810,7 @@
       "title": "Light and dark themes",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1073,
+      "line": 1078,
       "status": "draft",
       "commands": [
         "view.toggleTheme"
@@ -15856,7 +15860,7 @@
       "title": "Zoom and editor view toggles",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1128,
+      "line": 1133,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -15914,7 +15918,7 @@
       "title": "Keyboard focus returns to the active tab",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1192,
+      "line": 1197,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15960,7 +15964,7 @@
       "title": "Tab key can leave the editor",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1243,
+      "line": 1248,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -16000,7 +16004,7 @@
       "title": "Single instance and files handed over by Windows",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1288,
+      "line": 1293,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16052,7 +16056,7 @@
       "title": "Window size and position are remembered",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1347,
+      "line": 1352,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16090,7 +16094,7 @@
       "title": "Notice after an unexpected exit",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1389,
+      "line": 1394,
       "status": "draft",
       "commands": [],
       "files": [
