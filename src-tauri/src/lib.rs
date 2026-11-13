@@ -652,11 +652,6 @@ fn startup_paths() -> Vec<String> {
     cli_paths(std::env::args().skip(1), &std::env::current_dir().unwrap_or_default())
 }
 
-#[tauri::command]
-fn large_file_threshold() -> u64 {
-    files::LARGE_FILE_THRESHOLD
-}
-
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct ExternalFormatResult {
@@ -815,7 +810,6 @@ pub fn run() {
             watch_stop,
             fs_walk,
             startup_paths,
-            large_file_threshold,
             format_external,
             claude::claude_detect,
             claude::claude_start,

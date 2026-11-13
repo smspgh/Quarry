@@ -118,7 +118,6 @@ export const search = {
 
 export const sys = {
   startupPaths: () => invoke<string[]>("startup_paths"),
-  largeFileThreshold: () => invoke<number>("large_file_threshold"),
   formatExternal: (tool: string, args: string[], text: string, cwd?: string | null) =>
     invoke<{ ok: boolean; output: string; error: string; notFound: boolean }>("format_external", { tool, args, text, cwd: cwd ?? null }),
 };

@@ -9,7 +9,6 @@ This file is not a spec: `scripts/specs-index.mjs` ignores it.
 Possible bugs
 
 Doc / code mismatches
-- Unused Rust threshold: `sys.largeFileThreshold` (`src/lib/ipc.ts:121`), the `large_file_threshold` command (`src-tauri/src/lib.rs:656`) and `LARGE_FILE_THRESHOLD` (`src-tauri/src/files.rs:11`) have no caller; only `settings.largeFileThresholdMb` decides (`actions.ts:149`).
 
 Not verified
 - `cli_paths` (`src-tauri/src/lib.rs:638`) has no unit test (FILE-019), including the drive-root `C:"` repair and relative paths.

@@ -7,9 +7,6 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::time::UNIX_EPOCH;
 
-/// Files above this size open in the disk-backed large-file engine instead of CodeMirror.
-pub const LARGE_FILE_THRESHOLD: u64 = 32 * 1024 * 1024;
-
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FileStat {
@@ -19,7 +16,6 @@ pub struct FileStat {
     pub is_dir: bool,
     pub modified_ms: u64,
     pub readonly: bool,
-    pub is_large: bool,
 }
 
 #[derive(Serialize)]
@@ -66,7 +62,6 @@ pub fn stat(path: &Path) -> Result<FileStat, String> {
         is_dir: meta.is_dir(),
         modified_ms: modified_ms(&meta),
         readonly: meta.permissions().readonly(),
-        is_large: meta.len() >= LARGE_FILE_THRESHOLD,
     })
 }
 

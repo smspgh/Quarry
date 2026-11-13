@@ -10,7 +10,6 @@ export interface FileStat {
   isDir: boolean;
   modifiedMs: number;
   readonly: boolean;
-  isLarge: boolean;
 }
 
 export interface TextFile {

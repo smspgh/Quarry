@@ -248,9 +248,8 @@ Scenario: FILE-005.3 No folder open
 - Files:
   - `src/lib/actions.ts` — `openPath` compares `stat.size` with `settings.largeFileThresholdMb`; `openLarge`, `bigDocFields`, `pollBigIndex`; `sanitizeSettings` clamps the threshold to 1–4096
   - `src/lib/types.ts` — `Settings.largeFileThresholdMb` (default 32), `BigDocInfo`
-  - `src/lib/ipc.ts` — `big.open`, `big.info`, `sys.largeFileThreshold`
-  - `src-tauri/src/files.rs` — `LARGE_FILE_THRESHOLD` (32 MiB, the Rust-side default)
-  - `src-tauri/src/lib.rs` — `big_open`, `large_file_threshold`
+  - `src/lib/ipc.ts` — `big.open`, `big.info`
+  - `src-tauri/src/lib.rs` — `big_open`
   - `src/components/panels/SettingsPanel.tsx` — "Large-file threshold (MB)" row
 - Tests: `src/__tests__/paths.test.ts`
 - Docs: `docs/large-files.md`, `docs/editing.md`
