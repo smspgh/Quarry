@@ -122,6 +122,7 @@ describe("commit actions from the graph", () => {
 
   it("says what was done", () => {
     expect(actionDone("branch-switch", "18bc71d", "hotfix")).toBe("On new branch hotfix");
+    expect(actionDone("branch", "18bc71d", "keep-this")).toBe("Created branch keep-this");
     expect(actionDone("tag", "18bc71d", "v1.2.0")).toBe("Created tag v1.2.0");
     expect(actionDone("reset-mixed", "18bc71d")).toBe("Reset to 18bc71d");
   });

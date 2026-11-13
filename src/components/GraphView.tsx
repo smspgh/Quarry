@@ -616,6 +616,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
             </button>
           ))}
           {item("Create Branch Here…", GitBranch, () => { setNewName(""); setNaming({ action: "branch-switch", commit: menu.commit }); }, "A new branch starting at this commit, and switch to it")}
+          {item("Create Branch Here (Don't Switch)…", GitBranch, () => { setNewName(""); setNaming({ action: "branch", commit: menu.commit }); }, "A new branch starting at this commit; you stay where you are")}
           {item("Create Tag Here…", Tag, () => { setNewName(""); setNaming({ action: "tag", commit: menu.commit }); })}
           {item("Check Out This Commit…", GitCommitHorizontal, () => void act("checkout", menu.commit), "Look at the files as they were (detached: not on a branch)")}
           <div className="menu-sep" />

@@ -9098,6 +9098,10 @@
         {
           "id": "GRAPH-011.8",
           "title": "Invalid name"
+        },
+        {
+          "id": "GRAPH-011.9",
+          "title": "Create a branch without switching"
         }
       ]
     },
@@ -9106,7 +9110,7 @@
       "title": "Check out, cherry-pick or revert a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 631,
+      "line": 640,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9161,7 +9165,7 @@
       "title": "Reset the branch to a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 690,
+      "line": 699,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9205,7 +9209,7 @@
       "title": "See uncommitted work and a stopped operation above the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 736,
+      "line": 745,
       "status": "draft",
       "commands": [],
       "files": [

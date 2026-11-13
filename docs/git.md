@@ -65,6 +65,7 @@ Right-click a commit for the actions:
 | Copy Commit Id / Copy Message | To the clipboard. |
 | Switch to *branch* | For each branch label on that commit. A remote branch gets a local branch that tracks it. |
 | Create Branch Here… | A new branch starting at that commit, and switches to it. |
+| Create Branch Here (Don't Switch)… | A new branch starting at that commit; you stay on the branch you are on. |
 | Create Tag Here… | A tag on that commit. |
 | Check Out This Commit… | Your files become that commit, on no branch ("detached"). Switch back with the branch button. |
 | Cherry-pick onto *branch*… | Copies that commit's changes onto your branch as a new commit. |

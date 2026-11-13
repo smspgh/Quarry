@@ -572,7 +572,7 @@ Scenario: GRAPH-010.6 Open the file as it is now
   - `src/components/GraphView.tsx` — `GraphMenu` (kept inside the window; closes on outside click, Escape, window blur), naming strip (`Naming`, `commitNaming`), `act`
   - `src/lib/gitGraph.ts` — `actionDone` (success notifications)
   - `src/lib/git.ts` — `commitAction`, `checkoutRef`
-  - `src-tauri/src/git.rs` — `commit_action` / `git_commit_action` (`branch-switch` = `switch -c`, `tag`), `valid_ref_name`, `checkout`
+  - `src-tauri/src/git.rs` — `commit_action` / `git_commit_action` (`branch` = `branch`, `branch-switch` = `switch -c`, `tag`), `valid_ref_name`, `checkout`
   - `src/lib/gitApi.ts` — `GitCommitAction`, `git.commitAction`
 - Tests: `src-tauri/src/git.rs`, `src/__tests__/gitGraph.test.ts`
 - Docs: `docs/git.md`
@@ -586,7 +586,7 @@ Scenario: GRAPH-011.1 The menu
   When I right-click a commit
   Then the commit is selected
   And a menu opens headed by its short id and message
-  And it offers Copy Commit Id, Copy Message, Create Branch Here…, Create Tag Here…, Check Out This Commit…, Cherry-pick, Revert This Commit… and three Reset entries
+  And it offers Copy Commit Id, Copy Message, Create Branch Here…, Create Branch Here (Don't Switch)…, Create Tag Here…, Check Out This Commit…, Cherry-pick, Revert This Commit… and three Reset entries
   And it closes on Escape or a click elsewhere
 
 Scenario: GRAPH-011.2 Copy
@@ -626,6 +626,15 @@ Scenario: GRAPH-011.7 Cancel naming
 Scenario: GRAPH-011.8 Invalid name
   When I enter the name "bad name" or "-D"
   Then nothing is created and an error says the name is not valid
+
+Scenario: GRAPH-011.9 Create a branch without switching
+  Given I am on branch "main"
+  When I choose "Create Branch Here (Don't Switch)…"
+  Then a strip "New branch at 18bc71d:" appears with a name box and a disabled "Create" button
+  When I type "keep-this" and press Enter
+  Then branch "keep-this" is created at that commit
+  And I am still on "main" and my files are not touched
+  And a notification says "Created branch keep-this" and the graph reloads showing the new label
 ```
 
 ## GRAPH-012: Check out, cherry-pick or revert a commit
