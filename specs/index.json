@@ -10093,10 +10093,14 @@
         "src-tauri/src/lsp.rs",
         "src/lib/lsp.ts",
         "src/lib/lspServers.ts",
+        "src/lib/lspInstall.ts",
+        "src/components/LspStatus.tsx",
         "src/components/panels/SettingsPanel.tsx"
       ],
       "tests": [
-        "src-tauri/src/lsp.rs"
+        "src-tauri/src/lsp.rs",
+        "src/__tests__/lsp.test.ts",
+        "src/__tests__/lspInstall.test.ts"
       ],
       "docs": [
         "docs/code-intelligence.md"
@@ -10141,7 +10145,7 @@
       "title": "Server status in the status bar",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 175,
+      "line": 181,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10185,7 +10189,7 @@
       "title": "Offer to install a missing language server",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 230,
+      "line": 236,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10240,7 +10244,7 @@
       "title": "Suggestions while typing",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 290,
+      "line": 296,
       "status": "draft",
       "commands": [
         "code.triggerSuggest"
@@ -10285,7 +10289,7 @@
       "title": "Documentation on hover",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 334,
+      "line": 340,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10322,7 +10326,7 @@
       "title": "Parameter hints",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 368,
+      "line": 374,
       "status": "draft",
       "commands": [
         "code.signatureHelp"
@@ -10355,7 +10359,7 @@
       "title": "Go to definition, type definition and implementation",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 401,
+      "line": 407,
       "status": "draft",
       "commands": [
         "code.gotoDefinition",
@@ -10403,7 +10407,7 @@
       "title": "Find all references",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 449,
+      "line": 455,
       "status": "draft",
       "commands": [
         "code.findReferences"
@@ -10442,7 +10446,7 @@
       "title": "Rename a symbol",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 490,
+      "line": 496,
       "status": "draft",
       "commands": [
         "code.renameSymbol"
@@ -10484,7 +10488,7 @@
       "title": "Problems in the editor",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 537,
+      "line": 543,
       "status": "draft",
       "commands": [
         "code.nextProblem",
@@ -10535,7 +10539,7 @@
       "title": "The Problems list and counts",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 591,
+      "line": 597,
       "status": "draft",
       "commands": [
         "view.problems"
@@ -10582,7 +10586,7 @@
       "title": "Format with the language server",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 642,
+      "line": 648,
       "status": "draft",
       "commands": [
         "code.formatWithServer"
@@ -10620,7 +10624,7 @@
       "title": "Every open tab stays in sync with its server",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 681,
+      "line": 687,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10666,7 +10670,7 @@
       "title": "Settings for code intelligence",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 727,
+      "line": 733,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10714,7 +10718,7 @@
       "title": "Restart, crashes and quitting",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 778,
+      "line": 784,
       "status": "draft",
       "commands": [
         "code.restartLanguageServers"
@@ -16895,6 +16899,7 @@
       "SET-018"
     ],
     "src/components/LspStatus.tsx": [
+      "LSP-003",
       "LSP-004",
       "LSP-005",
       "LSP-013",
@@ -17903,6 +17908,7 @@
       "UPD-003"
     ],
     "src/lib/lspInstall.ts": [
+      "LSP-003",
       "LSP-005",
       "SET-014",
       "TERM-009"
@@ -18460,6 +18466,7 @@
     ],
     "src/__tests__/lsp.test.ts": [
       "LSP-001",
+      "LSP-003",
       "LSP-006",
       "LSP-007",
       "LSP-012",
@@ -18467,6 +18474,7 @@
       "LSP-016"
     ],
     "src/__tests__/lspInstall.test.ts": [
+      "LSP-003",
       "LSP-005",
       "TERM-009"
     ],

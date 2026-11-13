@@ -15,7 +15,7 @@ import { detectClaude, type ClaudeInstall } from "../../lib/claude";
 import { invoke } from "@tauri-apps/api/core";
 import { restartServers } from "../../lib/lsp";
 import { SERVERS, splitCommand } from "../../lib/lspServers";
-import { installServer } from "../../lib/lspInstall";
+import { installServer, resolveInstall } from "../../lib/lspInstall";
 
 /** Pure helper (testable): does a row with this label/hint match the filter text? */
 export function rowMatches(query: string, label: string, hint?: string, section?: string): boolean {
@@ -359,6 +359,8 @@ function CodeIntelSection({ change }: { change: <K extends keyof Settings>(key: 
   const isOpen = useStore((st) => isPanelShown(st, "settings"));
   const query = React.useContext(FilterCtx);
   const [found, setFound] = React.useState<Record<string, string | null>>({});
+  // Install commands that depend on what is installed (TypeScript), by server id.
+  const [installs, setInstalls] = React.useState<Record<string, string>>({});
   const [busy, setBusy] = React.useState(false);
 
   const folder = useStore((st) => st.folder);
@@ -372,6 +374,7 @@ function CodeIntelSection({ change }: { change: <K extends keyof Settings>(key: 
         ? invoke<{ command: string } | null>("lsp_typescript", { root: folder ?? "" }).then((ts) => ts?.command ?? null)
         : invoke<string | null>("lsp_which", { command: program });
       where.then((p) => setFound((f) => ({ ...f, [def.id]: p })), () => setFound((f) => ({ ...f, [def.id]: null })));
+      void resolveInstall(def, folder ?? "").then((cmd) => setInstalls((m) => ({ ...m, [def.id]: cmd })));
     }
   }, [s.lspCommands, folder]);
   React.useEffect(() => { if (isOpen && s.lspEnabled) detect(); }, [isOpen, s.lspEnabled, detect]);
@@ -423,7 +426,7 @@ function CodeIntelSection({ change }: { change: <K extends keyof Settings>(key: 
                 }}
               />
               {path === null && (
-                <button className="btn small" title={def.install} onClick={() => installServer(def)}>Install…</button>
+                <button className="btn small" title={installs[def.id] ?? def.install} onClick={() => installServer(def, installs[def.id] ?? def.install)}>Install…</button>
               )}
               <Switch on={on} onChange={(v) => void apply("lspDisabled", v ? s.lspDisabled.filter((x) => x !== def.id) : [...s.lspDisabled, def.id])} />
             </div>

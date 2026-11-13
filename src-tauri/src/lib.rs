@@ -827,6 +827,7 @@ pub fn run() {
             lsp::lsp_which,
             lsp::lsp_find_root,
             lsp::lsp_typescript,
+            lsp::lsp_typescript_found,
             lsp::lsp_start,
             lsp::lsp_send,
             lsp::lsp_stop,

@@ -14,7 +14,7 @@ Quarry uses [language servers](https://microsoft.github.io/language-server-proto
 
 | Language | Server | Install command |
 | --- | --- | --- |
-| TypeScript, JavaScript (`.ts .tsx .js .jsx .mjs .cjs`) | TypeScript 7's built-in server (`tsc --lsp`), or [typescript-language-server](https://github.com/typescript-language-server/typescript-language-server) for TypeScript 5 / 6 | `npm install -g typescript` |
+| TypeScript, JavaScript (`.ts .tsx .js .jsx .mjs .cjs`) | TypeScript 7's built-in server (`tsc --lsp`), or [typescript-language-server](https://github.com/typescript-language-server/typescript-language-server) for TypeScript 5 / 6 | `npm install -g typescript-language-server` (with `typescript` too when none is installed) |
 | Python (`.py .pyi`) | [Pyright](https://github.com/microsoft/pyright) | `npm install -g pyright` |
 | Rust (`.rs`) | [rust-analyzer](https://rust-analyzer.github.io/) | `rustup component add rust-analyzer` |
 | Go (`.go`) | [gopls](https://pkg.go.dev/golang.org/x/tools/gopls) | `go install golang.org/x/tools/gopls@latest` |
@@ -54,6 +54,8 @@ Errors and warnings from the server are underlined in the editor and marked in t
 ## Installing a language server
 
 If the server for a file isn't installed, the status bar shows **Install … support**. Clicking it runs the install command in a terminal tab, so you can see what happens. When it finishes, the servers restart and your open files connect.
+
+For TypeScript the offer depends on what you have. With TypeScript 5 or 6 installed (in the project or globally) and no typescript-language-server, it installs only typescript-language-server (`npm install -g typescript-language-server`) and leaves your TypeScript as it is. With no TypeScript at all, it installs both (`npm install -g typescript-language-server typescript`); whichever version npm installs, one of the two then serves.
 
 Install commands need the matching tool chain: Node.js for the npm ones, rustup for rust-analyzer, Go for gopls, the .NET SDK for csharp-ls. **Settings › Code intelligence** lists every server, says whether it's installed and where, and has an **Install…** button for each missing one.
 
