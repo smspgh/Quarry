@@ -72,7 +72,7 @@ Each macro is a file named `<name>.macro.json`.
 
 - Default folder: `%APPDATA%\com.quarry.app\macros`.
 - Change it in **Settings › Folders › Macros folder** or with the panel's folder button.
-- Saving a renamed macro deletes the old file. Delete asks first and removes the file.
+- Saving a renamed macro renames its file: the file under the old name is deleted, not moved to the Recycle Bin, since its steps are now in the new one. **Delete** asks first and moves the file to the Recycle Bin.
 - The list reloads when Quarry regains focus, unless a macro is unsaved, recording or playing.
 
 ## File format

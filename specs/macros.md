@@ -610,6 +610,7 @@ Scenario: MACRO-012.4 Saving a renamed macro replaces its file
   Given the saved macro "Macro 1" renamed to "Quote lines"
   When I click Save
   Then "Quote lines.macro.json" exists and "Macro 1.macro.json" no longer does
+  And "Macro 1.macro.json" is deleted outright, not moved to the Recycle Bin
 
 Scenario: MACRO-012.5 Name already used by another macro
   Given "Tidy.macro.json" exists and I rename a different macro to "Tidy"
