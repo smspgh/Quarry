@@ -23,9 +23,17 @@ export const numberLines: LineFn = (l) => {
   const w = String(l.length).length;
   return l.map((x, i) => String(i + 1).padStart(w, " ") + "  " + x);
 };
-export const indentToSpaces = (tabSize: number): LineFn => (l) => l.map((x) => x.replace(/^\t+/, (m) => " ".repeat(m.length * tabSize)));
-export const indentToTabs = (tabSize: number): LineFn => (l) =>
-  l.map((x) => x.replace(/^( {2,})/, (m) => "\t".repeat(Math.floor(m.length / tabSize)) + " ".repeat(m.length % tabSize)));
+/** Width in columns of a run of spaces and tabs at the start of a line (tabs go to the next stop). */
+function indentWidth(ws: string, tabSize: number) {
+  let col = 0;
+  for (const c of ws) col = c === "\t" ? col + tabSize - (col % tabSize) : col + 1;
+  return col;
+}
+/** Rewrite each line's leading spaces and tabs, keeping its width; the rest of the line is untouched. */
+const reindent = (tabSize: number, make: (width: number) => string): LineFn => (l) =>
+  l.map((x) => x.replace(/^[ \t]+/, (m) => make(indentWidth(m, tabSize))));
+export const indentToSpaces = (tabSize: number) => reindent(tabSize, (w) => " ".repeat(w));
+export const indentToTabs = (tabSize: number) => reindent(tabSize, (w) => "\t".repeat(Math.floor(w / tabSize)) + " ".repeat(w % tabSize));
 
 /**
  * Transform to Title Case: the first letter of every word goes upper case; the rest of the word is

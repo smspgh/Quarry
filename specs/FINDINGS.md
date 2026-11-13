@@ -35,7 +35,6 @@ Not verified
 ## Text editing (`editing.md`)
 
 Possible bugs
-- Convert to Tabs skips a single leading space and spaces after a leading tab; Convert to Spaces only converts the run of tabs at the very start of the line (`commands.ts:774`, `:778`).
 - The status-bar language picker calls `editor.setLanguage` directly (`src/components/StatusBar.tsx:200`) instead of `runCommand("code.setLanguage", …)`; macros do not record it.
 
 Doc / code mismatches and notes

@@ -560,13 +560,13 @@ Scenario: EDIT-010.7 A read-only document is not changed
 - Status: draft
 - Commands: `edit.indent`, `edit.outdent`, `code.indentToSpaces`, `code.indentToTabs`, `view.setTabSize`
 - Files:
-  - `src/lib/commands.ts` — `edit.indent` / `edit.outdent` (`indentMore` / `indentLess`, only while the editor has focus), `code.indentToSpaces` / `code.indentToTabs` (via `lineTransform`; `cmEdit` = nothing on a read-only document)
-  - `src/lib/lineTransforms.ts` — `indentToSpaces` / `indentToTabs` (leading whitespace only), `view.setTabSize` (1–16, otherwise opens the status-bar picker)
+  - `src/lib/commands.ts` — `edit.indent` / `edit.outdent` (`indentMore` / `indentLess`, only while the editor has focus), `code.indentToSpaces` / `code.indentToTabs` (via `lineTransform`; `cmEdit` = nothing on a read-only document), `view.setTabSize` (1–16, otherwise opens the status-bar picker)
+  - `src/lib/lineTransforms.ts` — `indentToSpaces` / `indentToTabs` (the whole leading run of spaces and tabs, rewritten at the same width; the rest of the line untouched)
   - `src/editor/cmSetup.ts` — `compartments.indent` (`tabSize`, `indentUnit` from `insertSpaces`), `indentOnInput`, `indentWithTab`, `defaultKeymap` (Ctrl+[ / Ctrl+])
   - `src/editor/manager.ts` — `applySettings`
   - `src/components/StatusBar.tsx` — "Spaces: 4" / "Tab Size: 4" picker (2, 4, 8)
   - `src/components/MenuBar.tsx` — Edit › Indent / Outdent, Code › Indentation
-- Tests: none
+- Tests: `src/__tests__/lineTransforms.test.ts`
 - Docs: `docs/editing.md`, `docs/keyboard-shortcuts.md`
 
 **As a** developer
@@ -608,6 +608,12 @@ Scenario: EDIT-011.6 Change the tab size from the status bar
   Then the status bar shows "Spaces: 2"
   And tab characters in every open tab are drawn 2 columns wide
   And the setting is kept for the next start
+
+Scenario: EDIT-011.7 Mixed indentation is converted as a whole
+  Given Tab size 4 and a line that starts with a tab followed by 4 spaces
+  When I choose Indentation: Convert to Tabs
+  Then the line starts with 2 tabs
+  And Indentation: Convert to Spaces on a line starting with a tab, 2 spaces and a tab gives 8 spaces
 ```
 
 ## EDIT-012: Toggle line and block comments

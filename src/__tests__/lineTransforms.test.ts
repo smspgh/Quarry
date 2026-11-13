@@ -93,6 +93,19 @@ describe("line commands: transforms", () => {
     expect(L.titleCase("élan vital, über-cool")).toBe("Élan Vital, Über-Cool");
     expect(L.titleCase("say 'hello'\nline two")).toBe("Say 'Hello'\nLine Two");
   });
+  it("converts leading indentation to spaces, keeping its width", () => {
+    const toSpaces = L.indentToSpaces(4);
+    expect(toSpaces(["\t\tx\ty"])).toEqual(["        x\ty"]);
+    expect(toSpaces(["\t  \tx"])).toEqual(["        x"]); // tab, 2 spaces, tab = 8 columns
+    expect(toSpaces(["  \tx"])).toEqual(["    x"]); // the tab only reaches the next stop
+  });
+  it("converts leading indentation to tabs, keeping its width", () => {
+    const toTabs = L.indentToTabs(4);
+    expect(toTabs(["      x"])).toEqual(["\t  x"]);
+    expect(toTabs(["\t    x  y"])).toEqual(["\t\tx  y"]); // spaces after a leading tab too
+    expect(toTabs([" x", "    x"])).toEqual([" x", "\tx"]);
+    expect(L.indentToTabs(1)([" x"])).toEqual(["\tx"]);
+  });
   it("numbers lines, padded to the widest number", () => {
     const out = L.numberLines(Array.from({ length: 12 }, (_, i) => `l${i}`));
     expect(out[0]).toBe(" 1  l0");
