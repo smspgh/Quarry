@@ -12618,6 +12618,7 @@
         "src/lib/panels.ts",
         "src/lib/commands.ts",
         "src/components/MenuBar.tsx",
+        "src/components/SidebarRail.tsx",
         "src/styles/app.css"
       ],
       "tests": [
@@ -12647,6 +12648,10 @@
         {
           "id": "SET-001.5",
           "title": "Clear the filter"
+        },
+        {
+          "id": "SET-001.6",
+          "title": "Other ways in"
         }
       ]
     },
@@ -12655,7 +12660,7 @@
       "title": "Changes apply at once and are saved automatically",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 61,
+      "line": 67,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12695,7 +12700,7 @@
       "title": "Settings are loaded, completed and repaired at start",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 104,
+      "line": 110,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12746,7 +12751,7 @@
       "title": "Use previous setting and Restore default on each row",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 170,
+      "line": 176,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12801,7 +12806,7 @@
       "title": "Reset everything and open the settings folder",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 234,
+      "line": 240,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12843,7 +12848,7 @@
       "title": "Theme, window material and menu bar position",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 281,
+      "line": 287,
       "status": "draft",
       "commands": [
         "view.toggleTheme"
@@ -12889,7 +12894,7 @@
       "title": "Editor font size and font family",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 332,
+      "line": 338,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -12946,7 +12951,7 @@
       "title": "Editor behaviour settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 395,
+      "line": 401,
       "status": "draft",
       "commands": [
         "view.toggleWrap",
@@ -13001,7 +13006,7 @@
       "title": "Number fields, switches and segmented choices",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 457,
+      "line": 463,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13048,7 +13053,7 @@
       "title": "Tab limit, large-file and session settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 519,
+      "line": 525,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13090,7 +13095,7 @@
       "title": "Scripts and macros folders",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 561,
+      "line": 567,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13132,7 +13137,7 @@
       "title": "Find and replace history size",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 602,
+      "line": 608,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13169,7 +13174,7 @@
       "title": "Confirmation and update-check switches",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 643,
+      "line": 649,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13198,7 +13203,7 @@
       "title": "Code intelligence settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 675,
+      "line": 681,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13246,7 +13251,7 @@
       "title": "Claude Code settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 726,
+      "line": 732,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13300,7 +13305,7 @@
       "title": "JSON pretty-print indent",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 786,
+      "line": 792,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13328,7 +13333,7 @@
       "title": "Themed dropdown lists",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 813,
+      "line": 819,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13379,7 +13384,7 @@
       "title": "Help \"i\" icons",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 879,
+      "line": 885,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16526,6 +16531,7 @@
     ],
     "src/components/SidebarRail.tsx": [
       "GIT-008",
+      "SET-001",
       "UI-012"
     ],
     "src/components/SplitDivider.tsx": [

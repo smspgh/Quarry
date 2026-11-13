@@ -17,6 +17,7 @@ The Settings panel, every setting it holds and what changing it does, the per-ro
   - `src/lib/panels.ts` — `SETTINGS_SHARE` = 0.35, `showPanel`, `isPanelShown`, `panelWidth`
   - `src/lib/commands.ts` — `view.settings`
   - `src/components/MenuBar.tsx` — Tools › Settings and View › Panels › Settings
+  - `src/components/SidebarRail.tsx` — the gear button below the other panel icons
   - `src/styles/app.css` — `.settings-body`, `.settings-filter`, `.settings-empty` (visible only when no row or button is left)
 - Tests: `src/__tests__/ui.test.ts`
 - Docs: `docs/settings.md`, `docs/keyboard-shortcuts.md`
@@ -56,6 +57,11 @@ Scenario: SET-001.5 Clear the filter
   Given the filter box contains "font"
   When I press Escape in the filter box, or click the "Clear filter" button
   Then the filter is empty and every row is shown again
+
+Scenario: SET-001.6 Other ways in
+  Given the Settings panel is closed
+  When I choose Tools › Settings, View › Panels › Settings, or click the gear at the bottom of the side rail
+  Then the Settings panel opens
 ```
 
 ## SET-002: Changes apply at once and are saved automatically

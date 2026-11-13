@@ -1,6 +1,6 @@
 # Settings
 
-Open Settings with **Ctrl+,** or **Tools › Settings**. Changes apply immediately and are saved automatically. Use the search box at the top to filter. Settings opens at 35% of the window width so its descriptions are readable.
+Open Settings with **Ctrl+,**, **Tools › Settings**, **View › Panels › Settings** or the gear icon at the bottom of the side rail. Changes apply immediately and are saved automatically. Use the search box at the top to filter. Settings opens at 35% of the window width so its descriptions are readable.
 
 Each setting has two buttons next to its name:
 
