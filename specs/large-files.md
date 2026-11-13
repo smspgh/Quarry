@@ -119,7 +119,8 @@ Scenario: BIG-002.4 Actions that need the whole index wait for it
   - `src-tauri/src/bigfile.rs` — `get_lines` (at most 5,000 lines and 16 MB per read), `locate_line`, `read_from`
   - `src-tauri/src/lib.rs` — `big_lines`
   - `src/lib/ipc.ts` — `big.lines`
-  - `src/lib/store.ts` — `BigViewState`, `bigViewState` (dropped when the tab closes)
+  - `src/lib/store.ts` — `BigViewState`, `bigViewState` (in memory only: dropped when the tab closes, not saved in the session)
+  - `src/lib/actions.ts` — `sessionDocs` saves only the path of a big tab (cursor / scroll are kept for text tabs only)
   - `src/styles/app.css` — `.bigview`, `.big-banner`, `.big-scroll`, `.big-row`, `.big-ln`, `.big-more`, `.big-loading`
 - Tests: `src/__tests__/bigview.test.ts`, `src-tauri/src/bigfile.rs`
 - Docs: `docs/large-files.md`
@@ -170,6 +171,12 @@ Scenario: BIG-003.7 Switching tabs keeps the position
   When I switch to another tab and back
   Then the same lines are on screen, the cursor is where it was
   And the find bar still shows the earlier results
+
+Scenario: BIG-003.8 After a restart the tab opens at the top
+  Given I scrolled a large-file tab to line 5,000 and closed Quarry with the tab open
+  When I start Quarry again
+  Then the tab is reopened in large-file mode
+  And it shows the file from line 1 with the cursor on line 1 and no find results
 ```
 
 ## BIG-004: Move the cursor, select lines and copy
@@ -282,6 +289,14 @@ Scenario: BIG-005.5 The status bar position opens Go to Line
   Given a large-file tab is active
   When I click "Ln 12, Col 1" in the status bar
   Then the Go to Line prompt opens
+
+Scenario: BIG-005.6 Go to Line during indexing does not call the line out of range
+  Given a large file is being indexed and 1,000,000 lines are known so far
+  When I press Ctrl+G
+  Then the prompt shows "Go to line[:column]  (1–1000000+, still indexing)"
+  When I type "3000000" and press Enter
+  Then no "out of range" hint or toast appears
+  And the view jumps to line 3,000,000 once indexing has reached it, or to the last line if the file is shorter
 ```
 
 ## BIG-006: Find in a large file
@@ -427,6 +442,11 @@ Scenario: BIG-007.8 No single replace
   Given the replace row is open on a large-file tab
   When I look at its buttons
   Then there is a "Replace All" button and no button to replace one match
+
+Scenario: BIG-007.9 A dollar sign is literal in plain-text mode
+  Given Regular Expression is off with the query "x" and the replacement "$5 $$ $1"
+  When I confirm Replace All
+  Then each "x" becomes exactly "$5 $$ $1"
 ```
 
 ## BIG-008: Edit, insert and delete lines
@@ -434,7 +454,7 @@ Scenario: BIG-007.8 No single replace
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/BigFileView.tsx` — `beginEdit`, `editGate`, `commitEdit`, `insertLine`, `deleteSelected`, the `.big-edit` input
+  - `src/components/BigFileView.tsx` — `canChange` (one gate for Enter / F2 / double-click / Ctrl+Enter / Delete), `beginEdit`, `editGate`, `commitEdit`, `insertLine`, `deleteSelected`, the `.big-edit` input
   - `src-tauri/src/bigfile.rs` — piece table (`Piece`, `replace_range`, `split_at`), `replace_line`, `insert_lines`, `delete_lines`, `ensure_editable`, `MAX_READ_BYTES`
   - `src-tauri/src/lib.rs` — `big_replace_line`, `big_insert_lines`, `big_delete_lines`
   - `src/lib/ipc.ts` — `big.replaceLine`, `big.insertLines`, `big.deleteLines`
@@ -482,7 +502,7 @@ Scenario: BIG-008.6 Editing waits for indexing
   Given a large file is still being indexed
   When I press Enter on a line
   Then a toast says "Editing is enabled once indexing completes."
-  And double-clicking a row or pressing Delete does nothing
+  And F2, a double-click on a row, Ctrl+Enter and Delete show the same toast and change nothing
 
 Scenario: BIG-008.7 A line longer than 16 MB cannot be edited
   Given line 3 is longer than 16 MB
@@ -626,12 +646,14 @@ Scenario: BIG-011.1 UTF-16 files with a byte-order mark are shown decoded and re
   Then its text is readable
   And a warning toast says it is UTF-16LE and opened read-only in large-file mode
   And the status bar shows "UTF-16LE" and "Read-only"
+  And hovering "UTF-16LE" shows "UTF-16LE large files are shown decoded and read-only"
 
 Scenario: BIG-011.2 A read-only file refuses edits
   Given a UTF-16 large-file tab
   When I press Enter on a line
   Then a warning says "UTF-16LE large files are read-only."
-  And Replace All, Delete and Ctrl+Enter report that the file is read-only instead of changing it
+  And F2, a double-click, Delete and Ctrl+Enter show the same warning and change nothing
+  And Replace All reports that the file is read-only instead of changing it
 
 Scenario: BIG-011.3 Find works on UTF-16 files
   Given a UTF-16 large-file tab
@@ -714,6 +736,13 @@ Scenario: BIG-012.6 Colours can be turned off
   When I open a large log
   Then large-file tabs show plain text
   And the filter pane no longer offers the Errors and Warnings buttons
+
+Scenario: BIG-012.7 Every coloured extension and the sniffed formats
+  Given large files named "a.json", "a.jsonc", "a.json5", "a.jsonl", "a.ndjson", "a.geojson", "a.har", "a.log", "a.out", "a.err", "a.csv", "a.tsv", "a.tab", "a.xml", "a.html", "a.htm", "a.xhtml", "a.svg", "a.plist", "a.xsd", "a.kml", "a.gpx" and "a.sql"
+  When I open each one
+  Then each is coloured as JSON, log, CSV, TSV, XML or SQL by its extension
+  And a file with another extension whose first lines start with "{" or "[" and hold "key": pairs is coloured as JSON
+  And one whose first lines mostly start with "<" is coloured as XML
 ```
 
 ## BIG-013: Filter view of matching lines
@@ -722,10 +751,10 @@ Scenario: BIG-012.6 Colours can be turned off
 - Commands: `big.filter`
 - Files:
   - `src/lib/commands.ts` — `big.filter` ("Large File: Filter Lines") emits `big.filter` for the active big tab
-  - `src/components/BigFilterPane.tsx` — the pane: query, options, `LEVEL_FILTERS`, paging by 200 (`big.filterLines`), keyboard and click navigation, status text, re-run on `version`
+  - `src/components/BigFilterPane.tsx` — the pane: query, options (`dotAll` always off: `.` stays within a line), `LEVEL_FILTERS`, long-row "more chars" marker, paging by 200 (`big.filterLines`), keyboard and click navigation, status text, re-run on `version`
   - `src/components/BigFileView.tsx` — Filter banner button, `filterOpen`, `onJump`, `filterClear` on close
-  - `src-tauri/src/bigfile.rs` — `filter_lines`, `scan_lines`, `LineFilter`, `LineSet` (bitset with a count per 512 lines, `line_at`, `position_of`)
-  - `src-tauri/src/lib.rs` — `big_filter`, `big_filter_lines` (at most 1,000 per call), `big_filter_clear`, `big_filter_position`, `AppState.filters`
+  - `src-tauri/src/bigfile.rs` — `filter_lines`, `scan_lines`, `LineFilter` (`opts`: `dot_all` off), `LineSet` (bitset with a count per 512 lines, `line_at`)
+  - `src-tauri/src/lib.rs` — `big_filter`, `big_filter_lines` (at most 1,000 per call), `big_filter_clear`, `AppState.filters`
   - `src/lib/ipc.ts` — `big.filter`, `big.filterLines`, `big.filterClear`
   - `src/lib/bigGeometry.ts` — scaled scrolling for millions of filtered lines
   - `src/styles/app.css` — `.big-filter`, `.big-filter-bar`, `.big-filter-list`
@@ -790,6 +819,18 @@ Scenario: BIG-013.10 UTF-16 files cannot be filtered
   Given a UTF-16 large-file tab
   When I enter a filter
   Then the status says filtering works on UTF-8 files
+
+Scenario: BIG-013.11 A dot never matches a line break
+  Given Regular Expression is on
+  When I filter by "start.*end"
+  Then only lines that contain both "start" and a later "end" are listed
+  And a "start" on one line and an "end" on the next do not match together
+
+Scenario: BIG-013.12 Long filtered lines say how much is cut
+  Given a matching line of 5,000 characters
+  When it is listed in the filter pane
+  Then its first 2,000 characters are shown, followed by "… (3,000 more chars)"
+  And in grid mode a row is cut at 20,000 characters the same way
 ```
 
 ## BIG-014: Follow a file as it grows
@@ -798,7 +839,7 @@ Scenario: BIG-013.10 UTF-16 files cannot be filtered
 - Commands: `big.follow`
 - Files:
   - `src/lib/commands.ts` — `big.follow` ("Large File: Follow (Show Lines as They Are Added)")
-  - `src/components/BigFileView.tsx` — Follow button, `canFollow`, 1 s polling, `stickToEnd`, "Following" chip, stop on edit, reload on "replaced"
+  - `src/components/BigFileView.tsx` — Follow button, `followBlocked` / `canFollow` (also guards the `big.follow` bus event), 1 s polling, `stickToEnd`, "Following" chip, stop on edit, reload on "replaced"
   - `src-tauri/src/bigfile.rs` — `follow_appended`, `remember_follow_sig` (`follow_sig`: first / last 4 KB), `extend_filter`, `Appended`
   - `src-tauri/src/lib.rs` — `big_follow`, `FollowResult`
   - `src/lib/ipc.ts` — `big.follow`
@@ -842,6 +883,7 @@ Scenario: BIG-014.5 Follow needs an unedited, indexed file
   Given a large file with unsaved changes
   When I hover the Follow button
   Then the Follow button is disabled with the tooltip "Save first: follow mode needs the file unedited"
+  And while indexing runs the tooltip is "Available once indexing finishes", and on a UTF-16 file "Follow mode works on UTF-8 files"
 
 Scenario: BIG-014.6 Editing stops follow mode
   Given follow mode is on
@@ -853,6 +895,12 @@ Scenario: BIG-014.7 Following replaces the external-change check
   Given follow mode is on and the file grew
   When the Quarry window regains focus
   Then no "changed on disk" reload or prompt appears for that tab
+
+Scenario: BIG-014.8 The palette command has the same guard as the button
+  Given a large file that is still being indexed, has unsaved changes, or is UTF-16
+  When I run "Large File: Follow (Show Lines as They Are Added)" from the command palette
+  Then follow mode does not start and no "Following" chip appears
+  And a toast gives the reason, e.g. "Available once indexing finishes" or "Follow mode works on UTF-8 files"
 ```
 
 ## BIG-015: CSV and TSV grid
@@ -1002,6 +1050,7 @@ Scenario: BIG-016.9 Only JSON extensions get a tree
   Given a large file "app.log" is active
   When I open the JSON panel
   Then the JSON panel says the file is open in large-file mode and isn't a .json file
+  And a large "events.jsonl" or "events.ndjson" file (one JSON value per line, coloured as JSON) gets the same message, not a tree
 
 Scenario: BIG-016.10 Collapse and re-read
   When I click "Collapse all"
@@ -1056,6 +1105,7 @@ Scenario: BIG-017.5 Only large files with a JSON extension
   Given a large file "app.log" is active
   When I open the JSON menu or the command palette
   Then JSON: Validate is disabled in the menu and the palette
+  And it is disabled for a large ".jsonl" or ".ndjson" file too, since those hold one JSON value per line
 
 Scenario: BIG-017.6 UTF-16 files are refused
   Given a large UTF-16 file "data.json"

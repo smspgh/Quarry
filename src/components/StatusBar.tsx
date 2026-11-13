@@ -206,7 +206,7 @@ export function StatusBar() {
             Ln {cursor.line}, Col {cursor.col}
             {cursor.selections > 1 && ` (${cursor.selections} lines selected)`}
           </button>
-          <span className="status-item" title="Large files are read and written as UTF-8">{doc.encoding}</span>
+          <span className="status-item" title={doc.encoding === "UTF-8" ? "Large files are read and written as UTF-8" : `${doc.encoding} large files are shown decoded and read-only`}>{doc.encoding}</span>
           <span className="status-item">{doc.eol}</span>
         </>
       )}

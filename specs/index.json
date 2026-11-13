@@ -241,6 +241,7 @@
         "src-tauri/src/lib.rs",
         "src/lib/ipc.ts",
         "src/lib/store.ts",
+        "src/lib/actions.ts",
         "src/styles/app.css"
       ],
       "tests": [
@@ -278,6 +279,10 @@
         {
           "id": "BIG-003.7",
           "title": "Switching tabs keeps the position"
+        },
+        {
+          "id": "BIG-003.8",
+          "title": "After a restart the tab opens at the top"
         }
       ]
     },
@@ -286,7 +291,7 @@
       "title": "Move the cursor, select lines and copy",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 175,
+      "line": 182,
       "status": "draft",
       "commands": [],
       "files": [
@@ -340,7 +345,7 @@
       "title": "Go to a line",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 238,
+      "line": 245,
       "status": "draft",
       "commands": [
         "goto.line",
@@ -379,6 +384,10 @@
         {
           "id": "BIG-005.5",
           "title": "The status bar position opens Go to Line"
+        },
+        {
+          "id": "BIG-005.6",
+          "title": "Go to Line during indexing does not call the line out of range"
         }
       ]
     },
@@ -387,7 +396,7 @@
       "title": "Find in a large file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 287,
+      "line": 302,
       "status": "draft",
       "commands": [
         "find.open",
@@ -455,7 +464,7 @@
       "title": "Replace All in a large file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 364,
+      "line": 379,
       "status": "draft",
       "commands": [
         "find.replace"
@@ -507,6 +516,10 @@
         {
           "id": "BIG-007.8",
           "title": "No single replace"
+        },
+        {
+          "id": "BIG-007.9",
+          "title": "A dollar sign is literal in plain-text mode"
         }
       ]
     },
@@ -515,7 +528,7 @@
       "title": "Edit, insert and delete lines",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 432,
+      "line": 452,
       "status": "draft",
       "commands": [],
       "files": [
@@ -577,7 +590,7 @@
       "title": "Undo and redo line edits",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 504,
+      "line": 524,
       "status": "draft",
       "commands": [
         "edit.undo",
@@ -624,7 +637,7 @@
       "title": "Save and Save As",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 551,
+      "line": 571,
       "status": "draft",
       "commands": [
         "file.save",
@@ -674,7 +687,7 @@
       "title": "Encodings and line endings",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 606,
+      "line": 626,
       "status": "draft",
       "commands": [],
       "files": [
@@ -726,7 +739,7 @@
       "title": "Syntax colours for large files",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 664,
+      "line": 686,
       "status": "draft",
       "commands": [],
       "files": [
@@ -768,6 +781,10 @@
         {
           "id": "BIG-012.6",
           "title": "Colours can be turned off"
+        },
+        {
+          "id": "BIG-012.7",
+          "title": "Every coloured extension and the sniffed formats"
         }
       ]
     },
@@ -776,7 +793,7 @@
       "title": "Filter view of matching lines",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 719,
+      "line": 748,
       "status": "draft",
       "commands": [
         "big.filter"
@@ -838,6 +855,14 @@
         {
           "id": "BIG-013.10",
           "title": "UTF-16 files cannot be filtered"
+        },
+        {
+          "id": "BIG-013.11",
+          "title": "A dot never matches a line break"
+        },
+        {
+          "id": "BIG-013.12",
+          "title": "Long filtered lines say how much is cut"
         }
       ]
     },
@@ -846,7 +871,7 @@
       "title": "Follow a file as it grows",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 795,
+      "line": 836,
       "status": "draft",
       "commands": [
         "big.follow"
@@ -895,6 +920,10 @@
         {
           "id": "BIG-014.7",
           "title": "Following replaces the external-change check"
+        },
+        {
+          "id": "BIG-014.8",
+          "title": "The palette command has the same guard as the button"
         }
       ]
     },
@@ -903,7 +932,7 @@
       "title": "CSV and TSV grid",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 858,
+      "line": 906,
       "status": "draft",
       "commands": [],
       "files": [
@@ -967,7 +996,7 @@
       "title": "JSON tree read from the file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 934,
+      "line": 982,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1037,7 +1066,7 @@
       "title": "Validate a large JSON file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1013,
+      "line": 1062,
       "status": "draft",
       "commands": [
         "json.validate"
@@ -1089,7 +1118,7 @@
       "title": "Show large-file info",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1066,
+      "line": 1116,
       "status": "draft",
       "commands": [
         "big.info"
@@ -1120,7 +1149,7 @@
       "title": "Reload when the file changes on disk",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1094,
+      "line": 1144,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1152,7 +1181,7 @@
       "title": "What large-file tabs do not offer",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1130,
+      "line": 1180,
       "status": "draft",
       "commands": [],
       "files": [
@@ -17068,6 +17097,7 @@
     "src/lib/actions.ts": [
       "BIG-001",
       "BIG-002",
+      "BIG-003",
       "BIG-005",
       "BIG-008",
       "BIG-010",

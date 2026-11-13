@@ -45,11 +45,13 @@ Large files are coloured as you scroll: only the lines on screen are coloured, s
 
 | Files | Colours |
 | --- | --- |
-| `.json`, `.jsonl`, `.ndjson`, `.geojson`, `.har` | keys, strings, numbers, `true` / `false` / `null` |
-| `.log` (and `.txt` files that look like logs) | timestamps, the log level (ERROR and FATAL in red, WARN in amber, DEBUG and TRACE dimmed), `[tags]`, `key=` names and numbers |
-| `.csv`, `.tsv` | one colour per column, so a row is easy to follow; quoted fields stay in one column |
-| `.xml`, `.html`, `.svg` | tags, attributes, values and comments |
+| `.json`, `.jsonc`, `.json5`, `.jsonl`, `.ndjson`, `.geojson`, `.har` | keys, strings, numbers, `true` / `false` / `null` |
+| `.log`, `.out`, `.err` | timestamps, the log level (ERROR and FATAL in red, WARN in amber, DEBUG and TRACE dimmed), `[tags]`, `key=` names and numbers |
+| `.csv`, `.tsv`, `.tab` | one colour per column, so a row is easy to follow; quoted fields stay in one column |
+| `.xml`, `.html`, `.htm`, `.xhtml`, `.svg`, `.plist`, `.xsd`, `.kml`, `.gpx` | tags, attributes, values and comments |
 | `.sql` | keywords, strings, numbers and comments |
+
+A file with any other extension (`.txt`, say) is coloured as a log, JSON or XML when its first 40 non-empty lines look like one; otherwise it stays plain.
 
 Each line is coloured on its own, so something that spans lines (an XML comment, say) is coloured only on its first line. Lines are coloured up to 4,000 characters. Turn it off with **Settings › Files › Colours in large-file mode**.
 
@@ -76,10 +78,11 @@ A large `.csv`, `.tsv` or `.tab` file opens as a grid: each field in its own col
 
 **Filter** in the large-file banner (or **Large File: Filter Lines** in the command palette) opens a pane under the file that shows only the lines matching a search: every one of them, however many, scrolled like the file itself.
 
-- Type a search and press **Enter**. Match Case, Whole Word and Regex work as in Find.
+- Type a search and press **Enter**. Match Case, Whole Word and Regex work as in Find, except that `.` never matches a line break (there is no option for it): a line is listed when a match starts on it.
 - **Hide matching lines** (the crossed-out eye) shows the opposite: every line *without* a match, for example to hide all DEBUG lines.
 - For logs, **Errors** and **Warnings** filter by log level in one click.
 - Click a line, or move with the arrow keys, to show it in context in the file above. Each line shows its line number in the file.
+- Long lines are shown up to 2,000 characters (20,000 in the grid), followed by "… (N more chars)"; click the line to see it in the file view.
 - The filter runs once the file is fully indexed (a few seconds per gigabyte); until then it says it is waiting and runs by itself. It re-runs after you edit the file.
 - Speed on the benchmark machine ([bench/RESULTS.md](../bench/RESULTS.md)): keeping the ERROR lines of a 5 GB log (7.4 million of 59 million) takes 0.6 s; hiding its DEBUG lines (44 million left) 1.0 s. The filter needs one bit per line of the file: about 7 MB for 60 million lines.
 
@@ -145,6 +148,8 @@ For a large `.json`, `.jsonc`, `.json5`, `.geojson` or `.har` file, the **JSON**
 - The tree reads the file as saved. With unsaved changes it asks you to save first; **Re-read the file** refreshes it after saving.
 
 **JSON: Validate** (**Ctrl+Alt+V**) works on large `.json`, `.jsonc`, `.json5`, `.geojson` and `.har` files of any size. It checks the file in place, without loading it into memory: about 1 GB a second on a fast machine. A valid file says so, with the time taken. For an invalid one it gives the line and column and jumps to the line. Files ending in `.jsonc` or `.json5` are checked as JSONC (comments and trailing commas allowed).
+
+JSON Lines files (`.jsonl`, `.ndjson`) are coloured as JSON but get neither the tree nor Validate: they hold one JSON value per line, not a single document. Use Find or the filter to work with them.
 
 The file is checked as saved, so save your changes first; Quarry says so if you haven't.
 

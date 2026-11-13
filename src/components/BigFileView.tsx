@@ -512,6 +512,19 @@ export function BigFileView({ doc }: { doc: Doc }) {
     return () => offs.forEach((f) => f());
   });
 
+  /** Edit / insert / delete keys share one gate: read-only first, then indexing. */
+  const canChange = () => {
+    if (doc.readonly) {
+      toast(doc.encoding !== "UTF-8" ? `${doc.encoding} large files are read-only.` : "This document is read-only.", "warning", 5000);
+      return false;
+    }
+    if (!indexed) {
+      toast("Editing is enabled once indexing completes.", "info");
+      return false;
+    }
+    return true;
+  };
+
   const onKey = async (e: React.KeyboardEvent) => {
     if (editing) return;
     const ext = e.shiftKey;
@@ -543,13 +556,13 @@ export function BigFileView({ doc }: { doc: Doc }) {
       case "Enter":
       case "F2": {
         e.preventDefault();
+        if (!canChange()) break;
         if (e.ctrlKey) { await insertLine(cursor + 1); break; }
-        if (!indexed) { toast("Editing is enabled once indexing completes.", "info"); break; }
         const t = lineText(cursor);
         if (t !== null) await beginEdit(cursor, t);
         break;
       }
-      case "Delete": e.preventDefault(); if (indexed) await deleteSelected(); break;
+      case "Delete": e.preventDefault(); if (canChange()) await deleteSelected(); break;
       case "a": if (e.ctrlKey) { e.preventDefault(); setAnchor(0); setCursor(total - 1); } break;
       case "c": if (e.ctrlKey) { e.preventDefault(); await copySelected(); } break;
       case "z": if (e.ctrlKey) { e.preventDefault(); await undoRedo(false); } break;
@@ -609,7 +622,17 @@ export function BigFileView({ doc }: { doc: Doc }) {
   const [filterGrowth, setFilterGrowth] = useState<number | null>(null);
   const stickToEnd = useRef(false);
   const lastScroll = useRef({ top: 0, viewH: 0 });
-  const canFollow = indexed && !doc.dirty && doc.bigInfo?.encoding === "UTF-8";
+  // Why follow mode cannot start (null = it can); shared by the button and the palette command.
+  const followBlocked = doc.dirty
+    ? "Save first: follow mode needs the file unedited"
+    : !indexed
+      ? "Available once indexing finishes"
+      : doc.bigInfo?.encoding !== "UTF-8"
+        ? "Follow mode works on UTF-8 files"
+        : null;
+  const canFollow = followBlocked === null;
+  const followState = useRef({ following, followBlocked });
+  followState.current = { following, followBlocked };
   useEffect(() => {
     updateDoc(doc.id, { following: following || undefined });
   }, [following]);
@@ -654,7 +677,15 @@ export function BigFileView({ doc }: { doc: Doc }) {
     return () => clearInterval(t);
   }, [following, canFollow, id]);
   useEffect(() => bus.onFor(doc.id, "big.filter", () => setFilterOpen(true)), [doc.id]);
-  useEffect(() => bus.onFor(doc.id, "big.follow", () => setFollowing((f) => !f)), [doc.id]);
+  useEffect(
+    () =>
+      bus.onFor(doc.id, "big.follow", () => {
+        const { following: on, followBlocked: why } = followState.current;
+        if (!on && why) toast(why, "info", 4000);
+        else setFollowing(!on);
+      }),
+    [doc.id],
+  );
 
   // Colours: by extension, or sniffed from the first lines (once they are loaded) for e.g. .txt.
   const firstLines = cache.current.get(0);
@@ -725,7 +756,7 @@ export function BigFileView({ doc }: { doc: Doc }) {
         <button className={`btn small ${filterOpen ? "on" : ""}`} title="Show only the lines that match a search" onClick={() => setFilterOpen((o) => !o)}><ListFilter size={13} /> Filter</button>
         <button
           className={`btn small ${following ? "on" : ""}`}
-          title={canFollow ? "Follow: show lines as they are added to the file, like tail -f" : doc.dirty ? "Save first: follow mode needs the file unedited" : "Available once indexing finishes"}
+          title={followBlocked ?? "Follow: show lines as they are added to the file, like tail -f"}
           disabled={!canFollow && !following}
           aria-pressed={following}
           onClick={() => setFollowing((f) => !f)}
@@ -824,8 +855,7 @@ export function BigFileView({ doc }: { doc: Doc }) {
                   onMouseDown={(e) => onRowMouseDown(n, e)}
                   onMouseEnter={() => onRowMouseEnter(n)}
                   onDoubleClick={() => {
-                    if (!indexed) return;
-                    if (text !== null) void beginEdit(n, text);
+                    if (text !== null && canChange()) void beginEdit(n, text);
                   }}
                 >
                   <span className="big-ln" style={{ width: `${lnWidth}ch` }}>{(n + 1).toLocaleString()}</span>

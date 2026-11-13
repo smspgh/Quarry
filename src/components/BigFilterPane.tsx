@@ -248,6 +248,9 @@ export function BigFilterPane({ doc, lang, rowH, version, onJump, onClose, growt
                       : lang
                       ? segments(r[1].slice(0, 2000), tokenize(lang, r[1].slice(0, 2000)), null).map((s, i) => (s.cls ? <span key={i} className={`hl-${s.cls}`}>{s.text}</span> : s.text))
                       : r[1].slice(0, 2000)}
+                    {r !== undefined && r[1].length > (grid ? 20000 : 2000) && (
+                      <span className="big-more" title="Long line: click it to see it in the file view">… ({(r[1].length - (grid ? 20000 : 2000)).toLocaleString()} more chars)</span>
+                    )}
                   </span>
                 </div>
               );

@@ -22,22 +22,6 @@ Possible bugs
 Doc / code mismatches
 - Look-around and backreferences cannot be run in any scope: `docs/find-and-replace.md:130-133` says they work with Current File / Open Files, but the panel always validates with the Rust engine and blocks the search (`SearchPanel.tsx:351-369`, `:375`, `:877`; SEARCH-004.7).
 
-## Large files (`large-files.md`)
-
-Possible bugs
-- Plain-text Replace All probably doubles `$`: `big_replace_all` escapes `$` to `$$` for non-regex queries (`src-tauri/src/lib.rs:477`), but `replace_all` writes the replacement verbatim in the non-regex branch (`src-tauri/src/bigfile.rs:950`, `:977-978`). `docs/large-files.md:100` says `$` is literal. No Rust test covers it.
-- `big.follow` from the palette skips the button's guard (indexed, unedited, UTF-8): on a dirty, indexing or UTF-16 tab the "Following" chip shows and `Doc.following` is set, so the external-change check skips the tab (`src/lib/actions.ts:592`) while nothing is polled (`src/components/BigFileView.tsx:655`, `:624`).
-- A deferred go-to while indexing shows "Line N is out of range; jumped to line X" (`src/components/CommandPalette.tsx:256`) because the palette compares against the partial line count (`BigFileView.tsx:494`).
-- Ctrl+Enter and Delete are gated differently from Enter: Enter shows a friendly toast while indexing (`BigFileView.tsx:547`), Delete does nothing (`:552`), Ctrl+Enter surfaces Rust's raw error (`:546`); on a read-only UTF-16 tab Delete and Ctrl+Enter bypass `editGate`.
-- The status bar tooltip says "Large files are read and written as UTF-8" even when the label shows UTF-16LE/BE (`src/components/StatusBar.tsx:210`).
-
-Doc / code mismatches and dead code
-- `docs/large-files.md:48-52` omits extensions that are coloured (`src/lib/bigHighlight.ts:21-27`): `.out`, `.err`, `.jsonc`, `.json5`, `.tab`, `.htm`, `.xhtml`, `.plist`, `.xsd`, `.kml`, `.gpx`; sniffing also detects JSON and XML.
-- `.jsonl` / `.ndjson` get colours but no JSON tree or Validate (`isBigJson`, `src/lib/commands.ts:343`); probably intended, stated nowhere.
-- The filter pane always sends `dotAll: false` (`src/components/BigFilterPane.tsx:73`); filtered rows are cut at 2,000 characters (20,000 in grid mode) with no "more" marker (`:247-250`).
-- `big_filter_position` (`src-tauri/src/lib.rs:338`) has no wrapper or caller; `BottomTab` still includes `"bigsearch"` (`src/lib/store.ts:7`).
-- Not determined: whether a big tab's view state survives a restart.
-
 ## JSON tools (`json.md`)
 
 - The JSON panel's Format / Minify / Validate buttons do nothing on a non-JSON-language tab whose text parses: the panel shows them (`src/components/panels/JsonPanel.tsx:311-313`) but `json.*` commands are disabled unless the language is JSON (`src/lib/commands.ts:538`; JSON-014.5).
