@@ -833,8 +833,9 @@ Scenario: SET-016.2 The default is 2
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/Select.tsx` — `Select` (combobox button, portalled listbox, `onKey`, type-ahead with a 700 ms window, closes on outside mouse-down / resize / outside scroll / blur), `placeFlyout` (flips up, clamps to the window, max height 320), `typeAheadIndex`, option groups and hints
+  - `src/components/Select.tsx` — `Select` (combobox button, portalled listbox, `onKey` (Escape on an open list calls `preventDefault`), type-ahead with a 700 ms window, closes on outside mouse-down / resize / outside scroll / blur), `placeFlyout` (flips up, clamps to the window, max height 320), `typeAheadIndex`, option groups and hints
   - `src/styles/app.css` — `.select-btn`, `.select-flyout`, `.select-option`, `.select-group`
+  - `src/components/Sidebar.tsx` — the floating panel's Escape handler skips a key a control already used (`defaultPrevented`)
 - Tests: `src/__tests__/ui.test.ts`
 - Docs: none
 
@@ -863,6 +864,7 @@ Scenario: SET-017.3 Escape closes without changing the value
   Given the list is open and I moved the highlight to another option
   When I press Escape
   Then the list closes and the value is unchanged
+  And a floating panel holding the dropdown (Settings, for example) stays open; a second Escape closes the panel
 
 Scenario: SET-017.4 Tab closes the list and moves on
   Given the list is open

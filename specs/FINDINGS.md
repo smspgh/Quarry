@@ -172,7 +172,6 @@ Doc / code mismatches
 
 - `InfoTip` is not used in Settings; its only use is `src/components/panels/SearchPanel.tsx:739`.
 - No settings migration code exists (nothing mentions the old ShiEdit id); loading is merge-over-defaults plus `sanitizeSettings` and the `.bak` fallback (`src/lib/actions.ts:673-718`; SET-003).
-- Not determined: whether Escape in an open `Select` inside a floating panel also closes the panel (`src/components/Select.tsx:147` does not stop propagation; SET-017.3).
 
 ## Updates and releases (`updates.md`)
 

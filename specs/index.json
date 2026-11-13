@@ -13346,7 +13346,8 @@
       "commands": [],
       "files": [
         "src/components/Select.tsx",
-        "src/styles/app.css"
+        "src/styles/app.css",
+        "src/components/Sidebar.tsx"
       ],
       "tests": [
         "src/__tests__/ui.test.ts"
@@ -13392,7 +13393,7 @@
       "title": "Help \"i\" icons",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 897,
+      "line": 899,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16533,6 +16534,7 @@
     ],
     "src/components/Sidebar.tsx": [
       "SET-001",
+      "SET-017",
       "UI-013",
       "UI-015",
       "UI-021"
