@@ -14,7 +14,7 @@ The tab strip: what a tab shows, switching and closing tabs, the right-click men
 - Files:
   - `src/components/TitleBar.tsx` — `TitleBar` (tab row above the title bar with `menuPosition: "titlebar"`, tabs inside the title bar otherwise; window title), `Tab`, `DocIcon`, `ClaudeBadge`
   - `src/lib/store.ts` — `docs`, `activeId`, `Doc.kind`, `addDoc` (new tabs go at the end)
-  - `src/styles/app.css` — `.tabbar`, `.tabs` (wrapping rows), `.tab`, `.tab.active`
+  - `src/styles/app.css` — `.tabbar` / `.titlebar` (`min-height` only, so they grow a row at a time), `.tabs` (`flex-wrap: wrap`), `.tab` (120–240 px wide), `.tab.active`; the brand mark and window buttons stay on the first row
 - Tests: none
 - Docs: `docs/editing.md`
 
@@ -40,6 +40,7 @@ Scenario: TAB-001.3 More tabs than fit wrap
   Given the window is 1000 px wide
   When I open 40 files
   Then the tabs continue on further rows and every tab is visible without scrolling
+  And no tab is narrower than 120 px, and the window buttons stay at the top right
 
 Scenario: TAB-001.4 Tooltip and window title
   Given "C:\work\a.txt" is the active tab

@@ -13747,7 +13747,7 @@
       "title": "Switch between tabs",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 56,
+      "line": 57,
       "status": "draft",
       "commands": [
         "file.nextTab",
@@ -13796,7 +13796,7 @@
       "title": "Use the tab strip from the keyboard",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 106,
+      "line": 107,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13837,7 +13837,7 @@
       "title": "See which tabs have unsaved changes",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 149,
+      "line": 150,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13874,7 +13874,7 @@
       "title": "Close a tab",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 188,
+      "line": 189,
       "status": "draft",
       "commands": [
         "file.close",
@@ -13933,7 +13933,7 @@
       "title": "Close other tabs or all tabs",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 253,
+      "line": 254,
       "status": "draft",
       "commands": [
         "file.closeOthers",
@@ -13982,7 +13982,7 @@
       "title": "Act on a tab from its right-click menu",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 302,
+      "line": 303,
       "status": "draft",
       "commands": [
         "file.showInQuarryExplorer",
@@ -14044,7 +14044,7 @@
       "title": "Preview tabs while browsing the Explorer",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 366,
+      "line": 367,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14097,7 +14097,7 @@
       "title": "Limit how many tabs are open",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 426,
+      "line": 427,
       "status": "draft",
       "commands": [],
       "files": [
