@@ -406,9 +406,10 @@ Scenario: EDIT-008.4 Greyed out outside text tabs
 - Status: draft
 - Commands: `code.sortAsc`, `code.sortDesc`, `code.reverseLines`, `code.dedupe`, `code.removeBlank`, `code.removeEmpty`, `code.trimTrailing`, `code.joinLines`, `edit.numberLines`
 - Files:
-  - `src/lib/commands.ts` — `lineTransform` (`cmEdit`: nothing on a read-only document; whole document when the selection is empty, otherwise the lines the main selection touches; one transaction, `input.transform`) and the nine registrations after it; `Intl.Collator` with `numeric` and `sensitivity: "base"`
+  - `src/lib/commands.ts` — `lineTransform` (`cmEdit`: nothing on a read-only document) and the nine registrations after it
+  - `src/lib/lineTransforms.ts` — the line functions (`Intl.Collator` with `numeric` and `sensitivity: "base"`) and `lineTransformSpec` (whole document but the empty line after a final line break when the selection is empty, otherwise the lines the main selection touches, without a last line it reaches only at column 0; one transaction, `input.transform`)
   - `src/components/MenuBar.tsx` — Edit › Lines submenu
-- Tests: none
+- Tests: `src/__tests__/lineTransforms.test.ts`
 - Docs: `docs/editing.md`
 
 **As a** person cleaning up a list or a log excerpt
@@ -472,6 +473,17 @@ Scenario: EDIT-009.10 A read-only document is not changed
   Given a file that opened read-only, with the lines "b" and "a"
   When I choose Sort Lines Ascending
   Then the lines are still "b", "a"
+
+Scenario: EDIT-009.11 A final line break stays at the end
+  Given the lines "c", "a", "b" followed by a line break, and nothing selected
+  When I choose Sort Lines Ascending
+  Then the document is "a", "b", "c" followed by a line break
+  And Number Lines on that document numbers 3 lines, not 4
+
+Scenario: EDIT-009.12 A line the selection only reaches at its start is left out
+  Given the lines "c", "b", "a" selected from the start of "c" to the start of "a"
+  When I choose Sort Lines Ascending
+  Then the lines are "b", "c", "a"
 ```
 
 ## EDIT-010: Change case and wrap selections in quotes
@@ -533,7 +545,8 @@ Scenario: EDIT-010.7 A read-only document is not changed
 - Status: draft
 - Commands: `edit.indent`, `edit.outdent`, `code.indentToSpaces`, `code.indentToTabs`, `view.setTabSize`
 - Files:
-  - `src/lib/commands.ts` — `edit.indent` / `edit.outdent` (`indentMore` / `indentLess`, only while the editor has focus), `code.indentToSpaces` / `code.indentToTabs` (via `lineTransform`, leading whitespace only; `cmEdit` = nothing on a read-only document), `view.setTabSize` (1–16, otherwise opens the status-bar picker)
+  - `src/lib/commands.ts` — `edit.indent` / `edit.outdent` (`indentMore` / `indentLess`, only while the editor has focus), `code.indentToSpaces` / `code.indentToTabs` (via `lineTransform`; `cmEdit` = nothing on a read-only document)
+  - `src/lib/lineTransforms.ts` — `indentToSpaces` / `indentToTabs` (leading whitespace only), `view.setTabSize` (1–16, otherwise opens the status-bar picker)
   - `src/editor/cmSetup.ts` — `compartments.indent` (`tabSize`, `indentUnit` from `insertSpaces`), `indentOnInput`, `indentWithTab`, `defaultKeymap` (Ctrl+[ / Ctrl+])
   - `src/editor/manager.ts` — `applySettings`
   - `src/components/StatusBar.tsx` — "Spaces: 4" / "Tab Size: 4" picker (2, 4, 8)

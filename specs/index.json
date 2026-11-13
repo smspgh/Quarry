@@ -3747,9 +3747,12 @@
       ],
       "files": [
         "src/lib/commands.ts",
+        "src/lib/lineTransforms.ts",
         "src/components/MenuBar.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/lineTransforms.test.ts"
+      ],
       "docs": [
         "docs/editing.md"
       ],
@@ -3793,6 +3796,14 @@
         {
           "id": "EDIT-009.10",
           "title": "A read-only document is not changed"
+        },
+        {
+          "id": "EDIT-009.11",
+          "title": "A final line break stays at the end"
+        },
+        {
+          "id": "EDIT-009.12",
+          "title": "A line the selection only reaches at its start is left out"
         }
       ]
     },
@@ -3801,7 +3812,7 @@
       "title": "Change case and wrap selections in quotes",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 477,
+      "line": 489,
       "status": "draft",
       "commands": [
         "edit.upper",
@@ -3853,7 +3864,7 @@
       "title": "Indent, outdent and convert indentation",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 531,
+      "line": 543,
       "status": "draft",
       "commands": [
         "edit.indent",
@@ -3864,6 +3875,7 @@
       ],
       "files": [
         "src/lib/commands.ts",
+        "src/lib/lineTransforms.ts",
         "src/editor/cmSetup.ts",
         "src/editor/manager.ts",
         "src/components/StatusBar.tsx",
@@ -3906,7 +3918,7 @@
       "title": "Toggle line and block comments",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 585,
+      "line": 598,
       "status": "draft",
       "commands": [
         "edit.toggleComment",
@@ -3944,7 +3956,7 @@
       "title": "Fold and unfold regions",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 624,
+      "line": 637,
       "status": "draft",
       "commands": [
         "code.fold",
@@ -3987,7 +3999,7 @@
       "title": "Right-click menu on a foldable line",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 666,
+      "line": 679,
       "status": "draft",
       "commands": [
         "code.foldLine",
@@ -4043,7 +4055,7 @@
       "title": "Brackets: matching, jumping and auto-closing",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 724,
+      "line": 737,
       "status": "draft",
       "commands": [
         "code.gotoBracket"
@@ -4083,7 +4095,7 @@
       "title": "Go to Line",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 763,
+      "line": 776,
       "status": "draft",
       "commands": [
         "goto.line"
@@ -4138,7 +4150,7 @@
       "title": "Detect a document's language",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 830,
+      "line": 843,
       "status": "draft",
       "commands": [
         "code.detectLanguage"
@@ -4195,7 +4207,7 @@
       "title": "Change the language of a document",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 902,
+      "line": 915,
       "status": "draft",
       "commands": [
         "code.setLanguage"
@@ -4244,7 +4256,7 @@
       "title": "Syntax highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 955,
+      "line": 968,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4276,7 +4288,7 @@
       "title": "Word wrap and visible whitespace",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 988,
+      "line": 1001,
       "status": "draft",
       "commands": [
         "view.toggleWrap",
@@ -4318,7 +4330,7 @@
       "title": "Zoom the editor text",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1031,
+      "line": 1044,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -4361,7 +4373,7 @@
       "title": "Let Tab leave the editor",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1073,
+      "line": 1086,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -4401,7 +4413,7 @@
       "title": "Line numbers, active line and selection-match highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1117,
+      "line": 1130,
       "status": "draft",
       "commands": [],
       "files": [
@@ -17367,6 +17379,10 @@
       "JSON-006",
       "JSON-007"
     ],
+    "src/lib/lineTransforms.ts": [
+      "EDIT-009",
+      "EDIT-011"
+    ],
     "src/lib/lsp.ts": [
       "FILE-017",
       "LSP-001",
@@ -17869,6 +17885,9 @@
     "src/__tests__/lineMenu.test.ts": [
       "EDIT-002",
       "EDIT-014"
+    ],
+    "src/__tests__/lineTransforms.test.ts": [
+      "EDIT-009"
     ],
     "src/__tests__/lsp.test.ts": [
       "LSP-001",

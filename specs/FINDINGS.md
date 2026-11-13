@@ -35,7 +35,6 @@ Not verified
 ## Text editing (`editing.md`)
 
 Possible bugs
-- Line commands treat a trailing newline as an empty last line: sorting a whole document that ends in a newline moves that empty line to the top; Number Lines numbers it (`commands.ts:750-753`).
 - Line commands use only the main selection; other selections are ignored (`commands.ts:748`).
 - Remove Duplicate Lines is quadratic (`indexOf` inside `filter`, `commands.ts:763`).
 - Title Case uses `/\b\w/g`: "don't" becomes "Don'T", and existing capitals are not lowered (`commands.ts:798`).
