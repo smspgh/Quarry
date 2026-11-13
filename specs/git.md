@@ -445,6 +445,13 @@ Scenario: GIT-008.7 The panel says who the commit is made as
   Given git's user.name is "Ada" and user.email is "ada@example.com"
   When I look under the Commit button
   Then a line reads "as Ada <ada@example.com>"
+
+Scenario: GIT-008.8 Ctrl+Enter while the button is disabled says why
+  Given the Commit button is disabled
+  When I press Ctrl+Enter in the message box
+  Then no commit is made
+  And a message says why: "Write a commit message first." with an empty box, "There is nothing to commit." with no changes, or the conflicts warning (CONFLICT-010.2)
+  And while a git action is running nothing happens
 ```
 
 ## GIT-009: Amend the last commit

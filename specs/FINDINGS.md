@@ -126,7 +126,6 @@ Doc / code mismatches and dead code
 ## Source control (`git.md`)
 
 Possible bugs
-- Ctrl+Enter in the message box ignores the Commit button's disabled state (`GitPanel.tsx:535-540`); it ends in a toast, not a bad commit.
 - A token in a remote URL can be shown: the toast "Remote origin now points to <url>" uses the raw URL (`git.ts:570`) and the Change form prefills it (`GitRepoSettings.tsx:74`); only the remote row uses `displayUrl`.
 - Background check: a failed check also counts toward the once-a-minute limit (`git.ts:542`); it runs `fetch --prune` without `--all` (`git.rs:939`), so only the default remote is checked.
 - `git_unpushed` stops at 500 (`git.rs:1187`), so "N to push" in the Commits heading tops out there while the status line uses the real ahead count.
