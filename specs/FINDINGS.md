@@ -100,10 +100,6 @@ Doc / code mismatches and dead code
 - `big_filter_position` (`src-tauri/src/lib.rs:338`) has no wrapper or caller; `BottomTab` still includes `"bigsearch"` (`src/lib/store.ts:7`).
 - Not determined: whether a big tab's view state survives a restart.
 
-## JSON tools (`json.md`)
-
-- `docs/json.md:75` mentions "Valid JSONC ✓" only; a `.json5` file reports "Valid JSON5 ✓" (`commands.ts:382`).
-
 ## Scripts (`scripting.md`)
 
 - Selection edits land on the selection at finish time, not the snapshot: `src/lib/scripting.ts:231` applies `selectionTexts` to the current ranges; moving the cursor during a slow script retargets them, and a changed range count mismatches them.

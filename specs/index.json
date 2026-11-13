@@ -9352,7 +9352,7 @@
       "title": "Pretty-print JSON without changing its values",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 437,
+      "line": 440,
       "status": "draft",
       "commands": [
         "json.format"
@@ -9407,7 +9407,7 @@
       "title": "Minify JSON",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 504,
+      "line": 507,
       "status": "draft",
       "commands": [
         "json.minify"
@@ -9449,7 +9449,7 @@
       "title": "Convert JSON to CSV",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 547,
+      "line": 550,
       "status": "draft",
       "commands": [
         "json.toCsv"
@@ -9497,7 +9497,7 @@
       "title": "Convert CSV or TSV to JSON",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 604,
+      "line": 607,
       "status": "draft",
       "commands": [
         "json.fromCsv"
@@ -9553,7 +9553,7 @@
       "title": "Copy the top-level keys",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 677,
+      "line": 680,
       "status": "draft",
       "commands": [
         "json.copyKeys"
@@ -9592,7 +9592,7 @@
       "title": "JSON commands are offered only where they apply",
       "area": "JSON",
       "spec": "specs/json.md",
-      "line": 715,
+      "line": 718,
       "status": "draft",
       "commands": [
         "json.format",

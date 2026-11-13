@@ -418,6 +418,9 @@ Scenario: JSON-008.6 JSON5 files are checked as JSONC
   When I validate
   Then the error message names the dialect JSON5
   And it adds that Quarry checks JSON5 files as JSONC: comments and trailing commas are fine, unquoted keys and single quotes are not
+  Given a tab config.json5 containing comments and a trailing comma but only quoted keys
+  When I validate
+  Then a message reads "Valid JSON5 ✓"
 
 Scenario: JSON-008.7 Byte-order mark and repeated presses
   Given a valid document that starts with a byte-order mark

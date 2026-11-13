@@ -73,7 +73,7 @@ The breadcrumb bar above the editor shows the path of the value under the cursor
 
 On an error, Quarry marks it in the editor, moves the cursor to it, and reports the line and column with a specific message: "trailing comma", "expected `,` or `}`", "key must be a string", "invalid escape", "invalid number (leading zero)", "trailing characters", and so on. The mark clears on your next edit.
 
-A leading byte-order mark is allowed. In a plain JSON file, a comment is reported as "comments are not allowed in JSON (they are in JSONC)". In a JSONC file, comments and trailing commas pass, and the result reads "Valid JSONC ✓".
+A leading byte-order mark is allowed. In a plain JSON file, a comment is reported as "comments are not allowed in JSON (they are in JSONC)". In a JSONC file, comments and trailing commas pass, and the result reads "Valid JSONC ✓" ("Valid JSON5 ✓" for a `.json5` file, which is checked the same way).
 
 ## Format and minify
 
