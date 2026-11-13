@@ -360,9 +360,11 @@ export async function saveDocument(docId?: string, saveAs = false): Promise<bool
     if (!picked) return false;
     target = picked;
   }
+  // The same file can come back from the dialog with other case or slashes.
+  const sameFile = samePath(target, doc.path);
   // Read-only covers binary files too: an Encoding / EOL pick marks them dirty, and writing the
   // decoded text back would corrupt them.
-  if (doc.readonly && target === doc.path) {
+  if (doc.readonly && sameFile) {
     store.toast(`${doc.name} is read-only. Use Save As to write a copy.`, "info", 4000);
     return false;
   }
@@ -372,7 +374,7 @@ export async function saveDocument(docId?: string, saveAs = false): Promise<bool
     store.toast(`${mappedElsewhere.name} is open in another tab in large-file mode. Close that tab before saving over it.`, "warning", 6000);
     return false;
   }
-  if (doc.kind === "text" && target === doc.path && doc.decodeErrors) {
+  if (doc.kind === "text" && sameFile && doc.decodeErrors) {
     const ok = await askDialog(
       `${doc.name} has bytes that could not be decoded`,
       `They are shown as \uFFFD, and saving writes that character in their place: the original bytes are lost. Use File › Reopen with Encoding to read the file in the right encoding, or Save As to write a copy.`,
@@ -380,7 +382,7 @@ export async function saveDocument(docId?: string, saveAs = false): Promise<bool
     );
     if (!ok) return false;
   }
-  if (doc.kind === "text" && target === doc.path && doc.modifiedMs) {
+  if (doc.kind === "text" && sameFile && doc.modifiedMs) {
     try {
       const stat = await fs.stat(target);
       if (stat.modifiedMs > doc.modifiedMs) {
@@ -394,7 +396,7 @@ export async function saveDocument(docId?: string, saveAs = false): Promise<bool
   saving.add(doc.id);
   try {
     if (doc.kind === "big") {
-      const info = await big.save(doc.bigId!, target !== doc.path ? target : undefined);
+      const info = await big.save(doc.bigId!, sameFile ? undefined : target);
       store.updateDoc(doc.id, { dirty: false, path: info.path, name: baseName(info.path), bigInfo: info, modifiedMs: await statMs(info.path) });
     } else {
       // The exact text written: edits made while the write (or a prompt) is pending stay dirty.

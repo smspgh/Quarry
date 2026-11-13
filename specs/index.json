@@ -5682,6 +5682,10 @@
         {
           "id": "FILE-011.4",
           "title": "Cancel"
+        },
+        {
+          "id": "FILE-011.5",
+          "title": "Save As onto the same file keeps the Save guards"
         }
       ]
     },
@@ -5690,7 +5694,7 @@
       "title": "Save all changed documents",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 537,
+      "line": 544,
       "status": "draft",
       "commands": [
         "file.saveAll"
@@ -5723,7 +5727,7 @@
       "title": "Revert a file to the version on disk",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 570,
+      "line": 577,
       "status": "draft",
       "commands": [
         "file.revert"
@@ -5761,7 +5765,7 @@
       "title": "Know which documents have unsaved changes",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 610,
+      "line": 617,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5798,7 +5802,7 @@
       "title": "Notice changes made by other programs",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 649,
+      "line": 656,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5852,7 +5856,7 @@
       "title": "Restore the previous session on start",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 717,
+      "line": 724,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5910,7 +5914,7 @@
       "title": "Exit without losing work (hot exit)",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 784,
+      "line": 791,
       "status": "draft",
       "commands": [
         "app.exit"
@@ -5967,7 +5971,7 @@
       "title": "Open files by dropping them on the window",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 846,
+      "line": 853,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6004,7 +6008,7 @@
       "title": "Open files from the command line and File Explorer",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 885,
+      "line": 892,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6045,7 +6049,7 @@
       "title": "Welcome screen",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 930,
+      "line": 937,
       "status": "draft",
       "commands": [],
       "files": [

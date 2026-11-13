@@ -495,7 +495,7 @@ Scenario: FILE-010.9 Save is unavailable for tabs that are not files
 - Status: draft
 - Commands: `file.saveAs`
 - Files:
-  - `src/lib/actions.ts` — `saveDocument(undefined, true)`: "Save As" dialog, tab takes the new path and name, `readonly` cleared, language re-detected, large-file mapping guard
+  - `src/lib/actions.ts` — `saveDocument(undefined, true)`: "Save As" dialog, tab takes the new path and name, `readonly` cleared, language re-detected, large-file mapping guard; a pick that `samePath`s the tab's own file keeps the read-only / decode-error / changed-on-disk guards
   - `src/lib/commands.ts` — `file.saveAs`; default `enabled` from `applyDefaultEnabled` (`fileOnly`)
   - `src/editor/manager.ts` — `setLanguage`
   - `src/editor/cmSetup.ts` — `detectLanguage`
@@ -532,6 +532,13 @@ Scenario: FILE-011.4 Cancel
   Given "config.txt" is open with unsaved changes
   When I press Ctrl+Shift+S and cancel the dialog
   Then nothing is written and the tab still shows "config.txt" with unsaved changes
+
+Scenario: FILE-011.5 Save As onto the same file keeps the Save guards
+  Given "C:\work\notes.txt" is open with unsaved changes
+  And another program has modified "notes.txt" since
+  When I use Save As and choose "c:/WORK/Notes.TXT"
+  Then Quarry asks "notes.txt changed on disk" with Overwrite and Cancel, as Save does
+  And had the tab been read-only, nothing would be written and the read-only notice would show
 ```
 
 ## FILE-012: Save all changed documents

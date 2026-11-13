@@ -7,7 +7,6 @@ This file is not a spec: `scripts/specs-index.mjs` ignores it.
 ## Files and sessions (`files.md`)
 
 Possible bugs
-- Read-only and changed-on-disk guards compare paths as exact strings (`src/lib/actions.ts:365`, `:383`, `target === doc.path` rather than `samePath`): Save As to the same file with different case or slashes skips the read-only guard and the "changed on disk" question.
 - A deleted large-file tab stays dirty: `actions.ts:587` marks any tab dirty when its file disappears, but the "file is back" cleanup at `:596` handles text tabs only.
 - An empty dirty untitled tab prompts at exit even with session restore on (`actions.ts:945`, `textLength === 0`; no snapshot is taken for it, `:119`). A unit test asserts this, so it may be intended.
 - File › Open with several files asks about the tab limit once per file (`actions.ts:291` loops `openPath`), unlike `openFiles` (`:269`), which asks once per batch.
