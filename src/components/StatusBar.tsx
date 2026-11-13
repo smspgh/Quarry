@@ -191,7 +191,7 @@ export function StatusBar() {
             onPick={(v) => void runCommand("file.setEncoding", v)}
             openOn="status.encoding"
           />
-          <Picker label={doc.eol} title="Line endings" options={["CRLF", "LF"]} value={doc.eol} onPick={(v) => void runCommand("file.setEol", v)} openOn="status.eol" />
+          <Picker label={doc.eol} title="Line endings" options={doc.eol === "CR" ? ["CRLF", "LF", "CR"] : ["CRLF", "LF"]} value={doc.eol} onPick={(v) => void runCommand("file.setEol", v)} openOn="status.eol" />
           <Picker
             label={doc.language}
             title="Language mode"

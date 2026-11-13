@@ -588,7 +588,8 @@ export function registerAllCommands() {
     run: (args) => {
       const d = textDoc();
       if (!d) return false;
-      if (args !== "CRLF" && args !== "LF") return void bus.emit("status.eol");
+      // CR (classic Mac) is only offered while the document uses it, but it is a valid choice.
+      if (args !== "CRLF" && args !== "LF" && args !== "CR") return void bus.emit("status.eol");
       if (args !== d.eol) s().updateDoc(d.id, { eol: args, dirty: true });
     },
   });

@@ -993,8 +993,8 @@ Scenario: UI-017.5 No document
 - Status: draft
 - Commands: `view.setTabSize`, `file.setEncoding`, `file.setEol`
 - Files:
-  - `src/components/StatusBar.tsx` — `Picker` (popup above the item, keyboard handling, current value ticked, `openOn` bus events), `placePopup`, the four pickers and the Column button in `StatusBar`
-  - `src/lib/commands.ts` — `view.setTabSize` (1-16, else opens the picker), `file.setEncoding`, `file.setEol` (no argument from the palette opens the picker)
+  - `src/components/StatusBar.tsx` — `Picker` (popup above the item, keyboard handling, current value ticked, `openOn` bus events), `placePopup`, the four pickers (line endings offer CR only while the document uses it) and the Column button in `StatusBar`
+  - `src/lib/commands.ts` — `view.setTabSize` (1-16, else opens the picker), `file.setEncoding`, `file.setEol` (CRLF / LF / CR; no argument from the palette opens the picker)
   - `src/lib/bus.ts` — `status.tabSize`, `status.encoding`, `status.eol` events
   - `src/lib/types.ts` — `ENCODINGS`, `Settings.tabSize`, `Settings.insertSpaces`
   - `src/editor/manager.ts` — `editor.setLanguage`, `editor.applySettings`
@@ -1062,6 +1062,12 @@ Scenario: UI-018.8 Column mode button
   Given a text document is active
   When I click "Column" in the status bar
   Then column mode turns on and the button reads "COLUMN" in the accent colour
+
+Scenario: UI-018.9 A CR-only file keeps CR in the line-ending picker
+  Given a text file with CR-only (classic Mac) line endings is active
+  When I click "CR" in the status bar
+  Then the picker lists "CRLF", "LF" and "CR", with "CR" ticked
+  And for a CRLF or LF document the picker lists only "CRLF" and "LF"
 ```
 
 ## UI-019: Light and dark themes

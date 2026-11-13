@@ -15379,6 +15379,10 @@
         {
           "id": "UI-018.8",
           "title": "Column mode button"
+        },
+        {
+          "id": "UI-018.9",
+          "title": "A CR-only file keeps CR in the line-ending picker"
         }
       ]
     },
@@ -15387,7 +15391,7 @@
       "title": "Light and dark themes",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1067,
+      "line": 1073,
       "status": "draft",
       "commands": [
         "view.toggleTheme"
@@ -15437,7 +15441,7 @@
       "title": "Zoom and editor view toggles",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1122,
+      "line": 1128,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -15495,7 +15499,7 @@
       "title": "Keyboard focus returns to the active tab",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1186,
+      "line": 1192,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15541,7 +15545,7 @@
       "title": "Tab key can leave the editor",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1237,
+      "line": 1243,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -15581,7 +15585,7 @@
       "title": "Single instance and files handed over by Windows",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1282,
+      "line": 1288,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15633,7 +15637,7 @@
       "title": "Window size and position are remembered",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1341,
+      "line": 1347,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15667,7 +15671,7 @@
       "title": "Notice after an unexpected exit",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1377,
+      "line": 1383,
       "status": "draft",
       "commands": [],
       "files": [
