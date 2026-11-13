@@ -55,6 +55,19 @@ describe("sanitizeSettings", () => {
     expect(s.scriptsDir).toBe("C:\\s");
     expect(s.fontSize).toBe(DEFAULT_SETTINGS.fontSize);
   });
+  it("falls back to defaults for switches that are not true / false and for an empty font", () => {
+    const junk = { ...DEFAULT_SETTINGS, wordWrap: "yes", lineNumbers: 0, restoreSession: null, mica: "off", confirmRuns: 1, autoUpdateCheck: "true", fontFamily: "  " } as never;
+    const s = sanitizeSettings(junk);
+    expect(s.wordWrap).toBe(DEFAULT_SETTINGS.wordWrap);
+    expect(s.lineNumbers).toBe(DEFAULT_SETTINGS.lineNumbers);
+    expect(s.restoreSession).toBe(DEFAULT_SETTINGS.restoreSession);
+    expect(s.mica).toBe(DEFAULT_SETTINGS.mica);
+    expect(s.confirmRuns).toBe(DEFAULT_SETTINGS.confirmRuns);
+    expect(s.autoUpdateCheck).toBe(DEFAULT_SETTINGS.autoUpdateCheck);
+    expect(s.fontFamily).toBe(DEFAULT_SETTINGS.fontFamily);
+    const ok = sanitizeSettings({ ...DEFAULT_SETTINGS, wordWrap: true, mica: false, fontFamily: "Consolas" });
+    expect([ok.wordWrap, ok.mica, ok.fontFamily]).toEqual([true, false, "Consolas"]);
+  });
 });
 
 describe("nextUntitledNumber", () => {

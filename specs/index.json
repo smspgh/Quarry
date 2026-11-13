@@ -12734,6 +12734,10 @@
         {
           "id": "SET-003.6",
           "title": "An unreadable file is kept as a backup"
+        },
+        {
+          "id": "SET-003.7",
+          "title": "Switches that are not true or false, and an empty font, fall back to the default"
         }
       ]
     },
@@ -12742,7 +12746,7 @@
       "title": "Use previous setting and Restore default on each row",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 165,
+      "line": 170,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12797,7 +12801,7 @@
       "title": "Reset everything and open the settings folder",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 229,
+      "line": 234,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12839,7 +12843,7 @@
       "title": "Theme, window material and menu bar position",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 276,
+      "line": 281,
       "status": "draft",
       "commands": [
         "view.toggleTheme"
@@ -12885,7 +12889,7 @@
       "title": "Editor font size and font family",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 327,
+      "line": 332,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -12942,7 +12946,7 @@
       "title": "Editor behaviour settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 390,
+      "line": 395,
       "status": "draft",
       "commands": [
         "view.toggleWrap",
@@ -12997,7 +13001,7 @@
       "title": "Number fields, switches and segmented choices",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 452,
+      "line": 457,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13044,7 +13048,7 @@
       "title": "Tab limit, large-file and session settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 514,
+      "line": 519,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13086,7 +13090,7 @@
       "title": "Scripts and macros folders",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 556,
+      "line": 561,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13128,7 +13132,7 @@
       "title": "Find and replace history size",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 597,
+      "line": 602,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13165,7 +13169,7 @@
       "title": "Confirmation and update-check switches",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 638,
+      "line": 643,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13194,7 +13198,7 @@
       "title": "Code intelligence settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 670,
+      "line": 675,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13242,7 +13246,7 @@
       "title": "Claude Code settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 721,
+      "line": 726,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13296,7 +13300,7 @@
       "title": "JSON pretty-print indent",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 781,
+      "line": 786,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13324,7 +13328,7 @@
       "title": "Themed dropdown lists",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 808,
+      "line": 813,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13375,7 +13379,7 @@
       "title": "Help \"i\" icons",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 874,
+      "line": 879,
       "status": "draft",
       "commands": [],
       "files": [

@@ -700,22 +700,23 @@ const clampInt = (v: unknown, min: number, max: number, dflt: number) =>
   typeof v === "number" && Number.isFinite(v) ? Math.round(Math.max(min, Math.min(max, v))) : dflt;
 
 /** Clamp numeric settings read from disk to the same bounds the Settings panel enforces. */
+const BOOLEAN_SETTINGS = ["insertSpaces", "wordWrap", "lineNumbers", "highlightActiveLine", "bracketMatching", "autoCloseBrackets", "renderWhitespace", "restoreSession", "mica", "confirmRuns", "autoUpdateCheck", "bigHighlight", "claudeEnabled", "lspEnabled"] as const;
+
 export function sanitizeSettings(s: Settings): Settings {
+  const switches = Object.fromEntries(BOOLEAN_SETTINGS.map((k) => [k, typeof s[k] === "boolean" ? s[k] : DEFAULT_SETTINGS[k]]));
   return {
     ...s,
+    ...switches,
+    fontFamily: typeof s.fontFamily === "string" && s.fontFamily.trim() ? s.fontFamily : DEFAULT_SETTINGS.fontFamily,
     fontSize: clampInt(s.fontSize, 8, 40, DEFAULT_SETTINGS.fontSize),
     tabSize: clampInt(s.tabSize, 1, 16, DEFAULT_SETTINGS.tabSize),
     jsonIndent: clampInt(s.jsonIndent, 1, 8, DEFAULT_SETTINGS.jsonIndent),
     largeFileThresholdMb: clampInt(s.largeFileThresholdMb, 1, 4096, DEFAULT_SETTINGS.largeFileThresholdMb),
     searchHistoryLimit: clampInt(s.searchHistoryLimit, 0, 1_000_000, DEFAULT_SETTINGS.searchHistoryLimit),
     maxOpenTabs: clampInt(s.maxOpenTabs, 1, 1000, DEFAULT_SETTINGS.maxOpenTabs),
-    autoUpdateCheck: typeof s.autoUpdateCheck === "boolean" ? s.autoUpdateCheck : DEFAULT_SETTINGS.autoUpdateCheck,
-    bigHighlight: typeof s.bigHighlight === "boolean" ? s.bigHighlight : DEFAULT_SETTINGS.bigHighlight,
-    claudeEnabled: typeof s.claudeEnabled === "boolean" ? s.claudeEnabled : DEFAULT_SETTINGS.claudeEnabled,
     claudePath: typeof s.claudePath === "string" ? s.claudePath : DEFAULT_SETTINGS.claudePath,
     claudeModel: typeof s.claudeModel === "string" ? s.claudeModel : DEFAULT_SETTINGS.claudeModel,
     claudePermissionMode: s.claudePermissionMode === "default" ? "default" : DEFAULT_SETTINGS.claudePermissionMode,
-    lspEnabled: typeof s.lspEnabled === "boolean" ? s.lspEnabled : DEFAULT_SETTINGS.lspEnabled,
     lspDisabled: Array.isArray(s.lspDisabled) ? s.lspDisabled.filter((x): x is string => typeof x === "string") : [],
     lspCommands: s.lspCommands && typeof s.lspCommands === "object" && !Array.isArray(s.lspCommands) ? Object.fromEntries(Object.entries(s.lspCommands).filter(([, v]) => typeof v === "string")) : {},
     theme: (["system", "light", "dark"] as const).includes(s.theme) ? s.theme : DEFAULT_SETTINGS.theme,

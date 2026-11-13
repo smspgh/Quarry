@@ -106,7 +106,7 @@ Scenario: SET-002.4 A split editor follows too
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/actions.ts` — `loadSettings` (merge over `DEFAULT_SETTINGS`, `.bak` copy and warning toast when unreadable), `sanitizeSettings`, `clampInt`
+  - `src/lib/actions.ts` — `loadSettings` (merge over `DEFAULT_SETTINGS`, `.bak` copy and warning toast when unreadable), `sanitizeSettings` (numbers clamped, enums and `BOOLEAN_SETTINGS` checked, empty `fontFamily` replaced), `clampInt`
   - `src/lib/types.ts` — `Settings`, `DEFAULT_SETTINGS`
   - `src/App.tsx` — boot order (`loadSettings` before commands and session restore)
   - `src-tauri/src/lib.rs` — `app_read`
@@ -160,6 +160,11 @@ Scenario: SET-003.6 An unreadable file is kept as a backup
   Then every setting has its default
   And the old content is saved as settings.json.bak in the same folder
   And a warning toast says "Settings file was unreadable; using defaults. The old file was kept as settings.json.bak."
+
+Scenario: SET-003.7 Switches that are not true or false, and an empty font, fall back to the default
+  Given settings.json contains "wordWrap": "yes", "restoreSession": null, "mica": "off" and "fontFamily": ""
+  When Quarry starts
+  Then word wrap is off, session restore and Mica are on, and the editor font is the default font list
 ```
 
 ## SET-004: Use previous setting and Restore default on each row
