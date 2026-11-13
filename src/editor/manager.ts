@@ -85,6 +85,8 @@ class EditorManager {
       state: this.emptyState(),
       dispatchTransactions: (trs, view) => this.dispatchIn(pane, trs, view),
     });
+    // Ctrl+M (Tab moves focus) applies to every pane, including one opened after it was turned on.
+    if (useStore.getState().tabMovesFocus) p.view.setTabFocusMode(true);
     // Swap the visible EditorStates in the same tick the store's activeId changes, rather than from a
     // React effect: otherwise a dispatch issued between `setActive` and the effect would edit the
     // previous document. CodeEditor's effect still calls syncPanes(), which is idempotent.

@@ -9,7 +9,6 @@ This file is not a spec: `scripts/specs-index.mjs` ignores it.
 - Close All is not atomic: tabs closed before a Cancel stay closed (`actions.ts:497-503`; recorded as TAB-006.5).
 - Tab reordering, reopen closed tab and back/forward navigation do not exist (no stories).
 - Tab context menu items (Close, Close Others, Open to the Side, Copy Path, Show in…, Compare with Last Commit, Show File History) call action functions directly (`src/components/TitleBar.tsx:124-149`), against the rule that every user action goes through `runCommand`; the macro recorder does not see them.
-- Tab Moves Focus is set only on the focused pane's view, so the other pane probably still indents on Tab (`src/lib/commands.ts:858`, `src/App.tsx:99`).
 
 ## Text editing (`editing.md`)
 

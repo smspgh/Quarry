@@ -66,9 +66,9 @@ Scenario: SPLIT-001.5 One tab strip for both panes
 - Files:
   - `src/lib/split.ts` — `focusPane` (then `editor.focus()` on the next frame)
   - `src/lib/store.ts` — `focusPane` (swaps `activeId` and `split.otherId`), `activePatch` (picking the other pane's tab moves the focus there), `paneDocId`
-  - `src/lib/commands.ts` — `view.focusLeftPane` (Ctrl+1), `view.focusRightPane` (Ctrl+2), enabled only while split
+  - `src/lib/commands.ts` — `view.focusLeftPane` (Ctrl+1), `view.focusRightPane` (Ctrl+2), enabled only while split; `view.toggleTabFocus` sets CodeMirror's tab-focus mode on both panes' views
   - `src/App.tsx` — `onMouseDownCapture` on each pane calls `focusPane`
-  - `src/editor/manager.ts` — `focusedPane`, `view` / `currentDocId` follow it; `onUpdate` moves the store's focus when a pane's editor gains focus; `publishCursor`
+  - `src/editor/manager.ts` — `focusedPane`, `view` / `currentDocId` follow it; `onUpdate` moves the store's focus when a pane's editor gains focus; `publishCursor`; `mount` gives a new pane's view the current tab-focus mode
   - `src/components/CodeEditor.tsx` — `FindBar` only in the focused pane, focus on a new document, `aria-label` "… editor (right)"
   - `src/components/TitleBar.tsx` — `.tab.other-pane` and its "Shown in the other pane" tooltip
   - `src/styles/app.css` — `.tab.other-pane:not(.active)` (lighter accent line)
@@ -120,6 +120,11 @@ Scenario: SPLIT-002.7 Not available without a split
   When I open the command palette
   Then "Focus Left Editor Pane" and "Focus Right Editor Pane" are not offered
   And Ctrl+1 and Ctrl+2 do nothing
+
+Scenario: SPLIT-002.8 Tab moves focus in both panes
+  Given the editor is split and I pressed Ctrl+M so that Tab moves focus
+  When I press Tab in either pane, or in a right pane opened after pressing Ctrl+M
+  Then the keyboard focus moves on and no indentation is inserted
 ```
 
 ## SPLIT-003: Open a document to the side

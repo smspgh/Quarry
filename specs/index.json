@@ -13509,6 +13509,10 @@
         {
           "id": "SPLIT-002.7",
           "title": "Not available without a split"
+        },
+        {
+          "id": "SPLIT-002.8",
+          "title": "Tab moves focus in both panes"
         }
       ]
     },
@@ -13517,7 +13521,7 @@
       "title": "Open a document to the side",
       "area": "SPLIT",
       "spec": "specs/split.md",
-      "line": 125,
+      "line": 130,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13549,7 +13553,7 @@
       "title": "The right pane shows text documents only",
       "area": "SPLIT",
       "spec": "specs/split.md",
-      "line": 159,
+      "line": 164,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13583,7 +13587,7 @@
       "title": "Edit the same document in both panes",
       "area": "SPLIT",
       "spec": "specs/split.md",
-      "line": 193,
+      "line": 198,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13625,7 +13629,7 @@
       "title": "Resize the panes",
       "area": "SPLIT",
       "spec": "specs/split.md",
-      "line": 238,
+      "line": 243,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13662,7 +13666,7 @@
       "title": "Keep the split sensible when tabs close and across restarts",
       "area": "SPLIT",
       "spec": "specs/split.md",
-      "line": 277,
+      "line": 282,
       "status": "draft",
       "commands": [],
       "files": [

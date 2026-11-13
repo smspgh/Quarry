@@ -855,8 +855,9 @@ export function registerAllCommands() {
     run: () => {
       const on = !s().tabMovesFocus;
       s().set({ tabMovesFocus: on });
-      // CodeMirror's own Tab handling (indentWithTab) honours its tab-focus mode; keep them in step.
-      editor.view?.setTabFocusMode(on);
+      // CodeMirror's own Tab handling (indentWithTab) honours its tab-focus mode; keep them in step
+      // in both panes of a split (a pane mounted later picks the setting up in editor.mount).
+      for (const pane of [0, 1] as const) editor.paneView(pane)?.setTabFocusMode(on);
       s().toast(on ? "Tab moves focus. Press Ctrl+M again to indent with Tab." : "Tab indents again", "info", 2500);
     },
   });
