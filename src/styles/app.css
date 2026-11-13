@@ -2262,6 +2262,11 @@ select optgroup {
 .menu-btn.open {
   background: var(--subtle-selected);
 }
+/* Alt+letter mnemonics: underlined only while Alt is held or a menu was opened from the keyboard. */
+.menubar.show-mnemonics .mnemonic {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 .menu-flyout {
   position: absolute;
   top: calc(100% + 2px);

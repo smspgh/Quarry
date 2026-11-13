@@ -18,6 +18,21 @@ export const DEFAULT_PANEL_WIDTH = 300;
 /** Settings always opens at this share of the window width, so its labels and hints are readable. */
 export const SETTINGS_SHARE = 0.35;
 
+/** Bottom panel: starting height, lowest height, and the room it always leaves above it. */
+export const BOTTOM_DEFAULT_HEIGHT = 220;
+export const BOTTOM_MIN_HEIGHT = 80;
+export const BOTTOM_ROOM_ABOVE = 200;
+
+/**
+ * A bottom-panel height that fits a window `windowHeight` px high: between BOTTOM_MIN_HEIGHT and
+ * the window less BOTTOM_ROOM_ABOVE. Anything that is not a number (a missing or damaged session
+ * value) gives the default.
+ */
+export function clampBottomHeight(h: unknown, windowHeight: number): number {
+  if (typeof h !== "number" || !Number.isFinite(h)) return BOTTOM_DEFAULT_HEIGHT;
+  return Math.round(Math.max(BOTTOM_MIN_HEIGHT, Math.min(windowHeight - BOTTOM_ROOM_ABOVE, h)));
+}
+
 export const isPinned = (s: State, p: SidebarPanel) => s.pinnedPanels.includes(p);
 
 /** Docked only because Find in Files has results (not pinned by the user). */

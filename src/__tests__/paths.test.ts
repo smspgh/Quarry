@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isInside, needsSavePromptOnExit, nextUntitledNumber, normalizePath, samePath, sanitizeSettings } from "../lib/actions";
+import { isInside, needsSavePromptOnExit, nextUntitledNumber, normalizePath, samePath, sanitizeSettings, SESSION_EXPANDED_MAX, sessionExpanded } from "../lib/actions";
 import { cleanDirSetting, displayPath, safeFileName } from "../lib/macros";
 import { DEFAULT_SETTINGS } from "../lib/types";
 import { isBigJson } from "../lib/commands";
@@ -162,6 +162,19 @@ describe("isInside", () => {
     expect(isInside(r`C:\proj`, r`C:\proj`)).toBe(false);
     expect(isInside(r`C:\project2\a.ts`, r`C:\proj`)).toBe(false);
     expect(isInside(r`D:\proj\a.ts`, r`C:\proj`)).toBe(false);
+  });
+});
+
+describe("sessionExpanded", () => {
+  const r = String.raw;
+  it("keeps folders inside the open folder, once each, in order", () => {
+    expect(sessionExpanded(r`C:\proj`, [r`C:\proj`, r`C:\proj\src`, r`C:\other\x`, r`c:\PROJ\SRC`, r`C:\proj\src\lib`, 5, null])).toEqual([r`C:\proj\src`, r`C:\proj\src\lib`]);
+  });
+  it("ignores anything that is not a list, and caps the count", () => {
+    expect(sessionExpanded(r`C:\proj`, undefined)).toEqual([]);
+    expect(sessionExpanded(r`C:\proj`, "C:\\proj\\src")).toEqual([]);
+    const many = Array.from({ length: SESSION_EXPANDED_MAX + 10 }, (_, i) => `C:\\proj\\d${i}`);
+    expect(sessionExpanded(r`C:\proj`, many)).toHaveLength(SESSION_EXPANDED_MAX);
   });
 });
 

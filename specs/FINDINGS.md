@@ -5,10 +5,6 @@ Possible bugs, doc/code mismatches and open questions noticed while the stories 
 This file is not a spec: `scripts/specs-index.mjs` ignores it.
 
 
-## Scripts (`scripting.md`)
-
-- `docs/macros.md:106` says script runs are blocked while a macro plays; only the hidden `script.run` has that guard (`src/lib/commands.ts:1133`) and nothing calls it; `script.runActive` (`commands.ts:1096`) is not blocked while recording or playing.
-
 ## Commit graph (`git-graph.md`)
 
 - The `"branch"` action (create without switching) exists in Rust, `GitCommitAction` and the `Naming` type, but the menu only offers `"branch-switch"` (`src/components/GraphView.tsx`, `Naming` and the "Create Branch Here…" item); the plain-branch path in `act` / the naming strip and its notification (`actionDone` in `src/lib/gitGraph.ts`) are dead UI code. It has been that way since the graph was added.
@@ -25,20 +21,6 @@ This file is not a spec: `scripts/specs-index.mjs` ignores it.
 ## Code intelligence (`code-intelligence.md`)
 
 - With global TypeScript 5 and no typescript-language-server, the install offer (status bar and Settings) runs `npm install -g typescript`; that only helps if npm's latest `typescript` is TypeScript 7 (`src/lib/lspServers.ts:34`, `src-tauri/src/lsp.rs` `typescript_setup`). Settings now reports the same choice as the status bar (LSP-003.8).
-
-## Explorer and file operations (`explorer.md`)
-
-- The New File / New Folder name box is always drawn at the top of the tree at a fixed indent (`src/components/panels/ExplorerPanel.tsx:662-680`); `docs/editing.md:169` says items are "named inline".
-- Expanded folders are not saved in the session; `openFolder` resets them to the root (`src/lib/actions.ts:313`).
-
-## Application shell (`app-shell.md`)
-
-Possible bugs
-- Collapsed state is not persisted: `src/App.tsx:172` triggers a session save when `pinnedHidden` changes, but `buildSession` (`actions.ts:813-832`) does not write it.
-- Bottom-panel layout is not persisted (`bottomVisible`, `bottomHeight`, `bottomTab`); it starts hidden, 220 px, on Console each time.
-
-Mismatches and notes
-- There are no menu mnemonics: only Alt / F10, arrows, Home / End, Enter / Space and Escape (UI-004).
 
 ## Wording pass
 

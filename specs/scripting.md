@@ -143,11 +143,12 @@ Scenario: SCRIPT-003.4 Unsaved edits are what runs
 - Status: draft
 - Commands: `script.runActive`, `script.run`
 - Files:
-  - `src/lib/commands.ts` — `runScriptPath` (own-tab guard, `readScript`, sets `activeScriptId`, `confirmRun`), `script.runActive`, `script.run`
+  - `src/lib/commands.ts` — `runScriptPath` (macro guard, own-tab guard, `readScript`, sets `activeScriptId`, `confirmRun`), `script.runActive`, `script.run`
+  - `src/lib/macros.ts` — `scriptBlockedByMacro` (refusal message while recording / playing), `isUnrecordable`
   - `src/lib/scripting.ts` — `runScript` (snapshot, worker message, busy guard), `readScript`, `getWorker`, run state store
   - `src/lib/scriptWorker.ts` — worker `onmessage`, `AsyncFunction` wrapper with `"use strict"` prelude
   - `src/components/panels/ScriptsPanel.tsx` — Run button, context-menu Run, `why` (disabled reasons)
-- Tests: none
+- Tests: `src/__tests__/scripts.test.ts`
 - Docs: `docs/scripting.md`
 
 **As a** developer with a script that transforms text
@@ -207,6 +208,19 @@ Scenario: SCRIPT-004.9 Top-level await and return
   Given a script whose body uses await and ends with return "done";
   When I run it
   Then it runs without a syntax error, because the body is an async function in strict mode
+
+Scenario: SCRIPT-004.10 No scripts while a macro records
+  Given a macro is recording and sort is the current script
+  When I press Ctrl+Shift+Enter
+  Then nothing runs and a warning reads "Scripts can't run while a macro is recording. Stop recording first (Ctrl+Shift+R)."
+  And no step is added to the recording
+  And the run bar's Run button is disabled with that message as its tooltip
+
+Scenario: SCRIPT-004.11 No scripts while a macro plays
+  Given a macro is playing
+  When I press Ctrl+Shift+Enter
+  Then nothing runs and a warning reads "Scripts can't run while a macro is playing."
+  And the run bar's Run buttons and the context-menu Run are disabled
 ```
 
 ## SCRIPT-005: Confirm before a script runs

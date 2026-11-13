@@ -11,7 +11,7 @@ import { claudeBusy, disposeClaude, openClaudeTab, stopAllClaude } from "./claud
 import { disposeTerminal, terminalPty } from "./terminal";
 import { stopAllServers } from "./lsp";
 import { disposeDiff, saveDiff } from "./diff";
-import { showPanel } from "./panels";
+import { clampBottomHeight, showPanel } from "./panels";
 import { makeRoom, markUsed } from "./tabLimit";
 import { popClosed, pushClosed, type ClosedTab } from "./closedTabs";
 import { appData, big, fs, sys } from "./ipc";
@@ -300,8 +300,35 @@ export async function openFolderDialog() {
   await openFolder(picked);
 }
 
-/** Open `path` in the Explorer. `show: false` (session restore) leaves the panels as they are. */
-export async function openFolder(path: string, { show = true }: { show?: boolean } = {}) {
+/** Most expanded folders kept in the session (each is checked on disk when restored). */
+export const SESSION_EXPANDED_MAX = 500;
+
+/**
+ * The session's expanded Explorer folders worth restoring for `folder`: strings inside it (any
+ * depth), without duplicates (case-insensitive), at most SESSION_EXPANDED_MAX. The folder itself is
+ * always expanded, so it is not listed. Pure; the caller drops paths that are gone.
+ */
+export function sessionExpanded(folder: string, saved: unknown): string[] {
+  if (!Array.isArray(saved)) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const p of saved) {
+    if (typeof p !== "string" || !isInside(p, folder)) continue;
+    const key = p.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(p);
+    if (out.length >= SESSION_EXPANDED_MAX) break;
+  }
+  return out;
+}
+
+/**
+ * Open `path` in the Explorer, collapsed at its root. `show: false` (session restore) leaves the
+ * panels as they are; `expanded` (session restore) are folders to expand again, kept only while
+ * they still exist.
+ */
+export async function openFolder(path: string, { show = true, expanded = [] }: { show?: boolean; expanded?: string[] } = {}) {
   const store = useStore.getState();
   try {
     const st = await fs.stat(path);
@@ -313,7 +340,10 @@ export async function openFolder(path: string, { show = true }: { show?: boolean
     return;
   }
   const norm = await fs.normalize(path);
-  store.set({ folder: norm, explorerExpanded: new Set([norm]), fileListCache: null, ...(show ? { sidebarVisible: true, sidebarPanel: "explorer" as const, pinnedHidden: false } : {}) });
+  const wanted = sessionExpanded(norm, expanded);
+  const isDir = await Promise.all(wanted.map((p) => fs.stat(p).then((st) => st.isDir, () => false)));
+  const kept = wanted.filter((_, i) => isDir[i]);
+  store.set({ folder: norm, explorerExpanded: new Set([norm, ...kept]), fileListCache: null, ...(show ? { sidebarVisible: true, sidebarPanel: "explorer" as const, pinnedHidden: false } : {}) });
   pushRecent("recentFolders", norm);
   saveSession();
 }
@@ -845,6 +875,8 @@ interface SessionDoc {
 
 interface Session {
   folder: string | null;
+  /** Expanded Explorer folders under `folder` (not the folder itself). */
+  explorerExpanded?: string[];
   /** Legacy field (paths only); superseded by `docs`. */
   openFiles: string[];
   activePath: string | null;
@@ -859,6 +891,8 @@ interface Session {
   sidebarWidth: number;
   pinnedPanels?: string[];
   panelWidths?: Partial<Record<string, number>>;
+  /** Bottom panel height in px (whether it is shown, and its tab, are not kept). */
+  bottomHeight?: number;
 }
 
 const UNTITLED_SESSION_MAX = 2 * 1024 * 1024;
@@ -908,6 +942,7 @@ function buildSession(): Session {
   const { docs, activeIndex, otherIndex } = sessionDocs(s);
   return {
     folder: s.folder,
+    explorerExpanded: s.folder ? sessionExpanded(s.folder, [...s.explorerExpanded]) : [],
     openFiles: s.docs.filter((d) => d.path).map((d) => d.path!),
     activePath: activeDoc(s)?.path ?? null,
     docs,
@@ -921,6 +956,7 @@ function buildSession(): Session {
     pinnedPanels: s.pinnedPanels,
     // Settings always reopens at 35%, so its width is not kept.
     panelWidths: Object.fromEntries(Object.entries(s.panelWidths).filter(([p]) => p !== "settings")),
+    bottomHeight: s.bottomHeight,
   };
 }
 
@@ -980,11 +1016,14 @@ async function restoreSessionTabs() {
     sidebarWidth: session.sidebarWidth ?? 300,
     pinnedPanels: pinned,
     panelWidths: Object.fromEntries(Object.entries(session.panelWidths ?? {}).filter(([p, w]) => PANELS.includes(p as SidebarPanel) && typeof w === "number" && w >= 200)),
+    // Only the height comes back; the panel itself starts hidden, on Console.
+    bottomHeight: clampBottomHeight(session.bottomHeight, window.innerHeight),
   });
   const startup = await sys.startupPaths().catch(() => [] as string[]);
   if (session.folder && store.settings.restoreSession) {
     // The folder comes back without opening the Explorer: only pinned panels reopen.
-    if (await fs.exists(session.folder)) await openFolder(session.folder, { show: false });
+    // Its expanded folders come back too, minus those that are gone.
+    if (await fs.exists(session.folder)) await openFolder(session.folder, { show: false, expanded: session.explorerExpanded ?? [] });
   }
   if (store.settings.restoreSession) {
     const all: SessionDoc[] = session.docs ?? (session.openFiles ?? []).map((p) => ({ path: p }));

@@ -1,6 +1,7 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { tabStripKey } from "../components/TitleBar";
-import { nextMenuIndex } from "../components/MenuBar";
+import { MENU_MNEMONICS, menuForMnemonic, mnemonicKey, nextMenuIndex, splitMnemonic } from "../components/MenuBar";
 import { placeFlyout, typeAheadIndex } from "../components/Select";
 import { describeValue, firstFontFamily, fontListFor, rowMatches } from "../components/panels/SettingsPanel";
 import { previewBefore } from "../components/panels/SearchPanel";
@@ -14,6 +15,52 @@ describe("nextMenuIndex", () => {
     expect(nextMenuIndex(1, 3, "Home")).toBe(0);
     expect(nextMenuIndex(1, 3, "End")).toBe(2);
     expect(nextMenuIndex(0, 0, "ArrowDown")).toBe(-1);
+  });
+});
+
+describe("menu mnemonics", () => {
+  const labels = ["File", "Edit", "Code", "Selection", "Find", "View", "Git", "JSON", "Scripts", "Macros", "Tools", "Help"];
+  const key = (code: string, mods: Partial<{ altKey: boolean; ctrlKey: boolean; shiftKey: boolean; metaKey: boolean }> = {}) =>
+    ({ key: code.slice(3).toLowerCase(), code, altKey: true, ctrlKey: false, shiftKey: false, metaKey: false, ...mods });
+
+  it("maps Alt+letter to its menu", () => {
+    expect(menuForMnemonic("f", labels)).toBe(0);
+    expect(menuForMnemonic("E", labels)).toBe(1);
+    expect(menuForMnemonic("o", labels)).toBe(2);
+    expect(menuForMnemonic("n", labels)).toBe(4);
+    expect(menuForMnemonic("i", labels)).toBe(8);
+    expect(menuForMnemonic("h", labels)).toBe(11);
+    expect(menuForMnemonic("q", labels)).toBeNull();
+    expect(menuForMnemonic("", labels)).toBeNull();
+  });
+  it("every menu has a unique letter that appears in its label", () => {
+    const letters = labels.map((l) => MENU_MNEMONICS[l]);
+    expect(letters.every(Boolean)).toBe(true);
+    expect(new Set(letters).size).toBe(labels.length);
+    for (const l of labels) expect(splitMnemonic(l, MENU_MNEMONICS[l])).not.toBeNull();
+    expect(menuForMnemonic("f")).toBe(0); // the real menu bar starts with File
+  });
+  it("no letter is taken by a plain Alt+letter shortcut", () => {
+    const src = ["src/lib/commands.ts", "src/lib/gitCommands.ts"].map((f) => readFileSync(f, "utf8")).join("\n");
+    const registered = [...src.matchAll(/keys: "Alt\+([A-Z])"/g)].map((m) => m[1].toLowerCase());
+    expect(registered).toContain("z");
+    // CodeMirror's Alt+L / Alt+U and the find bar's Alt+C / W / R / P.
+    const taken = new Set([...registered, "l", "u", "c", "w", "r", "p"]);
+    for (const l of labels) expect(taken.has(MENU_MNEMONICS[l])).toBe(false);
+  });
+  it("reads the letter from the physical key and only for a bare Alt", () => {
+    expect(mnemonicKey(key("KeyF"))).toBe("f");
+    expect(mnemonicKey({ ...key("KeyF"), key: "ƒ" })).toBe("f");
+    expect(mnemonicKey(key("KeyF", { ctrlKey: true }))).toBeNull();
+    expect(mnemonicKey(key("KeyF", { shiftKey: true }))).toBeNull();
+    expect(mnemonicKey(key("KeyF", { altKey: false }))).toBeNull();
+    expect(mnemonicKey({ ...key("KeyF"), code: "F4", key: "F4" })).toBeNull();
+  });
+  it("splits a label around the first occurrence of its letter", () => {
+    expect(splitMnemonic("Scripts", "i")).toEqual(["Scr", "i", "pts"]);
+    expect(splitMnemonic("JSON", "j")).toEqual(["", "J", "SON"]);
+    expect(splitMnemonic("Help", "x")).toBeNull();
+    expect(splitMnemonic("Help", undefined)).toBeNull();
   });
 });
 

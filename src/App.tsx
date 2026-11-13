@@ -168,8 +168,9 @@ export default function App() {
     // Persist session when the tab set changes.
     const unWatch = installExternalChangeWatch();
     const unsub = useStore.subscribe((s, prev) => {
-      if (s.docs !== prev.docs || s.activeId !== prev.activeId || s.split !== prev.split || s.folder !== prev.folder) saveSession();
-      if (s.pinnedPanels !== prev.pinnedPanels || s.pinnedHidden !== prev.pinnedHidden) saveSession();
+      if (s.docs !== prev.docs || s.activeId !== prev.activeId || s.split !== prev.split || s.folder !== prev.folder || s.explorerExpanded !== prev.explorerExpanded) saveSession();
+      // Collapsing (`pinnedHidden`) is not kept: pinned panels always come back expanded on start.
+      if (s.pinnedPanels !== prev.pinnedPanels || s.bottomHeight !== prev.bottomHeight) saveSession();
       if (s.recentFiles !== prev.recentFiles || s.recentFolders !== prev.recentFolders) saveSession();
       // Asking for a panel (menu, shortcut, command) also brings back collapsed pinned panels.
       if (s.sidebarVisible && s.pinnedHidden && (!prev.sidebarVisible || s.sidebarPanel !== prev.sidebarPanel)) s.set({ pinnedHidden: false });

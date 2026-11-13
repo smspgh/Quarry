@@ -1,5 +1,6 @@
 import { Trash2, X } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { clampBottomHeight } from "../lib/panels";
 import { useStore } from "../lib/store";
 import { ProblemsList, useProblemCount } from "./LspStatus";
 
@@ -24,7 +25,7 @@ export function BottomPanel() {
     e.preventDefault();
     const startY = e.clientY;
     const startH = height;
-    const move = (ev: MouseEvent) => set({ bottomHeight: Math.max(80, Math.min(window.innerHeight - 200, startH + (startY - ev.clientY))) });
+    const move = (ev: MouseEvent) => set({ bottomHeight: clampBottomHeight(startH + (startY - ev.clientY), window.innerHeight) });
     const up = () => {
       window.removeEventListener("mousemove", move);
       window.removeEventListener("mouseup", up);
