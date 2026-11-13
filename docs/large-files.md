@@ -100,7 +100,7 @@ A large `.csv`, `.tsv` or `.tab` file opens as a grid: each field in its own col
 Large-file mode supports **Replace All** but not replacing one match at a time.
 
 - It asks for confirmation, then streams the whole file into a new working copy in `%TEMP%`. The original file is untouched until you save.
-- In regex mode, use `$1` or `${name}` for capture groups, and `$$` for a literal `$`. In plain-text mode, `$` is literal.
+- In regex mode the replacement follows the same JavaScript rules as Find in Files: `$1` or `$<name>` for capture groups, `$&` for the whole match and `$$` for a literal `$` (`${name}` stays as typed). In plain-text mode, `$` is literal.
 - **Preserve Case** (the **Aa** toggle in the replace box) matches the case of each replaced text: `FOO` → `BAR`, `Foo` → `Bar`, `foo` → `bar`.
 - Replace All clears the undo history.
 - It is available once indexing has finished.
