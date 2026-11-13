@@ -339,7 +339,6 @@ async function jsonTransform(kind: "format" | "minify") {
   if (r.output !== null) {
     editor.replaceAll(doc.id, r.output);
     dropJsonTree(doc.id);
-    if (doc.language !== "JSON") editor.setLanguage(doc.id, "JSON").then((l) => s.updateDoc(doc.id, { language: l }));
     s.toast(kind === "format" ? "JSON formatted" : r.stripped ? "JSON minified (comments and trailing commas removed)" : "JSON minified", "success", r.stripped ? 3000 : 1500);
   }
   return true;
