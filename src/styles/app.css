@@ -4100,8 +4100,15 @@ select optgroup {
   color: var(--text-3);
   font-size: 12.5px;
 }
+.claude-history-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
 .claude-history-item {
   gap: 10px;
+  flex: 1;
+  min-width: 0;
 }
 .claude-history-item .title {
   flex: 1;

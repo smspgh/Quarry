@@ -4,14 +4,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // decides the message and whether the servers restart.
 const restarts = vi.fn(async () => {});
 vi.mock("../lib/lsp", () => ({ restartServers: () => restarts() }));
-vi.mock("@tauri-apps/api/core", () => ({ invoke: async () => undefined }));
+const invoke = vi.fn(async (_cmd: string, _args?: unknown): Promise<unknown> => undefined);
+vi.mock("@tauri-apps/api/core", () => ({ invoke: (cmd: string, args?: unknown) => invoke(cmd, args) }));
 
-const { installServer } = await import("../lib/lspInstall");
+const { installServer, resolveInstall } = await import("../lib/lspInstall");
 const { commandFinished } = await import("../lib/terminal");
 const { useStore } = await import("../lib/store");
 const { SERVERS } = await import("../lib/lspServers");
 
 const pyright = SERVERS.find((d) => d.id === "python")!;
+const typescript = SERVERS.find((d) => d.id === "typescript")!;
 const lastToast = () => { const t = useStore.getState().toasts; return t[t.length - 1]; };
 
 describe("installing a language server", () => {
@@ -45,5 +47,34 @@ describe("installing a language server", () => {
     commandFinished(useStore.getState().docs[1].id, null);
     expect(lastToast()?.kind).toBe("error");
     expect(restarts).not.toHaveBeenCalled();
+  });
+
+  it("runs the command it is given (TypeScript's depends on what is installed)", () => {
+    installServer(typescript, "npm install -g typescript-language-server");
+    expect(useStore.getState().docs[0].terminal?.command).toBe("npm install -g typescript-language-server");
+  });
+});
+
+describe("choosing the TypeScript install command", () => {
+  beforeEach(() => invoke.mockReset());
+
+  it("installs only typescript-language-server when TypeScript is there, both when it is not", async () => {
+    invoke.mockResolvedValueOnce(true);
+    expect(await resolveInstall(typescript, "D:\\work")).toBe("npm install -g typescript-language-server");
+    expect(invoke).toHaveBeenLastCalledWith("lsp_typescript_found", { root: "D:\\work" });
+    invoke.mockResolvedValueOnce(false);
+    expect(await resolveInstall(typescript, "")).toBe("npm install -g typescript-language-server typescript");
+  });
+
+  it("never offers npm install -g typescript alone, even when the check fails", async () => {
+    invoke.mockRejectedValueOnce(new Error("no"));
+    const cmd = await resolveInstall(typescript, "");
+    expect(cmd).toBe("npm install -g typescript-language-server typescript");
+    expect(cmd).not.toBe("npm install -g typescript");
+  });
+
+  it("other servers keep their own command without asking", async () => {
+    expect(await resolveInstall(pyright, "D:\\work")).toBe("npm install -g pyright");
+    expect(invoke).not.toHaveBeenCalled();
   });
 });

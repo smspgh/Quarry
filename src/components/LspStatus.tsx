@@ -1,7 +1,7 @@
 import { CircleAlert, CircleX, Download, Info, LoaderCircle, RotateCcw, Sparkles, TriangleAlert } from "lucide-react";
 import { editor } from "../editor/manager";
 import { runCommand } from "../lib/commands";
-import { installServer } from "../lib/lspInstall";
+import { installServer, useInstallCommand } from "../lib/lspInstall";
 import { restartServers, SERVERS, useLsp, type Problem } from "../lib/lsp";
 import { useStore, type Doc } from "../lib/store";
 
@@ -13,8 +13,10 @@ export function LspStatusItem({ doc }: { doc: Doc }) {
   const server = useLsp((s) => (key ? s.servers[key] : undefined));
   const problems = useLsp((s) => s.problems[doc.id]);
   const custom = useStore((s) => (server ? s.settings.lspCommands[server.def]?.trim() : undefined));
+  const def = server ? SERVERS.find((d) => d.id === server.def) : undefined;
+  // Re-checked whenever the server state changes (after an install, a restart).
+  const install = useInstallCommand(server?.status === "missing" ? def : undefined, server?.root ?? "", server?.status);
   if (!key || !server) return null;
-  const def = SERVERS.find((d) => d.id === server.def);
   if (!def) return null;
   const errors = problems?.filter((p) => p.severity === "error").length ?? 0;
   const warnings = problems?.filter((p) => p.severity === "warning").length ?? 0;
@@ -43,7 +45,7 @@ Click to open Settings`} onClick={() => runCommand("view.settings")}>
         </button>
       )}
       {server.status === "missing" && !custom && (
-        <button className="status-item clickable lsp-missing" title={`The ${def.name} language server isn't installed. Click to install it (${def.install})`} onClick={() => installServer(def)}>
+        <button className="status-item clickable lsp-missing" title={`The ${def.name} language server isn't installed. Click to install it (${install})`} onClick={() => installServer(def, install)}>
           <Download size={12} /> Install {name} support
         </button>
       )}

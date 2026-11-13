@@ -116,11 +116,13 @@ Scenario: LSP-002.7 Hovering shows the project
 - Status: draft
 - Commands: none
 - Files:
-  - `src-tauri/src/lsp.rs` — `typescript_setup`, `lsp_typescript` (`tsserver.js` = TypeScript 5 / 6, `getExePath.js` = TypeScript 7; global package in `%APPDATA%\npm\node_modules\typescript`)
+  - `src-tauri/src/lsp.rs` — `typescript_setup`, `lsp_typescript` (`tsserver.js` = TypeScript 5 / 6, `getExePath.js` = TypeScript 7; global package in `%APPDATA%\npm\node_modules\typescript`); `typescript_found` / `lsp_typescript_found` (any TypeScript, project or global: decides the install offer)
   - `src/lib/lsp.ts` — `launchOf` (TypeScript branch, `tsserver.fallbackPath`; a custom command from Settings bypasses the choice)
-  - `src/lib/lspServers.ts` — the `typescript` entry (`tsc --lsp --stdio`, `npm install -g typescript`)
-  - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection` detection asks `lsp_typescript` (root = the open folder, or empty for global only) for TypeScript without a custom command
-- Tests: `src-tauri/src/lsp.rs`
+  - `src/lib/lspServers.ts` — the `typescript` entry (`tsc --lsp --stdio`), `typescriptInstall`, `installCommand`
+  - `src/lib/lspInstall.ts` — `resolveInstall` (asks `lsp_typescript_found`), `useInstallCommand`
+  - `src/components/LspStatus.tsx` — the TypeScript install offer's tooltip and command (`useInstallCommand`, root = the server's project)
+  - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection` detection asks `lsp_typescript` (root = the open folder, or empty for global only) for TypeScript without a custom command, and `resolveInstall` for the Install… button
+- Tests: `src-tauri/src/lsp.rs`, `src/__tests__/lsp.test.ts`, `src/__tests__/lspInstall.test.ts`
 - Docs: `docs/code-intelligence.md`
 
 **As a** TypeScript developer
@@ -152,11 +154,14 @@ Scenario: LSP-003.5 TypeScript 5 without typescript-language-server
   Given only TypeScript 5 is installed and typescript-language-server is not
   When I open a .ts file
   Then no server starts and the status bar offers "Install TypeScript support"
+  And its tooltip and the command it runs are "npm install -g typescript-language-server"
+  And the installed TypeScript is left as it is
 
 Scenario: LSP-003.6 Nothing installed
   Given neither the project nor npm's global folder has TypeScript
   When I open a .ts file
   Then the status bar offers "Install TypeScript support"
+  And the command it runs is "npm install -g typescript-language-server typescript"
 
 Scenario: LSP-003.7 My own command wins
   Given Settings has a command line for TypeScript / JavaScript
@@ -167,6 +172,7 @@ Scenario: LSP-003.8 Settings reports the same choice
   Given only TypeScript 5 is installed globally, with "tsc" on PATH, and typescript-language-server is not
   When I open Settings › Code intelligence
   Then the TypeScript / JavaScript row says "Not installed · needs Node.js" and has an "Install…" button
+  And that button runs "npm install -g typescript-language-server", the same command as the status bar's offer
   Given instead TypeScript 7 or typescript-language-server would be started
   Then the row says "Installed · <path of the program that would be started>"
   And with no folder open only the global installation is looked at
@@ -232,10 +238,10 @@ Scenario: LSP-004.6 A custom command that is not found
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/lspInstall.ts` — `installServer` (terminal tab, toasts, `restartServers` on success)
+  - `src/lib/lspInstall.ts` — `installServer(def, command)` (terminal tab, toasts, `restartServers` on success), `resolveInstall` / `useInstallCommand` (TypeScript's command)
   - `src/components/LspStatus.tsx` — "Install … support" button (status `missing`, no custom command)
   - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection`: "Installed · path" / "Not installed · needs …", "Install…" button, re-detect on window focus (`lsp_which`; `lsp_typescript` for TypeScript)
-  - `src/lib/lspServers.ts` — `install`, `needs`
+  - `src/lib/lspServers.ts` — `install`, `needs`, `installCommand`
   - `src/lib/lsp.ts` — `launch` (`missing` when the program is not installed / not found)
   - `src/lib/terminal.ts` — `openCommandTerminal`
   - `src-tauri/src/lsp.rs` — `lsp_which`, `which` (also looks in npm, cargo, go and dotnet tool folders)

@@ -2074,6 +2074,50 @@ mod tests {
     }
 
     #[test]
+    fn a_stopped_patch_series_is_reported_as_am_and_can_be_skipped_or_aborted() {
+        let Some((_d, root)) = repo() else { return };
+        write(&root, "a.txt", "base\n");
+        git_ok(&root, &["add", "."]);
+        git_ok(&root, &["commit", "-qm", "base"]);
+        git_ok(&root, &["switch", "-qc", "side"]);
+        write(&root, "a.txt", "from the patch\n");
+        git_ok(&root, &["commit", "-qam", "patch one"]);
+        write(&root, "b.txt", "second patch\n");
+        git_ok(&root, &["add", "b.txt"]);
+        git_ok(&root, &["commit", "-qm", "patch two"]);
+        let patches = tempfile::tempdir().unwrap();
+        let out_dir = patches.path().to_string_lossy().into_owned();
+        git_ok(&root, &["format-patch", "-q", "-o", &out_dir, "main..side"]);
+        let mut files: Vec<String> = std::fs::read_dir(patches.path()).unwrap().map(|e| e.unwrap().path().to_string_lossy().into_owned()).collect();
+        files.sort();
+        assert_eq!(files.len(), 2);
+        git_ok(&root, &["switch", "-q", "main"]);
+        write(&root, "a.txt", "changed on main\n");
+        git_ok(&root, &["commit", "-qam", "on main"]);
+        let head = graph(&root, false, 0, 1).unwrap()[0].sha.clone();
+
+        let am = |root: &Path| {
+            let mut args = vec!["am", "-q"];
+            args.extend(files.iter().map(|s| s.as_str()));
+            run(root, false, &args, None)
+        };
+        assert!(am(&root).is_err());
+        let st = status(&root).unwrap().unwrap();
+        assert_eq!(st.operation.as_deref(), Some("am"));
+        assert_eq!(st.operation_step, Some((1, 2)));
+        assert_eq!(abort_operation(&root).unwrap(), "am");
+        assert!(operation(&root).is_none());
+        assert_eq!(graph(&root, false, 0, 1).unwrap()[0].sha, head);
+
+        // Skip the patch that does not apply: the second one goes on, and the series is finished.
+        assert!(am(&root).is_err());
+        assert_eq!(continue_operation(&root, "skip").unwrap(), "am");
+        assert!(operation(&root).is_none());
+        assert_eq!(graph(&root, false, 0, 1).unwrap()[0].summary, "patch two");
+        assert_eq!(std::fs::read_to_string(root.join("a.txt")).unwrap(), "changed on main\n");
+    }
+
+    #[test]
     fn identity_is_read_and_set_for_this_repository() {
         let Some((_d, root)) = repo() else { return };
         let id = identity(&root);

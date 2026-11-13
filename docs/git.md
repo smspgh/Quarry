@@ -56,7 +56,7 @@ The header also counts commits **to pull**, and its graph button opens the commi
 - **Details.** Click a commit (or move with the arrow keys) to see it in the pane below: the full id (with a copy button), the whole message, author and date, its parents (click one to jump to it), and the files it changed with a summary of lines added and removed. Click a file to open a [Compare tab](compare.md) of what the commit changed in it; clicking the next file reuses that tab (double-click its tab to keep it). Drag the pane's top edge to resize it.
 - **Loading.** Commits load 300 at a time as you scroll, in the background; the rest of Quarry, including the Source Control panel, never waits for the graph. Only the rows on screen are drawn.
 - **Very large histories.** Without git's *commit-graph* file (an index of the history that `git gc` writes), git has to walk the whole history for every page: about 0.5 s a page on an 86,000-commit repository and 1.8 s on a 350,000-commit one. Quarry then loads bigger pages, and offers **Speed Up**, which has git write that file once (about 2 s on the larger one; it lives inside `.git` and changes nothing else). Pages then take about 0.1 s and 0.3 s. Quarry never writes it without you pressing the button.
-- **What's in progress.** A strip under the toolbar says when you have uncommitted changes (they are not in the graph), and when a cherry-pick, revert, merge or rebase has stopped part-way, with **Abort** right there.
+- **What's in progress.** A strip under the toolbar says when you have uncommitted changes (they are not in the graph), and when a cherry-pick, revert, merge, rebase or patch series has stopped part-way, with **Abort** right there.
 
 Right-click a commit for the actions:
 
@@ -65,6 +65,7 @@ Right-click a commit for the actions:
 | Copy Commit Id / Copy Message | To the clipboard. |
 | Switch to *branch* | For each branch label on that commit. A remote branch gets a local branch that tracks it. |
 | Create Branch Here… | A new branch starting at that commit, and switches to it. |
+| Create Branch Here (Don't Switch)… | A new branch starting at that commit; you stay on the branch you are on. |
 | Create Tag Here… | A tag on that commit. |
 | Check Out This Commit… | Your files become that commit, on no branch ("detached"). Switch back with the branch button. |
 | Cherry-pick onto *branch*… | Copies that commit's changes onto your branch as a new commit. |
@@ -92,6 +93,10 @@ A rebase replays your commits one at a time on top of another branch, and can st
 - Resolve the files as above. In a rebase the sides are the other way round from what you might expect: **Current** is the branch you are rebasing onto, **Incoming** is your own commit. The conflict bars and the row buttons say so.
 - The message box is off, because each commit keeps its own message. The main button reads **Continue Rebase**: it carries on with the next commit, and stops again if that one conflicts too.
 - **Skip** leaves out the commit it stopped on; **Abort** puts the branch back where it was before the rebase.
+
+### Applying patches
+
+Applying a patch series with `git am` works the same way when a patch does not apply cleanly: the badge reads **Applying patches 2 of 5**, **Current** is your branch and **Incoming** is the patch, the message box is off because each patch keeps its own message, and the main button reads **Continue Applying Patches**. **Skip** leaves out the patch it stopped on; **Abort** (confirm with **Abort Applying Patches**) puts the branch back where it was before the patch series.
 
 While any file is still in conflict, the Commit button is disabled and reads **Resolve 1 Conflict First**. The message box is filled in with the message git prepared (the picked commit's own message, or "Merge branch …"), unless you had already typed one. Marking a file resolved (**+** under Merge Changes) checks it first: if it still contains git's `<<<<<<<` / `>>>>>>>` conflict lines, Quarry asks before staging it.
 

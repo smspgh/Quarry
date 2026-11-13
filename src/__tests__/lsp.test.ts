@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { languageIdOf, offsetOf, pathToUri, sanitizeHTML, serverFor, severityOf, splitCommand, uriKey, uriToPath } from "../lib/lspServers";
+import { installCommand, languageIdOf, offsetOf, pathToUri, sanitizeHTML, serverFor, SERVERS, severityOf, splitCommand, typescriptInstall, uriKey, uriToPath } from "../lib/lspServers";
 
 describe("language servers", () => {
   it("picks a server by file extension, unless switched off", () => {
@@ -53,5 +53,23 @@ describe("language servers", () => {
     expect(out).not.toMatch(/script|onclick|onerror|javascript:|iframe/i);
     expect(out).toContain('<a href="https://ok.dev">ok</a>');
     expect(out).toContain('<code class="c">x</code>');
+  });
+});
+
+describe("TypeScript install offer", () => {
+  const ts = SERVERS.find((d) => d.id === "typescript")!;
+  it("adds typescript-language-server to an installed TypeScript instead of reinstalling TypeScript", () => {
+    expect(typescriptInstall(true)).toBe("npm install -g typescript-language-server");
+    expect(typescriptInstall(false)).toBe("npm install -g typescript-language-server typescript");
+    expect(installCommand(ts, true)).toBe("npm install -g typescript-language-server");
+    expect(installCommand(ts, false)).toBe("npm install -g typescript-language-server typescript");
+  });
+  it("falls back to installing both when it is not known what is installed", () => {
+    expect(installCommand(ts, null)).toBe(ts.install);
+    expect(ts.install).toBe("npm install -g typescript-language-server typescript");
+  });
+  it("leaves other servers' commands alone", () => {
+    const py = SERVERS.find((d) => d.id === "python")!;
+    expect(installCommand(py, true)).toBe("npm install -g pyright");
   });
 });

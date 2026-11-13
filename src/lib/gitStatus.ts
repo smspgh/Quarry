@@ -102,11 +102,67 @@ export function hasConflictMarkers(text: string): boolean {
 /** The Commit button: what it will take (or what is in the way). */
 export function commitLabel(staged: number, total: number, amend: boolean, conflicts = 0, operation: string | null = null): string {
   if (conflicts) return `Resolve ${conflicts} Conflict${conflicts === 1 ? "" : "s"} First`;
-  // A rebase is not finished by committing: each of its commits keeps its own message.
-  if (operation === "rebase" || operation === "am") return "Continue Rebase";
+  // A rebase or `git am` is not finished by committing: each commit / patch keeps its own message.
+  const cont = operation ? operationWords(operation).continueLabel : null;
+  if (cont) return cont;
   if (amend) return "Amend Last Commit";
   if (staged) return `Commit ${staged} Staged`;
   return total ? `Commit All (${count(total, "file")})` : "Commit All";
+}
+
+/** How a stopped operation (`GitStatus.operation`) is named on buttons, in dialogs and notifications. */
+export interface OperationWords {
+  /** Badge beside the branch: "Rebasing", "Applying patches". */
+  badge: string;
+  /** In a sentence: "the rebase", "the patch series". */
+  noun: string;
+  /** What each step is: "commit", or "patch" for `git am`. */
+  item: string;
+  /** The main button when the operation is continued instead of committed (rebase, am); null otherwise. */
+  continueLabel: string | null;
+  /** Abort's confirm button. */
+  abortLabel: string;
+  /** Message box placeholder while the main button continues (rebase, am). */
+  placeholder: string | null;
+  /** Note on each conflict bar saying which side is which, or "". */
+  sidesNote: string;
+}
+
+const OPERATIONS: Record<string, OperationWords> = {
+  merge: { badge: "Merging", noun: "the merge", item: "commit", continueLabel: null, abortLabel: "Abort Merge", placeholder: null, sidesNote: "" },
+  rebase: {
+    badge: "Rebasing",
+    noun: "the rebase",
+    item: "commit",
+    continueLabel: "Continue Rebase",
+    abortLabel: "Abort Rebase",
+    placeholder: "A rebase keeps each commit's own message: resolve the conflicts, then Continue Rebase",
+    sidesNote: "Rebasing: Current is the branch you are rebasing onto, Incoming is your own commit.",
+  },
+  am: {
+    badge: "Applying patches",
+    noun: "the patch series",
+    item: "patch",
+    continueLabel: "Continue Applying Patches",
+    abortLabel: "Abort Applying Patches",
+    placeholder: "Each patch keeps its own message: resolve the conflicts, then Continue Applying Patches",
+    sidesNote: "Applying patches: Current is your branch, Incoming is the patch.",
+  },
+  "cherry-pick": { badge: "Cherry-picking", noun: "the cherry-pick", item: "commit", continueLabel: null, abortLabel: "Abort Cherry-pick", placeholder: null, sidesNote: "" },
+  revert: { badge: "Reverting", noun: "the revert", item: "commit", continueLabel: null, abortLabel: "Abort Revert", placeholder: null, sidesNote: "" },
+};
+
+/** Wording for a stopped operation; an unknown one is named by git's word for it. */
+export function operationWords(operation: string): OperationWords {
+  return OPERATIONS[operation] ?? { badge: operation, noun: `the ${operation}`, item: "commit", continueLabel: null, abortLabel: `Abort ${(operation[0] ?? "").toUpperCase()}${operation.slice(1)}`, placeholder: null, sidesNote: "" };
+}
+
+/** The notification after Continue / Skip (`still` = the operation stopped again) or Abort. */
+export function operationDone(operation: string, how: "continue" | "skip" | "abort", still = false): string {
+  const w = operationWords(operation);
+  if (how === "abort") return `Aborted ${w.noun}.`;
+  if (!still) return `${w.noun[0].toUpperCase()}${w.noun.slice(1)} is finished.`;
+  return `${how === "skip" ? `Skipped that ${w.item}` : "Continued"}: ${w.noun} is on its next ${w.item}.`;
 }
 
 /** Kind (colour / letter) of a file in a commit, from git's status letter there. */

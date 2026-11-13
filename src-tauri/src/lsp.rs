@@ -187,10 +187,29 @@ pub fn typescript_setup(root: &Path, global: Option<&Path>, tsls: Option<PathBuf
     None
 }
 
+/// Whether any TypeScript (5 / 6 with `tsserver.js`, or 7) is installed for the project or globally.
+/// When `typescript_setup` finds no server, this decides the install offer: with TypeScript there,
+/// only typescript-language-server is missing; without it, both are.
+pub fn typescript_found(root: &Path, global: Option<&Path>) -> bool {
+    let has = |pkg: &Path| {
+        let lib = pkg.join("lib");
+        lib.join("tsserver.js").is_file() || lib.join("getExePath.js").is_file()
+    };
+    (!root.as_os_str().is_empty() && has(&root.join("node_modules").join("typescript"))) || global.is_some_and(has)
+}
+
+fn global_typescript() -> Option<PathBuf> {
+    std::env::var_os("APPDATA").map(|a| PathBuf::from(a).join("npm").join("node_modules").join("typescript"))
+}
+
 #[tauri::command]
 pub fn lsp_typescript(root: String) -> Option<TsSetup> {
-    let global = std::env::var_os("APPDATA").map(|a| PathBuf::from(a).join("npm").join("node_modules").join("typescript"));
-    typescript_setup(Path::new(&root), global.as_deref(), which("typescript-language-server"))
+    typescript_setup(Path::new(&root), global_typescript().as_deref(), which("typescript-language-server"))
+}
+
+#[tauri::command]
+pub fn lsp_typescript_found(root: String) -> bool {
+    typescript_found(Path::new(&root), global_typescript().as_deref())
 }
 
 #[tauri::command]
@@ -383,6 +402,30 @@ mod tests {
         assert_eq!(typescript_setup(Path::new(""), Some(&global), None), None);
         assert!(typescript_setup(Path::new(""), Some(&global), Some(PathBuf::from(r"C:
 pm	ypescript-language-server.cmd"))).is_some());
+    }
+
+    #[test]
+    fn typescript_found_sees_any_version_in_the_project_or_globally() {
+        let dir = tempfile::tempdir().unwrap();
+        let proj = dir.path().join("p");
+        let global = dir.path().join("g");
+        std::fs::create_dir_all(global.join("lib")).unwrap();
+        let local = proj.join("node_modules").join("typescript").join("lib");
+        std::fs::create_dir_all(&local).unwrap();
+        // An empty package folder is not an installation.
+        assert!(!typescript_found(&proj, Some(&global)));
+        assert!(!typescript_found(&proj, None));
+        // Global TypeScript 5 (tsserver.js) or 7 (getExePath.js).
+        std::fs::write(global.join("lib").join("tsserver.js"), "").unwrap();
+        assert!(typescript_found(&proj, Some(&global)));
+        assert!(typescript_found(Path::new(""), Some(&global)));
+        std::fs::remove_file(global.join("lib").join("tsserver.js")).unwrap();
+        std::fs::write(global.join("lib").join("getExePath.js"), "").unwrap();
+        assert!(typescript_found(&proj, Some(&global)));
+        // The project's own TypeScript, without any global one; not looked for with no project.
+        std::fs::write(local.join("tsserver.js"), "").unwrap();
+        assert!(typescript_found(&proj, None));
+        assert!(!typescript_found(Path::new(""), None));
     }
 
     #[test]

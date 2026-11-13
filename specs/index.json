@@ -17,7 +17,7 @@
       "prefix": "CONFLICT",
       "title": "Merge Conflicts and Stopped Operations",
       "spec": "specs/git-conflicts.md",
-      "stories": 13
+      "stories": 14
     },
     {
       "prefix": "DIFF",
@@ -1661,6 +1661,10 @@
         {
           "id": "CLAUDE-009.5",
           "title": "No other mode can be started"
+        },
+        {
+          "id": "CLAUDE-009.6",
+          "title": "The hint says open tabs switch too"
         }
       ]
     },
@@ -1669,7 +1673,7 @@
       "title": "Answer Claude's questions",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 483,
+      "line": 487,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1711,7 +1715,7 @@
       "title": "Follow Claude's task list",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 529,
+      "line": 533,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1748,7 +1752,7 @@
       "title": "Attach pictures to a message",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 562,
+      "line": 566,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1802,7 +1806,7 @@
       "title": "Point Claude at files and selections",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 620,
+      "line": 624,
       "status": "draft",
       "commands": [
         "claude.addSelection",
@@ -1866,7 +1870,7 @@
       "title": "Read formatted replies",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 689,
+      "line": 693,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1917,7 +1921,7 @@
       "title": "Start a new conversation in the same folder",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 741,
+      "line": 745,
       "status": "draft",
       "commands": [
         "claude.newSession"
@@ -1957,7 +1961,7 @@
       "title": "Continue a conversation after restarting Quarry",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 779,
+      "line": 783,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2011,7 +2015,7 @@
       "title": "Browse and reopen past conversations",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 833,
+      "line": 837,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2059,6 +2063,10 @@
         {
           "id": "CLAUDE-017.8",
           "title": "What is not listed"
+        },
+        {
+          "id": "CLAUDE-017.9",
+          "title": "Continue in a terminal instead"
         }
       ]
     },
@@ -2067,7 +2075,7 @@
       "title": "Choose the model",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 893,
+      "line": 902,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2102,6 +2110,14 @@
         {
           "id": "CLAUDE-018.4",
           "title": "A model name from the settings file"
+        },
+        {
+          "id": "CLAUDE-018.5",
+          "title": "A continued conversation uses the new model"
+        },
+        {
+          "id": "CLAUDE-018.6",
+          "title": "The hint says when it applies"
         }
       ]
     },
@@ -2110,7 +2126,7 @@
       "title": "Know what background Claude tabs are doing",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 934,
+      "line": 953,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2146,7 +2162,7 @@
       "title": "Closing tabs, quitting and a process that stops",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 970,
+      "line": 989,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2774,6 +2790,55 @@
         {
           "id": "CONFLICT-013.6",
           "title": "The sides are explained"
+        }
+      ]
+    },
+    "CONFLICT-014": {
+      "id": "CONFLICT-014",
+      "title": "Carry on with a patch series (git am)",
+      "area": "CONFLICT",
+      "spec": "specs/git-conflicts.md",
+      "line": 625,
+      "status": "draft",
+      "commands": [],
+      "files": [
+        "src/components/panels/GitPanel.tsx",
+        "src/components/GraphView.tsx",
+        "src/lib/gitStatus.ts",
+        "src/lib/git.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/gitRemote.test.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "CONFLICT-014.1",
+          "title": "Progress"
+        },
+        {
+          "id": "CONFLICT-014.2",
+          "title": "The main button continues"
+        },
+        {
+          "id": "CONFLICT-014.3",
+          "title": "The sides are explained"
+        },
+        {
+          "id": "CONFLICT-014.4",
+          "title": "Skip a patch"
+        },
+        {
+          "id": "CONFLICT-014.5",
+          "title": "Abort"
+        },
+        {
+          "id": "CONFLICT-014.6",
+          "title": "Never called a rebase"
         }
       ]
     },
@@ -9199,6 +9264,10 @@
         {
           "id": "GRAPH-011.8",
           "title": "Invalid name"
+        },
+        {
+          "id": "GRAPH-011.9",
+          "title": "Create a branch without switching"
         }
       ]
     },
@@ -9207,7 +9276,7 @@
       "title": "Check out, cherry-pick or revert a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 631,
+      "line": 640,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9262,7 +9331,7 @@
       "title": "Reset the branch to a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 690,
+      "line": 699,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9306,7 +9375,7 @@
       "title": "See uncommitted work and a stopped operation above the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 736,
+      "line": 745,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10125,10 +10194,14 @@
         "src-tauri/src/lsp.rs",
         "src/lib/lsp.ts",
         "src/lib/lspServers.ts",
+        "src/lib/lspInstall.ts",
+        "src/components/LspStatus.tsx",
         "src/components/panels/SettingsPanel.tsx"
       ],
       "tests": [
-        "src-tauri/src/lsp.rs"
+        "src-tauri/src/lsp.rs",
+        "src/__tests__/lsp.test.ts",
+        "src/__tests__/lspInstall.test.ts"
       ],
       "docs": [
         "docs/code-intelligence.md"
@@ -10173,7 +10246,7 @@
       "title": "Server status in the status bar",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 175,
+      "line": 181,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10219,7 +10292,7 @@
       "title": "Offer to install a missing language server",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 230,
+      "line": 236,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10275,7 +10348,7 @@
       "title": "Suggestions while typing",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 290,
+      "line": 296,
       "status": "draft",
       "commands": [
         "code.triggerSuggest"
@@ -10320,7 +10393,7 @@
       "title": "Documentation on hover",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 334,
+      "line": 340,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10357,7 +10430,7 @@
       "title": "Parameter hints",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 368,
+      "line": 374,
       "status": "draft",
       "commands": [
         "code.signatureHelp"
@@ -10390,7 +10463,7 @@
       "title": "Go to definition, type definition and implementation",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 401,
+      "line": 407,
       "status": "draft",
       "commands": [
         "code.gotoDefinition",
@@ -10438,7 +10511,7 @@
       "title": "Find all references",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 449,
+      "line": 455,
       "status": "draft",
       "commands": [
         "code.findReferences"
@@ -10477,7 +10550,7 @@
       "title": "Rename a symbol",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 490,
+      "line": 496,
       "status": "draft",
       "commands": [
         "code.renameSymbol"
@@ -10519,7 +10592,7 @@
       "title": "Problems in the editor",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 537,
+      "line": 543,
       "status": "draft",
       "commands": [
         "code.nextProblem",
@@ -10570,7 +10643,7 @@
       "title": "The Problems list and counts",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 591,
+      "line": 597,
       "status": "draft",
       "commands": [
         "view.problems"
@@ -10617,7 +10690,7 @@
       "title": "Format with the language server",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 642,
+      "line": 648,
       "status": "draft",
       "commands": [
         "code.formatWithServer"
@@ -10655,7 +10728,7 @@
       "title": "Every open tab stays in sync with its server",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 681,
+      "line": 687,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10701,7 +10774,7 @@
       "title": "Settings for code intelligence",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 727,
+      "line": 733,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10749,7 +10822,7 @@
       "title": "Restart, crashes and quitting",
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
-      "line": 778,
+      "line": 784,
       "status": "draft",
       "commands": [
         "code.restartLanguageServers"
@@ -14787,6 +14860,7 @@
         "claude.openTerminal"
       ],
       "files": [
+        "src/components/ClaudeView.tsx",
         "src/lib/commands.ts",
         "src/lib/terminal.ts",
         "src/components/TerminalView.tsx",
@@ -14815,7 +14889,15 @@
         },
         {
           "id": "TERM-002.4",
-          "title": "No built-in entry point passes a conversation"
+          "title": "The other entry points start a fresh session"
+        },
+        {
+          "id": "TERM-002.5",
+          "title": "Continue a past conversation in a terminal"
+        },
+        {
+          "id": "TERM-002.6",
+          "title": "Not for the conversation open in the tab"
         }
       ]
     },
@@ -14824,7 +14906,7 @@
       "title": "Keys go to the program",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 113,
+      "line": 125,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14863,7 +14945,7 @@
       "title": "Copy and paste in the terminal",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 154,
+      "line": 166,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14899,7 +14981,7 @@
       "title": "The terminal fits the tab and follows the theme",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 190,
+      "line": 202,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14946,7 +15028,7 @@
       "title": "When the program ends",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 235,
+      "line": 247,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14989,7 +15071,7 @@
       "title": "Closing terminal tabs",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 277,
+      "line": 289,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15030,7 +15112,7 @@
       "title": "A clean environment for the program",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 321,
+      "line": 333,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15065,7 +15147,7 @@
       "title": "One-off command terminals",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 354,
+      "line": 366,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16753,6 +16835,7 @@
       "CONFLICT-011",
       "CONFLICT-012",
       "CONFLICT-013",
+      "CONFLICT-014",
       "DIFF-006",
       "GIT-001",
       "GIT-002",
@@ -17005,6 +17088,7 @@
       "CLAUDE-017",
       "CLAUDE-018",
       "TERM-001",
+      "TERM-002",
       "UI-021"
     ],
     "src/components/CodeEditor.tsx": [
@@ -17063,6 +17147,7 @@
     ],
     "src/components/GraphView.tsx": [
       "CONFLICT-011",
+      "CONFLICT-014",
       "GRAPH-001",
       "GRAPH-002",
       "GRAPH-003",
@@ -17089,6 +17174,7 @@
       "SET-018"
     ],
     "src/components/LspStatus.tsx": [
+      "LSP-003",
       "LSP-004",
       "LSP-005",
       "LSP-013",
@@ -17293,6 +17379,7 @@
       "CONFLICT-011",
       "CONFLICT-012",
       "CONFLICT-013",
+      "CONFLICT-014",
       "GIT-001",
       "GIT-007",
       "GIT-008",
@@ -17912,6 +17999,7 @@
       "CONFLICT-011",
       "CONFLICT-012",
       "CONFLICT-013",
+      "CONFLICT-014",
       "DIFF-006",
       "DIFF-014",
       "EXPL-016",
@@ -17994,6 +18082,7 @@
       "CONFLICT-009",
       "CONFLICT-010",
       "CONFLICT-013",
+      "CONFLICT-014",
       "EXPL-016",
       "GIT-004",
       "GIT-008",
@@ -18110,6 +18199,7 @@
       "UPD-003"
     ],
     "src/lib/lspInstall.ts": [
+      "LSP-003",
       "LSP-005",
       "SET-014",
       "TERM-009"
@@ -18435,6 +18525,7 @@
       "CONFLICT-011",
       "CONFLICT-012",
       "CONFLICT-013",
+      "CONFLICT-014",
       "DIFF-006",
       "GIT-001",
       "GIT-002",
@@ -18646,6 +18737,7 @@
       "CONFLICT-007",
       "CONFLICT-010",
       "CONFLICT-013",
+      "CONFLICT-014",
       "GIT-008",
       "GIT-009",
       "GIT-013",
@@ -18685,6 +18777,7 @@
     ],
     "src/__tests__/lsp.test.ts": [
       "LSP-001",
+      "LSP-003",
       "LSP-006",
       "LSP-007",
       "LSP-012",
@@ -18692,6 +18785,7 @@
       "LSP-016"
     ],
     "src/__tests__/lspInstall.test.ts": [
+      "LSP-003",
       "LSP-005",
       "TERM-009"
     ],

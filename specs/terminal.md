@@ -80,6 +80,7 @@ Scenario: TERM-001.7 Hidden while the integration is off
 - Status: draft
 - Commands: `claude.openTerminal`
 - Files:
+  - `src/components/ClaudeView.tsx` — `HistoryMenu`: "Continue in Terminal" button on each row (`onTerminal` → `runCommand("claude.openTerminal", { folder, resume })`; disabled for the conversation open in the tab)
   - `src/lib/commands.ts` — `claude.openTerminal` accepts `{ folder, resume }`
   - `src/lib/terminal.ts` — `openClaudeTerminal(folder, resume)`
   - `src/components/TerminalView.tsx` — `resume` passed on the first start only (`first`)
@@ -105,9 +106,20 @@ Scenario: TERM-002.3 An id that is not a conversation id is ignored
   When the resume value is "--dangerously-skip-permissions"
   Then claude is started without any resume option
 
-Scenario: TERM-002.4 No built-in entry point passes a conversation
-  When I open a terminal from the Explorer, the Tools menu, the palette or a Claude tab's header
-  Then claude starts a fresh session, and I use "claude --resume" or "/resume" myself to continue one
+Scenario: TERM-002.4 The other entry points start a fresh session
+  When I open a terminal from the Explorer, the Tools menu, the palette or a Claude tab's header terminal button
+  Then claude starts a fresh session
+
+Scenario: TERM-002.5 Continue a past conversation in a terminal
+  Given the Claude tab for "C:\work\shop" and its history list is open
+  When I click the "Continue in Terminal" button on the row of an earlier conversation
+  Then the list closes and a new tab "Claude CLI · shop" starts claude in "C:\work\shop" with that conversation resumed
+  And the Claude tab keeps showing its own conversation
+
+Scenario: TERM-002.6 Not for the conversation open in the tab
+  Given the history list is open
+  When I look at the row marked "open"
+  Then its "Continue in Terminal" button is disabled, and its tooltip says to start a new conversation in the tab first
 ```
 
 ## TERM-003: Keys go to the program

@@ -14,11 +14,28 @@ export interface ServerDef {
   args: string[];
   /** Files whose folder is the project root, nearest first (`*.ext` matches by suffix). */
   rootMarkers: string[];
-  /** Command line that installs it (run in a terminal tab from Settings). */
+  /** Command line that installs it (run in a terminal tab from Settings). TypeScript's depends on
+   *  what is installed already: see `installCommand`. */
   install: string;
   /** What `install` needs first. */
   needs?: string;
   initializationOptions?: Record<string, unknown>;
+}
+
+/**
+ * TypeScript's install offer. TypeScript 7 serves LSP itself; 5 and 6 need typescript-language-server.
+ * The offer only shows when no server could be started, so with TypeScript already installed (in
+ * the project or globally, `hasTypeScript`) what is missing is typescript-language-server, and an
+ * existing TypeScript is left alone; with none at all, both are installed (whatever version npm's
+ * `typescript` is, one of the two then serves).
+ */
+export function typescriptInstall(hasTypeScript: boolean): string {
+  return hasTypeScript ? "npm install -g typescript-language-server" : "npm install -g typescript-language-server typescript";
+}
+
+/** The install command for a server; `hasTypeScript` (Rust `lsp_typescript_found`) only matters for TypeScript. */
+export function installCommand(def: ServerDef, hasTypeScript: boolean | null): string {
+  return def.id === "typescript" && hasTypeScript !== null ? typescriptInstall(hasTypeScript) : def.install;
 }
 
 export const SERVERS: ServerDef[] = [
@@ -31,7 +48,7 @@ export const SERVERS: ServerDef[] = [
     command: "tsc",
     args: ["--lsp", "--stdio"],
     rootMarkers: ["tsconfig.json", "jsconfig.json", "package.json", ".git"],
-    install: "npm install -g typescript",
+    install: typescriptInstall(false),
     needs: "Node.js",
     initializationOptions: { preferences: { includeCompletionsForModuleExports: true, includeCompletionsWithInsertText: true } },
   },
