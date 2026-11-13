@@ -31,6 +31,8 @@ pub struct GitStatus {
     /// The message git prepared for the commit that finishes the operation (`MERGE_MSG` without
     /// its comment lines): the picked commit's message, "Merge branch ...", "Revert ...".
     pub operation_message: Option<String>,
+    /// A rebase's progress: the commit being replayed and how many there are ("2 of 5").
+    pub operation_step: Option<(u32, u32)>,
     pub files: Vec<GitFile>,
     pub remotes: Vec<GitRemote>,
 }
@@ -305,6 +307,16 @@ fn operation_message(root: &Path) -> Option<String> {
     (!msg.is_empty()).then(|| msg.to_string())
 }
 
+/// Where a rebase is: (current, total), from the files git keeps while it runs.
+fn operation_step(root: &Path) -> Option<(u32, u32)> {
+    let dir = run_text(root, true, &["rev-parse", "--absolute-git-dir"]).ok()?;
+    let dir = PathBuf::from(dir.trim().replace('/', "\\"));
+    let num = |p: PathBuf| std::fs::read_to_string(p).ok()?.trim().parse::<u32>().ok();
+    let merge = dir.join("rebase-merge");
+    let apply = dir.join("rebase-apply");
+    if merge.is_dir() { Some((num(merge.join("msgnum"))?, num(merge.join("end"))?)) } else if apply.is_dir() { Some((num(apply.join("next"))?, num(apply.join("last"))?)) } else { None }
+}
+
 /// Parse `status --porcelain=v2 --branch -z`.
 fn parse_status(root: &Path, out: &[u8]) -> GitStatus {
     let text = String::from_utf8_lossy(out);
@@ -318,6 +330,7 @@ fn parse_status(root: &Path, out: &[u8]) -> GitStatus {
         behind: 0,
         operation: None,
         operation_message: None,
+        operation_step: None,
         files: Vec::new(),
         remotes: Vec::new(),
     };
@@ -391,6 +404,7 @@ fn status(path: &Path) -> Result<Option<GitStatus>, String> {
     st.operation = operation(&root);
     if st.operation.is_some() {
         st.operation_message = operation_message(&root);
+        st.operation_step = operation_step(&root);
     }
     st.remotes = remote_list(&root)?;
     Ok(Some(st))
@@ -1381,6 +1395,24 @@ fn commit_action(root: &Path, action: &str, sha: &str, name: Option<&str>) -> Re
     if out.ok { Ok(combined(&out)) } else { Err(combined(&out)) }
 }
 
+/// Carry on with the operation in progress once its conflicts are resolved (`how` = "continue"),
+/// or leave out the commit it stopped on ("skip"). A rebase then replays its remaining commits,
+/// and may stop again on the next conflict (an error whose text says so).
+fn continue_operation(root: &Path, how: &str) -> Result<String, String> {
+    let Some(op) = operation(root) else { return Err("Nothing is in progress.".into()) };
+    let flag = match how {
+        "continue" => "--continue",
+        "skip" if op != "merge" => "--skip",
+        "skip" => return Err("A merge has nothing to skip. Abort it instead.".into()),
+        _ => return Err(format!("unknown step {how}")),
+    };
+    let mut cmd = git(root, false);
+    // Each commit keeps its own message: never wait on an editor.
+    cmd.env("GIT_EDITOR", "true").args([op.as_str(), flag]);
+    let out = exec(cmd, None)?;
+    if out.ok { Ok(op) } else { Err(combined(&out)) }
+}
+
 /// Abandon the merge / rebase / cherry-pick / revert in progress: back to how things were before it.
 fn abort_operation(root: &Path) -> Result<String, String> {
     let Some(op) = operation(root) else { return Err("Nothing is in progress.".into()) };
@@ -1550,6 +1582,11 @@ pub async fn git_abort(root: String) -> Result<String, String> {
 #[tauri::command]
 pub async fn git_resolve_side(root: String, path: String, side: String) -> Result<String, String> {
     blocking(move || resolve_side(Path::new(&root), &path, &side)).await
+}
+
+#[tauri::command]
+pub async fn git_continue(root: String, how: String) -> Result<String, String> {
+    blocking(move || continue_operation(Path::new(&root), &how)).await
 }
 
 #[tauri::command]
@@ -1954,6 +1991,29 @@ mod tests {
         abort_operation(&root).unwrap();
         git_ok(&root, &["reset", "-q", "--hard", "HEAD~1"]);
         assert_eq!(std::fs::read_to_string(root.join("a.txt")).unwrap(), "different\n");
+
+        // A rebase that stops on a conflict: progress is reported, Continue is refused until the
+        // file is resolved, then it finishes; Skip leaves the commit out instead.
+        assert!(continue_operation(&root, "continue").is_err());
+        let rebase = |root: &Path| run(root, false, &["rebase", "main"], None);
+        assert!(rebase(&root).is_err());
+        let st = status(&root).unwrap().unwrap();
+        assert_eq!(st.operation.as_deref(), Some("rebase"));
+        assert_eq!(st.operation_step, Some((1, 1)));
+        assert!(continue_operation(&root, "continue").is_err());
+        assert!(continue_operation(&root, "sideways").is_err());
+        assert_eq!(resolve_side(&root, &a, "theirs").unwrap(), "kept"); // in a rebase, "theirs" is your commit
+        assert_eq!(continue_operation(&root, "continue").unwrap(), "rebase");
+        assert!(operation(&root).is_none());
+        assert_eq!(std::fs::read_to_string(root.join("a.txt")).unwrap(), "different\n");
+        assert_eq!(graph(&root, false, 0, 2).unwrap().iter().map(|c| c.summary.as_str()).collect::<Vec<_>>(), ["clash", "on main"]);
+        // Again from the start, skipping the commit: the branch ends up equal to main.
+        git_ok(&root, &["reset", "-q", "--hard", "ORIG_HEAD"]);
+        assert!(rebase(&root).is_err());
+        assert_eq!(continue_operation(&root, "skip").unwrap(), "rebase");
+        assert!(operation(&root).is_none());
+        assert_eq!(graph(&root, false, 0, 1).unwrap()[0].sha, mine[0].sha);
+        git_ok(&root, &["reset", "-q", "--hard", "ORIG_HEAD"]);
         git_ok(&root, &["switch", "-q", "main"]);
 
         commit_action(&root, "checkout", &feature.sha, None).unwrap();

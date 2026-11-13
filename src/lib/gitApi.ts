@@ -32,6 +32,8 @@ export interface GitStatus {
   operation: GitOperation | null;
   /** The message git prepared for the commit that finishes the operation (a pick's original message, "Merge branch …"). */
   operationMessage: string | null;
+  /** A rebase's progress: [the commit being replayed, how many there are]. */
+  operationStep: [number, number] | null;
   files: GitFile[];
   remotes: GitRemote[];
 }
@@ -225,6 +227,8 @@ export const git = {
   /** Resolve a conflicted file by taking one whole side ("ours": your branch; "theirs": what comes in).
    *  Resolves with "kept", or "deleted" when that side had deleted the file. */
   resolveSide: (root: string, path: string, side: "ours" | "theirs") => invoke<"kept" | "deleted">("git_resolve_side", { root, path, side }),
+  /** Carry on with the operation in progress ("continue"), or leave out the commit it stopped on ("skip"). */
+  continueOp: (root: string, how: "continue" | "skip") => invoke<string>("git_continue", { root, how }),
   /** Abandon the merge / rebase / cherry-pick / revert in progress; resolves with its name. */
   abort: (root: string) => invoke<string>("git_abort", { root }),
   /** Ids of the current branch's commits its upstream does not have yet (none without an upstream). */

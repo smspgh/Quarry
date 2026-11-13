@@ -38,11 +38,11 @@ const D = {
 };
 
 class BarWidget extends WidgetType {
-  constructor(readonly current: string, readonly incoming: string, readonly n: number, readonly total: number) {
+  constructor(readonly current: string, readonly incoming: string, readonly n: number, readonly total: number, readonly note: string) {
     super();
   }
   eq(o: BarWidget) {
-    return o.current === this.current && o.incoming === this.incoming && o.n === this.n && o.total === this.total;
+    return o.current === this.current && o.incoming === this.incoming && o.n === this.n && o.total === this.total && o.note === this.note;
   }
   toDOM(view: EditorView) {
     const bar = document.createElement("div");
@@ -69,6 +69,26 @@ class BarWidget extends WidgetType {
     act("Accept Current", `Keep ${sideLabel("current", this.current)}: what your branch has`, "current", "current");
     act("Accept Incoming", `Keep ${sideLabel("incoming", this.incoming)}: what is being brought in`, "incoming", "incoming");
     act("Accept Both", "Keep both, current first", "both", "both");
+    if (hooks.compare) {
+      const c = document.createElement("button");
+      c.type = "button";
+      c.className = "cm-conflict-btn";
+      c.textContent = "Compare";
+      c.title = "Open the two sides of this conflict next to each other";
+      c.onmousedown = (e) => e.preventDefault();
+      c.onclick = () => {
+        const line = view.state.doc.lineAt(view.posAtDOM(bar)).number - 1;
+        const block = conflictsOf(view.state).find((x) => x.start === line);
+        if (block) hooks.compare?.(view, block, this.n);
+      };
+      bar.appendChild(c);
+    }
+    if (this.note) {
+      const note = document.createElement("span");
+      note.className = "cm-conflict-note";
+      note.textContent = this.note;
+      bar.appendChild(note);
+    }
     return bar;
   }
   ignoreEvent() {
@@ -79,9 +99,10 @@ class BarWidget extends WidgetType {
 function build(doc: Text, blocks: ConflictBlock[]): DecorationSet {
   if (!blocks.length) return Decoration.none;
   const b = new RangeSetBuilder<Decoration>();
+  const note = hooks.note?.() ?? "";
   blocks.forEach((k, i) => {
     const at = (line: number) => doc.line(line + 1).from;
-    b.add(at(k.start), at(k.start), Decoration.widget({ widget: new BarWidget(k.currentLabel, k.incomingLabel, i + 1, blocks.length), block: true, side: -1 }));
+    b.add(at(k.start), at(k.start), Decoration.widget({ widget: new BarWidget(k.currentLabel, k.incomingLabel, i + 1, blocks.length, note), block: true, side: -1 }));
     b.add(at(k.start), at(k.start), D.startMark);
     for (let l = k.start + 1; l < (k.base ?? k.mid); l++) b.add(at(l), at(l), D.current);
     if (k.base !== null) {
@@ -176,17 +197,25 @@ export function gotoConflict(view: EditorView, dir: 1 | -1): boolean {
   return true;
 }
 
-let onCleared: ((view: EditorView) => void) | null = null;
-/** Called when an edit removes the last conflict of a document (set once, by the git layer). */
-export function onConflictsCleared(fn: (view: EditorView) => void) {
-  onCleared = fn;
+export interface ConflictHooks {
+  /** An edit removed the last conflict of a document. */
+  cleared?: (view: EditorView) => void;
+  /** The bar's Compare button: show the two sides of block `n` side by side. */
+  compare?: (view: EditorView, block: ConflictBlock, n: number) => void;
+  /** A hint shown in each bar (which side is which during a rebase); "" for none. */
+  note?: () => string;
+}
+const hooks: ConflictHooks = {};
+/** Wired once by the git layer, which knows the repository and can open tabs. */
+export function setConflictHooks(h: ConflictHooks) {
+  Object.assign(hooks, h);
 }
 
 export function conflictExtensions(): Extension {
   return [
     conflictField,
     EditorView.updateListener.of((u) => {
-      if (u.docChanged && conflictsOf(u.startState).length > 0 && conflictsOf(u.state).length === 0) onCleared?.(u.view);
+      if (u.docChanged && conflictsOf(u.startState).length > 0 && conflictsOf(u.state).length === 0) hooks.cleared?.(u.view);
     }),
   ];
 }

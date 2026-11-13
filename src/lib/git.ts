@@ -9,7 +9,8 @@ import { Text } from "@codemirror/state";
 import { create } from "zustand";
 import { editor } from "../editor/manager";
 import { setBlame, setGitBase } from "../editor/git";
-import { onConflictsCleared } from "../editor/conflicts";
+import { setConflictHooks } from "../editor/conflicts";
+import type { ConflictBlock } from "./conflicts";
 import type { EditorView } from "@codemirror/view";
 import { git, type GitBranch, type GitCommitAction, type GitCommitFile, type GitFile, type GitLogEntry, type GitIdentity, type GitRemoteOp, type GitStatus, type GithubRepo } from "./gitApi";
 import { newDocId, useStore, type Doc } from "./store";
@@ -249,7 +250,12 @@ export function toggleBlame() {
 
 export function installGit(): () => void {
   refreshGit(0);
-  onConflictsCleared((view) => void conflictsCleared(view));
+  setConflictHooks({
+    cleared: (view) => void conflictsCleared(view),
+    compare: (view, block, n) => void compareSides(view, block, n),
+    // In a rebase the sides are the reverse of what people expect: say which is which.
+    note: () => (currentRepo()?.operation === "rebase" ? "Rebasing: Current is the branch you are rebasing onto, Incoming is your own commit." : ""),
+  });
   const unsub = useStore.subscribe((s, prev) => {
     if (s.folder !== prev.folder) {
       // The panel follows the newly opened folder's repository.
@@ -370,6 +376,42 @@ export async function takeSide(root: string, f: GitFile, side: "ours" | "theirs"
   }
 }
 
+/** The conflict bar's Compare: the two sides of one conflict in a (reused) Compare tab. */
+async function compareSides(view: EditorView, block: ConflictBlock, n: number) {
+  const st = useStore.getState();
+  const doc = st.docs.find((d) => d.kind === "text" && editor.viewOf(d.id) === view) ?? st.docs.find((d) => d.id === st.activeId);
+  const name = doc ? doc.name : "conflict";
+  const text = (from: number, to: number) => {
+    const lines: string[] = [];
+    for (let l = from; l < to; l++) lines.push(view.state.doc.line(l + 1).text);
+    return lines.join("\n");
+  };
+  const { openCompare } = await import("./diff");
+  await openCompare(
+    { kind: "text", label: `${name} · conflict ${n} · current`, text: text(block.start + 1, block.base ?? block.mid) },
+    { kind: "text", label: `${name} · conflict ${n} · incoming`, text: text(block.mid + 1, block.end) },
+    { preview: true },
+  );
+}
+
+/**
+ * Carry on with a stopped operation once its conflicts are resolved, or skip the commit it
+ * stopped on. A rebase may stop again on its next commit; the message then says so.
+ */
+export async function continueOperation(root: string, operation: string, how: "continue" | "skip") {
+  const { askDialog, checkExternalChanges } = await import("./actions");
+  if (how === "skip") {
+    const ok = await askDialog(`Skip this commit?`, `The commit the ${operation} stopped on is left out: its changes will not be on the branch. The ${operation} then carries on with the rest.`, "Skip Commit");
+    if (!ok) return;
+  }
+  const out = await run(how === "skip" ? "Skipping…" : "Continuing…", () => git.continueOp(root, how));
+  void checkExternalChanges();
+  if (out === undefined) return;
+  // Status is refreshed by run(); a rebase that is still going shows its next step there.
+  const still = await git.status(root).catch(() => null);
+  toast(still?.operation ? `${how === "skip" ? "Skipped that commit" : "Continued"}: the ${out} is on its next commit.` : `The ${out} is finished.`, "success", 3500);
+}
+
 /** The last conflict of a document was just resolved in the editor: offer to finish the file. */
 async function conflictsCleared(view: EditorView) {
   const st = useStore.getState();
@@ -382,7 +424,7 @@ async function conflictsCleared(view: EditorView) {
   const left = repo.files.filter((f) => f.conflicted).length - 1;
   const ok = await choose(
     `No conflicts left in ${name}`,
-    `Save ${name} and mark it resolved?${left > 0 ? ` ${left} other file${left === 1 ? " still has" : "s still have"} conflicts.` : " It is the last file: after this you can commit to finish."}\n\nYou can keep editing instead, and mark it resolved later with + under Merge Changes.`,
+    `Save ${name} and mark it resolved?${left > 0 ? ` ${left} other file${left === 1 ? " still has" : "s still have"} conflicts.` : repo.operation === "rebase" ? " It is the last file: after this, Continue Rebase carries on." : " It is the last file: after this you can commit to finish."}\n\nYou can keep editing instead, and mark it resolved later with + under Merge Changes.`,
     [
       { label: "Save and Mark Resolved", kind: "primary", default: true, value: true },
       { label: "Keep Editing", cancel: true, value: false },

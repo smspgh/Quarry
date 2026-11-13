@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowUp, Check, ChevronRight, CircleDot, CloudDownload, CloudOff, FileDiff, FileText, GitBranch, GitGraph, History, Minus, Plus, RefreshCw, TriangleAlert, Undo2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { openPath } from "../../lib/actions";
-import { abortOperation, resolveConflicts, takeSide, checkRemote, isMissingRepo, commit, compareCommitWithCurrent, currentRepo, discard, moreHistory, openChange, openCommitChange, openCommitFile, openGraph, pickBranch, remote, rescanGit, stage, unstage, useGit } from "../../lib/git";
+import { abortOperation, continueOperation, resolveConflicts, takeSide, checkRemote, isMissingRepo, commit, compareCommitWithCurrent, currentRepo, discard, moreHistory, openChange, openCommitChange, openCommitFile, openGraph, pickBranch, remote, rescanGit, stage, unstage, useGit } from "../../lib/git";
 import { commitFileKind, commitLabel, groupFiles, KIND_LABEL, KIND_LETTER, rowKind, syncLine, type Group } from "../../lib/gitStatus";
 import { git, type GitCommitFile, type GitFile, type GitLogEntry, type GitRemoteOp, type GitStatus } from "../../lib/gitApi";
 import { relativeTime } from "../../editor/git";
@@ -50,10 +50,10 @@ function FileRow({ f, repo, group }: { f: GitFile; repo: GitStatus; group: Group
         )}
         {group === "conflict" && (
           <>
-            <button className="btn small scm-side" title="Resolve by taking your branch's version of the whole file (deletes it if your branch deleted it)" onClick={() => void takeSide(repo.root, f, "ours")}>
+            <button className="btn small scm-side" title={repo.operation === "rebase" ? "Resolve by taking the version on the branch you are rebasing onto, for the whole file (deletes it if that side deleted it)" : "Resolve by taking your branch's version of the whole file (deletes it if your branch deleted it)"} onClick={() => void takeSide(repo.root, f, "ours")}>
               Current
             </button>
-            <button className="btn small scm-side" title="Resolve by taking the incoming version of the whole file (deletes it if the incoming side deleted it)" onClick={() => void takeSide(repo.root, f, "theirs")}>
+            <button className="btn small scm-side" title={repo.operation === "rebase" ? "Resolve by taking your own commit's version of the whole file (deletes it if your commit deleted it)" : "Resolve by taking the incoming version of the whole file (deletes it if the incoming side deleted it)"} onClick={() => void takeSide(repo.root, f, "theirs")}>
               Incoming
             </button>
           </>
@@ -432,11 +432,18 @@ export function GitPanel() {
     }
     if (offered.current === opKey) return;
     offered.current = opKey;
+    // (Not for a rebase: its commits keep their own messages.)
+    if (repo!.operation === "rebase" || repo!.operation === "am") return;
     setMessage((cur) => (cur.trim() ? cur : repo!.operationMessage!));
   }, [opKey]);
 
+  const rebasing = repo?.operation === "rebase" || repo?.operation === "am";
   const doCommit = async () => {
     if (!repo || busy) return;
+    if (rebasing) {
+      await continueOperation(repo.root, "rebase", "continue");
+      return;
+    }
     if (await commit(repo.root, message, amend)) {
       setMessage("");
       setAmend(false);
@@ -502,7 +509,12 @@ export function GitPanel() {
               <button className="btn small" title="Switch branch or create one" disabled={!!busy} onClick={() => void pickBranch()}>
                 <GitBranch size={13} /> <span className="truncate">{branchLabel}</span>
               </button>
-              {repo.operation && <span className="scm-op" title="Stopped part-way, usually on a conflict: resolve the files under Merge Changes and commit, or abort">{OPERATION[repo.operation] ?? repo.operation}</span>}
+              {repo.operation && <span className="scm-op" title="Stopped part-way, usually on a conflict: resolve the files under Merge Changes and commit, or abort">{OPERATION[repo.operation] ?? repo.operation}{repo.operationStep ? ` ${repo.operationStep[0]} of ${repo.operationStep[1]}` : ""}</span>}
+              {repo.operation && repo.operation !== "merge" && (
+                <button className="btn small" disabled={!!busy || groups.conflict.length > 0} title={groups.conflict.length ? "Resolve the conflicts first (or Abort)" : `Leave out the commit the ${repo.operation} stopped on and carry on`} onClick={() => void continueOperation(repo.root, repo.operation!, "skip")}>
+                  Skip
+                </button>
+              )}
               {repo.operation && (
                 <button className="btn small" disabled={!!busy} title={`Give up the ${repo.operation} and go back to how things were before it`} onClick={() => void abortOperation(repo.root, repo.operation!)}>
                   Abort
@@ -514,7 +526,8 @@ export function GitPanel() {
           </div>
           <textarea
             className="input scm-message"
-            placeholder={`Message (Ctrl+Enter to commit${target})`}
+            placeholder={rebasing ? "A rebase keeps each commit's own message: resolve the conflicts, then Continue Rebase" : `Message (Ctrl+Enter to commit${target})`}
+            disabled={rebasing}
             aria-label="Commit message"
             value={message}
             rows={3}
@@ -530,11 +543,11 @@ export function GitPanel() {
           <div className="row">
             <button
               className="btn btn-primary small grow"
-              disabled={!!busy || groups.conflict.length > 0 || (!message.trim() && !amend)}
+              disabled={!!busy || groups.conflict.length > 0 || (!rebasing && !message.trim() && !amend)}
               title={groups.conflict.length ? "Open each file under Merge Changes, fix the conflict, save, and mark it resolved with +. Then commit to finish, or Abort to go back." : undefined}
               onClick={() => void doCommit()}
             >
-              {commitLabel(groups.staged.length, repo.files.length, amend, groups.conflict.length)}
+              {commitLabel(groups.staged.length, repo.files.length, amend, groups.conflict.length, repo.operation)}
             </button>
             <label className="check" title="Replace the last commit with this one (the message box empty keeps its message)">
               <input type="checkbox" checked={amend} disabled={!repo.head} onChange={(e) => setAmend(e.target.checked)} />
@@ -550,7 +563,13 @@ export function GitPanel() {
         <Section title="Merge Changes" group="conflict" files={groups.conflict} repo={repo} />
         <Section title="Staged Changes" group="staged" files={groups.staged} repo={repo} />
         <Section title="Changes" group="changes" files={groups.changes} repo={repo} />
-        {repo.files.length === 0 && <div className="panel-note">No uncommitted changes.</div>}
+        {repo.files.length === 0 && (
+          <div className="panel-note">
+            {repo.operation && !rebasing
+              ? `Nothing is left to commit for this ${repo.operation}: its changes are already on the branch. ${repo.operation === "merge" ? "Abort to end it." : "Press Skip to move on, or Abort."}`
+              : "No uncommitted changes."}
+          </div>
+        )}
         <CommitsSection repo={repo} />
         <HistorySection />
         <RepoSettings repo={repo} />

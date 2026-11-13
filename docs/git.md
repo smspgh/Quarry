@@ -81,7 +81,17 @@ Click the file under **Merge Changes**: it opens in the editor with each conflic
 - **From the keyboard / menu.** **Git › Conflicts** has Next / Previous Conflict (**Alt+F6** / **Shift+Alt+F6**), the three Accept commands for the conflict at the cursor, and **Accept All Current / Incoming in This File**.
 - **When the last conflict in a file is gone**, Quarry offers **Save and Mark Resolved**; **Keep Editing** leaves that for later (the **+** on the file does the same, and saves the tab first).
 - **The whole file at once.** **Current** and **Incoming** on the file's row under Merge Changes take that side's version of the entire file. This is also how to settle a file that one side deleted: the side that deleted it removes the file, the other keeps it.
+- **See the two sides.** **Compare** on a conflict's bar opens its current and incoming text next to each other in a Compare tab.
 - **Then commit.** With every file resolved, the Commit button comes back and the message box already holds the message git prepared.
+- **Nothing left to commit?** If resolving left no changes (the commit's changes are already on your branch), the panel says so: **Skip** moves on without it, **Abort** goes back.
+
+### Rebase
+
+A rebase replays your commits one at a time on top of another branch, and can stop on a conflict at any of them (a **Pull (Rebase)** does this). Source Control then shows **Rebasing 2 of 5** beside the branch.
+
+- Resolve the files as above. In a rebase the sides are the other way round from what you might expect: **Current** is the branch you are rebasing onto, **Incoming** is your own commit. The conflict bars and the row buttons say so.
+- The message box is off, because each commit keeps its own message. The main button reads **Continue Rebase**: it carries on with the next commit, and stops again if that one conflicts too.
+- **Skip** leaves out the commit it stopped on; **Abort** puts the branch back where it was before the rebase.
 
 While any file is still in conflict, the Commit button is disabled and reads **Resolve 1 Conflict First**. The message box is filled in with the message git prepared (the picked commit's own message, or "Merge branch …"), unless you had already typed one. Marking a file resolved (**+** under Merge Changes) checks it first: if it still contains git's `<<<<<<<` / `>>>>>>>` conflict lines, Quarry asks before staging it.
 

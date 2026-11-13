@@ -96,8 +96,10 @@ export function hasConflictMarkers(text: string): boolean {
 }
 
 /** The Commit button: what it will take (or what is in the way). */
-export function commitLabel(staged: number, total: number, amend: boolean, conflicts = 0): string {
+export function commitLabel(staged: number, total: number, amend: boolean, conflicts = 0, operation: string | null = null): string {
   if (conflicts) return `Resolve ${conflicts} Conflict${conflicts === 1 ? "" : "s"} First`;
+  // A rebase is not finished by committing: each of its commits keeps its own message.
+  if (operation === "rebase" || operation === "am") return "Continue Rebase";
   if (amend) return "Amend Last Commit";
   if (staged) return `Commit ${staged} Staged`;
   return total ? `Commit All (${count(total, "file")})` : "Commit All";

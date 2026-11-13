@@ -5008,3 +5008,4 @@ select optgroup {
 .cm-conflict-btn.current { border-color: var(--git-added); }
 .cm-conflict-btn.incoming { border-color: var(--accent); }
 .scm-side { height: 20px; padding: 0 6px; font-size: 11px; }
+.cm-conflict-note { margin-left: 8px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }

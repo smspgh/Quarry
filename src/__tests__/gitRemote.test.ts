@@ -75,3 +75,11 @@ describe("conflicts", () => {
     expect(commitLabel(2, 3, true, 2)).toBe("Resolve 2 Conflicts First");
   });
 });
+
+describe("commit button during a rebase", () => {
+  it("continues instead of committing, once conflicts are gone", () => {
+    expect(commitLabel(0, 0, false, 0, "rebase")).toBe("Continue Rebase");
+    expect(commitLabel(1, 1, false, 2, "rebase")).toBe("Resolve 2 Conflicts First");
+    expect(commitLabel(1, 1, false, 0, "cherry-pick")).toBe("Commit 1 Staged");
+  });
+});
