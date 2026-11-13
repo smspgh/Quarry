@@ -317,18 +317,20 @@ Scenario: TAB-006.8 Running tabs are confirmed once, before anything closes
 ## TAB-007: Act on a tab from its right-click menu
 
 - Status: draft
-- Commands: `file.showInQuarryExplorer`, `file.showInWindowsExplorer`
+- Commands: `file.close`, `file.closeOthers`, `file.openToSide`, `file.copyPath`, `file.showInQuarryExplorer`, `file.showInWindowsExplorer`, `compare.withSaved`, `compare.withSelected`, `compare.selectForCompare`, `compare.withClipboard`, `git.compareWithHead`, `git.fileHistory`
 - Files:
-  - `src/components/TitleBar.tsx` — the `ctx-menu` in `Tab`: which items show for which document, closes on any mouse press or key outside
+  - `src/components/TitleBar.tsx` — the `ctx-menu` in `Tab`: which items show for which document, closes on any mouse press or key outside; every item (and the tab's ×, middle-click and Delete) is `runCommand(id, { docId })` via `onTab`
+  - `src/lib/commands.ts` — `docIdArg` (pure), `targetDoc` (the `{ docId }` tab, else the active one), `isEnabled(cmd, args)` / `Command.enabled(args)` so a command is judged against the tab it was given; `file.copyPath`, `file.openToSide`, `file.showInQuarryExplorer`, `file.showInWindowsExplorer` (enabled when the target document has a path)
+  - `src/lib/gitCommands.ts` — `repoFile(args)` / `tracked(args)` for `git.compareWithHead`, `git.fileHistory`
+  - `src/lib/macros.ts` — `recordableArgs` (pure): `recordCommand` drops `docId` from recorded arguments
   - `src/lib/actions.ts` — `showInExplorerPanel` (opens the file's folder when it is outside the open one, emits `explorer.reveal`), `showInWindowsExplorer`, `isInside`, `closeDocument`, `closeOthers`
-  - `src/lib/commands.ts` — `file.showInQuarryExplorer`, `file.showInWindowsExplorer` (enabled when the active document has a path)
   - `src/lib/split.ts` — `openToSide`
   - `src/lib/diff.ts` — `openCompare`, `selectForCompare`, `compareWithSelected`, `compareCandidate`
   - `src/lib/git.ts` — `repoOf`, `fileStatus`, `compareWithHead`, `showHistory`
   - `src/lib/panels.ts` — `showPanel`
   - `src/lib/bus.ts` — `explorer.reveal`
-- Tests: `src/__tests__/paths.test.ts`
-- Docs: `docs/editing.md`
+- Tests: `src/__tests__/paths.test.ts`, `src/__tests__/tabs.test.ts`
+- Docs: `docs/editing.md`, `docs/keyboard-shortcuts.md`
 
 **As a** person looking at a tab
 **I want** the actions for that document on its right-click menu
@@ -376,6 +378,23 @@ Scenario: TAB-007.8 Dismissing the menu
   Given a tab's right-click menu is open
   When I click elsewhere or press a key outside the menu
   Then the menu closes and no tab is closed or changed
+
+Scenario: TAB-007.9 The menu acts on the tab it was opened on
+  Given "a.txt" is the active tab and "b.txt" is a tracked file in a git repository
+  When I right-click the "b.txt" tab and choose Compare with Clipboard, Compare with Last Commit, Show File History or Copy Path
+  Then it is done for "b.txt", not for "a.txt"
+  And the item is offered even when the active tab is not a text file or not in a repository
+
+Scenario: TAB-007.10 Recorded in a macro as a command on the active tab
+  Given I am recording a macro
+  When I right-click the "b.txt" tab and choose Close
+  Then the macro records the Close Tab command without naming "b.txt"
+  And playing the macro back later closes whichever tab is active then
+
+Scenario: TAB-007.11 The same actions from the palette
+  Given "a.txt" is the active tab
+  When I run "Copy Path of Active File" or "Open to the Side" from the command palette
+  Then it acts on "a.txt"
 ```
 
 ## TAB-008: Preview tabs while browsing the Explorer

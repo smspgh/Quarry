@@ -199,7 +199,7 @@ Scenario: DIFF-004.3 Untitled
 - Commands: `compare.withClipboard`
 - Files:
   - `src/lib/commands.ts` — `compare.withClipboard` (clipboard text = left `text` source labelled "Clipboard")
-  - `src/components/TitleBar.tsx` — tab menu "Compare with Clipboard" (activates the command for the active tab)
+  - `src/components/TitleBar.tsx` — tab menu "Compare with Clipboard" (runs the command for that tab, `{ docId }`)
   - `src/lib/diff.ts` — `load` for `text` sources (read-only, line endings normalised)
 - Tests: `src/__tests__/diff.test.ts`, `src/__tests__/diffSession.test.ts`
 - Docs: `docs/compare.md`

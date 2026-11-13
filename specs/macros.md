@@ -69,7 +69,7 @@ Scenario: MACRO-001.6 No recording during playback
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/macros.ts` — `installRecorderHooks` (`onKeydown`, `onInput`, `IGNORED_KEYS`), `recordCommand` (skips `macro.*`), `push`
+  - `src/lib/macros.ts` — `installRecorderHooks` (`onKeydown`, `onInput`, `IGNORED_KEYS`), `recordCommand` (skips `macro.*`; `recordableArgs` drops a tab's `docId`, see TAB-007.10), `push`
   - `src/editor/manager.ts` — `hooks.onKeydown` (highest-precedence keydown handler), `hooks.onInput` (input handler)
   - `src/lib/commands.ts` — `runCommand` and `handleKeyEvent` call `recordCommand`
   - `src/lib/types.ts` — `MacroStep`

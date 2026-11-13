@@ -13847,10 +13847,13 @@
       "spec": "specs/split.md",
       "line": 130,
       "status": "draft",
-      "commands": [],
+      "commands": [
+        "file.openToSide"
+      ],
       "files": [
         "src/lib/split.ts",
         "src/components/TitleBar.tsx",
+        "src/lib/commands.ts",
         "src/lib/store.ts"
       ],
       "tests": [],
@@ -13877,7 +13880,7 @@
       "title": "The right pane shows text documents only",
       "area": "SPLIT",
       "spec": "specs/split.md",
-      "line": 164,
+      "line": 165,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13911,7 +13914,7 @@
       "title": "Edit the same document in both panes",
       "area": "SPLIT",
       "spec": "specs/split.md",
-      "line": 198,
+      "line": 199,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13953,7 +13956,7 @@
       "title": "Resize the panes",
       "area": "SPLIT",
       "spec": "specs/split.md",
-      "line": 243,
+      "line": 244,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13990,7 +13993,7 @@
       "title": "Keep the split sensible when tabs close and across restarts",
       "area": "SPLIT",
       "spec": "specs/split.md",
-      "line": 282,
+      "line": 283,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14325,13 +14328,25 @@
       "line": 317,
       "status": "draft",
       "commands": [
+        "file.close",
+        "file.closeOthers",
+        "file.openToSide",
+        "file.copyPath",
         "file.showInQuarryExplorer",
-        "file.showInWindowsExplorer"
+        "file.showInWindowsExplorer",
+        "compare.withSaved",
+        "compare.withSelected",
+        "compare.selectForCompare",
+        "compare.withClipboard",
+        "git.compareWithHead",
+        "git.fileHistory"
       ],
       "files": [
         "src/components/TitleBar.tsx",
-        "src/lib/actions.ts",
         "src/lib/commands.ts",
+        "src/lib/gitCommands.ts",
+        "src/lib/macros.ts",
+        "src/lib/actions.ts",
         "src/lib/split.ts",
         "src/lib/diff.ts",
         "src/lib/git.ts",
@@ -14339,10 +14354,12 @@
         "src/lib/bus.ts"
       ],
       "tests": [
-        "src/__tests__/paths.test.ts"
+        "src/__tests__/paths.test.ts",
+        "src/__tests__/tabs.test.ts"
       ],
       "docs": [
-        "docs/editing.md"
+        "docs/editing.md",
+        "docs/keyboard-shortcuts.md"
       ],
       "scenarios": [
         {
@@ -14376,6 +14393,18 @@
         {
           "id": "TAB-007.8",
           "title": "Dismissing the menu"
+        },
+        {
+          "id": "TAB-007.9",
+          "title": "The menu acts on the tab it was opened on"
+        },
+        {
+          "id": "TAB-007.10",
+          "title": "Recorded in a macro as a command on the active tab"
+        },
+        {
+          "id": "TAB-007.11",
+          "title": "The same actions from the palette"
         }
       ]
     },
@@ -14384,7 +14413,7 @@
       "title": "Preview tabs while browsing the Explorer",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 381,
+      "line": 400,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14437,7 +14466,7 @@
       "title": "Limit how many tabs are open",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 441,
+      "line": 460,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14503,7 +14532,7 @@
       "title": "Reopen a tab I closed",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 516,
+      "line": 535,
       "status": "draft",
       "commands": [
         "file.reopenClosedTab"
@@ -17583,6 +17612,7 @@
       "SET-013",
       "SPLIT-001",
       "SPLIT-002",
+      "SPLIT-003",
       "SPLIT-005",
       "TAB-002",
       "TAB-005",
@@ -17757,7 +17787,8 @@
       "GIT-015",
       "GIT-018",
       "GIT-020",
-      "GRAPH-001"
+      "GRAPH-001",
+      "TAB-007"
     ],
     "src/lib/gitGraph.ts": [
       "GRAPH-002",
@@ -17923,6 +17954,7 @@
       "SCRIPT-015",
       "SET-005",
       "SET-011",
+      "TAB-007",
       "UI-008"
     ],
     "src/lib/markdown.ts": [
@@ -18541,6 +18573,7 @@
     ],
     "src/__tests__/tabs.test.ts": [
       "TAB-006",
+      "TAB-007",
       "TAB-010"
     ],
     "src/__tests__/text.test.ts": [
@@ -18733,7 +18766,8 @@
       "DIFF-008"
     ],
     "compare.selectForCompare": [
-      "DIFF-002"
+      "DIFF-002",
+      "TAB-007"
     ],
     "compare.swap": [
       "DIFF-009"
@@ -18742,13 +18776,16 @@
       "DIFF-009"
     ],
     "compare.withClipboard": [
-      "DIFF-005"
+      "DIFF-005",
+      "TAB-007"
     ],
     "compare.withSaved": [
-      "DIFF-004"
+      "DIFF-004",
+      "TAB-007"
     ],
     "compare.withSelected": [
-      "DIFF-002"
+      "DIFF-002",
+      "TAB-007"
     ],
     "edit.copy": [
       "EDIT-002"
@@ -18828,7 +18865,8 @@
       "FILE-004"
     ],
     "file.close": [
-      "TAB-005"
+      "TAB-005",
+      "TAB-007"
     ],
     "file.closeAll": [
       "TAB-006"
@@ -18837,7 +18875,11 @@
       "TAB-005"
     ],
     "file.closeOthers": [
-      "TAB-006"
+      "TAB-006",
+      "TAB-007"
+    ],
+    "file.copyPath": [
+      "TAB-007"
     ],
     "file.new": [
       "FILE-001",
@@ -18864,6 +18906,10 @@
     ],
     "file.openRecentFolder": [
       "FILE-004"
+    ],
+    "file.openToSide": [
+      "SPLIT-003",
+      "TAB-007"
     ],
     "file.prevTab": [
       "TAB-002"
@@ -18966,7 +19012,8 @@
     ],
     "git.compareWithHead": [
       "DIFF-006",
-      "GIT-006"
+      "GIT-006",
+      "TAB-007"
     ],
     "git.createBranch": [
       "GIT-007"
@@ -18975,7 +19022,8 @@
       "GIT-015"
     ],
     "git.fileHistory": [
-      "GIT-018"
+      "GIT-018",
+      "TAB-007"
     ],
     "git.graph": [
       "GRAPH-001"

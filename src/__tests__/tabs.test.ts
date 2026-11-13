@@ -1,6 +1,32 @@
 import { describe, expect, it } from "vitest";
 import { closeManyQuestion } from "../lib/actions";
 import { CLOSED_TABS_MAX, popClosed, pushClosed, type ClosedTab } from "../lib/closedTabs";
+import { docIdArg } from "../lib/commands";
+import { recordableArgs } from "../lib/macros";
+
+describe("tab command arguments", () => {
+  it("docIdArg reads { docId } and nothing else", () => {
+    expect(docIdArg({ docId: "d3" })).toBe("d3");
+    expect(docIdArg({ docId: "d3", line: 4 })).toBe("d3");
+    expect(docIdArg(undefined)).toBeUndefined();
+    expect(docIdArg("C:\\a.txt")).toBeUndefined();
+    expect(docIdArg(["a", "b"])).toBeUndefined();
+    expect(docIdArg({ docId: 7 })).toBeUndefined();
+  });
+  it("the macro recorder drops docId", () => {
+    expect(recordableArgs({ docId: "d3" })).toBeUndefined();
+    expect(recordableArgs({ docId: "d3", toEnd: true })).toEqual({ toEnd: true });
+  });
+  it("the macro recorder keeps other arguments as they are", () => {
+    const obj = { folder: "C:\\x", resume: "s1" };
+    expect(recordableArgs(obj)).toBe(obj);
+    expect(recordableArgs("UTF-8")).toBe("UTF-8");
+    expect(recordableArgs(4)).toBe(4);
+    expect(recordableArgs(["a", "b"])).toEqual(["a", "b"]);
+    expect(recordableArgs(undefined)).toBeUndefined();
+    expect(recordableArgs(null)).toBeNull();
+  });
+});
 
 describe("closeManyQuestion", () => {
   it("names the one file", () => {
