@@ -451,7 +451,7 @@ Scenario: FIND-007.13 F3 steps without adding to the history
 - Commands: `edit.selectAllMatches`
 - Files:
   - `src/editor/bulkEdit.ts` — `selectAllFindMatches`, `findMatchSelection`, `MAX_OCCURRENCES` (200 000), `bulkEditing` (fast typing with many cursors)
-  - `src/components/FindBar.tsx` — Alt+Enter in the search box
+  - `src/App.tsx` — Alt+Enter in the search box: the window's capture-phase key handler runs `edit.selectAllMatches` before the find bar sees the key
   - `src/lib/commands.ts` — `edit.selectAllMatches` (closes the find bar when it selected something)
 - Tests: `src/__tests__/bulkedit.test.ts`
 - Docs: `docs/find-and-replace.md`, `docs/keyboard-shortcuts.md`
@@ -481,7 +481,7 @@ Scenario: FIND-008.3 More than 200,000 matches
 
 Scenario: FIND-008.4 No match
   Given the search has no match in the document
-  When I run "Select All Find Matches" from the menu
+  When I press Alt+Enter in the search box, or run "Select All Find Matches" from the menu
   Then the selection is unchanged
   And the find bar stays open
 ```

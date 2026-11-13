@@ -6533,7 +6533,7 @@
       ],
       "files": [
         "src/editor/bulkEdit.ts",
-        "src/components/FindBar.tsx",
+        "src/App.tsx",
         "src/lib/commands.ts"
       ],
       "tests": [
@@ -16331,6 +16331,7 @@
       "FILE-019",
       "FILE-020",
       "FIND-002",
+      "FIND-008",
       "GIT-001",
       "GRAPH-001",
       "LSP-001",
@@ -16466,8 +16467,7 @@
       "FIND-004",
       "FIND-005",
       "FIND-006",
-      "FIND-007",
-      "FIND-008"
+      "FIND-007"
     ],
     "src/components/GraphView.tsx": [
       "CONFLICT-011",
