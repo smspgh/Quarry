@@ -131,7 +131,7 @@
       "prefix": "UPD",
       "title": "Updates and About",
       "spec": "specs/updates.md",
-      "stories": 7
+      "stories": 8
     }
   ],
   "stories": {
@@ -16827,6 +16827,44 @@
         {
           "id": "UPD-007.5",
           "title": "The version must go up"
+        },
+        {
+          "id": "UPD-007.6",
+          "title": "No version given: the next patch version"
+        }
+      ]
+    },
+    "UPD-008": {
+      "id": "UPD-008",
+      "title": "Release in one step",
+      "area": "UPD",
+      "spec": "specs/updates.md",
+      "line": 368,
+      "status": "draft",
+      "commands": [],
+      "files": [
+        "scripts/quick-release.ps1"
+      ],
+      "tests": [],
+      "docs": [
+        "docs/releasing.md"
+      ],
+      "scenarios": [
+        {
+          "id": "UPD-008.1",
+          "title": "Release the next patch version"
+        },
+        {
+          "id": "UPD-008.2",
+          "title": "Own notes or a chosen version"
+        },
+        {
+          "id": "UPD-008.3",
+          "title": "Uncommitted work stops it"
+        },
+        {
+          "id": "UPD-008.4",
+          "title": "A failed build or upload"
         }
       ]
     }
@@ -16838,6 +16876,9 @@
     ],
     "scripts/bump.ps1": [
       "UPD-007"
+    ],
+    "scripts/quick-release.ps1": [
+      "UPD-008"
     ],
     "scripts/release.ps1": [
       "UPD-005",

@@ -55,7 +55,7 @@ It prints each story's id, title and `spec file:line` (and, for a story id, its 
 | `TAB` | Tabs | [tabs.md](tabs.md) | 10 |
 | `TERM` | Claude CLI Terminal Tabs | [terminal.md](terminal.md) | 9 |
 | `UI` | Application Shell | [app-shell.md](app-shell.md) | 25 |
-| `UPD` | Updates and About | [updates.md](updates.md) | 7 |
+| `UPD` | Updates and About | [updates.md](updates.md) | 8 |
 <!-- areas:end -->
 
 ## Story format

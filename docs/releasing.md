@@ -9,11 +9,23 @@ Source lives in the private repo `smspgh/Quarry`. Installers are published to th
   updates signed with it; if it is lost, users must reinstall by hand.
 - Updater endpoint: `https://github.com/smspgh/quarry-releases/releases/latest/download/latest.json`.
 
-## Cutting a release (exact commands, PowerShell, from the repo root)
+## Quick release (one command)
+```powershell
+.\scripts\quick-release.ps1                          # next patch version (0.1.9 -> 0.1.10), notes "Release Bump"
+.\scripts\quick-release.ps1 -Notes "What changed"    # your own notes for the update dialog
+.\scripts\quick-release.ps1 -Version 0.2.0           # a chosen version
+```
+It bumps the version, commits the version files as "Quarry <version>", builds, signs and publishes the installer
+(`release.ps1 -Publish`), then pushes. It refuses to start with uncommitted changes, and skips the "test the installer
+first" step below. If the build or upload fails, the version commit stays; finish with
+`.\scripts\release.ps1 -Notes "..." -Publish; git push` rather than running it again (that would bump once more).
+
+## Cutting a release step by step (exact commands, PowerShell, from the repo root)
 ```powershell
 cd C:\coding_projects\Quarry
 
 # 1. Set the new version everywhere (package.json, Cargo.toml, tauri.conf.json, Cargo.lock). Must be higher than the current version; the script refuses anything else.
+#    Leave the version out for the next patch version (0.1.1 -> 0.1.2).
 .\scripts\bump.ps1 0.1.2
 
 # 2. Commit (push to the private repo whenever you like)

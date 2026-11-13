@@ -320,7 +320,7 @@ Scenario: UPD-006.9 A version older than the latest release is refused
 - Status: draft
 - Commands: none
 - Files:
-  - `scripts/bump.ps1` — refuses a version not higher than the one in `tauri.conf.json`; rewrites `"version"` in `package.json` and `src-tauri/tauri.conf.json`, the first `version =` in `src-tauri/Cargo.toml`, then `cargo update -p quarry --offline` for `Cargo.lock`; files written as UTF-8 without BOM
+  - `scripts/bump.ps1` — no version given = the next patch version (`Major.Minor.Build+1`); refuses a version not higher than the one in `tauri.conf.json`; rewrites `"version"` in `package.json` and `src-tauri/tauri.conf.json`, the first `version =` in `src-tauri/Cargo.toml`, then `cargo update -p quarry --offline` for `Cargo.lock`; files written as UTF-8 without BOM
   - `package.json` — `version`
   - `src-tauri/tauri.conf.json` — `version`
   - `src-tauri/Cargo.toml` — package `version`
@@ -357,4 +357,50 @@ Scenario: UPD-007.5 The version must go up
   Given every version file says 0.1.7
   When I run .\scripts\bump.ps1 0.1.7 or .\scripts\bump.ps1 0.1.6
   Then it stops with "Version 0.1.6 is not higher than the current 0.1.7" (or 0.1.7) and no file is changed
+
+Scenario: UPD-007.6 No version given: the next patch version
+  Given every version file says 0.1.9
+  When I run .\scripts\bump.ps1 with no version
+  Then every version file says 0.1.10
+  And the script prints "Version is now 0.1.10"
+```
+
+## UPD-008: Release in one step
+
+- Status: draft
+- Commands: none
+- Files:
+  - `scripts/quick-release.ps1` — refuses a dirty working tree; `bump.ps1` (next patch, or `-Version`), commits only the four version files as "Quarry <version>", `release.ps1 -Publish` with `-Notes` (default "Release Bump"), then `git push`; each failure says how to carry on without bumping again
+  - `scripts/bump.ps1`, `scripts/release.ps1`
+- Tests: none
+- Docs: `docs/releasing.md`
+
+**As a** maintainer who just wants the current code out as a new version
+**I want** one command that bumps, commits, builds, publishes and pushes
+**So that** I don't have to type or order the steps myself
+
+```gherkin
+Scenario: UPD-008.1 Release the next patch version
+  Given the working tree is clean and the version is 0.1.9
+  When I run .\scripts\quick-release.ps1
+  Then the version files say 0.1.10 and are committed as "Quarry 0.1.10"
+  And release v0.1.10 is published to smspgh/quarry-releases with the notes "Release Bump"
+  And the commit is pushed
+  And it prints "Quarry 0.1.10 is published and pushed."
+
+Scenario: UPD-008.2 Own notes or a chosen version
+  When I run .\scripts\quick-release.ps1 -Notes "Faster search" -Version 0.2.0
+  Then release v0.2.0 is published with the notes "Faster search"
+
+Scenario: UPD-008.3 Uncommitted work stops it
+  Given a source file has uncommitted changes
+  When I run .\scripts\quick-release.ps1
+  Then it stops with "The working tree has uncommitted changes. Commit or stash them first, then run this again."
+  And no version file is changed
+
+Scenario: UPD-008.4 A failed build or upload
+  Given the version commit "Quarry 0.1.10" was made
+  When the build or the upload fails
+  Then it stops before pushing, saying the version commit is in place and to run .\scripts\release.ps1 -Notes "Release Bump" -Publish; git push
+  And running quick-release.ps1 again would release 0.1.11 instead
 ```

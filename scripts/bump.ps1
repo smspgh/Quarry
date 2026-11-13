@@ -1,9 +1,17 @@
-<# Set the version in package.json, src-tauri/Cargo.toml, src-tauri/tauri.conf.json and Cargo.lock.  Usage: .\scripts\bump.ps1 0.1.2 #>
-param([Parameter(Mandatory)][ValidatePattern('^\d+\.\d+\.\d+$')][string]$Version)
+<#
+  Set the version in package.json, src-tauri/Cargo.toml, src-tauri/tauri.conf.json and Cargo.lock.
+    .\scripts\bump.ps1 0.2.0    that version (must be higher than the current one)
+    .\scripts\bump.ps1          the next patch version: 0.1.8 -> 0.1.9, 0.1.9 -> 0.1.10
+#>
+param([ValidatePattern('^(\d+\.\d+\.\d+)?$')][string]$Version = "")
 $ErrorActionPreference = "Stop"
 Set-Location (Split-Path -Parent $PSScriptRoot)
 # The updater only installs a higher version, so a release must never go backwards or repeat.
 $current = (Get-Content "src-tauri/tauri.conf.json" -Raw | ConvertFrom-Json).version
+if (-not $Version) {
+  $v = [version]$current
+  $Version = "$($v.Major).$($v.Minor).$($v.Build + 1)"
+}
 if ([version]$Version -le [version]$current) { throw "Version $Version is not higher than the current $current." }
 function Edit($path, $pattern, $replacement) {
   $text = [IO.File]::ReadAllText((Resolve-Path $path))
