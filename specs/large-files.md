@@ -1031,6 +1031,7 @@ Scenario: BIG-016.9 Only JSON extensions get a tree
   Given a large file "app.log" is active
   When I open the JSON panel
   Then the JSON panel says the file is open in large-file mode and isn't a .json file
+  And a large "events.jsonl" or "events.ndjson" file (one JSON value per line, coloured as JSON) gets the same message, not a tree
 
 Scenario: BIG-016.10 Collapse and re-read
   When I click "Collapse all"
@@ -1085,6 +1086,7 @@ Scenario: BIG-017.5 Only large files with a JSON extension
   Given a large file "app.log" is active
   When I open the JSON menu or the command palette
   Then JSON: Validate is disabled in the menu and the palette
+  And it is disabled for a large ".jsonl" or ".ndjson" file too, since those hold one JSON value per line
 
 Scenario: BIG-017.6 UTF-16 files are refused
   Given a large UTF-16 file "data.json"

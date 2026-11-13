@@ -148,6 +148,8 @@ For a large `.json`, `.jsonc`, `.json5`, `.geojson` or `.har` file, the **JSON**
 
 **JSON: Validate** (**Ctrl+Alt+V**) works on large `.json`, `.jsonc`, `.json5`, `.geojson` and `.har` files of any size. It checks the file in place, without loading it into memory: about 1 GB a second on a fast machine. A valid file says so, with the time taken. For an invalid one it gives the line and column and jumps to the line. Files ending in `.jsonc` or `.json5` are checked as JSONC (comments and trailing commas allowed).
 
+JSON Lines files (`.jsonl`, `.ndjson`) are coloured as JSON but get neither the tree nor Validate: they hold one JSON value per line, not a single document. Use Find or the filter to work with them.
+
 The file is checked as saved, so save your changes first; Quarry says so if you haven't.
 
 ## What is not available

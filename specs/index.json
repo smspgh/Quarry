@@ -1053,7 +1053,7 @@
       "title": "Validate a large JSON file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1042,
+      "line": 1043,
       "status": "draft",
       "commands": [
         "json.validate"
@@ -1105,7 +1105,7 @@
       "title": "Show large-file info",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1095,
+      "line": 1097,
       "status": "draft",
       "commands": [
         "big.info"
@@ -1136,7 +1136,7 @@
       "title": "Reload when the file changes on disk",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1123,
+      "line": 1125,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1168,7 +1168,7 @@
       "title": "What large-file tabs do not offer",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1159,
+      "line": 1161,
       "status": "draft",
       "commands": [],
       "files": [
