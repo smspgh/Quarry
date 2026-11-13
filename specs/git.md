@@ -1008,7 +1008,7 @@ Scenario: GIT-017.10 A long run of unpushed commits is counted in full
 Scenario: GIT-018.1 Show the active file's history
   Given a tracked file "app.ts" is the active tab
   When I run Git › Show File History, or choose "Show File History" on the tab's right-click menu
-  Then Source Control opens with a section "History: app.ts" listing the commits that changed it, newest first
+  Then Source Control opens with a section "History: app.ts", below Commits and above Repository, listing the commits that changed it, newest first
 
 Scenario: GIT-018.2 History follows renames
   Given "util.ts" was called "old.ts" three commits ago

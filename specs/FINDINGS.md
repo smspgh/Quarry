@@ -128,7 +128,6 @@ Doc / code mismatches and dead code
 Possible bugs
 
 Doc / code mismatches
-- `docs/git.md:102` says file history is at the bottom of the panel; it sits above the Repository section (`GitPanel.tsx:574-575`).
 - There is no `git.commit` command: commit and amend are panel-only (the example in `specs/README.md` is illustrative).
 - No tests: GIT-004 (next / previous change), GIT-025 (repository picker), GIT-026 (status bar branch).
 

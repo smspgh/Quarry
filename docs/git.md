@@ -99,7 +99,7 @@ Not in the graph: dropping a commit from the middle of a branch and interactive 
 
 ## File history
 
-**Git › Show File History** (or **Show File History** on a tab's right-click menu) lists the commits that changed the active file, newest first, following renames. It appears at the bottom of the Source Control panel. Click a commit to see what it changed in the file; the compare button on its row compares that version with the current file. **Show more** loads older commits.
+**Git › Show File History** (or **Show File History** on a tab's right-click menu) lists the commits that changed the active file, newest first, following renames. It appears in the Source Control panel, below Commits and above the Repository section. Click a commit to see what it changed in the file; the compare button on its row compares that version with the current file. **Show more** loads older commits.
 
 ## Explorer and status bar
 
