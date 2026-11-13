@@ -125,10 +125,6 @@ Doc / code mismatches and dead code
 
 ## Source control (`git.md`)
 
-Possible bugs
-
-Doc / code mismatches
-- There is no `git.commit` command: commit and amend are panel-only (the example in `specs/README.md` is illustrative).
 - No tests: GIT-004 (next / previous change), GIT-025 (repository picker), GIT-026 (status bar branch).
 
 ## Commit graph (`git-graph.md`)
