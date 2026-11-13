@@ -84,13 +84,6 @@ Not determined
 - Multi-line plain-text search on CRLF files: a pattern typed with Ctrl+Enter contains `\n` only.
 - A match block is capped at 1,000 matches (`search.rs:186`); undocumented, no scenario.
 
-## Large files (`large-files.md`)
-
-Possible bugs
-
-Doc / code mismatches and dead code
-- Not determined: whether a big tab's view state survives a restart.
-
 ## JSON tools (`json.md`)
 
 - The JSON panel's Format / Minify / Validate buttons do nothing on a non-JSON-language tab whose text parses: the panel shows them (`src/components/panels/JsonPanel.tsx:311-313`) but `json.*` commands are disabled unless the language is JSON (`src/lib/commands.ts:538`; JSON-014.5).

@@ -241,6 +241,7 @@
         "src-tauri/src/lib.rs",
         "src/lib/ipc.ts",
         "src/lib/store.ts",
+        "src/lib/actions.ts",
         "src/styles/app.css"
       ],
       "tests": [
@@ -278,6 +279,10 @@
         {
           "id": "BIG-003.7",
           "title": "Switching tabs keeps the position"
+        },
+        {
+          "id": "BIG-003.8",
+          "title": "After a restart the tab opens at the top"
         }
       ]
     },
@@ -286,7 +291,7 @@
       "title": "Move the cursor, select lines and copy",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 175,
+      "line": 182,
       "status": "draft",
       "commands": [],
       "files": [
@@ -340,7 +345,7 @@
       "title": "Go to a line",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 238,
+      "line": 245,
       "status": "draft",
       "commands": [
         "goto.line",
@@ -391,7 +396,7 @@
       "title": "Find in a large file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 295,
+      "line": 302,
       "status": "draft",
       "commands": [
         "find.open",
@@ -459,7 +464,7 @@
       "title": "Replace All in a large file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 372,
+      "line": 379,
       "status": "draft",
       "commands": [
         "find.replace"
@@ -523,7 +528,7 @@
       "title": "Edit, insert and delete lines",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 445,
+      "line": 452,
       "status": "draft",
       "commands": [],
       "files": [
@@ -585,7 +590,7 @@
       "title": "Undo and redo line edits",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 517,
+      "line": 524,
       "status": "draft",
       "commands": [
         "edit.undo",
@@ -632,7 +637,7 @@
       "title": "Save and Save As",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 564,
+      "line": 571,
       "status": "draft",
       "commands": [
         "file.save",
@@ -682,7 +687,7 @@
       "title": "Encodings and line endings",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 619,
+      "line": 626,
       "status": "draft",
       "commands": [],
       "files": [
@@ -734,7 +739,7 @@
       "title": "Syntax colours for large files",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 679,
+      "line": 686,
       "status": "draft",
       "commands": [],
       "files": [
@@ -788,7 +793,7 @@
       "title": "Filter view of matching lines",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 741,
+      "line": 748,
       "status": "draft",
       "commands": [
         "big.filter"
@@ -866,7 +871,7 @@
       "title": "Follow a file as it grows",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 829,
+      "line": 836,
       "status": "draft",
       "commands": [
         "big.follow"
@@ -927,7 +932,7 @@
       "title": "CSV and TSV grid",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 899,
+      "line": 906,
       "status": "draft",
       "commands": [],
       "files": [
@@ -991,7 +996,7 @@
       "title": "JSON tree read from the file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 975,
+      "line": 982,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1061,7 +1066,7 @@
       "title": "Validate a large JSON file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1055,
+      "line": 1062,
       "status": "draft",
       "commands": [
         "json.validate"
@@ -1113,7 +1118,7 @@
       "title": "Show large-file info",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1109,
+      "line": 1116,
       "status": "draft",
       "commands": [
         "big.info"
@@ -1144,7 +1149,7 @@
       "title": "Reload when the file changes on disk",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1137,
+      "line": 1144,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1176,7 +1181,7 @@
       "title": "What large-file tabs do not offer",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1173,
+      "line": 1180,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16868,6 +16873,7 @@
     "src/lib/actions.ts": [
       "BIG-001",
       "BIG-002",
+      "BIG-003",
       "BIG-005",
       "BIG-008",
       "BIG-010",

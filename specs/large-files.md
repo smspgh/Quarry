@@ -119,7 +119,8 @@ Scenario: BIG-002.4 Actions that need the whole index wait for it
   - `src-tauri/src/bigfile.rs` — `get_lines` (at most 5,000 lines and 16 MB per read), `locate_line`, `read_from`
   - `src-tauri/src/lib.rs` — `big_lines`
   - `src/lib/ipc.ts` — `big.lines`
-  - `src/lib/store.ts` — `BigViewState`, `bigViewState` (dropped when the tab closes)
+  - `src/lib/store.ts` — `BigViewState`, `bigViewState` (in memory only: dropped when the tab closes, not saved in the session)
+  - `src/lib/actions.ts` — `sessionDocs` saves only the path of a big tab (cursor / scroll are kept for text tabs only)
   - `src/styles/app.css` — `.bigview`, `.big-banner`, `.big-scroll`, `.big-row`, `.big-ln`, `.big-more`, `.big-loading`
 - Tests: `src/__tests__/bigview.test.ts`, `src-tauri/src/bigfile.rs`
 - Docs: `docs/large-files.md`
@@ -170,6 +171,12 @@ Scenario: BIG-003.7 Switching tabs keeps the position
   When I switch to another tab and back
   Then the same lines are on screen, the cursor is where it was
   And the find bar still shows the earlier results
+
+Scenario: BIG-003.8 After a restart the tab opens at the top
+  Given I scrolled a large-file tab to line 5,000 and closed Quarry with the tab open
+  When I start Quarry again
+  Then the tab is reopened in large-file mode
+  And it shows the file from line 1 with the cursor on line 1 and no find results
 ```
 
 ## BIG-004: Move the cursor, select lines and copy
