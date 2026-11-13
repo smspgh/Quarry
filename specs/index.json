@@ -3102,7 +3102,9 @@
         "src/components/DiffView.tsx",
         "src/lib/commands.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/diffView.test.tsx"
+      ],
       "docs": [
         "docs/compare.md"
       ],
@@ -3146,7 +3148,8 @@
         "src/lib/commands.ts"
       ],
       "tests": [
-        "src/__tests__/diffSession.test.ts"
+        "src/__tests__/diffSession.test.ts",
+        "src/__tests__/diffView.test.tsx"
       ],
       "docs": [
         "docs/compare.md"
@@ -3195,7 +3198,8 @@
         "src/components/DiffView.tsx"
       ],
       "tests": [
-        "src/__tests__/diffSession.test.ts"
+        "src/__tests__/diffSession.test.ts",
+        "src/__tests__/diffView.test.tsx"
       ],
       "docs": [
         "docs/compare.md"
@@ -3235,7 +3239,9 @@
         "src/components/DiffView.tsx",
         "src/styles/app.css"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/diffView.test.tsx"
+      ],
       "docs": [
         "docs/compare.md"
       ],
@@ -18305,6 +18311,12 @@
       "DIFF-012",
       "DIFF-013",
       "DIFF-014"
+    ],
+    "src/__tests__/diffView.test.tsx": [
+      "DIFF-008",
+      "DIFF-009",
+      "DIFF-010",
+      "DIFF-011"
     ],
     "src/__tests__/findReplace.test.ts": [
       "FIND-003",

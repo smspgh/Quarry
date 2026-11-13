@@ -329,7 +329,7 @@ Scenario: DIFF-007.4 Either side failing stops the comparison
 - Files:
   - `src/components/DiffView.tsx` — `stepChange` (`goToNextChunk` / `goToPreviousChunk` on the right or inline editor), `position`, toolbar counter and arrow buttons
   - `src/lib/commands.ts` — `compare.nextChange` (`F7`), `compare.prevChange` (`Shift+F7`), enabled only on a Compare tab
-- Tests: none
+- Tests: `src/__tests__/diffView.test.tsx`
 - Docs: `docs/compare.md`
 
 **As a** developer reviewing a comparison
@@ -373,7 +373,7 @@ Scenario: DIFF-008.5 Only on a Compare tab
   - `src/components/DiffView.tsx` — layout switch (`unifiedMergeView` for inline), fold button (`collapseUnchanged: { margin: 3, minSize: 6 }`), rebuild effect on `version` / `inline` / `collapse`, `settingsReconfigure` on settings changes
   - `src/lib/diff.ts` — `DiffSession.inline` / `collapse` / `version`, `swapDiff`, `captureSideTexts`, `patchDiff`
   - `src/lib/commands.ts` — `compare.toggleInline`, `compare.swap` (disabled while the tab has unsaved edits)
-- Tests: `src/__tests__/diffSession.test.ts`
+- Tests: `src/__tests__/diffSession.test.ts`, `src/__tests__/diffView.test.tsx`
 - Docs: `docs/compare.md`
 
 **As a** developer reading a comparison
@@ -426,7 +426,7 @@ Scenario: DIFF-009.7 Editor settings apply
 - Files:
   - `src/lib/diff.ts` — `Side.editable` (file not read-only on disk → true; `tab` and `text` sources → false), `markSideEdited`, `syncDirty`, `sideText`, `diffViews`
   - `src/components/DiffView.tsx` — `EditorState.readOnly` per side, "read-only" / "edited" tags, update listener
-- Tests: `src/__tests__/diffSession.test.ts`
+- Tests: `src/__tests__/diffSession.test.ts`, `src/__tests__/diffView.test.tsx`
 - Docs: `docs/compare.md`
 
 **As a** developer comparing files
@@ -471,7 +471,7 @@ Scenario: DIFF-010.5 Inline layout edits the right side
   - `src/components/DiffView.tsx` — `revertControls`: `"a-to-b"` when the right side is editable, else `"b-to-a"` when the left is, else none; `mergeControls: false` inline
   - `src/styles/app.css` — `.cm-merge-revert`
   - Library behaviour, not set in this repo: @codemirror/merge (6.12.3) listens for `mousedown` on its `.cm-merge-revert` gutter (`MergeView.setupRevertControls` → `revertClicked`), so an arrow acts when the button goes down (DIFF-011.2)
-- Tests: none
+- Tests: `src/__tests__/diffView.test.tsx`
 - Docs: `docs/compare.md`
 
 **As a** developer merging two versions by hand

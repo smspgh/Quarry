@@ -34,10 +34,6 @@ Doc / code mismatches
 
 - An `am` operation is labelled as a rebase: the Commit button reads "Continue Rebase" and the message box says a rebase keeps each commit's message (`src/components/panels/GitPanel.tsx`, `rebasing`); the notifications say "the am" and Abort's confirm button reads "Abort Am" (`src/lib/git.ts`, `continueOperation` / `abortOperation`). The git side is right: `continue_operation` / `abort_operation` in `git.rs` detect the operation themselves and run `git am --continue` / `--skip` / `--abort`, so only the wording is off. No scenarios were written for `am`.
 
-## Compare (`compare.md`)
-
-- No test exercises `DiffView.tsx` (the editors, arrows, layout switch); it needs a component test harness. `openCompare` / `saveDiff` / `reloadDiff` / `swapDiff` are covered by `src/__tests__/diffSession.test.ts`.
-
 ## Claude Code tabs and terminals (`claude-code.md`, `terminal.md`)
 
 - The model setting applies on every process start, not only new conversations: the hint says "For conversations started from now on" (`src/components/panels/SettingsPanel.tsx:344`, `docs/settings.md:91`), but `spawn` passes `claudeModel` on resumes too (`src/lib/claude.ts:188`; CLAUDE-018.3).
