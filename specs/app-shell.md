@@ -180,7 +180,7 @@ Scenario: UI-003.7 Help menu
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/MenuBar.tsx` — `MenuBar` (lone Alt / F10 listener, Left / Right between menus, Escape, `openWithKeyboard`), `MenuList.onKeyDown` (Up / Down / Home / End, Right / Enter / Space into a submenu, Left out of it, Tab kept inside), `nextMenuIndex`, `ITEM_SELECTOR` (disabled items are skipped)
+  - `src/components/MenuBar.tsx` — `MenuBar` (lone Alt / F10 listener, ignored while `store.dialog` is set, Left / Right between menus, Escape, `openWithKeyboard`), `MenuList.onKeyDown` (Up / Down / Home / End, Right / Enter / Space into a submenu, Left out of it, Tab kept inside), `nextMenuIndex`, `ITEM_SELECTOR` (disabled items are skipped)
   - `src/editor/manager.ts` — `editor.focus()` when the menu closes
 - Tests: `src/__tests__/ui.test.ts`
 - Docs: `docs/keyboard-shortcuts.md`, `docs/editing.md`
@@ -238,6 +238,12 @@ Scenario: UI-004.7 Escape closes the whole menu
   Then every menu is closed
   And keyboard focus is in the active tab
   And Tab pressed while a menu is open does not move focus out of the menu
+
+Scenario: UI-004.8 Alt and F10 do nothing while a dialog is open
+  Given a dialog asks whether to save "notes.txt"
+  When I press and release Alt, or press F10
+  Then no menu opens
+  And the dialog keeps the keyboard focus
 ```
 
 ## UI-005: Command palette
