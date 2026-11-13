@@ -10,6 +10,7 @@ import { bareTitle, fuzzy, fuzzyCommand, fuzzyPath, shiftIndices } from "../lib/
 import { fs } from "../lib/ipc";
 import { activeDoc, useStore } from "../lib/store";
 import { ENCODINGS } from "../lib/types";
+import { parseGoto } from "../lib/goto";
 
 const RECENT_KEY = "quarry.recentCommands";
 const RECENT_MAX = 20;
@@ -66,13 +67,6 @@ function Highlight({ text, idx }: { text: string; idx: number[] }) {
 }
 
 type Item = { key: string; idx: number[]; cmd?: Command; arg?: string; file?: string; abs?: boolean; recent?: boolean };
-
-/** Parse "line[:col]" / "line,col". Returns null when there is no leading number. */
-function parseGoto(q: string): { line: number; col: number } | null {
-  const m = /^\s*(\d+)(?:\s*[:,]\s*(\d+))?/.exec(q);
-  if (!m) return null;
-  return { line: Number(m[1]), col: m[2] ? Number(m[2]) : 1 };
-}
 
 export function CommandPalette() {
   const mode = useStore((s) => s.palette);

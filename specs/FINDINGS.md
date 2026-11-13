@@ -32,10 +32,6 @@ Not verified
 - SPLIT-005 (one undo history, handover between panes) is written from reading `src/editor/manager.ts:150-225`; no test covers it.
 - Tab Moves Focus is set only on the focused pane's view, so the other pane probably still indents on Tab (`src/lib/commands.ts:858`, `src/App.tsx:99`).
 
-## Text editing (`editing.md`)
-
-- No tests: column mode, add cursor above/below, `rangesInWindow`, the line transforms, Go to Line parsing (`parseGoto` is private to `CommandPalette.tsx`).
-
 ## Formatting (`formatting.md`)
 
 - Format Document on JSON too large to pretty-print shows "JSON is not valid: … (line 0)" although the JSON is valid; `jsonTransform` handles line 0 properly (`src/lib/format.ts:172-174` vs `src/lib/commands.ts:325`).

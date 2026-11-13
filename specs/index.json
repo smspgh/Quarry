@@ -3558,7 +3558,9 @@
         "src/editor/cmSetup.ts",
         "src/components/MenuBar.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/columnMode.test.ts"
+      ],
       "docs": [
         "docs/editing.md"
       ],
@@ -3608,7 +3610,9 @@
         "src/components/StatusBar.tsx",
         "src/styles/app.css"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/columnMode.test.ts"
+      ],
       "docs": [
         "docs/editing.md"
       ],
@@ -3661,7 +3665,8 @@
         "src/editor/cmSetup.ts"
       ],
       "tests": [
-        "src/__tests__/bulkedit.test.ts"
+        "src/__tests__/bulkedit.test.ts",
+        "src/__tests__/columnMode.test.ts"
       ],
       "docs": [],
       "scenarios": [
@@ -4126,11 +4131,14 @@
       ],
       "files": [
         "src/lib/commands.ts",
+        "src/lib/goto.ts",
         "src/components/CommandPalette.tsx",
         "src/editor/manager.ts",
         "src/components/StatusBar.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/goto.test.ts"
+      ],
       "docs": [
         "docs/editing.md"
       ],
@@ -4174,7 +4182,7 @@
       "title": "Detect a document's language",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 877,
+      "line": 878,
       "status": "draft",
       "commands": [
         "code.detectLanguage"
@@ -4231,7 +4239,7 @@
       "title": "Change the language of a document",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 950,
+      "line": 951,
       "status": "draft",
       "commands": [
         "code.setLanguage"
@@ -4284,7 +4292,7 @@
       "title": "Syntax highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1009,
+      "line": 1010,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4316,7 +4324,7 @@
       "title": "Word wrap and visible whitespace",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1042,
+      "line": 1043,
       "status": "draft",
       "commands": [
         "view.toggleWrap",
@@ -4358,7 +4366,7 @@
       "title": "Zoom the editor text",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1085,
+      "line": 1086,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -4401,7 +4409,7 @@
       "title": "Let Tab leave the editor",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1127,
+      "line": 1128,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -4441,7 +4449,7 @@
       "title": "Line numbers, active line and selection-match highlighting",
       "area": "EDIT",
       "spec": "specs/editing.md",
-      "line": 1171,
+      "line": 1172,
       "status": "draft",
       "commands": [],
       "files": [
@@ -17341,6 +17349,9 @@
       "GRAPH-009",
       "GRAPH-012"
     ],
+    "src/lib/goto.ts": [
+      "EDIT-016"
+    ],
     "src/lib/ipc.ts": [
       "BIG-001",
       "BIG-002",
@@ -17860,6 +17871,11 @@
       "CLAUDE-018",
       "CLAUDE-020"
     ],
+    "src/__tests__/columnMode.test.ts": [
+      "EDIT-005",
+      "EDIT-006",
+      "EDIT-007"
+    ],
     "src/__tests__/conflicts.test.ts": [
       "CONFLICT-001",
       "CONFLICT-002",
@@ -17901,6 +17917,9 @@
       "GIT-021",
       "GIT-022",
       "GRAPH-012"
+    ],
+    "src/__tests__/goto.test.ts": [
+      "EDIT-016"
     ],
     "src/__tests__/history.test.ts": [
       "FIND-007"

@@ -213,11 +213,11 @@ Scenario: EDIT-004.3 The selection stops at 200 000 matches
 - Status: draft
 - Commands: `selection.addCursorAbove`, `selection.addCursorBelow`, `selection.blockToCursors`
 - Files:
-  - `src/editor/columnMode.ts` — `blockCommands` (`addCursorBelow` / `addCursorAbove` = `extend(±1, 0)`), `blockSelection` (visual columns, short rows), `blockToCursors`
+  - `src/editor/columnMode.ts` — `blockCommands` (`addCursorBelow` / `addCursorAbove` = `extend(±1, 0)` over `extendBlock`), `blockSelection` (visual columns, short rows), `blockToCursors` (`cursorsOfBlock`)
   - `src/lib/commands.ts` — the three `selection.*` registrations
   - `src/editor/cmSetup.ts` — `allowMultipleSelections`, `rectangularSelection` (Alt+drag) via `columnModeExtensions(false)`, `crosshairCursor`, Esc (`simplifySelection` in `defaultKeymap`)
   - `src/components/MenuBar.tsx` — Selection › Add Cursor Above / Below, Split Block Selection into Cursors
-- Tests: none
+- Tests: `src/__tests__/columnMode.test.ts`
 - Docs: `docs/editing.md`
 
 **As a** person editing several lines the same way
@@ -262,14 +262,14 @@ Scenario: EDIT-005.6 Escape goes back to one cursor
 - Status: draft
 - Commands: `selection.toggleColumnMode`
 - Files:
-  - `src/editor/columnMode.ts` — `columnModeExtensions`, `columnKeymap` (Shift+arrows, Home / End, Page Up / Down by 20 rows), `extend`, `extendHome`, `extendEnd`, `currentBlock`, `blockSelection`, `columnModeEnabled` / `setColumnMode`
+  - `src/editor/columnMode.ts` — `columnModeExtensions`, `columnKeymap` (Shift+arrows, Home / End, Page Up / Down by 20 rows), `extend` / `extendBlock`, `extendHome` / `extendEnd` (`blockToEdge`), `currentBlock`, `blockSelection`, `columnModeEnabled` / `setColumnMode`
   - `src/lib/commands.ts` — `selection.toggleColumnMode` (store `columnMode`, toast)
   - `src/editor/manager.ts` — `applyColumnMode` (both panes), `columnModeEffects`, re-applied in `show` when a tab is swapped in
   - `src/editor/cmSetup.ts` — `compartments.columnMode`
   - `src/lib/store.ts` — `columnMode` (starts false, not saved in the session)
   - `src/components/StatusBar.tsx` — Column / COLUMN button
   - `src/styles/app.css` — `.cm-editor.column-mode .cm-cursor`
-- Tests: none
+- Tests: `src/__tests__/columnMode.test.ts`
 - Docs: `docs/editing.md`
 
 **As a** person working with column-aligned text
@@ -330,7 +330,7 @@ Scenario: EDIT-006.8 Off when Quarry starts
   - `src/editor/bulkEdit.ts` — `bulkEditing` (input handler and Backspace / Delete keys from `BULK_MIN` = 500 ranges), `bulkReplace`, `deletionSpans`
   - `src/editor/viewportSelection.ts` — `viewportDrawSelection`, `rangesInWindow` (only ranges in the rendered viewport are measured and drawn)
   - `src/editor/cmSetup.ts` — both installed in `baseExtensions`
-- Tests: `src/__tests__/bulkedit.test.ts`
+- Tests: `src/__tests__/bulkedit.test.ts`, `src/__tests__/columnMode.test.ts`
 - Docs: none
 
 **As a** person editing a column across a very long file
@@ -813,10 +813,11 @@ Scenario: EDIT-015.4 Both can be turned off
 - Commands: `goto.line`
 - Files:
   - `src/lib/commands.ts` — `goto.line` (opens palette mode `goto`; enabled for text and large-file tabs)
-  - `src/components/CommandPalette.tsx` — `parseGoto` (`120`, `120:8`, `120,8`), live preview effect, `gotoOrigin` restored by `cancel`, `gotoHint`, out-of-range toast; a large-file tab gets `big.goto` instead
+  - `src/lib/goto.ts` — `parseGoto` (`120`, `120:8`, `120,8`)
+  - `src/components/CommandPalette.tsx` — live preview effect, `gotoOrigin` restored by `cancel`, `gotoHint`, out-of-range toast; a large-file tab gets `big.goto` instead
   - `src/editor/manager.ts` — `goTo` (clamps line and column, centres the line, `GOTO_CONTEXT` horizontal scroll)
   - `src/components/StatusBar.tsx` — "Ln, Col" button runs the command
-- Tests: none
+- Tests: `src/__tests__/goto.test.ts`
 - Docs: `docs/editing.md`
 
 **As a** person following a line number from an error message
