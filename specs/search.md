@@ -72,7 +72,7 @@ Scenario: SEARCH-001.7 A long search text stays visible
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SearchPanel.tsx` — `effectiveScope`, `searchOpenDocs`, `buildJsRegex`, `run()` (in-memory branch, large-file branch), scope buttons
+  - `src/components/panels/SearchPanel.tsx` — `effectiveScope`, `searchOpenDocs`, `searchTexts` ("Max" across all documents, `truncated`), `buildJsRegex`, `run()` (in-memory branch, large-file branch), scope buttons
   - `src/lib/store.ts` — `search.scope` (default `"doc"`), `search.inMemory`
   - `src/editor/manager.ts` — `editor.textOf(docId)`
 - Tests: `src/__tests__/replace.test.ts`
@@ -124,6 +124,12 @@ Scenario: SEARCH-002.7 These scopes use JavaScript regular expressions
   When I search for "ne+dle"
   Then the pattern is run by the JavaScript engine against the document text
   And the files on disk are not read
+
+Scenario: SEARCH-002.8 The result limit covers all open documents
+  Given "Max" is 4 and two open tabs each contain "x" 3 times
+  When I search for "x" with the Open Files scope
+  Then 4 results are listed in total, 3 in the first tab and 1 in the second
+  And the status ends with "(limit reached)"
 ```
 
 ## SEARCH-003: Search a folder, the Explorer selection or chosen folders

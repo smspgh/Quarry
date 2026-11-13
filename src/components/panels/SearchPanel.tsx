@@ -91,19 +91,22 @@ export function locateMatch(text: string, m: FileMatch, radius = 5): { line: num
   return null;
 }
 
-/** Search the text of open documents in memory: all of them, or only the one with id `onlyId`. */
-function searchOpenDocs(q: SearchQuery, onlyId?: string): SearchResultsFile[] {
+/**
+ * Pure helper (testable): search document texts in memory. "Max" (`q.maxResults`) caps the total
+ * across all of them, as it does for a folder search; `truncated` = the limit was reached.
+ */
+export function searchTexts(q: SearchQuery, docs: { path: string; text: string }[]): { files: SearchResultsFile[]; truncated: boolean } {
   const re = buildJsRegex(q);
-  if (!re) return [];
+  if (!re) return { files: [], truncated: false };
   const out: SearchResultsFile[] = [];
-  for (const d of useStore.getState().docs) {
-    if (d.kind !== "text" || (onlyId !== undefined && d.id !== onlyId)) continue;
-    const text = editor.textOf(d.id);
+  let total = 0;
+  for (const { path, text } of docs) {
+    if (total >= q.maxResults) break;
     const matches: FileMatch[] = [];
     re.lastIndex = 0;
     let m: RegExpExecArray | null;
     let lineStarts: number[] | null = null;
-    while ((m = re.exec(text)) && matches.length < q.maxResults) {
+    while (total < q.maxResults && (m = re.exec(text))) {
       if (m[0].length === 0) re.lastIndex++;
       if (!lineStarts) {
         lineStarts = [0];
@@ -121,11 +124,18 @@ function searchOpenDocs(q: SearchQuery, onlyId?: string): SearchResultsFile[] {
       if (le < 0) le = text.length;
       const pstart = m.index - ls > 40 ? m.index - 40 : ls;
       const preview = text.slice(pstart, Math.min(le, pstart + 400)).replace(/\r$/, "");
-      matches.push({ path: d.path ?? d.name, line: lo + 1, col: m.index - ls, len: m[0].length, preview, previewCol: m.index - pstart, previewCut: pstart > ls });
+      matches.push({ path, line: lo + 1, col: m.index - ls, len: m[0].length, preview, previewCol: m.index - pstart, previewCut: pstart > ls });
+      total++;
     }
-    if (matches.length) out.push({ path: d.path ?? d.name, matches });
+    if (matches.length) out.push({ path, matches });
   }
-  return out;
+  return { files: out, truncated: total >= q.maxResults };
+}
+
+/** Search the text of open documents in memory: all of them, or only the one with id `onlyId`. */
+function searchOpenDocs(q: SearchQuery, onlyId?: string): { files: SearchResultsFile[]; truncated: boolean } {
+  const docs = useStore.getState().docs.filter((d) => d.kind === "text" && (onlyId === undefined || d.id === onlyId));
+  return searchTexts(q, docs.map((d) => ({ path: d.path ?? d.name, text: editor.textOf(d.id) })));
 }
 
 const SEARCH_TIP = [
@@ -396,8 +406,8 @@ export function SearchPanel() {
       return;
     }
     if (scope === "open" || active?.kind === "text") {
-      const files = searchOpenDocs(q, active?.id);
-      setSearch({ running: false, inMemory: true, files, totalMatches: files.reduce((n, f) => n + f.matches.length, 0), filesSearched: active ? 1 : useStore.getState().docs.length });
+      const { files, truncated } = searchOpenDocs(q, active?.id);
+      setSearch({ running: false, inMemory: true, files, truncated, totalMatches: files.reduce((n, f) => n + f.matches.length, 0), filesSearched: active ? 1 : useStore.getState().docs.length });
       return;
     }
     // A large-file document is searched on disk like a one-file folder.

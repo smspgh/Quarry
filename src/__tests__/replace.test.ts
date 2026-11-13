@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { expandReplacement, preserveCase, replaceMatches } from "../lib/replace";
-import { activeFilterCount, buildJsRegex, effectiveScope, folderLabel, explorerRoots, leaveOutPatch, targetSummary } from "../components/panels/SearchPanel";
+import { activeFilterCount, buildJsRegex, effectiveScope, folderLabel, explorerRoots, leaveOutPatch, searchTexts, targetSummary } from "../components/panels/SearchPanel";
 import { DEFAULT_SEARCH_QUERY } from "../lib/store";
 import type { FileMatch } from "../lib/types";
 
@@ -113,5 +113,24 @@ describe("buildJsRegex", () => {
     expect("cat category cat.".match(ww("cat"))).toEqual(["cat", "cat"]);
     // The replace preview runs the regex on the hit alone.
     expect(ww("-2").test("-2")).toBe(true);
+  });
+});
+
+describe("searchTexts", () => {
+  const docs = [
+    { path: "a", text: "x x\nx" },
+    { path: "b", text: "x x" },
+  ];
+  const q = (maxResults: number) => ({ ...DEFAULT_SEARCH_QUERY, pattern: "x", maxResults });
+  it("Max caps the total across documents and reports the limit", () => {
+    const r = searchTexts(q(4), docs);
+    expect(r.files.map((f) => [f.path, f.matches.length])).toEqual([["a", 3], ["b", 1]]);
+    expect(r.truncated).toBe(true);
+    expect(searchTexts(q(2), docs).files.map((f) => f.path)).toEqual(["a"]);
+  });
+  it("is not truncated under the limit", () => {
+    const r = searchTexts(q(10), docs);
+    expect(r.files.reduce((n, f) => n + f.matches.length, 0)).toBe(5);
+    expect(r.truncated).toBe(false);
   });
 });
