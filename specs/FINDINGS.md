@@ -7,7 +7,6 @@ This file is not a spec: `scripts/specs-index.mjs` ignores it.
 ## Files and sessions (`files.md`)
 
 Possible bugs
-- File › Open with several files asks about the tab limit once per file (`actions.ts:291` loops `openPath`), unlike `openFiles` (`:269`), which asks once per batch.
 - Recent folders can never be cleared: `file.clearRecent` (`src/lib/commands.ts:620`) clears files only.
 - Saving a large-file tab skips the "changed on disk, overwrite?" check, which is text-only (`actions.ts:383`).
 

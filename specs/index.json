@@ -5239,6 +5239,7 @@
       "files": [
         "src/lib/actions.ts",
         "src/lib/ipc.ts",
+        "src/lib/tabLimit.ts",
         "src-tauri/src/files.rs",
         "src-tauri/src/lib.rs",
         "src/editor/manager.ts",
@@ -5272,6 +5273,10 @@
         {
           "id": "FILE-002.5",
           "title": "Cancelling the dialog"
+        },
+        {
+          "id": "FILE-002.6",
+          "title": "Several files over the open-tab limit ask once"
         }
       ]
     },
@@ -5280,7 +5285,7 @@
       "title": "Open a folder",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 99,
+      "line": 106,
       "status": "draft",
       "commands": [
         "file.openFolder"
@@ -5325,7 +5330,7 @@
       "title": "Recent files and folders",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 144,
+      "line": 151,
       "status": "draft",
       "commands": [
         "file.openRecent",
@@ -5373,7 +5378,7 @@
       "title": "Quick Open a file by name",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 193,
+      "line": 200,
       "status": "draft",
       "commands": [
         "file.quickOpen"
@@ -5409,7 +5414,7 @@
       "title": "Large files open in large-file mode",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 229,
+      "line": 236,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5455,7 +5460,7 @@
       "title": "Detect encoding and line endings on open",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 278,
+      "line": 285,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5494,7 +5499,7 @@
       "title": "Choose the encoding and line endings a file is saved with",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 320,
+      "line": 327,
       "status": "draft",
       "commands": [
         "file.setEncoding",
@@ -5546,7 +5551,7 @@
       "title": "Reopen a file in another encoding",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 374,
+      "line": 381,
       "status": "draft",
       "commands": [
         "file.reopenWithEncoding"
@@ -5586,7 +5591,7 @@
       "title": "Save a document",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 417,
+      "line": 424,
       "status": "draft",
       "commands": [
         "file.save"
@@ -5650,7 +5655,7 @@
       "title": "Save a document under another name",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 493,
+      "line": 500,
       "status": "draft",
       "commands": [
         "file.saveAs"
@@ -5694,7 +5699,7 @@
       "title": "Save all changed documents",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 544,
+      "line": 551,
       "status": "draft",
       "commands": [
         "file.saveAll"
@@ -5727,7 +5732,7 @@
       "title": "Revert a file to the version on disk",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 577,
+      "line": 584,
       "status": "draft",
       "commands": [
         "file.revert"
@@ -5765,7 +5770,7 @@
       "title": "Know which documents have unsaved changes",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 617,
+      "line": 624,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5802,7 +5807,7 @@
       "title": "Notice changes made by other programs",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 656,
+      "line": 663,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5856,7 +5861,7 @@
       "title": "Restore the previous session on start",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 725,
+      "line": 732,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5914,7 +5919,7 @@
       "title": "Exit without losing work (hot exit)",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 792,
+      "line": 799,
       "status": "draft",
       "commands": [
         "app.exit"
@@ -5975,7 +5980,7 @@
       "title": "Open files by dropping them on the window",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 861,
+      "line": 868,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6012,7 +6017,7 @@
       "title": "Open files from the command line and File Explorer",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 900,
+      "line": 907,
       "status": "draft",
       "commands": [],
       "files": [
@@ -6053,7 +6058,7 @@
       "title": "Welcome screen",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 945,
+      "line": 952,
       "status": "draft",
       "commands": [],
       "files": [
@@ -17540,6 +17545,7 @@
     "src/lib/tabLimit.ts": [
       "CLAUDE-003",
       "EXPL-014",
+      "FILE-002",
       "SET-010",
       "TAB-008",
       "TAB-009",

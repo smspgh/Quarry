@@ -288,7 +288,9 @@ export async function openFileDialog() {
   const picked = await openDialog({ multiple: true, title: "Open File" });
   if (!picked) return;
   const list = Array.isArray(picked) ? picked : [picked];
-  for (const p of list) await openPath(p);
+  // Several files: one question about the open-tab limit for the whole batch.
+  if (list.length > 1) await openFiles(list);
+  else if (list.length === 1) await openPath(list[0]);
 }
 
 export async function openFolderDialog() {

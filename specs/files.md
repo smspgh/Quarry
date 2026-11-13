@@ -51,8 +51,9 @@ Scenario: FILE-001.3 A new file counts towards the open-tab limit
 - Status: draft
 - Commands: `file.open`
 - Files:
-  - `src/lib/actions.ts` — `openFileDialog`, `openPath` (existing-tab check with `samePath`, binary / decode / mixed-EOL toasts, error toast)
+  - `src/lib/actions.ts` — `openFileDialog` (several picks go through `openFiles`: one tab-limit question), `openPath` (existing-tab check with `samePath`, binary / decode / mixed-EOL toasts, error toast)
   - `src/lib/ipc.ts` — `fs.stat`, `fs.readText`
+  - `src/lib/tabLimit.ts` — `makeRoom`
   - `src-tauri/src/files.rs` — `stat`, `read_text`, `looks_binary`
   - `src-tauri/src/lib.rs` — Tauri commands `fs_stat`, `fs_read_text`
   - `src/editor/manager.ts` — `create`, `goTo`
@@ -69,7 +70,7 @@ Scenario: FILE-001.3 A new file counts towards the open-tab limit
 Scenario: FILE-002.1 Open several files at once
   Given no tabs are open
   When I press Ctrl+O and pick "a.txt" and "b.json" in the "Open File" dialog
-  Then both files open in their own tabs
+  Then both files open in their own tabs and "a.txt" is shown
   And both are added to the recent files list
 
 Scenario: FILE-002.2 Opening a file that is already open shows its tab
@@ -94,6 +95,12 @@ Scenario: FILE-002.5 Cancelling the dialog
   Given 2 tabs are open
   When I press Ctrl+O and cancel the dialog
   Then the same 2 tabs are open and the active tab has not changed
+
+Scenario: FILE-002.6 Several files over the open-tab limit ask once
+  Given the open-tab limit is 10 and 9 clean tabs are open
+  When I press Ctrl+O and pick 3 files
+  Then Quarry asks once, "Close 2 tabs to stay within your limit?", naming the 3 files to open
+  And it does not ask again for each file
 ```
 
 ## FILE-003: Open a folder
