@@ -40,9 +40,6 @@ function currentBlock(view: EditorView): Block {
   const anchorRange = main === last ? first : last;
   const a = colOf(view, anchorRange.anchor);
   const h = colOf(view, main.head);
-  if (ranges.length === 1) {
-    return { anchorLine: a.line, anchorCol: a.col, headLine: h.line, headCol: h.col };
-  }
   return { anchorLine: a.line, anchorCol: a.col, headLine: h.line, headCol: h.col };
 }
 
@@ -132,7 +129,7 @@ export function columnModeExtensions(on: boolean): Extension {
 
 /** Always-available block commands. */
 export const blockCommands = {
-  /** Alt+Shift+Down style: add a cursor on the line below at the same column. */
+  /** Ctrl+Alt+Down: extend the block one line down (a cursor on the line below at the same column). */
   addCursorBelow: extend(1, 0),
   addCursorAbove: extend(-1, 0),
   blockToCursors,

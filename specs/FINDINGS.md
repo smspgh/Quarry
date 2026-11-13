@@ -34,7 +34,6 @@ Not verified
 
 ## Text editing (`editing.md`)
 
-- `currentBlock` has two identical return branches (`src/editor/columnMode.ts:43-46`); the comment on `addCursorBelow` says "Alt+Shift+Down style" but the key is Ctrl+Alt+Down (`columnMode.ts:135`).
 - Not determined: what the right-click menu shows on non-foldable gutter lines (EDIT-014.2 only says Quarry's menu does not open).
 - No tests: column mode, add cursor above/below, `rangesInWindow`, the line transforms, Go to Line parsing (`parseGoto` is private to `CommandPalette.tsx`).
 
