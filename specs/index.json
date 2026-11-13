@@ -12287,7 +12287,9 @@
         "src/lib/fileOps.ts",
         "src/components/panels/ExplorerPanel.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/replace.test.ts"
+      ],
       "docs": [
         "docs/find-and-replace.md"
       ],
@@ -12315,6 +12317,10 @@
         {
           "id": "SEARCH-011.6",
           "title": "A plain click still collapses"
+        },
+        {
+          "id": "SEARCH-011.7",
+          "title": "Results left out of a deleted file are forgotten"
         }
       ]
     },
@@ -12323,7 +12329,7 @@
       "title": "Replace in Files on disk",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 731,
+      "line": 739,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12393,7 +12399,7 @@
       "title": "Replace in Files keeps each file's encoding",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 819,
+      "line": 827,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12435,7 +12441,7 @@
       "title": "Replacement text: groups and Preserve Case",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 865,
+      "line": 873,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12482,7 +12488,7 @@
       "title": "Replace in the open documents",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 915,
+      "line": 923,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12533,7 +12539,7 @@
       "title": "Undo Replace in Files",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 980,
+      "line": 988,
       "status": "draft",
       "commands": [
         "find.undoReplaceInFiles"
@@ -17940,6 +17946,7 @@
       "SEARCH-004",
       "SEARCH-005",
       "SEARCH-010",
+      "SEARCH-011",
       "SEARCH-012",
       "SEARCH-014",
       "SEARCH-015"

@@ -683,11 +683,11 @@ Scenario: SEARCH-010.7 The × explains what it does
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SearchPanel.tsx` — `selFiles`, `fileAnchor`, `fileMenu`, `onDeleted` (deleted files leave the results)
+  - `src/components/panels/SearchPanel.tsx` — `selFiles`, `fileAnchor`, `fileMenu`, `onDeleted` + `deletedPatch` (deleted files leave the results, with their left-out results and the current result)
   - `src/components/FileMenu.tsx` — the shared file menu (specified with the Explorer)
   - `src/lib/fileOps.ts` — the actions behind the menu
   - `src/components/panels/ExplorerPanel.tsx` — `rangeOf`, `toggleIn` selection helpers reused here
-- Tests: none
+- Tests: `src/__tests__/replace.test.ts`
 - Docs: `docs/find-and-replace.md`
 
 **As a** person looking at the files a search found
@@ -726,6 +726,14 @@ Scenario: SEARCH-011.6 A plain click still collapses
   Given two file rows are selected
   When I click a file row without Ctrl or Shift
   Then the selection is cleared and that file's results collapse or expand
+
+Scenario: SEARCH-011.7 Results left out of a deleted file are forgotten
+  Given 12 results in 3 files, and I left out 2 results of "a.ts" and 1 of "b.ts"
+  And the current result (F4) is in "a.ts"
+  When I delete "a.ts" from its menu
+  Then the status ends with "· 1 left out"
+  And the Replace All dialog mentions 1 left-out result
+  And F4 starts again from the first result
 ```
 
 ## SEARCH-012: Replace in Files on disk

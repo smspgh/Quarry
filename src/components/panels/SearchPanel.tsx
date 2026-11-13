@@ -252,6 +252,25 @@ export function leaveOutPatch(st: Pick<SearchState, "files" | "excluded" | "tota
   };
 }
 
+/**
+ * Pure helper (testable): the search-state change when files are deleted from the results menu.
+ * Their results leave the list, along with what was left out of them and the current result.
+ */
+export function deletedPatch(st: Pick<SearchState, "files" | "excluded" | "totalMatches" | "leftOut" | "activeKey">, deleted: string[]): Partial<SearchState> {
+  const gone = new Set(deleted);
+  const removed = st.files.filter((x) => gone.has(x.path)).reduce((n, x) => n + x.matches.length, 0);
+  const excluded = Object.fromEntries(Object.entries(st.excluded).filter(([p]) => !gone.has(p)));
+  const leftOut = deleted.reduce((n, p) => n - (st.excluded[p]?.length ?? 0), st.leftOut);
+  const activeGone = st.activeKey !== null && deleted.some((p) => st.activeKey!.startsWith(`${p}:`));
+  return {
+    files: st.files.filter((x) => !gone.has(x.path)),
+    totalMatches: Math.max(0, st.totalMatches - removed),
+    excluded,
+    leftOut: Math.max(0, leftOut),
+    ...(activeGone ? { activeKey: null } : {}),
+  };
+}
+
 export function SearchPanel() {
   const st = useStore((s) => s.search);
   const setSearch = useStore((s) => s.setSearch);
@@ -1029,11 +1048,8 @@ ${st.leftOut.toLocaleString()} result${st.leftOut === 1 ? "" : "s"} you left out
             onClose={() => setFileMenu(null)}
             onDeleted={(deleted) => {
               // Deleted files leave the results.
-              const cur = useStore.getState().search;
-              const gone = new Set(deleted);
-              const removed = cur.files.filter((x) => gone.has(x.path)).reduce((n, x) => n + x.matches.length, 0);
-              setSearch({ files: cur.files.filter((x) => !gone.has(x.path)), totalMatches: Math.max(0, cur.totalMatches - removed) });
-              setSelFiles((sel) => sel.filter((p) => !gone.has(p)));
+              setSearch(deletedPatch(useStore.getState().search, deleted));
+              setSelFiles((sel) => sel.filter((p) => !deleted.includes(p)));
             }}
           />
         );

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { expandReplacement, preserveCase, replaceMatches } from "../lib/replace";
-import { activeFilterCount, buildJsRegex, effectiveScope, folderLabel, explorerRoots, leaveOutPatch, searchTexts, targetSummary } from "../components/panels/SearchPanel";
+import { activeFilterCount, buildJsRegex, deletedPatch, effectiveScope, folderLabel, explorerRoots, leaveOutPatch, searchTexts, targetSummary } from "../components/panels/SearchPanel";
 import { DEFAULT_SEARCH_QUERY } from "../lib/store";
 import type { FileMatch } from "../lib/types";
 
@@ -103,6 +103,14 @@ describe("Find in Files panel helpers", () => {
     expect([p.totalMatches, p.leftOut]).toEqual([1, 2]);
     expect(leaveOutPatch(st, "b", b1)!.files!.map((f) => f.path)).toEqual(["a"]);
     expect(leaveOutPatch(st, "zzz")).toBeNull();
+  });
+  it("deletedPatch drops a deleted file's results, left-out positions and current result", () => {
+    const cur = { ...st, excluded: { a: ["9:9"], b: ["5:5", "6:6"] }, leftOut: 3, activeKey: "b:1:0" };
+    const p = deletedPatch(cur, ["b"]);
+    expect(p.files!.map((f) => f.path)).toEqual(["a"]);
+    expect(p.excluded).toEqual({ a: ["9:9"] });
+    expect([p.totalMatches, p.leftOut, p.activeKey]).toEqual([2, 1, null]);
+    expect("activeKey" in deletedPatch({ ...cur, activeKey: "a:1:0" }, ["b"])).toBe(false);
   });
 });
 
