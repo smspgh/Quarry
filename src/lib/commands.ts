@@ -180,6 +180,7 @@ export function prettyKeys(keys: string): string {
 
 // Two-key chord state ("Ctrl+K" pressed, waiting for the second stroke).
 const CHORD_TIMEOUT_MS = 1500;
+// Never registered: getCommandsForKeys returns it so App.tsx swallows a chord's strokes.
 const CHORD_PLACEHOLDER: Command = { id: "ui.chordPending", title: "Chord pending", category: "View", hidden: true, run: () => true };
 let pendingChord: string | null = null;
 let chordTimer = 0;
