@@ -119,7 +119,7 @@ Scenario: TERM-002.4 No built-in entry point passes a conversation
   - `src/components/TerminalView.tsx` — `t.onData` → `pty_write`, `editor.registerFocus`
   - `src-tauri/src/pty.rs` — `pty_write`
   - `src-tauri/src/writer.rs` — `ChannelWriter` (input written off the UI thread)
-- Tests: none
+- Tests: `src/__tests__/terminalView.test.tsx`
 - Docs: `docs/claude-code.md`
 
 **As a** developer using the Claude Code command line
@@ -157,7 +157,7 @@ Scenario: TERM-003.4 A dialog still owns the keyboard
 - Commands: none
 - Files:
   - `src/components/TerminalView.tsx` — `attachCustomKeyEventHandler` (Ctrl+C with a selection, Ctrl+Shift+C, Ctrl+V, Ctrl+Shift+V; clipboard plugin `readText` / `writeText`)
-- Tests: none
+- Tests: `src/__tests__/terminalView.test.tsx`
 - Docs: `docs/claude-code.md`
 
 **As a** developer
@@ -240,7 +240,7 @@ Scenario: TERM-005.6 Scrollback
   - `src-tauri/src/pty.rs` — watcher thread in `spawn` (polls the child every 150 ms because ConPTY keeps the output pipe open), `pty:exit` (always with the exit code; a tab killed with `pty_kill` reports nothing)
   - `src/components/TerminalView.tsx` — `pty:exit` listener, Enter restarts (`t.reset()` + `start`)
   - `src/lib/terminal.ts` — `setTerminalPty`, `terminalPty`, `commandFinished` (code `null` only when a one-off command could not start)
-- Tests: `src/__tests__/claudeSession.test.ts`
+- Tests: `src/__tests__/claudeSession.test.ts`, `src/__tests__/terminalView.test.tsx`
 - Docs: `docs/claude-code.md`
 
 **As a** developer who typed /exit
@@ -360,7 +360,7 @@ Scenario: TERM-008.4 The folder must exist
   - `src/components/TerminalView.tsx` — `command` branch (dimmed "> command" line, Done / Failed line, no restart on Enter)
   - `src-tauri/src/pty.rs` — `pty_start` with `command` (`cmd.exe /d /s /c <line>`)
   - `src/lib/lspInstall.ts` — `installServer` (the only caller)
-- Tests: `src/__tests__/claudeSession.test.ts`, `src/__tests__/lspInstall.test.ts`
+- Tests: `src/__tests__/claudeSession.test.ts`, `src/__tests__/lspInstall.test.ts`, `src/__tests__/terminalView.test.tsx`
 - Docs: `docs/code-intelligence.md`
 
 **As a** developer installing a language server from Quarry

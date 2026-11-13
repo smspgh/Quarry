@@ -14615,7 +14615,9 @@
         "src-tauri/src/pty.rs",
         "src-tauri/src/writer.rs"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/terminalView.test.tsx"
+      ],
       "docs": [
         "docs/claude-code.md"
       ],
@@ -14649,7 +14651,9 @@
       "files": [
         "src/components/TerminalView.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/terminalView.test.tsx"
+      ],
       "docs": [
         "docs/claude-code.md"
       ],
@@ -14733,7 +14737,8 @@
         "src/lib/terminal.ts"
       ],
       "tests": [
-        "src/__tests__/claudeSession.test.ts"
+        "src/__tests__/claudeSession.test.ts",
+        "src/__tests__/terminalView.test.tsx"
       ],
       "docs": [
         "docs/claude-code.md"
@@ -14853,7 +14858,8 @@
       ],
       "tests": [
         "src/__tests__/claudeSession.test.ts",
-        "src/__tests__/lspInstall.test.ts"
+        "src/__tests__/lspInstall.test.ts",
+        "src/__tests__/terminalView.test.tsx"
       ],
       "docs": [
         "docs/code-intelligence.md"
@@ -18489,6 +18495,12 @@
     "src/__tests__/tabLimit.test.ts": [
       "SET-010",
       "TAB-009"
+    ],
+    "src/__tests__/terminalView.test.tsx": [
+      "TERM-003",
+      "TERM-004",
+      "TERM-006",
+      "TERM-009"
     ],
     "src/__tests__/text.test.ts": [
       "EDIT-017",
