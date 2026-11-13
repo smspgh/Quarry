@@ -479,10 +479,15 @@ export function SettingsPanel() {
   const resetAll = async () => {
     const ok = await askDialog("Reset all settings?", "Every setting goes back to its default value. Scripts and macros folders revert to the app data folder.", "Reset all");
     if (!ok) return;
+    const before = useStore.getState().settings;
+    const lspKey = (x: Settings) => JSON.stringify([x.lspEnabled, x.lspDisabled, x.lspCommands]);
+    const lspChanged = lspKey(before) !== lspKey(DEFAULT_SETTINGS);
     update({ ...DEFAULT_SETTINGS });
     editor.applySettings(useStore.getState().settings);
     persistSettings();
     void loadMacros("switch");
+    // Like every other change to the code-intelligence settings: reconnect the language servers.
+    if (lspChanged) void restartServers();
     toast("Settings reset to defaults", "info");
   };
 

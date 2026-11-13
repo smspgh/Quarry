@@ -231,9 +231,10 @@ Scenario: SET-004.8 Rows with side effects run them
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — `resetAll` (confirmation, `DEFAULT_SETTINGS`, `loadMacros("switch")`, toast), "Open settings folder" button (`appData.path`, `revealItemInDir`, falls back to a toast with the path)
+  - `src/components/panels/SettingsPanel.tsx` — `resetAll` (confirmation, `DEFAULT_SETTINGS`, `loadMacros("switch")`, `restartServers` when a code-intelligence setting changes, toast), "Open settings folder" button (`appData.path`, `revealItemInDir`, falls back to a toast with the path)
   - `src/lib/actions.ts` — `askDialog`, `persistSettings`
   - `src/lib/macros.ts` — `loadMacros`
+  - `src/lib/lsp.ts` — `restartServers`
   - `src-tauri/src/lib.rs` — `app_data_path`
 - Tests: none
 - Docs: `docs/settings.md`
@@ -264,6 +265,12 @@ Scenario: SET-005.3 Cancelling changes nothing
 Scenario: SET-005.4 Open settings folder
   When I click "Open settings folder"
   Then Windows File Explorer opens showing %APPDATA%\com.quarry.app
+
+Scenario: SET-005.5 Reset all reconnects the language servers
+  Given code intelligence is on with the Rust language server turned off in Settings
+  When I confirm "Reset all"
+  Then the language servers are restarted and open Rust files get code intelligence again
+  And when no code-intelligence setting changed, running language servers are left alone
 ```
 
 ## SET-006: Theme, window material and menu bar position

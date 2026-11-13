@@ -12804,6 +12804,7 @@
         "src/components/panels/SettingsPanel.tsx",
         "src/lib/actions.ts",
         "src/lib/macros.ts",
+        "src/lib/lsp.ts",
         "src-tauri/src/lib.rs"
       ],
       "tests": [],
@@ -12826,6 +12827,10 @@
         {
           "id": "SET-005.4",
           "title": "Open settings folder"
+        },
+        {
+          "id": "SET-005.5",
+          "title": "Reset all reconnects the language servers"
         }
       ]
     },
@@ -12834,7 +12839,7 @@
       "title": "Theme, window material and menu bar position",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 269,
+      "line": 276,
       "status": "draft",
       "commands": [
         "view.toggleTheme"
@@ -12880,7 +12885,7 @@
       "title": "Editor font size and font family",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 320,
+      "line": 327,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -12937,7 +12942,7 @@
       "title": "Editor behaviour settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 383,
+      "line": 390,
       "status": "draft",
       "commands": [
         "view.toggleWrap",
@@ -12992,7 +12997,7 @@
       "title": "Number fields, switches and segmented choices",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 445,
+      "line": 452,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13039,7 +13044,7 @@
       "title": "Tab limit, large-file and session settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 507,
+      "line": 514,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13081,7 +13086,7 @@
       "title": "Scripts and macros folders",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 549,
+      "line": 556,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13123,7 +13128,7 @@
       "title": "Find and replace history size",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 590,
+      "line": 597,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13160,7 +13165,7 @@
       "title": "Confirmation and update-check switches",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 631,
+      "line": 638,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13189,7 +13194,7 @@
       "title": "Code intelligence settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 663,
+      "line": 670,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13237,7 +13242,7 @@
       "title": "Claude Code settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 714,
+      "line": 721,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13291,7 +13296,7 @@
       "title": "JSON pretty-print indent",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 774,
+      "line": 781,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13319,7 +13324,7 @@
       "title": "Themed dropdown lists",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 801,
+      "line": 808,
       "status": "draft",
       "commands": [],
       "files": [
@@ -13370,7 +13375,7 @@
       "title": "Help \"i\" icons",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 867,
+      "line": 874,
       "status": "draft",
       "commands": [],
       "files": [
@@ -17424,6 +17429,7 @@
       "LSP-015",
       "LSP-016",
       "LSP-017",
+      "SET-005",
       "SET-014",
       "UPD-003"
     ],
