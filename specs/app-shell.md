@@ -800,7 +800,7 @@ Scenario: UI-013.10 Restoring the open folder does not open the Explorer
 - Commands: `view.toggleSidebar`
 - Files:
   - `src/lib/panels.ts` — `toggleAllPanels`, `collapsePanels`, `anyPanelShown`
-  - `src/components/TitleBar.tsx` — `Brand` button (labels "Collapse side panels" / "Show pinned panels" / "Quarry")
+  - `src/components/TitleBar.tsx` — `Brand` button (labels "Collapse side panels" / "Show pinned panels" / "Quarry"; deliberately inert with nothing pinned or open, where Ctrl+B reopens the last panel)
   - `src/lib/commands.ts` — `view.toggleSidebar` (Ctrl+B, "Collapse / Restore Side Panels")
   - `src/App.tsx` — store subscription: asking for a panel clears `pinnedHidden`
   - `src/lib/store.ts` — `pinnedHidden`
