@@ -2,7 +2,7 @@ import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { AlertTriangle, Braces, Brackets, CheckCircle2, ChevronRight, ChevronsDownUp, ChevronsUpDown, CircleOff, ClipboardCopy, Copy, Crosshair, Hash, Minimize2, Quote, ToggleLeft, XCircle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { editor } from "../../editor/manager";
-import { isBigJson, runCommand } from "../../lib/commands";
+import { getCommand, isBigJson, isEnabled, runCommand } from "../../lib/commands";
 import { BigJsonTree } from "./BigJsonTree";
 import { describeCopiedPath, formatPath, nodeAtOffset, nodeKey, nodePreview, pathSegments, valueClipboardText, type JsonNode, type JsonNodeType, type ParseOutcome, type PathStyle } from "../../lib/jsonPath";
 import { getJsonTree, PATH_STYLES, previewValue } from "../../lib/jsonModel";
@@ -300,6 +300,9 @@ export function JsonPanel() {
   const err = isEmpty ? null : outcome?.error;
   const lineAt = (offset: number) => { const d = editor.docOf(doc.id); return d ? d.lineAt(Math.min(offset, d.length)).number : 1; };
   const jsonLike = doc.language === "JSON" || !!shown?.root;
+  // The header buttons follow the JSON commands' rule (language JSON), greyed out like the JSON menu.
+  const can = (id: string) => { const c = getCommand(id); return !!c && isEnabled(c); };
+  const notJson = doc.language !== "JSON" ? " (set the language to JSON first)" : "";
   // The focused row falls back to the cursor row, then the root, so Tab lands somewhere useful.
   const tabKey = (focusKey && rows.some((r) => r.key === focusKey) ? focusKey : null) ?? (cursorKey && rows.some((r) => r.key === cursorKey) ? cursorKey : null) ?? rows[0]?.key;
 
@@ -308,9 +311,9 @@ export function JsonPanel() {
       <div className="sidebar-header">
         JSON
         <span className="grow" />
-        <button className="icon-btn" title="Format / pretty-print (Ctrl+Alt+F)" onClick={() => runCommand("json.format")}><Braces size={15} /></button>
-        <button className="icon-btn" title="Minify (Ctrl+Alt+M)" onClick={() => runCommand("json.minify")}><Minimize2 size={14} /></button>
-        <button className="icon-btn" title="Validate (Ctrl+Alt+V)" onClick={() => runCommand("json.validate")}><CheckCircle2 size={15} /></button>
+        <button className="icon-btn" disabled={!can("json.format")} title={`Format / pretty-print (Ctrl+Alt+F)${notJson}`} onClick={() => runCommand("json.format")}><Braces size={15} /></button>
+        <button className="icon-btn" disabled={!can("json.minify")} title={`Minify (Ctrl+Alt+M)${notJson}`} onClick={() => runCommand("json.minify")}><Minimize2 size={14} /></button>
+        <button className="icon-btn" disabled={!can("json.validate")} title={`Validate (Ctrl+Alt+V)${notJson}`} onClick={() => runCommand("json.validate")}><CheckCircle2 size={15} /></button>
       </div>
       <div className="panel-section" style={{ paddingTop: 0, gap: 6 }}>
         <div className="row">

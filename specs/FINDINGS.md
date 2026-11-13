@@ -102,7 +102,6 @@ Doc / code mismatches and dead code
 
 ## JSON tools (`json.md`)
 
-- The JSON panel's Format / Minify / Validate buttons do nothing on a non-JSON-language tab whose text parses: the panel shows them (`src/components/panels/JsonPanel.tsx:311-313`) but `json.*` commands are disabled unless the language is JSON (`src/lib/commands.ts:538`; JSON-014.5).
 - "Too large" shows as Invalid: `getJsonTree` returns an error at offset 0 (`src/lib/jsonModel.ts:16`), so the panel shows the "Invalid" chip and a "Document too large for tree view — click to jump" button that jumps to line 1.
 - `docs/json.md:47` says the tree limit is 64 MB; the check is `doc.length` in UTF-16 code units (`jsonModel.ts:16`).
 - `docs/json.md:75` mentions "Valid JSONC ✓" only; a `.json5` file reports "Valid JSON5 ✓" (`commands.ts:382`).

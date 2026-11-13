@@ -718,7 +718,7 @@ Scenario: JSON-013.4 Invalid JSON
 - Files:
   - `src/lib/commands.ts` — `applyDefaultEnabled` (`json.*` → `hasJson`), `isBigJson`, `isCsvDoc`, `textDocOnly`, `runCommand` / `handleKeyEvent` (disabled commands are no-ops)
   - `src/components/MenuBar.tsx` — JSON menu items
-  - `src/components/panels/JsonPanel.tsx` — header buttons run the same commands
+  - `src/components/panels/JsonPanel.tsx` — header buttons run the same commands and are disabled when the command is (`getCommand` + `isEnabled`)
 - Tests: none
 - Docs: `docs/json.md`
 
@@ -753,6 +753,9 @@ Scenario: JSON-014.4 Large-file JSON tabs offer Validate only
 
 Scenario: JSON-014.5 Panel buttons obey the same rule
   Given a Plain Text tab whose text happens to parse as JSON, with the JSON panel open
-  When I click the panel's Format button
-  Then the document is unchanged
+  When I look at the panel header
+  Then the Format, Minify and Validate buttons are greyed out
+  And their tooltips say to set the language to JSON first
+  When I set the tab's language to JSON
+  Then the three buttons are enabled
 ```
