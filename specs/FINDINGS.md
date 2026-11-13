@@ -87,7 +87,6 @@ Not determined
 ## Large files (`large-files.md`)
 
 Possible bugs
-- A deferred go-to while indexing shows "Line N is out of range; jumped to line X" (`src/components/CommandPalette.tsx:256`) because the palette compares against the partial line count (`BigFileView.tsx:494`).
 - Ctrl+Enter and Delete are gated differently from Enter: Enter shows a friendly toast while indexing (`BigFileView.tsx:547`), Delete does nothing (`:552`), Ctrl+Enter surfaces Rust's raw error (`:546`); on a read-only UTF-16 tab Delete and Ctrl+Enter bypass `editGate`.
 - The status bar tooltip says "Large files are read and written as UTF-8" even when the label shows UTF-16LE/BE (`src/components/StatusBar.tsx:210`).
 

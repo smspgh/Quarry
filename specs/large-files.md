@@ -282,6 +282,14 @@ Scenario: BIG-005.5 The status bar position opens Go to Line
   Given a large-file tab is active
   When I click "Ln 12, Col 1" in the status bar
   Then the Go to Line prompt opens
+
+Scenario: BIG-005.6 Go to Line during indexing does not call the line out of range
+  Given a large file is being indexed and 1,000,000 lines are known so far
+  When I press Ctrl+G
+  Then the prompt shows "Go to line[:column]  (1–1000000+, still indexing)"
+  When I type "3000000" and press Enter
+  Then no "out of range" hint or toast appears
+  And the view jumps to line 3,000,000 once indexing has reached it, or to the last line if the file is shorter
 ```
 
 ## BIG-006: Find in a large file

@@ -112,7 +112,10 @@ export function CommandPalette() {
   const doc = activeDoc(useStore.getState());
   const totalLines = mode === "goto" ? (doc?.kind === "text" && editor.view ? editor.view.state.doc.lines : doc?.kind === "big" ? (doc.bigInfo?.totalLines ?? 0) : 0) : 0;
   const gotoParsed = mode === "goto" ? parseGoto(query) : null;
-  const gotoOutOfRange = !!gotoParsed && totalLines > 0 && (gotoParsed.line < 1 || gotoParsed.line > totalLines);
+  // While a large file is still being indexed its line count is only a lower bound: a later line is
+  // not out of range, the view jumps there once indexing reaches it.
+  const totalKnown = !(doc?.kind === "big" && !doc.bigInfo?.indexed);
+  const gotoOutOfRange = !!gotoParsed && totalLines > 0 && (gotoParsed.line < 1 || (totalKnown && gotoParsed.line > totalLines));
   useEffect(() => {
     if (mode !== "goto" || !gotoParsed || doc?.kind !== "text") return;
     const view = editor.view;
@@ -254,7 +257,7 @@ export function CommandPalette() {
       close();
       if (d?.kind === "big") import("../lib/bus").then(({ bus }) => bus.emit("big.goto", { line: p.line }));
       else editor.goTo(p.line, p.col);
-      if (totalLines > 0 && (p.line < 1 || p.line > totalLines)) useStore.getState().toast(`Line ${p.line} is out of range; jumped to line ${Math.max(1, Math.min(totalLines, p.line))}.`, "info", 2500);
+      if (totalLines > 0 && (p.line < 1 || (totalKnown && p.line > totalLines))) useStore.getState().toast(`Line ${p.line} is out of range; jumped to line ${Math.max(1, Math.min(totalLines, p.line))}.`, "info", 2500);
       return;
     }
     if (!it) return;
@@ -304,7 +307,7 @@ export function CommandPalette() {
             ? "Search files in folder by name…"
             : "Search open and recent files…"
           : totalLines > 0
-            ? `Go to line[:column]  (1–${totalLines})`
+            ? `Go to line[:column]  (1–${totalLines}${totalKnown ? "" : "+, still indexing"})`
             : "Go to line[:column]";
 
   const gotoHint = () => {
