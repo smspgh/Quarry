@@ -14538,6 +14538,7 @@
       "commands": [
         "file.close",
         "file.closeOthers",
+        "file.closeAll",
         "file.openToSide",
         "file.copyPath",
         "file.showInQuarryExplorer",
@@ -14613,6 +14614,10 @@
         {
           "id": "TAB-007.11",
           "title": "The same actions from the palette"
+        },
+        {
+          "id": "TAB-007.12",
+          "title": "Close All from a tab's menu"
         }
       ]
     },
@@ -14621,7 +14626,7 @@
       "title": "Preview tabs while browsing the Explorer",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 400,
+      "line": 406,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14674,7 +14679,7 @@
       "title": "Limit how many tabs are open",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 460,
+      "line": 466,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14740,7 +14745,7 @@
       "title": "Reopen a tab I closed",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 535,
+      "line": 541,
       "status": "draft",
       "commands": [
         "file.reopenClosedTab"
@@ -19187,7 +19192,8 @@
       "TAB-007"
     ],
     "file.closeAll": [
-      "TAB-006"
+      "TAB-006",
+      "TAB-007"
     ],
     "file.closeF4": [
       "TAB-005"

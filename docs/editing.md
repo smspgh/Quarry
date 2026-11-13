@@ -17,7 +17,7 @@
 ## Window layout
 
 - **Title bar.** By default it holds the Quarry mark and the menus (File, Edit, View, …). **Alt** or **F10** opens the menus from the keyboard, and **Alt+letter** opens one menu directly: hold Alt and each menu's letter is underlined (**Alt+F** File, **Alt+E** Edit, **Alt+O** Code, **Alt+N** Find, **Alt+I** Scripts, …).
-- **Tabs.** Once a document is open, its tab appears in a row above the title bar. The active tab is always highlighted with an accent bar and bold name. Right-click a tab for Close, Close Others, Copy Path, **Show in Quarry Explorer** and **Show in Windows Explorer** (the last three for saved files only).
+- **Tabs.** Once a document is open, its tab appears in a row above the title bar. The active tab is always highlighted with an accent bar and bold name. Right-click a tab for Close, Close Others, Close All, Copy Path, **Show in Quarry Explorer** and **Show in Windows Explorer** (the last three for saved files only).
   - **Close All Tabs / Close Others** ask once, before anything closes: "Save changes to 3 files?" with Save All, Don't Save and Cancel (and one "Stop … running tabs?" for Claude or terminal tabs still working). Cancel leaves every tab open.
   - **Reopen Closed Tab** (**Ctrl+Shift+T**, File menu) brings back the file tabs you closed, most recent first, with the cursor and scroll where they were. The last 20 are remembered; untitled, Claude, terminal, Compare and commit graph tabs are not, and files that were deleted since are skipped.
   - **More tabs than fit** wrap onto another row below, starting under the first tab, so every tab stays visible. The tab area grows a row at a time.

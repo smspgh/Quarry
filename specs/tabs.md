@@ -317,9 +317,9 @@ Scenario: TAB-006.8 Running tabs are confirmed once, before anything closes
 ## TAB-007: Act on a tab from its right-click menu
 
 - Status: draft
-- Commands: `file.close`, `file.closeOthers`, `file.openToSide`, `file.copyPath`, `file.showInQuarryExplorer`, `file.showInWindowsExplorer`, `compare.withSaved`, `compare.withSelected`, `compare.selectForCompare`, `compare.withClipboard`, `git.compareWithHead`, `git.fileHistory`
+- Commands: `file.close`, `file.closeOthers`, `file.closeAll`, `file.openToSide`, `file.copyPath`, `file.showInQuarryExplorer`, `file.showInWindowsExplorer`, `compare.withSaved`, `compare.withSelected`, `compare.selectForCompare`, `compare.withClipboard`, `git.compareWithHead`, `git.fileHistory`
 - Files:
-  - `src/components/TitleBar.tsx` — the `ctx-menu` in `Tab`: which items show for which document, closes on any mouse press or key outside; every item (and the tab's ×, middle-click and Delete) is `runCommand(id, { docId })` via `onTab`
+  - `src/components/TitleBar.tsx` — the `ctx-menu` in `Tab`: which items show for which document, closes on any mouse press or key outside; every item (and the tab's ×, middle-click and Delete) is `runCommand(id, { docId })` via `onTab`, except Close All, which is `runCommand("file.closeAll")`
   - `src/lib/commands.ts` — `docIdArg` (pure), `targetDoc` (the `{ docId }` tab, else the active one), `isEnabled(cmd, args)` / `Command.enabled(args)` so a command is judged against the tab it was given; `file.copyPath`, `file.openToSide`, `file.showInQuarryExplorer`, `file.showInWindowsExplorer` (enabled when the target document has a path)
   - `src/lib/gitCommands.ts` — `repoFile(args)` / `tracked(args)` for `git.compareWithHead`, `git.fileHistory`
   - `src/lib/macros.ts` — `recordableArgs` (pure): `recordCommand` drops `docId` from recorded arguments
@@ -340,12 +340,12 @@ Scenario: TAB-006.8 Running tabs are confirmed once, before anything closes
 Scenario: TAB-007.1 Menu for a saved text file
   Given "C:\work\a.txt" is open, has no unsaved changes and is not in a git repository
   When I right-click its tab
-  Then the menu offers Close (Ctrl+W), Close Others, Open to the Side, Select for Compare, Compare with Clipboard, Copy Path, Show in Quarry Explorer and Show in Windows Explorer
+  Then the menu offers Close (Ctrl+W), Close Others, Close All, Open to the Side, Select for Compare, Compare with Clipboard, Copy Path, Show in Quarry Explorer and Show in Windows Explorer
 
 Scenario: TAB-007.2 Menu for an untitled document
   Given "Untitled-1" is open
   When I right-click its tab
-  Then the menu offers Close, Close Others, Open to the Side and Compare with Clipboard
+  Then the menu offers Close, Close Others, Close All, Open to the Side and Compare with Clipboard
   And it has no Copy Path, Show in Quarry Explorer or Show in Windows Explorer
 
 Scenario: TAB-007.3 Items that depend on the document
@@ -356,7 +356,7 @@ Scenario: TAB-007.3 Items that depend on the document
 Scenario: TAB-007.4 Tabs that are not text documents
   Given a large-file tab "big.log" is open
   When I right-click its tab
-  Then the menu offers Close, Close Others, Copy Path, Show in Quarry Explorer and Show in Windows Explorer only
+  Then the menu offers Close, Close Others, Close All, Copy Path, Show in Quarry Explorer and Show in Windows Explorer only
 
 Scenario: TAB-007.5 Copy Path
   Given "C:\work\a.txt" is open
@@ -395,6 +395,12 @@ Scenario: TAB-007.11 The same actions from the palette
   Given "a.txt" is the active tab
   When I run "Copy Path of Active File" or "Open to the Side" from the command palette
   Then it acts on "a.txt"
+
+Scenario: TAB-007.12 Close All from a tab's menu
+  Given "a.txt" and "b.txt" have unsaved changes and "c.txt" has none
+  When I right-click any tab and choose Close All
+  Then it runs File › Close All Tabs: one question "Save changes to 2 files?" before anything closes (TAB-006)
+  And choosing Cancel leaves every tab open
 ```
 
 ## TAB-008: Preview tabs while browsing the Explorer

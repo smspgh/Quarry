@@ -123,6 +123,7 @@ function Tab({ doc, active, index, count }: { doc: Doc; active: boolean; index: 
         <div className="palette ctx-menu" style={{ position: "fixed", left: Math.min(menu.x, window.innerWidth - 228), top: menu.y, width: 220, zIndex: 300, padding: 4 }} onMouseDown={(e) => e.stopPropagation()}>
           <button className="palette-item" autoFocus onClick={() => { setMenu(null); void onTab("file.close", doc.id); }}><span className="title">Close</span><span className="kbd">Ctrl+W</span></button>
           <button className="palette-item" onClick={() => { setMenu(null); void onTab("file.closeOthers", doc.id); }}><span className="title">Close Others</span></button>
+          <button className="palette-item" onClick={() => { setMenu(null); void runCommand("file.closeAll"); }}><span className="title">Close All</span></button>
           {doc.kind === "text" && (
             <>
               <button className="palette-item" onClick={() => { setMenu(null); void onTab("file.openToSide", doc.id); }}><Columns2 size={13} /><span className="title">Open to the Side</span></button>
