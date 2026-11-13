@@ -9,7 +9,7 @@ export function BottomPanel() {
   const lines = useStore((s) => s.consoleLines);
   const set = useStore((s) => s.set);
   const clear = useStore((s) => s.clearConsole);
-  const tab = useStore((s) => (s.bottomTab === "problems" ? "problems" : "console"));
+  const tab = useStore((s) => s.bottomTab);
   const problemCount = useProblemCount();
   const bodyRef = useRef<HTMLDivElement>(null);
 

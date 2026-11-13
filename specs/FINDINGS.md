@@ -52,30 +52,17 @@ Doc / code mismatches
 
 ## Explorer and file operations (`explorer.md`)
 
-- The New File / New Folder name box is always drawn at the top of the tree at a fixed indent (`src/components/panels/ExplorerPanel.tsx:651-668`); `docs/editing.md:169` says items are "named inline".
-- `docs/editing.md:182-184` lists only arrows, Enter and type-ahead; the code also handles Home / End, PageUp / PageDown (15 rows), Space, F2, Delete and Ctrl+C / X / V (`ExplorerPanel.tsx:531-609`).
-- Not determined: what an open tab does after its file is deleted from the Explorer (`trashPaths`, `src/lib/fileOps.ts:72-90`, does not close or retarget tabs).
-- Needs a manual check: Escape in the rename / new-name box unmounts an input that also commits on blur (`ExplorerPanel.tsx:662-665`, `:763-766`); if WebView2 fires blur on removal the name could still be committed (EXPL-008.3, EXPL-009.4 state the intended behaviour).
-- Expanded folders are not saved in the session; `openFolder` resets them to the root (`src/lib/actions.ts:312`).
-- EXPL-016 lists `src/__tests__/splitGit.test.ts` on the strength of a grep for `kindOf` / `KIND_LETTER` only.
+- The New File / New Folder name box is always drawn at the top of the tree at a fixed indent (`src/components/panels/ExplorerPanel.tsx:662-680`); `docs/editing.md:169` says items are "named inline".
+- Expanded folders are not saved in the session; `openFolder` resets them to the root (`src/lib/actions.ts:313`).
 
 ## Application shell (`app-shell.md`)
 
 Possible bugs
-- The menu opens behind a dialog: the Alt / F10 listeners in `src/components/MenuBar.tsx:499-521` do not check `store.dialog`, unlike the shortcut guard at `src/App.tsx:105`.
-- The Explorer reopens floating on start: `src/lib/actions.ts:883-884` says only a pinned panel reopens, but restoring the session folder calls `openFolder` (`:892`), which sets `sidebarVisible: true, sidebarPanel: "explorer"` (`:312`).
-- Collapsed state is not persisted: `src/App.tsx:172` triggers a session save when `pinnedHidden` changes, but `buildSession` (`actions.ts:812-831`) does not write it.
-- Bottom-panel layout is not persisted (`bottomVisible`, `bottomHeight`, `bottomTab`); `bottomTab` defaults to `"results"` (`src/lib/store.ts:276`), which `BottomPanel` treats as Console.
-- Brand icon and Ctrl+B differ: with nothing pinned and nothing open, Ctrl+B reopens the last panel (`src/lib/panels.ts:77`), the brand icon does nothing (`src/components/TitleBar.tsx:164`; UI-014.4).
+- Collapsed state is not persisted: `src/App.tsx:172` triggers a session save when `pinnedHidden` changes, but `buildSession` (`actions.ts:813-832`) does not write it.
+- Bottom-panel layout is not persisted (`bottomVisible`, `bottomHeight`, `bottomTab`); it starts hidden, 220 px, on Console each time.
 
 Mismatches and notes
 - There are no menu mnemonics: only Alt / F10, arrows, Home / End, Enter / Space and Escape (UI-004).
-- `docs/editing.md:31` says a panel opens floating over the editor; it pushes the editor over (`src/styles/app.css:105`; UI-013.3).
-- `Doc.eol` can be `"CR"` (`store.ts:18`) but the picker offers only CRLF / LF (`src/components/StatusBar.tsx:194`).
-- `view.zoomReset` hard-codes 14 (`src/lib/commands.ts:904`) rather than `DEFAULT_SETTINGS.fontSize`.
-- `matchesRegistered` in `src/App.tsx:265-267` has a redundant branch and a `void editor;`; `ui.chordPending` is a placeholder that is never registered.
-- Window state (UI-024) rests on `tauri_plugin_window_state` defaults (`src-tauri/src/lib.rs:755`); the scenarios describe the plugin's defaults.
-- No tests: `resolveStroke` / `normalizeKeys` / `eventToKeys`, `dialogDefaultAction` / `dialogCancelAction`, `placePopup`, the dialog queue.
 
 ## Wording pass
 

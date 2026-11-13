@@ -180,7 +180,7 @@ Scenario: UI-003.7 Help menu
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/MenuBar.tsx` — `MenuBar` (lone Alt / F10 listener, Left / Right between menus, Escape, `openWithKeyboard`), `MenuList.onKeyDown` (Up / Down / Home / End, Right / Enter / Space into a submenu, Left out of it, Tab kept inside), `nextMenuIndex`, `ITEM_SELECTOR` (disabled items are skipped)
+  - `src/components/MenuBar.tsx` — `MenuBar` (lone Alt / F10 listener, ignored while `store.dialog` is set, Left / Right between menus, Escape, `openWithKeyboard`), `MenuList.onKeyDown` (Up / Down / Home / End, Right / Enter / Space into a submenu, Left out of it, Tab kept inside), `nextMenuIndex`, `ITEM_SELECTOR` (disabled items are skipped)
   - `src/editor/manager.ts` — `editor.focus()` when the menu closes
 - Tests: `src/__tests__/ui.test.ts`
 - Docs: `docs/keyboard-shortcuts.md`, `docs/editing.md`
@@ -238,6 +238,12 @@ Scenario: UI-004.7 Escape closes the whole menu
   Then every menu is closed
   And keyboard focus is in the active tab
   And Tab pressed while a menu is open does not move focus out of the menu
+
+Scenario: UI-004.8 Alt and F10 do nothing while a dialog is open
+  Given a dialog asks whether to save "notes.txt"
+  When I press and release Alt, or press F10
+  Then no menu opens
+  And the dialog keeps the keyboard focus
 ```
 
 ## UI-005: Command palette
@@ -473,7 +479,7 @@ Scenario: UI-008.4 Commands that are always available
   - `src/App.tsx` — capture-phase `onKey` handler (field, terminal, tab strip, Explorer tree and history-menu exceptions), `matchesRegistered` (which keys are swallowed)
   - `src/lib/commands.ts` — `handleKeyEvent`, `resolveStroke`, `normalizeKeys`, `eventToKeys` (physical key for letters and digits), `getCommandsForKeys`, `Command.when`, chord state (`CHORD_TIMEOUT_MS` 1500, `chordPrefixes`), `ui.escape`
   - `src/lib/bus.ts` — `palette.cancel` emitted by `ui.escape`
-- Tests: none
+- Tests: `src/__tests__/shell.test.ts`
 - Docs: `docs/keyboard-shortcuts.md`
 
 **As a** keyboard-driven user
@@ -555,7 +561,7 @@ Scenario: UI-009.9 Browser context menu is suppressed
   - `src/App.tsx` — `onKey` returns early while `store.dialog` is set, so no shortcut runs behind a dialog
   - `src/lib/store.ts` — `dialog`, `DialogAction`
   - `src/styles/app.css` — `.overlay`, `.dialog`, `.btn-primary`, `.btn-danger`
-- Tests: none
+- Tests: `src/__tests__/shell.test.ts`
 - Docs: none
 
 **As a** user being asked to confirm something
@@ -714,7 +720,7 @@ Scenario: UI-012.6 A panel keeps its contents while closed
   - `src/lib/panels.ts` — `isPinned`, `isAutoDocked`, `isDocked`, `floatingPanel`, `isPanelShown`, `setPinned`, `closePanel`
   - `src/components/Sidebar.tsx` — `PanelFrame` (pin button, close button, pin badge, dock order, Escape on a floating panel), `Sidebar` (mousedown outside closes the floating panel)
   - `src/lib/store.ts` — `pinnedPanels`, `searchDocked`, `sidebarVisible`, `sidebarPanel`
-  - `src/lib/actions.ts` — `buildSession` / `restoreSessionTabs` keep `pinnedPanels`
+  - `src/lib/actions.ts` — `buildSession` / `restoreSessionTabs` keep `pinnedPanels`; the session folder is reopened with `openFolder(..., { show: false })` so it does not show the Explorer
   - `src/styles/app.css` — `.panel-dock`, `.sidebar.floating`, `.sidebar.docked`, `.panel-pin-badge`, `.sidebar-pin`, `.sidebar-close`
 - Tests: `src/__tests__/panels.test.ts`
 - Docs: `docs/editing.md`
@@ -780,6 +786,12 @@ Scenario: UI-013.9 Pins survive a restart
   When I restart Quarry
   Then both panels are docked again in the same order
   And a panel that was open but not pinned is not reopened by the restart itself
+
+Scenario: UI-013.10 Restoring the open folder does not open the Explorer
+  Given a folder was open in the Explorer, and the Explorer is not pinned
+  When I restart Quarry with session restore on
+  Then the folder is open again in the Explorer
+  But no side panel is shown until I open one
 ```
 
 ## UI-014: Collapse and restore the side panels
@@ -788,7 +800,7 @@ Scenario: UI-013.9 Pins survive a restart
 - Commands: `view.toggleSidebar`
 - Files:
   - `src/lib/panels.ts` — `toggleAllPanels`, `collapsePanels`, `anyPanelShown`
-  - `src/components/TitleBar.tsx` — `Brand` button (labels "Collapse side panels" / "Show pinned panels" / "Quarry")
+  - `src/components/TitleBar.tsx` — `Brand` button (labels "Collapse side panels" / "Show pinned panels" / "Quarry"; deliberately inert with nothing pinned or open, where Ctrl+B reopens the last panel)
   - `src/lib/commands.ts` — `view.toggleSidebar` (Ctrl+B, "Collapse / Restore Side Panels")
   - `src/App.tsx` — store subscription: asking for a panel clears `pinnedHidden`
   - `src/lib/store.ts` — `pinnedHidden`
@@ -879,7 +891,7 @@ Scenario: UI-015.4 Settings always opens at 35% of the window
 - Files:
   - `src/components/BottomPanel.tsx` — `BottomPanel` (Console and Problems tabs, problem count, Clear console, close button, `startResize`, scroll to newest line)
   - `src/lib/commands.ts` — `view.togglePanel` (Ctrl+J), `view.problems` (shows the panel on the Problems tab)
-  - `src/lib/store.ts` — `bottomVisible`, `bottomTab`, `bottomHeight` (220), `consoleLines`, `log` (keeps about the last 2000 lines), `clearConsole`
+  - `src/lib/store.ts` — `bottomVisible`, `bottomTab` (`console` | `problems`, starts on `console`), `bottomHeight` (220), `consoleLines`, `log` (keeps about the last 2000 lines), `clearConsole`
   - `src/components/LspStatus.tsx` — `ProblemsList`, `useProblemCount` shown inside the Problems tab
   - `src/lib/scripting.ts` — opens the panel on the Console tab when a script writes output
   - `src/styles/app.css` — `.bottom-panel`, `.bottom-tabs`, `.bottom-resizer`, `.console-line`
@@ -981,14 +993,14 @@ Scenario: UI-017.5 No document
 - Status: draft
 - Commands: `view.setTabSize`, `file.setEncoding`, `file.setEol`
 - Files:
-  - `src/components/StatusBar.tsx` — `Picker` (popup above the item, keyboard handling, current value ticked, `openOn` bus events), `placePopup`, the four pickers and the Column button in `StatusBar`
-  - `src/lib/commands.ts` — `view.setTabSize` (1-16, else opens the picker), `file.setEncoding`, `file.setEol` (no argument from the palette opens the picker)
+  - `src/components/StatusBar.tsx` — `Picker` (popup above the item, keyboard handling, current value ticked, `openOn` bus events), `placePopup`, the four pickers (line endings offer CR only while the document uses it) and the Column button in `StatusBar`
+  - `src/lib/commands.ts` — `view.setTabSize` (1-16, else opens the picker), `file.setEncoding`, `file.setEol` (CRLF / LF / CR; no argument from the palette opens the picker)
   - `src/lib/bus.ts` — `status.tabSize`, `status.encoding`, `status.eol` events
   - `src/lib/types.ts` — `ENCODINGS`, `Settings.tabSize`, `Settings.insertSpaces`
   - `src/editor/manager.ts` — `editor.setLanguage`, `editor.applySettings`
   - `src/editor/cmSetup.ts` — `allLanguageNames` for the language picker
   - `src/styles/app.css` — `.status-popup`, `.status-item.clickable`
-- Tests: none
+- Tests: `src/__tests__/shell.test.ts`
 - Docs: `docs/editing.md`, `docs/settings.md`
 
 **As a** user
@@ -1050,6 +1062,12 @@ Scenario: UI-018.8 Column mode button
   Given a text document is active
   When I click "Column" in the status bar
   Then column mode turns on and the button reads "COLUMN" in the accent colour
+
+Scenario: UI-018.9 A CR-only file keeps CR in the line-ending picker
+  Given a text file with CR-only (classic Mac) line endings is active
+  When I click "CR" in the status bar
+  Then the picker lists "CRLF", "LF" and "CR", with "CR" ticked
+  And for a CRLF or LF document the picker lists only "CRLF" and "LF"
 ```
 
 ## UI-019: Light and dark themes
@@ -1112,7 +1130,7 @@ Scenario: UI-019.6 Windows accessibility settings
 - Status: draft
 - Commands: `view.zoomIn`, `view.zoomInPlus`, `view.zoomOut`, `view.zoomReset`, `view.toggleWrap`, `view.toggleWhitespace`
 - Files:
-  - `src/lib/commands.ts` — `view.zoomIn` (Ctrl+=), `view.zoomInPlus` (Ctrl+Plus, hidden duplicate), `view.zoomOut` (Ctrl+-), `view.zoomReset` (Ctrl+0), `view.toggleWrap` (Alt+Z), `view.toggleWhitespace`; each updates the setting, applies it and saves it
+  - `src/lib/commands.ts` — `view.zoomIn` (Ctrl+=), `view.zoomInPlus` (Ctrl+Plus, hidden duplicate), `view.zoomOut` (Ctrl+-), `view.zoomReset` (Ctrl+0, back to `DEFAULT_SETTINGS.fontSize`), `view.toggleWrap` (Alt+Z), `view.toggleWhitespace`; each updates the setting, applies it and saves it
   - `src/lib/actions.ts` — `persistSettings`
   - `src/editor/manager.ts` — `editor.applySettings`
   - `src/lib/types.ts` — `Settings.fontSize` (14), `Settings.wordWrap`, `Settings.renderWhitespace`
@@ -1144,7 +1162,7 @@ Scenario: UI-020.2 Zoom limits
 Scenario: UI-020.3 Reset zoom
   Given the editor font size is 22
   When I press Ctrl+0
-  Then the editor font size is 14
+  Then the editor font size is 14, the default font size
 
 Scenario: UI-020.4 Zoom is remembered
   Given I zoomed to font size 18
@@ -1331,7 +1349,7 @@ Scenario: UI-023.7 Drop files on the window
 - Status: draft
 - Commands: none
 - Files:
-  - `src-tauri/src/lib.rs` — `run` registers `tauri_plugin_window_state` with its default settings
+  - `src-tauri/src/lib.rs` — `run` registers `tauri_plugin_window_state` with its default settings (plugin 2.5: every `StateFlags` flag, saved on close and on exit to `.window-state.json` in the app config folder; a saved position is applied only if it overlaps a connected monitor)
   - `src-tauri/capabilities/default.json` — `window-state:default` permission
   - `src-tauri/tauri.conf.json` — first-run window: 1280 x 820, centred, minimum 720 x 400
 - Tests: none
@@ -1360,6 +1378,12 @@ Scenario: UI-024.3 Maximized state comes back
 Scenario: UI-024.4 Minimum size
   When I drag the window smaller
   Then it cannot become smaller than 720 x 400
+
+Scenario: UI-024.5 A monitor that is gone
+  Given I closed Quarry with its window on a second monitor
+  And that monitor is no longer connected
+  When I start Quarry
+  Then the window keeps its saved size but is placed on a connected screen
 ```
 
 ## UI-025: Notice after an unexpected exit

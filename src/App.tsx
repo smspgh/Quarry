@@ -18,7 +18,7 @@ import { Dialog, Toasts } from "./components/Toasts";
 import { Welcome } from "./components/Welcome";
 import { editor } from "./editor/manager";
 import { flushSession, installCloseGuard, loadSettings, openPath, restoreSession, saveSession, installExternalChangeWatch } from "./lib/actions";
-import { handleKeyEvent, registerAllCommands } from "./lib/commands";
+import { eventToKeys, getCommandsForKeys, handleKeyEvent, registerAllCommands } from "./lib/commands";
 import { appIpc, big } from "./lib/ipc";
 import { installClaudeEvents } from "./lib/claude";
 import { installLsp } from "./lib/lsp";
@@ -251,7 +251,7 @@ export default function App() {
   );
 }
 
-import { eventToKeys, getCommandsForKeys } from "./lib/commands";
+/** True when the key event is a registered shortcut that should be kept from the page. */
 function matchesRegistered(e: KeyboardEvent): boolean {
   const k = eventToKeys(e);
   if (!k) return false;
@@ -262,7 +262,5 @@ function matchesRegistered(e: KeyboardEvent): boolean {
     const s = useStore.getState();
     return !!(s.palette || s.findBar.open);
   }
-  if (k === "Ctrl+Tab" || k === "Ctrl+Shift+Tab") return true;
-  void editor;
   return true;
 }

@@ -64,7 +64,7 @@ import { clipboardText, cutSpec, foldLineSpec, foldTreeSpec, pasteSpec } from ".
 import { bindAppKeyFallback, bindCommandRunner, guarded, pausePlayback, playDetail, playSteps, playToEnd, recordCommand, stageMacros, startRecording, stopPlayback, stopRecording, TO_END_DETAIL } from "./macros";
 import { readScript, runScript, runScriptTimes, runScriptToEnd, scriptNameOf, SCRIPT_API_HELP } from "./scripting";
 import { activeDoc, useStore, type SidebarPanel } from "./store";
-import type { Macro, Script } from "./types";
+import { DEFAULT_SETTINGS, type Macro, type Script } from "./types";
 import { undoReplaceInFiles } from "./replaceUndo";
 import { focusPane, toggleSplit } from "./split";
 import { registerGitCommands } from "./gitCommands";
@@ -181,6 +181,7 @@ export function prettyKeys(keys: string): string {
 
 // Two-key chord state ("Ctrl+K" pressed, waiting for the second stroke).
 const CHORD_TIMEOUT_MS = 1500;
+// Never registered: getCommandsForKeys returns it so App.tsx swallows a chord's strokes.
 const CHORD_PLACEHOLDER: Command = { id: "ui.chordPending", title: "Chord pending", category: "View", hidden: true, run: () => true };
 let pendingChord: string | null = null;
 let chordTimer = 0;
@@ -603,7 +604,8 @@ export function registerAllCommands() {
     run: (args) => {
       const d = textDoc();
       if (!d) return false;
-      if (args !== "CRLF" && args !== "LF") return void bus.emit("status.eol");
+      // CR (classic Mac) is only offered while the document uses it, but it is a valid choice.
+      if (args !== "CRLF" && args !== "LF" && args !== "CR") return void bus.emit("status.eol");
       if (args !== d.eol) s().updateDoc(d.id, { eol: args, dirty: true });
     },
   });
@@ -901,7 +903,7 @@ export function registerAllCommands() {
   register({ id: "view.zoomIn", title: "Zoom In", category: "View", keys: "Ctrl+=", run: () => { s().updateSettings({ fontSize: Math.min(40, s().settings.fontSize + 1) }); editor.applySettings(s().settings); persistSettings(); } });
   register({ id: "view.zoomInPlus", title: "Zoom In", category: "View", keys: "Ctrl+Plus", hidden: true, run: () => runCommand("view.zoomIn") });
   register({ id: "view.zoomOut", title: "Zoom Out", category: "View", keys: "Ctrl+-", run: () => { s().updateSettings({ fontSize: Math.max(8, s().settings.fontSize - 1) }); editor.applySettings(s().settings); persistSettings(); } });
-  register({ id: "view.zoomReset", title: "Reset Zoom", category: "View", keys: "Ctrl+0", run: () => { s().updateSettings({ fontSize: 14 }); editor.applySettings(s().settings); persistSettings(); } });
+  register({ id: "view.zoomReset", title: "Reset Zoom", category: "View", keys: "Ctrl+0", run: () => { s().updateSettings({ fontSize: DEFAULT_SETTINGS.fontSize }); editor.applySettings(s().settings); persistSettings(); } });
   register({
     id: "view.toggleTheme",
     title: "Toggle Light/Dark Theme",

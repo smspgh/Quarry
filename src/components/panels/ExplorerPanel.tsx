@@ -321,10 +321,19 @@ export function FileTree({ variant }: { variant?: TreeVariant }) {
 
   // Enter commits, and so does the blur that follows when the new file opens in the editor: once only.
   const committingCreate = useRef(false);
+  // Set by Escape and once a name box has been dealt with: a blur that arrives as the box is
+  // removed (stale closure, same name) must not create or rename anything.
+  const createClosed = useRef(false);
+  const renameClosed = useRef(false);
+  const closeCreate = () => {
+    createClosed.current = true;
+    setCreating(null);
+    setNewName("");
+  };
   const commitCreate = async () => {
-    if (committingCreate.current) return;
+    if (committingCreate.current || createClosed.current) return;
     if (!creating || !newName.trim()) {
-      setCreating(null);
+      closeCreate();
       return;
     }
     const problem = fileNameProblem(newName.trim());
@@ -338,8 +347,7 @@ export function FileTree({ variant }: { variant?: TreeVariant }) {
     try {
       if (await fs.exists(path)) {
         toast(`${made.name} already exists`, "error");
-        setCreating(null);
-        setNewName("");
+        closeCreate();
         return;
       }
       if (creating.kind === "dir") await fs.createDir(path);
@@ -354,17 +362,19 @@ export function FileTree({ variant }: { variant?: TreeVariant }) {
     } finally {
       committingCreate.current = false;
     }
-    setCreating(null);
-    setNewName("");
+    closeCreate();
   };
 
   const startRename = (entry: DirEntry) => {
     setMenu(null);
+    renameClosed.current = false;
     setRenaming(entry.path);
     setRenameName(entry.name);
   };
 
   const commitRename = async () => {
+    if (renameClosed.current) return;
+    renameClosed.current = true;
     const from = renaming;
     setRenaming(null);
     const name = renameName.trim();
@@ -507,6 +517,7 @@ export function FileTree({ variant }: { variant?: TreeVariant }) {
   };
   const deleteSelection = () => void trashPaths(selection(), isDirPath).then(afterDelete);
   const startCreate = (kind: "file" | "dir", dir = targetDir()) => {
+    createClosed.current = false;
     setCreating({ dir, kind });
     setNewName("");
   };
@@ -659,7 +670,7 @@ export function FileTree({ variant }: { variant?: TreeVariant }) {
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") void commitCreate();
-                if (e.key === "Escape") setCreating(null);
+                if (e.key === "Escape") closeCreate();
                 e.stopPropagation();
               }}
               onBlur={() => void commitCreate()}
@@ -760,7 +771,10 @@ export function FileTree({ variant }: { variant?: TreeVariant }) {
                   onClick={(e) => e.stopPropagation()}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") void commitRename();
-                    if (e.key === "Escape") setRenaming(null);
+                    if (e.key === "Escape") {
+                      renameClosed.current = true;
+                      setRenaming(null);
+                    }
                     e.stopPropagation();
                   }}
                   onBlur={() => void commitRename()}

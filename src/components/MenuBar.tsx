@@ -504,9 +504,14 @@ export function MenuBar({ inline = false, overlay = false }: { inline?: boolean;
   }, [openIdx, byKeyboard]);
 
   // A lone Alt press (no other key while held) or F10 opens the first menu, like classic Win32 apps.
+  // Not while a modal dialog is open: it owns the keyboard, as in App.tsx's shortcut guard.
   useEffect(() => {
     let altOnly = false;
     const down = (e: KeyboardEvent) => {
+      if (useStore.getState().dialog) {
+        altOnly = false;
+        return;
+      }
       altOnly = e.key === "Alt" && !e.ctrlKey && !e.shiftKey;
       if (e.key === "F10" && !e.ctrlKey && !e.altKey && !e.shiftKey) {
         e.preventDefault();
@@ -514,7 +519,7 @@ export function MenuBar({ inline = false, overlay = false }: { inline?: boolean;
       }
     };
     const up = (e: KeyboardEvent) => {
-      if (e.key === "Alt" && altOnly) {
+      if (e.key === "Alt" && altOnly && !useStore.getState().dialog) {
         e.preventDefault();
         openWithKeyboard(openIdx === null ? 0 : null);
       }

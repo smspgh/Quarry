@@ -4918,7 +4918,7 @@
       "title": "Rename a file or folder",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 446,
+      "line": 448,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4964,6 +4964,10 @@
         {
           "id": "EXPL-009.8",
           "title": "Rename is for one item"
+        },
+        {
+          "id": "EXPL-009.9",
+          "title": "Enter renames once"
         }
       ]
     },
@@ -4972,7 +4976,7 @@
       "title": "Delete files and folders to the Recycle Bin",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 508,
+      "line": 517,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5007,6 +5011,10 @@
         {
           "id": "EXPL-010.5",
           "title": "An item that cannot be deleted does not stop the others"
+        },
+        {
+          "id": "EXPL-010.6",
+          "title": "An open tab of a deleted file stays open"
         }
       ]
     },
@@ -5015,7 +5023,7 @@
       "title": "Cut, copy and paste files through the Windows clipboard",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 559,
+      "line": 574,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5085,7 +5093,7 @@
       "title": "Copy a path or a name as text",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 655,
+      "line": 670,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5116,7 +5124,7 @@
       "title": "Show a file in Windows File Explorer",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 689,
+      "line": 704,
       "status": "draft",
       "commands": [
         "file.showInWindowsExplorer"
@@ -5151,7 +5159,7 @@
       "title": "Open all files of a folder or a selection",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 723,
+      "line": 738,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5191,7 +5199,7 @@
       "title": "Start Find in Files from the Explorer",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 765,
+      "line": 780,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5228,7 +5236,7 @@
       "title": "Git status in the tree",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 802,
+      "line": 817,
       "status": "draft",
       "commands": [],
       "files": [
@@ -5263,7 +5271,7 @@
       "title": "The file right-click menu",
       "area": "EXPL",
       "spec": "specs/explorer.md",
-      "line": 843,
+      "line": 858,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15060,6 +15068,10 @@
         {
           "id": "UI-004.7",
           "title": "Escape closes the whole menu"
+        },
+        {
+          "id": "UI-004.8",
+          "title": "Alt and F10 do nothing while a dialog is open"
         }
       ]
     },
@@ -15068,7 +15080,7 @@
       "title": "Command palette",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 243,
+      "line": 249,
       "status": "draft",
       "commands": [
         "view.commandPalette",
@@ -15124,7 +15136,7 @@
       "title": "Quick Open a file by name",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 309,
+      "line": 315,
       "status": "draft",
       "commands": [
         "file.quickOpen"
@@ -15170,7 +15182,7 @@
       "title": "Go to Line from the palette",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 359,
+      "line": 365,
       "status": "draft",
       "commands": [
         "goto.line"
@@ -15223,7 +15235,7 @@
       "title": "One command registry behind menus, shortcuts and the palette",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 423,
+      "line": 429,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15260,7 +15272,7 @@
       "title": "Global keyboard shortcuts",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 468,
+      "line": 474,
       "status": "draft",
       "commands": [
         "ui.escape"
@@ -15270,7 +15282,9 @@
         "src/lib/commands.ts",
         "src/lib/bus.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/shell.test.ts"
+      ],
       "docs": [
         "docs/keyboard-shortcuts.md"
       ],
@@ -15318,7 +15332,7 @@
       "title": "Modal dialogs",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 548,
+      "line": 554,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15328,7 +15342,9 @@
         "src/lib/store.ts",
         "src/styles/app.css"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/shell.test.ts"
+      ],
       "docs": [],
       "scenarios": [
         {
@@ -15362,7 +15378,7 @@
       "title": "Notifications",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 610,
+      "line": 616,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15397,7 +15413,7 @@
       "title": "Panel rail",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 650,
+      "line": 656,
       "status": "draft",
       "commands": [
         "view.explorer",
@@ -15454,7 +15470,7 @@
       "title": "Floating and pinned side panels",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 709,
+      "line": 715,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15506,6 +15522,10 @@
         {
           "id": "UI-013.9",
           "title": "Pins survive a restart"
+        },
+        {
+          "id": "UI-013.10",
+          "title": "Restoring the open folder does not open the Explorer"
         }
       ]
     },
@@ -15514,7 +15534,7 @@
       "title": "Collapse and restore the side panels",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 785,
+      "line": 797,
       "status": "draft",
       "commands": [
         "view.toggleSidebar"
@@ -15557,7 +15577,7 @@
       "title": "Side panel widths",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 830,
+      "line": 842,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15596,7 +15616,7 @@
       "title": "Bottom panel",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 875,
+      "line": 887,
       "status": "draft",
       "commands": [
         "view.togglePanel",
@@ -15647,7 +15667,7 @@
       "title": "Status bar position and document facts",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 932,
+      "line": 944,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15689,7 +15709,7 @@
       "title": "Status bar pickers for indentation, encoding, line endings and language",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 979,
+      "line": 991,
       "status": "draft",
       "commands": [
         "view.setTabSize",
@@ -15705,7 +15725,9 @@
         "src/editor/cmSetup.ts",
         "src/styles/app.css"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/shell.test.ts"
+      ],
       "docs": [
         "docs/editing.md",
         "docs/settings.md"
@@ -15742,6 +15764,10 @@
         {
           "id": "UI-018.8",
           "title": "Column mode button"
+        },
+        {
+          "id": "UI-018.9",
+          "title": "A CR-only file keeps CR in the line-ending picker"
         }
       ]
     },
@@ -15750,7 +15776,7 @@
       "title": "Light and dark themes",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1055,
+      "line": 1073,
       "status": "draft",
       "commands": [
         "view.toggleTheme"
@@ -15800,7 +15826,7 @@
       "title": "Zoom and editor view toggles",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1110,
+      "line": 1128,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -15858,7 +15884,7 @@
       "title": "Keyboard focus returns to the active tab",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1174,
+      "line": 1192,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15904,7 +15930,7 @@
       "title": "Tab key can leave the editor",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1225,
+      "line": 1243,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -15944,7 +15970,7 @@
       "title": "Single instance and files handed over by Windows",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1270,
+      "line": 1288,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15996,7 +16022,7 @@
       "title": "Window size and position are remembered",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1329,
+      "line": 1347,
       "status": "draft",
       "commands": [],
       "files": [
@@ -16022,6 +16048,10 @@
         {
           "id": "UI-024.4",
           "title": "Minimum size"
+        },
+        {
+          "id": "UI-024.5",
+          "title": "A monitor that is gone"
         }
       ]
     },
@@ -16030,7 +16060,7 @@
       "title": "Notice after an unexpected exit",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1365,
+      "line": 1389,
       "status": "draft",
       "commands": [],
       "files": [
@@ -18412,6 +18442,11 @@
     ],
     "src/__tests__/search-budget.test.ts": [
       "SEARCH-007"
+    ],
+    "src/__tests__/shell.test.ts": [
+      "UI-009",
+      "UI-010",
+      "UI-018"
     ],
     "src/__tests__/splitGit.test.ts": [
       "CONFLICT-009",
