@@ -5,7 +5,8 @@ import { describeCopiedPath, formatPath, nodeAtOffset, parseJsonTree, pathSegmen
 import { activeDoc, useStore } from "./store";
 
 const cache = new Map<string, { doc: Text; outcome: ParseOutcome }>();
-const MAX_TREE_BYTES = 64 * 1024 * 1024;
+/** Measured in characters (UTF-16 code units, `Text.length`), not bytes: 64 MB of ASCII. */
+const MAX_TREE_CHARS = 64 * 1024 * 1024;
 
 /** Parse (cached per document version) the JSON tree for a text document. */
 export function getJsonTree(docId: string): ParseOutcome | null {
@@ -13,7 +14,7 @@ export function getJsonTree(docId: string): ParseOutcome | null {
   if (!doc) return null;
   const hit = cache.get(docId);
   if (hit && hit.doc === doc) return hit.outcome;
-  if (doc.length > MAX_TREE_BYTES) return { root: null, error: null, tooLarge: true };
+  if (doc.length > MAX_TREE_CHARS) return { root: null, error: null, tooLarge: true };
   const outcome = parseJsonTree(doc.toString());
   cache.set(docId, { doc, outcome });
   return outcome;

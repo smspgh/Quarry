@@ -115,7 +115,7 @@ Scenario: JSON-002.6 Double-click toggles a container
 - Files:
   - `src/components/panels/JsonPanel.tsx` — status chip (Parsed / Lenient / Invalid / Too large / Empty document / Not JSON), `lastGood` stale tree, error button → `editor.goTo`
   - `src/lib/jsonPath.ts` — `parseJsonTree` (tolerant parser, `lenient` reason, `maxNodes` 2,000,000 → `tooLarge`, iterative so depth is not limited by the call stack)
-  - `src/lib/jsonModel.ts` — `MAX_TREE_BYTES` (64 MB) in `getJsonTree` → `tooLarge`
+  - `src/lib/jsonModel.ts` — `MAX_TREE_CHARS` (64 Mi characters, counted as UTF-16 code units, not bytes) in `getJsonTree` → `tooLarge`
 - Tests: `src/__tests__/hostile.test.ts`, `src/__tests__/text.test.ts`
 - Docs: `docs/json.md`
 
@@ -158,7 +158,7 @@ Scenario: JSON-003.5 Empty and non-JSON documents
   Then the chip reads "Invalid" and no tree is shown
 
 Scenario: JSON-003.6 Size limits
-  Given a document longer than 64 MB, or one with more than 2,000,000 values
+  Given a document longer than 64 million characters (67,108,864), or one with more than 2,000,000 values
   When I open the JSON panel
   Then no tree is built, and no earlier tree of that document stays visible
   And the chip reads "Too large", not "Invalid"

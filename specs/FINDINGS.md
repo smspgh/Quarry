@@ -102,7 +102,6 @@ Doc / code mismatches and dead code
 
 ## JSON tools (`json.md`)
 
-- `docs/json.md:47` says the tree limit is 64 MB; the check is `doc.length` in UTF-16 code units (`jsonModel.ts:16`).
 - `docs/json.md:75` mentions "Valid JSONC ✓" only; a `.json5` file reports "Valid JSON5 ✓" (`commands.ts:382`).
 
 ## Scripts (`scripting.md`)

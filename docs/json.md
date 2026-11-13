@@ -45,7 +45,7 @@ Opening a JSON file shows the JSON panel when that panel is pinned (see [Window 
   - **Too large**: over the size limit below, so there is no tree.
   - **Not JSON** or **Empty**.
 - **While you edit.** If the document stops being valid JSON, the last good tree stays visible, dimmed, until it parses again.
-- **Size limit.** Documents over 64 MB or 2,000,000 nodes don't get a tree.
+- **Size limit.** Documents over 64 million characters (about 64 MB of plain ASCII text) or 2,000,000 nodes don't get a tree.
 
 The tree's parser is tolerant on purpose so it keeps working while you type. It accepts `//` and `/* */` comments, trailing commas, single-quoted strings, unquoted keys, and `NaN` / `Infinity` / hex numbers. **Validate** and **Format** are strict, as described below.
 

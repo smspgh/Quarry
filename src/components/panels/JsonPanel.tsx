@@ -321,7 +321,7 @@ export function JsonPanel() {
           {err ? (
             <span className="chip danger" title={err.message}><XCircle size={12} /> Invalid</span>
           ) : outcome?.tooLarge ? (
-            <span className="chip" title="Over 64 MB or 2,000,000 values: no tree is built. Validate and Format still work.">Too large</span>
+            <span className="chip" title="Over 64 million characters or 2,000,000 values: no tree is built. Validate and Format still work.">Too large</span>
           ) : outcome?.root && outcome.lenient ? (
             <span className="chip warning" title={`Parsed leniently: ${outcome.lenient.reason} at line ${lineAt(outcome.lenient.offset)}. Validate and Format need strict JSON.`}><AlertTriangle size={12} /> Lenient</span>
           ) : outcome?.root ? (
@@ -349,7 +349,7 @@ export function JsonPanel() {
             {err.message} — click to jump
           </button>
         )}
-        {outcome?.tooLarge && <div className="panel-note" style={{ padding: 0 }}>Document too large for tree view (over 64 MB or 2,000,000 values).</div>}
+        {outcome?.tooLarge && <div className="panel-note" style={{ padding: 0 }}>Document too large for tree view (over 64 million characters or 2,000,000 values).</div>}
       </div>
       <div
         className={`panel-body json-tree ${stale ? "stale" : ""}`}
