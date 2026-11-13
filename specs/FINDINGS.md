@@ -126,7 +126,6 @@ Doc / code mismatches and dead code
 ## Source control (`git.md`)
 
 Possible bugs
-- `git.refresh` does not rediscover a new repository: `src/lib/gitCommands.ts:81` calls `refreshGit(0)`, which skips folders cached in `notRepo` (`src/lib/git.ts:156`); only the panel's Refresh button clears the cache (`rescanGit`, `src/components/panels/GitPanel.tsx:470`). `docs/git.md:5` says the menu command handles the `git init` case.
 - "Git was not found … then click Refresh" cannot recover: availability is re-checked only while `null` (`git.ts:149-150`).
 - Status errors are swallowed: `find_root` returns an error for "dubious ownership" (`src-tauri/src/git.rs:219-232`), but `doRefresh` turns any rejection into "not a repository" and caches it (`git.ts:157-161`); a transient `git status` failure may be cached the same way.
 - Ctrl+Enter in the message box ignores the Commit button's disabled state (`GitPanel.tsx:535-540`); it ends in a toast, not a bad commit.

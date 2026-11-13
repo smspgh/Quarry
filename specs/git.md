@@ -16,7 +16,7 @@ Git in the editor (change markers, peek / revert, line blame), the Source Contro
   - `src/lib/gitApi.ts` — `git.available`, `git.status`, `GitStatus` / `GitFile`
   - `src-tauri/src/git.rs` — `git_available`, `git_status`, `find_root`, `parse_status`, `git()` (`--no-optional-locks`, `GIT_TERMINAL_PROMPT=0`)
   - `src/components/panels/GitPanel.tsx` — header Refresh button (`rescanGit`), "Git was not found" / "not in a git repository" notes
-  - `src/lib/gitCommands.ts` — `git.refresh`
+  - `src/lib/gitCommands.ts` — `git.refresh` (runs `rescanGit`, like the panel's Refresh button)
   - `src/App.tsx` — calls `installGit()` at start-up
 - Tests: `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
@@ -44,7 +44,7 @@ Scenario: GIT-001.3 Status follows saves, file changes, git actions and window f
 
 Scenario: GIT-001.4 Refresh after git init in a terminal
   Given the open folder was not a repository and I ran "git init" in a terminal
-  When I click the Refresh button in the Source Control header
+  When I click the Refresh button in the Source Control header, or choose Git › Refresh Git Status
   Then folders that were remembered as "not a repository" are asked again and the new repository appears
 
 Scenario: GIT-001.5 Git is not installed

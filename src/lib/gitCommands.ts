@@ -5,7 +5,7 @@ import { accept, acceptAll, conflictAtCursor, conflictsOf, gotoConflict } from "
 import type { ConflictChoice } from "./conflicts";
 import type { EditorView } from "@codemirror/view";
 import { register } from "./commands";
-import { compareWithHead, currentRepo, checkout, openGraph, resolveConflicts, fileStatus, pickBranch, refreshGit, remote, repoOf, showAddRemote, showHistory, stage, toggleBlame, unstage, useGit } from "./git";
+import { compareWithHead, currentRepo, checkout, openGraph, resolveConflicts, fileStatus, pickBranch, remote, repoOf, rescanGit, showAddRemote, showHistory, stage, toggleBlame, unstage, useGit } from "./git";
 import { showPanel } from "./panels";
 import { activeDoc, useStore } from "./store";
 
@@ -78,7 +78,7 @@ export function registerGitCommands() {
   register({ id: "git.acceptAllIncoming", title: "Accept All Incoming in This File", category: "Git", enabled: hasConflicts, run: acceptEvery("incoming") });
   register({ id: "git.showPanel", title: "Show Source Control", category: "Git", keys: "Ctrl+Shift+G", run: () => showPanel("git") });
   register({ id: "git.graph", title: "Show Commit Graph", category: "Git", enabled: hasRepo, run: () => openGraph() });
-  register({ id: "git.refresh", title: "Refresh Git Status", category: "Git", run: () => refreshGit(0) });
+  register({ id: "git.refresh", title: "Refresh Git Status", category: "Git", run: rescanGit });
   register({ id: "git.switchBranch", title: "Switch Branch…", category: "Git", enabled: hasRepo, run: () => void pickBranch() });
   register({ id: "git.checkoutTo", title: "Switch to Branch", category: "Git", hidden: true, run: (name) => void (typeof name === "string" && checkout(name)) });
   register({ id: "git.createBranch", title: "Create Branch", category: "Git", hidden: true, run: (name) => void (typeof name === "string" && checkout(name, true)) });
