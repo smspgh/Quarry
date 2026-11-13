@@ -6,7 +6,6 @@ This file is not a spec: `scripts/specs-index.mjs` ignores it.
 
 ## Tabs and split editor (`tabs.md`, `split.md`)
 
-- Tab reordering, reopen closed tab and back/forward navigation do not exist (no stories).
 - Tab context menu items (Close, Close Others, Open to the Side, Copy Path, Show in…, Compare with Last Commit, Show File History) call action functions directly (`src/components/TitleBar.tsx:124-149`), against the rule that every user action goes through `runCommand`; the macro recorder does not see them.
 
 ## Find and replace in a document (`find.md`)

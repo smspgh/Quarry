@@ -104,6 +104,7 @@ const MENUS: Menu[] = [
       { cmd: "file.close" },
       { cmd: "file.closeOthers" },
       { cmd: "file.closeAll" },
+      { cmd: "file.reopenClosedTab" },
       { sep: true },
       { cmd: "app.exit" },
     ],

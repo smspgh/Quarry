@@ -52,7 +52,7 @@ It prints each story's id, title and `spec file:line` (and, for a story id, its 
 | `SEARCH` | Find in Files | [search.md](search.md) | 16 |
 | `SET` | Settings | [settings.md](settings.md) | 18 |
 | `SPLIT` | Split Editor | [split.md](split.md) | 7 |
-| `TAB` | Tabs | [tabs.md](tabs.md) | 9 |
+| `TAB` | Tabs | [tabs.md](tabs.md) | 10 |
 | `TERM` | Claude CLI Terminal Tabs | [terminal.md](terminal.md) | 9 |
 | `UI` | Application Shell | [app-shell.md](app-shell.md) | 25 |
 | `UPD` | Updates and About | [updates.md](updates.md) | 7 |

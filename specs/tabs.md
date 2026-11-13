@@ -5,7 +5,7 @@ prefix: TAB
 
 # Tabs
 
-The tab strip: what a tab shows, switching and closing tabs, the right-click menu, preview tabs and the open-tab limit. Tabs keep the order they were opened in; there is no drag reordering, no "reopen closed tab" and no back / forward navigation history. User documentation: `docs/editing.md` (Window layout) and `docs/keyboard-shortcuts.md`.
+The tab strip: what a tab shows, switching and closing tabs, the right-click menu, preview tabs and the open-tab limit. Tabs keep the order they were opened in. Drag reordering and back / forward navigation history are deliberately not built (owner decision, 2026-11); a closed file tab can be reopened (TAB-010). User documentation: `docs/editing.md` (Window layout) and `docs/keyboard-shortcuts.md`.
 
 ## TAB-001: See the open documents in the tab strip
 
@@ -511,4 +511,60 @@ Scenario: TAB-009.10 The setting's bounds
   Given Settings is open
   When I enter 0 or 5000 for Maximum open tabs
   Then the value is kept within 1 to 1000
+```
+
+## TAB-010: Reopen a tab I closed
+
+- Status: draft
+- Commands: `file.reopenClosedTab`
+- Files:
+  - `src/lib/closedTabs.ts` — `pushClosed` (newest last, one entry per path, at most 20), `popClosed` (skips and drops entries that are open again or gone)
+  - `src/lib/actions.ts` — `rememberClosed` in `closeDocument` (file-backed text and large-file tabs only; cursor and scroll of a text tab; `remember` = false for a preview replaced by the next one), `reopenClosedTab` (`fs.stat`, `openPath`, `editor.restoreViewState`), `hasClosedTabs`
+  - `src/lib/commands.ts` — `file.reopenClosedTab` (Ctrl+Shift+T, enabled while the stack is not empty)
+  - `src/components/MenuBar.tsx` — File › Reopen Closed Tab
+- Tests: `src/__tests__/tabs.test.ts`
+- Docs: `docs/editing.md`, `docs/keyboard-shortcuts.md`
+
+**As a** person who just closed the wrong tab
+**I want** to bring back the tabs I closed, most recent first
+**So that** a slip of Ctrl+W costs me nothing
+
+```gherkin
+Scenario: TAB-010.1 Reopen the last closed tab where I was
+  Given "C:\work\a.txt" is open with the cursor on line 120
+  When I close its tab and press Ctrl+Shift+T
+  Then "a.txt" opens again in a new tab, active, with the cursor on line 120 and the same scroll position
+
+Scenario: TAB-010.2 Most recent first
+  Given I closed "a.txt", then "b.txt", then "c.txt"
+  When I press Ctrl+Shift+T three times
+  Then "c.txt", "b.txt" and "a.txt" reopen in that order
+
+Scenario: TAB-010.3 Only file tabs are remembered
+  Given I closed "Untitled-1", a Claude Code tab, a Claude CLI terminal tab, a Compare tab and a commit graph tab after closing "a.txt"
+  When I press Ctrl+Shift+T
+  Then "a.txt" reopens
+  And a large-file tab that was closed reopens as a large-file tab
+
+Scenario: TAB-010.4 Files that are gone or open again are skipped
+  Given I closed "a.txt" and then "b.txt", and "b.txt" was deleted since
+  When I press Ctrl+Shift+T
+  Then "a.txt" reopens
+  And a closed file that I have opened again in the meantime is skipped the same way
+
+Scenario: TAB-010.5 Nothing left to reopen
+  Given no file tab has been closed since Quarry started
+  When I open the File menu
+  Then Reopen Closed Tab is disabled
+  And when every remembered file is gone, Ctrl+Shift+T shows "No closed tab to reopen"
+
+Scenario: TAB-010.6 The last 20 are remembered
+  Given I closed 25 different file tabs
+  When I press Ctrl+Shift+T 21 times
+  Then the 20 most recently closed files reopen and the 21st press reopens nothing
+
+Scenario: TAB-010.7 Browsing previews are not remembered
+  Given "a.txt" is the preview tab
+  When I single-click "b.txt" in the Explorer, which replaces the preview, and press Ctrl+Shift+T
+  Then "a.txt" does not reopen
 ```

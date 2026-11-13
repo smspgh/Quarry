@@ -29,6 +29,8 @@ import { editor } from "../editor/manager";
 import { blockCommands } from "../editor/columnMode";
 import {
   closeAll,
+  hasClosedTabs,
+  reopenClosedTab,
   closeDocument,
   closeOthers,
   formatBytes,
@@ -574,6 +576,7 @@ export function registerAllCommands() {
   register({ id: "file.close", title: "Close Tab", category: "File", keys: "Ctrl+W", run: () => void closeDocument() });
   register({ id: "file.closeF4", title: "Close Tab", category: "File", keys: "Ctrl+F4", hidden: true, run: () => void closeDocument() });
   register({ id: "file.closeAll", title: "Close All Tabs", category: "File", run: () => void closeAll() });
+  register({ id: "file.reopenClosedTab", title: "Reopen Closed Tab", category: "File", keys: "Ctrl+Shift+T", enabled: hasClosedTabs, run: () => void reopenClosedTab() });
   const activePath = () => activeDoc(s())?.path ?? null;
   register({ id: "file.showInQuarryExplorer", title: "Show in Quarry Explorer", category: "File", enabled: () => !!activePath(), run: () => { const p = activePath(); if (p) void showInExplorerPanel(p); } });
   register({ id: "file.showInWindowsExplorer", title: "Show in Windows Explorer", category: "File", enabled: () => !!activePath(), run: () => { const p = activePath(); if (p) void showInWindowsExplorer(p); } });

@@ -113,7 +113,7 @@
       "prefix": "TAB",
       "title": "Tabs",
       "spec": "specs/tabs.md",
-      "stories": 9
+      "stories": 10
     },
     {
       "prefix": "TERM",
@@ -14498,6 +14498,60 @@
         }
       ]
     },
+    "TAB-010": {
+      "id": "TAB-010",
+      "title": "Reopen a tab I closed",
+      "area": "TAB",
+      "spec": "specs/tabs.md",
+      "line": 516,
+      "status": "draft",
+      "commands": [
+        "file.reopenClosedTab"
+      ],
+      "files": [
+        "src/lib/closedTabs.ts",
+        "src/lib/actions.ts",
+        "src/lib/commands.ts",
+        "src/components/MenuBar.tsx"
+      ],
+      "tests": [
+        "src/__tests__/tabs.test.ts"
+      ],
+      "docs": [
+        "docs/editing.md",
+        "docs/keyboard-shortcuts.md"
+      ],
+      "scenarios": [
+        {
+          "id": "TAB-010.1",
+          "title": "Reopen the last closed tab where I was"
+        },
+        {
+          "id": "TAB-010.2",
+          "title": "Most recent first"
+        },
+        {
+          "id": "TAB-010.3",
+          "title": "Only file tabs are remembered"
+        },
+        {
+          "id": "TAB-010.4",
+          "title": "Files that are gone or open again are skipped"
+        },
+        {
+          "id": "TAB-010.5",
+          "title": "Nothing left to reopen"
+        },
+        {
+          "id": "TAB-010.6",
+          "title": "The last 20 are remembered"
+        },
+        {
+          "id": "TAB-010.7",
+          "title": "Browsing previews are not remembered"
+        }
+      ]
+    },
     "TERM-001": {
       "id": "TERM-001",
       "title": "Open a Claude CLI tab in a folder",
@@ -16873,6 +16927,7 @@
       "SET-006",
       "SPLIT-001",
       "TAB-006",
+      "TAB-010",
       "TERM-001",
       "UI-002",
       "UI-003",
@@ -17344,6 +17399,7 @@
       "TAB-007",
       "TAB-008",
       "TAB-009",
+      "TAB-010",
       "TERM-007",
       "UI-002",
       "UI-013",
@@ -17417,6 +17473,9 @@
       "CLAUDE-017",
       "CLAUDE-018",
       "CLAUDE-020"
+    ],
+    "src/lib/closedTabs.ts": [
+      "TAB-010"
     ],
     "src/lib/commands.ts": [
       "BIG-005",
@@ -17530,6 +17589,7 @@
       "TAB-006",
       "TAB-007",
       "TAB-009",
+      "TAB-010",
       "TERM-001",
       "TERM-002",
       "UI-001",
@@ -18480,7 +18540,8 @@
       "TAB-009"
     ],
     "src/__tests__/tabs.test.ts": [
-      "TAB-006"
+      "TAB-006",
+      "TAB-010"
     ],
     "src/__tests__/text.test.ts": [
       "EDIT-017",
@@ -18813,6 +18874,9 @@
     "file.quickOpen": [
       "FILE-005",
       "UI-006"
+    ],
+    "file.reopenClosedTab": [
+      "TAB-010"
     ],
     "file.reopenWithEncoding": [
       "FILE-009"
