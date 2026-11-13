@@ -18,10 +18,12 @@ import { choose } from "../../lib/dialogs";
 
 let seq = 1;
 
-function buildJsRegex(q: SearchQuery): RegExp | null {
+/** The search as a JavaScript regex (open documents, the replace preview). Whole Word follows the
+ *  folder search's rule: no word character just before or after the match ("-2" in "x -2 y"). */
+export function buildJsRegex(q: Pick<SearchQuery, "pattern" | "isRegex" | "wholeWord" | "caseSensitive" | "dotAll">): RegExp | null {
   try {
     let src = q.isRegex ? q.pattern : q.pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    if (q.wholeWord) src = `\\b(?:${src})\\b`;
+    if (q.wholeWord) src = `(?<!\\w)(?:${src})(?!\\w)`;
     return new RegExp(src, `gm${q.caseSensitive ? "" : "i"}${q.dotAll ? "s" : ""}`);
   } catch {
     return null;

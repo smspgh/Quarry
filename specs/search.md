@@ -207,9 +207,10 @@ Scenario: SEARCH-003.9 No folder to search
   - `src/components/panels/SearchPanel.tsx` — Match Case / Whole Word / Regex toggles, Ctrl+Enter, "Dot matches newline", debounced `validateRegex` (150 ms), `invalidRegex`, `regexMessage`, `multiline` flag sent with the query
   - `src/lib/ipc.ts` — `search.validateRegex`
   - `src-tauri/src/lib.rs` — `validate_regex` command
-  - `src-tauri/src/search.rs` — `build_matcher`, `validate_regex`, `one_line_regex_error`, `build_searcher` (multi-line)
+  - `src-tauri/src/search.rs` — `build_matcher`, `validate_regex`, `one_line_regex_error`, `build_searcher` (multi-line), Whole Word in `replace_in_files` (`\b{start-half}` / `\b{end-half}`, as `RegexMatcherBuilder::word`)
+  - `src/components/panels/SearchPanel.tsx` — `buildJsRegex` (Whole Word as `(?<!\w)` / `(?!\w)` for open documents and the replace preview)
   - `src/lib/types.ts` — `SearchQuery`
-- Tests: `src-tauri/src/search.rs`
+- Tests: `src-tauri/src/search.rs`, `src/__tests__/replace.test.ts`
 - Docs: `docs/find-and-replace.md`
 
 **As a** person searching files
@@ -263,6 +264,12 @@ Scenario: SEARCH-004.8 Empty search
   Given the search box is empty
   When I look at the panel
   Then the Search button is disabled
+
+Scenario: SEARCH-004.9 Whole Word around a pattern that starts or ends with a non-word character
+  Given a file containing "x -2 y a-2 -2b"
+  When I search for "-2" with Match Whole Word on
+  Then only the "-2" between spaces is found
+  And Replace All replaces exactly that one match, in any scope, and the preview shows it
 ```
 
 ## SEARCH-005: Filter which files are searched

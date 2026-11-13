@@ -534,7 +534,9 @@ fn encode_error(e: String) -> String {
 /// copied there first so `undo_replace` can restore it.
 pub fn replace_in_files(targets: &[ReplaceTarget], q: &SearchQuery, replacement: &str, backup_dir: Option<&Path>) -> Result<Vec<ReplaceFileResult>, String> {
     let pattern = if q.is_regex { q.pattern.clone() } else { regex::escape(&q.pattern) };
-    let pattern = if q.whole_word { format!(r"\b(?:{pattern})\b") } else { pattern };
+    // The search's Whole Word rule (`RegexMatcherBuilder::word`): no word character just before or
+    // after the match. Plain `\b` misses "-2" in "x -2 y", which the search lists.
+    let pattern = if q.whole_word { format!(r"\b{{start-half}}(?:{pattern})\b{{end-half}}") } else { pattern };
     let re = regex::RegexBuilder::new(&pattern)
         .case_insensitive(!q.case_sensitive)
         .multi_line(true)
@@ -787,6 +789,25 @@ mod tests {
         let named = regex::Regex::new(r"(?<w>\w+)").unwrap();
         assert_eq!(replace_text("hi", &named, "[$<w>|$<nope>]", false, false, &none).0, "[hi|]");
         assert_eq!(replace_text("ab-1", &re, "$1", true, false, &none).0, "$1");
+    }
+
+    #[test]
+    fn whole_word_replace_matches_what_the_search_finds() {
+        let dir = tempfile::tempdir().unwrap();
+        let f = dir.path().join("a.txt");
+        let text = "x -2 y a-2 -2b\ncat category cat.\n";
+        let roots = vec![dir.path().to_string_lossy().into_owned()];
+        for (pat, hits, out) in [("-2", 1, "x z y a-2 -2b\ncat category cat.\n"), ("cat", 2, "x -2 y a-2 -2b\nz category z.\n")] {
+            std::fs::write(&f, text).unwrap();
+            let mut ww = q(pat, false);
+            ww.whole_word = true;
+            let found = Mutex::new(Vec::new());
+            search_paths(1, &roots, &ww, Arc::new(AtomicBool::new(false)), |b| found.lock().unwrap().extend(b)).unwrap();
+            assert_eq!(found.into_inner().unwrap().len(), hits, "{pat}");
+            let res = replace_in_files(&targets(&[&f]), &ww, "z", None).unwrap();
+            assert_eq!(res[0].replaced, hits, "{pat}");
+            assert_eq!(std::fs::read_to_string(&f).unwrap(), out);
+        }
     }
 
     #[test]

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { expandReplacement, preserveCase, replaceMatches } from "../lib/replace";
-import { activeFilterCount, effectiveScope, folderLabel, explorerRoots, leaveOutPatch, targetSummary } from "../components/panels/SearchPanel";
+import { activeFilterCount, buildJsRegex, effectiveScope, folderLabel, explorerRoots, leaveOutPatch, targetSummary } from "../components/panels/SearchPanel";
 import { DEFAULT_SEARCH_QUERY } from "../lib/store";
 import type { FileMatch } from "../lib/types";
 
@@ -103,5 +103,15 @@ describe("Find in Files panel helpers", () => {
     expect([p.totalMatches, p.leftOut]).toEqual([1, 2]);
     expect(leaveOutPatch(st, "b", b1)!.files!.map((f) => f.path)).toEqual(["a"]);
     expect(leaveOutPatch(st, "zzz")).toBeNull();
+  });
+});
+
+describe("buildJsRegex", () => {
+  const ww = (pattern: string) => buildJsRegex({ pattern, isRegex: false, wholeWord: true, caseSensitive: false, dotAll: false })!;
+  it("Whole Word wants no word character beside the match, like the folder search", () => {
+    expect("x -2 y a-2 -2b".match(ww("-2"))).toEqual(["-2"]);
+    expect("cat category cat.".match(ww("cat"))).toEqual(["cat", "cat"]);
+    // The replace preview runs the regex on the hit alone.
+    expect(ww("-2").test("-2")).toBe(true);
   });
 });

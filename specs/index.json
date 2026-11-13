@@ -11877,10 +11877,12 @@
         "src/lib/ipc.ts",
         "src-tauri/src/lib.rs",
         "src-tauri/src/search.rs",
+        "src/components/panels/SearchPanel.tsx",
         "src/lib/types.ts"
       ],
       "tests": [
-        "src-tauri/src/search.rs"
+        "src-tauri/src/search.rs",
+        "src/__tests__/replace.test.ts"
       ],
       "docs": [
         "docs/find-and-replace.md"
@@ -11917,6 +11919,10 @@
         {
           "id": "SEARCH-004.8",
           "title": "Empty search"
+        },
+        {
+          "id": "SEARCH-004.9",
+          "title": "Whole Word around a pattern that starts or ends with a non-word character"
         }
       ]
     },
@@ -11925,7 +11931,7 @@
       "title": "Filter which files are searched",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 268,
+      "line": 275,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11979,7 +11985,7 @@
       "title": "Streamed results, cancelling and limits",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 335,
+      "line": 342,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12042,7 +12048,7 @@
       "title": "Browse the results list",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 409,
+      "line": 416,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12098,7 +12104,7 @@
       "title": "Open a result in the editor",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 476,
+      "line": 483,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12155,7 +12161,7 @@
       "title": "Step through results with F4",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 541,
+      "line": 548,
       "status": "draft",
       "commands": [
         "find.nextResult",
@@ -12207,7 +12213,7 @@
       "title": "Leave results out",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 595,
+      "line": 602,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12256,7 +12262,7 @@
       "title": "File actions on result file rows",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 650,
+      "line": 657,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12301,7 +12307,7 @@
       "title": "Replace in Files on disk",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 700,
+      "line": 707,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12371,7 +12377,7 @@
       "title": "Replace in Files keeps each file's encoding",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 788,
+      "line": 795,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12413,7 +12419,7 @@
       "title": "Replacement text: groups and Preserve Case",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 834,
+      "line": 841,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12460,7 +12466,7 @@
       "title": "Replace in the open documents",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 884,
+      "line": 891,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12502,7 +12508,7 @@
       "title": "Undo Replace in Files",
       "area": "SEARCH",
       "spec": "specs/search.md",
-      "line": 931,
+      "line": 938,
       "status": "draft",
       "commands": [
         "find.undoReplaceInFiles"
@@ -17906,6 +17912,7 @@
       "FIND-006",
       "SEARCH-002",
       "SEARCH-003",
+      "SEARCH-004",
       "SEARCH-005",
       "SEARCH-010",
       "SEARCH-012",
