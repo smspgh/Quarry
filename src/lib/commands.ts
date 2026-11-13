@@ -29,6 +29,8 @@ import { editor } from "../editor/manager";
 import { blockCommands } from "../editor/columnMode";
 import {
   closeAll,
+  hasClosedTabs,
+  reopenClosedTab,
   closeDocument,
   closeOthers,
   formatBytes,
@@ -63,10 +65,10 @@ import { readText as readClipboardText, writeText as writeClipboardText } from "
 import { clipboardText, cutSpec, foldLineSpec, foldTreeSpec, pasteSpec } from "../editor/lineMenu";
 import { bindAppKeyFallback, bindCommandRunner, guarded, pausePlayback, playDetail, playSteps, playToEnd, recordCommand, stageMacros, startRecording, stopPlayback, stopRecording, TO_END_DETAIL } from "./macros";
 import { readScript, runScript, runScriptTimes, runScriptToEnd, scriptNameOf, SCRIPT_API_HELP } from "./scripting";
-import { activeDoc, useStore, type SidebarPanel } from "./store";
+import { activeDoc, useStore, type Doc, type SidebarPanel } from "./store";
 import { DEFAULT_SETTINGS, type Macro, type Script } from "./types";
 import { undoReplaceInFiles } from "./replaceUndo";
-import { focusPane, toggleSplit } from "./split";
+import { focusPane, openToSide, toggleSplit } from "./split";
 import { registerGitCommands } from "./gitCommands";
 import { showAbout } from "./about";
 import { showPanel as showPanelOnly, toggleAllPanels, togglePanel } from "./panels";
@@ -80,8 +82,11 @@ export interface Command {
   /** Return false when the command does not apply in the current context. */
   run: (args?: unknown) => boolean | void | Promise<boolean | void>;
   hidden?: boolean;
-  /** When this returns false the command is greyed out in menus and omitted from the palette. */
-  enabled?: () => boolean;
+  /**
+   * When this returns false the command is greyed out in menus and omitted from the palette.
+   * `args` is what `runCommand` was given (e.g. `{ docId }` from a tab's right-click menu).
+   */
+  enabled?: (args?: unknown) => boolean;
   /** Context-sensitive label for menus (e.g. "Stop Macro Recording" while recording). */
   dynamicTitle?: () => string;
   /**
@@ -92,8 +97,25 @@ export interface Command {
   when?: () => boolean;
 }
 
-export function isEnabled(cmd: Command): boolean {
-  return cmd.enabled ? cmd.enabled() !== false : true;
+export function isEnabled(cmd: Command, args?: unknown): boolean {
+  return cmd.enabled ? cmd.enabled(args) !== false : true;
+}
+
+/**
+ * The document a command should act on: `{ docId }` (a tab's right-click menu passes it) names a
+ * tab, anything else means the active one. Pure.
+ */
+export function docIdArg(args: unknown): string | undefined {
+  if (!args || typeof args !== "object" || Array.isArray(args)) return undefined;
+  const id = (args as { docId?: unknown }).docId;
+  return typeof id === "string" ? id : undefined;
+}
+
+/** The tab named by `{ docId }`, else the active one; undefined when the named tab is gone. */
+export function targetDoc(args?: unknown): Doc | undefined {
+  const st = useStore.getState();
+  const id = docIdArg(args);
+  return id !== undefined ? st.docs.find((d) => d.id === id) : activeDoc(st);
 }
 
 const registry = new Map<string, Command>();
@@ -136,7 +158,7 @@ export async function runCommand(id: string, args?: unknown): Promise<boolean> {
   const cmd = registry.get(id);
   if (!cmd) return false;
   // Disabled commands (greyed in menus) are no-ops everywhere, including shortcuts and panel buttons.
-  if (!isEnabled(cmd)) return false;
+  if (!isEnabled(cmd, args)) return false;
   recordCommand(id, args);
   const r = await cmd.run(args);
   return r !== false;
@@ -571,13 +593,28 @@ export function registerAllCommands() {
   register({ id: "file.save", title: "Save", category: "File", keys: "Ctrl+S", enabled: () => hasFileDoc() || (activeDoc(s())?.kind === "diff" && !!activeDoc(s())?.dirty), run: () => void saveDocument() });
   register({ id: "file.saveAs", title: "Save As…", category: "File", keys: "Ctrl+Shift+S", run: () => void saveDocument(undefined, true) });
   register({ id: "file.saveAll", title: "Save All", category: "File", keys: "Ctrl+Alt+S", run: () => void saveAll() });
-  register({ id: "file.close", title: "Close Tab", category: "File", keys: "Ctrl+W", run: () => void closeDocument() });
-  register({ id: "file.closeF4", title: "Close Tab", category: "File", keys: "Ctrl+F4", hidden: true, run: () => void closeDocument() });
+  // Tab commands take an optional { docId } (the tab's right-click menu); without it they act on the active tab.
+  register({ id: "file.close", title: "Close Tab", category: "File", keys: "Ctrl+W", run: (a) => void closeDocument(docIdArg(a)) });
+  register({ id: "file.closeF4", title: "Close Tab", category: "File", keys: "Ctrl+F4", hidden: true, run: (a) => void closeDocument(docIdArg(a)) });
   register({ id: "file.closeAll", title: "Close All Tabs", category: "File", run: () => void closeAll() });
-  const activePath = () => activeDoc(s())?.path ?? null;
-  register({ id: "file.showInQuarryExplorer", title: "Show in Quarry Explorer", category: "File", enabled: () => !!activePath(), run: () => { const p = activePath(); if (p) void showInExplorerPanel(p); } });
-  register({ id: "file.showInWindowsExplorer", title: "Show in Windows Explorer", category: "File", enabled: () => !!activePath(), run: () => { const p = activePath(); if (p) void showInWindowsExplorer(p); } });
-  register({ id: "file.closeOthers", title: "Close Other Tabs", category: "File", run: () => { const d = activeDoc(s()); if (d) void closeOthers(d.id); } });
+  register({ id: "file.reopenClosedTab", title: "Reopen Closed Tab", category: "File", keys: "Ctrl+Shift+T", enabled: hasClosedTabs, run: () => void reopenClosedTab() });
+  const targetPath = (a?: unknown) => targetDoc(a)?.path ?? null;
+  register({ id: "file.showInQuarryExplorer", title: "Show in Quarry Explorer", category: "File", enabled: (a) => !!targetPath(a), run: (a) => { const p = targetPath(a); if (p) void showInExplorerPanel(p); } });
+  register({ id: "file.showInWindowsExplorer", title: "Show in Windows Explorer", category: "File", enabled: (a) => !!targetPath(a), run: (a) => { const p = targetPath(a); if (p) void showInWindowsExplorer(p); } });
+  register({
+    id: "file.copyPath",
+    title: "Copy Path of Active File",
+    category: "File",
+    enabled: (a) => !!targetPath(a),
+    run: async (a) => {
+      const p = targetPath(a);
+      if (!p) return false;
+      await writeClipboardText(p);
+      s().toast("Path copied", "success", 1200);
+    },
+  });
+  register({ id: "file.closeOthers", title: "Close Other Tabs", category: "File", run: (a) => { const d = targetDoc(a); if (d) void closeOthers(d.id); } });
+  register({ id: "file.openToSide", title: "Open to the Side", category: "File", enabled: (a) => targetDoc(a)?.kind === "text", run: (a) => { const d = targetDoc(a); return d ? openToSide(d.id) : false; } });
   register({ id: "file.revert", title: "Revert File", category: "File", enabled: () => { const d = activeDoc(s()); return d?.kind === "text" && !!d.path; }, run: () => void revertDocument() });
   // Encoding / line endings / indentation: the status-bar pickers run these; from the palette (no
   // argument) they open the picker.
@@ -1317,9 +1354,9 @@ export function registerAllCommands() {
     id: "compare.withSaved",
     title: "Compare with Saved",
     category: "Compare",
-    enabled: () => { const d = activeDoc(s()); return d?.kind === "text" && !!d.path && d.dirty; },
-    run: async () => {
-      const d = activeDoc(s());
+    enabled: (a) => { const d = targetDoc(a); return d?.kind === "text" && !!d.path && d.dirty; },
+    run: async (a) => {
+      const d = targetDoc(a);
       if (d?.kind !== "text" || !d.path) return false;
       await openCompare({ kind: "file", path: d.path }, { kind: "tab", docId: d.id });
     },
@@ -1328,9 +1365,9 @@ export function registerAllCommands() {
     id: "compare.withClipboard",
     title: "Compare with Clipboard",
     category: "Compare",
-    enabled: () => activeDoc(s())?.kind === "text",
-    run: async () => {
-      const d = activeDoc(s());
+    enabled: (a) => targetDoc(a)?.kind === "text",
+    run: async (a) => {
+      const d = targetDoc(a);
       if (d?.kind !== "text") return false;
       const { readText } = await import("@tauri-apps/plugin-clipboard-manager");
       const clip = await readText().catch(() => "");
@@ -1341,14 +1378,15 @@ export function registerAllCommands() {
       await openCompare({ kind: "text", label: "Clipboard", text: clip }, d.path && !d.dirty ? { kind: "file", path: d.path } : { kind: "tab", docId: d.id });
     },
   });
-  register({ id: "compare.selectForCompare", title: "Select Active File for Compare", category: "Compare", enabled: () => !!activeDoc(s())?.path && activeDoc(s())?.kind === "text", run: (args) => { const p = typeof args === "string" ? args : activeDoc(s())?.path; if (!p) return false; selectForCompare(p); } });
+  // args: a path, or { docId }; without one, the active file.
+  register({ id: "compare.selectForCompare", title: "Select Active File for Compare", category: "Compare", enabled: (a) => typeof a === "string" || (!!targetDoc(a)?.path && targetDoc(a)?.kind === "text"), run: (args) => { const p = typeof args === "string" ? args : targetDoc(args)?.path; if (!p) return false; selectForCompare(p); } });
   register({
     id: "compare.withSelected",
     title: "Compare Active File with Selected",
     category: "Compare",
     // Like Select for Compare, only a text tab: a large file can't be compared.
-    enabled: () => { const c = compareCandidate(); const d = activeDoc(s()); return !!c && d?.kind === "text" && !!d.path && !samePath(c, d.path); },
-    run: (args) => { const d = activeDoc(s()); const p = typeof args === "string" ? args : d?.kind === "text" ? d.path : null; if (!p) return false; compareWithSelected(p); },
+    enabled: (a) => { const c = compareCandidate(); if (typeof a === "string") return !!c && !samePath(c, a); const d = targetDoc(a); return !!c && d?.kind === "text" && !!d.path && !samePath(c, d.path); },
+    run: (args) => { const d = targetDoc(args); const p = typeof args === "string" ? args : d?.kind === "text" ? d.path : null; if (!p) return false; compareWithSelected(p); },
   });
   register({ id: "compare.nextChange", title: "Next Change", category: "Compare", keys: "F7", enabled: () => !!activeDiff(), run: () => { const d = activeDiff(); return d ? stepChange(d.id, 1) : false; } });
   register({ id: "compare.prevChange", title: "Previous Change", category: "Compare", keys: "Shift+F7", enabled: () => !!activeDiff(), run: () => { const d = activeDiff(); return d ? stepChange(d.id, -1) : false; } });

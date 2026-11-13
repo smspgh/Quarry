@@ -49,11 +49,23 @@ function push(step: MacroStep) {
   useStore.getState().set({ recordingSteps: steps.length });
 }
 
+/**
+ * The arguments a macro step keeps. A `{ docId }` (a tab's right-click menu) names a tab of this
+ * session and means nothing at replay, so it is dropped: the step then acts on the active tab.
+ * Pure.
+ */
+export function recordableArgs(args: unknown): unknown {
+  if (!args || typeof args !== "object" || Array.isArray(args) || !("docId" in args)) return args;
+  const { docId: _drop, ...rest } = args as Record<string, unknown>;
+  return Object.keys(rest).length > 0 ? rest : undefined;
+}
+
 /** Called by the command registry when a command executes. */
 export function recordCommand(id: string, args?: unknown) {
   if (!isRecording()) return;
   if (id.startsWith("macro.")) return;
-  push({ type: "command", id, args });
+  const kept = recordableArgs(args);
+  push(kept === undefined ? { type: "command", id } : { type: "command", id, args: kept });
 }
 
 export function startRecording(targetId: string | null = null) {

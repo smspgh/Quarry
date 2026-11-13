@@ -4,7 +4,7 @@ import { changeAtLine, changeRows, changesOf, revertChange, setPeek } from "../e
 import { accept, acceptAll, conflictAtCursor, conflictsOf, gotoConflict } from "../editor/conflicts";
 import type { ConflictChoice } from "./conflicts";
 import type { EditorView } from "@codemirror/view";
-import { register } from "./commands";
+import { register, targetDoc } from "./commands";
 import { compareWithHead, currentRepo, checkout, openGraph, resolveConflicts, fileStatus, pickBranch, remote, repoOf, rescanGit, showAddRemote, showHistory, stage, toggleBlame, unstage, useGit } from "./git";
 import { nextChangeIndex } from "./gitStatus";
 import { showPanel } from "./panels";
@@ -12,15 +12,16 @@ import { activeDoc, useStore } from "./store";
 
 const s = () => useStore.getState();
 
-/** The active document's file when it is in a known repository. */
-function repoFile(): { path: string; root: string } | null {
-  const d = activeDoc(s());
+/** The active document's file (or the tab named by `{ docId }`) when it is in a known repository. */
+function repoFile(args?: unknown): { path: string; root: string } | null {
+  const d = targetDoc(args);
   const repo = repoOf(d?.path);
   return d?.path && repo ? { path: d.path, root: repo.root } : null;
 }
 
-const tracked = () => {
-  const f = repoFile();
+const tracked = (args?: unknown) => {
+  if (typeof args === "string") return !!repoOf(args) && !fileStatus(args)?.untracked;
+  const f = repoFile(args);
   return !!f && !fileStatus(f.path)?.untracked;
 };
 
@@ -112,13 +113,14 @@ export function registerGitCommands() {
       if (f) void unstage(f.root, [f.path]);
     },
   });
-  register({ id: "git.compareWithHead", title: "Compare with Last Commit (HEAD)", category: "Git", enabled: tracked, run: () => void compareWithHead(repoFile()!.path) });
+  // These two take { docId } (a tab's right-click menu); git.fileHistory also takes a path.
+  register({ id: "git.compareWithHead", title: "Compare with Last Commit (HEAD)", category: "Git", enabled: tracked, run: (a) => { const f = repoFile(a); if (!f) return false; void compareWithHead(f.path); } });
   register({
     id: "git.fileHistory",
     title: "Show File History",
     category: "Git",
     enabled: tracked,
-    run: (path) => void showHistory(typeof path === "string" ? path : repoFile()!.path),
+    run: (a) => { const p = typeof a === "string" ? a : repoFile(a)?.path; if (!p) return false; void showHistory(p); },
   });
   register({ id: "git.toggleBlame", title: "Toggle Line Blame", category: "Git", dynamicTitle: () => (useGit.getState().blameOn ? "Hide Line Blame" : "Show Line Blame"), run: toggleBlame });
   register({ id: "git.nextChange", title: "Next Change", category: "Git", keys: "Alt+F5", enabled: () => activeDoc(s())?.kind === "text", run: () => jumpChange(1) });

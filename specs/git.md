@@ -288,7 +288,7 @@ Scenario: GIT-005.6 Hide blame
 - Files:
   - `src/lib/git.ts` — `compareWithHead` (HEAD text vs tab / file on disk / empty "(deleted)")
   - `src/lib/gitCommands.ts` — `git.compareWithHead`, `tracked()` enabled rule
-  - `src/components/TitleBar.tsx` — tab right-click item "Compare with Last Commit" (calls `compareWithHead` directly)
+  - `src/components/TitleBar.tsx` — tab right-click item "Compare with Last Commit" (`runCommand("git.compareWithHead", { docId })`)
   - `src/components/MenuBar.tsx` — Git menu entry
   - `src-tauri/src/git.rs` — `git_show`
 - Tests: `src-tauri/src/git.rs`

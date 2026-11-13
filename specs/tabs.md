@@ -5,7 +5,7 @@ prefix: TAB
 
 # Tabs
 
-The tab strip: what a tab shows, switching and closing tabs, the right-click menu, preview tabs and the open-tab limit. Tabs keep the order they were opened in; there is no drag reordering, no "reopen closed tab" and no back / forward navigation history. User documentation: `docs/editing.md` (Window layout) and `docs/keyboard-shortcuts.md`.
+The tab strip: what a tab shows, switching and closing tabs, the right-click menu, preview tabs and the open-tab limit. Tabs keep the order they were opened in. Drag reordering and back / forward navigation history are deliberately not built (owner decision, 2026-11); a closed file tab can be reopened (TAB-010). User documentation: `docs/editing.md` (Window layout) and `docs/keyboard-shortcuts.md`.
 
 ## TAB-001: See the open documents in the tab strip
 
@@ -256,11 +256,11 @@ Scenario: TAB-005.7 Ctrl+F4 also closes
 - Status: draft
 - Commands: `file.closeOthers`, `file.closeAll`
 - Files:
-  - `src/lib/actions.ts` — `closeOthers`, `closeAll` (tab order, each through `closeDocument`, stop at the first Cancel)
+  - `src/lib/actions.ts` — `closeOthers`, `closeAll` → `closeMany` (one `askSaveChanges` for every dirty tab and one `askDialog` for running Claude / terminal tabs, both before anything closes; then `closeDocument(id, true)`), `closeManyQuestion` (pure: title, up to 8 names, Save / Save All)
   - `src/lib/commands.ts` — `file.closeOthers`, `file.closeAll`; default `enabled` (`docOnly`)
   - `src/components/TitleBar.tsx` — "Close Others" in the tab menu
   - `src/components/MenuBar.tsx` — File › Close Other Tabs / Close All Tabs
-- Tests: none
+- Tests: `src/__tests__/tabs.test.ts`
 - Docs: `docs/editing.md`, `docs/keyboard-shortcuts.md`
 
 **As a** person with many tabs open
@@ -283,38 +283,54 @@ Scenario: TAB-006.3 Close All Tabs
   When I choose File › Close All Tabs
   Then no tabs are open and the Welcome screen is shown
 
-Scenario: TAB-006.4 Each tab with unsaved changes is asked about
-  Given tabs "a.txt", "b.txt", "c.txt" are open and "b.txt" has unsaved changes
+Scenario: TAB-006.4 One question for all the unsaved tabs
+  Given tabs "a.txt", "b.txt", "c.txt" are open and "b.txt" and "c.txt" have unsaved changes
   When I choose File › Close All Tabs
-  Then "a.txt" closes and Quarry asks "Save changes to b.txt?"
+  Then before any tab closes Quarry asks once "Save changes to 2 files?", naming "b.txt" and "c.txt", with Save All, Don't Save and Cancel
+  And Save All writes both files and closes every tab
+  And Don't Save closes every tab without writing
+  And with only "b.txt" unsaved the question is "Save changes to b.txt?" with Save, Don't Save and Cancel
 
-Scenario: TAB-006.5 Cancel stops the rest
+Scenario: TAB-006.5 Cancel closes nothing
   Given tabs "a.txt", "b.txt", "c.txt" are open and "b.txt" has unsaved changes
-  When I choose File › Close All Tabs and answer Cancel for "b.txt"
-  Then "b.txt" and "c.txt" stay open
-  And "a.txt", closed before the question, stays closed
+  When I choose File › Close All Tabs and answer Cancel
+  Then "a.txt", "b.txt" and "c.txt" all stay open
+  And the same holds when I choose Save All and then cancel the "Save" file dialog for an untitled tab
 
 Scenario: TAB-006.6 Unavailable with no tabs
   Given no tabs are open
   When I open the File menu
   Then Close Tab, Close Other Tabs and Close All Tabs are disabled
+
+Scenario: TAB-006.7 Close Others asks the same way
+  Given tabs "a.txt", "b.txt", "c.txt" are open and "a.txt" and "c.txt" have unsaved changes
+  When I right-click "b.txt", choose Close Others and answer Cancel to "Save changes to 2 files?"
+  Then all three tabs stay open
+
+Scenario: TAB-006.8 Running tabs are confirmed once, before anything closes
+  Given a Claude Code tab is still working and a terminal tab has a program running
+  When I choose File › Close All Tabs
+  Then Quarry asks once "Stop 2 running tabs?" with "Close tabs" and Cancel
+  And Cancel leaves every tab open
 ```
 
 ## TAB-007: Act on a tab from its right-click menu
 
 - Status: draft
-- Commands: `file.showInQuarryExplorer`, `file.showInWindowsExplorer`
+- Commands: `file.close`, `file.closeOthers`, `file.openToSide`, `file.copyPath`, `file.showInQuarryExplorer`, `file.showInWindowsExplorer`, `compare.withSaved`, `compare.withSelected`, `compare.selectForCompare`, `compare.withClipboard`, `git.compareWithHead`, `git.fileHistory`
 - Files:
-  - `src/components/TitleBar.tsx` — the `ctx-menu` in `Tab`: which items show for which document, closes on any mouse press or key outside
+  - `src/components/TitleBar.tsx` — the `ctx-menu` in `Tab`: which items show for which document, closes on any mouse press or key outside; every item (and the tab's ×, middle-click and Delete) is `runCommand(id, { docId })` via `onTab`
+  - `src/lib/commands.ts` — `docIdArg` (pure), `targetDoc` (the `{ docId }` tab, else the active one), `isEnabled(cmd, args)` / `Command.enabled(args)` so a command is judged against the tab it was given; `file.copyPath`, `file.openToSide`, `file.showInQuarryExplorer`, `file.showInWindowsExplorer` (enabled when the target document has a path)
+  - `src/lib/gitCommands.ts` — `repoFile(args)` / `tracked(args)` for `git.compareWithHead`, `git.fileHistory`
+  - `src/lib/macros.ts` — `recordableArgs` (pure): `recordCommand` drops `docId` from recorded arguments
   - `src/lib/actions.ts` — `showInExplorerPanel` (opens the file's folder when it is outside the open one, emits `explorer.reveal`), `showInWindowsExplorer`, `isInside`, `closeDocument`, `closeOthers`
-  - `src/lib/commands.ts` — `file.showInQuarryExplorer`, `file.showInWindowsExplorer` (enabled when the active document has a path)
   - `src/lib/split.ts` — `openToSide`
   - `src/lib/diff.ts` — `openCompare`, `selectForCompare`, `compareWithSelected`, `compareCandidate`
   - `src/lib/git.ts` — `repoOf`, `fileStatus`, `compareWithHead`, `showHistory`
   - `src/lib/panels.ts` — `showPanel`
   - `src/lib/bus.ts` — `explorer.reveal`
-- Tests: `src/__tests__/paths.test.ts`
-- Docs: `docs/editing.md`
+- Tests: `src/__tests__/paths.test.ts`, `src/__tests__/tabs.test.ts`
+- Docs: `docs/editing.md`, `docs/keyboard-shortcuts.md`
 
 **As a** person looking at a tab
 **I want** the actions for that document on its right-click menu
@@ -362,6 +378,23 @@ Scenario: TAB-007.8 Dismissing the menu
   Given a tab's right-click menu is open
   When I click elsewhere or press a key outside the menu
   Then the menu closes and no tab is closed or changed
+
+Scenario: TAB-007.9 The menu acts on the tab it was opened on
+  Given "a.txt" is the active tab and "b.txt" is a tracked file in a git repository
+  When I right-click the "b.txt" tab and choose Compare with Clipboard, Compare with Last Commit, Show File History or Copy Path
+  Then it is done for "b.txt", not for "a.txt"
+  And the item is offered even when the active tab is not a text file or not in a repository
+
+Scenario: TAB-007.10 Recorded in a macro as a command on the active tab
+  Given I am recording a macro
+  When I right-click the "b.txt" tab and choose Close
+  Then the macro records the Close Tab command without naming "b.txt"
+  And playing the macro back later closes whichever tab is active then
+
+Scenario: TAB-007.11 The same actions from the palette
+  Given "a.txt" is the active tab
+  When I run "Copy Path of Active File" or "Open to the Side" from the command palette
+  Then it acts on "a.txt"
 ```
 
 ## TAB-008: Preview tabs while browsing the Explorer
@@ -497,4 +530,60 @@ Scenario: TAB-009.10 The setting's bounds
   Given Settings is open
   When I enter 0 or 5000 for Maximum open tabs
   Then the value is kept within 1 to 1000
+```
+
+## TAB-010: Reopen a tab I closed
+
+- Status: draft
+- Commands: `file.reopenClosedTab`
+- Files:
+  - `src/lib/closedTabs.ts` — `pushClosed` (newest last, one entry per path, at most 20), `popClosed` (skips and drops entries that are open again or gone)
+  - `src/lib/actions.ts` — `rememberClosed` in `closeDocument` (file-backed text and large-file tabs only; cursor and scroll of a text tab; `remember` = false for a preview replaced by the next one), `reopenClosedTab` (`fs.stat`, `openPath`, `editor.restoreViewState`), `hasClosedTabs`
+  - `src/lib/commands.ts` — `file.reopenClosedTab` (Ctrl+Shift+T, enabled while the stack is not empty)
+  - `src/components/MenuBar.tsx` — File › Reopen Closed Tab
+- Tests: `src/__tests__/tabs.test.ts`
+- Docs: `docs/editing.md`, `docs/keyboard-shortcuts.md`
+
+**As a** person who just closed the wrong tab
+**I want** to bring back the tabs I closed, most recent first
+**So that** a slip of Ctrl+W costs me nothing
+
+```gherkin
+Scenario: TAB-010.1 Reopen the last closed tab where I was
+  Given "C:\work\a.txt" is open with the cursor on line 120
+  When I close its tab and press Ctrl+Shift+T
+  Then "a.txt" opens again in a new tab, active, with the cursor on line 120 and the same scroll position
+
+Scenario: TAB-010.2 Most recent first
+  Given I closed "a.txt", then "b.txt", then "c.txt"
+  When I press Ctrl+Shift+T three times
+  Then "c.txt", "b.txt" and "a.txt" reopen in that order
+
+Scenario: TAB-010.3 Only file tabs are remembered
+  Given I closed "Untitled-1", a Claude Code tab, a Claude CLI terminal tab, a Compare tab and a commit graph tab after closing "a.txt"
+  When I press Ctrl+Shift+T
+  Then "a.txt" reopens
+  And a large-file tab that was closed reopens as a large-file tab
+
+Scenario: TAB-010.4 Files that are gone or open again are skipped
+  Given I closed "a.txt" and then "b.txt", and "b.txt" was deleted since
+  When I press Ctrl+Shift+T
+  Then "a.txt" reopens
+  And a closed file that I have opened again in the meantime is skipped the same way
+
+Scenario: TAB-010.5 Nothing left to reopen
+  Given no file tab has been closed since Quarry started
+  When I open the File menu
+  Then Reopen Closed Tab is disabled
+  And when every remembered file is gone, Ctrl+Shift+T shows "No closed tab to reopen"
+
+Scenario: TAB-010.6 The last 20 are remembered
+  Given I closed 25 different file tabs
+  When I press Ctrl+Shift+T 21 times
+  Then the 20 most recently closed files reopen and the 21st press reopens nothing
+
+Scenario: TAB-010.7 Browsing previews are not remembered
+  Given "a.txt" is the preview tab
+  When I single-click "b.txt" in the Explorer, which replaces the preview, and press Ctrl+Shift+T
+  Then "a.txt" does not reopen
 ```

@@ -1,18 +1,15 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Braces, Columns2, Copy, FileCode2, FileText, FolderOpen, FolderTree, FileDiff, GitGraph, HardDrive, History, Minus, Square, SquareTerminal, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { closeDocument, closeOthers, showInExplorerPanel, showInWindowsExplorer } from "../lib/actions";
 import { anyPanelShown, toggleAllPanels } from "../lib/panels";
 import { BrandIcon } from "./BrandIcon";
 import { useStore, type Doc } from "../lib/store";
 import { MenuBar } from "./MenuBar";
 import { ClaudeMark } from "./ClaudeView";
 import { useClaudeBadge } from "../lib/claude";
-import { compareCandidate, compareWithSelected, openCompare, selectForCompare } from "../lib/diff";
+import { compareCandidate } from "../lib/diff";
 import { runCommand } from "../lib/commands";
-import { openToSide } from "../lib/split";
-import { compareWithHead, fileStatus, repoOf, showHistory } from "../lib/git";
-import { writeText } from "@tauri-apps/plugin-clipboard-manager";
+import { fileStatus, repoOf } from "../lib/git";
 
 function DocIcon({ doc }: { doc: Doc }) {
   if (doc.kind === "big") return <HardDrive className="tab-icon" />;
@@ -50,6 +47,9 @@ function focusTabAt(index: number) {
   if (tabs.length) tabs[Math.max(0, Math.min(index, tabs.length - 1))].focus();
 }
 
+/** Run a tab command on this tab (not necessarily the active one); see `targetDoc` in commands.ts. */
+const onTab = (id: string, docId: string) => runCommand(id, { docId });
+
 function Tab({ doc, active, index, count }: { doc: Doc; active: boolean; index: number; count: number }) {
   const setActive = useStore((s) => s.setActive);
   // Shown in the pane of the split editor that doesn't have the keyboard.
@@ -82,7 +82,7 @@ function Tab({ doc, active, index, count }: { doc: Doc; active: boolean; index: 
           e.stopPropagation();
           if (a.kind === "focus") focusTabAt(a.index);
           else if (a.kind === "activate") setActive(doc.id);
-          else if (a.kind === "close") void closeDocument(doc.id).then(() => setTimeout(() => focusTabAt(index), 0));
+          else if (a.kind === "close") void onTab("file.close", doc.id).then(() => setTimeout(() => focusTabAt(index), 0));
           else {
             const r = e.currentTarget.getBoundingClientRect();
             setMenu({ x: r.left, y: r.bottom });
@@ -92,7 +92,7 @@ function Tab({ doc, active, index, count }: { doc: Doc; active: boolean; index: 
           if (e.button === 0) setActive(doc.id);
           if (e.button === 1) {
             e.preventDefault();
-            void closeDocument(doc.id);
+            void onTab("file.close", doc.id);
           }
         }}
         onDoubleClick={() => doc.preview && useStore.getState().updateDoc(doc.id, { preview: false })}
@@ -113,7 +113,7 @@ function Tab({ doc, active, index, count }: { doc: Doc; active: boolean; index: 
           onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation();
-            void closeDocument(doc.id);
+            void onTab("file.close", doc.id);
           }}
         >
           <X size={13} />
@@ -121,22 +121,22 @@ function Tab({ doc, active, index, count }: { doc: Doc; active: boolean; index: 
       </div>
       {menu && (
         <div className="palette ctx-menu" style={{ position: "fixed", left: Math.min(menu.x, window.innerWidth - 228), top: menu.y, width: 220, zIndex: 300, padding: 4 }} onMouseDown={(e) => e.stopPropagation()}>
-          <button className="palette-item" autoFocus onClick={() => { setMenu(null); void closeDocument(doc.id); }}><span className="title">Close</span><span className="kbd">Ctrl+W</span></button>
-          <button className="palette-item" onClick={() => { setMenu(null); void closeOthers(doc.id); }}><span className="title">Close Others</span></button>
+          <button className="palette-item" autoFocus onClick={() => { setMenu(null); void onTab("file.close", doc.id); }}><span className="title">Close</span><span className="kbd">Ctrl+W</span></button>
+          <button className="palette-item" onClick={() => { setMenu(null); void onTab("file.closeOthers", doc.id); }}><span className="title">Close Others</span></button>
           {doc.kind === "text" && (
             <>
-              <button className="palette-item" onClick={() => { setMenu(null); openToSide(doc.id); }}><Columns2 size={13} /><span className="title">Open to the Side</span></button>
+              <button className="palette-item" onClick={() => { setMenu(null); void onTab("file.openToSide", doc.id); }}><Columns2 size={13} /><span className="title">Open to the Side</span></button>
               <div className="menu-sep" />
-              {doc.path && doc.dirty && <button className="palette-item" onClick={() => { setMenu(null); void openCompare({ kind: "file", path: doc.path! }, { kind: "tab", docId: doc.id }); }}><FileDiff size={13} /><span className="title">Compare with Saved</span></button>}
+              {doc.path && doc.dirty && <button className="palette-item" onClick={() => { setMenu(null); void onTab("compare.withSaved", doc.id); }}><FileDiff size={13} /><span className="title">Compare with Saved</span></button>}
               {doc.path && compareCandidate() && compareCandidate()!.toLowerCase() !== doc.path.toLowerCase() && (
-                <button className="palette-item" onClick={() => { setMenu(null); compareWithSelected(doc.path!); }}><FileDiff size={13} /><span className="title">Compare with Selected</span></button>
+                <button className="palette-item" onClick={() => { setMenu(null); void onTab("compare.withSelected", doc.id); }}><FileDiff size={13} /><span className="title">Compare with Selected</span></button>
               )}
-              {doc.path && <button className="palette-item" onClick={() => { setMenu(null); selectForCompare(doc.path!); }}><FileDiff size={13} /><span className="title">Select for Compare</span></button>}
-              <button className="palette-item" onClick={() => { setMenu(null); void runCommand("compare.withClipboard"); }}><FileDiff size={13} /><span className="title">Compare with Clipboard</span></button>
+              {doc.path && <button className="palette-item" onClick={() => { setMenu(null); void onTab("compare.selectForCompare", doc.id); }}><FileDiff size={13} /><span className="title">Select for Compare</span></button>}
+              <button className="palette-item" onClick={() => { setMenu(null); void onTab("compare.withClipboard", doc.id); }}><FileDiff size={13} /><span className="title">Compare with Clipboard</span></button>
               {doc.path && repoOf(doc.path) && !fileStatus(doc.path)?.untracked && (
                 <>
-                  <button className="palette-item" onClick={() => { setMenu(null); void compareWithHead(doc.path!); }}><FileDiff size={13} /><span className="title">Compare with Last Commit</span></button>
-                  <button className="palette-item" onClick={() => { setMenu(null); void showHistory(doc.path!); }}><History size={13} /><span className="title">Show File History</span></button>
+                  <button className="palette-item" onClick={() => { setMenu(null); void onTab("git.compareWithHead", doc.id); }}><FileDiff size={13} /><span className="title">Compare with Last Commit</span></button>
+                  <button className="palette-item" onClick={() => { setMenu(null); void onTab("git.fileHistory", doc.id); }}><History size={13} /><span className="title">Show File History</span></button>
                 </>
               )}
             </>
@@ -144,9 +144,9 @@ function Tab({ doc, active, index, count }: { doc: Doc; active: boolean; index: 
           {doc.path && (
             <>
               <div className="menu-sep" />
-              <button className="palette-item" onClick={() => { setMenu(null); void writeText(doc.path!); useStore.getState().toast("Path copied", "success", 1200); }}><Copy size={13} /><span className="title">Copy Path</span></button>
-              <button className="palette-item" onClick={() => { setMenu(null); void showInExplorerPanel(doc.path!); }}><FolderTree size={13} /><span className="title">Show in Quarry Explorer</span></button>
-              <button className="palette-item" onClick={() => { setMenu(null); void showInWindowsExplorer(doc.path!); }}><FolderOpen size={13} /><span className="title">Show in Windows Explorer</span></button>
+              <button className="palette-item" onClick={() => { setMenu(null); void onTab("file.copyPath", doc.id); }}><Copy size={13} /><span className="title">Copy Path</span></button>
+              <button className="palette-item" onClick={() => { setMenu(null); void onTab("file.showInQuarryExplorer", doc.id); }}><FolderTree size={13} /><span className="title">Show in Quarry Explorer</span></button>
+              <button className="palette-item" onClick={() => { setMenu(null); void onTab("file.showInWindowsExplorer", doc.id); }}><FolderOpen size={13} /><span className="title">Show in Windows Explorer</span></button>
             </>
           )}
         </div>

@@ -130,10 +130,11 @@ Scenario: SPLIT-002.8 Tab moves focus in both panes
 ## SPLIT-003: Open a document to the side
 
 - Status: draft
-- Commands: none
+- Commands: `file.openToSide`
 - Files:
   - `src/lib/split.ts` — `openToSide` (splits if needed; otherwise shows the document in the pane that is not focused and focuses it)
-  - `src/components/TitleBar.tsx` — "Open to the Side" in the tab menu, text documents only
+  - `src/components/TitleBar.tsx` — "Open to the Side" in the tab menu, text documents only (`file.openToSide` with `{ docId }`)
+  - `src/lib/commands.ts` — `file.openToSide`
   - `src/lib/store.ts` — `SplitState`
 - Tests: none
 - Docs: `docs/editing.md`

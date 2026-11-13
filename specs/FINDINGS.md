@@ -4,12 +4,6 @@ Possible bugs, doc/code mismatches and open questions noticed while the stories 
 
 This file is not a spec: `scripts/specs-index.mjs` ignores it.
 
-## Tabs and split editor (`tabs.md`, `split.md`)
-
-- Close All is not atomic: tabs closed before a Cancel stay closed (`actions.ts:497-503`; recorded as TAB-006.5).
-- Tab reordering, reopen closed tab and back/forward navigation do not exist (no stories).
-- Tab context menu items (Close, Close Others, Open to the Side, Copy Path, Show in…, Compare with Last Commit, Show File History) call action functions directly (`src/components/TitleBar.tsx:124-149`), against the rule that every user action goes through `runCommand`; the macro recorder does not see them.
-
 ## Find and replace in a document (`find.md`)
 
 - There is no "in selection" option anywhere (`src/components/FindBar.tsx`, `findBar` in `src/lib/store.ts:279`).
