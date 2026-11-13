@@ -379,7 +379,7 @@ Scenario: GRAPH-007.6 Nothing matches
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — `searchAll`, results list (`hits`, `hitsOpen`, `pickHit`), `goTo` (loads pages of 4,800 until the commit is in the graph, then centres it), "Show in Graph"
-  - `src-tauri/src/git.rs` — `graph_search` / `git_graph_search` (`--grep`, `--author`, `-i --fixed-strings`, an id of 4-64 hex digits; newest first, de-duplicated)
+  - `src-tauri/src/git.rs` — `graph_search` / `git_graph_search` (`--grep`, `--author`, `-i --fixed-strings`, branch / tag names via `for-each-ref` + `--simplify-by-decoration --decorate-refs`, an id of 4-64 hex digits; newest first, de-duplicated)
   - `src/lib/gitApi.ts` — `git.graphSearch`
 - Tests: `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
@@ -392,7 +392,7 @@ Scenario: GRAPH-007.6 Nothing matches
 Scenario: GRAPH-008.1 Search All History
   Given 300 commits are loaded, more exist, and "tokenizer" is in the Find box
   When I click "Search All History"
-  Then a results list appears headed '3 commits in the whole history match "tokenizer" (message, author or id)'
+  Then a results list appears headed '3 commits in the whole history match "tokenizer" (message, author, branch / tag or id)'
   And the results are listed newest first with id, message, author and date
 
 Scenario: GRAPH-008.2 Keyboard
@@ -441,6 +441,12 @@ Scenario: GRAPH-008.10 Editing the text closes the results
   Given the results list is showing
   When I change the text in the Find box, or click the list's close button
   Then the results list disappears
+
+Scenario: GRAPH-008.11 Search by branch or tag name
+  Given tag "v0.3.0" points at a commit far back in the history and branch "Release-2" at another
+  When I search the whole history for "v0.3" or for "release"
+  Then the commit the tag or branch points at is among the results, ignoring case
+  And with "Current branch" selected a branch or tag on another branch's commits is not listed
 ```
 
 ## GRAPH-009: See a commit's details

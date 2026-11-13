@@ -8715,6 +8715,10 @@
         {
           "id": "GRAPH-008.10",
           "title": "Editing the text closes the results"
+        },
+        {
+          "id": "GRAPH-008.11",
+          "title": "Search by branch or tag name"
         }
       ]
     },
@@ -8723,7 +8727,7 @@
       "title": "See a commit's details",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 446,
+      "line": 452,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8778,7 +8782,7 @@
       "title": "Open what a commit changed in a file",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 506,
+      "line": 512,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8824,7 +8828,7 @@
       "title": "Copy, switch, branch and tag from a commit's right-click menu",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 555,
+      "line": 561,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8879,7 +8883,7 @@
       "title": "Check out, cherry-pick or revert a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 618,
+      "line": 624,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8932,7 +8936,7 @@
       "title": "Reset the branch to a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 676,
+      "line": 682,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8974,7 +8978,7 @@
       "title": "See uncommitted work and a stopped operation above the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 721,
+      "line": 727,
       "status": "draft",
       "commands": [],
       "files": [

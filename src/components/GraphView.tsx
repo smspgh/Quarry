@@ -484,7 +484,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
       {hits && (
         <div className={`graph-hits ${hitsOpen ? "" : "compact"}`} role="listbox" aria-label="Search results in the whole history">
           <div className="graph-hits-head">
-            <span className="grow">{hits.list.length === 0 ? `No commit ${all ? "in any branch" : "on this branch"} matches "${hits.query}"${all ? "." : ". Try All branches."}` : `${hits.list.length}${hits.list.length === 200 ? "+" : ""} commit${hits.list.length === 1 ? "" : "s"} in the whole history match "${hits.query}" (message, author or id)`}</span>
+            <span className="grow">{hits.list.length === 0 ? `No commit ${all ? "in any branch" : "on this branch"} matches "${hits.query}"${all ? "." : ". Try All branches."}` : `${hits.list.length}${hits.list.length === 200 ? "+" : ""} commit${hits.list.length === 1 ? "" : "s"} in the whole history match "${hits.query}" (message, author, branch / tag or id)`}</span>
             {hits.list.length > 3 && (
               <button className="btn small" title={hitsOpen ? "Shrink the results to a few rows" : "Show more of the results"} onClick={() => setHitsOpen(!hitsOpen)}>{hitsOpen ? "Show Fewer" : "Show More"}</button>
             )}
