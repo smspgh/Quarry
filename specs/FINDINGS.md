@@ -87,7 +87,6 @@ Not determined
 ## Large files (`large-files.md`)
 
 Possible bugs
-- The status bar tooltip says "Large files are read and written as UTF-8" even when the label shows UTF-16LE/BE (`src/components/StatusBar.tsx:210`).
 
 Doc / code mismatches and dead code
 - `docs/large-files.md:48-52` omits extensions that are coloured (`src/lib/bigHighlight.ts:21-27`): `.out`, `.err`, `.jsonc`, `.json5`, `.tab`, `.htm`, `.xhtml`, `.plist`, `.xsd`, `.kml`, `.gpx`; sniffing also detects JSON and XML.

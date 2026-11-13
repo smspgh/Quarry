@@ -734,7 +734,7 @@
       "title": "Syntax colours for large files",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 678,
+      "line": 679,
       "status": "draft",
       "commands": [],
       "files": [
@@ -784,7 +784,7 @@
       "title": "Filter view of matching lines",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 733,
+      "line": 734,
       "status": "draft",
       "commands": [
         "big.filter"
@@ -854,7 +854,7 @@
       "title": "Follow a file as it grows",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 809,
+      "line": 810,
       "status": "draft",
       "commands": [
         "big.follow"
@@ -915,7 +915,7 @@
       "title": "CSV and TSV grid",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 879,
+      "line": 880,
       "status": "draft",
       "commands": [],
       "files": [
@@ -979,7 +979,7 @@
       "title": "JSON tree read from the file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 955,
+      "line": 956,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1049,7 +1049,7 @@
       "title": "Validate a large JSON file",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1034,
+      "line": 1035,
       "status": "draft",
       "commands": [
         "json.validate"
@@ -1101,7 +1101,7 @@
       "title": "Show large-file info",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1087,
+      "line": 1088,
       "status": "draft",
       "commands": [
         "big.info"
@@ -1132,7 +1132,7 @@
       "title": "Reload when the file changes on disk",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1115,
+      "line": 1116,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1164,7 +1164,7 @@
       "title": "What large-file tabs do not offer",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 1151,
+      "line": 1152,
       "status": "draft",
       "commands": [],
       "files": [

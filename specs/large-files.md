@@ -639,6 +639,7 @@ Scenario: BIG-011.1 UTF-16 files with a byte-order mark are shown decoded and re
   Then its text is readable
   And a warning toast says it is UTF-16LE and opened read-only in large-file mode
   And the status bar shows "UTF-16LE" and "Read-only"
+  And hovering "UTF-16LE" shows "UTF-16LE large files are shown decoded and read-only"
 
 Scenario: BIG-011.2 A read-only file refuses edits
   Given a UTF-16 large-file tab
