@@ -71,14 +71,16 @@ function RemoteForm({ repo, change, onCancel }: { repo: GitStatus; change?: GitR
   const [remoteName, setRemoteName] = useState(() => change?.name ?? (taken("origin") ? "" : "origin"));
   const [repoName, setRepoName] = useState(() => repoNameFor(repo.root));
   const [isPrivate, setPrivate] = useState(true);
-  const [url, setUrl] = useState(change?.url ?? "");
+  // Prefilled without a token or password that may be in the stored URL (it is never shown).
+  const shown = change ? displayUrl(change.url) : "";
+  const [url, setUrl] = useState(shown);
   const first = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (asked || change) first.current?.focus();
   }, [asked, how]);
 
   const nameOk = !!remoteName.trim() && (!!change || !taken(remoteName));
-  const ready = !busy && nameOk && (how === "github" ? !!repoName.trim() : !!url.trim() && url.trim() !== change?.url);
+  const ready = !busy && nameOk && (how === "github" ? !!repoName.trim() : !!url.trim() && url.trim() !== shown);
   const canPush = !!repo.head;
   const go = async (push: boolean) => {
     if (!ready) return;

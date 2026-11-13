@@ -5,7 +5,8 @@ import { accept, acceptAll, conflictAtCursor, conflictsOf, gotoConflict } from "
 import type { ConflictChoice } from "./conflicts";
 import type { EditorView } from "@codemirror/view";
 import { register } from "./commands";
-import { compareWithHead, currentRepo, checkout, openGraph, resolveConflicts, fileStatus, pickBranch, refreshGit, remote, repoOf, showAddRemote, showHistory, stage, toggleBlame, unstage, useGit } from "./git";
+import { compareWithHead, currentRepo, checkout, openGraph, resolveConflicts, fileStatus, pickBranch, remote, repoOf, rescanGit, showAddRemote, showHistory, stage, toggleBlame, unstage, useGit } from "./git";
+import { nextChangeIndex } from "./gitStatus";
 import { showPanel } from "./panels";
 import { activeDoc, useStore } from "./store";
 
@@ -34,8 +35,7 @@ function jumpChange(dir: 1 | -1): boolean {
   }
   const line = view.state.doc.lineAt(view.state.selection.main.head).number;
   const starts = chunks.map((c) => changeRows(c, view.state.doc)[0]);
-  let i = dir === 1 ? starts.findIndex((n) => n > line) : starts.map((n, k) => (n < line ? k : -1)).filter((k) => k >= 0).pop() ?? -1;
-  if (i === -1) i = dir === 1 ? 0 : starts.length - 1; // wrap around
+  const i = nextChangeIndex(starts, line, dir);
   const pos = view.state.doc.line(starts[i]).from;
   view.dispatch({ selection: { anchor: pos }, scrollIntoView: true, effects: setPeek.of(starts[i]) });
   view.focus();
@@ -78,7 +78,7 @@ export function registerGitCommands() {
   register({ id: "git.acceptAllIncoming", title: "Accept All Incoming in This File", category: "Git", enabled: hasConflicts, run: acceptEvery("incoming") });
   register({ id: "git.showPanel", title: "Show Source Control", category: "Git", keys: "Ctrl+Shift+G", run: () => showPanel("git") });
   register({ id: "git.graph", title: "Show Commit Graph", category: "Git", enabled: hasRepo, run: () => openGraph() });
-  register({ id: "git.refresh", title: "Refresh Git Status", category: "Git", run: () => refreshGit(0) });
+  register({ id: "git.refresh", title: "Refresh Git Status", category: "Git", run: rescanGit });
   register({ id: "git.switchBranch", title: "Switch Branch…", category: "Git", enabled: hasRepo, run: () => void pickBranch() });
   register({ id: "git.checkoutTo", title: "Switch to Branch", category: "Git", hidden: true, run: (name) => void (typeof name === "string" && checkout(name)) });
   register({ id: "git.createBranch", title: "Create Branch", category: "Git", hidden: true, run: (name) => void (typeof name === "string" && checkout(name, true)) });

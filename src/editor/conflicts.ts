@@ -143,9 +143,8 @@ export function conflictsOf(state: EditorState): readonly ConflictBlock[] {
   return state.field(conflictField, false)?.blocks ?? [];
 }
 
-/** Replace one block with the chosen side(s), as one undo step. */
-export function accept(view: EditorView, block: ConflictBlock, choice: ConflictChoice) {
-  const doc = view.state.doc;
+/** The change that replaces one block with the chosen side(s). */
+export function resolveChange(doc: Text, block: ConflictBlock, choice: ConflictChoice): { from: number; to: number; insert: string } {
   const lines: string[] = [];
   for (let l = block.start; l <= block.end; l++) lines.push(doc.line(l + 1).text);
   const shift = (n: number | null) => (n === null ? null : n - block.start);
@@ -155,7 +154,13 @@ export function accept(view: EditorView, block: ConflictBlock, choice: ConflictC
   let to = doc.line(block.end + 1).to;
   // Nothing kept (one side was empty): the block's line break goes too.
   if (!kept.length && to < doc.length) to += 1;
-  view.dispatch({ changes: { from, to, insert: kept.join("\n") }, selection: { anchor: from }, userEvent: "input.conflict", scrollIntoView: true });
+  return { from, to, insert: kept.join("\n") };
+}
+
+/** Replace one block with the chosen side(s), as one undo step. */
+export function accept(view: EditorView, block: ConflictBlock, choice: ConflictChoice) {
+  const change = resolveChange(view.state.doc, block, choice);
+  view.dispatch({ changes: change, selection: { anchor: change.from }, userEvent: "input.conflict", scrollIntoView: true });
 }
 
 /** The block the cursor is in, else the next one below it, else the first. */
@@ -170,27 +175,23 @@ export function conflictAtCursor(state: EditorState): ConflictBlock | null {
 export function acceptAll(view: EditorView, choice: ConflictChoice): number {
   const blocks = [...conflictsOf(view.state)];
   if (!blocks.length) return 0;
-  const doc = view.state.doc;
-  const changes = blocks.map((block) => {
-    const lines: string[] = [];
-    for (let l = block.start; l <= block.end; l++) lines.push(doc.line(l + 1).text);
-    const shift = (n: number | null) => (n === null ? null : n - block.start);
-    const kept = resolvedLines(lines, { ...block, start: 0, base: shift(block.base), mid: block.mid - block.start, end: block.end - block.start }, choice);
-    const from = doc.line(block.start + 1).from;
-    let to = doc.line(block.end + 1).to;
-    if (!kept.length && to < doc.length) to += 1;
-    return { from, to, insert: kept.join("\n") };
-  });
+  const changes = blocks.map((block) => resolveChange(view.state.doc, block, choice));
   view.dispatch({ changes, userEvent: "input.conflict", scrollIntoView: true });
   return blocks.length;
 }
 
+/** The next / previous conflict from the cursor (wrapping); null when there is none. */
+export function nextConflict(state: EditorState, dir: 1 | -1): ConflictBlock | null {
+  const blocks = conflictsOf(state);
+  if (!blocks.length) return null;
+  const line = state.doc.lineAt(state.selection.main.head).number - 1;
+  return dir === 1 ? (blocks.find((b) => b.start > line) ?? blocks[0]) : ([...blocks].reverse().find((b) => b.start < line && b.end < line) ?? blocks[blocks.length - 1]);
+}
+
 /** Move the cursor to the next / previous conflict (wrapping). False when there is none. */
 export function gotoConflict(view: EditorView, dir: 1 | -1): boolean {
-  const blocks = conflictsOf(view.state);
-  if (!blocks.length) return false;
-  const line = view.state.doc.lineAt(view.state.selection.main.head).number - 1;
-  const next = dir === 1 ? (blocks.find((b) => b.start > line) ?? blocks[0]) : ([...blocks].reverse().find((b) => b.start < line && b.end < line) ?? blocks[blocks.length - 1]);
+  const next = nextConflict(view.state, dir);
+  if (!next) return false;
   const pos = view.state.doc.line(next.start + 1).from;
   view.dispatch({ selection: { anchor: pos }, effects: EditorView.scrollIntoView(pos, { y: "center" }) });
   view.focus();

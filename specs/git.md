@@ -12,13 +12,13 @@ Git in the editor (change markers, peek / revert, line blame), the Source Contro
 - Status: draft
 - Commands: `git.refresh`
 - Files:
-  - `src/lib/git.ts` — `installGit`, `refreshGit` (debounce), `doRefresh`, `rescanGit`, `interesting`, `notRepo`, `repoOf`, `currentRepo`, `fileStatus`
+  - `src/lib/git.ts` — `installGit`, `refreshGit` (debounce), `doRefresh` (a git failure goes to `statusErrors`, never `notRepo`; a known repository keeps its last status), `rescanGit` (clears `notRepo`, re-checks a missing git), `interesting`, `notRepo`, `repoOf`, `currentRepo`, `fileStatus`
   - `src/lib/gitApi.ts` — `git.available`, `git.status`, `GitStatus` / `GitFile`
   - `src-tauri/src/git.rs` — `git_available`, `git_status`, `find_root`, `parse_status`, `git()` (`--no-optional-locks`, `GIT_TERMINAL_PROMPT=0`)
-  - `src/components/panels/GitPanel.tsx` — header Refresh button (`rescanGit`), "Git was not found" / "not in a git repository" notes
-  - `src/lib/gitCommands.ts` — `git.refresh`
+  - `src/components/panels/GitPanel.tsx` — header Refresh button (`rescanGit`), "Git was not found" / "not in a git repository" / "Git could not read" notes
+  - `src/lib/gitCommands.ts` — `git.refresh` (runs `rescanGit`, like the panel's Refresh button)
   - `src/App.tsx` — calls `installGit()` at start-up
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitRefresh.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer who opens folders and files that live in git repositories
@@ -44,13 +44,13 @@ Scenario: GIT-001.3 Status follows saves, file changes, git actions and window f
 
 Scenario: GIT-001.4 Refresh after git init in a terminal
   Given the open folder was not a repository and I ran "git init" in a terminal
-  When I click the Refresh button in the Source Control header
+  When I click the Refresh button in the Source Control header, or choose Git › Refresh Git Status
   Then folders that were remembered as "not a repository" are asked again and the new repository appears
 
 Scenario: GIT-001.5 Git is not installed
   Given git cannot be run
   When I open the Source Control panel
-  Then it says "Git was not found. Install Git for Windows (git-scm.com) and make sure git is on PATH, then click Refresh."
+  Then it says "Git was not found. Install Git for Windows (git-scm.com) and make sure git is on PATH, then click Refresh (after installing it, restart Quarry first: a running program keeps its old PATH)."
   And no repository features are shown
 
 Scenario: GIT-001.6 No repository
@@ -63,6 +63,23 @@ Scenario: GIT-001.7 Untracked files are listed one by one
   Given a repository with a new folder holding 3 new files
   When the status is read
   Then each of the 3 files is listed as untracked, not just the folder
+
+Scenario: GIT-001.8 Refresh looks for git again
+  Given the Source Control panel says "Git was not found"
+  And git can now be run with Quarry's PATH (for example a broken install was repaired)
+  When I click the Refresh button in the Source Control header, or choose Git › Refresh Git Status
+  Then Quarry looks for git again and shows the repository
+
+Scenario: GIT-001.9 Git fails to read a folder
+  Given the open folder is in a repository git refuses to read ("detected dubious ownership")
+  When the status is read
+  Then the Source Control panel says "Git could not read the open folder:" followed by git's message
+  And the folder is not remembered as "not a repository": the next refresh asks git again
+
+Scenario: GIT-001.10 A failed read keeps the last status
+  Given a repository is shown
+  When one status read fails (for example a git lock held by another program)
+  Then the panel keeps showing the repository's last status instead of dropping it
 ```
 
 ## GIT-002: Change markers in the gutter
@@ -173,10 +190,11 @@ Scenario: GIT-003.7 Revert at cursor on an unchanged line
 - Status: draft
 - Commands: `git.nextChange`, `git.prevChange`
 - Files:
-  - `src/lib/gitCommands.ts` — `jumpChange` (wrap-around, opens the peek)
+  - `src/lib/gitCommands.ts` — `jumpChange` (opens the peek)
+  - `src/lib/gitStatus.ts` — `nextChangeIndex` (which change, wrap-around)
   - `src/editor/git.ts` — `changesOf`, `changeRows`, `setPeek`
   - `src/components/MenuBar.tsx` — Git menu entries
-- Tests: none
+- Tests: `src/__tests__/gitNav.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer reviewing my edits before committing
@@ -428,6 +446,13 @@ Scenario: GIT-008.7 The panel says who the commit is made as
   Given git's user.name is "Ada" and user.email is "ada@example.com"
   When I look under the Commit button
   Then a line reads "as Ada <ada@example.com>"
+
+Scenario: GIT-008.8 Ctrl+Enter while the button is disabled says why
+  Given the Commit button is disabled
+  When I press Ctrl+Enter in the message box
+  Then no commit is made
+  And a message says why: "Write a commit message first." with an empty box, "There is nothing to commit." with no changes, or the conflicts warning (CONFLICT-010.2)
+  And while a git action is running nothing happens
 ```
 
 ## GIT-009: Amend the last commit
@@ -633,7 +658,7 @@ Scenario: GIT-012.4 An untracked file goes to the Recycle Bin
 Scenario: GIT-012.5 Discard all
   Given 4 files under Changes, 1 of them untracked
   When I click "Discard all changes" on the Changes heading
-  Then the dialog says "Your changes to 4 files will be lost (1 untracked file go to the Recycle Bin). Open tabs reload the committed text."
+  Then the dialog says "Your changes to 4 files will be lost (1 untracked file goes to the Recycle Bin). Open tabs reload the committed text."
   And nothing happens unless I click "Discard"
 
 Scenario: GIT-012.6 No discard for staged rows
@@ -716,9 +741,9 @@ Scenario: GIT-013.9 No line without a remote or a branch
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/git.ts` — `checkRemote` (`CHECK_EVERY` = 60 s, skipped while busy / already checking / no remote), `markChecked`, `remoteCheck` state
+  - `src/lib/git.ts` — `checkRemote` (`CHECK_EVERY` = 60 s counted from the last check, failed or not; skipped while busy / already checking / no remote), `markChecked`, `remoteCheck` state
   - `src/components/panels/GitPanel.tsx` — `SyncStatus` effect (on mount and window focus), ↻ "Check the remote now" button, "Couldn't check the remote" row with Fetch
-  - `src-tauri/src/git.rs` — `remote_op` "check" (`fetch --prune --quiet`, `GCM_INTERACTIVE=never`), `quiet_options` (BatchMode ssh, HTTP low-speed limits), `GIT_TERMINAL_PROMPT=0` in `git()`
+  - `src-tauri/src/git.rs` — `remote_op` "check" (`fetch --prune --quiet`, no `--all`: git fetches the branch's remote, else origin; `GCM_INTERACTIVE=never`), `quiet_options` (BatchMode ssh, HTTP low-speed limits), `GIT_TERMINAL_PROMPT=0` in `git()`
   - `src/lib/gitApi.ts` — `GitRemoteOp` "check"
 - Tests: `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
@@ -762,6 +787,18 @@ Scenario: GIT-014.6 Not while another git action runs
   When Quarry gets focus
   Then no background check is started
   And the status line's action buttons are disabled while a check or another action is running
+
+Scenario: GIT-014.7 A failed check also waits a minute
+  Given the last background check failed 20 seconds ago because the network is down
+  When Quarry gets focus
+  Then no new check is made (an offline machine is not asked again on every focus)
+  And the ↻ button or Fetch still tries at once
+
+Scenario: GIT-014.8 Only the branch's remote is checked
+  Given the repository has remotes "origin" (the branch's upstream) and "backup"
+  When the background check runs
+  Then only "origin" is fetched, since the status line is about the upstream
+  And the header's Fetch button fetches every remote
 ```
 
 ## GIT-015: Fetch, pull, push and publish a branch
@@ -880,7 +917,7 @@ Scenario: GIT-016.5 The warning clears when the remote is changed
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/GitPanel.tsx` — `CommitsSection` (`COMMITS_PAGE` = 30, "N to push" / "N to pull" counts, expand to files, "Show more", graph button)
+  - `src/components/panels/GitPanel.tsx` — `CommitsSection` (`COMMITS_PAGE` = 30, "N to push" (the status's ahead count) / "N to pull" counts, expand to files, "Show more", graph button)
   - `src/lib/git.ts` — `openCommitFile` (parent vs commit, `preview` Compare tab)
   - `src/lib/gitStatus.ts` — `commitFileKind`
   - `src/editor/git.ts` — `relativeTime`
@@ -944,6 +981,11 @@ Scenario: GIT-017.9 No commits yet
   Given a repository with no commits
   When I look at Source Control
   Then there is no Commits section
+
+Scenario: GIT-017.10 A long run of unpushed commits is counted in full
+  Given branch "main" has 750 commits origin/main does not have
+  When I look at the Commits heading
+  Then it shows "750 to push", the same count as the status line
 ```
 
 ## GIT-018: File history
@@ -967,7 +1009,7 @@ Scenario: GIT-017.9 No commits yet
 Scenario: GIT-018.1 Show the active file's history
   Given a tracked file "app.ts" is the active tab
   When I run Git › Show File History, or choose "Show File History" on the tab's right-click menu
-  Then Source Control opens with a section "History: app.ts" listing the commits that changed it, newest first
+  Then Source Control opens with a section "History: app.ts", below Commits and above Repository, listing the commits that changed it, newest first
 
 Scenario: GIT-018.2 History follows renames
   Given "util.ts" was called "old.ts" three commits ago
@@ -1109,9 +1151,9 @@ Scenario: GIT-020.6 A name and a URL are required
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/GitRepoSettings.tsx` — remote rows (name, short URL, Open, Change), `RemoteForm` with `change` ("Save and Push" / "Save"), `shortUrl`
+  - `src/components/panels/GitRepoSettings.tsx` — remote rows (name, short URL, Open, Change), `RemoteForm` with `change` ("Save and Push" / "Save"; URL prefilled through `displayUrl`), `shortUrl`
   - `src/lib/gitStatus.ts` — `remoteWebUrl`, `displayUrl`
-  - `src/lib/git.ts` — `saveRemote` with `replace`, `markChecked`, `checkRemote(root, true)`
+  - `src/lib/git.ts` — `saveRemote` with `replace` (toast via `displayUrl`), `markChecked`, `checkRemote(root, true)`
   - `src-tauri/src/git.rs` — `git_set_remote_url` (`remote set-url`, then drops `refs/remotes/<name>/*` with `update-ref --no-deref --stdin`)
 - Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
@@ -1155,6 +1197,12 @@ Scenario: GIT-021.6 Cancel a change
   Given the Change form is open
   When I press Escape in a field or click ✕
   Then the form closes and the remote is unchanged
+
+Scenario: GIT-021.7 A token in the URL stays hidden when changing it
+  Given remote "origin" is "https://ada:ghp_secret@github.com/ada/demo.git"
+  When I open its Change form
+  Then the URL field shows "https://github.com/ada/demo.git" and Save is disabled
+  And after saving "https://ada:ghp_new@github.com/ada/other.git" the message reads "Remote origin now points to https://github.com/ada/other.git."
 ```
 
 ## GIT-022: Create a repository on GitHub and push to it
@@ -1329,7 +1377,7 @@ Scenario: GIT-024.5 A repository created from Quarry is badged at once
   - `src/lib/git.ts` — `current`, `currentRepo`, `doRefresh` (default = the open folder's repository), `installGit` (reset on folder change), `repoOf` (deepest repository wins)
   - `src/components/StatusBar.tsx` — `GitStatusItem` sets `current` on click
   - `src/components/Select.tsx` — the picker
-- Tests: none
+- Tests: `src/__tests__/gitRefresh.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer with a project folder open and a file from another repository in a tab
@@ -1370,9 +1418,10 @@ Scenario: GIT-025.5 Nested repositories
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/StatusBar.tsx` — `GitStatusItem` (branch, `*`, ↓ / ↑ counts, busy label, tooltip, click = `pickBranch`)
+  - `src/components/StatusBar.tsx` — `GitStatusItem` (click = `pickBranch`)
+  - `src/lib/gitStatus.ts` — `statusBarBranch` (branch, `*`, ↓ / ↑ counts, busy label, tooltip)
   - `src/lib/git.ts` — `repoOf`, `currentRepo`, `pickBranch`, `busy`
-- Tests: none
+- Tests: `src/__tests__/gitNav.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer editing a file

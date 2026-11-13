@@ -1269,7 +1269,8 @@ fn graph_scope(root: &Path, all: bool) -> Vec<&'static str> {
 }
 
 /// Search the whole history (not just the pages loaded): commits whose message or author
-/// contains `query` (ignoring case), or the commit `query` is an id of. Newest first.
+/// contains `query` (ignoring case), that a branch or tag whose name contains it points at, or
+/// the commit `query` is an id of. Newest first.
 fn graph_search(root: &Path, all: bool, query: &str, limit: u32) -> Result<Vec<GitGraphCommit>, String> {
     let q = query.trim();
     if q.is_empty() || !has_head(root) {
@@ -1282,6 +1283,31 @@ fn graph_search(root: &Path, all: bool, query: &str, limit: u32) -> Result<Vec<G
         let mut args = vec!["log", "-z", "--decorate=full", GRAPH_FORMAT, &limit_arg, "-i", "--fixed-strings", &filter];
         args.extend(scope.iter().copied());
         found.extend(parse_graph(&run(root, true, &args, None)?));
+    }
+    // Branches and tags whose name contains the text (ignoring case): the commits they point at,
+    // when those are in the scope (`--simplify-by-decoration` keeps only commits the given refs decorate).
+    let lower = q.to_lowercase();
+    let refs: Vec<String> = run_text(root, true, &["for-each-ref", "--format=%(refname)", "refs/heads", "refs/remotes", "refs/tags"])?
+        .lines()
+        .map(str::trim)
+        .filter(|r| !r.is_empty() && !r.ends_with("/HEAD"))
+        .filter(|r| ["refs/heads/", "refs/remotes/", "refs/tags/"].iter().find_map(|p| r.strip_prefix(p)).is_some_and(|n| n.to_lowercase().contains(&lower)))
+        .take(200)
+        .map(String::from)
+        .collect();
+    if !refs.is_empty() {
+        let filters: Vec<String> = refs.iter().map(|r| format!("--decorate-refs={r}")).collect();
+        let mut args = vec!["log", "-z", "--decorate=full", GRAPH_FORMAT, &limit_arg, "--simplify-by-decoration"];
+        args.extend(filters.iter().map(String::as_str));
+        args.extend(scope.iter().copied());
+        // The simplification also keeps root commits: only those a matching ref points at count.
+        let shas: Vec<String> = parse_graph(&run(root, true, &args, None)?).into_iter().filter(|c| c.refs.iter().any(|r| refs.contains(r))).map(|c| c.sha).take(200).collect();
+        if !shas.is_empty() {
+            // Again with every label (the filter above hid the others).
+            let mut args = vec!["log", "-z", "--decorate=full", GRAPH_FORMAT, "--no-walk"];
+            args.extend(shas.iter().map(String::as_str));
+            found.extend(parse_graph(&run(root, true, &args, None)?));
+        }
     }
     if (4..=64).contains(&q.len()) && q.bytes().all(|b| b.is_ascii_hexdigit()) {
         let spec = format!("{q}^{{commit}}");
@@ -1913,6 +1939,13 @@ mod tests {
         assert!(hits("on feature", false).is_empty()); // not on the current branch
         assert_eq!(hits("test user", true).len(), 3);
         assert_eq!(hits(&feature.sha[..8], false), ["on feature"]);
+        // Branch and tag names (any case), only within the scope.
+        assert_eq!(hits("FEAT", true), ["on feature"]);
+        assert!(hits("feat", false).is_empty()); // feature is not on the current branch
+        assert_eq!(hits("v1", false), ["on main"]);
+        let tagged = graph_search(&root, false, "v1", 50).unwrap();
+        assert_eq!(tagged[0].refs, ["HEAD", "refs/heads/main", "refs/tags/v1"]); // every label, not just the match
+        assert_eq!(hits("main", false), ["on main"]);
         assert!(hits("no such thing", true).is_empty());
         assert!(hits("  ", true).is_empty());
         assert!(!has_commit_graph(&root));

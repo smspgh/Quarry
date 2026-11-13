@@ -214,7 +214,7 @@ Scenario: GRAPH-004.3 A branch with no remote branch
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — `load()`, `PAGE` = 300, `SLOW_PAGE_MS` = 400, `MAX_PAGE` = 4800, `generation` guard, windowed rows (`first` / `last`, 8 rows of overscan), next page when within 40 rows of the end
+  - `src/components/GraphView.tsx` — `load()`, `PAGE` = 300, `SLOW_PAGE_MS` = 400, `MAX_PAGE` = 4800, `generation` guard, reload on the `stamp` (head, branch, ahead / behind, upstream, operation) keeping `selected` and the scroll offset, windowed rows (`first` / `last`, 8 rows of overscan), next page when within 40 rows of the end
   - `src/lib/gitGraph.ts` — `GraphState` carried from page to page
   - `src-tauri/src/git.rs` — `graph` (`--skip`, `--max-count` clamped to 5000; no commits before the first commit)
 - Tests: `src/__tests__/gitGraph.test.ts`, `src-tauri/src/git.rs`
@@ -269,6 +269,12 @@ Scenario: GRAPH-005.8 A reload discards late pages
   Given a page is still being loaded
   When the graph is reloaded
   Then the late page's commits are not added to the new list
+
+Scenario: GRAPH-005.9 What a reload keeps
+  Given commit 150 of the list is selected and on screen
+  When the repository changes (a commit, pull, push, checkout, a fetch that moves the upstream, or an operation starting or ending) and the graph reloads from the first page
+  Then the scroll position, the selected commit and its details pane are kept
+  And a selected commit beyond the first page (300 rows, or the grown page size) is no longer shown: its details pane closes and the list is left at the end of the first page, where scrolling loads the next page
 ```
 
 ## GRAPH-006: Speed up a very large history
@@ -379,7 +385,7 @@ Scenario: GRAPH-007.6 Nothing matches
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — `searchAll`, results list (`hits`, `hitsOpen`, `pickHit`), `goTo` (loads pages of 4,800 until the commit is in the graph, then centres it), "Show in Graph"
-  - `src-tauri/src/git.rs` — `graph_search` / `git_graph_search` (`--grep`, `--author`, `-i --fixed-strings`, an id of 4-64 hex digits; newest first, de-duplicated)
+  - `src-tauri/src/git.rs` — `graph_search` / `git_graph_search` (`--grep`, `--author`, `-i --fixed-strings`, branch / tag names via `for-each-ref` + `--simplify-by-decoration --decorate-refs`, an id of 4-64 hex digits; newest first, de-duplicated)
   - `src/lib/gitApi.ts` — `git.graphSearch`
 - Tests: `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
@@ -392,7 +398,7 @@ Scenario: GRAPH-007.6 Nothing matches
 Scenario: GRAPH-008.1 Search All History
   Given 300 commits are loaded, more exist, and "tokenizer" is in the Find box
   When I click "Search All History"
-  Then a results list appears headed '3 commits in the whole history match "tokenizer" (message, author or id)'
+  Then a results list appears headed '3 commits in the whole history match "tokenizer" (message, author, branch / tag or id)'
   And the results are listed newest first with id, message, author and date
 
 Scenario: GRAPH-008.2 Keyboard
@@ -441,6 +447,12 @@ Scenario: GRAPH-008.10 Editing the text closes the results
   Given the results list is showing
   When I change the text in the Find box, or click the list's close button
   Then the results list disappears
+
+Scenario: GRAPH-008.11 Search by branch or tag name
+  Given tag "v0.3.0" points at a commit far back in the history and branch "Release-2" at another
+  When I search the whole history for "v0.3" or for "release"
+  Then the commit the tag or branch points at is among the results, ignoring case
+  And with "Current branch" selected a branch or tag on another branch's commits is not listed
 ```
 
 ## GRAPH-009: See a commit's details
@@ -558,10 +570,11 @@ Scenario: GRAPH-010.6 Open the file as it is now
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — `GraphMenu` (kept inside the window; closes on outside click, Escape, window blur), naming strip (`Naming`, `commitNaming`), `act`
+  - `src/lib/gitGraph.ts` — `actionDone` (success notifications)
   - `src/lib/git.ts` — `commitAction`, `checkoutRef`
   - `src-tauri/src/git.rs` — `commit_action` / `git_commit_action` (`branch-switch` = `switch -c`, `tag`), `valid_ref_name`, `checkout`
   - `src/lib/gitApi.ts` — `GitCommitAction`, `git.commitAction`
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitGraph.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer
@@ -620,12 +633,13 @@ Scenario: GRAPH-011.8 Invalid name
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — `act()` confirmations and success notifications
+  - `src/components/GraphView.tsx` — `act()`
+  - `src/lib/gitGraph.ts` — `actionConfirm` (the dialogs), `actionDone` (success notifications)
   - `src/lib/git.ts` — `commitAction` (busy label, error via `gitErrorText`, `checkExternalChanges`)
   - `src/lib/gitStatus.ts` — `gitErrorText` ("Stopped on a conflict…")
   - `src/lib/actions.ts` — `askDialog`
   - `src-tauri/src/git.rs` — `commit_action` (`checkout --detach`, `cherry-pick`, `revert --no-edit`; merges with `-m 1`; `GIT_EDITOR=true`)
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitRemote.test.ts`
+- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitRemote.test.ts`, `src/__tests__/gitGraph.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer
@@ -678,10 +692,11 @@ Scenario: GRAPH-012.7 Detached HEAD wording
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — Reset menu entries (hard one styled as dangerous), `act()` dialogs
+  - `src/components/GraphView.tsx` — Reset menu entries (hard one styled as dangerous), `act()`
+  - `src/lib/gitGraph.ts` — `actionConfirm` (the dialogs; the hard reset counts the changes it loses)
   - `src/lib/git.ts` — `commitAction`
   - `src-tauri/src/git.rs` — `commit_action` (`reset --soft` / `--mixed` / `--hard`)
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitGraph.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer who wants to take commits back

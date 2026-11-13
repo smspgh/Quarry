@@ -160,3 +160,38 @@ export function commitMatches(c: { sha: string; summary: string; author: string;
   if (!q) return true;
   return c.summary.toLowerCase().includes(q) || c.author.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.sha.startsWith(q) || c.refs.some((r) => r.toLowerCase().includes(q));
 }
+
+/** The graph's commit actions (gitApi's `GitCommitAction`, repeated so this file stays free of imports). */
+export type GraphAction = "checkout" | "branch" | "branch-switch" | "tag" | "cherry-pick" | "revert" | "reset-soft" | "reset-mixed" | "reset-hard";
+
+/**
+ * The question asked before a commit action from the graph's menu, or null when it runs at once
+ * (creating a branch or tag). `branch` is the current branch (null when detached), `dirty` the
+ * number of uncommitted changes.
+ */
+export function actionConfirm(action: GraphAction, c: { short: string; summary: string }, branch: string | null, dirty: number): { title: string; text: string; ok: string; kind: "primary" | "danger" } | null {
+  const on = branch ? `"${branch}"` : "the current commit (not on a branch)";
+  const what = `${c.short} "${c.summary}"`;
+  switch (action) {
+    case "cherry-pick":
+      return { title: "Cherry-pick this commit?", text: `Copies the changes of ${what} onto ${on} as a new commit. If they conflict, the pick stops and Source Control shows the files to resolve.`, ok: "Cherry-pick", kind: "primary" };
+    case "revert":
+      return { title: "Revert this commit?", text: `Adds a new commit on ${on} that undoes ${what}. History is kept; nothing is deleted.`, ok: "Revert", kind: "primary" };
+    case "reset-soft":
+      return { title: "Reset (soft)?", text: `Moves ${on} back to ${what}. The commits after it leave the branch, but all their changes stay staged, ready to commit again. Your files are not touched.`, ok: "Reset (Soft)", kind: "primary" };
+    case "reset-mixed":
+      return { title: "Reset (mixed)?", text: `Moves ${on} back to ${what}. The commits after it leave the branch; their changes stay in your files, unstaged.`, ok: "Reset (Mixed)", kind: "primary" };
+    case "reset-hard":
+      return { title: "Reset (hard) and discard changes?", text: `Moves ${on} back to ${what} and makes every tracked file match it. The commits after it leave the branch${dirty ? `, and your ${dirty} uncommitted change${dirty === 1 ? "" : "s"} to tracked files ${dirty === 1 ? "is" : "are"} lost` : ""}. This can't be undone from Quarry.`, ok: "Reset and Discard", kind: "danger" };
+    case "checkout":
+      return { title: "Check out this commit?", text: `Your files become ${what}, and you are no longer on a branch ("detached"). Commits made here belong to no branch until you create one. Switch back with the branch button.`, ok: "Check Out", kind: "primary" };
+    default:
+      return null;
+  }
+}
+
+/** The notification after a commit action from the graph succeeded. */
+export function actionDone(action: GraphAction, short: string, name?: string): string {
+  const done: Record<GraphAction, string> = { checkout: `Checked out ${short}`, branch: `Created branch ${name}`, "branch-switch": `On new branch ${name}`, tag: `Created tag ${name}`, "cherry-pick": `Cherry-picked ${short}`, revert: `Reverted ${short}`, "reset-soft": `Reset to ${short}`, "reset-mixed": `Reset to ${short}`, "reset-hard": `Reset to ${short}` };
+  return done[action];
+}

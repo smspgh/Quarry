@@ -6,6 +6,7 @@ import { formatBytes } from "../lib/actions";
 import { bus } from "../lib/bus";
 import { runCommand } from "../lib/commands";
 import { currentRepo, pickBranch, repoOf, useGit } from "../lib/git";
+import { statusBarBranch } from "../lib/gitStatus";
 import { useActiveDoc, useStore } from "../lib/store";
 import { ENCODINGS } from "../lib/types";
 import { ScriptStatusItem } from "./panels/ScriptsPanel";
@@ -103,21 +104,17 @@ function GitStatusItem() {
   const g = useGit();
   const repo = repoOf(path) ?? currentRepo(g);
   if (!repo) return null;
-  const branch = repo.branch ?? (repo.head ? `${repo.head} (detached)` : "no commits");
-  const sync = `${repo.behind ? ` ↓${repo.behind}` : ""}${repo.ahead ? ` ↑${repo.ahead}` : ""}`;
+  const { text, title } = statusBarBranch(repo, g.busy);
   return (
     <button
       className="status-item clickable"
-      title={`${repo.root}\nBranch ${branch}${repo.upstream ? `, tracking ${repo.upstream}` : ""}${sync ? ` (${repo.ahead} to push, ${repo.behind} to pull)` : ""}${repo.files.length ? `\n${repo.files.length} changed file${repo.files.length === 1 ? "" : "s"}` : ""}\nClick to switch branch`}
+      title={title}
       onClick={() => {
         useGit.setState({ current: repo.root.toLowerCase() });
         void pickBranch();
       }}
     >
-      <GitBranch size={12} /> {branch}
-      {repo.files.length > 0 && "*"}
-      {sync}
-      {g.busy && ` · ${g.busy}`}
+      <GitBranch size={12} /> {text}
     </button>
   );
 }

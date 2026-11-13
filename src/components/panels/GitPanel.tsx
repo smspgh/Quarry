@@ -2,7 +2,7 @@ import { ArrowDown, ArrowUp, Check, ChevronRight, CircleDot, CloudDownload, Clou
 import { useEffect, useRef, useState } from "react";
 import { openPath } from "../../lib/actions";
 import { abortOperation, continueOperation, resolveConflicts, takeSide, checkRemote, isMissingRepo, commit, compareCommitWithCurrent, currentRepo, discard, moreHistory, openChange, openCommitChange, openCommitFile, openGraph, pickBranch, remote, rescanGit, stage, unstage, useGit } from "../../lib/git";
-import { commitFileKind, commitLabel, groupFiles, KIND_LABEL, KIND_LETTER, rowKind, syncLine, type Group } from "../../lib/gitStatus";
+import { commitFileKind, commitLabel, gitErrorText, groupFiles, KIND_LABEL, KIND_LETTER, rowKind, syncLine, type Group } from "../../lib/gitStatus";
 import { git, type GitCommitFile, type GitFile, type GitLogEntry, type GitRemoteOp, type GitStatus } from "../../lib/gitApi";
 import { relativeTime } from "../../editor/git";
 import { useStore } from "../../lib/store";
@@ -178,7 +178,8 @@ function CommitsSection({ repo }: { repo: GitStatus }) {
           <ChevronRight size={14} />
         </span>
         <span>Commits</span>
-        {unpushed.size > 0 && <span className="scm-count" title={`${unpushed.size} not on ${repo.upstream} yet`}>{unpushed.size} to push</span>}
+        {/* git's ahead count, not the marked commits: those stop at 500. */}
+        {tracked && repo.ahead > 0 && <span className="scm-count" title={`${repo.ahead} not on ${repo.upstream} yet`}>{repo.ahead} to push</span>}
         {repo.behind > 0 && <span className="scm-count" title={`${repo.behind} on ${repo.upstream} that you don't have yet: open the graph to see them`}>{repo.behind} to pull</span>}
         <span className="grow" />
         <span className="scm-actions always" onClick={(e) => e.stopPropagation()}>
@@ -477,15 +478,24 @@ export function GitPanel() {
     return (
       <>
         {header}
-        <div className="panel-note">Git was not found. Install Git for Windows (git-scm.com) and make sure <span className="kbd">git</span> is on PATH, then click Refresh.</div>
+        <div className="panel-note">Git was not found. Install Git for Windows (git-scm.com) and make sure <span className="kbd">git</span> is on PATH, then click Refresh (after installing it, restart Quarry first: a running program keeps its old PATH).</div>
       </>
     );
   }
   if (!repo) {
+    const isFolder = (p: string) => !!folder && p.toLowerCase() === folder.toLowerCase();
+    const failed = g.statusErrors.find((e) => isFolder(e.path)) ?? g.statusErrors[0];
     return (
       <>
         {header}
-        <div className="panel-note">{folder ? "The open folder is not in a git repository." : "Open a folder (or a file) in a git repository to see its changes here."}</div>
+        {failed ? (
+          <div className="panel-note scm-status-error">
+            Git could not read {isFolder(failed.path) ? "the open folder" : failed.path}:{"\n"}
+            {gitErrorText(failed.error)}
+          </div>
+        ) : (
+          <div className="panel-note">{folder ? "The open folder is not in a git repository." : "Open a folder (or a file) in a git repository to see its changes here."}</div>
+        )}
         <HistorySection />
       </>
     );

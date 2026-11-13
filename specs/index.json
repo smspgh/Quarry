@@ -2197,7 +2197,8 @@
         "src/styles/app.css"
       ],
       "tests": [
-        "src/__tests__/conflicts.test.ts"
+        "src/__tests__/conflicts.test.ts",
+        "src/__tests__/conflictsEditor.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -2252,7 +2253,8 @@
         "src/components/MenuBar.tsx"
       ],
       "tests": [
-        "src/__tests__/conflicts.test.ts"
+        "src/__tests__/conflicts.test.ts",
+        "src/__tests__/conflictsEditor.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -2305,7 +2307,8 @@
         "src/lib/conflicts.ts"
       ],
       "tests": [
-        "src/__tests__/conflicts.test.ts"
+        "src/__tests__/conflicts.test.ts",
+        "src/__tests__/conflictsEditor.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -2344,7 +2347,9 @@
         "src/editor/conflicts.ts",
         "src/lib/gitCommands.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/conflictsEditor.test.ts"
+      ],
       "docs": [
         "docs/git.md"
       ],
@@ -7130,7 +7135,8 @@
         "src/App.tsx"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git.rs",
+        "src/__tests__/gitRefresh.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -7163,6 +7169,18 @@
         {
           "id": "GIT-001.7",
           "title": "Untracked files are listed one by one"
+        },
+        {
+          "id": "GIT-001.8",
+          "title": "Refresh looks for git again"
+        },
+        {
+          "id": "GIT-001.9",
+          "title": "Git fails to read a folder"
+        },
+        {
+          "id": "GIT-001.10",
+          "title": "A failed read keeps the last status"
         }
       ]
     },
@@ -7171,7 +7189,7 @@
       "title": "Change markers in the gutter",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 68,
+      "line": 85,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7217,7 +7235,7 @@
       "title": "Peek at a change and revert it",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 115,
+      "line": 132,
       "status": "draft",
       "commands": [
         "git.peekChange",
@@ -7270,7 +7288,7 @@
       "title": "Jump to the next or previous change",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 171,
+      "line": 188,
       "status": "draft",
       "commands": [
         "git.nextChange",
@@ -7278,10 +7296,13 @@
       ],
       "files": [
         "src/lib/gitCommands.ts",
+        "src/lib/gitStatus.ts",
         "src/editor/git.ts",
         "src/components/MenuBar.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/gitNav.test.ts"
+      ],
       "docs": [
         "docs/git.md"
       ],
@@ -7313,7 +7334,7 @@
       "title": "Line blame",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 213,
+      "line": 231,
       "status": "draft",
       "commands": [
         "git.toggleBlame"
@@ -7364,7 +7385,7 @@
       "title": "Compare a file with the last commit",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 266,
+      "line": 284,
       "status": "draft",
       "commands": [
         "git.compareWithHead"
@@ -7411,7 +7432,7 @@
       "title": "Switch and create branches",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 310,
+      "line": 328,
       "status": "draft",
       "commands": [
         "git.switchBranch",
@@ -7467,7 +7488,7 @@
       "title": "Commit from the Source Control panel",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 371,
+      "line": 389,
       "status": "draft",
       "commands": [
         "git.showPanel"
@@ -7515,6 +7536,10 @@
         {
           "id": "GIT-008.7",
           "title": "The panel says who the commit is made as"
+        },
+        {
+          "id": "GIT-008.8",
+          "title": "Ctrl+Enter while the button is disabled says why"
         }
       ]
     },
@@ -7523,7 +7548,7 @@
       "title": "Amend the last commit",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 433,
+      "line": 458,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7562,7 +7587,7 @@
       "title": "See the changed files and open their changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 472,
+      "line": 497,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7619,7 +7644,7 @@
       "title": "Stage and unstage files",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 537,
+      "line": 562,
       "status": "draft",
       "commands": [
         "git.stageFile",
@@ -7673,7 +7698,7 @@
       "title": "Discard changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 593,
+      "line": 618,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7720,7 +7745,7 @@
       "title": "Status line: where the branch stands against its remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 645,
+      "line": 670,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7780,7 +7805,7 @@
       "title": "Background check of the remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 714,
+      "line": 739,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7819,6 +7844,14 @@
         {
           "id": "GIT-014.6",
           "title": "Not while another git action runs"
+        },
+        {
+          "id": "GIT-014.7",
+          "title": "A failed check also waits a minute"
+        },
+        {
+          "id": "GIT-014.8",
+          "title": "Only the branch's remote is checked"
         }
       ]
     },
@@ -7827,7 +7860,7 @@
       "title": "Fetch, pull, push and publish a branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 767,
+      "line": 804,
       "status": "draft",
       "commands": [
         "git.fetch",
@@ -7889,7 +7922,7 @@
       "title": "Recover when the remote repository is gone",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 834,
+      "line": 871,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7932,7 +7965,7 @@
       "title": "Commits of the current branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 878,
+      "line": 915,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7985,6 +8018,10 @@
         {
           "id": "GIT-017.9",
           "title": "No commits yet"
+        },
+        {
+          "id": "GIT-017.10",
+          "title": "A long run of unpushed commits is counted in full"
         }
       ]
     },
@@ -7993,7 +8030,7 @@
       "title": "File history",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 949,
+      "line": 991,
       "status": "draft",
       "commands": [
         "git.fileHistory"
@@ -8047,7 +8084,7 @@
       "title": "Commit identity (name and email)",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1004,
+      "line": 1046,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8094,7 +8131,7 @@
       "title": "Add a remote by URL",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1055,
+      "line": 1097,
       "status": "draft",
       "commands": [
         "git.addRemote"
@@ -8143,7 +8180,7 @@
       "title": "See, open and change remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1107,
+      "line": 1149,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8183,6 +8220,10 @@
         {
           "id": "GIT-021.6",
           "title": "Cancel a change"
+        },
+        {
+          "id": "GIT-021.7",
+          "title": "A token in the URL stays hidden when changing it"
         }
       ]
     },
@@ -8191,7 +8232,7 @@
       "title": "Create a repository on GitHub and push to it",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1160,
+      "line": 1208,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8248,7 +8289,7 @@
       "title": "GitHub accounts",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1227,
+      "line": 1275,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8295,7 +8336,7 @@
       "title": "Private / Public badge on GitHub remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1279,
+      "line": 1327,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8337,7 +8378,7 @@
       "title": "Work with more than one repository",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1323,
+      "line": 1371,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8346,7 +8387,9 @@
         "src/components/StatusBar.tsx",
         "src/components/Select.tsx"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/gitRefresh.test.ts"
+      ],
       "docs": [
         "docs/git.md"
       ],
@@ -8378,14 +8421,17 @@
       "title": "Branch in the status bar",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1368,
+      "line": 1416,
       "status": "draft",
       "commands": [],
       "files": [
         "src/components/StatusBar.tsx",
+        "src/lib/gitStatus.ts",
         "src/lib/git.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/gitNav.test.ts"
+      ],
       "docs": [
         "docs/git.md"
       ],
@@ -8421,7 +8467,7 @@
       "title": "Git decorations in the Explorer",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1418,
+      "line": 1467,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8695,6 +8741,10 @@
         {
           "id": "GRAPH-005.8",
           "title": "A reload discards late pages"
+        },
+        {
+          "id": "GRAPH-005.9",
+          "title": "What a reload keeps"
         }
       ]
     },
@@ -8703,7 +8753,7 @@
       "title": "Speed up a very large history",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 274,
+      "line": 280,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8749,7 +8799,7 @@
       "title": "Find among the loaded commits",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 325,
+      "line": 331,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8794,7 +8844,7 @@
       "title": "Search the whole history and go to a result",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 376,
+      "line": 382,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8848,6 +8898,10 @@
         {
           "id": "GRAPH-008.10",
           "title": "Editing the text closes the results"
+        },
+        {
+          "id": "GRAPH-008.11",
+          "title": "Search by branch or tag name"
         }
       ]
     },
@@ -8856,7 +8910,7 @@
       "title": "See a commit's details",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 446,
+      "line": 458,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8911,7 +8965,7 @@
       "title": "Open what a commit changed in a file",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 506,
+      "line": 518,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8957,17 +9011,19 @@
       "title": "Copy, switch, branch and tag from a commit's right-click menu",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 555,
+      "line": 567,
       "status": "draft",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
+        "src/lib/gitGraph.ts",
         "src/lib/git.ts",
         "src-tauri/src/git.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git.rs",
+        "src/__tests__/gitGraph.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -9012,11 +9068,12 @@
       "title": "Check out, cherry-pick or revert a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 618,
+      "line": 631,
       "status": "draft",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
+        "src/lib/gitGraph.ts",
         "src/lib/git.ts",
         "src/lib/gitStatus.ts",
         "src/lib/actions.ts",
@@ -9024,7 +9081,8 @@
       ],
       "tests": [
         "src-tauri/src/git.rs",
-        "src/__tests__/gitRemote.test.ts"
+        "src/__tests__/gitRemote.test.ts",
+        "src/__tests__/gitGraph.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -9065,16 +9123,18 @@
       "title": "Reset the branch to a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 676,
+      "line": 690,
       "status": "draft",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
+        "src/lib/gitGraph.ts",
         "src/lib/git.ts",
         "src-tauri/src/git.rs"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git.rs",
+        "src/__tests__/gitGraph.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -9107,7 +9167,7 @@
       "title": "See uncommitted work and a stopped operation above the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 721,
+      "line": 736,
       "status": "draft",
       "commands": [],
       "files": [
@@ -17545,7 +17605,10 @@
       "GRAPH-002",
       "GRAPH-003",
       "GRAPH-005",
-      "GRAPH-007"
+      "GRAPH-007",
+      "GRAPH-011",
+      "GRAPH-012",
+      "GRAPH-013"
     ],
     "src/lib/gitStatus.ts": [
       "CONFLICT-007",
@@ -17553,6 +17616,7 @@
       "CONFLICT-010",
       "CONFLICT-013",
       "EXPL-016",
+      "GIT-004",
       "GIT-008",
       "GIT-009",
       "GIT-010",
@@ -17562,6 +17626,7 @@
       "GIT-017",
       "GIT-021",
       "GIT-022",
+      "GIT-026",
       "GIT-027",
       "GRAPH-009",
       "GRAPH-012"
@@ -18106,6 +18171,12 @@
       "CONFLICT-002",
       "CONFLICT-003"
     ],
+    "src/__tests__/conflictsEditor.test.ts": [
+      "CONFLICT-001",
+      "CONFLICT-002",
+      "CONFLICT-003",
+      "CONFLICT-004"
+    ],
     "src/__tests__/csv-hostile.test.ts": [
       "JSON-011",
       "JSON-012"
@@ -18139,7 +18210,18 @@
       "GRAPH-002",
       "GRAPH-003",
       "GRAPH-005",
-      "GRAPH-007"
+      "GRAPH-007",
+      "GRAPH-011",
+      "GRAPH-012",
+      "GRAPH-013"
+    ],
+    "src/__tests__/gitNav.test.ts": [
+      "GIT-004",
+      "GIT-026"
+    ],
+    "src/__tests__/gitRefresh.test.ts": [
+      "GIT-001",
+      "GIT-025"
     ],
     "src/__tests__/gitRemote.test.ts": [
       "CONFLICT-007",

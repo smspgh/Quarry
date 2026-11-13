@@ -15,7 +15,7 @@ import type { EditorView } from "@codemirror/view";
 import { git, type GitBranch, type GitCommitAction, type GitCommitFile, type GitFile, type GitLogEntry, type GitIdentity, type GitRemoteOp, type GitStatus, type GithubRepo } from "./gitApi";
 import { newDocId, useStore, type Doc } from "./store";
 import { fs } from "./ipc";
-import { gitErrorText, hasConflictMarkers, isMissingRepo, KIND_RANK, kindOf, type GitKind } from "./gitStatus";
+import { displayUrl, gitErrorText, hasConflictMarkers, isMissingRepo, KIND_RANK, kindOf, type GitKind } from "./gitStatus";
 
 export { isMissingRepo, KIND_LABEL, KIND_LETTER, kindOf, type GitKind } from "./gitStatus";
 import { choose } from "./dialogs";
@@ -32,6 +32,9 @@ interface GitState {
   available: boolean | null;
   /** Status per repository, keyed by lower-case root. */
   repos: Record<string, GitStatus>;
+  /** Why git could not read a place in view that is not under a known repository (for example
+   *  "dubious ownership"). Not cached: the next refresh asks again. */
+  statusErrors: { path: string; error: string }[];
   /** The repository the Source Control panel shows (lower-case root). */
   current: string | null;
   /** Lower-case path → status of changed files (all repositories). */
@@ -65,6 +68,7 @@ interface GitState {
 export const useGit = create<GitState>(() => ({
   available: null,
   repos: {},
+  statusErrors: [],
   current: null,
   files: {},
   dirs: {},
@@ -154,11 +158,24 @@ async function doRefresh() {
     .map((r) => r.root)
     .filter((root) => want.some((p) => under(p, root) || under(root, p)));
   const lookups = want.filter((p) => !roots.some((r) => under(p, r)) && !notRepo.has(key(p)));
-  const results = await Promise.all([...roots, ...new Set(lookups)].map((p) => git.status(p).then((st) => ({ p, st })).catch(() => ({ p, st: null }))));
+  const prev = useGit.getState().repos;
+  const results = await Promise.all(
+    [...roots, ...new Set(lookups)].map((p) =>
+      git
+        .status(p)
+        .then((st) => ({ p, st, error: null as string | null }))
+        .catch((e) => ({ p, st: null, error: String(e) })),
+    ),
+  );
   const repos: Record<string, GitStatus> = {};
-  for (const { p, st } of results) {
+  const statusErrors: GitState["statusErrors"] = [];
+  for (const { p, st, error } of results) {
     if (st) repos[key(st.root)] = st;
-    else notRepo.add(key(p));
+    else if (error === null) notRepo.add(key(p)); // git answered: not a repository
+    // git failed (dubious ownership, a lock, ...): keep a known repository's last status, and
+    // report a new place instead of remembering it as "not a repository".
+    else if (prev[key(p)]) repos[key(p)] = prev[key(p)];
+    else statusErrors.push({ path: p, error });
   }
   const files: Record<string, GitFile> = {};
   const dirs: Record<string, GitKind> = {};
@@ -181,13 +198,15 @@ async function doRefresh() {
   const folder = useStore.getState().folder;
   const folderRepo = folder ? Object.keys(repos).find((k) => under(folder, repos[k].root)) : undefined;
   const current = cur && repos[cur] ? cur : folderRepo || Object.keys(repos)[0] || null;
-  useGit.setState({ repos, files, dirs, current });
+  useGit.setState({ repos, statusErrors, files, dirs, current });
   void syncBases();
 }
 
-/** Forget the "not a repository" answers (a folder may have become one: git init, clone). */
+/** Forget the "not a repository" answers (a folder may have become one: git init, clone), and
+ *  look for git again if it wasn't found (it may have been installed since). */
 export function rescanGit() {
   notRepo.clear();
+  if (useGit.getState().available === false) useGit.setState({ available: null });
   refreshGit(0);
 }
 
@@ -443,7 +462,7 @@ export async function discard(root: string, files: GitFile[]): Promise<void> {
   const msg =
     untracked === files.length
       ? `${name} ${files.length === 1 ? "is" : "are"} not tracked by git and will be moved to the Recycle Bin.`
-      : `Your changes to ${name} will be lost${untracked ? ` (${untracked} untracked file${untracked === 1 ? "" : "s"} go to the Recycle Bin)` : ""}. Open tabs reload the committed text.`;
+      : `Your changes to ${name} will be lost${untracked ? ` (${untracked} untracked file${untracked === 1 ? " goes" : "s go"} to the Recycle Bin)` : ""}. Open tabs reload the committed text.`;
   const ok = await choose("Discard changes?", msg, [
     { label: "Discard", kind: "danger", value: true },
     { label: "Cancel", cancel: true, default: true, value: false },
@@ -567,7 +586,7 @@ export async function saveRemote(root: string, name: string, url: string, opts: 
   if (!ok) return false;
   useGit.setState({ addingRemote: false });
   noteRemote(root, n, u);
-  toast(opts.replace ? `Remote ${n} now points to ${u}.` : `Added remote ${n}.`, "success", 3000);
+  toast(opts.replace ? `Remote ${n} now points to ${displayUrl(u)}.` : `Added remote ${n}.`, "success", 3000);
   // What the last check said was about the old URL.
   markChecked(root, null);
   if (opts.push) await remote(root, "push");

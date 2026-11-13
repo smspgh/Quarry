@@ -26,34 +26,14 @@ Doc / code mismatches
 
 - `docs/macros.md:106` says script runs are blocked while a macro plays; only the hidden `script.run` has that guard (`src/lib/commands.ts:1133`) and nothing calls it; `script.runActive` (`commands.ts:1096`) is not blocked while recording or playing.
 
-## Source control (`git.md`)
-
-Possible bugs
-- `git.refresh` does not rediscover a new repository: `src/lib/gitCommands.ts:81` calls `refreshGit(0)`, which skips folders cached in `notRepo` (`src/lib/git.ts:156`); only the panel's Refresh button clears the cache (`rescanGit`, `src/components/panels/GitPanel.tsx:470`). `docs/git.md:5` says the menu command handles the `git init` case.
-- "Git was not found … then click Refresh" cannot recover: availability is re-checked only while `null` (`git.ts:149-150`).
-- Status errors are swallowed: `find_root` returns an error for "dubious ownership" (`src-tauri/src/git.rs:219-232`), but `doRefresh` turns any rejection into "not a repository" and caches it (`git.ts:157-161`); a transient `git status` failure may be cached the same way.
-- Ctrl+Enter in the message box ignores the Commit button's disabled state (`GitPanel.tsx:535-540`); it ends in a toast, not a bad commit.
-- A token in a remote URL can be shown: the toast "Remote origin now points to <url>" uses the raw URL (`git.ts:570`) and the Change form prefills it (`GitRepoSettings.tsx:74`); only the remote row uses `displayUrl`.
-- Background check: a failed check also counts toward the once-a-minute limit (`git.ts:542`); it runs `fetch --prune` without `--all` (`git.rs:939`), so only the default remote is checked.
-- `git_unpushed` stops at 500 (`git.rs:1187`), so "N to push" in the Commits heading tops out there while the status line uses the real ahead count.
-- Grammar in the discard dialog: "(1 untracked file go to the Recycle Bin)" (`git.ts:446`; quoted as is in GIT-012.5).
-
-Doc / code mismatches
-- `docs/git.md:102` says file history is at the bottom of the panel; it sits above the Repository section (`GitPanel.tsx:574-575`).
-- There is no `git.commit` command: commit and amend are panel-only (the example in `specs/README.md` is illustrative).
-- No tests: GIT-004 (next / previous change), GIT-025 (repository picker), GIT-026 (status bar branch).
-
 ## Commit graph (`git-graph.md`)
 
-- The `"branch"` action (create without switching) exists in Rust, `GitCommitAction` and the `Naming` type, but the menu only offers `"branch-switch"` (`src/components/GraphView.tsx:76`, `:628`); the plain-branch path and its toast (`:330`) are dead UI code.
-- The Find box placeholder says "message, author, id, branch", but whole-history search does not match branch names; only the loaded-commit filter does (`GraphView.tsx:404` vs `src-tauri/src/git.rs:1281`).
-- The graph reloads from page one on every change to head, branch, ahead/behind, upstream or operation (`GraphView.tsx:178-183`); whether scroll position and selection survive was not determined.
-- No test exercises `GraphView.tsx`.
+- The `"branch"` action (create without switching) exists in Rust, `GitCommitAction` and the `Naming` type, but the menu only offers `"branch-switch"` (`src/components/GraphView.tsx`, `Naming` and the "Create Branch Here…" item); the plain-branch path in `act` / the naming strip and its notification (`actionDone` in `src/lib/gitGraph.ts`) are dead UI code. It has been that way since the graph was added.
+- No test renders `GraphView.tsx` (toolbar, paging and scrolling, selection keys, menu, naming strip, details pane); the action dialogs and notifications are now tested through `actionConfirm` / `actionDone` in `src/lib/gitGraph.ts`. Rendering it needs a DOM harness (React + jsdom), which the repository does not have.
 
 ## Merge conflicts and stopped operations (`git-conflicts.md`)
 
-- An `am` operation is treated as a rebase: the button reads "Continue Rebase" and calls `continueOperation(root, "rebase", …)` (`src/components/panels/GitPanel.tsx:440-445`); Abort's confirm button would read "Abort Am" (`src/lib/git.ts:853`). No scenarios were written for `am`.
-- No test exercises `src/editor/conflicts.ts`.
+- An `am` operation is labelled as a rebase: the Commit button reads "Continue Rebase" and the message box says a rebase keeps each commit's message (`src/components/panels/GitPanel.tsx`, `rebasing`); the notifications say "the am" and Abort's confirm button reads "Abort Am" (`src/lib/git.ts`, `continueOperation` / `abortOperation`). The git side is right: `continue_operation` / `abort_operation` in `git.rs` detect the operation themselves and run `git am --continue` / `--skip` / `--abort`, so only the wording is off. No scenarios were written for `am`.
 
 ## Compare (`compare.md`)
 

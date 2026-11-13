@@ -13,7 +13,7 @@ Nothing here ships in the application.
 | A feature area | The table of areas below, then that area's `.md` file |
 | A story id (`GIT-012`) or scenario id (`GIT-012.3`) | `index.json` → `stories["GIT-012"]` gives the spec file and line, commands, files, tests |
 | A source file you are about to change | `index.json` → `files["src/lib/git.ts"]` lists every story that depends on it |
-| A command id (`git.commit`) | `index.json` → `commands["git.commit"]` |
+| A command id (`git.push`) | `index.json` → `commands["git.push"]` |
 | A test file | `index.json` → `tests[...]` |
 
 The quickest way is the lookup command, which takes any mix of source files, command ids and story ids:
@@ -75,7 +75,7 @@ One or two sentences on what the area covers and where its user documentation is
 ## GIT-012: Commit staged changes
 
 - Status: draft
-- Commands: `git.commit`
+- Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — commit box, button label
   - `src/lib/git.ts` — `commit()` action, unsaved-tabs warning

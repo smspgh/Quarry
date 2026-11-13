@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { commitMatches, layoutGraph, newGraphState, refLabels } from "../lib/gitGraph";
+import { actionConfirm, actionDone, commitMatches, layoutGraph, newGraphState, refLabels, type GraphAction } from "../lib/gitGraph";
 
 const c = (sha: string, ...parents: string[]) => ({ sha, parents });
 
@@ -98,5 +98,31 @@ describe("graph search", () => {
     for (const q of ["", "parser", "ADA", "example.com", "abc12", "feature/x"]) expect(commitMatches(commit, q)).toBe(true);
     expect(commitMatches(commit, "c123")).toBe(false);
     expect(commitMatches(commit, "nothing")).toBe(false);
+  });
+});
+
+describe("commit actions from the graph", () => {
+  const commit = { short: "18bc71d", summary: "Add tokenizer" };
+
+  it("asks before every action that changes the branch or the files", () => {
+    const asks: GraphAction[] = ["checkout", "cherry-pick", "revert", "reset-soft", "reset-mixed", "reset-hard"];
+    for (const a of asks) expect(actionConfirm(a, commit, "main", 0), a).not.toBeNull();
+    for (const a of ["branch", "branch-switch", "tag"] as GraphAction[]) expect(actionConfirm(a, commit, "main", 0), a).toBeNull();
+  });
+
+  it("names the branch and the commit, and warns what a hard reset loses", () => {
+    expect(actionConfirm("revert", commit, "main", 0)?.text).toBe('Adds a new commit on "main" that undoes 18bc71d "Add tokenizer". History is kept; nothing is deleted.');
+    expect(actionConfirm("cherry-pick", commit, null, 0)?.text).toContain("onto the current commit (not on a branch)");
+    const hard = actionConfirm("reset-hard", commit, "main", 2)!;
+    expect(hard).toMatchObject({ title: "Reset (hard) and discard changes?", ok: "Reset and Discard", kind: "danger" });
+    expect(hard.text).toContain("and your 2 uncommitted changes to tracked files are lost");
+    expect(actionConfirm("reset-hard", commit, "main", 0)!.text).not.toContain("uncommitted");
+    expect(actionConfirm("reset-soft", commit, "main", 0)!.kind).toBe("primary");
+  });
+
+  it("says what was done", () => {
+    expect(actionDone("branch-switch", "18bc71d", "hotfix")).toBe("On new branch hotfix");
+    expect(actionDone("tag", "18bc71d", "v1.2.0")).toBe("Created tag v1.2.0");
+    expect(actionDone("reset-mixed", "18bc71d")).toBe("Reset to 18bc71d");
   });
 });
