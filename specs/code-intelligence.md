@@ -239,7 +239,7 @@ Scenario: LSP-004.6 A custom command that is not found
   - `src/lib/lsp.ts` — `launch` (`missing` when the program is not installed / not found)
   - `src/lib/terminal.ts` — `openCommandTerminal`
   - `src-tauri/src/lsp.rs` — `lsp_which`, `which` (also looks in npm, cargo, go and dotnet tool folders)
-- Tests: `src-tauri/src/lsp.rs`
+- Tests: `src-tauri/src/lsp.rs`, `src/__tests__/lspInstall.test.ts`
 - Docs: `docs/code-intelligence.md`
 
 **As a** developer opening a language for the first time

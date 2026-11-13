@@ -9887,7 +9887,8 @@
         "src-tauri/src/lsp.rs"
       ],
       "tests": [
-        "src-tauri/src/lsp.rs"
+        "src-tauri/src/lsp.rs",
+        "src/__tests__/lspInstall.test.ts"
       ],
       "docs": [
         "docs/code-intelligence.md"
@@ -14508,7 +14509,8 @@
         "src/lib/lspInstall.ts"
       ],
       "tests": [
-        "src/__tests__/claudeSession.test.ts"
+        "src/__tests__/claudeSession.test.ts",
+        "src/__tests__/lspInstall.test.ts"
       ],
       "docs": [
         "docs/code-intelligence.md"
@@ -17946,6 +17948,10 @@
       "LSP-012",
       "LSP-015",
       "LSP-016"
+    ],
+    "src/__tests__/lspInstall.test.ts": [
+      "LSP-005",
+      "TERM-009"
     ],
     "src/__tests__/panels.test.ts": [
       "EXPL-001",

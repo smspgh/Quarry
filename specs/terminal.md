@@ -360,7 +360,7 @@ Scenario: TERM-008.4 The folder must exist
   - `src/components/TerminalView.tsx` — `command` branch (dimmed "> command" line, Done / Failed line, no restart on Enter)
   - `src-tauri/src/pty.rs` — `pty_start` with `command` (`cmd.exe /d /s /c <line>`)
   - `src/lib/lspInstall.ts` — `installServer` (the only caller)
-- Tests: `src/__tests__/claudeSession.test.ts`
+- Tests: `src/__tests__/claudeSession.test.ts`, `src/__tests__/lspInstall.test.ts`
 - Docs: `docs/code-intelligence.md`
 
 **As a** developer installing a language server from Quarry
