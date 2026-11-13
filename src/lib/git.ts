@@ -12,7 +12,7 @@ import { setBlame, setGitBase } from "../editor/git";
 import { git, type GitBranch, type GitCommitAction, type GitCommitFile, type GitFile, type GitLogEntry, type GitIdentity, type GitRemoteOp, type GitStatus, type GithubRepo } from "./gitApi";
 import { newDocId, useStore, type Doc } from "./store";
 import { fs } from "./ipc";
-import { isMissingRepo, KIND_RANK, kindOf, type GitKind } from "./gitStatus";
+import { gitErrorText, isMissingRepo, KIND_RANK, kindOf, type GitKind } from "./gitStatus";
 
 export { isMissingRepo, KIND_LABEL, KIND_LETTER, kindOf, type GitKind } from "./gitStatus";
 import { choose } from "./dialogs";
@@ -287,7 +287,7 @@ async function run<T>(label: string, fn: () => Promise<T>): Promise<T | undefine
   try {
     return await fn();
   } catch (e) {
-    toast(String(e).replace(/^Error: /, ""), "error", 12000);
+    toast(gitErrorText(String(e)), "error", 12000);
     return undefined;
   } finally {
     useGit.setState({ busy: null });

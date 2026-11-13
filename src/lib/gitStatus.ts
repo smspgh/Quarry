@@ -101,3 +101,18 @@ export function commitLabel(staged: number, total: number, amend: boolean): stri
 export function commitFileKind(status: string): GitKind {
   return status === "A" ? "added" : status === "D" ? "deleted" : status === "R" || status === "C" ? "renamed" : "modified";
 }
+
+/**
+ * What to show when git fails: its message without the `hint:` lines (they name command-line
+ * steps Quarry has buttons for). An operation that stopped on a conflict gets a plain sentence
+ * saying where to go, with git's CONFLICT lines kept.
+ */
+export function gitErrorText(raw: string): string {
+  const lines = raw.replace(/^Error: /, "").split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !/^hint:/i.test(l));
+  const conflicts = lines.filter((l) => /^CONFLICT /.test(l));
+  if (conflicts.length) {
+    const shown = conflicts.slice(0, 3).join("\n") + (conflicts.length > 3 ? `\n… and ${conflicts.length - 3} more` : "");
+    return `Stopped on a conflict. Resolve the files under Merge Changes in Source Control and commit, or press Abort to go back.\n\n${shown}`;
+  }
+  return lines.join("\n");
+}

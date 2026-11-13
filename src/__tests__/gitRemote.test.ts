@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { commitLabel, displayUrl, isMissingRepo, remoteWebUrl, repoNameFor, syncLine } from "../lib/gitStatus";
+import { commitLabel, displayUrl, gitErrorText, isMissingRepo, remoteWebUrl, repoNameFor, syncLine } from "../lib/gitStatus";
 
 describe("remote URLs", () => {
   it("finds the web page of https and ssh remotes", () => {
@@ -44,5 +44,19 @@ describe("source control status line", () => {
     expect(commitLabel(0, 1, false)).toBe("Commit All (1 file)");
     expect(commitLabel(0, 0, false)).toBe("Commit All");
     expect(commitLabel(3, 14, true)).toBe("Amend Last Commit");
+  });
+});
+
+describe("git error text", () => {
+  it("drops hint lines and explains a conflict", () => {
+    const raw = "Error: CONFLICT (modify/delete): exp.txt deleted in HEAD and modified in 18bc71d (Experiment B).  Version 18bc71d (Experiment B) of exp.txt left in tree.\nerror: could not apply 18bc71d... Experiment B\nhint: After resolving the conflicts, mark them with\nhint: \"git add/rm <pathspec>\", then run\nhint: \"git cherry-pick --continue\".";
+    const text = gitErrorText(raw);
+    expect(text).toMatch(/^Stopped on a conflict\. Resolve the files under Merge Changes/);
+    expect(text).toContain("CONFLICT (modify/delete): exp.txt");
+    expect(text).not.toMatch(/hint:|cherry-pick --continue|could not apply/);
+  });
+  it("keeps other errors, minus hints and the Error: prefix", () => {
+    expect(gitErrorText("Error: fatal: a branch named 'x' already exists\nhint: use -f")).toBe("fatal: a branch named 'x' already exists");
+    expect(gitErrorText("plain")).toBe("plain");
   });
 });

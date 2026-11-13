@@ -101,6 +101,8 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   /** Whole-history search results for `hits.query` (null: not searched). */
   const [hits, setHits] = useState<{ query: string; list: GitGraphCommit[] } | null>(null);
   const [searching, setSearching] = useState(false);
+  /** The results list shrinks to a few rows once a result is picked, so the graph keeps its room. */
+  const [hitsOpen, setHitsOpen] = useState(true);
   const [menu, setMenu] = useState<Menu | null>(null);
   const [naming, setNaming] = useState<Naming | null>(null);
   const [newName, setNewName] = useState("");
@@ -264,13 +266,17 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
     setSearching(true);
     try {
       setHits({ query: q, list: await git.graphSearch(root, all, q, 200) });
+      setHitsOpen(true);
     } catch (e) {
       toast(String(e), "error");
     } finally {
       setSearching(false);
     }
   };
-  const pickHit = (c: GitGraphCommit) => {
+  const pickHit = (c: GitGraphCommit, el?: HTMLElement) => {
+    setHitsOpen(false);
+    // Keep the picked result in view once the list has shrunk.
+    if (el) requestAnimationFrame(() => el.scrollIntoView({ block: "nearest" }));
     setPicked(c);
     setSelected(c.sha);
     const i = indexOf.current.get(c.sha);
@@ -463,13 +469,16 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
         </div>
       )}
       {hits && (
-        <div className="graph-hits" role="listbox" aria-label="Search results in the whole history">
+        <div className={`graph-hits ${hitsOpen ? "" : "compact"}`} role="listbox" aria-label="Search results in the whole history">
           <div className="graph-hits-head">
             <span className="grow">{hits.list.length === 0 ? `No commit ${all ? "in any branch" : "on this branch"} matches "${hits.query}"${all ? "." : ". Try All branches."}` : `${hits.list.length}${hits.list.length === 200 ? "+" : ""} commit${hits.list.length === 1 ? "" : "s"} in the whole history match "${hits.query}" (message, author or id)`}</span>
+            {hits.list.length > 3 && (
+              <button className="btn small" title={hitsOpen ? "Shrink the results to a few rows" : "Show more of the results"} onClick={() => setHitsOpen(!hitsOpen)}>{hitsOpen ? "Show Fewer" : "Show More"}</button>
+            )}
             <button className="icon-btn xs" title="Close the results" onClick={() => setHits(null)}><X size={14} /></button>
           </div>
           {hits.list.map((c) => (
-            <div key={c.sha} role="option" aria-selected={c.sha === selected} className={`graph-hit ${c.sha === selected ? "selected" : ""}`} onClick={() => pickHit(c)} onDoubleClick={() => void goTo(c.sha)} title="Click for its details, double-click to go to it in the graph">
+            <div key={c.sha} role="option" aria-selected={c.sha === selected} className={`graph-hit ${c.sha === selected ? "selected" : ""}`} onClick={(e) => pickHit(c, e.currentTarget)} onDoubleClick={() => void goTo(c.sha)} title="Click for its details, double-click to go to it in the graph">
               <span className="mono graph-c-sha">{c.short}</span>
               <span className="truncate grow">{c.summary}</span>
               <span className="graph-c-author truncate">{c.author}</span>
