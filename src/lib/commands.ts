@@ -477,12 +477,22 @@ async function showScriptApi() {
   useStore.getState().updateDoc(doc.id, { dirty: false });
 }
 
-let lastMacro: Macro | null = null;
+/**
+ * The macro Play Last plays, kept as a reference and looked up in the current list on each use, so
+ * an edit or rename (new objects via stageMacros / saveMacro) is played as it is now and a deleted
+ * one is not played at all. The path finds it again after a reload, which re-ids macros by path.
+ */
+let lastMacroRef: { id: string; path?: string } | null = null;
 export function setLastMacro(m: Macro | null) {
-  lastMacro = m;
+  lastMacroRef = m ? { id: m.id, path: m.path } : null;
 }
-export function getLastMacro() {
-  return lastMacro;
+export function getLastMacro(): Macro | null {
+  const ref = lastMacroRef;
+  if (!ref) return null;
+  const list = useStore.getState().macros;
+  const m = list.find((x) => x.id === ref.id) ?? (ref.path ? list.find((x) => !!x.path && samePath(x.path, ref.path!)) : undefined);
+  if (m) lastMacroRef = { id: m.id, path: m.path };
+  return m ?? null;
 }
 
 function toggleRecording() {
@@ -497,14 +507,14 @@ function toggleRecording() {
     if (target) {
       // Recording started from the macro editor: append to that macro instead of creating a new one.
       const updated: Macro = { ...target, steps: [...target.steps, ...steps], unsaved: true };
-      lastMacro = updated;
+      setLastMacro(updated);
       stageMacros(s.macros.map((m) => (m.id === target.id ? updated : m)));
       s.toast(`Added ${steps.length} step${steps.length === 1 ? "" : "s"} to "${target.name}". Save it to keep the change.`, "success", 4000);
       s.set({ sidebarVisible: true, sidebarPanel: "macros", activeMacroId: target.id, recordTargetId: null });
       return;
     }
     const macro: Macro = { id: `m-${Date.now().toString(36)}`, name: `Macro ${s.macros.length + 1}`, steps, createdAt: Date.now(), unsaved: true };
-    lastMacro = macro;
+    setLastMacro(macro);
     stageMacros([macro, ...s.macros]);
     s.toast(`Recorded ${steps.length} steps as "${macro.name}". Save it in the Macros panel to keep it.`, "success", 4000);
     s.set({ sidebarVisible: true, sidebarPanel: "macros", activeMacroId: macro.id });
@@ -992,7 +1002,7 @@ export function registerAllCommands() {
     dynamicTitle: () => (s().recording ? `Stop Macro Recording (${s().recordingSteps} steps)` : "Start Macro Recording"),
     run: () => toggleRecording(),
   });
-  const macroReady = () => hasText() && !s().recording && !s().macroPlaying && !!(lastMacro ?? s().macros[0]);
+  const macroReady = () => hasText() && !s().recording && !s().macroPlaying && !!(getLastMacro() ?? s().macros[0]);
   register({
     id: "macro.stop",
     title: "Macro: Stop Playback",
@@ -1029,9 +1039,9 @@ export function registerAllCommands() {
     category: "Macros",
     keys: "Ctrl+Shift+M",
     enabled: macroReady,
-    dynamicTitle: () => { const m = lastMacro ?? s().macros[0]; return m ? `Play Macro "${m.name}"` : "Play Last Recorded Macro"; },
+    dynamicTitle: () => { const m = getLastMacro() ?? s().macros[0]; return m ? `Play Macro "${m.name}"` : "Play Last Recorded Macro"; },
     run: async () => {
-      const m = lastMacro ?? s().macros[0];
+      const m = getLastMacro() ?? s().macros[0];
       if (!m) {
         s().toast("No macro recorded yet. Press Ctrl+Shift+R to start recording.", "info");
         return;
@@ -1045,9 +1055,9 @@ export function registerAllCommands() {
     title: "Macro: Play Last Until End of File",
     category: "Macros",
     enabled: macroReady,
-    dynamicTitle: () => { const m = lastMacro ?? s().macros[0]; return m ? `Play "${m.name}" Until End of File` : "Play Last Macro Until End of File"; },
+    dynamicTitle: () => { const m = getLastMacro() ?? s().macros[0]; return m ? `Play "${m.name}" Until End of File` : "Play Last Macro Until End of File"; },
     run: async () => {
-      const m = lastMacro ?? s().macros[0];
+      const m = getLastMacro() ?? s().macros[0];
       if (!m) return;
       if (!(await confirmRun("macro", m, "Repeats until the cursor stops moving or reaches the end of the file."))) return false;
       const n = await guarded(() => playToEnd(m.steps));
@@ -1066,7 +1076,7 @@ export function registerAllCommands() {
       const toEnd = typeof args === "object" && args ? !!(args as { toEnd?: boolean }).toEnd : false;
       const m = s().macros.find((x) => x.id === id);
       if (!m) return false;
-      lastMacro = m;
+      setLastMacro(m);
       s().set({ activeMacroId: m.id });
       if (!(await confirmRun("macro", m, toEnd ? "Repeats until the cursor stops moving or reaches the end of the file." : `${m.steps.length} recorded steps.`))) return false;
       if (toEnd) {

@@ -154,7 +154,7 @@ Scenario: MACRO-003.3 Unavailable without a text tab
 - Status: draft
 - Commands: `macro.playLast`, `macro.play`
 - Files:
-  - `src/lib/commands.ts` — `macro.playLast` (`lastMacro ?? macros[0]`, `macroReady`, `dynamicTitle`), `macro.play` (hidden; id or `{ id, toEnd }`), `bindCommandRunner`, `bindAppKeyFallback`
+  - `src/lib/commands.ts` — `macro.playLast` (`getLastMacro() ?? macros[0]`: looked up by id, then path, in the current list; `macroReady`, `dynamicTitle`), `macro.play` (hidden; id or `{ id, toEnd }`), `bindCommandRunner`, `bindAppKeyFallback`
   - `src/lib/macros.ts` — `playSteps` (text via `replaceSelection`, keys via `runScopeHandlers` then the app shortcut fallback, commands via the registry), `syntheticKey`, `guarded`
   - `src/components/panels/MacrosPanel.tsx` — `play`, Play button, `canPlay`, `playTitle`
   - `src/components/StatusBar.tsx` — "PLAYING" item
@@ -207,6 +207,20 @@ Scenario: MACRO-004.7 Not while recording, playing or without a text tab
   Given the tab in front is not a text tab
   When I look at the Macros panel
   Then Play has the tooltip "Open a text document to play macros"
+
+Scenario: MACRO-004.8 Play Last plays the macro as it is now
+  Given I played "B" from the panel
+  When I delete one of its steps in the editor, or rename it to "C" and save
+  And I press Ctrl+Shift+M
+  Then the edited macro is played, under its current name in the menu item
+  And the steps it had before the edit are not played
+
+Scenario: MACRO-004.9 A deleted macro is not played
+  Given macros "A" and "B", and I played "B" from the panel
+  When I delete "B" in the Macros panel
+  Then the play item reads 'Play Macro "A"'
+  When I press Ctrl+Shift+M
+  Then "A" is played, not "B"
 ```
 
 ## MACRO-005: Play a macro N times

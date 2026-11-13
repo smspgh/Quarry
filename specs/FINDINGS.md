@@ -106,7 +106,6 @@ Doc / code mismatches and dead code
 
 ## Macros (`macros.md`)
 
-- Play Last can play a stale or deleted macro: `lastMacro` (`src/lib/commands.ts:480`, used at `:1034`, `:1050`) is an object reference; editing or renaming creates new objects through `stageMacros`, and `deleteMacro` (`src/lib/macros.ts:431`) never clears it.
 - The macro times box is not clamped at 100,000 (`src/components/panels/MacrosPanel.tsx:151`, only `Math.max(1, …)`); the Scripts box clamps both ends (`ScriptsPanel.tsx:144`); `docs/macros.md:46` says 1 to 100,000.
 - `docs/macros.md:75` says Delete "removes the file": Delete moves it to the Recycle Bin (`macros.ts:432`), while saving a renamed macro permanently deletes the old file (`macros.ts:421`).
 - The to-end confirmation is worded differently in the panel (`MacrosPanel.tsx:52`) and the commands (`commands.ts:1052`, `:1071`).
