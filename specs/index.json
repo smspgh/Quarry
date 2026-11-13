@@ -6081,7 +6081,13 @@
       "spec": "specs/files.md",
       "line": 981,
       "status": "draft",
-      "commands": [],
+      "commands": [
+        "file.new",
+        "file.open",
+        "file.openFolder",
+        "view.commandPalette",
+        "file.openRecent"
+      ],
       "files": [
         "src/components/Welcome.tsx",
         "src/App.tsx",
@@ -6115,6 +6121,10 @@
         {
           "id": "FILE-020.5",
           "title": "All commands"
+        },
+        {
+          "id": "FILE-020.6",
+          "title": "Welcome actions are commands"
         }
       ]
     },
@@ -18275,7 +18285,8 @@
       "TAB-006"
     ],
     "file.new": [
-      "FILE-001"
+      "FILE-001",
+      "FILE-020"
     ],
     "file.nextTab": [
       "TAB-002"
@@ -18284,14 +18295,17 @@
       "TAB-002"
     ],
     "file.open": [
-      "FILE-002"
+      "FILE-002",
+      "FILE-020"
     ],
     "file.openFolder": [
       "EXPL-001",
-      "FILE-003"
+      "FILE-003",
+      "FILE-020"
     ],
     "file.openRecent": [
-      "FILE-004"
+      "FILE-004",
+      "FILE-020"
     ],
     "file.openRecentFolder": [
       "FILE-004"
@@ -18573,6 +18587,7 @@
       "UI-009"
     ],
     "view.commandPalette": [
+      "FILE-020",
       "UI-005"
     ],
     "view.commandPaletteF1": [

@@ -981,9 +981,9 @@ Scenario: FILE-019.6 A quoted folder path ending in a backslash
 ## FILE-020: Welcome screen
 
 - Status: draft
-- Commands: none
+- Commands: `file.new`, `file.open`, `file.openFolder`, `view.commandPalette`, `file.openRecent`
 - Files:
-  - `src/components/Welcome.tsx` — `Welcome` (four actions, Recent list, focus landing), `displayRecent`
+  - `src/components/Welcome.tsx` — `Welcome` (four actions and the Recent list, each through `runCommand`; focus landing), `displayRecent`
   - `src/App.tsx` — renders `Welcome` when `docs.length === 0`
   - `src/lib/actions.ts` — `openFileDialog`, `openFolderDialog`, `openPath`, `dirName`; `restoreSessionTabs` creates no empty Untitled document
   - `src/components/BrandIcon.tsx` — the Quarry mark
@@ -1023,4 +1023,9 @@ Scenario: FILE-020.5 All commands
   Given the Welcome screen is shown
   When I click "All commands"
   Then the command palette opens
+
+Scenario: FILE-020.6 Welcome actions are commands
+  Given I am recording a macro and the Welcome screen is shown
+  When I click "Open folder" or a Recent file
+  Then the macro records the same command as File › Open Folder or File › Open Recent File
 ```
