@@ -32,7 +32,7 @@ Decisions:
 - Status: draft
 - Commands: `git.stageChange`
 - Files:
-  - `src/lib/gitHunks.ts` — pure: `hunksOf` (line ranges of each change from the two texts' chunks; lines that are the same on both sides are dropped from a chunk's ends), `hunkAt` (change at a line), `Pick` type (`oldStart`, `oldCount`, `newStart`, `newCount`), `textHash`
+  - `src/lib/gitHunks.ts` — pure: `hunksOf` (line ranges of each change from the two texts' chunks; lines that are the same on both sides are dropped from a chunk's ends), `hunkAt` (change at a line), `Pick` type (`oldStart`, `oldCount`, `newStart`, `newCount`), `textHash`, `barPlace` (where a change's bar and the left side's gap go so the two sides stay level; a change with no lines on a side hangs its widget below the line before it)
   - `src/lib/gitStaging.ts` — `openChangeCompare` / `changeSources` (the comparison's two sides and its `git` mark; an open comparison of the same file and section is shown again), `stageHunk` / `applyChange` (busy label, refresh of the comparison), `reloadChange`
   - `src/lib/git.ts` — `openChange` (untracked and conflicted files open as files; everything else goes to `openChangeCompare`)
   - `src/lib/diff.ts` — `DiffSession.git` (`DiffGit`: root, path, `staged`, `base`, `origPath`, `whole`), `openCompare` option carrying it, `loadSide`
@@ -104,6 +104,12 @@ Scenario: STAGE-001.8 A file that already has something staged
 Scenario: STAGE-001.9 No question is asked
   When I click "Stage Change"
   Then the change is staged without a confirmation dialog, since nothing is lost
+
+Scenario: STAGE-001.10 The two sides stay level
+  Given the side by side comparison of a file where lines were only removed in one place and only added in another, also at the very start and the very end
+  When I look at the lines after each change, before and after scrolling
+  Then every unchanged line is at the same height in the left and the right side
+  And the bar of a change that only removes lines sits above the empty space those lines leave in the right side (at the very start of the file: below it, directly above the first line)
 ```
 
 ## STAGE-002: Unstage one change

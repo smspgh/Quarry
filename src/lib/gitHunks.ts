@@ -58,6 +58,31 @@ export function hunksOf(chunks: readonly ChunkLike[], a: Text, b: Text): Pick[] 
 }
 
 /**
+ * Where the block widget of a change goes in the side by side layout (the bar in the right
+ * editor, the equally high gap in the left one), so the two sides stay level. `from`/`to` are the
+ * change's range in this editor's document, `otherFrom`/`otherTo` its range in the other one.
+ *
+ * @codemirror/merge levels the two editors at the first line after each change, and it measures
+ * that line together with the block widgets drawn above it. A widget above the first line of a
+ * change is inside the change and is counted; but a change with no lines on this side (lines only
+ * removed, or only added on the other side) has no first line, and a widget above the line that
+ * follows it would be measured as part of that line: the line itself would end up one bar lower
+ * than its twin. So there the widget hangs below the line before the change instead (`side` 1).
+ * At the very start of the document there is no line before it: the widget stays above the first
+ * line (after the spacer the merge view puts there), and the other editor puts its widget above
+ * its own first line after the change, so both are measured alike.
+ */
+export function barPlace(doc: Text, from: number, to: number, otherFrom: number, otherTo: number): { pos: number; side: number } {
+  if (to <= from) {
+    if (from > doc.length) return { pos: doc.length, side: 1 };
+    const line = doc.lineAt(from);
+    return line.number > 1 ? { pos: line.from - 1, side: 1 } : { pos: 0, side: -0.5 };
+  }
+  if (otherTo <= otherFrom && otherFrom === 0) return to > doc.length ? { pos: doc.length, side: 1 } : { pos: doc.lineAt(to).from, side: -2 };
+  return { pos: doc.lineAt(Math.min(from, doc.length)).from, side: -2 };
+}
+
+/**
  * Index of the change at a line of the right side (-1: none). Removed lines have no line of their
  * own there: they count as the line they were removed before (the last line, at the end).
  */

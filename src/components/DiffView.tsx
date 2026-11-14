@@ -1,4 +1,4 @@
-import { EditorState, Prec, RangeSetBuilder, StateField, type Extension } from "@codemirror/state";
+import { EditorState, Prec, StateField, type Extension } from "@codemirror/state";
 import { Decoration, EditorView, WidgetType, type DecorationSet } from "@codemirror/view";
 import { getChunks, goToNextChunk, goToPreviousChunk, MergeView, unifiedMergeView } from "@codemirror/merge";
 import { ArrowDown, ArrowLeftRight, ArrowUp, ChevronsDownUp, Columns2, RefreshCw, Rows2, Save } from "lucide-react";
@@ -8,6 +8,7 @@ import { captureSideTexts, diffViews, markSideEdited, patchDiff, reloadDiff, sav
 import { useStore, type Doc } from "../lib/store";
 import { editor } from "../editor/manager";
 import { useGit } from "../lib/git";
+import { barPlace } from "../lib/gitHunks";
 import { applyChange, applySelection, changeAtCursor as stagingChangeAt, selectedLines as stagingSelection, type ApplyAction } from "../lib/gitStaging";
 
 /** The editor that holds the changes (the right side, or the single inline editor), per tab, for
@@ -95,18 +96,24 @@ class HunkGap extends WidgetType {
 }
 
 /** Bars above the changes of the right / inline editor (`kind`), or matching gaps in the left one. */
-function hunkBars(docId: string, kind: "changes" | "staged" | "gap"): Extension {
+function hunkBars(docId: string, kind: "changes" | "staged" | "gap", inline = false): Extension {
   const build = (state: EditorState): DecorationSet => {
     const got = getChunks(state);
-    const b = new RangeSetBuilder<Decoration>();
-    if (got) {
-      got.chunks.forEach((c, i) => {
-        const at = state.doc.lineAt(Math.min(kind === "gap" ? c.fromA : c.fromB, state.doc.length)).from;
-        // side -2: above the removed lines the inline layout draws there (side -1).
-        b.add(at, at, Decoration.widget({ widget: kind === "gap" ? new HunkGap() : new HunkBar(docId, i, kind), block: true, side: -2 }));
-      });
-    }
-    return b.finish();
+    if (!got) return Decoration.none;
+    const doc = state.doc;
+    return Decoration.set(
+      got.chunks.map((c, i) => {
+        // Inline: above the removed lines drawn there (side -1). Side by side: where the two
+        // editors stay level (`barPlace`).
+        const at = inline
+          ? { pos: doc.lineAt(Math.min(c.fromB, doc.length)).from, side: -2 }
+          : kind === "gap"
+            ? barPlace(doc, c.fromA, c.toA, c.fromB, c.toB)
+            : barPlace(doc, c.fromB, c.toB, c.fromA, c.toA);
+        return Decoration.widget({ widget: kind === "gap" ? new HunkGap() : new HunkBar(docId, i, kind), block: true, side: at.side }).range(at.pos);
+      }),
+      true,
+    );
   };
   return StateField.define<DecorationSet>({
     create: build,
@@ -191,7 +198,7 @@ export function DiffView({ doc, visible }: { doc: Doc; visible: boolean }) {
           parent: el,
           state: EditorState.create({
             doc: cur.right.text,
-            extensions: [side("right", cur.right), staging ? hunkBars(doc.id, staging) : [], unifiedMergeView({ original: cur.left.text, mergeControls: false, gutter: true, highlightChanges: true, syntaxHighlightDeletions: true, collapseUnchanged: fold, diffConfig: { timeout: 3000 } })],
+            extensions: [side("right", cur.right), staging ? hunkBars(doc.id, staging, true) : [], unifiedMergeView({ original: cur.left.text, mergeControls: false, gutter: true, highlightChanges: true, syntaxHighlightDeletions: true, collapseUnchanged: fold, diffConfig: { timeout: 3000 } })],
           }),
         });
         changeViews.set(doc.id, single);

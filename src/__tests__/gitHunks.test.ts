@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Chunk } from "@codemirror/merge";
 import { Text } from "@codemirror/state";
-import { describeLines, discardText, hunkAt, hunksOf, picksForSelection, selectionApplies, textHash, type Pick } from "../lib/gitHunks";
+import { barPlace, describeLines, discardText, hunkAt, hunksOf, picksForSelection, selectionApplies, textHash, type Pick } from "../lib/gitHunks";
 
 // Partial staging, the pure part (STAGE-001..004, 006): changes and selections as line ranges.
 const text = (s: string) => Text.of(s.split("\n"));
@@ -163,5 +163,53 @@ describe("textHash", () => {
   it("tells texts apart", () => {
     expect(textHash("a\nb\n")).not.toBe(textHash("a\nb"));
     expect(textHash("ab")).not.toBe(textHash("ba"));
+  });
+});
+
+// Where the bar / gap of a change goes in the side by side layout, so both sides stay level
+// (STAGE-001.1; found in the live pass: a widget above the line after a change with no lines on
+// that side pushed the line one bar below its twin).
+describe("barPlace", () => {
+  const place = (a: string, b: string) => {
+    const [ta, tb] = [text(a), text(b)];
+    return Chunk.build(ta, tb).map((c) => ({ left: barPlace(ta, c.fromA, c.toA, c.fromB, c.toB), right: barPlace(tb, c.fromB, c.toB, c.fromA, c.toA) }));
+  };
+  const above = (s: string, line: number) => ({ pos: text(s).line(line).from, side: -2 });
+  const below = (s: string, line: number) => ({ pos: text(s).line(line).to, side: 1 });
+
+  it("lines changed on both sides: above the first line of the change, on each side", () => {
+    const [a, b] = [lines(9), lines(9, (l) => (l[4] = "changed"))];
+    expect(place(a, b)).toEqual([{ left: above(a, 5), right: above(b, 5) }]);
+  });
+  it("lines only removed: the right bar hangs below the line before them", () => {
+    const [a, b] = [lines(9), lines(9, (l) => l.splice(4, 2))];
+    expect(place(a, b)).toEqual([{ left: above(a, 5), right: below(b, 4) }]);
+  });
+  it("lines only added: the left gap hangs below the line before them", () => {
+    const [a, b] = [lines(9), lines(9, (l) => l.splice(4, 0, "new 1", "new 2"))];
+    expect(place(a, b)).toEqual([{ left: below(a, 4), right: above(b, 5) }]);
+  });
+  it("lines removed at the very start: both widgets directly above the first line that is left", () => {
+    const [a, b] = [lines(9), lines(9, (l) => l.splice(0, 2))];
+    expect(place(a, b)).toEqual([{ left: above(a, 3), right: { pos: 0, side: -0.5 } }]);
+  });
+  it("lines added at the very start", () => {
+    const [a, b] = [lines(9), lines(9, (l) => l.splice(0, 0, "new 1"))];
+    expect(place(a, b)).toEqual([{ left: { pos: 0, side: -0.5 }, right: above(b, 2) }]);
+  });
+  it("lines removed at the very end: below the last line that is left", () => {
+    const [a, b] = [lines(9), lines(9, (l) => l.splice(7, 2))];
+    expect(place(a, b)).toEqual([{ left: above(a, 8), right: below(b, 7) }]);
+  });
+  it("everything removed or everything new: the other side's widget goes after its lines", () => {
+    // (above the empty last line of a text that ends with a line break, else below the last line)
+    expect(place("one\ntwo\n", "")).toEqual([{ left: { pos: 8, side: -2 }, right: { pos: 0, side: -0.5 } }]);
+    expect(place("", "one\ntwo\n")).toEqual([{ left: { pos: 0, side: -0.5 }, right: { pos: 8, side: -2 } }]);
+  });
+  it("places come in document order", () => {
+    const [a, b] = [lines(30), lines(30, (l) => { l.splice(20, 3); l.splice(10, 0, "new"); l.splice(0, 1); })];
+    const got = place(a, b);
+    expect(got).toHaveLength(3);
+    for (const side of ["left", "right"] as const) expect(got.map((g) => g[side].pos)).toEqual([...got.map((g) => g[side].pos)].sort((x, y) => x - y));
   });
 });

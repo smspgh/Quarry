@@ -18482,6 +18482,10 @@
         {
           "id": "STAGE-001.9",
           "title": "No question is asked"
+        },
+        {
+          "id": "STAGE-001.10",
+          "title": "The two sides stay level"
         }
       ]
     },
@@ -18490,7 +18494,7 @@
       "title": "Unstage one change",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 109,
+      "line": 115,
       "status": "draft",
       "commands": [
         "git.unstageChange"
@@ -18542,7 +18546,7 @@
       "title": "Discard one change, after asking",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 164,
+      "line": 170,
       "status": "draft",
       "commands": [
         "git.discardChange"
@@ -18603,7 +18607,7 @@
       "title": "Stage, unstage or discard selected lines",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 228,
+      "line": 234,
       "status": "draft",
       "commands": [
         "git.stageLines",
@@ -18677,7 +18681,7 @@
       "title": "Unsaved edits are saved first",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 314,
+      "line": 320,
       "status": "draft",
       "commands": [
         "git.stageChange",
@@ -18728,7 +18732,7 @@
       "title": "Line endings, encoding and the end of the file are preserved",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 369,
+      "line": 375,
       "status": "draft",
       "commands": [],
       "files": [
@@ -18779,7 +18783,7 @@
       "title": "Where partial staging is offered",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 431,
+      "line": 437,
       "status": "draft",
       "commands": [
         "git.stageChange",
@@ -18852,7 +18856,7 @@
       "title": "Partial staging from the menu, the palette and the keyboard",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 508,
+      "line": 514,
       "status": "draft",
       "commands": [
         "git.stageChange",
@@ -18923,7 +18927,7 @@
       "title": "The comparison stays true to the index",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 581,
+      "line": 587,
       "status": "draft",
       "commands": [],
       "files": [
