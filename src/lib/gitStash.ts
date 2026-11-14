@@ -149,7 +149,8 @@ export function stashConflictStrip(conflicts: number): string {
 export function dropOffer(title: string): { title: string; text: string; drop: string; keep: string } {
   return {
     title: "Conflicts resolved: drop the stash?",
-    text: `The changes of "${title}" are now in your files. The stash itself is still in the list: drop it if you no longer need it.`,
+    // Which side each conflict kept is not known here: a file resolved with Current does not have the stash's change.
+    text: `The conflicts are resolved. Where you kept Incoming (the stash), the changes of "${title}" are now in your files; where you kept Current, they are only in the stash. It is still in the list: drop it only if you no longer need any of it.`,
     drop: "Drop Stash",
     keep: "Keep Stash",
   };

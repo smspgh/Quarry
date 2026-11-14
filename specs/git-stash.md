@@ -573,7 +573,7 @@ Scenario: STASH-009.4 The conflict bars say which side is which
 Scenario: STASH-009.5 Resolving the last file of a pop offers the drop
   Given "app.ts" is the only conflicted file of the pop of "WIP parser"
   When I mark it resolved
-  Then a dialog "Conflicts resolved: drop the stash?" says the changes of "WIP parser" are now in my files and the stash itself is still in the list
+  Then a dialog "Conflicts resolved: drop the stash?" says that where I kept Incoming the changes of "WIP parser" are now in my files, that where I kept Current they are only in the stash, and that the stash itself is still in the list
   And its buttons are "Drop Stash" and "Keep Stash" (default)
 
 Scenario: STASH-009.6 Drop Stash

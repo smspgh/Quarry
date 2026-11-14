@@ -124,6 +124,9 @@ describe("drop dialog and stash-conflict wording", () => {
     const offer = dropOffer("WIP parser");
     expect(offer.title).toBe("Conflicts resolved: drop the stash?");
     expect([offer.drop, offer.keep]).toEqual(["Drop Stash", "Keep Stash"]);
+    // Resolving with Current keeps the stash's change out of the files: the text must not claim otherwise.
+    expect(offer.text).toContain("where you kept Current, they are only in the stash");
+    expect(offer.text).not.toMatch(/^The changes of .* are now in your files\./);
     const all = [stashConflictWarning("x", true, 1), stashConflictStrip(1), stashSideTitle("ours"), stashSideTitle("theirs"), offer.text, ...Object.values(STASH_CONFLICT)].join(" ");
     expect(all).not.toMatch(/abort/i);
     expect(all).not.toMatch(/you can commit to finish/);
