@@ -109,3 +109,14 @@ export function closePanel(p: SidebarPanel) {
   else if (isPinned(s, p)) s.set({ pinnedPanels: s.pinnedPanels.filter((x) => x !== p), ...(s.sidebarPanel === p ? { sidebarVisible: false } : {}) });
   else if (floatingPanel(s) === p) s.set({ sidebarVisible: false });
 }
+
+/**
+ * What a mousedown on `target` does to the floating panel: "now" (a click back into the document,
+ * the tabs, the title bar, the status bar or a docked panel closes it), "after-click" (on a button
+ * there, e.g. a conflict bar's Accept Current: closing moves the editor, so it waits until the
+ * click has landed), or null (leave it open).
+ */
+export function floatCloseOn(target: Element | null): "now" | "after-click" | null {
+  if (!target?.closest?.(".editor-area, .titlebar, .tabbar, .statusbar, .sidebar.docked")) return null;
+  return target.closest("button, a[href], [role='button'], [role='menuitem'], input, label, select") ? "after-click" : "now";
+}

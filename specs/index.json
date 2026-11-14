@@ -3160,7 +3160,7 @@
       "title": "Compare a commit with the working tree",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 280,
+      "line": 281,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3244,7 +3244,7 @@
       "title": "Compare with a branch",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 378,
+      "line": 379,
       "status": "draft",
       "commands": [
         "git.compareWithBranch",
@@ -3333,7 +3333,7 @@
       "title": "Comparing never changes the repository",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 475,
+      "line": 476,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21143,6 +21143,14 @@
         {
           "id": "UI-003.9",
           "title": "A submenu stays inside the window"
+        },
+        {
+          "id": "UI-003.10",
+          "title": "A menu taller than the window scrolls"
+        },
+        {
+          "id": "UI-003.11",
+          "title": "A disabled button still shows its tooltip"
         }
       ]
     },
@@ -21151,7 +21159,7 @@
       "title": "Menu bar keyboard access",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 190,
+      "line": 204,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21226,7 +21234,7 @@
       "title": "Command palette",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 312,
+      "line": 326,
       "status": "draft",
       "commands": [
         "view.commandPalette",
@@ -21287,7 +21295,7 @@
       "title": "Quick Open a file by name",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 385,
+      "line": 399,
       "status": "draft",
       "commands": [
         "file.quickOpen"
@@ -21333,7 +21341,7 @@
       "title": "Go to Line from the palette",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 435,
+      "line": 449,
       "status": "draft",
       "commands": [
         "goto.line"
@@ -21386,7 +21394,7 @@
       "title": "One command registry behind menus, shortcuts and the palette",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 499,
+      "line": 513,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21423,7 +21431,7 @@
       "title": "Global keyboard shortcuts",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 544,
+      "line": 558,
       "status": "draft",
       "commands": [
         "ui.escape"
@@ -21483,7 +21491,7 @@
       "title": "Modal dialogs",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 624,
+      "line": 638,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21529,7 +21537,7 @@
       "title": "Notifications",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 686,
+      "line": 700,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21564,7 +21572,7 @@
       "title": "Panel rail",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 726,
+      "line": 740,
       "status": "draft",
       "commands": [
         "view.explorer",
@@ -21621,7 +21629,7 @@
       "title": "Floating and pinned side panels",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 785,
+      "line": 799,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21677,6 +21685,10 @@
         {
           "id": "UI-013.10",
           "title": "Restoring the open folder does not open the Explorer"
+        },
+        {
+          "id": "UI-013.11",
+          "title": "A button in the editor still gets the click"
         }
       ]
     },
@@ -21685,7 +21697,7 @@
       "title": "Collapse and restore the side panels",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 867,
+      "line": 888,
       "status": "draft",
       "commands": [
         "view.toggleSidebar"
@@ -21732,7 +21744,7 @@
       "title": "Side panel widths",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 917,
+      "line": 938,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21771,7 +21783,7 @@
       "title": "Bottom panel",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 962,
+      "line": 983,
       "status": "draft",
       "commands": [
         "view.togglePanel",
@@ -21835,7 +21847,7 @@
       "title": "Status bar position and document facts",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1034,
+      "line": 1055,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21882,7 +21894,7 @@
       "title": "Status bar pickers for indentation, encoding, line endings and language",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1088,
+      "line": 1109,
       "status": "draft",
       "commands": [
         "view.setTabSize",
@@ -21949,7 +21961,7 @@
       "title": "Light and dark themes",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1170,
+      "line": 1191,
       "status": "draft",
       "commands": [
         "view.toggleTheme"
@@ -21999,7 +22011,7 @@
       "title": "Zoom and editor view toggles",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1225,
+      "line": 1246,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -22057,7 +22069,7 @@
       "title": "Keyboard focus returns to the active tab",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1289,
+      "line": 1310,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22103,7 +22115,7 @@
       "title": "Tab key can leave the editor",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1340,
+      "line": 1361,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -22143,7 +22155,7 @@
       "title": "Single instance and files handed over by Windows",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1385,
+      "line": 1406,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22195,7 +22207,7 @@
       "title": "Window size and position are remembered",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1444,
+      "line": 1465,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22233,7 +22245,7 @@
       "title": "Notice after an unexpected exit",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1486,
+      "line": 1507,
       "status": "draft",
       "commands": [],
       "files": [

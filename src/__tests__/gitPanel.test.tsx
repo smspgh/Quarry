@@ -86,12 +86,18 @@ describe("Source Control panel: Merge or Rebase", () => {
   });
 
   // Seen live: `.btn:disabled { pointer-events: none }` made WebView2 show no tooltip on the disabled
-  // button, so the reason was never seen. The branch row keeps pointer events for disabled buttons.
-  it("the disabled button's tooltip is reachable: the branch row keeps pointer events on", async () => {
+  // button, so the reason was never seen. Disabled buttons keep pointer events everywhere (open issue 2)
+  // and the hover highlight skips them.
+  it("the disabled button's tooltip is reachable: no disabled button switches pointer events off", async () => {
     const { readFileSync } = await import("node:fs");
     const css = readFileSync("src/styles/app.css", "utf8");
-    expect(css).toMatch(/\.btn:disabled\s*\{[^}]*pointer-events:\s*none/);
-    expect(css).toMatch(/\.scm-branch \.btn:disabled\s*\{[^}]*pointer-events:\s*auto/);
+    for (const sel of ["\\.btn", "\\.icon-btn", "\\.diff-toolbar \\.icon-btn", "\\.claude-input-foot \\.icon-btn"]) {
+      const rule = new RegExp(`(^|\\n)${sel}:disabled\\s*\\{([^}]*)\\}`).exec(css);
+      expect(rule, sel).not.toBeNull();
+      expect(rule![2]).not.toMatch(/pointer-events:\s*none/);
+    }
+    expect(css).toMatch(/\.btn:hover:not\(:disabled\)/);
+    expect(css).toMatch(/\.icon-btn:hover:not\(:disabled\)/);
   });
 
   it("is disabled while another git action is running", async () => {

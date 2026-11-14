@@ -2,7 +2,7 @@ import { PanelLeftClose, Pin, PinOff } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { editor } from "../editor/manager";
 import { saveSession } from "../lib/actions";
-import { closePanel, floatingPanel, isDocked, isPanelShown, isPinned, minPanelWidth, panelWidth, setPinned, SETTINGS_SHARE } from "../lib/panels";
+import { closePanel, floatCloseOn, floatingPanel, isDocked, isPanelShown, isPinned, minPanelWidth, panelWidth, setPinned, SETTINGS_SHARE } from "../lib/panels";
 import { PANELS, useStore, type SidebarPanel } from "../lib/store";
 import { ExplorerPanel } from "./panels/ExplorerPanel";
 import { GitPanel } from "./panels/GitPanel";
@@ -114,7 +114,11 @@ export function Sidebar() {
   useEffect(() => {
     if (!floating) return;
     const onDown = (e: MouseEvent) => {
-      if ((e.target as HTMLElement | null)?.closest?.(".editor-area, .titlebar, .tabbar, .statusbar, .sidebar.docked")) set({ sidebarVisible: false });
+      const when = floatCloseOn(e.target as Element | null);
+      const close = () => set({ sidebarVisible: false });
+      // After a button's click: closing now would shift the editor under the pointer (UI-013.11).
+      if (when === "after-click") window.addEventListener("mouseup", () => setTimeout(close, 0), { once: true, capture: true });
+      else if (when === "now") close();
     };
     window.addEventListener("mousedown", onDown, true);
     return () => window.removeEventListener("mousedown", onDown, true);

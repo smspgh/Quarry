@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { anyPanelShown, BOTTOM_DEFAULT_HEIGHT, BOTTOM_MIN_HEIGHT, BOTTOM_ROOM_ABOVE, clampBottomHeight, closePanel, floatingPanel, isDocked, isPanelShown, showPanel, toggleAllPanels, togglePanel } from "../lib/panels";
+import { anyPanelShown, BOTTOM_DEFAULT_HEIGHT, BOTTOM_MIN_HEIGHT, BOTTOM_ROOM_ABOVE, clampBottomHeight, closePanel, floatCloseOn, floatingPanel, isDocked, isPanelShown, showPanel, toggleAllPanels, togglePanel } from "../lib/panels";
 import { useStore } from "../lib/store";
 
 const st = () => useStore.getState();
@@ -70,5 +70,32 @@ describe("bottom panel height", () => {
   });
   it("never goes under the minimum, even in a tiny window", () => {
     expect(clampBottomHeight(300, 150)).toBe(BOTTOM_MIN_HEIGHT);
+  });
+});
+
+describe("floatCloseOn (UI-013.1, UI-013.11)", () => {
+  const dom = (html: string) => {
+    const host = document.createElement("div");
+    host.innerHTML = html;
+    document.body.appendChild(host);
+    return host;
+  };
+  it("closes at once on a click back into the document, tabs or status bar", () => {
+    const host = dom('<div class="editor-area"><div class="cm-line" id="t"></div></div><div class="statusbar"><span id="s"></span></div>');
+    expect(floatCloseOn(host.querySelector("#t"))).toBe("now");
+    expect(floatCloseOn(host.querySelector("#s"))).toBe("now");
+    host.remove();
+  });
+  it("waits for the click of a button in the editor (a conflict bar's Accept Current)", () => {
+    const host = dom('<div class="editor-area"><div class="cm-conflict-bar"><button id="b"><span id="in">Accept Current</span></button></div></div>');
+    expect(floatCloseOn(host.querySelector("#b"))).toBe("after-click");
+    expect(floatCloseOn(host.querySelector("#in"))).toBe("after-click");
+    host.remove();
+  });
+  it("leaves the panel open for a click anywhere else (inside the panel itself)", () => {
+    const host = dom('<aside class="sidebar"><button id="p">Stage</button></aside>');
+    expect(floatCloseOn(host.querySelector("#p"))).toBe(null);
+    expect(floatCloseOn(null)).toBe(null);
+    host.remove();
   });
 });

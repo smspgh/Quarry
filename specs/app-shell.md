@@ -114,7 +114,7 @@ Scenario: UI-002.5 A corrupt setting falls back to the default
 - Status: draft
 - Commands: `help.scriptApi`
 - Files:
-  - `src/components/MenuBar.tsx` — `MENUS` model (items reference command ids), `resolve` (label, shortcut, disabled state, dynamic title), `TEXT_CATEGORY`, `MenuList` (a submenu is moved up to stay inside the window: pure `submenuShift`), `languageMenu`, `recentFilesMenu`, `recentFoldersMenu`
+  - `src/components/MenuBar.tsx` — `MENUS` model (items reference command ids), `resolve` (label, shortcut, disabled state, dynamic title), `TEXT_CATEGORY`, `MenuList` (a top-level menu's max-height is the room below it, so it scrolls; a submenu is `position: fixed` beside its entry, moved up / to the left to stay inside the window: pure `submenuPlace` over `submenuShift`; scrolling closes the open submenu), `languageMenu`, `recentFilesMenu`, `recentFoldersMenu`
   - `src/lib/commands.ts` — `getCommand`, `isEnabled`, `prettyKeys`, `Command.enabled` / `dynamicTitle`, `applyDefaultEnabled`, `showScriptApi` (`help.scriptApi`)
   - `src/lib/fuzzy.ts` — `bareTitle` strips the "JSON: " / "Macro: " / "Script: " / "Large File: " prefix from menu labels
   - `src/styles/app.css` — `.menubar`, `.menu-flyout`, `.menu-item`, `.menu-keys`, `.menu-sep`
@@ -185,6 +185,20 @@ Scenario: UI-003.9 A submenu stays inside the window
   When I move the mouse over "Branches and Tags", which is near the bottom of the menu
   Then its submenu opens beside it, moved up as far as needed for its last entry "Push Tag…" to be inside the window
   And a submenu that fits below its entry opens level with it, as before
+
+Scenario: UI-003.10 A menu taller than the window scrolls
+  Given the window is too short for the whole Git menu
+  When I open the Git menu
+  Then it ends 8 px above the window's bottom edge and scrolls with the mouse wheel, so Push, Force Push…, Add Remote… and Claude can be reached
+  And a submenu opened after scrolling opens beside its entry and is not cut off by the menu's edge
+  And scrolling the menu closes a submenu that was open
+  And a submenu with no room on the right opens on the left of its entry
+
+Scenario: UI-003.11 A disabled button still shows its tooltip
+  Given a greyed-out button anywhere in Quarry (Commit with nothing staged, a Source Control header icon, a stash action, Draft, a Compare toolbar button)
+  When I rest the mouse on it
+  Then its tooltip shows, saying why it is off where the button gives a reason
+  And it does not light up on hover, and clicking it does nothing
 ```
 
 ## UI-004: Menu bar keyboard access
@@ -787,8 +801,8 @@ Scenario: UI-012.6 A panel keeps its contents while closed
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/panels.ts` — `isPinned`, `isAutoDocked`, `isDocked`, `floatingPanel`, `isPanelShown`, `setPinned`, `closePanel`
-  - `src/components/Sidebar.tsx` — `PanelFrame` (pin button, close button, pin badge, dock order, Escape on a floating panel), `Sidebar` (mousedown outside closes the floating panel)
+  - `src/lib/panels.ts` — `isPinned`, `isAutoDocked`, `isDocked`, `floatingPanel`, `isPanelShown`, `setPinned`, `closePanel`, `floatCloseOn`
+  - `src/components/Sidebar.tsx` — `PanelFrame` (pin button, close button, pin badge, dock order, Escape on a floating panel), `Sidebar` (mousedown outside closes the floating panel; on a button it closes after the click, pure `floatCloseOn` in panels.ts)
   - `src/lib/store.ts` — `pinnedPanels`, `searchDocked`, `sidebarVisible`, `sidebarPanel`
   - `src/lib/actions.ts` — `buildSession` / `restoreSessionTabs` keep `pinnedPanels`; the session folder is reopened with `openFolder(..., { show: false })` so it does not show the Explorer
   - `src/styles/app.css` — `.panel-dock`, `.sidebar.floating`, `.sidebar.docked`, `.panel-pin-badge`, `.sidebar-pin`, `.sidebar-close`
@@ -862,6 +876,13 @@ Scenario: UI-013.10 Restoring the open folder does not open the Explorer
   When I restart Quarry with session restore on
   Then the folder is open again in the Explorer
   But no side panel is shown until I open one
+
+Scenario: UI-013.11 A button in the editor still gets the click
+  Given Source Control is open and not pinned, and a conflict bar shows in the editor
+  When I click "Accept Current" on the bar
+  Then the conflict is resolved with the current side (the click is not lost)
+  And Source Control closes once the click is done
+  And the same holds for any other button in the editor area, such as a comparison's Stage bar
 ```
 
 ## UI-014: Collapse and restore the side panels

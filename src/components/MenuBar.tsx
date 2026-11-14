@@ -421,6 +421,18 @@ export function submenuShift(top: number, bottom: number, windowHeight: number, 
   return Math.max(0, Math.min(over, top - margin));
 }
 
+/**
+ * Where a submenu goes (window coordinates, for `position: fixed`): level with its entry and just
+ * right of it, moved up as `submenuShift` says, and to the entry's left when it would pass the
+ * window's right edge. Pure so it can be unit-tested.
+ */
+export function submenuPlace(entry: { top: number; left: number; right: number }, width: number, height: number, windowWidth: number, windowHeight: number, margin = 8): { top: number; left: number } {
+  const top = entry.top - 4;
+  const right = entry.right - 2;
+  const left = right + width > windowWidth - margin ? Math.max(margin, entry.left + 2 - width) : right;
+  return { top: top - submenuShift(top, top + height, windowHeight, margin), left };
+}
+
 function MenuList({ items, onDone, onClose, depth = 0, autoFocus = false }: { items: Item[]; onDone: () => void; onClose?: () => void; depth?: number; autoFocus?: boolean }) {
   const [sub, setSub] = useState<number | null>(null);
   const [subByKey, setSubByKey] = useState(false);
@@ -432,14 +444,22 @@ function MenuList({ items, onDone, onClose, depth = 0, autoFocus = false }: { it
     if (autoFocus) ownItems()[0]?.focus();
   }, [autoFocus]);
 
-  // A submenu is kept inside the window (see submenuShift): its CSS top is -4px, level with the parent entry.
+  // A top-level menu gets the room below it and scrolls past that (the Git menu is taller than a
+  // small window). A submenu is fixed beside its entry, so that scrolling never clips it, and kept
+  // inside the window (see submenuPlace).
   useLayoutEffect(() => {
     const el = ref.current;
-    if (!el || depth === 0) return;
-    el.style.top = ""; // measure from the CSS position (the effect runs twice in development)
+    if (!el) return;
+    if (depth === 0) {
+      el.style.maxHeight = `${Math.max(120, window.innerHeight - el.getBoundingClientRect().top - 8)}px`;
+      return;
+    }
+    const entry = el.parentElement?.getBoundingClientRect();
+    if (!entry) return;
+    Object.assign(el.style, { position: "fixed", top: `${entry.top - 4}px`, left: `${entry.right - 2}px` });
     const r = el.getBoundingClientRect();
-    const up = submenuShift(r.top, r.bottom, window.innerHeight);
-    if (up > 0) el.style.top = `${-4 - up}px`;
+    const p = submenuPlace(entry, r.width, r.height, window.innerWidth, window.innerHeight);
+    Object.assign(el.style, { top: `${p.top}px`, left: `${p.left}px` });
   }, []);
 
   // Keyboard handling for this level only: events bubble up from the focused item, so the innermost open list sees them first.
@@ -491,7 +511,7 @@ function MenuList({ items, onDone, onClose, depth = 0, autoFocus = false }: { it
   };
 
   return (
-    <div ref={ref} className={`menu-flyout ${depth > 0 ? "submenu" : ""}`} role="menu" onKeyDown={onKeyDown}>
+    <div ref={ref} className={`menu-flyout ${depth > 0 ? "submenu" : ""}`} role="menu" onKeyDown={onKeyDown} onScroll={() => sub !== null && setSub(null)}>
       {items.map((it, i) => {
         if ("sep" in it) return <div key={i} className="menu-sep" />;
         const r = resolve(it);

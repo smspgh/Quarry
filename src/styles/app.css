@@ -696,16 +696,18 @@ button {
   white-space: nowrap;
   transition: background var(--dur-fast);
 }
-.btn:hover {
+.btn:hover:not(:disabled) {
   background: var(--control-hover);
 }
-.btn:active {
+.btn:active:not(:disabled) {
   background: var(--control-pressed);
   color: var(--text-2);
 }
+/* Pointer events stay on so the tooltip saying why it is off still shows (WebView2 shows none
+   without them); the hover rules skip disabled buttons, and a disabled button gets no click. */
 .btn:disabled {
   opacity: 0.45;
-  pointer-events: none;
+  cursor: default;
 }
 .btn.small {
   height: 26px;
@@ -718,10 +720,10 @@ button {
   color: var(--on-accent);
   font-weight: 600;
 }
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background: var(--accent-hover);
 }
-.btn-primary:active {
+.btn-primary:active:not(:disabled) {
   background: var(--accent-pressed);
   color: var(--on-accent);
 }
@@ -729,7 +731,7 @@ button {
   background: transparent;
   border-color: transparent;
 }
-.btn-ghost:hover {
+.btn-ghost:hover:not(:disabled) {
   background: var(--subtle-hover);
 }
 .btn-danger {
@@ -746,11 +748,11 @@ button {
   flex: none;
   transition: background var(--dur-fast), color var(--dur-fast);
 }
-.icon-btn:hover {
+.icon-btn:hover:not(:disabled) {
   background: var(--subtle-hover);
   color: var(--text);
 }
-.icon-btn:active {
+.icon-btn:active:not(:disabled) {
   background: var(--subtle-pressed);
 }
 .icon-btn.on {
@@ -760,7 +762,7 @@ button {
 }
 .icon-btn:disabled {
   opacity: 0.4;
-  pointer-events: none;
+  cursor: default;
 }
 .icon-btn.xs {
   width: 22px;
@@ -2282,12 +2284,19 @@ select optgroup {
   border: 1px solid var(--stroke-2);
   border-radius: var(--radius-m);
   box-shadow: var(--shadow-flyout);
-  animation: menu-in 80ms var(--ease);
+  /* Opacity only: a transform would make the menu the containing block of its fixed submenus. */
+  animation: menu-fade 80ms var(--ease);
 }
+/* Placed by MenuList (position: fixed beside its entry), so a scrolling menu never clips it. */
 .menu-flyout.submenu {
   top: -4px;
   left: calc(100% - 2px);
   max-width: 560px;
+}
+/* A menu taller than the window scrolls (MenuList sets max-height to the room below it). */
+.menu-flyout:not(.submenu) {
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .menu-item-wrap {
   position: relative;
@@ -2382,6 +2391,14 @@ select optgroup {
 }
 
 /* ---- App shell & chrome fixes ---- */
+@keyframes menu-fade {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}
 @keyframes menu-in {
   from {
     transform: translateY(-3px);
@@ -3836,7 +3853,7 @@ select optgroup {
 }
 .claude-input-foot .icon-btn:disabled {
   opacity: 0.4;
-  pointer-events: none;
+  cursor: default;
 }
 .claude-user-imgs {
   display: flex;
@@ -4416,7 +4433,7 @@ select optgroup {
 }
 .diff-toolbar .icon-btn:disabled {
   opacity: 0.4;
-  pointer-events: none;
+  cursor: default;
 }
 /* Partial staging (specs/git-staging.md): the bar above each change of a Source Control
    comparison, the same height as a gap on the left side so the two sides stay level. */
@@ -4616,11 +4633,6 @@ select optgroup {
 .scm-top { gap: 6px; }
 .scm-branch { min-width: 0; }
 .scm-branch .btn { max-width: 70%; min-width: 0; }
-/* A disabled button in this row says why in its tooltip (MERGE-003.9, CONFLICT-012.2). `.btn:disabled`
-   switches pointer events off, and WebView2 then shows no tooltip, so they stay on here. */
-.scm-branch .btn:disabled { pointer-events: auto; cursor: default; }
-.scm-branch .btn:disabled:hover,
-.scm-branch .btn:disabled:active { background: var(--control); color: var(--text); }
 .scm-op {
   font-size: 11px;
   padding: 1px 6px;

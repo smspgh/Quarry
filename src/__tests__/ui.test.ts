@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { tabStripKey } from "../components/TitleBar";
-import { MENU_MNEMONICS, menuForMnemonic, mnemonicKey, nextMenuIndex, splitMnemonic, submenuShift } from "../components/MenuBar";
+import { MENU_MNEMONICS, menuForMnemonic, mnemonicKey, nextMenuIndex, splitMnemonic, submenuPlace, submenuShift } from "../components/MenuBar";
 import { placeFlyout, typeAheadIndex } from "../components/Select";
 import { describeValue, firstFontFamily, fontListFor, rowMatches } from "../components/panels/SettingsPanel";
 import { previewBefore } from "../components/panels/SearchPanel";
@@ -17,6 +17,30 @@ describe("submenuShift (UI-003.9)", () => {
   it("never moves it above the top margin", () => {
     expect(submenuShift(40, 900, 816)).toBe(32);
     expect(submenuShift(4, 900, 816)).toBe(0);
+  });
+});
+
+describe("submenuPlace (UI-003.9, UI-003.10)", () => {
+  const entry = { top: 300, left: 100, right: 340, bottom: 330 };
+  it("puts a submenu just right of its entry, level with it", () => {
+    expect(submenuPlace(entry, 220, 150, 1400, 816)).toEqual({ top: 296, left: 338 });
+  });
+  it("moves it up to stay inside the window", () => {
+    expect(submenuPlace({ ...entry, top: 700 }, 220, 219, 1400, 816)).toEqual({ top: 589, left: 338 });
+  });
+  it("opens it on the left when the right side has no room", () => {
+    // No room on either side: kept at the left margin.
+    expect(submenuPlace(entry, 220, 150, 560, 816)).toEqual({ top: 296, left: 8 });
+    expect(submenuPlace({ top: 300, left: 900, right: 1140 }, 220, 150, 1200, 816)).toEqual({ top: 296, left: 682 });
+  });
+});
+
+describe("the menu layout (UI-003.10)", () => {
+  const css = readFileSync("src/styles/app.css", "utf8");
+  it("lets a top-level menu scroll and keeps transforms off menus (they would anchor the fixed submenus)", () => {
+    expect(css).toMatch(/\.menu-flyout:not\(\.submenu\) \{\s*overflow-y: auto;/);
+    expect(css).toMatch(/\.menu-flyout \{[^}]*animation: menu-fade/);
+    expect(css).toMatch(/@keyframes menu-fade \{\s*from \{\s*opacity/);
   });
 });
 
