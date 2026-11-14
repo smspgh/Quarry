@@ -126,7 +126,9 @@ function hunkBars(docId: string, kind: "changes" | "staged" | "gap", inline = fa
 interface Place {
   line: number;
   col: number;
+  /** First line in view, and how far (px) its text starts above the top edge (negative: below). */
   top: number;
+  off: number;
   focused: boolean;
 }
 
@@ -134,20 +136,38 @@ function placeOf(view: EditorView, host: HTMLElement): Place {
   const head = view.state.selection.main.head;
   const line = view.state.doc.lineAt(head);
   let top = 1;
+  let off = 0;
   try {
-    top = view.state.doc.lineAt(view.lineBlockAtHeight(host.getBoundingClientRect().top - view.documentTop).from).number;
+    const edge = host.getBoundingClientRect().top;
+    const from = view.lineBlockAtHeight(edge - view.documentTop).from;
+    top = view.state.doc.lineAt(from).number;
+    const at = view.coordsAtPos(from);
+    if (at) off = edge - at.top;
   } catch {
     // not laid out
   }
-  return { line: line.number, col: head - line.from, top, focused: view.hasFocus };
+  return { line: line.number, col: head - line.from, top, off, focused: view.hasFocus };
 }
 
 function restorePlace(view: EditorView, p: Place) {
   const doc = view.state.doc;
   const line = doc.line(Math.min(p.line, doc.lines));
   const top = doc.line(Math.min(p.top, doc.lines)).from;
-  view.dispatch({ selection: { anchor: Math.min(line.from + p.col, line.to) }, effects: p.top > 1 ? EditorView.scrollIntoView(top, { y: "start" }) : [] });
+  const scrolled = p.top > 1 || p.off > 0;
+  const scroll = () => EditorView.scrollIntoView(top, { y: "start", yMargin: -p.off });
+  view.dispatch({ selection: { anchor: Math.min(line.from + p.col, line.to) }, effects: scrolled ? scroll() : [] });
   if (p.focused) view.focus();
+  // Side by side, the spacers that level the two sides are only added once the new editors are
+  // measured, which moves the lines again: put the same line back when that has happened.
+  if (scrolled && typeof requestAnimationFrame === "function") {
+    let frames = 3;
+    const again = () => {
+      if (!view.dom.isConnected) return;
+      view.dispatch({ effects: scroll() });
+      if (--frames > 0) requestAnimationFrame(again);
+    };
+    requestAnimationFrame(again);
+  }
 }
 
 export function DiffView({ doc, visible }: { doc: Doc; visible: boolean }) {
