@@ -4393,12 +4393,14 @@
       ],
       "files": [
         "src/components/DiffView.tsx",
+        "src/styles/app.css",
         "src/lib/diff.ts",
         "src/lib/commands.ts"
       ],
       "tests": [
         "src/__tests__/diffSession.test.ts",
-        "src/__tests__/diffView.test.tsx"
+        "src/__tests__/diffView.test.tsx",
+        "src/__tests__/ui.test.ts"
       ],
       "docs": [
         "docs/compare.md"
@@ -4431,6 +4433,10 @@
         {
           "id": "DIFF-009.7",
           "title": "Editor settings apply"
+        },
+        {
+          "id": "DIFF-009.8",
+          "title": "A narrow Compare tab"
         }
       ]
     },
@@ -4439,7 +4445,7 @@
       "title": "Edit file sides; snapshots are read-only",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 423,
+      "line": 431,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4481,7 +4487,7 @@
       "title": "Copy a change across with the arrows",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 467,
+      "line": 475,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4526,7 +4532,7 @@
       "title": "Save an edited side",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 516,
+      "line": 524,
       "status": "draft",
       "commands": [
         "file.save"
@@ -4585,7 +4591,7 @@
       "title": "Reload the compared texts",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 584,
+      "line": 592,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4642,7 +4648,7 @@
       "title": "Preview comparisons replace each other",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 646,
+      "line": 654,
       "status": "draft",
       "commands": [],
       "files": [
@@ -24872,6 +24878,7 @@
       "COMMITCMP-002",
       "CONFLICT-001",
       "DIFF-001",
+      "DIFF-009",
       "DIFF-011",
       "EDIT-006",
       "EDIT-013",
@@ -25685,6 +25692,7 @@
       "UI-006"
     ],
     "src/__tests__/ui.test.ts": [
+      "DIFF-009",
       "GITAI-001",
       "SEARCH-007",
       "SET-001",

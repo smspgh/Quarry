@@ -4365,9 +4365,14 @@ select optgroup {
   display: flex;
   align-items: center;
   gap: 6px;
-  height: 40px;
+  min-height: 40px;
   padding: 0 10px 0 14px;
   border-bottom: 1px solid var(--divider);
+  flex: none;
+}
+/* Only the file labels give way when the toolbar is short of room; the controls keep their size
+   (they used to be squashed over each other). Narrower still: shorter words, then two rows. */
+.diff-toolbar > :not(.diff-sides) {
   flex: none;
 }
 .diff-sides {
@@ -4375,8 +4380,36 @@ select optgroup {
   align-items: center;
   gap: 8px;
   flex: 1;
-  min-width: 0;
+  min-width: 140px;
   font-size: 13px;
+}
+.diff-view {
+  container-type: inline-size;
+  container-name: diff;
+}
+.diff-lines-btn .short {
+  display: none;
+}
+@container diff (max-width: 1000px) {
+  .diff-toolbar .segmented .seg-text {
+    display: none;
+  }
+  .diff-lines-btn .long {
+    display: none;
+  }
+  .diff-lines-btn .short {
+    display: inline;
+  }
+}
+@container diff (max-width: 680px) {
+  .diff-toolbar {
+    flex-wrap: wrap;
+    row-gap: 4px;
+    padding-block: 4px;
+  }
+  .diff-sides {
+    flex-basis: 100%;
+  }
 }
 .diff-label {
   display: inline-flex;

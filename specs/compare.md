@@ -370,10 +370,11 @@ Scenario: DIFF-008.5 Only on a Compare tab
 - Status: draft
 - Commands: `compare.toggleInline`, `compare.swap`
 - Files:
-  - `src/components/DiffView.tsx` — layout switch (`unifiedMergeView` for inline), fold button (`collapseUnchanged: { margin: 3, minSize: 6 }`), rebuild effect on `version` / `inline` / `collapse`, `settingsReconfigure` on settings changes
+  - `src/components/DiffView.tsx` — layout switch (`unifiedMergeView` for inline), fold button (`collapseUnchanged: { margin: 3, minSize: 6 }`), rebuild effect on `version` / `inline` / `collapse`, `settingsReconfigure` on settings changes; toolbar words in `.seg-text` / `.long` / `.short` spans
+  - `src/styles/app.css` — `.diff-toolbar` (controls `flex: none`, file labels give way down to 140 px), `@container diff` rules (shorter words below 1000 px, two rows below 680 px)
   - `src/lib/diff.ts` — `DiffSession.inline` / `collapse` / `version` / `swapped`, `swapDiff`, `captureSideTexts`, `patchDiff`
   - `src/lib/commands.ts` — `compare.toggleInline`, `compare.swap` (disabled while the tab has unsaved edits)
-- Tests: `src/__tests__/diffSession.test.ts`, `src/__tests__/diffView.test.tsx`
+- Tests: `src/__tests__/diffSession.test.ts`, `src/__tests__/diffView.test.tsx`, `src/__tests__/ui.test.ts`
 - Docs: `docs/compare.md`
 
 **As a** developer reading a comparison
@@ -418,6 +419,13 @@ Scenario: DIFF-009.6 Edits survive a layout change
 Scenario: DIFF-009.7 Editor settings apply
   When I change the font size or word wrap in Settings
   Then the Compare editors follow without losing the cursor position or unsaved edits
+
+Scenario: DIFF-009.8 A narrow Compare tab
+  Given a Compare tab
+  When it is less than 1000 px wide
+  Then the buttons keep their size and do not overlap: the layout switch shows its two icons only (the names stay in the tooltips) and a Source Control comparison's buttons read "Stage Lines" / "Discard Lines" / "Unstage Lines"
+  And the file names shrink with "…" but keep at least 140 px
+  And below 680 px the file names take a row of their own above the buttons
 ```
 
 ## DIFF-010: Edit file sides; snapshots are read-only

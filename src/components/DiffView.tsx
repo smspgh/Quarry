@@ -304,8 +304,8 @@ export function DiffView({ doc, visible }: { doc: Doc; visible: boolean }) {
         <button className="icon-btn" title="Next change (F7)" aria-label="Next change" disabled={!nav.total} onClick={() => stepChange(doc.id, 1)}><ArrowDown size={15} /></button>
         <span className="diff-sep" />
         <div className="segmented" role="radiogroup" aria-label="Layout">
-          <button role="radio" aria-checked={!s.inline} className={!s.inline ? "on" : ""} title="Side by side" onClick={() => patchDiff(doc.id, () => ({ inline: false }))}><Columns2 size={13} /> Side by side</button>
-          <button role="radio" aria-checked={s.inline} className={s.inline ? "on" : ""} title="One editor, removed lines shown inline" onClick={() => patchDiff(doc.id, () => ({ inline: true }))}><Rows2 size={13} /> Inline</button>
+          <button role="radio" aria-checked={!s.inline} className={!s.inline ? "on" : ""} title="Side by side" onClick={() => patchDiff(doc.id, () => ({ inline: false }))}><Columns2 size={13} /><span className="seg-text">Side by side</span></button>
+          <button role="radio" aria-checked={s.inline} className={s.inline ? "on" : ""} title="One editor, removed lines shown inline" onClick={() => patchDiff(doc.id, () => ({ inline: true }))}><Rows2 size={13} /><span className="seg-text">Inline</span></button>
         </div>
         <button className={`icon-btn ${s.collapse ? "on" : ""}`} title={s.collapse ? "Show unchanged lines" : "Fold unchanged lines"} aria-pressed={s.collapse} onClick={() => patchDiff(doc.id, (cur) => ({ collapse: !cur.collapse }))}><ChevronsDownUp size={15} /></button>
         <button className="icon-btn" title="Swap sides" aria-label="Swap sides" disabled={dirty} onClick={() => swapDiff(doc.id)}><ArrowLeftRight size={15} /></button>
@@ -314,14 +314,15 @@ export function DiffView({ doc, visible }: { doc: Doc; visible: boolean }) {
           <>
             <span className="diff-sep" />
             {(s.git.staged
-              ? [{ action: "unstage" as const, label: "Unstage Selected Lines", title: "Unstage the selected lines of the right side (Ctrl+K N)" }]
+              ? [{ action: "unstage" as const, label: "Unstage Selected Lines", short: "Unstage Lines", title: "Unstage the selected lines of the right side (Ctrl+K N)" }]
               : [
-                  { action: "stage" as const, label: "Stage Selected Lines", title: "Stage the selected lines of the right side (Ctrl+K L)" },
-                  { action: "discard" as const, label: "Discard Selected Lines", title: "Discard the selected lines of the right side… (asks first)" },
+                  { action: "stage" as const, label: "Stage Selected Lines", short: "Stage Lines", title: "Stage the selected lines of the right side (Ctrl+K L)" },
+                  { action: "discard" as const, label: "Discard Selected Lines", short: "Discard Lines", title: "Discard the selected lines of the right side… (asks first)" },
                 ]
             ).map((b) => (
-              <button key={b.action} className={`btn small diff-lines-btn${b.action === "discard" ? " btn-danger" : ""}`} title={b.title} disabled={busy || !lines} onMouseDown={(e) => e.preventDefault()} onClick={() => void applySelection(doc.id, b.action)}>
-                {b.label}
+              <button key={b.action} aria-label={b.label} className={`btn small diff-lines-btn${b.action === "discard" ? " btn-danger" : ""}`} title={b.title} disabled={busy || !lines} onMouseDown={(e) => e.preventDefault()} onClick={() => void applySelection(doc.id, b.action)}>
+                <span className="long">{b.label}</span>
+                <span className="short">{b.short}</span>
               </button>
             ))}
           </>

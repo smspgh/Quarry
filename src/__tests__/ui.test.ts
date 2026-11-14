@@ -35,6 +35,19 @@ describe("submenuPlace (UI-003.9, UI-003.10)", () => {
   });
 });
 
+describe("the Compare toolbar when narrow (DIFF-009.8)", () => {
+  const css = readFileSync("src/styles/app.css", "utf8");
+  it("keeps the controls their size and only lets the file labels shrink, to 140 px", () => {
+    expect(css).toMatch(/\.diff-toolbar > :not\(\.diff-sides\) \{\s*flex: none;/);
+    expect(css).toMatch(/\.diff-sides \{[^}]*min-width: 140px/);
+  });
+  it("shortens the words below 1000 px and wraps below 680 px", () => {
+    expect(css).toMatch(/\.diff-view \{\s*container-type: inline-size;\s*container-name: diff;/);
+    expect(css).toMatch(/@container diff \(max-width: 1000px\) \{\s*\.diff-toolbar \.segmented \.seg-text \{\s*display: none;/);
+    expect(css).toMatch(/@container diff \(max-width: 680px\) \{\s*\.diff-toolbar \{\s*flex-wrap: wrap;/);
+  });
+});
+
 describe("the menu layout (UI-003.10)", () => {
   const css = readFileSync("src/styles/app.css", "utf8");
   it("lets a top-level menu scroll and keeps transforms off menus (they would anchor the fixed submenus)", () => {
