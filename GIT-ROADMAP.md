@@ -12,7 +12,7 @@ Owner decisions, 2026-11-13: build items 0-9, item 10 gets a spec only; one loca
 | --- | --- | --- | --- | --- | --- |
 | 0 | Verification debt + `git.graph` in the palette | `git-graph.md` (GRAPH-019); live checks of CONFLICT-008 / 012 / 013 | indexed; GRAPH-019 is `draft` | palette fix yes (5eacf9b; 465 Vitest tests pass); nothing else to build | no: the menu item (GRAPH-019.4) and the three verification-debt checks wait for the live pass |
 | 1 | Hunk and line staging | `git-staging.md` (STAGE-001..009) | indexed; 2 owner questions (partial staging of removed lines, silent save on Stage); to check in review: its Ctrl+K chord shortcuts | no | no |
-| 2 | Stash | `git-stash.md` (STASH-001..011) | indexed; 2 owner questions (no Abort for a conflicted pop, untracked files included by default) | no | no |
+| 2 | Stash | `git-stash.md` (STASH-001..011) | indexed; 2 owner questions (no Abort for a conflicted pop, untracked files included by default) | yes (b8660bf; on main: 610 Vitest + 132 Rust tests pass; stories `draft`) | no: 13 live checks listed by the build agent |
 | 3 | Start a merge or a rebase | `git-merge-rebase.md` (MERGE-001..009; 009 = Force Push, shared with item 6) | indexed; open default: merge is blocked on a dirty tree | yes (8184e5c; on main: 542 Vitest + 124 Rust tests pass; stories `draft`) | no: 11 live checks listed by the build agent |
 | 4 | Branch and tag housekeeping | `git-branches.md` (BRANCH-001..009) | indexed; 3 optional owner questions (remote tag delete, which remote when several, ask before deleting a merged branch) | no | no |
 | 5 | Compare commits | `git-compare-commits.md` (COMMITCMP-001..006) | indexed; 2 owner questions (two-dot vs three-dot for branches, untracked files vs working tree) | no | no |
@@ -26,7 +26,7 @@ Spec phase, 2026-11-13: all eleven items have stories (80 new, all `planned`), i
 
 Build phase: the specs were committed locally as 021d25f. Wave 1 (items 0, 1, 2, 3) started 2026-11-13, one agent per item in its own worktree; the Built column changes when an item is merged into local main with tsc, Vitest and Rust tests passing.
 
-Paused 2026-11-13 (usage limit reached). State: items 0 and 3 are merged on local main. Item 2 (stash) is finished and tested on branch `worktree-agent-a1b65a3dd8da77409` (commit 4ce2342) but NOT merged: cherry-picking it onto main conflicts in 12 files with item 3 (keep both sides; one `finishFirst`), the attempt was aborted, main is clean. Item 1 (hunk staging) is half built and uncommitted in the worktree `.claude/worktrees/agent-a0a1fc270e9a5b0bd` (Rust and TS parts in progress; commands, menu, CSS, tests, specs and docs still open). Waves 2-4 and the live pass have not started.
+Resumed 2026-11-13: item 2 (stash) merged as b8660bf (on main: 610 Vitest + 132 Rust tests pass). Item 1 is being finished in its worktree; wave 2 (items 4, 5, 9) started on top of b8660bf.
 
 Build order (agents work in parallel inside a wave, each in its own worktree; waves are merged before the next starts because they share `GraphView.tsx`, `git.ts` and `git.rs`): wave 1 = items 0, 1, 2, 3; wave 2 = 4, 5, 9; wave 3 = 6, 7; wave 4 = 8 (audits every action, so it goes last); then the live pass.
 
