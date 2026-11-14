@@ -32,6 +32,10 @@ import { loadRefInfo } from "../lib/git";
 import { REF_COMMANDS, type RefMenuEntry } from "../lib/gitRefs";
 // Claude git helpers: the Summarise entries of the commit menu (specs/git-claude.md).
 import { SummariseItems } from "./GraphSummarise";
+// Graph polish (GRAPH-015..018): the uncommitted-changes row, results divider, lane scrolling, date order.
+import { clampHitsHeight, clampLaneScroll, DATE_ORDER_OFF, DATE_ORDER_WHY, dateOrderAllowed, isUncommitted, LIST_MIN, revealLane, rowOffset, takePage, UNCOMMITTED, uncommittedLineEnd, withoutUncommitted, withUncommitted } from "../lib/gitGraph";
+import { GraphLaneScroll } from "./GraphLaneScroll";
+import { GraphUncommitted } from "./GraphUncommitted";
 
 const PAGE = 300;
 /** A page slower than this means git is walking the whole history for it. */
@@ -39,17 +43,23 @@ const SLOW_PAGE_MS = 400;
 const MAX_PAGE = 4800;
 const ROW = 26;
 const LANE = 12;
-/** Lanes the graph column grows to; the rare lanes beyond share the last one. */
+/** Lanes the graph column shows at once; a wider graph scrolls sideways in it (GRAPH-017). */
 const MAX_LANES = 16;
 const LANE_COLORS = 8;
 
-const x = (lane: number) => Math.min(lane, MAX_LANES - 1) * LANE + LANE / 2;
+/** Every lane has its own place, however many there are. */
+const x = (lane: number) => lane * LANE + LANE / 2;
 
-/** The lines and the dot of one row. */
-function RowGraph({ row, head, width, stash = false }: { row: GraphRow; head: boolean; width: number; stash?: boolean }) {
+/**
+ * The lines and the dot of one row, drawn at the graph's full `width`. `uncommitted`: "row" = the
+ * uncommitted-changes row itself (hollow dot, dashed line down); "line" = its dashed line passes
+ * this row in lane 0, or ends at this commit (GRAPH-015).
+ */
+function RowGraph({ row, head, width, stash = false, uncommitted }: { row: GraphRow; head: boolean; width: number; stash?: boolean; uncommitted?: "row" | "line" }) {
   const mid = ROW / 2;
   const cx = x(row.col);
-  const cls = (lane: number) => `gl gl-${lane % LANE_COLORS}`;
+  const color = (lane: number) => `gl gl-${lane % LANE_COLORS}`;
+  const cls = (lane: number) => `${color(lane)}${uncommitted === "line" && lane === 0 ? " dashed" : ""}`;
   return (
     <svg className="graph-lanes" width={width} height={ROW} aria-hidden>
       {row.through.map((i) => <line key={`t${i}`} className={cls(i)} x1={x(i)} y1={0} x2={x(i)} y2={ROW} />)}
@@ -57,21 +67,21 @@ function RowGraph({ row, head, width, stash = false }: { row: GraphRow; head: bo
         ? <line key={`i${i}`} className={cls(i)} x1={cx} y1={0} x2={cx} y2={mid} />
         : <path key={`i${i}`} className={cls(i)} d={`M ${x(i)} 0 Q ${x(i)} ${mid} ${cx} ${mid}`} />))}
       {row.cut.map((i) => (
-        <g key={`c${i}`} className={cls(i)}>
+        <g key={`c${i}`} className={color(i)}>
           <line x1={x(i)} y1={0} x2={x(i)} y2={mid - 3} />
           <path className="ga" d={`M ${x(i) - 3} ${mid - 4} L ${x(i)} ${mid + 1} L ${x(i) + 3} ${mid - 4}`} />
         </g>
       ))}
       {row.from.length > 0 && (
-        <g className={cls(row.col)}>
+        <g className={color(row.col)}>
           <path className="ga" d={`M ${cx + 4} ${mid - 9} L ${cx + 7} ${mid - 13} L ${cx + 10} ${mid - 9}`} />
           <path d={`M ${cx + 7} ${mid - 12} Q ${cx + 7} ${mid} ${cx} ${mid}`} />
         </g>
       )}
       {row.out.map((j) => (j === row.col
-        ? <line key={`o${j}`} className={cls(j)} x1={cx} y1={mid} x2={cx} y2={ROW} />
-        : <path key={`o${j}`} className={cls(j)} d={`M ${cx} ${mid} Q ${x(j)} ${mid} ${x(j)} ${ROW}`} />))}
-      <circle className={`gn gl-${row.col % LANE_COLORS} ${head ? "head" : ""} ${stash ? "stash" : ""}`} cx={cx} cy={mid} r={head ? 4.5 : 3.5} />
+        ? <line key={`o${j}`} className={`${color(j)}${uncommitted === "row" ? " dashed" : ""}`} x1={cx} y1={mid} x2={cx} y2={ROW} />
+        : <path key={`o${j}`} className={color(j)} d={`M ${cx} ${mid} Q ${x(j)} ${mid} ${x(j)} ${ROW}`} />))}
+      <circle className={`gn gl-${row.col % LANE_COLORS} ${head ? "head" : ""} ${stash ? "stash" : ""} ${uncommitted === "row" ? "uncommitted" : ""}`} cx={cx} cy={mid} r={head ? 4.5 : 3.5} />
     </svg>
   );
 }
@@ -104,6 +114,9 @@ interface Naming {
   /** "rename": the branch being renamed (BRANCH-004). */
   branch?: string;
 }
+
+/** The uncommitted-changes row (GRAPH-015): laid out as one more commit on top of the current one, but never a commit. */
+const uncommittedRow = (head: string | null): GitGraphCommit => ({ sha: UNCOMMITTED, short: "", parents: head ? [head] : [], author: "", email: "", time: 0, refs: [], summary: "Uncommitted changes", stash: false });
 
 /**
  * Commit graph tab: every commit of the branch (or of all branches) as a lane graph with its
@@ -163,6 +176,43 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   const inFlight = useRef(false);
   /** Stash rows among the loaded rows. */
   const stashRows = useRef(0);
+  // ----- Graph polish (GRAPH-015..018): state -----
+  /** The rows as last placed: `load` and the uncommitted-row sync build on it (the state lags a render behind). */
+  const loaded = useRef(data);
+  /** A first page has been placed since this tab opened. */
+  const placed = useRef(false);
+  /** There are uncommitted changes: they are the graph's first row (GRAPH-015). */
+  const dirty = (repo?.files.length ?? 0) > 0;
+  const dirtyRef = useRef(dirty);
+  dirtyRef.current = dirty;
+  const hasHead = useRef(false);
+  hasHead.current = !!repo?.head;
+  /** Date order (GRAPH-018): the user's choice; `countedFor` = the scope (`all`) whose first page has arrived. */
+  const [byDate, setByDate] = useState(false);
+  const byDateRef = useRef(byDate);
+  byDateRef.current = byDate;
+  const [countedFor, setCountedFor] = useState<boolean | null>(null);
+  /** The commit to bring back into view once the graph is loaded again in the other order. */
+  const orderKeep = useRef<string | null>(null);
+  /** Sideways scroll of the lane column, in lanes (GRAPH-017). */
+  const [laneScroll, setLaneScroll] = useState(0);
+  const wideRef = useRef(1);
+  wideRef.current = data.wide;
+  /** Height of the whole-history results once the divider under them was dragged (GRAPH-016). */
+  const [hitsH, setHitsH] = useState<number | null>(null);
+  const hitsRef = useRef<HTMLDivElement>(null);
+  /** The current commit's full id (the uncommitted row's parent): among `list`, else asked from git. */
+  const headOf = async (list: GitGraphCommit[]): Promise<string | null> => list.find((c) => c.refs.includes("HEAD"))?.sha ?? (hasHead.current ? ((await git.headSha(root).catch(() => null)) ?? null) : null);
+  /** Lay `list` out from the top (the uncommitted row came or went: every lane may shift). */
+  const place = (list: GitGraphCommit[]) => {
+    lanes.current = newGraphState();
+    indexOf.current = new Map(list.map((c, i) => [c.sha, i]));
+    const laid = layoutGraph(list, lanes.current);
+    const next = { commits: list, rows: laid, wide: laid.reduce((m, r) => Math.max(m, r.width), 1) };
+    loaded.current = next;
+    setData(next);
+  };
+  // ----- end -----
 
   useEffect(() => editor.registerFocus(doc.id, () => listRef.current?.focus()), [doc.id]);
   useEffect(() => {
@@ -178,11 +228,27 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
     setError(null);
     try {
       const size = pageSize.current;
-      // Stash rows are extra rows of a page: git's paging counts commits only.
-      const skip = reset ? 0 : indexOf.current.size - stashRows.current;
+      // Stash rows (and the uncommitted row) are extra rows of a page: git's paging counts commits only.
+      const skip = reset ? 0 : indexOf.current.size - stashRows.current - (indexOf.current.has(UNCOMMITTED) ? 1 : 0);
       const started = performance.now();
-      const page = await git.graph(root, allRef.current, skip, size);
+      // Graph polish: the first page asks for one commit more than it shows, which tells "exactly
+      // 300 commits" from "more" (GRAPH-018.6); `order` is the Date order toggle.
+      const date = byDateRef.current;
+      const got = await git.graph(root, allRef.current, skip, reset ? size + 1 : size, date ? "date" : null);
       const took = performance.now() - started;
+      if (gen !== generation.current) return true;
+      const probe = reset ? takePage(got, size) : null;
+      const page = probe ? probe.rows : got;
+      // Date order is only for a history that fits one page: a larger one goes back to branch
+      // order (turning the toggle off makes the reload effect run again).
+      if (probe?.more && date) {
+        byDateRef.current = false;
+        setByDate(false);
+        toast(DATE_ORDER_OFF, "info", 5000);
+        return true;
+      }
+      // The uncommitted row's parent is the current commit, which need not be on this page.
+      const head = reset && dirtyRef.current ? await headOf(page) : null;
       if (gen !== generation.current) return true;
       // Without git's commit-graph file every page costs a walk of the whole history: ask for
       // bigger pages then, so scrolling pays that cost less often.
@@ -195,14 +261,29 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
         indexOf.current = new Map();
         stashRows.current = 0;
       }
-      const fresh = page.filter((c) => !indexOf.current.has(c.sha));
+      const real = page.filter((c) => !indexOf.current.has(c.sha));
+      // Uncommitted changes are the first row of the first page (GRAPH-015).
+      const fresh = reset && dirtyRef.current ? withUncommitted(real, uncommittedRow(head)) : real;
       stashRows.current += fresh.filter((c) => c.stash).length;
-      const full = page.filter((c) => !c.stash).length === size;
+      const full = probe ? probe.more : page.filter((c) => !c.stash).length === size;
       const base = indexOf.current.size;
       fresh.forEach((c, i) => indexOf.current.set(c.sha, base + i));
       const laid = layoutGraph(fresh, lanes.current);
       const wide = laid.reduce((m, r) => Math.max(m, r.width), 1);
-      setData((cur) => (reset ? { commits: fresh, rows: laid, wide } : { commits: [...cur.commits, ...fresh], rows: [...cur.rows, ...laid], wide: Math.max(cur.wide, wide) }));
+      const cur = loaded.current;
+      const next = reset ? { commits: fresh, rows: laid, wide } : { commits: [...cur.commits, ...fresh], rows: [...cur.rows, ...laid], wide: Math.max(cur.wide, wide) };
+      loaded.current = next;
+      setData(next);
+      if (reset) {
+        placed.current = true;
+        setCountedFor(allRef.current);
+        // Date order was switched: the selected commit has moved, bring it back into view (GRAPH-018.9).
+        if (orderKeep.current) {
+          revealWanted.current = orderKeep.current;
+          orderKeep.current = null;
+          setRevealTick((t) => t + 1);
+        }
+      }
       setMore(full);
       return full;
     } catch (e) {
@@ -224,11 +305,58 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
     if (!visible) return;
     inFlight.current = false;
     void load(true);
-  }, [visible, all, stamp, load]);
+  }, [visible, all, stamp, load, byDate]);
+
+  // ----- Graph polish: the uncommitted row follows the working folder (GRAPH-015.7 / .8) -----
+  // Its count is read from the status on every render; only its coming and going touches the
+  // loaded rows (every lane may shift by one), and the history is not read again for it.
+  useEffect(() => {
+    if (!placed.current || (rowOffset(loaded.current.commits) === 1) === dirty) return;
+    const gen = generation.current;
+    void (async () => {
+      const head = dirty ? await headOf(withoutUncommitted(loaded.current.commits)) : null;
+      const now = loaded.current.commits;
+      const want = dirtyRef.current;
+      if (gen !== generation.current || want !== dirty || (rowOffset(now) === 1) === want) return;
+      place(want ? withUncommitted(now, uncommittedRow(head)) : withoutUncommitted(now));
+      // The rows moved by one: what was on screen stays where it was.
+      const el = listRef.current;
+      if (el && el.scrollTop > 0) el.scrollTop = Math.max(0, el.scrollTop + (want ? ROW : -ROW));
+    })();
+  }, [dirty]);
+  // The row is gone (everything committed or discarded): so is its details pane.
+  useEffect(() => {
+    if (isUncommitted(selected) && !dirty) setSelected(null);
+  }, [dirty, selected]);
+  // Switching between Current branch and All branches starts the lane column at lane 1 again (GRAPH-017.9).
+  useEffect(() => setLaneScroll(0), [all]);
+  // Shift+wheel over the lane column scrolls the lanes sideways, never the list (GRAPH-017.3).
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const wheel = (e: WheelEvent) => {
+      if (!e.shiftKey || wideRef.current <= MAX_LANES || !(e.target as Element).closest?.(".graph-lane-cell")) return;
+      e.preventDefault();
+      const d = e.deltaX || e.deltaY;
+      setLaneScroll((cur) => clampLaneScroll(clampLaneScroll(cur, MAX_LANES, wideRef.current) + Math.sign(d) * Math.max(1, Math.abs(d) / 40), MAX_LANES, wideRef.current));
+    };
+    el.addEventListener("wheel", wheel, { passive: false });
+    return () => el.removeEventListener("wheel", wheel);
+  }, []);
+  /** Rows above the first commit (the uncommitted row), and the commits loaded without it. */
+  const extra = rowOffset(commits);
+  const total = commits.length - extra;
+  /** Where the uncommitted row's dashed line ends (see `uncommittedLineEnd`). */
+  const lineEnd = useMemo(() => uncommittedLineEnd(commits), [commits]);
+  const orderOk = countedFor === all && dateOrderAllowed(total - stashRows.current, more);
+  // ----- end -----
 
   const lanesWide = Math.min(MAX_LANES, data.wide);
   const graphW = lanesWide * LANE + 6;
-  const matches = useMemo(() => (query.trim() ? commits.map((c) => commitMatches(c.stash ? { ...c, summary: stashTitle(c.summary).title } : c, query)) : null), [commits, query]);
+  // Graph polish (GRAPH-017): the rows are drawn `fullW` wide and shifted by `lanePx` inside the `graphW` column.
+  const fullW = data.wide * LANE + 6;
+  const lanePx = clampLaneScroll(laneScroll, MAX_LANES, data.wide) * LANE;
+  const matches = useMemo(() => (query.trim() ? commits.map((c) => !isUncommitted(c.sha) && commitMatches(c.stash ? { ...c, summary: stashTitle(c.summary).title } : c, query)) : null), [commits, query]);
   const matchCount = matches ? matches.filter(Boolean).length : 0;
 
   // Only the rows on screen are in the DOM.
@@ -250,7 +378,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   // Details of the selected commit.
   useEffect(() => {
     setDetail(null);
-    if (!selected) return;
+    if (!selected || isUncommitted(selected)) return; // the uncommitted row is not a commit: its pane reads the status
     let live = true;
     // A stash: the files it holds (untracked ones included) instead of a commit's changes.
     const at = indexOf.current.get(selected);
@@ -260,6 +388,11 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   }, [root, selected]);
 
   const index = selected ? (indexOf.current.get(selected) ?? -1) : -1;
+  // Graph polish (GRAPH-017.5): selecting a commit scrolls the lane column just far enough to show its dot.
+  useEffect(() => {
+    const col = index >= 0 ? rows[index]?.col : undefined;
+    if (col !== undefined && data.wide > MAX_LANES) setLaneScroll((cur) => revealLane(clampLaneScroll(cur, MAX_LANES, data.wide), col, MAX_LANES, data.wide));
+  }, [selected, index]);
   const reveal = (i: number) => {
     const el = listRef.current;
     if (!el) return;
@@ -322,7 +455,8 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
     }
   };
   const pickHit = (c: GitGraphCommit, el?: HTMLElement) => {
-    setHitsOpen(false);
+    // A dragged height is the user's choice: the list only shrinks while it has its default height (GRAPH-016.4).
+    if (hitsH === null) setHitsOpen(false);
     // Keep the picked result in view once the list has shrunk.
     if (el) requestAnimationFrame(() => el.scrollIntoView({ block: "nearest" }));
     setPicked(c);
@@ -472,13 +606,13 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   };
   /** Ctrl+click on a commit row. A stash cannot be compared (nor compared with): a plain click then. */
   const ctrlClick = (c: GitGraphCommit) => {
-    if (c.stash || !selected || rowOf(selected)?.stash) return setSelected(c.sha);
+    if (c.stash || !selected || rowOf(selected)?.stash || isUncommitted(c.sha) || isUncommitted(selected)) return setSelected(c.sha); // nor can the uncommitted row (GRAPH-015.16)
     const next = compareClick({ first: selected, second: compare }, c.sha);
     comparePair(next.first, next.second);
   };
   /** Call before a right-click moves the selection to `c`. */
   const noteMenuOther = (c: GitGraphCommit) => {
-    const other = selected && selected !== c.sha && !c.stash ? rowOf(selected) : null;
+    const other = selected && selected !== c.sha && !c.stash && !isUncommitted(selected) ? rowOf(selected) : null;
     setMenuOther(other && !other.stash ? other : null);
   };
   // A comparison asked for from outside (Compare with Branch…): its commits need not be loaded.
@@ -505,8 +639,35 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
     window.addEventListener("mousemove", move);
     window.addEventListener("mouseup", up);
   };
+  // Graph polish (GRAPH-016): the divider under the whole-history results. The height is kept for
+  // this tab; the limits are `clampHitsHeight`'s, measured when the drag starts.
+  const startHitsResize = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const el = hitsRef.current;
+    const listEl = listRef.current;
+    if (!el || !listEl) return;
+    const startY = e.clientY;
+    const startH = el.offsetHeight;
+    const content = el.scrollHeight;
+    const available = startH + listEl.clientHeight - LIST_MIN;
+    let moved = false;
+    const move = (ev: MouseEvent) => {
+      const h = clampHitsHeight(startH + ev.clientY - startY, content, available);
+      // A drag that changes nothing (2 results cannot grow) is not remembered as a chosen height.
+      if (h !== startH) moved = true;
+      if (!moved) return;
+      setHitsH(h);
+      setHitsOpen(true);
+    };
+    const up = () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+    };
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+  };
 
-  const conflicts = repo?.files.filter((f) => f.conflicted).length ?? 0;
+  const conflicts =repo?.files.filter((f) => f.conflicted).length ?? 0;
   /** Open Source Control and land on the first file that needs attention (a conflict, else a change). */
   const openSourceControl = () => {
     showPanel("git");
@@ -533,6 +694,21 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
           <button className={all ? "" : "on"} aria-pressed={!all} title={`${branch ?? "The current commit"} and the branch it tracks on the remote: your commits to push and the ones to pull`} onClick={() => setAll(false)}>Current branch</button>
           <button className={all ? "on" : ""} aria-pressed={all} title="Every branch and tag, local and remote" onClick={() => setAll(true)}>All branches</button>
         </div>
+        {/* Graph polish (GRAPH-018): date order, for a history that fits one page. */}
+        <div className="segmented graph-order" title={orderOk ? undefined : countedFor === all ? DATE_ORDER_WHY : "Available once the commits are counted"}>
+          <button
+            className={byDate && orderOk ? "on" : ""}
+            aria-pressed={byDate && orderOk}
+            disabled={!orderOk}
+            title={orderOk ? "List the commits newest first across branches (by the date in the Date column) instead of branch by branch" : countedFor === all ? DATE_ORDER_WHY : "Available once the commits are counted"}
+            onClick={() => {
+              orderKeep.current = selected;
+              setByDate(!byDate);
+            }}
+          >
+            Date order
+          </button>
+        </div>
         <span className="graph-search">
           <Search size={13} className="muted" />
           <input
@@ -555,18 +731,18 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
               e.stopPropagation();
             }}
           />
-          {matches && <span className="muted graph-count" title="Matches among the commits loaded so far">{matchCount} in {commits.length} loaded</span>}
+          {matches && <span className="muted graph-count" title="Matches among the commits loaded so far">{matchCount} in {total} loaded</span>}
           {matches && <button className="icon-btn xs" title="Previous match (Shift+Enter)" disabled={!matchCount} onClick={() => nextMatch(-1)}><ArrowUp size={13} /></button>}
           {matches && <button className="icon-btn xs" title="Next match (Enter)" disabled={!matchCount} onClick={() => nextMatch(1)}><ArrowDown size={13} /></button>}
           {matches && more && (
-            <button className="btn small" disabled={searching} title={`Only ${commits.length} commits are loaded so far. Search every commit ${all ? "of every branch" : "of this branch"} with git (Ctrl+Enter; Enter when nothing loaded matches)`} onClick={() => void searchAll()}>
+            <button className="btn small" disabled={searching} title={`Only ${total} commits are loaded so far. Search every commit ${all ? "of every branch" : "of this branch"} with git (Ctrl+Enter; Enter when nothing loaded matches)`} onClick={() => void searchAll()}>
               {searching ? "Searching…" : "Search All History"}
             </button>
           )}
         </span>
         <span className="grow" />
         {(busy || loading || seeking) && <span className="muted row graph-busy"><Loader2 size={13} className="spin" /> {busy ?? (seeking ? "Loading back to that commit…" : "Loading…")}</span>}
-        <span className="muted graph-count">{commits.length}{more ? "+" : ""} commits</span>
+        <span className="muted graph-count">{total}{more ? "+" : ""} commits</span>
         <button className="icon-btn" title="Fetch from all remotes" disabled={!!busy} onClick={() => void remote(root, "fetch").then(() => load(true))}><CloudDownload size={15} /></button>
         <button className="icon-btn" title="Reload the graph" onClick={() => void load(true)}><RefreshCw size={15} /></button>
       </div>
@@ -589,13 +765,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
           {!gitShown && <button className="btn small" onClick={openSourceControl}>Open Source Control</button>}
         </div>
       )}
-      {repo && !repo.operation && conflicts === 0 && repo.files.length > 0 && (
-        <div className="graph-strip" role="status">
-          <CircleDot size={13} className="muted" />
-          <span className="grow">{repo.files.length} uncommitted change{repo.files.length === 1 ? "" : "s"}{repo.branch ? ` on ${repo.branch}` : ""}: not in the graph until committed.</span>
-          {!gitShown && <button className="btn small" onClick={openSourceControl}>Open Source Control</button>}
-        </div>
-      )}
+      {/* Uncommitted changes are the first row of the list, not a strip (GRAPH-015). */}
       {slowMs > 0 && indexed === false && !hideSpeedUp && (
         <div className="graph-strip" role="status">
           <Gauge size={14} className="muted" />
@@ -626,7 +796,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
         </div>
       )}
       {hits && (
-        <div className={`graph-hits ${hitsOpen ? "" : "compact"}`} role="listbox" aria-label="Search results in the whole history">
+        <div ref={hitsRef} className={`graph-hits ${hitsOpen ? "" : "compact"} ${hitsH !== null && hitsOpen ? "sized" : ""}`} style={hitsH !== null && hitsOpen ? { maxHeight: hitsH } : undefined} role="listbox" aria-label="Search results in the whole history">
           <div className="graph-hits-head">
             <span className="grow">{hits.list.length === 0 ? `No commit ${all ? "in any branch" : "on this branch"} matches "${hits.query}"${all ? "." : ". Try All branches."}` : `${hits.list.length}${hits.list.length === 200 ? "+" : ""} commit${hits.list.length === 1 ? "" : "s"} in the whole history match "${hits.query}" (message, author, branch / tag or id)`}</span>
             {hits.list.length > 3 && (
@@ -644,6 +814,8 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
           ))}
         </div>
       )}
+      {/* Graph polish (GRAPH-016): drag the edge between the results and the graph; double-click for the default height. */}
+      {hits && hits.list.length > 0 && <div className="graph-resizer graph-hits-resizer" title="Drag to resize the results; double-click for the default height" onMouseDown={startHitsResize} onDoubleClick={() => setHitsH(null)} />}
       {naming && (
         <div className="graph-naming">
           {naming.action === "rename" ? <span>Rename branch <span className="mono">{naming.branch}</span> to:</span> : <span>{naming.action === "tag" ? "New tag" : "New branch"} at <span className="mono">{naming.commit.short}</span>:</span>}
@@ -672,10 +844,13 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
         <span className="graph-c-author">Author</span>
         <span className="graph-c-date">Date</span>
         <span className="graph-c-sha">Id</span>
+        {/* Graph polish (GRAPH-017): a graph wider than 16 lanes scrolls sideways under the column heading. */}
+        {data.wide > MAX_LANES && <GraphLaneScroll scroll={lanePx} width={graphW} total={fullW} onScroll={(px) => setLaneScroll(px / LANE)} />}
       </div>
       <div
         ref={listRef}
-        className="graph-list"
+        className={`graph-list ${lanePx > 0 ? "lanes-left" : ""} ${lanePx < fullW - graphW ? "lanes-right" : ""}`}
+        style={{ "--lane-scroll": `${lanePx}px` } as React.CSSProperties}
         role="listbox"
         aria-label="Commits"
         tabIndex={0}
@@ -683,7 +858,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
         onKeyDown={onKeyDown}
       >
         {error && <div className="panel-note">Could not read the history: {error}</div>}
-        {!error && commits.length === 0 && <div className="panel-note">{loading ? "Loading…" : "No commits yet."}</div>}
+        {!error && total === 0 && !extra && <div className="panel-note">{loading ? "Loading…" : "No commits yet."}</div>}
         <div style={{ height: commits.length * ROW, position: "relative" }}>
           {commits.slice(first, last).map((c, k) => {
             const i = first + k;
@@ -691,33 +866,40 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
             const labels = refLabels(c.refs);
             const isHead = c.refs.includes("HEAD");
             const dim = matches ? !matches[i] : false;
+            // Graph polish (GRAPH-015): the uncommitted row (not a commit: no menu, empty columns) and its dashed line in lane 0.
+            const un = isUncommitted(c.sha);
+            const unLine = un ? "row" : extra && lineEnd !== 0 && (lineEnd < 0 || i <= lineEnd) ? "line" : undefined;
             return (
               <div
                 key={c.sha}
                 role="option"
                 aria-selected={c.sha === selected || c.sha === compare}
-                className={`graph-row ${c.sha === selected ? "selected" : ""} ${dim ? "dim" : ""} ${isHead ? "head" : ""} ${c.stash ? "stash" : ""} ${c.sha === compare ? "selected compare" : ""}`}
+                className={`graph-row ${c.sha === selected ? "selected" : ""} ${dim ? "dim" : ""} ${isHead ? "head" : ""} ${c.stash ? "stash" : ""} ${c.sha === compare ? "selected compare" : ""} ${un ? "uncommitted" : ""}`}
                 style={{ top: i * ROW, height: ROW }}
                 onClick={(e) => { if (e.ctrlKey) ctrlClick(c); else setSelected(c.sha); listRef.current?.focus(); }}
                 onContextMenu={(e) => {
                   e.preventDefault();
+                  if (un) return setSelected(c.sha); // selected, but nothing to offer: it is not a commit (GRAPH-015.9)
                   noteMenuOther(c);
                   setSelected(c.sha);
                   setMenu({ x: e.clientX, y: e.clientY, commit: c });
                 }}
               >
-                <span className="graph-lane-cell" style={{ width: graphW }}>{row && <RowGraph row={row} head={isHead} width={graphW} stash={c.stash} />}</span>
+                <span className="graph-lane-cell" style={{ width: graphW }}>{row && <RowGraph row={row} head={isHead} width={fullW} stash={c.stash} uncommitted={unLine} />}</span>
                 <span className="graph-c-msg">
                   {labels.map((l) => <RefBadge key={l.full} label={l} open={refMenu?.label.full === l.full && refMenu.commit.sha === c.sha} onContextMenu={(e) => onRefContext(e, c, l)} />)}
-                  <span className="truncate" title={c.summary}>{c.stash ? stashTitle(c.summary).title : c.summary}</span>
+                  {un && <CircleDot size={12} className="muted" />}
+                  <span className="truncate" title={un ? "Work that is not committed yet, on the commit it sits on. Select it to see the changed files." : c.summary}>{un ? `Uncommitted changes (${repo?.files.length ?? 0})` : c.stash ? stashTitle(c.summary).title : c.summary}</span>
                 </span>
-                <span className="graph-c-author truncate" title={`${c.author} <${c.email}>`}>{c.author}</span>
-                <span className="graph-c-date truncate" title={new Date(c.time * 1000).toLocaleString()}>{relativeTime(c.time)}</span>
-                <span className="graph-c-sha mono" title={c.sha}>{c.short}</span>
+                <span className="graph-c-author truncate" title={un ? undefined : `${c.author} <${c.email}>`}>{c.author}</span>
+                <span className="graph-c-date truncate" title={un ? undefined : new Date(c.time * 1000).toLocaleString()}>{un ? "" : relativeTime(c.time)}</span>
+                <span className="graph-c-sha mono" title={un ? undefined : c.sha}>{c.short}</span>
               </div>
             );
           })}
         </div>
+        {/* Before the first commit the uncommitted row stands alone (GRAPH-015.14). */}
+        {!error && total === 0 && extra > 0 && !loading && <div className="panel-note">No commits yet.</div>}
       </div>
 
       {/* Two sides set: the comparison pane takes the details pane's place (same resizer and height). */}
@@ -740,7 +922,14 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
           />
         </>
       )}
-      {sel && !compare && (
+      {/* Graph polish (GRAPH-015): the uncommitted row's pane lists the changed files instead of a commit's details. */}
+      {isUncommitted(selected) && !compare && repo && dirty && (
+        <>
+          <div className="graph-resizer" onMouseDown={startResize} />
+          <GraphUncommitted repo={repo} base={commits[0]?.parents[0] ?? null} height={detailH} gitShown={gitShown} onBase={(sha) => void goTo(sha)} onOpenSourceControl={openSourceControl} onClose={() => setSelected(null)} />
+        </>
+      )}
+      {sel && !compare && !isUncommitted(sel.sha) && (
         <>
           <div className="graph-resizer" onMouseDown={startResize} />
           <div className="graph-detail selectable" style={{ height: detailH }}>

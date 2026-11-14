@@ -223,7 +223,9 @@ describe("GraphView stash rows", () => {
 
     await act(async () => useGit.setState({ repos: { [ROOT.toLowerCase()]: status({ operation: "rebase", files: [conflict("a.ts")] }) as never } }));
     await flush();
-    await fire.contextMenu(rows()[1]);
+    // The conflicted file is uncommitted work: its row is now the first one, the stash the third.
+    expect(rows()[0].textContent).toContain("Uncommitted changes (1)");
+    await fire.contextMenu(rows()[2]);
     expect(menuItems().map((b) => [b.disabled, b.title])).toEqual([[true, "Finish or abort the rebase first"], [true, "Finish or abort the rebase first"], [false, ""], [false, ""]]);
     await fire.keyDown(window, "Escape");
   });
@@ -256,10 +258,12 @@ describe("GraphView stash rows", () => {
 
   it("the next page skips by commits, not by rows", async () => {
     const id = (i: number) => `${1000 + i}`.padEnd(40, "0");
-    const many = Array.from({ length: 300 }, (_, i) => commit(1, { sha: id(i), parents: [id(i + 1)], summary: `c${i}` }));
+    // The first page is asked for with one commit more than it shows (GRAPH-018.6): 301 came, so more exist.
+    const many = Array.from({ length: 301 }, (_, i) => commit(1, { sha: id(i), parents: [id(i + 1)], summary: `c${i}` }));
     answers.page = [STASH, ...many];
     await render(<GraphView doc={doc} visible />);
     await flush();
+    expect(calls.find((c) => c.cmd === "git_graph")?.args.limit).toBe(301);
     expect(document.querySelector(".graph-toolbar")?.textContent).toContain("301+ commits");
     answers.page = [];
     await act(async () => {

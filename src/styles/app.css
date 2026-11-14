@@ -5084,6 +5084,25 @@ select optgroup {
 .graph-hit { display: flex; align-items: center; gap: 10px; height: 24px; padding: 0 14px; cursor: default; min-width: 0; }
 .graph-hit:hover { background: var(--accent-hover-soft); }
 .graph-hit.selected { background: var(--accent-soft); }
+/* Graph polish (GRAPH-015..018). The uncommitted-changes row: hollow dot, dashed line down to the current commit. */
+.gl.dashed { stroke-dasharray: 3 3; }
+.gn.uncommitted.gl-0 { fill: var(--editor-bg); stroke: var(--panel-search); stroke-width: 1.5; }
+.graph-row.uncommitted .graph-c-msg > .truncate { font-style: italic; color: var(--text-2); }
+.graph-row.uncommitted .graph-c-msg > svg { flex: none; }
+.graph-uncommitted-title { font-weight: 600; color: var(--text); }
+.graph-uncommitted-meta { margin-top: 8px; }
+/* The divider under the Search All History results; a dragged height may still give way to the commit list. */
+.graph-hits.sized { flex: 0 1 auto; min-height: 54px; }
+.graph-hits-resizer { border-top: 0; }
+/* Lanes beyond the 16 shown: every row's lines are drawn full width and shifted together; faded edges say more is hidden. */
+.graph-lanes { transform: translateX(calc(-1 * var(--lane-scroll, 0px))); }
+.graph-list.lanes-left .graph-lane-cell { -webkit-mask-image: linear-gradient(to right, transparent, #000 18px); mask-image: linear-gradient(to right, transparent, #000 18px); }
+.graph-list.lanes-right .graph-lane-cell { -webkit-mask-image: linear-gradient(to left, transparent, #000 18px); mask-image: linear-gradient(to left, transparent, #000 18px); }
+.graph-list.lanes-left.lanes-right .graph-lane-cell { -webkit-mask-image: linear-gradient(to right, transparent, #000 18px, #000 calc(100% - 18px), transparent); mask-image: linear-gradient(to right, transparent, #000 18px, #000 calc(100% - 18px), transparent); }
+.graph-head { position: relative; }
+.graph-lane-scroll { position: absolute; left: 8px; bottom: 0; height: 12px; overflow-x: auto; overflow-y: hidden; }
+/* Date order toggle: off for histories that do not fit one page. */
+.graph-order button:disabled, .graph-order button:disabled:hover { opacity: 0.5; background: none; cursor: default; }
 
 /* ---------- Conflicts in the editor ---------- */
 .cm-conflict-current { background: var(--diff-add-bg); }

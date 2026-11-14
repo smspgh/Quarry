@@ -859,6 +859,7 @@ pub fn run() {
             git::git_resolve_side,
             git::git_abort,
             git::git_graph,
+            git::git_head_sha,
             git::git_graph_search,
             git::git_graph_indexed,
             git::git_graph_index,

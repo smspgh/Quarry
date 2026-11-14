@@ -524,7 +524,7 @@ Scenario: STASH-008.8 No way to drop every stash at once
   - `src/lib/gitStatus.ts` — `gitErrorText` must not be used for this case (its text says "press Abort")
   - `src/components/panels/GitPanel.tsx` — "Stash conflicts" badge beside the branch, in the place of the stopped-operation badge (the two never show together; no Abort / Skip buttons), Merge Changes rows' "Current" / "Incoming" tooltips, the Commit button's tooltip
   - `src/components/panels/StashSection.tsx` — "applied with conflicts" mark on the pending stash's row
-  - `src/components/GraphView.tsx` — warning strip for conflicted files with no operation in progress (no Abort button), in the place of the stopped-operation strip of GRAPH-014; it stays a strip when GRAPH-015 turns the uncommitted-changes strip into a row
+  - `src/components/GraphView.tsx` — warning strip for conflicted files with no operation in progress (no Abort button), in the place of the stopped-operation strip of GRAPH-014; it stays a strip; the conflicted files are also counted in the graph's uncommitted-changes row (GRAPH-015), which took the place of the old uncommitted-changes strip
   - `src/editor/conflicts.ts` — conflict bars show the sides note it is given (as for a rebase)
   - `src-tauri/src/git.rs` — `stash_op` reports "conflicts" as a result instead of an error (git failed and unmerged files appeared: `has_unmerged`); test that a conflicted pop keeps the stash
 - Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src/__tests__/graphView.test.tsx`, `src-tauri/src/git.rs`
@@ -609,6 +609,7 @@ Scenario: STASH-009.12 The graph tab
   When I look at the graph tab
   Then a warning strip says "A stash was applied with conflicts: 2 files have conflicts. Resolve them in Source Control."
   And the strip has no "Abort" button
+  And the first row of the graph reads "Uncommitted changes (2)" (GRAPH-015.12)
 
 Scenario: STASH-009.13 No new stash, apply or pop until the conflicts are resolved
   Given a pop stopped on conflicts

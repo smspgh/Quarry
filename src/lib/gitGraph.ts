@@ -220,3 +220,90 @@ export function actionDone(action: GraphAction, short: string, name?: string): s
   const done: Record<GraphAction, string> = { checkout: `Checked out ${short}`, branch: `Created branch ${name}`, "branch-switch": `On new branch ${name}`, tag: `Created tag ${name}`, "cherry-pick": `Cherry-picked ${short}`, revert: `Reverted ${short}`, "reset-soft": `Reset to ${short}`, "reset-mixed": `Reset to ${short}`, "reset-hard": `Reset to ${short}` };
   return done[action];
 }
+
+// ---------- Graph polish (GRAPH-015..018): uncommitted row, results divider, lane scrolling, date order ----------
+
+/** The "sha" of the uncommitted-changes row: never a commit id, so nothing git-side can be run on it. */
+export const UNCOMMITTED = "uncommitted";
+export const isUncommitted = (sha: string | null | undefined): boolean => sha === UNCOMMITTED;
+
+/**
+ * The graph's input with the uncommitted-changes row first: one extra "commit" (`row`, sha
+ * `UNCOMMITTED`) whose only parent is the current commit (none before the first commit). Laid out
+ * by `layoutGraph` like any other row, it takes lane 0 and keeps it down to the current commit
+ * (lane 0 is never cut). Replaces a row that is already there.
+ */
+export function withUncommitted<T extends GraphInput>(commits: T[], row: T): T[] {
+  return [row, ...withoutUncommitted(commits)];
+}
+
+export function withoutUncommitted<T extends { sha: string }>(commits: T[]): T[] {
+  return isUncommitted(commits[0]?.sha) ? commits.slice(1) : commits;
+}
+
+/** Rows above the first commit: 1 with the uncommitted row, else 0 (row index = commit index + this). */
+export const rowOffset = (rows: { sha: string }[]): number => (isUncommitted(rows[0]?.sha) ? 1 : 0);
+
+/**
+ * The row the uncommitted row's line ends at (the current commit); -1 when that commit is not
+ * among the loaded rows (the line then runs to the end of the list); 0 when there is no such row
+ * or it has no line (no commits yet). Rows 1..result carry the line in lane 0.
+ */
+export function uncommittedLineEnd(rows: GraphInput[]): number {
+  if (!isUncommitted(rows[0]?.sha) || !rows[0].parents.length) return 0;
+  const head = rows[0].parents[0];
+  return rows.findIndex((r) => r.sha === head);
+}
+
+/**
+ * The first page is asked for with one commit more than it shows, so "exactly `size` commits" can
+ * be told from "more": keeps `size` commits (stash rows ride along and are not counted) and says
+ * whether another one came.
+ */
+export function takePage<T extends { stash?: boolean }>(page: T[], size: number): { rows: T[]; more: boolean } {
+  let n = 0;
+  for (let i = 0; i < page.length; i++) {
+    if (page[i].stash) continue;
+    if (++n > size) return { rows: page.slice(0, i), more: true };
+  }
+  return { rows: page, more: false };
+}
+
+/** Date order is only offered for a history that fits one page (GRAPH-018). */
+export const DATE_ORDER_MAX = 300;
+export const DATE_ORDER_WHY = `Only for histories of ${DATE_ORDER_MAX} commits or fewer: in larger ones date order spreads the branches over many more lanes.`;
+export const DATE_ORDER_OFF = `Date order is off: this history has more than ${DATE_ORDER_MAX} commits.`;
+
+/** `count`: the commits loaded (no stash or uncommitted rows); `more`: commits remain unloaded. */
+export function dateOrderAllowed(count: number, more: boolean): boolean {
+  return !more && count <= DATE_ORDER_MAX;
+}
+
+/** Height the commit list always keeps beside the search results: 6 rows. */
+export const LIST_MIN = 156;
+export const HITS_MIN = 80;
+
+/**
+ * The height of the Search All History results for a dragged `wanted`: at least 80 px, the commit
+ * list keeps its 156 px (`available` = what the results may take at most), and never taller than
+ * the `content` (heading + rows), which wins over the minimum.
+ */
+export function clampHitsHeight(wanted: number, content: number, available: number): number {
+  return Math.round(Math.min(content, Math.max(HITS_MIN, Math.min(wanted, available))));
+}
+
+/**
+ * Sideways scroll of the lane column, in lanes: the new scroll that shows `lane`, moving just far
+ * enough; unchanged when the lane is already in view. `visible` lanes of `total` are shown.
+ */
+export function revealLane(scroll: number, lane: number, visible: number, total: number): number {
+  let next = scroll;
+  if (lane < next) next = lane;
+  else if (lane + 1 > next + visible) next = lane + 1 - visible;
+  return clampLaneScroll(next, visible, total);
+}
+
+/** A lane scroll kept within the graph's width (the graph gets narrower on a reload). */
+export function clampLaneScroll(scroll: number, visible: number, total: number): number {
+  return Math.max(0, Math.min(Math.max(0, total - visible), scroll));
+}

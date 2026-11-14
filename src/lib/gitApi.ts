@@ -364,7 +364,10 @@ export const git = {
   commitFiles: (root: string, sha: string) => invoke<GitCommitFile[]>("git_commit_files", { root, sha }),
   /** One page of the commit graph (children before parents). `all`: every branch and tag, else the
    *  current branch and its upstream. */
-  graph: (root: string, all: boolean, skip: number, limit: number) => invoke<GitGraphCommit[]>("git_graph", { root, all, skip, limit }),
+  graph: (root: string, all: boolean, skip: number, limit: number, order: "date" | null = null) => invoke<GitGraphCommit[]>("git_graph", { root, all, skip, limit, order }),
+  /** Graph polish: `order` "date" above is git's author-date order instead of branch by branch (GRAPH-018);
+   *  this is the full id of the current commit, null before the first commit (GRAPH-015). */
+  headSha: (root: string) => invoke<string | null>("git_head_sha", { root }),
   /** Search the whole history (message, author, or an id), newest first. */
   graphSearch: (root: string, all: boolean, query: string, limit = 200) => invoke<GitGraphCommit[]>("git_graph_search", { root, all, query, limit }),
   /** Has git's commit-graph file been written (pages of a large history are then fast)? */

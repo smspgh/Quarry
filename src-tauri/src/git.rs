@@ -1258,7 +1258,16 @@ fn parse_graph(out: &[u8]) -> Vec<GitGraphCommit> {
 
 /// One page of the commit graph, children before parents. `all`: every branch and
 /// tag; otherwise the current branch and its upstream (so commits to pull show too).
+#[cfg(test)]
 fn graph(root: &Path, all: bool, skip: u32, limit: u32) -> Result<Vec<GitGraphCommit>, String> {
+    graph_ordered(root, all, skip, limit, false)
+}
+
+/// Graph polish (GRAPH-018): `by_date` lists the commits in git's author-date order (newest
+/// first, but never a commit above one of its children) instead of branch by branch. The UI only
+/// asks for it when the whole history fits one page, which it finds out by asking the first page
+/// for one commit more than it shows (`limit` = 301).
+fn graph_ordered(root: &Path, all: bool, skip: u32, limit: u32, by_date: bool) -> Result<Vec<GitGraphCommit>, String> {
     if !has_head(root) {
         return Ok(Vec::new());
     }
@@ -1266,7 +1275,8 @@ fn graph(root: &Path, all: bool, skip: u32, limit: u32) -> Result<Vec<GitGraphCo
     let limit_arg = format!("--max-count={}", limit.clamp(1, 5000));
     // Topological order: a branch's commits stay together, which keeps the graph several times
     // narrower than date order on histories with many merged branches.
-    let mut args = vec!["log", "-z", "--topo-order", "--decorate=full", GRAPH_FORMAT, &skip_arg, &limit_arg];
+    let order = if by_date { "--author-date-order" } else { "--topo-order" };
+    let mut args = vec!["log", "-z", order, "--decorate=full", GRAPH_FORMAT, &skip_arg, &limit_arg];
     args.extend(graph_scope(root, all));
     // Stash: with `all`, the commit each stash was made on is walked too (it may be on no branch
     // any more), and every stash becomes one row above that commit (`fold_stashes`).
@@ -2537,8 +2547,19 @@ pub async fn git_commit_files(root: String, sha: String) -> Result<Vec<GitCommit
 }
 
 #[tauri::command]
-pub async fn git_graph(root: String, all: bool, skip: u32, limit: u32) -> Result<Vec<GitGraphCommit>, String> {
-    blocking(move || graph(Path::new(&root), all, skip, limit)).await
+pub async fn git_graph(root: String, all: bool, skip: u32, limit: u32, order: Option<String>) -> Result<Vec<GitGraphCommit>, String> {
+    blocking(move || graph_ordered(Path::new(&root), all, skip, limit, order.as_deref() == Some("date"))).await
+}
+
+/// Graph polish (GRAPH-015): the full id of the current commit (the parent of the graph's
+/// uncommitted-changes row), None before the first commit.
+fn head_sha(root: &Path) -> Option<String> {
+    run_text(root, true, &["rev-parse", "--verify", "-q", "HEAD^{commit}"]).ok().map(|s| s.trim().to_string()).filter(|s| is_sha(s))
+}
+
+#[tauri::command]
+pub async fn git_head_sha(root: String) -> Result<Option<String>, String> {
+    blocking(move || Ok(head_sha(Path::new(&root)))).await
 }
 
 #[tauri::command]
@@ -2951,6 +2972,78 @@ mod tests {
         // No upstream: nothing is known to be unpushed.
         assert!(unpushed(&root).is_empty());
     }
+
+    // ----- Graph polish (GRAPH-015, GRAPH-018) -----
+    #[test]
+    fn graph_date_order_interleaves_branches_but_never_lists_a_commit_above_its_child() {
+        let Some((_d, root)) = repo() else { return };
+        let commit_at = |file: &str, msg: &str, date: &str| {
+            write(&root, file, msg);
+            git_ok(&root, &["add", "."]);
+            git_ok(&root, &["commit", "-qm", msg, "--date", date]);
+        };
+        // Before the first commit there is no current commit.
+        assert_eq!(head_sha(&root), None);
+        commit_at("a.txt", "main 10:00", "2026-01-05T10:00:00");
+        git_ok(&root, &["switch", "-qc", "feature"]);
+        commit_at("f.txt", "feature 11:00", "2026-01-05T11:00:00");
+        git_ok(&root, &["switch", "-q", "main"]);
+        commit_at("b.txt", "main 12:00", "2026-01-05T12:00:00");
+        git_ok(&root, &["merge", "-q", "--no-ff", "-m", "merge 13:00", "feature"]);
+        git_ok(&root, &["commit", "-q", "--amend", "--no-edit", "--date", "2026-01-05T13:00:00"]);
+        let names = |by_date: bool| graph_ordered(&root, false, 0, 301, by_date).unwrap().into_iter().map(|c| c.summary).collect::<Vec<_>>();
+        // Branch order (the default, and what `graph` gives): the merged branch's commit is not
+        // sorted in between main's by date.
+        assert_eq!(names(false), graph(&root, false, 0, 301).unwrap().into_iter().map(|c| c.summary).collect::<Vec<_>>());
+        // Date order: by author date across the branches.
+        assert_eq!(names(true), ["merge 13:00", "main 12:00", "feature 11:00", "main 10:00"]);
+        // Parents and labels are the same in either order.
+        let by_date = graph_ordered(&root, false, 0, 301, true).unwrap();
+        assert_eq!(by_date[0].parents.len(), 2);
+        assert_eq!(by_date[0].refs, ["HEAD", "refs/heads/main"]);
+        assert_eq!(head_sha(&root).as_deref(), Some(by_date[0].sha.as_str()));
+
+        // A commit authored later than the commit made on top of it (a wrong clock) stays below it.
+        commit_at("c.txt", "authored in 2030", "2030-01-01T09:00:00");
+        commit_at("d.txt", "on top, authored 14:00", "2026-01-05T14:00:00");
+        assert_eq!(names(true)[..3], ["on top, authored 14:00", "authored in 2030", "merge 13:00"]);
+        // The date used is the author's (what the Date column shows): a commit authored on an
+        // earlier day is listed by that day even though it was committed just now.
+        git_ok(&root, &["switch", "-qc", "side", "HEAD~2"]);
+        commit_at("e.txt", "side, authored 10:30", "2026-01-05T10:30:00");
+        let all = graph_ordered(&root, true, 0, 301, true).unwrap().into_iter().map(|c| c.summary).collect::<Vec<_>>();
+        assert_eq!(all, ["on top, authored 14:00", "authored in 2030", "side, authored 10:30", "merge 13:00", "main 12:00", "feature 11:00", "main 10:00"]);
+    }
+
+    #[test]
+    fn graph_first_page_probe_tells_exactly_300_commits_from_more() {
+        let Some((_d, root)) = repo() else { return };
+        // 301 commits without files, written in one go.
+        let mut stream = String::new();
+        for i in 1..=301 {
+            let msg = format!("c{i}");
+            stream.push_str(&format!("commit refs/heads/main\nmark :{i}\ncommitter Test User <test@example.com> {} +0000\ndata {}\n{msg}\n", 1_700_000_000 + i, msg.len()));
+            if i > 1 {
+                stream.push_str(&format!("from :{}\n", i - 1));
+            }
+            stream.push('\n');
+        }
+        run(&root, false, &["fast-import", "--quiet"], Some(stream.into_bytes())).unwrap();
+        // The UI asks the first page for 301 commits: 301 back means "more than 300".
+        let page = graph_ordered(&root, false, 0, 301, false).unwrap();
+        assert_eq!(page.len(), 301);
+        assert_eq!(page[0].summary, "c301");
+        // The commit left out of the first page is the first one of the next.
+        assert_eq!(graph_ordered(&root, false, 300, 300, false).unwrap().iter().map(|c| c.summary.as_str()).collect::<Vec<_>>(), ["c1"]);
+        // Exactly 300 commits: the probe comes back with 300, so the whole history is known to be loaded.
+        git_ok(&root, &["update-ref", "refs/heads/main", "refs/heads/main~1"]);
+        for by_date in [false, true] {
+            let page = graph_ordered(&root, false, 0, 301, by_date).unwrap();
+            assert_eq!(page.len(), 300);
+            assert_eq!((page[0].summary.as_str(), page[299].summary.as_str()), ("c300", "c1"));
+        }
+    }
+    // ----- end -----
 
     #[test]
     fn graph_lists_parents_and_refs_and_actions_move_the_branch() {

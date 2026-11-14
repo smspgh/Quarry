@@ -158,3 +158,158 @@ describe("stash rows in the layout", () => {
     expect(commitMatches(row, "lexer")).toBe(false);
   });
 });
+
+// ----- Graph polish (GRAPH-015..018) -----
+import { clampHitsHeight, clampLaneScroll, dateOrderAllowed, isUncommitted, revealLane, rowOffset, takePage, UNCOMMITTED, uncommittedLineEnd, withoutUncommitted, withUncommitted } from "../lib/gitGraph";
+
+describe("the uncommitted-changes row in the layout (GRAPH-015)", () => {
+  const un = (head?: string) => ({ sha: UNCOMMITTED, parents: head ? [head] : [] });
+
+  it("is the first row, in lane 0, joined to the current commit below it", () => {
+    const list = withUncommitted([c("tip", "old"), c("old")], un("tip"));
+    expect(list.map((r) => r.sha)).toEqual([UNCOMMITTED, "tip", "old"]);
+    const rows = layoutGraph(list);
+    expect(rows[0]).toEqual({ col: 0, into: [], through: [], out: [0], cut: [], from: [], width: 1 });
+    expect(rows[1]).toMatchObject({ col: 0, into: [0], out: [0] });
+    expect(uncommittedLineEnd(list)).toBe(1);
+    expect(rowOffset(list)).toBe(1);
+    expect(rowOffset(withoutUncommitted(list))).toBe(0);
+    expect(isUncommitted(list[0].sha)).toBe(true);
+    // Adding it again replaces the row instead of stacking a second one.
+    expect(withUncommitted(list, un("tip"))).toHaveLength(3);
+  });
+
+  it("runs down lane 0 past commits to pull, which sit in the second lane", () => {
+    // origin/main is 2 commits ahead of the commit I am on (head).
+    const list = withUncommitted([c("in2", "in1"), c("in1", "head"), c("head", "old"), c("old")], un("head"));
+    const rows = layoutGraph(list);
+    expect(rows.map((r) => r.col)).toEqual([0, 1, 1, 0, 0]);
+    expect(rows[1]).toMatchObject({ col: 1, through: [0] });
+    // The incoming line joins lane 0, which already leads to the current commit.
+    expect(rows[2]).toMatchObject({ col: 1, through: [0], out: [0] });
+    expect(rows[3]).toMatchObject({ col: 0, into: [0] });
+    expect(uncommittedLineEnd(list)).toBe(3);
+  });
+
+  it("is never cut, however far down the current commit is", () => {
+    // 500 commits of another branch above the current commit.
+    const other = Array.from({ length: 500 }, (_, i) => c(`o${i}`, `o${i + 1}`));
+    const list = withUncommitted([...other, c("o500"), c("head", "old"), c("old")], un("head"));
+    const rows = layoutGraph(list);
+    expect(rows[0].col).toBe(0);
+    for (let i = 1; i <= 501; i++) {
+      expect(rows[i].through).toContain(0);
+      expect(rows[i].cut).toEqual([]);
+      expect(rows[i].col).toBe(1);
+    }
+    expect(rows[502]).toMatchObject({ col: 0, into: [0], from: [] });
+    expect(uncommittedLineEnd(list)).toBe(502);
+  });
+
+  it("has no line before the first commit, and reports a current commit that is not loaded", () => {
+    const empty = withUncommitted([], un());
+    expect(layoutGraph(empty)).toEqual([{ col: 0, into: [], through: [], out: [], cut: [], from: [], width: 1 }]);
+    expect(uncommittedLineEnd(empty)).toBe(0);
+    expect(uncommittedLineEnd(withUncommitted([c("a", "b")], un("far")))).toBe(-1);
+    expect(uncommittedLineEnd([c("a", "b")])).toBe(0);
+  });
+
+  it("lays out the same page by page as in one go", () => {
+    const side = Array.from({ length: 90 }, (_, i) => c(`s${i}`, i === 89 ? "base" : `s${i + 1}`));
+    const main = Array.from({ length: 60 }, (_, i) => c(`m${i}`, i === 59 ? "base" : `m${i + 1}`));
+    const list = withUncommitted([...side.slice(0, 30), ...main, ...side.slice(30), c("base")], un("m0"));
+    const whole = layoutGraph(list);
+    const state = newGraphState();
+    const paged = [...layoutGraph(list.slice(0, 50), state), ...layoutGraph(list.slice(50, 120), state), ...layoutGraph(list.slice(120), state)];
+    expect(paged).toEqual(whole);
+    // The side branch started first, but lane 0 is the uncommitted row's and then main's.
+    expect(whole[31]).toMatchObject({ col: 0, into: [0] });
+  });
+});
+
+describe("lanes beyond the 16 shown (GRAPH-017)", () => {
+  it("gives every lane its own number: 40 open branches need 40 lanes", () => {
+    // 40 branch tips, each on its own older commit.
+    const tips = Array.from({ length: 40 }, (_, i) => c(`t${i}`, `p${i}`));
+    const rows = layoutGraph([...tips, ...Array.from({ length: 40 }, (_, i) => c(`p${i}`))]);
+    expect(rows.slice(0, 40).map((r) => r.col)).toEqual(Array.from({ length: 40 }, (_, i) => i));
+    expect(rows[39].width).toBe(40);
+    // Each line ends in its own lane too.
+    expect(rows.slice(40).map((r) => r.col)).toEqual(Array.from({ length: 40 }, (_, i) => i));
+    expect(rows[40]).toMatchObject({ col: 0, into: [0], width: 40 });
+  });
+
+  it("revealLane scrolls just far enough to show a lane", () => {
+    // 16 of 44 lanes are visible, starting at lane 0.
+    expect(revealLane(0, 5, 16, 44)).toBe(0); // already in view
+    expect(revealLane(0, 29, 16, 44)).toBe(14); // lanes 14..29: its dot is the last one shown
+    expect(revealLane(14, 0, 16, 44)).toBe(0);
+    expect(revealLane(14, 20, 16, 44)).toBe(14);
+    expect(revealLane(9.5, 9, 16, 44)).toBe(9); // a half-hidden lane is brought in whole
+    expect(revealLane(0, 43, 16, 44)).toBe(28);
+    expect(revealLane(0, 60, 16, 44)).toBe(28); // never past the last lane
+    expect(revealLane(3, 2, 16, 12)).toBe(0); // a graph that fits does not scroll
+  });
+
+  it("clampLaneScroll keeps a scroll inside the graph's width", () => {
+    expect(clampLaneScroll(9, 16, 44)).toBe(9);
+    expect(clampLaneScroll(40, 16, 44)).toBe(28);
+    expect(clampLaneScroll(-3, 16, 44)).toBe(0);
+    expect(clampLaneScroll(9, 16, 12)).toBe(0);
+  });
+});
+
+describe("the first-page probe and date order (GRAPH-018)", () => {
+  const n = (count: number): { sha: string; stash?: boolean }[] => Array.from({ length: count }, (_, i) => ({ sha: `${i}` }));
+
+  it("takePage keeps `size` commits and says whether one more came", () => {
+    expect(takePage(n(301), 300)).toMatchObject({ more: true, rows: { length: 300 } });
+    expect(takePage(n(300), 300)).toMatchObject({ more: false, rows: { length: 300 } });
+    expect(takePage(n(12), 300)).toMatchObject({ more: false, rows: { length: 12 } });
+    expect(takePage([], 300)).toEqual({ more: false, rows: [] });
+  });
+
+  it("takePage does not count stash rows", () => {
+    const page = [{ sha: "s", stash: true }, ...n(3), { sha: "s2", stash: true }, { sha: "x" }];
+    expect(takePage(page, 4)).toEqual({ rows: page, more: false });
+    // The stash row above the commit that is left out stays on the page; the next page brings its commit.
+    expect(takePage(page, 3)).toEqual({ rows: page.slice(0, 5), more: true });
+  });
+
+  it("date order is allowed for 300 commits or fewer, all loaded", () => {
+    expect(dateOrderAllowed(40, false)).toBe(true);
+    expect(dateOrderAllowed(300, false)).toBe(true);
+    expect(dateOrderAllowed(300, true)).toBe(false); // "300+": 301 or more
+    expect(dateOrderAllowed(301, false)).toBe(false);
+    expect(dateOrderAllowed(0, false)).toBe(true);
+  });
+
+  it("the layout takes commits in date order: branches interleave, main keeps lane 0", () => {
+    // merge(13:00) of main(12:00) and feature(11:00), both on base(10:00): newest first.
+    const rows = layoutGraph([c("merge", "main12", "feat11"), c("main12", "base10"), c("feat11", "base10"), c("base10")]);
+    expect(rows.map((r) => r.col)).toEqual([0, 0, 1, 0]);
+    expect(rows[1]).toMatchObject({ into: [0], through: [1], out: [0] });
+    // The feature commit's line joins main's lane, which already leads to their common parent.
+    expect(rows[2]).toMatchObject({ into: [1], through: [0], out: [0] });
+    expect(rows[3]).toMatchObject({ into: [0], width: 1 });
+  });
+});
+
+describe("the height of the Search All History results (GRAPH-016)", () => {
+  it("follows the drag between its limits", () => {
+    // 60 results (content 1,470 px); results + commit list share 700 px, of which the list keeps 156.
+    expect(clampHitsHeight(370, 1470, 544)).toBe(370);
+    expect(clampHitsHeight(20, 1470, 544)).toBe(80); // heading and one result stay
+    expect(clampHitsHeight(900, 1470, 544)).toBe(544); // the commit list keeps 6 rows
+  });
+
+  it("is never taller than its content, which wins over the minimum", () => {
+    expect(clampHitsHeight(400, 78, 544)).toBe(78); // 2 results
+    expect(clampHitsHeight(10, 78, 544)).toBe(78);
+    expect(clampHitsHeight(400, 200, 544)).toBe(200);
+  });
+
+  it("keeps the minimum in a window too small for both", () => {
+    expect(clampHitsHeight(300, 1470, 40)).toBe(80);
+  });
+});

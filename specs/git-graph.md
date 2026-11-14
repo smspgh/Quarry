@@ -71,8 +71,8 @@ Scenario: GRAPH-001.6 Not restored after a restart
 - Commands: none
 - Files:
   - `src/lib/gitGraph.ts` — `layoutGraph` (first parent keeps the lane, lowest free lane reused, carried `GraphState`), `refLabels`
-  - `src/components/GraphView.tsx` — `RowGraph` (SVG lines and dot), `RefBadge` (its right-click opens the ref-label menu of MERGE-002 and BRANCH-001; `open` marks the label whose menu is showing), `MAX_LANES` = 16, `LANE_COLORS` = 8, `ROW` = 26
-  - `src-tauri/src/git.rs` — `graph` (`log --topo-order --decorate=full`), `parse_graph`, command `git_graph`
+  - `src/components/GraphView.tsx` — `RowGraph` (SVG lines and dot), `RefBadge` (its right-click opens the ref-label menu of MERGE-002 and BRANCH-001; `open` marks the label whose menu is showing), `MAX_LANES` = 16 (the lanes shown at once; a wider graph scrolls sideways, GRAPH-017), `LANE_COLORS` = 8, `ROW` = 26
+  - `src-tauri/src/git.rs` — `graph_ordered` (`log --topo-order --decorate=full`; `--author-date-order` when Date order is on, GRAPH-018), `parse_graph`, command `git_graph`
   - `src/lib/gitApi.ts` — `git.graph`, `GitGraphCommit`
   - `src/styles/app.css` — `.graph-*`, `.gl-*` lane colours
 - Tests: `src/__tests__/gitGraph.test.ts`, `src-tauri/src/git.rs`
@@ -101,6 +101,7 @@ Scenario: GRAPH-002.3 The first parent keeps the lane
   When I open the graph
   Then the commits of "main" stay in the first lane all the way down
   And the side branch runs beside it until its fork point
+  And with uncommitted changes the first lane is that of their row and of the commit I am on: commits to pull then sit in the second lane (GRAPH-015.3)
 
 Scenario: GRAPH-002.4 A freed lane is reused
   Given two side branches that were merged one after the other
@@ -112,6 +113,7 @@ Scenario: GRAPH-002.5 Commits are listed branch by branch
   Given a merged branch whose commits are older than later commits on "main"
   When I open the graph
   Then the branch's commits are listed together under the merge, not interleaved by date
+  But with "Date order" on (small histories only, GRAPH-018) they are listed by author date across branches
 
 Scenario: GRAPH-002.6 Labels
   Given I am on "main", which is on the same commit as "origin/main", and tag "v1.0" and branch "feature" exist
@@ -133,7 +135,7 @@ Scenario: GRAPH-002.8 Very wide histories
   Given a history that needs more than 16 lanes at once
   When I open the graph
   Then the graph column stops growing at 16 lanes
-  And the lanes beyond share the last one
+  And the lanes beyond keep their own place: the column scrolls sideways to them (GRAPH-017)
 ```
 
 ## GRAPH-003: Long branch lines are cut short
@@ -173,6 +175,7 @@ Scenario: GRAPH-003.4 The first lane is never cut
   Given the branch in the first lane runs for 200 rows
   When I open the graph
   Then its line is drawn unbroken for all 200 rows
+  And so is the dashed line from the uncommitted-changes row down to the commit I am on, which always runs in the first lane (GRAPH-015.4)
 
 Scenario: GRAPH-003.5 Paging does not change the picture
   Given a history laid out in one go
@@ -186,7 +189,7 @@ Scenario: GRAPH-003.5 Paging does not change the picture
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — "Current branch" / "All branches" segmented control (`all` state, starts on Current branch)
-  - `src-tauri/src/git.rs` — `graph_scope` (HEAD + `@{upstream}`, or `--all` without `refs/stash`); with All branches `graph` adds one row per stash (STASH-010)
+  - `src-tauri/src/git.rs` — `graph_scope` (HEAD + `@{upstream}`, or `--all` without `refs/stash`); with All branches `graph_ordered` adds one row per stash (STASH-010)
 - Tests: `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 
@@ -219,9 +222,9 @@ Scenario: GRAPH-004.3 A branch with no remote branch
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — `load()`, `PAGE` = 300, `SLOW_PAGE_MS` = 400, `MAX_PAGE` = 4800, `generation` guard, reload on the `stamp` (head, branch, ahead / behind, upstream, operation) keeping `selected` and the scroll offset, windowed rows (`first` / `last`, 8 rows of overscan), next page when within 40 rows of the end
-  - `src/lib/gitGraph.ts` — `GraphState` carried from page to page
-  - `src-tauri/src/git.rs` — `graph` (`--skip`, `--max-count` clamped to 5000; no commits before the first commit)
+  - `src/components/GraphView.tsx` — `load()`, `PAGE` = 300, `SLOW_PAGE_MS` = 400, `MAX_PAGE` = 4800, `generation` guard, reload on the `stamp` (head, branch, ahead / behind, upstream, operation) keeping `selected` and the scroll offset, windowed rows (`first` / `last`, 8 rows of overscan), next page when within 40 rows of the end; the first page asks git for one commit more than it shows (`takePage`), the next pages for exactly the page size
+  - `src/lib/gitGraph.ts` — `GraphState` carried from page to page, `takePage` (keeps the page size, says whether one more commit came)
+  - `src-tauri/src/git.rs` — `graph_ordered` (`--skip`, `--max-count` clamped to 5000; no commits before the first commit; branch order unless asked for date order, GRAPH-018)
 - Tests: `src/__tests__/gitGraph.test.ts`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 
@@ -235,6 +238,7 @@ Scenario: GRAPH-005.1 The first page
   When I open the graph
   Then the first 300 commits are listed
   And the toolbar says "300+ commits"
+  And git was asked for 301 commits: the extra one only tells "more than 300" from "exactly 300" and is not listed
 
 Scenario: GRAPH-005.2 More commits load while scrolling
   Given 300 commits are loaded and more exist
@@ -247,6 +251,7 @@ Scenario: GRAPH-005.3 The end of the history
   When I open the graph
   Then the toolbar says "120 commits" with no plus sign
   And nothing more is requested when I scroll to the end
+  And a repository with exactly 300 commits says "300 commits" at once, also with no plus sign (GRAPH-018.6)
 
 Scenario: GRAPH-005.4 Slow pages grow
   Given a page of 300 commits took git longer than 400 ms
@@ -264,6 +269,7 @@ Scenario: GRAPH-005.6 A repository without commits
   Given a repository in which nothing has been committed yet
   When I open the graph
   Then the list says "No commits yet."
+  And when files exist already, the row "Uncommitted changes (5)" stands above that note (GRAPH-015.14)
 
 Scenario: GRAPH-005.7 git fails
   Given git cannot read the history
@@ -281,6 +287,8 @@ Scenario: GRAPH-005.9 What a reload keeps
   Then the scroll position, the selected commit and its details pane are kept
   And a selected commit beyond the first page (300 rows, or the grown page size) is no longer shown: its details pane closes and the list is left at the end of the first page, where scrolling loads the next page
   And two commits being compared stay compared, with the comparison pane unchanged, also when one is beyond the first page (COMMITCMP-001.10)
+  And a selected uncommitted-changes row stays selected while there are changes (GRAPH-015), the lane column keeps its sideways scroll (GRAPH-017.9) and "Date order" stays on (GRAPH-018.10)
+  But a change to the working folder alone (a file saved, staged or discarded) does not reload the graph: only the uncommitted-changes row follows it (GRAPH-015.7)
 ```
 
 ## GRAPH-006: Speed up a very large history
@@ -354,6 +362,7 @@ Scenario: GRAPH-007.1 Typing marks the matches
   When I type "updater" in the Find box
   Then the count next to the box says "6 in 1200 loaded"
   And the 6 matching rows stay bright while the others are dimmed
+  And the uncommitted-changes row is not one of the 1,200: it never matches and is dimmed with the others (GRAPH-015.11)
 
 Scenario: GRAPH-007.2 What is matched
   When I type text in the Find box
@@ -383,6 +392,7 @@ Scenario: GRAPH-007.6 Nothing matches
   When I have typed it in the Find box
   Then the count says "0 in 1200 loaded"
   And the previous / next match buttons are disabled
+  And that is also what "uncommitted" finds when only the uncommitted-changes row carries the word
 ```
 
 ## GRAPH-008: Search the whole history and go to a result
@@ -406,6 +416,7 @@ Scenario: GRAPH-008.1 Search All History
   When I click "Search All History"
   Then a results list appears headed '3 commits in the whole history match "tokenizer" (message, author, branch / tag or id)'
   And the results are listed newest first with id, message, author and date
+  And the edge under the list can be dragged to change its height (GRAPH-016)
 
 Scenario: GRAPH-008.2 Keyboard
   Given text is in the Find box
@@ -438,6 +449,7 @@ Scenario: GRAPH-008.7 Click a result for its details
   When I click it
   Then the details pane shows that commit with a "Show in Graph" button
   And the results list shrinks to a few rows ("Show More" opens it again)
+  But a list whose height I dragged keeps that height (GRAPH-016.4)
 
 Scenario: GRAPH-008.8 Go to a result in the graph
   When I double-click a result, or click "Show in Graph"
@@ -489,7 +501,7 @@ Scenario: GRAPH-009.1 Select a commit
 Scenario: GRAPH-009.2 Move with the keyboard
   Given the commit list has focus and a commit is selected
   When I press Down, Up, PageDown, PageUp, Home or End
-  Then the selection moves by one row, by one screen, or to the first / last loaded commit
+  Then the selection moves by one row, by one screen, or to the first / last loaded row (the first row is the uncommitted-changes row when there is one, GRAPH-015.10)
   And the selected row is scrolled into view and the details follow
   And while two commits are being compared the move starts from the first of them and ends the comparison, and Escape ends it leaving the first selected (COMMITCMP-001.6)
 
@@ -757,12 +769,12 @@ Scenario: GRAPH-013.5 Cancel
   Then the branch and files are unchanged
 ```
 
-## GRAPH-014: See uncommitted work and a stopped operation above the graph
+## GRAPH-014: See a stopped operation above the graph
 
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — `.graph-strip` rows, `openSourceControl()` (focuses the first Merge Changes row, else the first change), Abort button
+  - `src/components/GraphView.tsx` — `.graph-strip` rows (stopped operation, stash conflicts; uncommitted changes are a row of the list, GRAPH-015), `openSourceControl()` (focuses the first Merge Changes row, else the first change), Abort button
   - `src/lib/git.ts` — `abortOperation`
   - `src/lib/gitStash.ts` — `isStashConflict`, `stashConflictStrip` (the strip for conflicts with no operation in progress)
   - `src/lib/panels.ts` — `isPanelShown`, `showPanel`
@@ -774,27 +786,29 @@ Scenario: GRAPH-013.5 Cancel
 **So that** I am not misled by the graph and can get to the fix
 
 ```gherkin
-Scenario: GRAPH-014.1 Uncommitted changes
+Scenario: GRAPH-014.1 Uncommitted changes are a row, not a strip
   Given I have 4 uncommitted changes on "main" and nothing is in progress
   When I look at the graph tab
-  Then a strip under the toolbar says "4 uncommitted changes on main: not in the graph until committed."
+  Then no strip under the toolbar mentions them
+  And they are the first row of the graph, "Uncommitted changes (4)" (GRAPH-015.1)
 
 Scenario: GRAPH-014.2 A stopped operation
   Given a cherry-pick stopped with 1 conflicted file
   When I look at the graph tab
   Then a warning strip says "The cherry-pick stopped part-way: 1 file has conflicts. Resolve them in Source Control and commit, or abort to go back to how things were."
   And it has an "Abort" button
-  And the uncommitted-changes strip is not shown at the same time
+  And the conflicted file is counted in the uncommitted-changes row below, the first row of the list (GRAPH-015.12)
 
 Scenario: GRAPH-014.3 Open Source Control from the strip
   Given the Source Control panel is not showing
-  When I click "Open Source Control" in the strip
+  When I click "Open Source Control" in the strip, or in the details pane of the uncommitted-changes row (GRAPH-015.5)
   Then the panel opens with focus on the first file under Merge Changes, or on the first changed file
 
 Scenario: GRAPH-014.4 The button is hidden when it would do nothing
   Given the Source Control panel is already showing
   When I look at the graph tab
   Then the strips have no "Open Source Control" button
+  And neither has the details pane of the uncommitted-changes row
 
 Scenario: GRAPH-014.5 Abort from the strip
   When I click "Abort" in the strip
@@ -805,12 +819,14 @@ Scenario: GRAPH-014.6 Conflicts left by a stash
   When I look at the graph tab
   Then a warning strip says "A stash was applied with conflicts: 2 files have conflicts. Resolve them in Source Control."
   And it has no "Abort" button
-  And the uncommitted-changes strip is not shown at the same time
+  And the 2 files are counted in the uncommitted-changes row, the first row of the list
 ```
 
 ### Decisions (planned stories)
 
-GRAPH-015 to GRAPH-019 are `planned`: they come from `GIT-ROADMAP.md` ("7. Graph polish" and the `git.graph` fix in "0."). The roadmap left some choices open; these are the ones the stories below assume.
+GRAPH-015 to GRAPH-019 come from `GIT-ROADMAP.md` ("7. Graph polish" and the `git.graph` fix in "0."); all five are built (`draft`). The roadmap left some choices open; these are the ones the stories below assume.
+
+Built as decided, with these additions: the uncommitted row's parent is the current commit's full id, taken from the loaded page or asked from git (`git_head_sha`) when that commit is further down; the row's count follows the status on its own, and only its coming and going lays the loaded rows out again (no history is read for it); the first page of every load asks for one commit more than it shows, which is how "exactly 300 commits" is known; a results list that already shows everything is not given a remembered height by a drag that changes nothing.
 
 - **Uncommitted row (GRAPH-015).** The row is laid out as one extra commit whose only parent is the current commit, placed first in the list. It therefore takes the first lane, and so does the current commit's line below it; the first lane is never cut (GRAPH-003.4), so the row's line always reaches the current commit, however far down that is. The row replaces the uncommitted-changes strip of GRAPH-014.1; the stopped-operation strip with Abort stays, and the row shows during a stopped operation too. The row has no right-click menu. The count is the number of changed files, as in the strip today. Next to the other planned git specs: the warning strip a stash leaves when it came back with conflicts (STASH-009.12) stays a strip, like the stopped-operation strip; the row is not a commit, so none of the entries other specs add to the commit menu (merge, rebase, compare, edit history, Summarise with Claude) applies to it, and it cannot be picked with Ctrl+click for Compare Commits (COMMITCMP-001: Compare with Working Tree on a commit is the way to compare with uncommitted work); while the Edit History list is open (HISTORY-007) it replaces every row, this one included; a file clicked in the row's details pane opens the Source Control comparison, so it has the partial-staging controls of STAGE-001.
 - **Results divider (GRAPH-016).** Same kind of divider as the details pane. Limits: at least 80 px, never taller than its content, and the commit list always keeps 156 px (6 rows). A dragged height is the user's choice: it is kept for the tab, and clicking a result no longer shrinks the list. Not saved across restarts (graph tabs are not in the session).
@@ -821,16 +837,18 @@ GRAPH-015 to GRAPH-019 are `planned`: they come from `GIT-ROADMAP.md` ("7. Graph
 
 ## GRAPH-015: Uncommitted changes as the first row of the graph
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — the uncommitted row (first row of the list, hollow dot, dashed line), its details pane (file list instead of commit details), selection / keyboard / find / right-click over a row that is not a commit; the uncommitted-changes `.graph-strip` goes away
-  - `src/lib/gitGraph.ts` — new `withUncommitted` (prepends the extra row with the current commit as its parent before `layoutGraph`), row index ↔ commit index helpers
+  - `src/components/GraphView.tsx` — the uncommitted row (`uncommittedRow`, first row of `commits` with the id `UNCOMMITTED`; `RowGraph` `uncommitted`: hollow dot, dashed line in lane 0 down to `lineEnd`), added by `load()` on the first page and by the `dirty` effect (`place()` lays the loaded rows out again when the row comes or goes; `headOf` finds the current commit's full id), `extra` / `total` (counts and paging without the row), selection / keyboard / find / right-click / Ctrl+click over a row that is not a commit; there is no uncommitted-changes `.graph-strip` any more
+  - `src/components/GraphUncommitted.tsx` — the row's details pane: heading (`uncommittedHeading`), Based on, the files in Source Control's groups (`ChangedFile`: click = `openChange`, double-click = the file), Open Source Control
+  - `src/lib/gitGraph.ts` — `UNCOMMITTED`, `isUncommitted`, `withUncommitted` (the extra row first, before `layoutGraph`), `withoutUncommitted`, `rowOffset` (row index = commit index + this), `uncommittedLineEnd`
   - `src/lib/git.ts` — `openChange` (reused for a click on a file), `useGit` repository `files` (the row follows it without reloading the history)
-  - `src/lib/gitStatus.ts` — grouping into Merge Changes / Staged Changes / Changes shared with the panel
-  - `src/components/panels/GitPanel.tsx` — shares the grouping and the file row
-  - `src/styles/app.css` — `.graph-row.uncommitted`, hollow dot and dashed line
-- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphView.test.tsx`
+  - `src/lib/gitStatus.ts` — `groupFiles`, `rowKind`: Merge Changes / Staged Changes / Changes and the letters, shared with the panel
+  - `src-tauri/src/git.rs` — `head_sha` / `git_head_sha` (the current commit's full id, when it is not on the first page)
+  - `src/lib/gitApi.ts` — `git.headSha`
+  - `src/styles/app.css` — `.graph-row.uncommitted`, `.gn.uncommitted` (hollow dot), `.gl.dashed`, `.graph-uncommitted-*`
+- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphPolish.test.tsx`, `src/__tests__/graphView.test.tsx`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 
 **As a** developer with work that is not committed yet
@@ -942,13 +960,13 @@ Scenario: GRAPH-015.16 The row cannot be picked for a comparison
 
 ## GRAPH-016: Drag the height of the Search All History results
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — results list height (`hitsH`, new `startHitsResize` beside `startResize`), divider under `.graph-hits`, how `hitsOpen` / Show Fewer / Show More and `pickHit` behave once a height was dragged
-  - `src/lib/gitGraph.ts` — new pure `clampHitsHeight(wanted, content, available)`
-  - `src/styles/app.css` — `.graph-hits` (the fixed `max-height: 34%` / compact 100 px become the defaults only), divider reusing `.graph-resizer`
-- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphView.test.tsx`
+  - `src/components/GraphView.tsx` — results list height (`hitsH`, an inline `max-height` while the list is open; `startHitsResize` beside `startResize`, measuring the limits when the drag starts), divider `.graph-hits-resizer` under `.graph-hits` (double-click clears `hitsH`), how `hitsOpen` / Show Fewer / Show More and `pickHit` behave once a height was dragged
+  - `src/lib/gitGraph.ts` — pure `clampHitsHeight(wanted, content, available)`, `HITS_MIN` = 80, `LIST_MIN` = 156
+  - `src/styles/app.css` — `.graph-hits` (`max-height: 34%` / compact 100 px are the defaults only), `.graph-hits.sized` (a dragged list gives way to the commit list's 156 px in a small window), `.graph-hits-resizer` (reuses `.graph-resizer`)
+- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphPolish.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer going through many search results
@@ -1009,7 +1027,7 @@ Scenario: GRAPH-016.9 The window gets smaller
   Then the results list becomes shorter so the commit list keeps 156 px
 
 Scenario: GRAPH-016.10 No divider without results
-  Given no whole-history search has been run, or its results were closed
+  Given no whole-history search has been run, its results were closed, or it found no commit
   When I look at the graph tab
   Then there is no results divider
   And the details pane's own divider works as before
@@ -1017,13 +1035,14 @@ Scenario: GRAPH-016.10 No divider without results
 
 ## GRAPH-017: Scroll sideways through a graph wider than 16 lanes
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — `x()` no longer clamps a lane to `MAX_LANES - 1`; `RowGraph` drawn at the full width and shifted by a shared `laneScroll`; `MAX_LANES` = 16 stays the visible width; Shift+wheel on the lane column, scroll bar in `.graph-head`, reveal of the selected dot, faded edges
-  - `src/lib/gitGraph.ts` — new pure `revealLane(scroll, lane, visibleLanes, totalLanes)`; `layoutGraph` is not changed
-  - `src/styles/app.css` — `.graph-lane-cell` (clipping, edge fades), lane scroll bar
-- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphView.test.tsx`
+  - `src/components/GraphView.tsx` — `x()` gives every lane its own place; `RowGraph` drawn at the full width (`fullW`) inside the `graphW` column and shifted by the shared `laneScroll` (in lanes; `lanePx` goes to the rows as the CSS variable `--lane-scroll`); `MAX_LANES` = 16 stays the visible width; Shift+wheel on the lane column (a non-passive `wheel` listener on the list), reveal of the selected dot, `lanes-left` / `lanes-right` (faded edges), reset on a scope switch
+  - `src/components/GraphLaneScroll.tsx` — the scroll bar under the lane column's heading (in `.graph-head`), only while the graph is wider than 16 lanes
+  - `src/lib/gitGraph.ts` — pure `revealLane(scroll, lane, visibleLanes, totalLanes)`, `clampLaneScroll`; `layoutGraph` is not changed
+  - `src/styles/app.css` — `.graph-lanes` (shifted by `--lane-scroll`), `.graph-list.lanes-left` / `.lanes-right` (edge fades on `.graph-lane-cell`), `.graph-lane-scroll`
+- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphPolish.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer reading a history with dozens of branches open at once
@@ -1094,14 +1113,15 @@ Scenario: GRAPH-017.9 Reload and switching scope
 
 ## GRAPH-018: List a small history by date
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — "Date order" toggle in the toolbar (`byDate` state, off by default), enabled only while the whole history is loaded in one page of at most 300 commits (asks for `PAGE + 1` to tell 300 from more), falls back to branch order when the history grows past it
-  - `src-tauri/src/git.rs` — `graph` / `git_graph` take the order (`--topo-order` or `--author-date-order`)
+  - `src/components/GraphView.tsx` — "Date order" toggle in the toolbar (`byDate` state, off by default; `orderOk`), enabled only once the first page of the scope shown has arrived (`countedFor`) and the whole history is loaded in one page of at most 300 commits (`load()` asks the first page for one commit more, `takePage`), falls back to branch order with one notification when the history is larger (`load()` turns `byDate` off and the reload effect runs again), `orderKeep` (the selected commit is brought back into view after the switch)
+  - `src-tauri/src/git.rs` — `graph_ordered` / `git_graph` take the order (`--topo-order`, or `--author-date-order` for `order: "date"`)
   - `src/lib/gitApi.ts` — `git.graph` order argument
-  - `src/lib/gitGraph.ts` — new pure `dateOrderAllowed(count, more)`; `layoutGraph` unchanged (works on any children-before-parents order)
-- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphView.test.tsx`, `src-tauri/src/git.rs`
+  - `src/lib/gitGraph.ts` — pure `dateOrderAllowed(count, more)`, `takePage`, `DATE_ORDER_MAX` = 300, the tooltip and notification texts `DATE_ORDER_WHY` / `DATE_ORDER_OFF`; `layoutGraph` unchanged (works on any children-before-parents order)
+  - `src/styles/app.css` — `.graph-order` (the disabled toggle)
+- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphPolish.test.tsx`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 
 **As a** developer in a small repository
@@ -1181,6 +1201,7 @@ Scenario: GRAPH-018.12 While loading
   Given the first page has not arrived yet
   When I look at the toolbar
   Then "Date order" is disabled until the commit count is known
+  And its tooltip says "Available once the commits are counted"
 ```
 
 ## GRAPH-019: Show Commit Graph is in the palette without a repository

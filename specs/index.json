@@ -10738,7 +10738,7 @@
       "title": "Long branch lines are cut short",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 139,
+      "line": 141,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10779,7 +10779,7 @@
       "title": "Show the current branch or all branches",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 183,
+      "line": 186,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10812,7 +10812,7 @@
       "title": "Load a long history in pages",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 217,
+      "line": 220,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10871,7 +10871,7 @@
       "title": "Speed up a very large history",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 286,
+      "line": 294,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10917,7 +10917,7 @@
       "title": "Find among the loaded commits",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 337,
+      "line": 345,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10962,7 +10962,7 @@
       "title": "Search the whole history and go to a result",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 388,
+      "line": 398,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11028,7 +11028,7 @@
       "title": "See a commit's details",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 464,
+      "line": 476,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11084,7 +11084,7 @@
       "title": "Open what a commit changed in a file",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 529,
+      "line": 541,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11130,7 +11130,7 @@
       "title": "Copy, switch, branch and tag from a commit's right-click menu",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 578,
+      "line": 590,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11192,7 +11192,7 @@
       "title": "Check out, cherry-pick or revert a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 655,
+      "line": 667,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11247,7 +11247,7 @@
       "title": "Reset the branch to a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 714,
+      "line": 726,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11288,10 +11288,10 @@
     },
     "GRAPH-014": {
       "id": "GRAPH-014",
-      "title": "See uncommitted work and a stopped operation above the graph",
+      "title": "See a stopped operation above the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 760,
+      "line": 772,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11309,7 +11309,7 @@
       "scenarios": [
         {
           "id": "GRAPH-014.1",
-          "title": "Uncommitted changes"
+          "title": "Uncommitted changes are a row, not a strip"
         },
         {
           "id": "GRAPH-014.2",
@@ -11338,20 +11338,24 @@
       "title": "Uncommitted changes as the first row of the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 822,
-      "status": "planned",
+      "line": 838,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
+        "src/components/GraphUncommitted.tsx",
         "src/lib/gitGraph.ts",
         "src/lib/git.ts",
         "src/lib/gitStatus.ts",
-        "src/components/panels/GitPanel.tsx",
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts",
         "src/styles/app.css"
       ],
       "tests": [
         "src/__tests__/gitGraph.test.ts",
-        "src/__tests__/graphView.test.tsx"
+        "src/__tests__/graphPolish.test.tsx",
+        "src/__tests__/graphView.test.tsx",
+        "src-tauri/src/git.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -11428,8 +11432,8 @@
       "title": "Drag the height of the Search All History results",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 943,
-      "status": "planned",
+      "line": 961,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -11438,7 +11442,7 @@
       ],
       "tests": [
         "src/__tests__/gitGraph.test.ts",
-        "src/__tests__/graphView.test.tsx"
+        "src/__tests__/graphPolish.test.tsx"
       ],
       "docs": [
         "docs/git.md"
@@ -11491,17 +11495,18 @@
       "title": "Scroll sideways through a graph wider than 16 lanes",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1018,
-      "status": "planned",
+      "line": 1036,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
+        "src/components/GraphLaneScroll.tsx",
         "src/lib/gitGraph.ts",
         "src/styles/app.css"
       ],
       "tests": [
         "src/__tests__/gitGraph.test.ts",
-        "src/__tests__/graphView.test.tsx"
+        "src/__tests__/graphPolish.test.tsx"
       ],
       "docs": [
         "docs/git.md"
@@ -11550,18 +11555,19 @@
       "title": "List a small history by date",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1095,
-      "status": "planned",
+      "line": 1114,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
         "src-tauri/src/git.rs",
         "src/lib/gitApi.ts",
-        "src/lib/gitGraph.ts"
+        "src/lib/gitGraph.ts",
+        "src/styles/app.css"
       ],
       "tests": [
         "src/__tests__/gitGraph.test.ts",
-        "src/__tests__/graphView.test.tsx",
+        "src/__tests__/graphPolish.test.tsx",
         "src-tauri/src/git.rs"
       ],
       "docs": [
@@ -11623,7 +11629,7 @@
       "title": "Show Commit Graph is in the palette without a repository",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1186,
+      "line": 1207,
       "status": "draft",
       "commands": [
         "git.graph"
@@ -19485,7 +19491,7 @@
       "title": "Stashes in the commit graph",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 636,
+      "line": 637,
       "status": "draft",
       "commands": [
         "git.graph"
@@ -19573,7 +19579,7 @@
       "title": "Stash from the menu and the command palette",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 730,
+      "line": 731,
       "status": "draft",
       "commands": [
         "git.stash",
@@ -22641,6 +22647,7 @@
       "GRAPH-011",
       "GRAPH-012",
       "GRAPH-013",
+      "GRAPH-015",
       "GRAPH-018",
       "HISTORY-001",
       "HISTORY-002",
@@ -22989,9 +22996,15 @@
       "COMMITCMP-005",
       "COMMITCMP-006"
     ],
+    "src/components/GraphLaneScroll.tsx": [
+      "GRAPH-017"
+    ],
     "src/components/GraphSummarise.tsx": [
       "GITAI-001",
       "GITAI-009"
+    ],
+    "src/components/GraphUncommitted.tsx": [
+      "GRAPH-015"
     ],
     "src/components/GraphView.tsx": [
       "BRANCH-001",
@@ -23321,7 +23334,6 @@
       "GITAI-001",
       "GITAI-003",
       "GRAPH-001",
-      "GRAPH-015",
       "HISTORY-002",
       "HISTORY-010",
       "MERGE-003",
@@ -24120,6 +24132,7 @@
       "GRAPH-008",
       "GRAPH-009",
       "GRAPH-011",
+      "GRAPH-015",
       "GRAPH-018",
       "HISTORY-001",
       "HISTORY-003",
@@ -24734,6 +24747,7 @@
       "GRAPH-015",
       "GRAPH-016",
       "GRAPH-017",
+      "GRAPH-018",
       "HISTORY-007",
       "JSON-007",
       "LSP-010",
@@ -24874,6 +24888,7 @@
       "GRAPH-011",
       "GRAPH-012",
       "GRAPH-013",
+      "GRAPH-015",
       "GRAPH-018",
       "HISTORY-001",
       "HISTORY-002",
@@ -25285,6 +25300,12 @@
       "MERGE-001",
       "MERGE-002"
     ],
+    "src/__tests__/graphPolish.test.tsx": [
+      "GRAPH-015",
+      "GRAPH-016",
+      "GRAPH-017",
+      "GRAPH-018"
+    ],
     "src/__tests__/graphView.test.tsx": [
       "COMMITCMP-001",
       "COMMITCMP-005",
@@ -25295,9 +25316,6 @@
       "GRAPH-011",
       "GRAPH-014",
       "GRAPH-015",
-      "GRAPH-016",
-      "GRAPH-017",
-      "GRAPH-018",
       "HISTORY-001",
       "HISTORY-003",
       "STASH-009",
