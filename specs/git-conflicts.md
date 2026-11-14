@@ -442,11 +442,11 @@ Scenario: CONFLICT-009.3 A file that is not in the folder
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/GitPanel.tsx` — Commit button `disabled` / tooltip, message prefill effect (`offered`, `opKey`)
+  - `src/components/panels/GitPanel.tsx` — Commit button `disabled` / tooltip, message prefill effect (`offered`, `opKey`; `offeredText`: the unedited prepared message is taken out again when the operation ends without a commit)
   - `src/lib/gitStatus.ts` — `commitLabel` ("Resolve N Conflict(s) First")
   - `src/lib/git.ts` — `commit()` refuses while conflicted files exist
   - `src-tauri/src/git.rs` — `operation_message` (MERGE_MSG without `#` lines) in `GitStatus.operationMessage`
-- Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitRemote.test.ts`, `src/__tests__/gitPanel.test.tsx`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 
 **As a** developer finishing a merge, cherry-pick or revert
@@ -487,6 +487,12 @@ Scenario: CONFLICT-010.6 The button comes back
   Given every file has been marked resolved
   When I look at the commit box
   Then the Commit button is enabled again with its normal wording, for example "Commit 2 Staged"
+
+Scenario: CONFLICT-010.7 The prepared message goes when the operation is aborted
+  Given the prepared message "Merge branch 'feature'" was filled in and I did not change it
+  When I abort the merge, or switch Source Control to another repository
+  Then the message box is empty again
+  And a prepared message I edited stays in the box
 ```
 
 ## CONFLICT-011: Abort a stopped operation

@@ -438,18 +438,29 @@ export function GitPanel() {
 
   // A stopped pick / merge / revert comes with the message git prepared: offer it once, in an empty box.
   const offered = useRef("");
+  const offeredText = useRef("");
   const opKey = repo?.operation && repo.operationMessage ? `${repo.root}|${repo.operation}|${repo.operationMessage}` : "";
   useEffect(() => {
     if (!opKey) {
       // The operation ended: the next one gets its message offered again, even an identical one.
       offered.current = "";
+      // Ended without a commit (Abort, or another repository is shown now): git's message goes with
+      // it, unless it was edited. Left in the box it was offered for the next, unrelated commit.
+      const was = offeredText.current;
+      offeredText.current = "";
+      if (was) setMessage((cur) => (cur === was ? "" : cur));
       return;
     }
     if (offered.current === opKey) return;
     offered.current = opKey;
     // (Not for a rebase or am: its commits / patches keep their own messages.)
     if (operationWords(repo!.operation!).continueLabel) return;
-    setMessage((cur) => (cur.trim() ? cur : repo!.operationMessage!));
+    const text = repo!.operationMessage!;
+    setMessage((cur) => {
+      if (cur.trim()) return cur;
+      offeredText.current = text;
+      return text;
+    });
   }, [opKey]);
 
   // Edit History: Undo Last Commit hands the undone commit's message back, into an empty box only (HISTORY-002.3).

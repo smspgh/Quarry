@@ -153,3 +153,48 @@ describe("Source Control panel: status line after a rewrite", () => {
     expect(syncButtons()).toEqual(["Push"]);
   });
 });
+
+// Seen live: after Abort Merge the box still held "Merge branch 'clash'", and it was still there
+// when another repository was opened, ready to be used for an unrelated commit.
+describe("Source Control panel: the message git prepared for a stopped merge", () => {
+  const box = () => document.querySelector<HTMLTextAreaElement>("textarea.scm-message")!;
+  const merging = () => repo({ operation: "merge", operationMessage: "Merge branch 'clash'", files: [{ path: `${ROOT}\notes.txt`, origPath: null, index: "U", worktree: "U", conflicted: true, untracked: false }] });
+  const setStatus = async (status: GitStatus) => {
+    answers.status = status;
+    await act(async () => useGit.setState({ repos: { [KEY]: status } }));
+    await flush();
+  };
+  const type = (text: string) =>
+    act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")!.set!.call(box(), text);
+      box().dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+  beforeEach(() => {
+    useStore.setState({ folder: ROOT, docs: [], dialog: null, toasts: [] });
+  });
+  afterEach(cleanup);
+
+  it("is offered in the empty box and goes again when the merge ends without a commit", async () => {
+    await show(merging());
+    expect(box().value).toBe("Merge branch 'clash'");
+    await setStatus(repo()); // Abort: no operation any more
+    expect(box().value).toBe("");
+  });
+
+  it("stays when it was edited", async () => {
+    await show(merging());
+    await type("Merge branch 'clash' (kept both lines)");
+    await setStatus(repo());
+    expect(box().value).toBe("Merge branch 'clash' (kept both lines)");
+  });
+
+  it("a message typed before the merge is never replaced or cleared", async () => {
+    await show(repo());
+    await type("my own message");
+    await setStatus(merging());
+    expect(box().value).toBe("my own message");
+    await setStatus(repo());
+    expect(box().value).toBe("my own message");
+  });
+});

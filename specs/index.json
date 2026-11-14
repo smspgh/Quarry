@@ -3800,6 +3800,7 @@
       ],
       "tests": [
         "src/__tests__/gitRemote.test.ts",
+        "src/__tests__/gitPanel.test.tsx",
         "src-tauri/src/git.rs"
       ],
       "docs": [
@@ -3829,6 +3830,10 @@
         {
           "id": "CONFLICT-010.6",
           "title": "The button comes back"
+        },
+        {
+          "id": "CONFLICT-010.7",
+          "title": "The prepared message goes when the operation is aborted"
         }
       ]
     },
@@ -3837,7 +3842,7 @@
       "title": "Abort a stopped operation",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 492,
+      "line": 498,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3885,7 +3890,7 @@
       "title": "Skip the commit an operation stopped on",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 546,
+      "line": 552,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3924,7 +3929,7 @@
       "title": "Carry on with a rebase",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 590,
+      "line": 596,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3973,7 +3978,7 @@
       "title": "Carry on with a patch series (git am)",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 649,
+      "line": 655,
       "status": "draft",
       "commands": [],
       "files": [
@@ -25283,6 +25288,7 @@
       "GIT-026"
     ],
     "src/__tests__/gitPanel.test.tsx": [
+      "CONFLICT-010",
       "MERGE-003",
       "MERGE-009"
     ],
