@@ -1,10 +1,33 @@
 # Quarry git roadmap
 
-Plan of attack for making Quarry's git experience the best one inside an editor. Written on 2026-11-12, at release 0.1.7, for a session that starts with no context. Read this, then the Git paragraph in `CLAUDE.md` and `docs/git.md`, before touching anything.
+Plan of attack for making Quarry's git experience the best one inside an editor. Written on 2026-11-12 at release 0.1.7; **items 0-9 were built on 2026-11-13/14 (item 10 has a spec only)**. This file is the handover for a session that starts with no context: read "Start here", then the Git notes in `CLAUDE.md` (the "Git roadmap work" bullets name the new code) and `docs/git.md`, before touching anything.
+
+## Start here (state on 2026-11-14)
+
+**Where things stand**
+
+- All work is on local `main`, 43+ commits after "Quarry 0.1.9" (139afb0): one specs commit, one commit per roadmap item, 17 "Fix: …" commits from the live pass, and "Roadmap: …" tracker commits. **Nothing is pushed, no version was bumped, nothing was released.** Commit, push and release only when the owner says so; no attribution trailers.
+- Checks on that main: `npx tsc --noEmit -p tsconfig.json` clean; `pnpm test` 1311 tests pass (about 25 s); `cd src-tauri && cargo test` 192 pass, 1 ignored (`real_claude_oneshot` makes a real Claude request: never run it unasked); `pnpm specs:check` 423 stories, 0 problems.
+- Specs: one file per item (table under "Progress"). Stories of items 0-9 are `draft` (built, not yet confirmed by the owner); THREEWAY-001..005 are `planned`. `Status: planned` is a third status the index script accepts (see `specs/README.md`). Shared conventions for the new features (Git menu layout, graph commit-menu order, ref-label menu, branch-picker purposes) are written once, in the Decisions of `specs/git-merge-rebase.md`.
+- Live pass: 123 checks in the dev build on throwaway repos. The check list and the full per-check results (what was seen, what was only verified through internal calls, which scenario ids were never exercised) are in `live-pass-2026-11-14/` (`live-checks.md`, `live-results-A.md` … `-D.md`). Their screenshots are on this machine only, git-ignored, in `.claude/live-pass-2026-11-14/shots-A` … `shots-D`.
+
+**What is left, in the order I would take it**
+
+1. **Owner decisions.** The numbered list "Open issues from the live pass" below is the backlog (24 entries). None is decided yet. The ones that matter most: 21 (signing failure during a history edit reports success), 1 (Git menu taller than the window), 3 (first click on a conflict bar lost while Source Control floats), 14 (double-click in the graph's file lists), 2 (disabled buttons have no tooltip), 9 (Compare toolbar when narrow), 10 (drop-stash wording), 8 (two choices made on the owner's behalf). Ask the owner which to act on; do not pick silently for the ones marked as decisions.
+2. **Defaults the spec agents chose that the owner never confirmed** (each is in the Decisions list of its spec file; they stand until he says otherwise): merge is blocked on any uncommitted change to a tracked file; stash includes untracked files by default and a conflicted pop has no Abort; a deletion is staged whole and Stage saves an unsaved tab silently; Compare with Branch shows the direct diff of the two tips; deleting a tag on the remote is out of scope and a merged branch still asks before delete; "Force Push…" shows on the status line only while Quarry remembers (in memory) that it rewrote pushed commits; lanes beyond 16 scroll sideways; date order only for histories of 300 commits or fewer; the Draft button sits under the message box; the three open questions for item 10 (Progress row 10).
+3. **Housekeeping not done:** `docs/git.md` and `CLAUDE.md` do not yet describe the 17 live-pass fixes (see `git log --grep "^Fix:"`); the roadmap sections "What exists at 0.1.7" and "Work, in order" below are the original plan, kept for reference, and no longer describe what is missing; the optional VS Code speed comparison (item 0) was never done; lane scrolling was checked on git/git only, not rust-lang/rust; the signed-out and usage-limit error paths of the Claude helpers were never seen live.
+4. **Then, when the owner asks:** bump the version, commit "Quarry <ver>", push, release (`docs/releasing.md`).
+
+**How this was built, and what to repeat or avoid**
+
+- Method: specs first (one agent per item), a reconciliation pass over the specs, then one build agent per item in its own git worktree, merged into main by cherry-pick with all checks re-run after every merge; then four serial live-pass runs. The same files are touched by every item (`GraphView.tsx`, `git.ts`, `git.rs`, `gitCommands.ts`, `MenuBar.tsx`), so parallel work means merge conflicts: "keep both sides" was right nearly every time; the real interactions were the branch picker and the graph menus.
+- A worktree created by the agent tool may start from an older commit: reset it to `main` before work. `CLAUDE.md` is git-ignored, so it is not in a worktree (read it from the main checkout) and edits to it are never committed.
+- Tests that mock `gitApi` need `stashList`; tests that mock `actions` need `answerAhead` and `missingOnly`.
+- Live tests: the rules under "How to verify" below, plus what this pass learned: never move the real mouse pointer, send OS input or take OS-level screen captures (CDP input and CDP screenshots only); the owner's saved session reopens this repository, so back up `%APPDATA%\com.quarry.app` (`session.json`, `settings.json`, `.window-state.json`, `search-history.json`), start the dev build with a scratch session, and restore by hash at the end; never click the Welcome page's recent files; kill only processes you started; the Claude helpers make real requests on the owner's plan (cap them, dummy text only).
 
 ## Progress
 
-Updated as work lands (last update: 2026-11-13). Each item has a spec in `specs/`; stories are `planned` until built, then `draft`; only the owner marks them `verified`. Stages: **Spec** (stories written and indexed) → **Built** (code + Vitest / Rust tests pass, committed on local main) → **Live** (seen working in the dev build on a throwaway repo).
+Updated as work lands (last update: 2026-11-14). Each item has a spec in `specs/`; stories are `planned` until built, then `draft`; only the owner marks them `verified`. Stages: **Spec** (stories written and indexed) → **Built** (code + Vitest / Rust tests pass, committed on local main) → **Live** (seen working in the dev build on a throwaway repo).
 
 Owner decisions, 2026-11-13: build items 0-9, item 10 gets a spec only; one local commit per item, nothing pushed or released; live checks in one pass after the build (the installed Quarry must be closed for it).
 
@@ -72,6 +95,8 @@ The owner uses the app day to day and reports rough edges himself. Do not plan a
 
 ## What exists at 0.1.7
 
+(Original plan text, kept for reference. Since then items 0-9 below were built: see "Start here" and "Progress".)
+
 All of it is described in `CLAUDE.md` (Git paragraph) and `docs/git.md`. In short:
 
 - **Source Control panel** (`components/panels/GitPanel.tsx`): branch + status line that tells uncommitted work from commits to push / pull, commit box, change sections, Commits list (marks unpushed), file history, collapsed Repository section.
@@ -103,6 +128,8 @@ From `CLAUDE.md`, plus lessons from building the above:
 - Large-history fixtures (rebuild when needed, they live in temp): `git clone --filter=tree:0 --no-checkout https://github.com/git/git.git` (86k commits) and the same for `rust-lang/rust` (352k). They have no files checked out: open them only as a graph tab, never as a folder with Source Control.
 
 ## Work, in order
+
+(Original plan text. Items 0-9 are built; item 10 is specified only. What is left is in "Start here" and "Open issues from the live pass".)
 
 Each item: what to build, how it should behave, and what "done" means. Ship each as its own commit; keep `docs/git.md` and the Git paragraph of `CLAUDE.md` in step.
 
