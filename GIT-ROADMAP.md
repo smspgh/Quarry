@@ -10,10 +10,10 @@ Owner decisions, 2026-11-13: build items 0-9, item 10 gets a spec only; one loca
 
 | # | Item | Spec file | Spec | Built | Live |
 | --- | --- | --- | --- | --- | --- |
-| 0 | Verification debt + `git.graph` in the palette | `git-graph.md` (GRAPH-019); live checks of CONFLICT-008 / 012 / 013 | indexed; GRAPH-019 is `draft` | palette fix yes (5eacf9b; 465 Vitest tests pass); nothing else to build | no: the menu item (GRAPH-019.4) and the three verification-debt checks wait for the live pass |
+| 0 | Verification debt + `git.graph` in the palette | `git-graph.md` (GRAPH-019); live checks of CONFLICT-008 / 012 / 013 | indexed; GRAPH-019 is `draft` | palette fix yes (5eacf9b; 465 Vitest tests pass); nothing else to build | yes, 2026-11-14: A0.1-A0.4 pass (rebase stopping twice, Skip, changed-by-us / deleted-by-them, palette + menu entry). VS Code timing comparison not done (optional) |
 | 1 | Hunk and line staging | `git-staging.md` (STAGE-001..009) | indexed; 2 owner questions (partial staging of removed lines, silent save on Stage); to check in review: its Ctrl+K chord shortcuts | yes (see git log: "stage, unstage and discard single changes and lines"; on main: 674 Vitest + 148 Rust tests pass; stories `draft`) | no: 16 live checks listed by the build agent (the bar layout has never been seen rendered) |
 | 2 | Stash | `git-stash.md` (STASH-001..011) | indexed; 2 owner questions (no Abort for a conflicted pop, untracked files included by default) | yes (b8660bf; on main: 610 Vitest + 132 Rust tests pass; stories `draft`) | no: 13 live checks listed by the build agent |
-| 3 | Start a merge or a rebase | `git-merge-rebase.md` (MERGE-001..009; 009 = Force Push, shared with item 6) | indexed; open default: merge is blocked on a dirty tree | yes (8184e5c; on main: 542 Vitest + 124 Rust tests pass; stories `draft`) | no: 11 live checks listed by the build agent |
+| 3 | Start a merge or a rebase | `git-merge-rebase.md` (MERGE-001..009; 009 = Force Push, shared with item 6) | indexed; open default: merge is blocked on a dirty tree | yes (8184e5c; on main: 542 Vitest + 124 Rust tests pass; stories `draft`) | yes, 2026-11-14: 11 checks, 10 pass; Git menu layout fails (taller than the window, open issue 1). Not checked: detached HEAD, repo with no commits, MERGE-006.5, MERGE-008.4/.8/.9/.10 |
 | 4 | Branch and tag housekeeping | `git-branches.md` (BRANCH-001..009) | indexed; 3 optional owner questions (remote tag delete, which remote when several, ask before deleting a merged branch) | yes (6fc83f8; on main: 840 Vitest + 162 Rust tests pass; stories `draft`) | no: 17 live checks listed by the build agent |
 | 5 | Compare commits | `git-compare-commits.md` (COMMITCMP-001..006) | indexed; 2 owner questions (two-dot vs three-dot for branches, untracked files vs working tree) | yes ("Graph: compare two commits, a commit with the working tree, or with a branch"; on main: 730 Vitest + 152 Rust tests pass; stories `draft`) | no: 11 live checks listed by the build agent |
 | 6 | Edit history | `git-history-edit.md` (HISTORY-001..011) | indexed; owner decided: warn, then Force Push (built with item 3) | yes (63b41f3; on main: 1068 Vitest + 192 Rust tests pass; stories `draft`; the no-editor rebase mechanism was verified on Windows in a throwaway repo). Open for the owner: reworded messages skip commit hooks (`--no-verify`) | no: 14 live checks; drag-reorder and squash-into-root have no test; one CSS-only merge fix (results divider vs Edit History list) to look at |
@@ -26,9 +26,22 @@ Spec phase, 2026-11-13: all eleven items have stories (80 new, all `planned`), i
 
 Build phase: the specs were committed locally as 021d25f. Wave 1 (items 0, 1, 2, 3) started 2026-11-13, one agent per item in its own worktree; the Built column changes when an item is merged into local main with tsc, Vitest and Rust tests passing.
 
-Resumed 2026-11-13: item 2 (stash) merged as b8660bf (on main: 610 Vitest + 132 Rust tests pass). Item 1 merged the same day (wave 1 complete). Wave 2 complete (items 4, 5, 9 merged). Wave 3 complete 2026-11-14 (items 6, 7 merged). Wave 4 (item 8) merged the same day: the build of items 0-9 is complete on local main (nothing pushed). Next and last: the live pass (needs the installed Quarry closed), about 120 live checks collected from the build agents plus item 0's three verification-debt checks.
+Resumed 2026-11-13: item 2 (stash) merged as b8660bf (on main: 610 Vitest + 132 Rust tests pass). Item 1 merged the same day (wave 1 complete). Wave 2 complete (items 4, 5, 9 merged). Wave 3 complete 2026-11-14 (items 6, 7 merged). Wave 4 (item 8) merged the same day: the build of items 0-9 is complete on local main (nothing pushed). Live pass started 2026-11-14 in four serial runs (A: items 0, 3 done; B: 1, 2; C: 4, 5, 7; D: 6, 8, 9); results per item in the Live column, open issues in the section below. The live pass (needs the installed Quarry closed), about 120 live checks collected from the build agents plus item 0's three verification-debt checks.
 
 Build order (agents work in parallel inside a wave, each in its own worktree; waves are merged before the next starts because they share `GraphView.tsx`, `git.ts` and `git.rs`): wave 1 = items 0, 1, 2, 3; wave 2 = 4, 5, 9; wave 3 = 6, 7; wave 4 = 8 (audits every action, so it goes last); then the live pass.
+
+## Open issues from the live pass
+
+Found in the dev build on throwaway repos; not fixed because each needs the owner's decision or is larger than a small fix. Fixed ones are separate "Fix: …" commits.
+
+1. **Git menu taller than the window** (883 px in an 816 px window, does not scroll): Push, Force Push…, Add Remote… and the Claude submenu cannot be reached with the mouse. Scrolling the top level would clip its submenus: needs a design decision (regroup into submenus, or scroll).
+2. **Disabled buttons show no tooltip** (`.btn:disabled` turns pointer events off): fixed for Merge or Rebase and Skip (ace9f47); every other disabled `.btn` / `.icon-btn` (Commit, header icons, stash, Draft) still has none. A global fix changes hover and click-through everywhere.
+3. **First click on a conflict-bar button is lost while Source Control floats (unpinned)**: the click closes the panel, the editor shifts, and Accept Current / Incoming is not pressed. A conflict stop opens that panel by itself, so this is the usual state.
+4. Menus and dialogs are see-through (text behind them is readable).
+5. The graph's commit menu is too narrow (220 px): "Create Branch Here (Don't Switch)…" and both Summarise entries are cut.
+6. The macro recorder records the picker step (`git.mergeBranch`) as well as `git.mergeRef`.
+7. Small: "Merge main into main…" shows (greyed) on the own-branch label; Stash comes before Stage Part of a File in the Git menu (planned order is the reverse); after Skip a further conflict shows the error toast rather than the notification CONFLICT-012.3 names; an extra "changed on disk and was reloaded" toast when the text is unchanged; at 280 px the Merge or Rebase button label is clipped.
+8. For the owner to confirm: the wording of fix a06eb63 ("Commit Merge" + its note) for a merge whose resolution changes no file; reworded / squashed messages skip commit hooks (`--no-verify`, item 6).
 
 ## The goal, stated honestly
 
