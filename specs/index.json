@@ -3588,7 +3588,7 @@
       "title": "Mark a conflicted file as resolved",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 279,
+      "line": 280,
       "status": "draft",
       "commands": [
         "git.stageFile"
@@ -3642,11 +3642,12 @@
       "title": "Take one side's version of a whole file",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 337,
+      "line": 338,
       "status": "draft",
       "commands": [],
       "files": [
         "src/components/panels/GitPanel.tsx",
+        "src/lib/gitStash.ts",
         "src/lib/git.ts",
         "src-tauri/src/git.rs",
         "src/lib/gitApi.ts",
@@ -3690,7 +3691,7 @@
       "title": "Open a conflicted file from Merge Changes",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 392,
+      "line": 395,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3724,7 +3725,7 @@
       "title": "Commit only when every conflict is resolved",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 425,
+      "line": 428,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3772,7 +3773,7 @@
       "title": "Abort a stopped operation",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 477,
+      "line": 480,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3820,7 +3821,7 @@
       "title": "Skip the commit an operation stopped on",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 529,
+      "line": 533,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3859,7 +3860,7 @@
       "title": "Carry on with a rebase",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 572,
+      "line": 576,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3908,7 +3909,7 @@
       "title": "Carry on with a patch series (git am)",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 628,
+      "line": 633,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10650,7 +10651,7 @@
       "title": "Long branch lines are cut short",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 137,
+      "line": 138,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10691,7 +10692,7 @@
       "title": "Show the current branch or all branches",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 181,
+      "line": 182,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10724,7 +10725,7 @@
       "title": "Load a long history in pages",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 214,
+      "line": 216,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10783,7 +10784,7 @@
       "title": "Speed up a very large history",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 282,
+      "line": 284,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10829,7 +10830,7 @@
       "title": "Find among the loaded commits",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 333,
+      "line": 335,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10874,7 +10875,7 @@
       "title": "Search the whole history and go to a result",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 384,
+      "line": 386,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10940,7 +10941,7 @@
       "title": "See a commit's details",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 460,
+      "line": 462,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10996,7 +10997,7 @@
       "title": "Open what a commit changed in a file",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 520,
+      "line": 523,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11042,7 +11043,7 @@
       "title": "Copy, switch, branch and tag from a commit's right-click menu",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 569,
+      "line": 572,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11104,7 +11105,7 @@
       "title": "Check out, cherry-pick or revert a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 643,
+      "line": 647,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11159,7 +11160,7 @@
       "title": "Reset the branch to a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 702,
+      "line": 706,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11203,15 +11204,18 @@
       "title": "See uncommitted work and a stopped operation above the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 748,
+      "line": 752,
       "status": "draft",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
         "src/lib/git.ts",
+        "src/lib/gitStash.ts",
         "src/lib/panels.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/graphView.test.tsx"
+      ],
       "docs": [
         "docs/git.md"
       ],
@@ -11235,6 +11239,10 @@
         {
           "id": "GRAPH-014.5",
           "title": "Abort from the strip"
+        },
+        {
+          "id": "GRAPH-014.6",
+          "title": "Conflicts left by a stash"
         }
       ]
     },
@@ -11243,7 +11251,7 @@
       "title": "Uncommitted changes as the first row of the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 802,
+      "line": 814,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11333,7 +11341,7 @@
       "title": "Drag the height of the Search All History results",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 923,
+      "line": 935,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11396,7 +11404,7 @@
       "title": "Scroll sideways through a graph wider than 16 lanes",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 998,
+      "line": 1010,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11455,7 +11463,7 @@
       "title": "List a small history by date",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1075,
+      "line": 1087,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11528,7 +11536,7 @@
       "title": "Show Commit Graph is in the palette without a repository",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1166,
+      "line": 1178,
       "status": "draft",
       "commands": [
         "git.graph"
@@ -18800,8 +18808,8 @@
       "title": "Stash uncommitted changes",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 24,
-      "status": "planned",
+      "line": 25,
+      "status": "draft",
       "commands": [
         "git.stash"
       ],
@@ -18812,6 +18820,7 @@
         "src/lib/gitStash.ts",
         "src/lib/gitCommands.ts",
         "src-tauri/src/git.rs",
+        "src-tauri/src/lib.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
@@ -18858,8 +18867,8 @@
       "title": "Choose whether untracked files go into the stash",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 89,
-      "status": "planned",
+      "line": 91,
+      "status": "draft",
       "commands": [
         "git.stash"
       ],
@@ -18913,8 +18922,8 @@
       "title": "Guards before stashing",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 146,
-      "status": "planned",
+      "line": 148,
+      "status": "draft",
       "commands": [
         "git.stash"
       ],
@@ -18923,11 +18932,13 @@
         "src/lib/git.ts",
         "src/components/panels/StashSection.tsx",
         "src/lib/gitCommands.ts",
-        "src/lib/gitStatus.ts"
+        "src/lib/gitStatus.ts",
+        "src-tauri/src/git.rs"
       ],
       "tests": [
         "src/__tests__/gitStash.test.ts",
-        "src/__tests__/stashSection.test.tsx"
+        "src/__tests__/stashSection.test.tsx",
+        "src-tauri/src/git.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -18960,8 +18971,8 @@
       "title": "See the stashes of the repository",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 191,
-      "status": "planned",
+      "line": 194,
+      "status": "draft",
       "commands": [
         "git.showStashes"
       ],
@@ -19027,8 +19038,8 @@
       "title": "See what a stash holds",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 260,
-      "status": "planned",
+      "line": 263,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/panels/StashSection.tsx",
@@ -19036,10 +19047,12 @@
         "src/lib/gitStatus.ts",
         "src-tauri/src/git.rs",
         "src/lib/gitApi.ts",
-        "src/lib/diff.ts"
+        "src/lib/diff.ts",
+        "src/lib/ipc.ts"
       ],
       "tests": [
         "src/__tests__/stashSection.test.tsx",
+        "src/__tests__/gitStash.test.ts",
         "src-tauri/src/git.rs"
       ],
       "docs": [
@@ -19085,8 +19098,8 @@
       "title": "Apply a stash and keep it",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 322,
-      "status": "planned",
+      "line": 326,
+      "status": "draft",
       "commands": [
         "git.stashApply"
       ],
@@ -19158,8 +19171,8 @@
       "title": "Pop a stash",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 404,
-      "status": "planned",
+      "line": 408,
+      "status": "draft",
       "commands": [
         "git.stashPop"
       ],
@@ -19206,8 +19219,8 @@
       "title": "Drop a stash",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 451,
-      "status": "planned",
+      "line": 455,
+      "status": "draft",
       "commands": [
         "git.stashDrop"
       ],
@@ -19267,8 +19280,8 @@
       "title": "A stash that conflicts when it comes back",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 513,
-      "status": "planned",
+      "line": 517,
+      "status": "draft",
       "commands": [
         "git.stashApply",
         "git.stashPop"
@@ -19286,6 +19299,7 @@
       "tests": [
         "src/__tests__/gitStash.test.ts",
         "src/__tests__/stashSection.test.tsx",
+        "src/__tests__/graphView.test.tsx",
         "src-tauri/src/git.rs"
       ],
       "docs": [
@@ -19363,8 +19377,8 @@
       "title": "Stashes in the commit graph",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 629,
-      "status": "planned",
+      "line": 636,
+      "status": "draft",
       "commands": [
         "git.graph"
       ],
@@ -19374,12 +19388,14 @@
         "src/components/GraphView.tsx",
         "src/lib/git.ts",
         "src/lib/gitApi.ts",
+        "src/lib/gitStash.ts",
         "src/styles/app.css",
         "src/styles/tokens.css"
       ],
       "tests": [
         "src/__tests__/gitGraph.test.ts",
         "src/__tests__/graphView.test.tsx",
+        "src/__tests__/gitStash.test.ts",
         "src-tauri/src/git.rs"
       ],
       "docs": [
@@ -19433,6 +19449,14 @@
         {
           "id": "STASH-010.12",
           "title": "No stashes"
+        },
+        {
+          "id": "STASH-010.13",
+          "title": "A stash on a commit no branch reaches any more"
+        },
+        {
+          "id": "STASH-010.14",
+          "title": "Loading more commits"
         }
       ]
     },
@@ -19441,8 +19465,8 @@
       "title": "Stash from the menu and the command palette",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 712,
-      "status": "planned",
+      "line": 730,
+      "status": "draft",
       "commands": [
         "git.stash",
         "git.stashApply",
@@ -22525,6 +22549,7 @@
       "STAGE-009",
       "STASH-001",
       "STASH-002",
+      "STASH-003",
       "STASH-004",
       "STASH-005",
       "STASH-006",
@@ -22589,6 +22614,7 @@
       "SET-003",
       "SET-005",
       "STAGE-001",
+      "STASH-001",
       "UI-006",
       "UI-023",
       "UI-024",
@@ -24110,7 +24136,9 @@
       "SAFE-007"
     ],
     "src/lib/gitStash.ts": [
+      "CONFLICT-008",
       "GITAI-008",
+      "GRAPH-014",
       "STASH-001",
       "STASH-002",
       "STASH-003",
@@ -24119,6 +24147,7 @@
       "STASH-007",
       "STASH-008",
       "STASH-009",
+      "STASH-010",
       "STASH-011"
     ],
     "src/lib/gitStatus.ts": [
@@ -24219,6 +24248,7 @@
       "SEARCH-016",
       "SET-002",
       "SET-011",
+      "STASH-005",
       "TAB-005",
       "UI-023",
       "UI-025",
@@ -24708,6 +24738,7 @@
       "STAGE-009",
       "STASH-001",
       "STASH-002",
+      "STASH-003",
       "STASH-004",
       "STASH-005",
       "STASH-006",
@@ -25025,10 +25056,12 @@
       "STASH-002",
       "STASH-003",
       "STASH-004",
+      "STASH-005",
       "STASH-006",
       "STASH-007",
       "STASH-008",
       "STASH-009",
+      "STASH-010",
       "STASH-011"
     ],
     "src/__tests__/goto.test.ts": [
@@ -25056,12 +25089,14 @@
       "GRAPH-001",
       "GRAPH-009",
       "GRAPH-011",
+      "GRAPH-014",
       "GRAPH-015",
       "GRAPH-016",
       "GRAPH-017",
       "GRAPH-018",
       "HISTORY-001",
       "HISTORY-003",
+      "STASH-009",
       "STASH-010"
     ],
     "src/__tests__/history.test.ts": [

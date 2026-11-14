@@ -121,7 +121,7 @@ export function layoutGraph(commits: GraphInput[], state: GraphState = newGraphS
   return rows;
 }
 
-export type RefKind = "head" | "branch" | "remote" | "tag";
+export type RefKind = "head" | "branch" | "remote" | "tag" | "stash";
 
 export interface RefLabel {
   kind: RefKind;
@@ -148,9 +148,10 @@ export function refLabels(refs: string[]): RefLabel[] {
       out.push({ kind: current ? "head" : "branch", name: full.slice(11), full });
     } else if (full.startsWith("refs/remotes/")) out.push({ kind: "remote", name: full.slice(13), full });
     else if (full.startsWith("refs/tags/")) out.push({ kind: "tag", name: full.slice(10), full });
+    else if (full === "refs/stash") out.push({ kind: "stash", name: "stash", full }); // a stash row's label
   }
   if (head && !attached) out.unshift({ kind: "head", name: "HEAD", full: "HEAD" });
-  const rank: Record<RefKind, number> = { head: 0, branch: 1, remote: 2, tag: 3 };
+  const rank: Record<RefKind, number> = { head: 0, branch: 1, remote: 2, tag: 3, stash: 4 };
   return out.sort((a, b) => rank[a.kind] - rank[b.kind]);
 }
 
@@ -159,6 +160,30 @@ export function commitMatches(c: { sha: string; summary: string; author: string;
   const q = query.trim().toLowerCase();
   if (!q) return true;
   return c.summary.toLowerCase().includes(q) || c.author.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.sha.startsWith(q) || c.refs.some((r) => r.toLowerCase().includes(q));
+}
+
+/** An entry of a stash row's right-click menu (it never gets the commit actions). */
+export interface StashMenuItem {
+  id: "apply" | "pop" | "drop" | "copy";
+  label: string;
+  /** Why it cannot run now (shown as its tooltip), or null. */
+  disabled: string | null;
+  danger: boolean;
+}
+
+/**
+ * The right-click menu of a stash row. `blocked`: why Apply / Pop cannot run (`stashBlocked`: a
+ * stopped operation, files in conflict), or null; `busy`: another git action is running. Drop and
+ * Copy are never blocked by an operation.
+ */
+export function stashMenu(blocked: string | null, busy: boolean): StashMenuItem[] {
+  const wait = busy ? "Another git action is running" : null;
+  return [
+    { id: "apply", label: "Apply Stash", disabled: wait ?? blocked, danger: false },
+    { id: "pop", label: "Pop Stash", disabled: wait ?? blocked, danger: false },
+    { id: "drop", label: "Drop Stash…", disabled: wait, danger: true },
+    { id: "copy", label: "Copy Message", disabled: null, danger: false },
+  ];
 }
 
 /** The graph's commit actions (gitApi's `GitCommitAction`, repeated so this file stays free of imports). */

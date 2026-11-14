@@ -48,6 +48,17 @@ describe("menu mnemonics", () => {
     const taken = new Set([...registered, "l", "u", "c", "w", "r", "p"]);
     for (const l of labels) expect(taken.has(MENU_MNEMONICS[l])).toBe(false);
   });
+  it("Git › Stash lists the five stash commands, after Unstage Current File, with no Drop All and no shortcuts", () => {
+    const menu = readFileSync("src/components/MenuBar.tsx", "utf8");
+    const sub = /\{ cmd: "git\.unstageFile" \},\s*(?:\{[^\n]*\},\s*)?\{ label: "Stash", submenu: \(\) => \[([^\]]*)\] \}/.exec(menu);
+    expect(sub).not.toBeNull();
+    expect([...sub![1].matchAll(/cmd: "([^"]+)"/g)].map((m) => m[1])).toEqual(["git.stash", "git.stashApply", "git.stashPop", "git.stashDrop", "git.showStashes"]);
+    const cmds = readFileSync("src/lib/gitCommands.ts", "utf8");
+    const stash = cmds.split("\n").filter((l) => /register\(\{ id: "git\.(stash|showStashes)/.test(l));
+    expect(stash).toHaveLength(5);
+    expect(stash.some((l) => l.includes("keys:"))).toBe(false);
+    expect(/Drop All|stashClear|stashDropAll/i.test(menu + cmds)).toBe(false);
+  });
   it("reads the letter from the physical key and only for a bare Alt", () => {
     expect(mnemonicKey(key("KeyF"))).toBe("f");
     expect(mnemonicKey({ ...key("KeyF"), key: "ƒ" })).toBe("f");

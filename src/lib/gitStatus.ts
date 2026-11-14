@@ -180,6 +180,7 @@ export function operationDone(operation: string, how: "continue" | "skip" | "abo
 
 /** Kind (colour / letter) of a file in a commit, from git's status letter there. */
 export function commitFileKind(status: string): GitKind {
+  if (status === "?") return "untracked"; // an untracked file held by a stash
   return status === "A" ? "added" : status === "D" ? "deleted" : status === "R" || status === "C" ? "renamed" : "modified";
 }
 

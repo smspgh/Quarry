@@ -6,6 +6,7 @@ const api = vi.hoisted(() => ({
   available: vi.fn(async () => "git version 2.53.0"),
   status: vi.fn<(path: string) => Promise<unknown>>(),
   show: vi.fn(async () => null),
+  stashList: vi.fn(async () => []),
   mergePreview: vi.fn<(root: string, target: string) => Promise<unknown>>(),
   merge: vi.fn<(root: string, target: string, mode: string) => Promise<string>>(),
   rebase: vi.fn<(root: string, target: string) => Promise<string>>(),

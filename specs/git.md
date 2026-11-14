@@ -14,7 +14,7 @@ Git in the editor (change markers, peek / revert, line blame), the Source Contro
 - Files:
   - `src/lib/git.ts` — `installGit`, `refreshGit` (debounce), `doRefresh` (a git failure goes to `statusErrors`, never `notRepo`; a known repository keeps its last status), `rescanGit` (clears `notRepo`, re-checks a missing git), `interesting`, `notRepo`, `repoOf`, `currentRepo`, `fileStatus`
   - `src/lib/gitApi.ts` — `git.available`, `git.status`, `GitStatus` / `GitFile`
-  - `src-tauri/src/git.rs` — `git_available`, `git_status`, `find_root`, `parse_status`, `git()` (`--no-optional-locks`, `GIT_TERMINAL_PROMPT=0`)
+  - `src-tauri/src/git.rs` — `git_available`, `git_status`, `find_root`, `parse_status`, `git()` (`--no-optional-locks`, `GIT_TERMINAL_PROMPT=0`); `status` also reads the newest stash's id and the number of stashes (STASH-004)
   - `src/components/panels/GitPanel.tsx` — header Refresh button (`rescanGit`), "Git was not found" / "not in a git repository" / "Git could not read" notes
   - `src/lib/gitCommands.ts` — `git.refresh` (runs `rescanGit`, like the panel's Refresh button)
   - `src/App.tsx` — calls `installGit()` at start-up

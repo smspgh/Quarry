@@ -119,6 +119,7 @@ Scenario: GRAPH-002.6 Labels
   Then the commit of "main" shows a filled label "main" and a larger dot
   And "feature" shows an outlined label, "origin/main" a remote label and "v1.0" a tag label
   And the labels are ordered: current branch, other local branches, remote branches, tags
+  And a stash row (All branches) carries a "stash" label and a hollow dot instead (STASH-010)
   And no label is shown for "origin/HEAD"
   And a right-click on a branch or tag label opens that label's own menu (MERGE-002), not the commit's
 
@@ -184,7 +185,7 @@ Scenario: GRAPH-003.5 Paging does not change the picture
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — "Current branch" / "All branches" segmented control (`all` state, starts on Current branch)
-  - `src-tauri/src/git.rs` — `graph_scope` (HEAD + `@{upstream}`, or `--all` without `refs/stash`)
+  - `src-tauri/src/git.rs` — `graph_scope` (HEAD + `@{upstream}`, or `--all` without `refs/stash`); with All branches `graph` adds one row per stash (STASH-010)
 - Tests: `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 
@@ -203,7 +204,8 @@ Scenario: GRAPH-004.1 Current branch is the default
 Scenario: GRAPH-004.2 All branches
   When I click "All branches"
   Then the graph is loaded again with every local branch, remote branch and tag
-  And stash entries are not shown
+  And each stash is shown as one row with a "stash" label above the commit it was made on (STASH-010)
+  And the commits git keeps behind a stash ("index on main: …", "untracked files on main: …") are not shown
 
 Scenario: GRAPH-004.3 A branch with no remote branch
   Given the current branch has no upstream
@@ -478,6 +480,7 @@ Scenario: GRAPH-009.1 Select a commit
   When I click a commit in the graph
   Then a details pane opens below with the full commit id, the whole message, the author with e-mail and date, its parents, its branch and tag labels
   And it lists the changed files with their letter (A, M, D, R) under a summary such as "3 files changed, 10 insertions(+), 2 deletions(-)"
+  And for a stash row it shows the stash's message, who stashed it and when, the commit it was made on as its only Parent, and the files it holds under "2 files in this stash" (STASH-010.6)
 
 Scenario: GRAPH-009.2 Move with the keyboard
   Given the commit list has focus and a commit is selected
@@ -589,6 +592,7 @@ Scenario: GRAPH-011.1 The menu
   Then the commit is selected
   And a menu opens headed by its short id and message
   And it offers Copy Commit Id, Copy Message, Create Branch Here…, Create Branch Here (Don't Switch)…, Create Tag Here…, Check Out This Commit…, Cherry-pick, Revert This Commit…, the merge and rebase entries of MERGE-001 and three Reset entries
+  And a stash row gets none of these: its menu is Apply Stash, Pop Stash, Drop Stash… and Copy Message (STASH-010.7)
   And it closes on Escape or a click elsewhere
   And a right-click on a branch or tag label of the row opens that label's menu instead (MERGE-002)
 
@@ -752,8 +756,9 @@ Scenario: GRAPH-013.5 Cancel
 - Files:
   - `src/components/GraphView.tsx` — `.graph-strip` rows, `openSourceControl()` (focuses the first Merge Changes row, else the first change), Abort button
   - `src/lib/git.ts` — `abortOperation`
+  - `src/lib/gitStash.ts` — `isStashConflict`, `stashConflictStrip` (the strip for conflicts with no operation in progress)
   - `src/lib/panels.ts` — `isPanelShown`, `showPanel`
-- Tests: none
+- Tests: `src/__tests__/graphView.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer looking at the graph
@@ -786,6 +791,13 @@ Scenario: GRAPH-014.4 The button is hidden when it would do nothing
 Scenario: GRAPH-014.5 Abort from the strip
   When I click "Abort" in the strip
   Then I am asked "Abort the cherry-pick?" before anything is undone
+
+Scenario: GRAPH-014.6 Conflicts left by a stash
+  Given 2 files are in conflict and no operation is in progress (a stash was applied or popped, STASH-009)
+  When I look at the graph tab
+  Then a warning strip says "A stash was applied with conflicts: 2 files have conflicts. Resolve them in Source Control."
+  And it has no "Abort" button
+  And the uncommitted-changes strip is not shown at the same time
 ```
 
 ### Decisions (planned stories)

@@ -36,6 +36,27 @@ export interface GitStatus {
   operationStep: [number, number] | null;
   files: GitFile[];
   remotes: GitRemote[];
+  /** Stash: id of the newest stash (what `refs/stash` points at; null with none) and how many
+   *  there are. Together they change whenever a stash is made, popped or dropped. */
+  stash?: string | null;
+  stashCount?: number;
+}
+
+/** A stash: uncommitted work put aside (STASH-004). */
+export interface GitStash {
+  /** The stash's commit id: every action names the stash by it, never by `stash@{n}`. */
+  sha: string;
+  short: string;
+  /** The commit it was made on. */
+  base: string;
+  author: string;
+  email: string;
+  /** When it was made, unix seconds. */
+  time: number;
+  /** git's subject: "On main: <message>", or "WIP on main: 1a2b3c4 <last commit>" (see `stashTitle`). */
+  subject: string;
+  /** It holds untracked files. */
+  untracked: boolean;
 }
 
 export interface GitIdentity {
@@ -124,7 +145,7 @@ export interface GitCommitFile {
   path: string;
   /** Repo-relative path at this commit. */
   rel: string;
-  /** git's status letter: A, M, D, R, C, T. */
+  /** git's status letter: A, M, D, R, C, T ("?" for an untracked file held by a stash). */
   status: string;
   /** The path before the commit (rename / copy). */
   origRel: string | null;
@@ -142,6 +163,9 @@ export interface GitGraphCommit {
   /** Full ref names pointing here: "HEAD", "refs/heads/main", "refs/remotes/origin/main", "refs/tags/v1". */
   refs: string[];
   summary: string;
+  /** A stash row (All branches): its only parent is the commit it was made on, `summary` is git's
+   *  stash subject and `refs` is ["refs/stash"]. */
+  stash?: boolean;
 }
 
 export interface GitCommitDetail {
@@ -282,4 +306,15 @@ export const git = {
   /** Plain `rebase <target>` of the current branch; rejects with git's output when it stops on a conflict. */
   rebase: (root: string, target: string) => invoke<string>("git_rebase", { root, target }),
   forcePushPreview: (root: string) => invoke<GitForcePushPreview>("git_force_push_preview", { root }),
+  // ---- stash ----
+  /** Every stash, newest first. */
+  stashList: (root: string) => invoke<GitStash[]>("git_stash_list", { root }),
+  /** Put the uncommitted changes aside (`untracked`: the untracked files too; never ignored ones).
+   *  Resolves with the new stash's id; rejects when there was nothing to stash. */
+  stashPush: (root: string, message: string, untracked: boolean) => invoke<string>("git_stash_push", { root, message, untracked }),
+  /** The files a stash holds, against the commit it was made on; untracked ones have status "?". */
+  stashFiles: (root: string, sha: string) => invoke<GitCommitFile[]>("git_stash_files", { root, sha }),
+  /** Apply, pop or drop the stash with this commit id. "conflicts": an apply / pop left conflicted
+   *  files (the stash is kept, also for a pop). Rejects when the id is no longer a stash. */
+  stashOp: (root: string, sha: string, op: "apply" | "pop" | "drop") => invoke<"ok" | "conflicts">("git_stash_op", { root, sha, op }),
 };

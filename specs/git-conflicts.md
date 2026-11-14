@@ -234,7 +234,7 @@ Scenario: CONFLICT-005.3 diff3 conflicts
 - Commands: none
 - Files:
   - `src/editor/conflicts.ts` — update listener in `conflictExtensions` (`hooks.cleared` when the count goes from some to none)
-  - `src/lib/git.ts` — `conflictsCleared` (only for a file git lists as conflicted), then `resolveConflicts`
+  - `src/lib/git.ts` — `conflictsCleared` (only for a file git lists as conflicted; `stashLastFile` words the last file of a stash conflict), then `resolveConflicts`
   - `src/lib/dialogs.ts` — `choose`
 - Tests: none
 - Docs: `docs/git.md`
@@ -262,8 +262,9 @@ Scenario: CONFLICT-006.4 The dialog says what is left
   Given 2 other files still have conflicts
   When the dialog appears after I resolve the last conflict of a file
   Then the dialog adds "2 other files still have conflicts."
-  And when it is the last file it says "It is the last file: after this you can commit to finish."
+  And when it is the last file of a merge, cherry-pick or revert it says "It is the last file: after this you can commit to finish."
   And when it is the last file of a rebase it says "It is the last file: after this, Continue Rebase carries on."
+  And when the conflicts came from a stash (no operation in progress) it says what STASH-009.9 gives, never "commit to finish"
 
 Scenario: CONFLICT-006.5 Deleting the markers by hand counts too
   Given I edit the text and delete the last marker lines myself
@@ -339,7 +340,8 @@ Scenario: CONFLICT-007.7 A file deleted on one side
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/GitPanel.tsx` — "Current" / "Incoming" buttons on Merge Changes rows (`FileRow`), rebase-aware tooltips
+  - `src/components/panels/GitPanel.tsx` — "Current" / "Incoming" buttons on Merge Changes rows (`FileRow`), rebase-aware and stash-aware tooltips
+  - `src/lib/gitStash.ts` — `stashSideTitle`
   - `src/lib/git.ts` — `takeSide` (asks before discarding unsaved edits, reloads or closes the open tab)
   - `src-tauri/src/git.rs` — `resolve_side` / `git_resolve_side` (`checkout --ours` / `--theirs` + `add`, or `rm -f` when that side has no stage 2 / 3 entry)
   - `src/lib/gitApi.ts` — `git.resolveSide`
@@ -387,6 +389,7 @@ Scenario: CONFLICT-008.6 During a rebase the tooltips say which side is which
   When I hover the buttons on a Merge Changes row
   Then the "Current" tooltip says it takes the version on the branch I am rebasing onto
   And the "Incoming" tooltip says it takes my own commit's version
+  And when the conflict came from a stash (no operation in progress) the tooltips say "Stash: Current is your files as they are now, Incoming is the stash."
 ```
 
 ## CONFLICT-009: Open a conflicted file from Merge Changes
@@ -498,6 +501,7 @@ Scenario: CONFLICT-011.1 The panel shows the operation
   Then a badge "Cherry-picking" shows after the branch button and the "Merge or Rebase" button, with an "Abort" button
   And a merge shows "Merging", a revert "Reverting" and a rebase "Rebasing"
   And it is the same for a merge or rebase started in Quarry (MERGE-007)
+  And conflicts left by a stash (no operation in progress) show the badge "Stash conflicts" instead, with no "Abort" button (STASH-009.3)
 
 Scenario: CONFLICT-011.2 Abort asks first
   When I click "Abort"
@@ -576,7 +580,7 @@ Scenario: CONFLICT-012.4 Nothing left to commit
 - Files:
   - `src/components/panels/GitPanel.tsx` — `rebasing`, disabled message box and its placeholder, `doCommit` → `continueOperation`, "Rebasing 2 of 5" from `operationStep`
   - `src/lib/gitStatus.ts` — `commitLabel(..., operation)` → "Continue Rebase"
-  - `src/lib/git.ts` — `continueOperation(root, "rebase", "continue")` (then `rewriteContinued`, MERGE-009), rebase `note` hook in `installGit`
+  - `src/lib/git.ts` — `continueOperation(root, "rebase", "continue")` (then `rewriteContinued`, MERGE-009), `note` hook in `installGit` (rebase / am wording, or the stash note)
   - `src/editor/conflicts.ts` — `ConflictHooks.note`, note shown in each bar
   - `src-tauri/src/git.rs` — `operation_step` (msgnum / end, next / last), `continue_operation` (`rebase --continue`, `GIT_EDITOR=true`)
 - Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git.rs`
@@ -622,7 +626,8 @@ Scenario: CONFLICT-013.6 The sides are explained
   Given a rebase is in progress and I open a conflicted file
   When I look at its conflict bars
   Then each conflict bar also says "Rebasing: Current is the branch you are rebasing onto, Incoming is your own commit."
-  And outside a rebase the bars carry no such note
+  And during a merge, cherry-pick or revert the bars carry no such note
+  And when the conflicts came from a stash they say "Stash: Current is your files as they are now, Incoming is the stash." (STASH-009.4)
 ```
 
 ## CONFLICT-014: Carry on with a patch series (git am)

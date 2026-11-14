@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, CircleDot, CloudDownload, Copy, Gauge, GitBranch, GitCommitHorizontal, GitMerge, History, Loader2, RefreshCw, RotateCcw, Search, Tag, TriangleAlert, Undo2, X } from "lucide-react";
+import { Archive, ArchiveRestore, ArrowDown, ArrowUp, CircleDot, CloudDownload, Copy, Gauge, GitBranch, GitCommitHorizontal, GitMerge, History, Loader2, RefreshCw, RotateCcw, Search, Tag, TriangleAlert, Undo2, X } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
@@ -12,9 +12,13 @@ import { actionConfirm, actionDone, commitMatches, layoutGraph, newGraphState, r
 import { commitFileKind, KIND_LABEL, KIND_LETTER, operationWords } from "../lib/gitStatus";
 import { useStore, type Doc } from "../lib/store";
 // Merge / rebase entries of the commit menu and the ref-label menu (specs/git-merge-rebase.md).
-import { startMerge, startRebase } from "../lib/git";
+import { openStashFile, stashAction, startMerge, startRebase } from "../lib/git";
 import { startEntries, targetOf, type StartEntry, type StartTarget } from "../lib/gitMerge";
 import { refMenu as refMenuOf } from "../lib/gitRefs";
+// Stash rows (All branches): STASH-010.
+import { stashMenu } from "../lib/gitGraph";
+import { isStashConflict, stashBlocked, stashConflictStrip, stashTitle } from "../lib/gitStash";
+import { fs } from "../lib/ipc";
 
 const PAGE = 300;
 /** A page slower than this means git is walking the whole history for it. */
@@ -29,7 +33,7 @@ const LANE_COLORS = 8;
 const x = (lane: number) => Math.min(lane, MAX_LANES - 1) * LANE + LANE / 2;
 
 /** The lines and the dot of one row. */
-function RowGraph({ row, head, width }: { row: GraphRow; head: boolean; width: number }) {
+function RowGraph({ row, head, width, stash = false }: { row: GraphRow; head: boolean; width: number; stash?: boolean }) {
   const mid = ROW / 2;
   const cx = x(row.col);
   const cls = (lane: number) => `gl gl-${lane % LANE_COLORS}`;
@@ -54,14 +58,14 @@ function RowGraph({ row, head, width }: { row: GraphRow; head: boolean; width: n
       {row.out.map((j) => (j === row.col
         ? <line key={`o${j}`} className={cls(j)} x1={cx} y1={mid} x2={cx} y2={ROW} />
         : <path key={`o${j}`} className={cls(j)} d={`M ${cx} ${mid} Q ${x(j)} ${mid} ${x(j)} ${ROW}`} />))}
-      <circle className={`gn gl-${row.col % LANE_COLORS} ${head ? "head" : ""}`} cx={cx} cy={mid} r={head ? 4.5 : 3.5} />
+      <circle className={`gn gl-${row.col % LANE_COLORS} ${head ? "head" : ""} ${stash ? "stash" : ""}`} cx={cx} cy={mid} r={head ? 4.5 : 3.5} />
     </svg>
   );
 }
 
 function RefBadge({ label, onContextMenu }: { label: RefLabel; onContextMenu?: (e: React.MouseEvent) => void }) {
-  const Icon = label.kind === "tag" ? Tag : label.kind === "remote" ? CloudDownload : GitBranch;
-  const what = label.kind === "head" ? (label.name === "HEAD" ? "You are here (detached: not on a branch)" : `${label.name}: the branch you are on`) : label.kind === "branch" ? `Local branch ${label.name}` : label.kind === "remote" ? `Remote branch ${label.name}` : `Tag ${label.name}`;
+  const Icon = label.kind === "stash" ? Archive : label.kind === "tag" ? Tag : label.kind === "remote" ? CloudDownload : GitBranch;
+  const what = label.kind === "stash" ? "A stash: uncommitted work put aside, drawn on the commit it was made on" : label.kind === "head" ? (label.name === "HEAD" ? "You are here (detached: not on a branch)" : `${label.name}: the branch you are on`) : label.kind === "branch" ? `Local branch ${label.name}` : label.kind === "remote" ? `Remote branch ${label.name}` : `Tag ${label.name}`;
   return (
     <span className={`graph-ref ${label.kind}`} title={what} onContextMenu={onContextMenu}>
       <Icon size={10} /> {label.name}
@@ -100,6 +104,8 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   /** Commits loaded so far and their rows; laid out page by page, carrying the lanes over. */
   const [data, setData] = useState<{ commits: GitGraphCommit[]; rows: GraphRow[]; wide: number }>({ commits: [], rows: [], wide: 1 });
   const { commits, rows } = data;
+  const commitsRef = useRef(commits);
+  commitsRef.current = commits;
   const [more, setMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -133,6 +139,8 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   const indexOf = useRef(new Map<string, number>());
   const pageSize = useRef(PAGE);
   const inFlight = useRef(false);
+  /** Stash rows among the loaded rows. */
+  const stashRows = useRef(0);
 
   useEffect(() => editor.registerFocus(doc.id, () => listRef.current?.focus()), [doc.id]);
   useEffect(() => {
@@ -148,7 +156,8 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
     setError(null);
     try {
       const size = pageSize.current;
-      const skip = reset ? 0 : indexOf.current.size;
+      // Stash rows are extra rows of a page: git's paging counts commits only.
+      const skip = reset ? 0 : indexOf.current.size - stashRows.current;
       const started = performance.now();
       const page = await git.graph(root, allRef.current, skip, size);
       const took = performance.now() - started;
@@ -162,15 +171,18 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
       if (reset) {
         lanes.current = newGraphState();
         indexOf.current = new Map();
+        stashRows.current = 0;
       }
       const fresh = page.filter((c) => !indexOf.current.has(c.sha));
+      stashRows.current += fresh.filter((c) => c.stash).length;
+      const full = page.filter((c) => !c.stash).length === size;
       const base = indexOf.current.size;
       fresh.forEach((c, i) => indexOf.current.set(c.sha, base + i));
       const laid = layoutGraph(fresh, lanes.current);
       const wide = laid.reduce((m, r) => Math.max(m, r.width), 1);
       setData((cur) => (reset ? { commits: fresh, rows: laid, wide } : { commits: [...cur.commits, ...fresh], rows: [...cur.rows, ...laid], wide: Math.max(cur.wide, wide) }));
-      setMore(page.length === size);
-      return page.length === size;
+      setMore(full);
+      return full;
     } catch (e) {
       if (gen === generation.current) setError(String(e));
       return false;
@@ -185,7 +197,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   allRef.current = all;
 
   // (Re)load when the tab is shown and whenever the repository moves: commit, pull, push, checkout, fetch.
-  const stamp = repo ? `${repo.head}|${repo.branch}|${repo.ahead}|${repo.behind}|${repo.upstream}|${repo.operation}` : "";
+  const stamp = repo ? `${repo.head}|${repo.branch}|${repo.ahead}|${repo.behind}|${repo.upstream}|${repo.operation}|${repo.stash ?? ""}|${repo.stashCount ?? 0}` : "";
   useEffect(() => {
     if (!visible) return;
     inFlight.current = false;
@@ -194,7 +206,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
 
   const lanesWide = Math.min(MAX_LANES, data.wide);
   const graphW = lanesWide * LANE + 6;
-  const matches = useMemo(() => (query.trim() ? commits.map((c) => commitMatches(c, query)) : null), [commits, query]);
+  const matches = useMemo(() => (query.trim() ? commits.map((c) => commitMatches(c.stash ? { ...c, summary: stashTitle(c.summary).title } : c, query)) : null), [commits, query]);
   const matchCount = matches ? matches.filter(Boolean).length : 0;
 
   // Only the rows on screen are in the DOM.
@@ -218,7 +230,10 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
     setDetail(null);
     if (!selected) return;
     let live = true;
-    git.commitDetail(root, selected).then((d) => live && setDetail(d), () => {});
+    // A stash: the files it holds (untracked ones included) instead of a commit's changes.
+    const at = indexOf.current.get(selected);
+    const held = at !== undefined && commitsRef.current[at]?.stash ? git.stashFiles(root, selected).catch(() => null) : null;
+    Promise.all([git.commitDetail(root, selected), held]).then(([d, list]) => live && d && setDetail(list ? { ...d, files: list, stat: `${list.length} file${list.length === 1 ? "" : "s"} in this stash` } : d), () => {});
     return () => { live = false; };
   }, [root, selected]);
 
@@ -333,6 +348,9 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
       if (action === "branch" || action === "tag") void load(true);
     }
   };
+  /** Stash rows: the same guarded actions as the Stashes section. */
+  const stashBlock = repo ? stashBlocked(repo, "apply") : null;
+  const stashAct = (what: "apply" | "pop" | "drop", c: GitGraphCommit) => void stashAction(root, { sha: c.sha, subject: c.summary, time: c.time }, what);
   const commitNaming = () => {
     const n = newName.trim();
     const cur = naming;
@@ -366,7 +384,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
     e.stopPropagation();
     setSelected(c.sha);
     const at = { x: e.clientX, y: e.clientY, commit: c };
-    const has = !!refMenuOf(label, { repo, busy });
+    const has = !c.stash && !!refMenuOf(label, { repo, busy }); // a stash row only ever gets its own menu
     setMenu(has ? null : at);
     setRefMenu(has ? { ...at, label } : null);
   };
@@ -467,7 +485,14 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
           <button className="btn small" disabled={!!busy} onClick={() => void abortOperation(root, repo.operation!)}>Abort</button>
         </div>
       )}
-      {repo && !repo.operation && repo.files.length > 0 && (
+      {repo && isStashConflict(repo) && (
+        <div className="graph-strip warn" role="status">
+          <TriangleAlert size={14} />
+          <span className="grow">{stashConflictStrip(conflicts)}</span>
+          {!gitShown && <button className="btn small" onClick={openSourceControl}>Open Source Control</button>}
+        </div>
+      )}
+      {repo && !repo.operation && conflicts === 0 && repo.files.length > 0 && (
         <div className="graph-strip" role="status">
           <CircleDot size={13} className="muted" />
           <span className="grow">{repo.files.length} uncommitted change{repo.files.length === 1 ? "" : "s"}{repo.branch ? ` on ${repo.branch}` : ""}: not in the graph until committed.</span>
@@ -573,7 +598,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
                 key={c.sha}
                 role="option"
                 aria-selected={c.sha === selected}
-                className={`graph-row ${c.sha === selected ? "selected" : ""} ${dim ? "dim" : ""} ${isHead ? "head" : ""}`}
+                className={`graph-row ${c.sha === selected ? "selected" : ""} ${dim ? "dim" : ""} ${isHead ? "head" : ""} ${c.stash ? "stash" : ""}`}
                 style={{ top: i * ROW, height: ROW }}
                 onClick={() => { setSelected(c.sha); listRef.current?.focus(); }}
                 onContextMenu={(e) => {
@@ -582,10 +607,10 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
                   setMenu({ x: e.clientX, y: e.clientY, commit: c });
                 }}
               >
-                <span className="graph-lane-cell" style={{ width: graphW }}>{row && <RowGraph row={row} head={isHead} width={graphW} />}</span>
+                <span className="graph-lane-cell" style={{ width: graphW }}>{row && <RowGraph row={row} head={isHead} width={graphW} stash={c.stash} />}</span>
                 <span className="graph-c-msg">
                   {labels.map((l) => <RefBadge key={l.full} label={l} onContextMenu={(e) => onRefContext(e, c, l)} />)}
-                  <span className="truncate" title={c.summary}>{c.summary}</span>
+                  <span className="truncate" title={c.summary}>{c.stash ? stashTitle(c.summary).title : c.summary}</span>
                 </span>
                 <span className="graph-c-author truncate" title={`${c.author} <${c.email}>`}>{c.author}</span>
                 <span className="graph-c-date truncate" title={new Date(c.time * 1000).toLocaleString()}>{relativeTime(c.time)}</span>
@@ -609,10 +634,10 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
                 <span className="grow" />
                 <button className="icon-btn xs" title="Close details" onClick={() => setSelected(null)}><X size={14} /></button>
               </div>
-              <pre className="graph-message">{detail?.message ?? sel.summary}</pre>
+              <pre className="graph-message">{sel.stash ? stashTitle(sel.summary).title : (detail?.message ?? sel.summary)}</pre>
               <dl className="graph-meta">
-                <dt>Author</dt><dd>{sel.author} &lt;{sel.email}&gt; · {new Date(sel.time * 1000).toLocaleString()}</dd>
-                {detail && (detail.committer !== detail.author || detail.commitTime !== detail.time) && (
+                <dt>{sel.stash ? "Stashed" : "Author"}</dt><dd>{sel.author} &lt;{sel.email}&gt; · {new Date(sel.time * 1000).toLocaleString()}</dd>
+                {detail && !sel.stash && (detail.committer !== detail.author || detail.commitTime !== detail.time) && (
                   <><dt>Committed</dt><dd>{detail.committer} &lt;{detail.committerEmail}&gt; · {new Date(detail.commitTime * 1000).toLocaleString()}</dd></>
                 )}
                 {index >= 0 && rows[index]?.from.length > 0 && (
@@ -621,7 +646,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
                     <dd>{rows[index].from.map((r) => commits[r] && <button key={r} className="link-btn mono" title={commits[r].summary} onClick={() => select(r)}>{commits[r].short}</button>)}</dd>
                   </>
                 )}
-                <dt>{sel.parents.length > 1 ? "Parents" : "Parent"}</dt>
+                <dt title={sel.stash ? "The commit this stash was made on" : undefined}>{sel.parents.length > 1 ? "Parents" : "Parent"}</dt>
                 <dd>
                   {sel.parents.length === 0 && "none (the first commit)"}
                   {sel.parents.map((p) => <button key={p} className="link-btn mono" title="Go to this commit" onClick={() => void goTo(p)}>{p.slice(0, 7)}</button>)}
@@ -637,7 +662,30 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
         </>
       )}
 
-      {menu && createPortal(
+      {menu && menu.commit.stash && createPortal(
+        <GraphMenu menu={menu}>
+          {stashMenu(stashBlock, !!busy).map((m) => (
+            <button
+              key={m.id}
+              className={`palette-item ${m.danger ? "danger" : ""}`}
+              role="menuitem"
+              disabled={!!m.disabled}
+              title={m.disabled ?? undefined}
+              onClick={() => {
+                const c = menu.commit;
+                setMenu(null);
+                if (m.id === "copy") copy(stashTitle(c.summary).title, "the message");
+                else stashAct(m.id, c);
+              }}
+            >
+              {m.id === "copy" ? <Copy size={13} /> : m.id === "drop" ? <X size={13} /> : m.id === "pop" ? <ArchiveRestore size={13} /> : <Archive size={13} />}
+              <span className="title">{m.label}</span>
+            </button>
+          ))}
+        </GraphMenu>,
+        document.body,
+      )}
+      {menu && !menu.commit.stash && createPortal(
         <GraphMenu menu={menu}>
           {item("Copy Commit Id", Copy, () => copy(menu.commit.sha, "the commit id"))}
           {item("Copy Message", Copy, () => copy(menu.commit.summary, "the message"))}
@@ -693,14 +741,14 @@ function stoppedNoun(operation: string): string {
 function DetailFile({ file, commit }: { file: GitCommitFile; commit: GitGraphCommit }) {
   const kind = commitFileKind(file.status);
   const slash = file.rel.lastIndexOf("/");
-  const open = () => void openCommitFile({ sha: commit.sha, short: commit.short, author: commit.author, email: commit.email, time: commit.time, summary: commit.summary, rel: file.rel, root: "" }, file);
+  const open = () => commit.stash ? void openStashFile({ sha: commit.sha, short: commit.short, base: commit.parents[0] ?? "" }, file) : void openCommitFile({ sha: commit.sha, short: commit.short, author: commit.author, email: commit.email, time: commit.time, summary: commit.summary, rel: file.rel, root: "" }, file);
   return (
     <div
       className="scm-row graph-file"
       tabIndex={0}
       title={`${file.rel}\n${KIND_LABEL[kind]}${file.origRel ? ` (from ${file.origRel})` : ""}\nClick to see what this commit changed, double-click to open the file as it is now`}
       onClick={open}
-      onDoubleClick={() => file.status !== "D" && void openPath(file.path)}
+      onDoubleClick={() => file.status !== "D" && (commit.stash ? void fs.exists(file.path).then((there) => void (there && openPath(file.path)), () => {}) : void openPath(file.path))}
       onKeyDown={(e) => e.key === "Enter" && open()}
     >
       <span className={`scm-name git-${kind}`}>{file.rel.slice(slash + 1)}</span>
@@ -722,7 +770,7 @@ function GraphMenu({ menu, children, head }: { menu: Menu; children: React.React
   }, [menu.x, menu.y]);
   return (
     <div ref={ref} className="palette ctx-menu graph-menu" role="menu" style={{ left: pos.left, top: pos.top }} onMouseDown={(e) => e.stopPropagation()}>
-      <div className="graph-menu-head truncate">{head ?? <><span className="mono">{menu.commit.short}</span> {menu.commit.summary}</>}</div>
+      <div className="graph-menu-head truncate">{head ?? <><span className="mono">{menu.commit.short}</span> {menu.commit.stash ? `Stash: ${stashTitle(menu.commit.summary).title}` : menu.commit.summary}</>}</div>
       {children}
     </div>
   );

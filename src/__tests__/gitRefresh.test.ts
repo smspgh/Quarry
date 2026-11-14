@@ -5,7 +5,7 @@ const api = vi.hoisted(() => ({
   available: vi.fn<() => Promise<string | null>>(),
   status: vi.fn<(path: string) => Promise<unknown>>(),
 }));
-vi.mock("../lib/gitApi", () => ({ git: { available: api.available, status: api.status, show: vi.fn(async () => null) } }));
+vi.mock("../lib/gitApi", () => ({ git: { available: api.available, status: api.status, show: vi.fn(async () => null), stashList: vi.fn(async () => []) } }));
 
 import { currentRepo, followOpenFolder, refreshGit, repoOf, rescanGit, setSourceControlContext, useGit } from "../lib/git";
 import { pathArg } from "../lib/gitCommands";

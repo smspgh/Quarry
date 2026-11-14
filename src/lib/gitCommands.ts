@@ -9,6 +9,7 @@ import { compareWithHead, currentRepo, checkout, openGraph, resolveConflicts, fi
 import { nextChangeIndex } from "./gitStatus";
 import { forcePush, startMerge, startRebase } from "./git";
 import { forcePushBlocked, startBlocked, type StartKind } from "./gitMerge";
+import { showStashes, showStashForm, stashLatest } from "./git";
 import { showPanel } from "./panels";
 import { activeDoc, useStore } from "./store";
 
@@ -196,4 +197,14 @@ export function registerGitCommands() {
       if (repo) void forcePush(repo.root);
     },
   });
+
+  // ---- stash (no shortcuts, and on purpose no command that drops every stash) ----
+  // The commands stay enabled while a stash cannot run (a stopped operation, conflicts, nothing to
+  // stash): running one then says why, through the same guards as the panel's buttons.
+  const hasStash = () => (currentRepo()?.stashCount ?? 0) > 0;
+  register({ id: "git.stash", title: "Stash Changes…", category: "Git", enabled: hasRepo, run: showStashForm });
+  register({ id: "git.stashApply", title: "Apply Latest Stash", category: "Git", enabled: hasStash, run: () => void stashLatest("apply") });
+  register({ id: "git.stashPop", title: "Pop Latest Stash", category: "Git", enabled: hasStash, run: () => void stashLatest("pop") });
+  register({ id: "git.stashDrop", title: "Drop Latest Stash…", category: "Git", enabled: hasStash, run: () => void stashLatest("drop") });
+  register({ id: "git.showStashes", title: "Show Stashes", category: "Git", enabled: hasRepo, run: showStashes });
 }

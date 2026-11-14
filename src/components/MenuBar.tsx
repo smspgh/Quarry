@@ -264,6 +264,7 @@ const MENUS: Menu[] = [
       { sep: true },
       { cmd: "git.stageFile" },
       { cmd: "git.unstageFile" },
+      { label: "Stash", submenu: () => [{ cmd: "git.stash" }, { cmd: "git.stashApply" }, { cmd: "git.stashPop" }, { cmd: "git.stashDrop" }, { sep: true }, { cmd: "git.showStashes" }] },
       { sep: true },
       { cmd: "git.switchBranch" },
       { cmd: "git.mergeBranch" },

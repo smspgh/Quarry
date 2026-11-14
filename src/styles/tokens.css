@@ -124,6 +124,8 @@
   --git-deleted: #c42b1c;
   --git-untracked: #2e8a3c;
   --git-conflict: #a5009b;
+  --git-stash: #0b7285;
+  --git-stash-soft: rgba(11, 114, 133, 0.12);
   --git-deleted-bg: rgba(196, 43, 28, 0.08);
 
   /* Claude Code tabs */
@@ -239,6 +241,8 @@
   --git-deleted: #ff8a8a;
   --git-untracked: #6fcf7f;
   --git-conflict: #e48bff;
+  --git-stash: #66d9e8;
+  --git-stash-soft: rgba(102, 217, 232, 0.14);
   --git-deleted-bg: rgba(255, 138, 138, 0.10);
 
   --claude-accent: #e5896a;

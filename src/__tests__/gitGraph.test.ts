@@ -127,3 +127,34 @@ describe("commit actions from the graph", () => {
     expect(actionDone("reset-mixed", "18bc71d")).toBe("Reset to 18bc71d");
   });
 });
+
+// A stash row is a commit with one parent (the commit it was made on) and no children, listed
+// right above that commit: the layout needs nothing special for it.
+describe("stash rows in the layout", () => {
+  it("puts a stash on an older commit in its own lane, joined at its base, with main in the first lane", () => {
+    const rows = layoutGraph([c("m3", "m2"), c("m2", "m1"), c("stash", "m1"), c("m1", "m0"), c("m0")]);
+    expect(rows.map((r) => r.col)).toEqual([0, 0, 1, 0, 0]);
+    // Its line curves straight into main's lane, which already leads to that commit.
+    expect(rows[2]).toMatchObject({ col: 1, into: [], through: [0], out: [0], width: 2 });
+    expect(rows[3]).toMatchObject({ col: 0, into: [0], width: 1 }); // the lane is free again
+  });
+
+  it("draws several stashes on one commit as separate rows joined to it", () => {
+    const rows = layoutGraph([c("m2", "m1"), c("s2", "m1"), c("s1", "m1"), c("m1")]);
+    expect(rows.map((r) => r.col)).toEqual([0, 1, 1, 0]);
+    expect(rows.slice(1, 3).map((r) => r.out)).toEqual([[0], [0]]);
+  });
+
+  it("a stash on the newest commit sits above it", () => {
+    const rows = layoutGraph([c("stash", "tip"), c("tip", "old"), c("old")]);
+    expect(rows.map((r) => r.col)).toEqual([0, 0, 0]);
+    expect(rows[1].into).toEqual([0]);
+  });
+
+  it("find matches the stash label", () => {
+    const row = { sha: "f".repeat(40), summary: "WIP parser", author: "Ada", email: "ada@example.com", refs: ["refs/stash"] };
+    expect(commitMatches(row, "parser")).toBe(true);
+    expect(commitMatches(row, "stash")).toBe(true);
+    expect(commitMatches(row, "lexer")).toBe(false);
+  });
+});

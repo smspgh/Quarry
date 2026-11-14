@@ -4772,6 +4772,18 @@ select optgroup {
 .scm-commit-row.local .scm-commit-line { font-weight: 600; }
 .scm-row.scm-commit-file { padding-left: 40px; }
 .panel-note.scm-commit-files { padding-left: 40px; }
+/* Stashes section (StashSection.tsx) and stash rows of the commit graph. */
+.scm-stash-new { height: 20px; padding: 0 6px; font-size: 11px; }
+.scm-stash-form { padding: 6px 12px 8px 26px; }
+.scm-stash:focus-within .scm-actions { display: inline-flex; }
+.scm-stash .scm-actions { gap: 3px; flex-shrink: 0; }
+.scm-stash-drop:not(:disabled) { color: var(--danger); }
+.scm-stash-drop:not(:disabled):hover { background: var(--danger-soft); }
+.scm-stash-mark { color: var(--warning); }
+.graph-ref.stash { background: var(--git-stash-soft); border-color: transparent; color: var(--git-stash); }
+.graph-row.stash .graph-c-msg > .truncate { font-style: italic; }
+/* A stash is not a commit: its dot is hollow. */
+.gn.stash.gl-0, .gn.stash.gl-1, .gn.stash.gl-2, .gn.stash.gl-3, .gn.stash.gl-4, .gn.stash.gl-5, .gn.stash.gl-6, .gn.stash.gl-7 { fill: var(--editor-bg); stroke: var(--git-stash); stroke-width: 1.5; }
 
 /* Explorer */
 .tree-row .tree-label.git-deleted { text-decoration: line-through; }

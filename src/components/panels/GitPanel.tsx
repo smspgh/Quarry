@@ -11,6 +11,8 @@ import { RepoSettings } from "./GitRepoSettings";
 import { MergeRebaseButton } from "./GitMergeButton";
 import { forcePush } from "../../lib/git";
 import { isRewritten } from "../../lib/gitMerge";
+import { StashesSection } from "./StashSection";
+import { isStashConflict, STASH_CONFLICT, stashSideTitle } from "../../lib/gitStash";
 
 const nameOf = (p: string) => p.slice(p.lastIndexOf("\\") + 1);
 
@@ -53,10 +55,10 @@ function FileRow({ f, repo, group }: { f: GitFile; repo: GitStatus; group: Group
         )}
         {group === "conflict" && (
           <>
-            <button className="btn small scm-side" title={repo.operation === "rebase" ? "Resolve by taking the version on the branch you are rebasing onto, for the whole file (deletes it if that side deleted it)" : "Resolve by taking your branch's version of the whole file (deletes it if your branch deleted it)"} onClick={() => void takeSide(repo.root, f, "ours")}>
+            <button className="btn small scm-side" title={repo.operation === "rebase" ? "Resolve by taking the version on the branch you are rebasing onto, for the whole file (deletes it if that side deleted it)" : !repo.operation ? stashSideTitle("ours") : "Resolve by taking your branch's version of the whole file (deletes it if your branch deleted it)"} onClick={() => void takeSide(repo.root, f, "ours")}>
               Current
             </button>
-            <button className="btn small scm-side" title={repo.operation === "rebase" ? "Resolve by taking your own commit's version of the whole file (deletes it if your commit deleted it)" : "Resolve by taking the incoming version of the whole file (deletes it if the incoming side deleted it)"} onClick={() => void takeSide(repo.root, f, "theirs")}>
+            <button className="btn small scm-side" title={repo.operation === "rebase" ? "Resolve by taking your own commit's version of the whole file (deletes it if your commit deleted it)" : !repo.operation ? stashSideTitle("theirs") : "Resolve by taking the incoming version of the whole file (deletes it if the incoming side deleted it)"} onClick={() => void takeSide(repo.root, f, "theirs")}>
               Incoming
             </button>
           </>
@@ -561,6 +563,8 @@ export function GitPanel() {
                   Abort
                 </button>
               )}
+              {/* Stash: a stash that came back with conflicts has no operation, so no Abort / Skip; the two badges never show together. */}
+              {isStashConflict(repo) && <span className="scm-op" title={STASH_CONFLICT.badgeTitle}>{STASH_CONFLICT.badge}</span>}
               {busy && <span className="muted scm-busy">{busy}</span>}
             </div>
             <SyncStatus repo={repo} />
@@ -585,7 +589,7 @@ export function GitPanel() {
             <button
               className="btn btn-primary small grow"
               disabled={!!busy || groups.conflict.length > 0 || (!rebasing && !message.trim() && !amend) || (!rebasing && !amend && repo.files.length === 0)}
-              title={groups.conflict.length ? "Open each file under Merge Changes, fix the conflict, save, and mark it resolved with +. Then commit to finish, or Abort to go back." : undefined}
+              title={groups.conflict.length && !repo.operation ? STASH_CONFLICT.commitTitle : groups.conflict.length ? "Open each file under Merge Changes, fix the conflict, save, and mark it resolved with +. Then commit to finish, or Abort to go back." : undefined}
               onClick={() => void doCommit()}
             >
               {commitLabel(groups.staged.length, repo.files.length, amend, groups.conflict.length, repo.operation)}
@@ -611,6 +615,7 @@ export function GitPanel() {
               : "No uncommitted changes."}
           </div>
         )}
+        <StashesSection repo={repo} />
         <CommitsSection repo={repo} />
         <HistorySection />
         <RepoSettings repo={repo} />

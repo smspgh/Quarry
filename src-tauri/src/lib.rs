@@ -867,6 +867,10 @@ pub fn run() {
             git::git_merge,
             git::git_rebase,
             git::git_force_push_preview,
+            git::git_stash_list,
+            git::git_stash_push,
+            git::git_stash_files,
+            git::git_stash_op,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

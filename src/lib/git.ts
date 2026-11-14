@@ -24,6 +24,9 @@ import { showPanel } from "./panels";
 import type { GitForcePushPreview, GitMergePreview } from "./gitApi";
 import { dirtyRefusal, forcePushBlocked, forcePushConfirm, forcePushDone, isRewritten, mergeConfirm, mergeDone, rebaseConfirm, rebaseDone, startBlocked, trackedChanges, type StartKind, type StartTarget } from "./gitMerge";
 import type { BranchPurpose } from "./gitRefs";
+import type { GitStash } from "./gitApi";
+import { dropConfirm, dropOffer, isStashConflict, STASH_CONFLICT, stashBlocked, stashConflictWarning, stashCounts, stashDone, stashErrorText, stashTitle } from "./gitStash";
+import { relativeTime } from "../editor/git";
 
 export interface FileHistory {
   path: string;
@@ -73,6 +76,16 @@ interface GitState {
   /** Branches on which Quarry rewrote commits that were already pushed (lower-case root → branch);
    *  the status line then offers Force Push. In memory only; pruned by `pruneRewritten`. */
   rewrotePushed: Record<string, string>;
+  // ---- stash ----
+  /** Stashes per repository (lower-case root), newest first; reloaded when the status's stash id / count changes. */
+  stashes: Record<string, GitStash[]>;
+  /** The Stashes section shows its Stash Changes form. */
+  stashForm: boolean;
+  /** Bumped by Show Stashes: the section opens and focuses its first row. */
+  stashReveal: number;
+  /** A stash that came back with conflicts (git records nothing for it, so Quarry remembers it here,
+   *  in memory only): its row is marked, and for a pop the drop is offered once the files are resolved. */
+  stashPending: { root: string; sha: string; title: string; pop: boolean } | null;
 }
 
 export const useGit = create<GitState>(() => ({
@@ -94,6 +107,11 @@ export const useGit = create<GitState>(() => ({
   editRemote: null,
   branchPick: "switch",
   rewrotePushed: {},
+  // stash
+  stashes: {},
+  stashForm: false,
+  stashReveal: 0,
+  stashPending: null,
 }));
 
 const key = (p: string) => p.toLowerCase();
@@ -227,6 +245,7 @@ async function doRefresh() {
   } else if (cur && repos[cur]) current = cur;
   else current = folder ? (repoKeyOf(repos, folder) ?? null) : (Object.keys(repos)[0] ?? null);
   useGit.setState({ repos, statusErrors, files, dirs, current });
+  stashAfterRefresh(repos);
   void syncBases();
 }
 
@@ -344,7 +363,10 @@ export function installGit(): () => void {
     compare: (view, block, n) => void compareSides(view, block, n),
     // In a rebase the sides are the reverse of what people expect: say which is which.
     note: () => {
-      const op = currentRepo()?.operation;
+      const repo = currentRepo();
+      const op = repo?.operation;
+      // Stash: conflicts with no operation in progress come from a stash that was applied or popped.
+      if (repo && isStashConflict(repo)) return STASH_CONFLICT.sidesNote;
       return op ? operationWords(op).sidesNote : "";
     },
   });
@@ -514,7 +536,7 @@ async function conflictsCleared(view: EditorView) {
   const left = repo.files.filter((f) => f.conflicted).length - 1;
   const ok = await choose(
     `No conflicts left in ${name}`,
-    `Save ${name} and mark it resolved?${left > 0 ? ` ${left} other file${left === 1 ? " still has" : "s still have"} conflicts.` : repo.operation && operationWords(repo.operation).continueLabel ? ` It is the last file: after this, ${operationWords(repo.operation).continueLabel} carries on.` : " It is the last file: after this you can commit to finish."}\n\nYou can keep editing instead, and mark it resolved later with + under Merge Changes.`,
+    `Save ${name} and mark it resolved?${left > 0 ? ` ${left} other file${left === 1 ? " still has" : "s still have"} conflicts.` : repo.operation && operationWords(repo.operation).continueLabel ? ` It is the last file: after this, ${operationWords(repo.operation).continueLabel} carries on.` : repo.operation ? " It is the last file: after this you can commit to finish." : ` ${stashLastFile(repo.root)}`}\n\nYou can keep editing instead, and mark it resolved later with + under Merge Changes.`,
     [
       { label: "Save and Mark Resolved", kind: "primary", default: true, value: true },
       { label: "Keep Editing", cancel: true, value: false },
@@ -554,7 +576,7 @@ export async function commit(root: string, message: string, amend = false): Prom
   // Never with conflicts left: git refuses anyway, and its message is less clear than this one.
   const conflicts = repo?.files.filter((f) => f.conflicted).length ?? 0;
   if (conflicts) {
-    toast(`${conflicts} file${conflicts === 1 ? " still has" : "s still have"} conflicts. Resolve ${conflicts === 1 ? "it" : "them"} under Merge Changes (then mark ${conflicts === 1 ? "it" : "each"} resolved with +), or abort.`, "warning", 7000);
+    toast(`${conflicts} file${conflicts === 1 ? " still has" : "s still have"} conflicts. Resolve ${conflicts === 1 ? "it" : "them"} under Merge Changes (then mark ${conflicts === 1 ? "it" : "each"} resolved with +)${repo?.operation ? ", or abort" : ""}.`, "warning", 7000);
     return false;
   }
   const staged = repo?.files.filter((f) => !f.untracked && f.index !== "." && !f.conflicted) ?? [];
@@ -830,7 +852,7 @@ export async function openChange(f: GitFile, staged: boolean) {
   // conflict markers show both sides to choose from.
   if (kind === "untracked" || (kind === "added" && !staged) || kind === "conflict") {
     if (kind !== "conflict" || (await fs.exists(f.path))) void openPath(f.path);
-    else toast(`${nameOf(f.path)} was deleted on one side and is not in the folder. Mark it resolved with + to keep it deleted, or abort.`, "info", 7000);
+    else toast(`${nameOf(f.path)} was deleted on one side and is not in the folder. Mark it resolved with + to keep it deleted${repoOf(f.path)?.operation ? ", or abort" : ""}.`, "info", 7000);
     return;
   }
   const show = (rev: string, path = f.path) => git.show(path, rev).catch(() => null);
@@ -1140,4 +1162,235 @@ export async function forcePush(root: string): Promise<boolean> {
   markChecked(root, null);
   toast(forcePushDone(p), "success", 4000);
   return true;
+}
+
+// ---------- stash ----------
+
+/** The stash id / count each repository's list was last loaded for. */
+const stashStamp = new Map<string, string>();
+
+/** Read a repository's stashes into `useGit.stashes`. */
+export async function loadStashes(root: string) {
+  const list = await git.stashList(root).catch(() => null);
+  if (list) useGit.setState((g) => ({ stashes: { ...g.stashes, [key(root)]: list } }));
+  else stashStamp.delete(key(root)); // the next status refresh asks again
+}
+
+/** After every status refresh: reload the lists that changed (also a stash made in a terminal),
+ *  and see whether a stash that came back with conflicts is resolved now. */
+function stashAfterRefresh(repos: Record<string, GitStatus>) {
+  for (const [k, r] of Object.entries(repos)) {
+    const stamp = `${r.stash ?? ""}|${r.stashCount ?? 0}`;
+    if (stashStamp.get(k) === stamp) continue;
+    stashStamp.set(k, stamp);
+    void loadStashes(r.root);
+  }
+  const p = useGit.getState().stashPending;
+  const repo = p ? repos[key(p.root)] : null;
+  if (repo && !repo.files.some((f) => f.conflicted)) void settleStash();
+}
+
+let settling = false;
+
+/**
+ * The files of the stash that came back with conflicts look resolved: forget it, and for a pop
+ * offer to drop the stash (git kept it). Keep Stash is the default; nothing is asked when the
+ * stash was dropped in the meantime.
+ */
+async function settleStash() {
+  const p = useGit.getState().stashPending;
+  if (!p || settling) return;
+  settling = true;
+  try {
+    // The status that got us here may be older than the apply / pop itself: ask git again.
+    const st = await git.status(p.root).catch(() => null);
+    if (!st || st.files.some((f) => f.conflicted) || useGit.getState().stashPending !== p) return;
+    useGit.setState({ stashPending: null });
+    if (!p.pop) return;
+    const list = await git.stashList(p.root).catch(() => [] as GitStash[]);
+    if (!list.some((s) => s.sha === p.sha)) return;
+    const w = dropOffer(p.title);
+    const drop = await choose(
+      w.title,
+      w.text,
+      [
+        { label: w.drop, kind: "danger", value: true },
+        { label: w.keep, cancel: true, default: true, value: false },
+      ],
+      false,
+    );
+    if (!drop) return;
+    if ((await stashRun("Dropping stash…", p.root, p.sha, "drop")) !== null) toast(stashDone("drop", p.title), "success", 3000);
+  } finally {
+    settling = false;
+  }
+}
+
+/** The "last file" sentence of the No-conflicts-left dialog when the conflicts came from a stash. */
+function stashLastFile(root: string): string {
+  const p = useGit.getState().stashPending;
+  return p?.pop && key(p.root) === key(root) ? STASH_CONFLICT.lastFilePop : STASH_CONFLICT.lastFile;
+}
+
+/** Open Source Control with the Stash Changes form (nothing is stashed until its Stash button). */
+export function showStashForm() {
+  const repo = currentRepo();
+  if (!repo) {
+    toast("The open folder is not in a git repository.", "info");
+    return;
+  }
+  const why = stashBlocked(repo, "stash");
+  if (why) {
+    toast(`${why}.`, "info", 4000);
+    return;
+  }
+  useGit.setState({ stashForm: true });
+  showPanel("git");
+}
+
+/** Open Source Control with the Stashes section open and the focus on its first row. */
+export function showStashes() {
+  if (!currentRepo()) {
+    toast("The open folder is not in a git repository.", "info");
+    return;
+  }
+  showPanel("git");
+  useGit.setState((g) => ({ stashReveal: g.stashReveal + 1 }));
+}
+
+/**
+ * Stash the uncommitted changes of `root` (with `untracked`, the untracked files too). The guards
+ * run on a fresh status. True when a stash was made. (The unsaved-tabs question of SAFE-003.6 is
+ * not asked here yet: the files are taken as they are on disk.)
+ */
+export async function stashChanges(root: string, message: string, untracked: boolean): Promise<boolean> {
+  if (useGit.getState().busy) return false;
+  const st = await git.status(root).catch(() => null);
+  const why = st ? stashBlocked(st, "stash") : "Git could not read the repository";
+  if (!st || why) {
+    toast(`${why}.`, "info", 4000);
+    return false;
+  }
+  const n = stashCounts(st.files);
+  const files = n.tracked + (untracked ? n.untracked : 0);
+  if (!files) {
+    toast("Only untracked files have changed: tick the box to stash them.", "info", 4000);
+    return false;
+  }
+  const sha = await run("Stashing…", () => git.stashPush(root, message, untracked));
+  if (sha === undefined) return false;
+  useGit.setState({ stashForm: false });
+  toast(stashDone("stash", message, files), "success", 4000);
+  await loadStashes(root);
+  const { checkExternalChanges } = await import("./actions");
+  void checkExternalChanges();
+  return true;
+}
+
+/** Run one stash operation with a busy label; a refusal becomes a toast and null. The list is reloaded either way. */
+async function stashRun(label: string, root: string, sha: string, op: "apply" | "pop" | "drop"): Promise<"ok" | "conflicts" | null> {
+  useGit.setState({ busy: label });
+  try {
+    return await git.stashOp(root, sha, op);
+  } catch (e) {
+    toast(op === "drop" ? gitErrorText(String(e)) : stashErrorText(String(e), op), "error", 12000);
+    return null;
+  } finally {
+    useGit.setState({ busy: null });
+    refreshGit(0);
+    await loadStashes(root);
+  }
+}
+
+/**
+ * Apply, pop or drop a stash, named by its commit id (so a list that went stale cannot hit another
+ * one). Drop asks first, with Cancel as the default; apply and pop are refused while an operation
+ * is stopped or files are in conflict (checked on a fresh status). An apply / pop that conflicts
+ * is not an error: the files go to Merge Changes and the stash is remembered in `stashPending`.
+ * (The unsaved-tabs question of SAFE-003.7 is not asked here yet.) True when git ran.
+ */
+export async function stashAction(root: string, stash: Pick<GitStash, "sha" | "subject" | "time">, what: "apply" | "pop" | "drop"): Promise<boolean> {
+  if (useGit.getState().busy) return false;
+  const t = stashTitle(stash.subject);
+  if (what === "drop") {
+    const files = await git.stashFiles(root, stash.sha).then(
+      (l) => l.length,
+      () => null,
+    );
+    const w = dropConfirm(t, relativeTime(stash.time), files);
+    const ok = await choose(
+      w.title,
+      w.text,
+      [
+        { label: w.drop, kind: "danger", value: true },
+        { label: w.cancel, cancel: true, default: true, value: false },
+      ],
+      false,
+    );
+    if (!ok) return false;
+    if ((await stashRun("Dropping stash…", root, stash.sha, "drop")) === null) return false;
+    if (useGit.getState().stashPending?.sha === stash.sha) useGit.setState({ stashPending: null });
+    toast(stashDone("drop", t.title), "success", 3000);
+    return true;
+  }
+  const st = await git.status(root).catch(() => null);
+  const why = st ? stashBlocked(st, what) : "Git could not read the repository";
+  if (why) {
+    toast(`${why}.`, "info", 4000);
+    return false;
+  }
+  const out = await stashRun(what === "pop" ? "Popping stash…" : "Applying stash…", root, stash.sha, what);
+  const { checkExternalChanges } = await import("./actions");
+  void checkExternalChanges();
+  if (out === null) return false;
+  if (out === "conflicts") {
+    const after = await git.status(root).catch(() => null);
+    const conflicts = after?.files.filter((f) => f.conflicted).length ?? 0;
+    if (conflicts) {
+      useGit.setState({ stashPending: { root, sha: stash.sha, title: t.title, pop: what === "pop" } });
+      toast(stashConflictWarning(t.title, what === "pop", conflicts), "warning", 12000);
+      showPanel("git");
+      return true;
+    }
+  }
+  toast(stashDone(what, t.title), "success", 4000);
+  return true;
+}
+
+/** Apply / pop / drop the newest stash of the current repository (the Git menu and the palette). */
+export async function stashLatest(what: "apply" | "pop" | "drop") {
+  const repo = currentRepo();
+  if (!repo) {
+    toast("The open folder is not in a git repository.", "info");
+    return;
+  }
+  const why = what === "drop" ? null : stashBlocked(repo, what);
+  if (why) {
+    toast(`${why}.`, "info", 4000);
+    return;
+  }
+  const list = await git.stashList(repo.root).catch(() => [] as GitStash[]);
+  useGit.setState((g) => ({ stashes: { ...g.stashes, [key(repo.root)]: list } }));
+  if (!list.length) {
+    toast("There are no stashes.", "info");
+    return;
+  }
+  await stashAction(repo.root, list[0], what);
+}
+
+/** What a stash changed in one of its files: the commit it was made on vs the stash (both read-only). */
+export async function openStashFile(stash: Pick<GitStash, "sha" | "short" | "base">, f: GitCommitFile) {
+  const { openCompare } = await import("./diff");
+  const added = f.status === "A" || f.status === "?";
+  const [a, b] = await Promise.all([
+    added ? null : git.show(f.path, stash.base, f.origRel ?? f.rel).catch(() => null),
+    // An untracked file is kept in the stash's third parent, not in the stash commit itself.
+    f.status === "D" ? null : git.show(f.path, f.status === "?" ? `${stash.sha}^3` : stash.sha, f.rel).catch(() => null),
+  ]);
+  if (a?.binary || b?.binary) {
+    toast("This file is binary.", "info");
+    return;
+  }
+  const name = nameOf(f.rel.replace(/\//g, "\\"));
+  await openCompare({ kind: "text", label: `${name} @ ${stash.base.slice(0, 7)}`, text: a?.text ?? "" }, { kind: "text", label: `${name} @ stash ${stash.short}`, text: b?.text ?? "" }, { preview: true });
 }
