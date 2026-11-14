@@ -27,6 +27,7 @@ The first file is the left (original) side and the second the right (changed) si
 - **Colours.** Removed lines are red on the left, added lines green on the right, and the words that changed are highlighted more strongly.
 - **Moving between changes.** **F7** / **Shift+F7** (or the arrows in the toolbar) go to the next / previous change. The toolbar shows where you are, for example **Change 2 of 5**.
 - **Layout.** **Side by side** / **Inline** switches the layout. In inline mode the removed lines appear above the lines that replaced them.
+- **A narrow tab.** Below about 1000 px the layout switch shows only its icons and the Source Control buttons read **Stage Lines** / **Discard Lines** / **Unstage Lines**; below about 680 px the file names get a row of their own above the buttons.
 - **Unchanged lines.** The fold button hides long unchanged stretches. Click a folded stretch to show it.
 - **Swap** (⇄) puts each side on the other side. **Reload** reads the files from disk again and takes a tab's current text; clipboard and git versions keep the text they had, except in a comparison opened from Source Control, which reads its git side again too (it is off while a side has unsaved edits). A comparison with a file side also reloads by itself when that file changes on disk and nothing in the comparison is edited (see [Editing › External changes](editing.md#external-changes)).
 

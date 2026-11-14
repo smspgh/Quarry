@@ -177,6 +177,7 @@ The header also counts commits **to pull**, and its graph button opens the commi
 - **Details.** Click a commit (or move with the arrow keys) to see it in the pane below: the full id (with a copy button), the whole message, author and date, its parents (click one to jump to it), and the files it changed with a summary of lines added and removed. Click a file to open a [Compare tab](compare.md) of what the commit changed in it; clicking the next file reuses that tab (double-click its tab to keep it). Drag the pane's top edge to resize it.
 - **Loading.** Commits load 300 at a time as you scroll, in the background; the rest of Quarry, including the Source Control panel, never waits for the graph. Only the rows on screen are drawn.
 - **Very large histories.** Without git's *commit-graph* file (an index of the history that `git gc` writes), git has to walk the whole history for every page: about 0.5 s a page on an 86,000-commit repository and 1.8 s on a 350,000-commit one. Quarry then loads bigger pages, and offers **Speed Up**, which has git write that file once (about 2 s on the larger one; it lives inside `.git` and changes nothing else). Pages then take about 0.1 s and 0.3 s. Quarry never writes it without you pressing the button.
+- **Opening files.** In the graph's file lists (a commit's files, uncommitted changes, a comparison of two commits), a click opens a Compare tab after a short pause and a double-click opens the file itself instead.
 - **What's in progress.** A strip under the toolbar says when a cherry-pick, revert, merge, rebase or patch series has stopped part-way, with **Abort** right there (uncommitted changes are the first row of the graph, see above). Conflicts left by a stash that was applied or popped get a warning strip too, without Abort (see *Stash*).
 
 Right-click a commit for the actions:
@@ -217,7 +218,8 @@ Click the file under **Merge Changes**: it opens in the editor with each conflic
 - **When the last conflict in a file is gone**, Quarry offers **Save and Mark Resolved**; **Keep Editing** leaves that for later (the **+** on the file does the same, and saves the tab first).
 - **The whole file at once.** **Current** and **Incoming** on the file's row under Merge Changes take that side's version of the entire file. This is also how to settle a file that one side deleted: the side that deleted it removes the file, the other keeps it.
 - **See the two sides.** **Compare** on a conflict's bar opens its current and incoming text next to each other in a Compare tab.
-- **Then commit.** With every file resolved, the Commit button comes back and the message box already holds the message git prepared.
+- The conflict bar's buttons work on the first click also while Source Control is open beside the editor (not pinned): the panel closes once the click has landed.
+- **Then commit.** With every file resolved, the Commit button comes back and the message box already holds the message git prepared. If the resolution left the files exactly as they were (say you kept your side of every file), the button reads **Commit Merge**: git still needs the merge commit to finish. **Abort** also clears the prepared message from the box.
 - **Nothing left to commit?** If resolving left no changes (the commit's changes are already on your branch), the panel says so: **Skip** moves on without it, **Abort** goes back.
 
 ### Rebase
