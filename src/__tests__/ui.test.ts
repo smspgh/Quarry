@@ -1,10 +1,24 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { tabStripKey } from "../components/TitleBar";
-import { MENU_MNEMONICS, menuForMnemonic, mnemonicKey, nextMenuIndex, splitMnemonic } from "../components/MenuBar";
+import { MENU_MNEMONICS, menuForMnemonic, mnemonicKey, nextMenuIndex, splitMnemonic, submenuShift } from "../components/MenuBar";
 import { placeFlyout, typeAheadIndex } from "../components/Select";
 import { describeValue, firstFontFamily, fontListFor, rowMatches } from "../components/panels/SettingsPanel";
 import { previewBefore } from "../components/panels/SearchPanel";
+
+describe("submenuShift (UI-003.9)", () => {
+  it("leaves a submenu that fits where it is", () => {
+    expect(submenuShift(300, 500, 816)).toBe(0);
+    expect(submenuShift(600, 808, 816)).toBe(0);
+  });
+  it("moves a submenu up by what would be below the window, keeping a margin", () => {
+    expect(submenuShift(695, 914, 816)).toBe(106);
+  });
+  it("never moves it above the top margin", () => {
+    expect(submenuShift(40, 900, 816)).toBe(32);
+    expect(submenuShift(4, 900, 816)).toBe(0);
+  });
+});
 
 describe("nextMenuIndex", () => {
   it("wraps in both directions and handles Home/End and no selection", () => {

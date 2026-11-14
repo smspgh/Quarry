@@ -114,11 +114,11 @@ Scenario: UI-002.5 A corrupt setting falls back to the default
 - Status: draft
 - Commands: `help.scriptApi`
 - Files:
-  - `src/components/MenuBar.tsx` — `MENUS` model (items reference command ids), `resolve` (label, shortcut, disabled state, dynamic title), `TEXT_CATEGORY`, `MenuList`, `languageMenu`, `recentFilesMenu`, `recentFoldersMenu`
+  - `src/components/MenuBar.tsx` — `MENUS` model (items reference command ids), `resolve` (label, shortcut, disabled state, dynamic title), `TEXT_CATEGORY`, `MenuList` (a submenu is moved up to stay inside the window: pure `submenuShift`), `languageMenu`, `recentFilesMenu`, `recentFoldersMenu`
   - `src/lib/commands.ts` — `getCommand`, `isEnabled`, `prettyKeys`, `Command.enabled` / `dynamicTitle`, `applyDefaultEnabled`, `showScriptApi` (`help.scriptApi`)
   - `src/lib/fuzzy.ts` — `bareTitle` strips the "JSON: " / "Macro: " / "Script: " / "Large File: " prefix from menu labels
   - `src/styles/app.css` — `.menubar`, `.menu-flyout`, `.menu-item`, `.menu-keys`, `.menu-sep`
-- Tests: none
+- Tests: `src/__tests__/ui.test.ts`
 - Docs: `docs/editing.md`, `docs/development.md`
 
 **As a** user who finds features through the menus
@@ -179,6 +179,12 @@ Scenario: UI-003.8 Git menu: Stage Part of a File
   Then "Stage Part of a File" comes directly after "Stage Current File" and "Unstage Current File"
   And its submenu lists the six partial-staging commands (STAGE-008.1), with "Ctrl+K S", "Ctrl+K U", "Ctrl+K L" and "Ctrl+K N" beside the four that have a shortcut
   And the submenu is greyed out unless the active tab is a comparison opened from Source Control in which one of them applies
+
+Scenario: UI-003.9 A submenu stays inside the window
+  Given the Git menu is open in a window 816 px high
+  When I move the mouse over "Branches and Tags", which is near the bottom of the menu
+  Then its submenu opens beside it, moved up as far as needed for its last entry "Push Tag…" to be inside the window
+  And a submenu that fits below its entry opens level with it, as before
 ```
 
 ## UI-004: Menu bar keyboard access

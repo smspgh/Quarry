@@ -1,5 +1,5 @@
 import { ChevronRight } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { dirName } from "../lib/actions";
 import { getCommand, isEnabled, prettyKeys, runCommand } from "../lib/commands";
 import { activeDoc } from "../lib/store";
@@ -410,6 +410,17 @@ export function nextMenuIndex(current: number, count: number, key: "ArrowDown" |
   return key === "ArrowDown" ? (current + 1) % count : (current + count - 1) % count;
 }
 
+/**
+ * How far up (in px) a submenu must move so that its last entry is inside the window: it opens level with its
+ * parent entry, and one opened from an entry low in a tall menu would otherwise end below the bottom edge.
+ * Never moved above the top margin. Pure so it can be unit-tested.
+ */
+export function submenuShift(top: number, bottom: number, windowHeight: number, margin = 8): number {
+  const over = bottom - (windowHeight - margin);
+  if (over <= 0) return 0;
+  return Math.max(0, Math.min(over, top - margin));
+}
+
 function MenuList({ items, onDone, onClose, depth = 0, autoFocus = false }: { items: Item[]; onDone: () => void; onClose?: () => void; depth?: number; autoFocus?: boolean }) {
   const [sub, setSub] = useState<number | null>(null);
   const [subByKey, setSubByKey] = useState(false);
@@ -420,6 +431,16 @@ function MenuList({ items, onDone, onClose, depth = 0, autoFocus = false }: { it
   useEffect(() => {
     if (autoFocus) ownItems()[0]?.focus();
   }, [autoFocus]);
+
+  // A submenu is kept inside the window (see submenuShift): its CSS top is -4px, level with the parent entry.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || depth === 0) return;
+    el.style.top = ""; // measure from the CSS position (the effect runs twice in development)
+    const r = el.getBoundingClientRect();
+    const up = submenuShift(r.top, r.bottom, window.innerHeight);
+    if (up > 0) el.style.top = `${-4 - up}px`;
+  }, []);
 
   // Keyboard handling for this level only: events bubble up from the focused item, so the innermost open list sees them first.
   const onKeyDown = (e: React.KeyboardEvent) => {
