@@ -14,7 +14,7 @@ Owner decisions, 2026-11-13: build items 0-9, item 10 gets a spec only; one loca
 | 1 | Hunk and line staging | `git-staging.md` (STAGE-001..009) | indexed; 2 owner questions (partial staging of removed lines, silent save on Stage); to check in review: its Ctrl+K chord shortcuts | yes (see git log: "stage, unstage and discard single changes and lines"; on main: 674 Vitest + 148 Rust tests pass; stories `draft`) | no: 16 live checks listed by the build agent (the bar layout has never been seen rendered) |
 | 2 | Stash | `git-stash.md` (STASH-001..011) | indexed; 2 owner questions (no Abort for a conflicted pop, untracked files included by default) | yes (b8660bf; on main: 610 Vitest + 132 Rust tests pass; stories `draft`) | no: 13 live checks listed by the build agent |
 | 3 | Start a merge or a rebase | `git-merge-rebase.md` (MERGE-001..009; 009 = Force Push, shared with item 6) | indexed; open default: merge is blocked on a dirty tree | yes (8184e5c; on main: 542 Vitest + 124 Rust tests pass; stories `draft`) | no: 11 live checks listed by the build agent |
-| 4 | Branch and tag housekeeping | `git-branches.md` (BRANCH-001..009) | indexed; 3 optional owner questions (remote tag delete, which remote when several, ask before deleting a merged branch) | no | no |
+| 4 | Branch and tag housekeeping | `git-branches.md` (BRANCH-001..009) | indexed; 3 optional owner questions (remote tag delete, which remote when several, ask before deleting a merged branch) | yes (6fc83f8; on main: 840 Vitest + 162 Rust tests pass; stories `draft`) | no: 17 live checks listed by the build agent |
 | 5 | Compare commits | `git-compare-commits.md` (COMMITCMP-001..006) | indexed; 2 owner questions (two-dot vs three-dot for branches, untracked files vs working tree) | yes ("Graph: compare two commits, a commit with the working tree, or with a branch"; on main: 730 Vitest + 152 Rust tests pass; stories `draft`) | no: 11 live checks listed by the build agent |
 | 6 | Edit history | `git-history-edit.md` (HISTORY-001..011) | indexed; owner decided: warn, then Force Push (built with item 3) | no | no |
 | 7 | Graph polish | `git-graph.md` (GRAPH-015..018) | indexed; no blocking questions | no | no |
@@ -26,7 +26,7 @@ Spec phase, 2026-11-13: all eleven items have stories (80 new, all `planned`), i
 
 Build phase: the specs were committed locally as 021d25f. Wave 1 (items 0, 1, 2, 3) started 2026-11-13, one agent per item in its own worktree; the Built column changes when an item is merged into local main with tsc, Vitest and Rust tests passing.
 
-Resumed 2026-11-13: item 2 (stash) merged as b8660bf (on main: 610 Vitest + 132 Rust tests pass). Item 1 merged the same day (wave 1 complete). Wave 2 (items 4, 5, 9) started on top of b8660bf.
+Resumed 2026-11-13: item 2 (stash) merged as b8660bf (on main: 610 Vitest + 132 Rust tests pass). Item 1 merged the same day (wave 1 complete). Wave 2: items 4 and 5 merged; item 9 still building. Wave 3 (items 6, 7) started on top of item 4.
 
 Build order (agents work in parallel inside a wave, each in its own worktree; waves are merged before the next starts because they share `GraphView.tsx`, `git.ts` and `git.rs`): wave 1 = items 0, 1, 2, 3; wave 2 = 4, 5, 9; wave 3 = 6, 7; wave 4 = 8 (audits every action, so it goes last); then the live pass.
 
