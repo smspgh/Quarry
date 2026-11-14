@@ -625,7 +625,8 @@ Scenario: GRAPH-011.3 Switch to a branch on the commit
   Then the menu has "Switch to feature" and "Switch to origin/review"
   When I choose "Switch to origin/review"
   Then a local branch "review" tracking it is checked out
-  And open files that changed on disk are re-checked
+  And open files that changed on disk are reloaded (SAFE-006)
+  And when tabs of the repository have unsaved changes the unsaved-changes dialog comes first (SAFE-003.1)
   And the label menus of "feature" and "origin/review" have the same "Switch to …" entry, doing the same (BRANCH-001.1, BRANCH-001.3)
 
 Scenario: GRAPH-011.4 No switch entry for the branch I am on
@@ -671,7 +672,7 @@ Scenario: GRAPH-011.9 Create a branch without switching
 - Files:
   - `src/components/GraphView.tsx` — `act()`
   - `src/lib/gitGraph.ts` — `actionConfirm` (the dialogs), `actionDone` (success notifications)
-  - `src/lib/git.ts` — `commitAction` (busy label, error via `gitErrorText`, `checkExternalChanges`)
+  - `src/lib/git.ts` — `commitAction` (busy label, error via `gitErrorText`; the unsaved-tabs `guard` for check-out, create-and-switch, cherry-pick and revert, and the tab check afterwards through `rewrite`, also after a stop or failure: SAFE-003, SAFE-006)
   - `src/lib/gitStatus.ts` — `gitErrorText` ("Stopped on a conflict…")
   - `src/lib/actions.ts` — `askDialog`
   - `src-tauri/src/git.rs` — `commit_action` (`checkout --detach`, `cherry-pick`, `revert --no-edit`; merges with `-m 1`; `GIT_EDITOR=true`)
@@ -689,6 +690,7 @@ Scenario: GRAPH-012.1 Check out asks first
   When I confirm with "Check Out"
   Then my files become that commit and a notification says "Checked out 18bc71d"
   And the graph shows the label "HEAD" on that commit
+  And when tabs of the repository have unsaved changes the unsaved-changes dialog follows my confirmation, before git runs (SAFE-002.9, SAFE-003.2)
 
 Scenario: GRAPH-012.2 Cherry-pick
   Given I am on "main"
@@ -696,14 +698,16 @@ Scenario: GRAPH-012.2 Cherry-pick
   When I choose it and confirm "Cherry-pick this commit?" with "Cherry-pick"
   Then a new commit with that commit's changes is on "main"
   And a notification says "Cherry-picked 18bc71d"
+  And when tabs of the repository have unsaved changes the unsaved-changes dialog follows my confirmation, before git runs (SAFE-003.8)
 
 Scenario: GRAPH-012.3 Revert
   When I choose "Revert This Commit…" and confirm with "Revert"
   Then a new commit that undoes it is added on the current branch, without asking for a message
   And a notification says "Reverted 18bc71d"
+  And when tabs of the repository have unsaved changes the unsaved-changes dialog follows my confirmation, before git runs (SAFE-003.8)
 
 Scenario: GRAPH-012.4 Cancelling does nothing
-  When I cancel any of these dialogs
+  When I cancel any of these dialogs, or the unsaved-changes dialog that follows one
   Then git is not run and nothing changes
 
 Scenario: GRAPH-012.5 A conflict stops the operation
@@ -711,6 +715,7 @@ Scenario: GRAPH-012.5 A conflict stops the operation
   When I confirm the cherry-pick
   Then an error says "Stopped on a conflict. Resolve the files under Merge Changes in Source Control and commit, or press Abort to go back." followed by git's CONFLICT lines
   And the graph shows the stopped-operation strip
+  And open tabs of the conflicted files show git's conflict markers at once (SAFE-006.4)
 
 Scenario: GRAPH-012.6 A merge commit
   When I cherry-pick or revert a merge commit
@@ -762,7 +767,8 @@ Scenario: GRAPH-013.4 Hard warns about uncommitted work
   Then a dialog "Reset (hard) and discard changes?" says the later commits leave the branch, "and your 3 uncommitted changes to tracked files are lost", and that it can't be undone from Quarry
   When I confirm with "Reset and Discard"
   Then every tracked file matches that commit
-  And open tabs of files that changed are re-checked against the disk
+  And open tabs of files that changed are reloaded from the disk
+  And when tabs of the repository have unsaved edits the dialog names them, and those whose file the reset rewrote reload without a second question (SAFE-004.4, SAFE-004.5)
 
 Scenario: GRAPH-013.5 Cancel
   When I cancel a reset dialog

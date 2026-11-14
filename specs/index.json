@@ -3749,7 +3749,7 @@
       "title": "Open a conflicted file from Merge Changes",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 400,
+      "line": 402,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3783,7 +3783,7 @@
       "title": "Commit only when every conflict is resolved",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 433,
+      "line": 435,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3831,7 +3831,7 @@
       "title": "Abort a stopped operation",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 485,
+      "line": 487,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3879,7 +3879,7 @@
       "title": "Skip the commit an operation stopped on",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 538,
+      "line": 541,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3918,7 +3918,7 @@
       "title": "Carry on with a rebase",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 581,
+      "line": 585,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3967,7 +3967,7 @@
       "title": "Carry on with a patch series (git am)",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 638,
+      "line": 644,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4575,12 +4575,14 @@
       "commands": [],
       "files": [
         "src/lib/diff.ts",
+        "src/lib/actions.ts",
         "src/lib/gitStaging.ts",
         "src/components/DiffView.tsx"
       ],
       "tests": [
         "src/__tests__/diffSession.test.ts",
-        "src/__tests__/gitStaging.test.tsx"
+        "src/__tests__/gitStaging.test.tsx",
+        "src/__tests__/gitSafetyGuard.test.ts"
       ],
       "docs": [
         "docs/compare.md"
@@ -4613,6 +4615,10 @@
         {
           "id": "DIFF-013.7",
           "title": "A file that can no longer be read"
+        },
+        {
+          "id": "DIFF-013.8",
+          "title": "Reloaded by itself when a file side changes on disk"
         }
       ]
     },
@@ -4621,7 +4627,7 @@
       "title": "Preview comparisons replace each other",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 638,
+      "line": 646,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7209,13 +7215,17 @@
       "commands": [],
       "files": [
         "src/lib/actions.ts",
+        "src/lib/gitSafety.ts",
+        "src/lib/diff.ts",
         "src/App.tsx",
         "src/lib/store.ts",
         "src/components/BigFileView.tsx",
         "src/lib/ipc.ts",
         "src-tauri/src/files.rs"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/gitSafetyGuard.test.ts"
+      ],
       "docs": [
         "docs/editing.md"
       ],
@@ -7263,7 +7273,7 @@
       "title": "Restore the previous session on start",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 755,
+      "line": 763,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7321,7 +7331,7 @@
       "title": "Exit without losing work (hot exit)",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 822,
+      "line": 830,
       "status": "draft",
       "commands": [
         "app.exit"
@@ -7382,7 +7392,7 @@
       "title": "Open files by dropping them on the window",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 891,
+      "line": 899,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7419,7 +7429,7 @@
       "title": "Open files from the command line and File Explorer",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 930,
+      "line": 938,
       "status": "draft",
       "commands": [],
       "files": [
@@ -7466,7 +7476,7 @@
       "title": "Welcome screen",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 981,
+      "line": 989,
       "status": "draft",
       "commands": [
         "file.new",
@@ -8866,7 +8876,7 @@
       "title": "Commit from the Source Control panel",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 391,
+      "line": 392,
       "status": "draft",
       "commands": [
         "git.showPanel"
@@ -8931,7 +8941,7 @@
       "title": "Amend the last commit",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 467,
+      "line": 468,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8970,7 +8980,7 @@
       "title": "See the changed files and open their changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 506,
+      "line": 507,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9028,7 +9038,7 @@
       "title": "Stage and unstage files",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 576,
+      "line": 577,
       "status": "draft",
       "commands": [
         "git.stageFile",
@@ -9082,7 +9092,7 @@
       "title": "Discard changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 633,
+      "line": 634,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9129,7 +9139,7 @@
       "title": "Status line: where the branch stands against its remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 685,
+      "line": 690,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9189,7 +9199,7 @@
       "title": "Background check of the remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 756,
+      "line": 761,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9244,7 +9254,7 @@
       "title": "Fetch, pull, push and publish a branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 821,
+      "line": 826,
       "status": "draft",
       "commands": [
         "git.fetch",
@@ -9306,7 +9316,7 @@
       "title": "Recover when the remote repository is gone",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 889,
+      "line": 895,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9350,7 +9360,7 @@
       "title": "Commits of the current branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 934,
+      "line": 940,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9415,7 +9425,7 @@
       "title": "File history",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1010,
+      "line": 1016,
       "status": "draft",
       "commands": [
         "git.fileHistory"
@@ -9469,7 +9479,7 @@
       "title": "Commit identity (name and email)",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1065,
+      "line": 1071,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9516,7 +9526,7 @@
       "title": "Add a remote by URL",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1116,
+      "line": 1122,
       "status": "draft",
       "commands": [
         "git.addRemote"
@@ -9565,7 +9575,7 @@
       "title": "See, open and change remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1168,
+      "line": 1174,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9617,7 +9627,7 @@
       "title": "Create a repository on GitHub and push to it",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1227,
+      "line": 1233,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9674,7 +9684,7 @@
       "title": "GitHub accounts",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1294,
+      "line": 1300,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9721,7 +9731,7 @@
       "title": "Private / Public badge on GitHub remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1346,
+      "line": 1352,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9763,7 +9773,7 @@
       "title": "Work with more than one repository",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1390,
+      "line": 1396,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9819,7 +9829,7 @@
       "title": "Branch in the status bar",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1509,
+      "line": 1515,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9865,7 +9875,7 @@
       "title": "Git decorations in the Explorer",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1560,
+      "line": 1566,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9909,7 +9919,7 @@
       "title": "Set a folder as the Source Control context",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1459,
+      "line": 1465,
       "status": "draft",
       "commands": [
         "git.setContext"
@@ -11192,7 +11202,7 @@
       "title": "Check out, cherry-pick or revert a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 667,
+      "line": 668,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11247,7 +11257,7 @@
       "title": "Reset the branch to a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 726,
+      "line": 731,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11291,7 +11301,7 @@
       "title": "See a stopped operation above the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 772,
+      "line": 778,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11342,7 +11352,7 @@
       "title": "Uncommitted changes as the first row of the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 844,
+      "line": 850,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11436,7 +11446,7 @@
       "title": "Drag the height of the Search All History results",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 967,
+      "line": 973,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11499,7 +11509,7 @@
       "title": "Scroll sideways through a graph wider than 16 lanes",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1042,
+      "line": 1048,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11559,7 +11569,7 @@
       "title": "List a small history by date",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1120,
+      "line": 1126,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11633,7 +11643,7 @@
       "title": "Show Commit Graph is in the palette without a repository",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1213,
+      "line": 1219,
       "status": "draft",
       "commands": [
         "git.graph"
@@ -15087,8 +15097,8 @@
       "title": "Be told which tabs have unsaved changes before git rewrites files",
       "area": "SAFE",
       "spec": "specs/git-safety.md",
-      "line": 52,
-      "status": "planned",
+      "line": 66,
+      "status": "draft",
       "commands": [
         "git.switchBranch",
         "git.checkoutTo",
@@ -15096,6 +15106,7 @@
       ],
       "files": [
         "src/lib/gitSafety.ts",
+        "src/lib/gitTabs.ts",
         "src/lib/git.ts",
         "src/lib/dialogs.ts",
         "src/lib/actions.ts",
@@ -15103,7 +15114,8 @@
         "src/lib/store.ts"
       ],
       "tests": [
-        "src/__tests__/gitSafety.test.ts"
+        "src/__tests__/gitSafety.test.ts",
+        "src/__tests__/gitSafetyGuard.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -15168,18 +15180,19 @@
       "title": "Save All, Continue Without Saving or Cancel",
       "area": "SAFE",
       "spec": "specs/git-safety.md",
-      "line": 149,
-      "status": "planned",
+      "line": 165,
+      "status": "draft",
       "commands": [
         "git.switchBranch",
         "git.checkoutTo",
         "git.pull"
       ],
       "files": [
-        "src/lib/git.ts",
+        "src/lib/gitTabs.ts",
         "src/lib/gitSafety.ts",
         "src/lib/actions.ts",
-        "src/lib/diff.ts"
+        "src/lib/diff.ts",
+        "src/lib/git.ts"
       ],
       "tests": [
         "src/__tests__/gitSafety.test.ts",
@@ -15236,8 +15249,8 @@
       "title": "Every operation that can rewrite files asks",
       "area": "SAFE",
       "spec": "specs/git-safety.md",
-      "line": 229,
-      "status": "planned",
+      "line": 246,
+      "status": "draft",
       "commands": [
         "git.switchBranch",
         "git.checkoutTo",
@@ -15267,7 +15280,9 @@
       "files": [
         "src/lib/git.ts",
         "src/lib/gitSafety.ts",
+        "src/lib/gitTabs.ts",
         "src/lib/gitMerge.ts",
+        "src/lib/gitRefActions.ts",
         "src/components/GraphView.tsx"
       ],
       "tests": [
@@ -15337,22 +15352,23 @@
       "title": "Operations that throw work away say which unsaved tabs go too",
       "area": "SAFE",
       "spec": "specs/git-safety.md",
-      "line": 326,
-      "status": "planned",
+      "line": 347,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/lib/git.ts",
         "src/lib/gitSafety.ts",
+        "src/lib/gitTabs.ts",
         "src/lib/gitGraph.ts",
         "src/components/GraphView.tsx",
         "src/components/panels/GitPanel.tsx",
         "src/lib/actions.ts",
-        "src/lib/diff.ts"
+        "src/lib/gitStaging.ts"
       ],
       "tests": [
         "src/__tests__/gitSafety.test.ts",
-        "src/__tests__/gitGraph.test.ts",
-        "src/__tests__/gitSafetyGuard.test.ts"
+        "src/__tests__/gitSafetyGuard.test.ts",
+        "src/__tests__/gitSafetyRoutes.test.tsx"
       ],
       "docs": [
         "docs/git.md"
@@ -15405,8 +15421,8 @@
       "title": "No route around the question",
       "area": "SAFE",
       "spec": "specs/git-safety.md",
-      "line": 406,
-      "status": "planned",
+      "line": 430,
+      "status": "draft",
       "commands": [
         "git.switchBranch",
         "git.checkoutTo",
@@ -15423,14 +15439,19 @@
       ],
       "files": [
         "src/lib/git.ts",
+        "src/lib/gitTabs.ts",
         "src/lib/gitCommands.ts",
+        "src/lib/gitRefActions.ts",
+        "src/lib/gitStaging.ts",
         "src/components/panels/GitPanel.tsx",
+        "src/components/panels/GitMergeButton.tsx",
         "src/components/panels/StashSection.tsx",
         "src/components/GraphView.tsx",
+        "src/components/GraphHistory.tsx",
         "src/components/HistoryEditList.tsx",
         "src/components/CommandPalette.tsx",
         "src/components/StatusBar.tsx",
-        "src/lib/commands.ts"
+        "src/lib/macros.ts"
       ],
       "tests": [
         "src/__tests__/gitSafetyGuard.test.ts",
@@ -15487,8 +15508,8 @@
       "title": "Open tabs show what is on disk after every operation",
       "area": "SAFE",
       "spec": "specs/git-safety.md",
-      "line": 482,
-      "status": "planned",
+      "line": 513,
+      "status": "draft",
       "commands": [
         "git.discardChange",
         "git.discardLines",
@@ -15501,14 +15522,17 @@
       ],
       "files": [
         "src/lib/git.ts",
+        "src/lib/gitTabs.ts",
         "src/lib/actions.ts",
         "src/lib/diff.ts",
         "src/lib/gitSafety.ts",
+        "src/lib/gitStaging.ts",
         "src/components/BigFileView.tsx"
       ],
       "tests": [
         "src/__tests__/gitSafety.test.ts",
-        "src/__tests__/gitSafetyGuard.test.ts"
+        "src/__tests__/gitSafetyGuard.test.ts",
+        "src/__tests__/gitStaging.test.tsx"
       ],
       "docs": [
         "docs/git.md"
@@ -15569,11 +15593,12 @@
       "title": "Tabs whose file is not there after the operation",
       "area": "SAFE",
       "spec": "specs/git-safety.md",
-      "line": 565,
-      "status": "planned",
+      "line": 600,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/lib/actions.ts",
+        "src/lib/gitTabs.ts",
         "src/lib/git.ts",
         "src/lib/gitSafety.ts"
       ],
@@ -23037,7 +23062,8 @@
       "HISTORY-004",
       "HISTORY-005",
       "HISTORY-007",
-      "HISTORY-010"
+      "HISTORY-010",
+      "SAFE-005"
     ],
     "src/components/GraphLaneScroll.tsx": [
       "GRAPH-017"
@@ -23345,7 +23371,8 @@
       "GITAI-005"
     ],
     "src/components/panels/GitMergeButton.tsx": [
-      "MERGE-003"
+      "MERGE-003",
+      "SAFE-005"
     ],
     "src/components/panels/GitPanel.tsx": [
       "CONFLICT-007",
@@ -23668,6 +23695,7 @@
       "CONFLICT-008",
       "DIFF-001",
       "DIFF-012",
+      "DIFF-013",
       "EXPL-001",
       "EXPL-002",
       "EXPL-006",
@@ -23897,7 +23925,6 @@
       "MACRO-009",
       "MACRO-010",
       "MACRO-011",
-      "SAFE-005",
       "SCRIPT-002",
       "SCRIPT-003",
       "SCRIPT-004",
@@ -23999,10 +24026,10 @@
       "DIFF-014",
       "EXPL-017",
       "FILE-010",
+      "FILE-015",
       "GRAPH-010",
       "SAFE-001",
       "SAFE-002",
-      "SAFE-004",
       "SAFE-006",
       "STAGE-001",
       "STAGE-005",
@@ -24313,7 +24340,9 @@
       "BRANCH-007",
       "BRANCH-008",
       "BRANCH-009",
-      "GIT-016"
+      "GIT-016",
+      "SAFE-003",
+      "SAFE-005"
     ],
     "src/lib/gitRefs.ts": [
       "BRANCH-001",
@@ -24326,6 +24355,7 @@
       "MERGE-003"
     ],
     "src/lib/gitSafety.ts": [
+      "FILE-015",
       "SAFE-001",
       "SAFE-002",
       "SAFE-003",
@@ -24336,6 +24366,9 @@
     "src/lib/gitStaging.ts": [
       "DIFF-013",
       "GIT-010",
+      "SAFE-004",
+      "SAFE-005",
+      "SAFE-006",
       "STAGE-001",
       "STAGE-002",
       "STAGE-003",
@@ -24400,6 +24433,15 @@
       "STASH-009",
       "THREEWAY-004",
       "THREEWAY-005"
+    ],
+    "src/lib/gitTabs.ts": [
+      "SAFE-001",
+      "SAFE-002",
+      "SAFE-003",
+      "SAFE-004",
+      "SAFE-005",
+      "SAFE-006",
+      "SAFE-007"
     ],
     "src/lib/goto.ts": [
       "EDIT-016"
@@ -24546,6 +24588,7 @@
       "MACRO-011",
       "MACRO-012",
       "MACRO-013",
+      "SAFE-005",
       "SCRIPT-004",
       "SCRIPT-015",
       "SET-005",
@@ -25207,7 +25250,6 @@
       "GRAPH-016",
       "GRAPH-017",
       "GRAPH-018",
-      "SAFE-004",
       "STASH-010"
     ],
     "src/__tests__/gitHunks.test.ts": [
@@ -25286,6 +25328,9 @@
       "SAFE-007"
     ],
     "src/__tests__/gitSafetyGuard.test.ts": [
+      "DIFF-013",
+      "FILE-015",
+      "SAFE-001",
       "SAFE-002",
       "SAFE-003",
       "SAFE-004",
@@ -25294,10 +25339,12 @@
       "SAFE-007"
     ],
     "src/__tests__/gitSafetyRoutes.test.tsx": [
+      "SAFE-004",
       "SAFE-005"
     ],
     "src/__tests__/gitStaging.test.tsx": [
       "DIFF-013",
+      "SAFE-006",
       "STAGE-001",
       "STAGE-002",
       "STAGE-003",

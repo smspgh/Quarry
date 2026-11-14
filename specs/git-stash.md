@@ -9,7 +9,7 @@ Putting uncommitted work aside and bringing it back: Stash Changes, the Stashes 
 
 Decisions (taken where the roadmap left the choice open):
 
-- **Owner decisions (2026-11-13).** The unsaved-tabs question (Save All / Continue Without Saving / Cancel) is specified once, in SAFE-001 to SAFE-003 (stashing: SAFE-003.6; applying or popping: SAFE-003.7), and arrives with that area; nothing in this area asks about unsaved tabs. Until then a stash simply takes the files as they are on disk and unsaved text stays in its tab.
+- **Owner decisions (2026-11-13).** The unsaved-tabs question (Save All / Continue Without Saving / Cancel) is specified once, in SAFE-001 to SAFE-003 (stashing: SAFE-003.6; applying or popping: SAFE-003.7), and is built: `stashChanges` and `stashAction` (apply, pop) ask it through the shared guard before git runs; dropping a stash does not. This area defines no unsaved-tabs dialog of its own.
 - **Where.** A **Stashes** section sits in the Source Control panel between the change sections and Commits. It is always there once the repository has a commit (so the feature can be found), with a one-line note when there are no stashes. All stashes are listed, newest first, with no paging.
 - **Asking for the message.** Stash Changes opens a small form at the top of the Stashes section (message box, untracked option, Stash / Cancel), like the Add Remote form; there is no text-input dialog in Quarry and none is added. The message is optional; without one git's own "WIP on main: …" subject is kept and shown as "WIP at 1a2b3c4 Fix tab order".
 - **What a stash takes.** Staged and unstaged changes to tracked files, always. **Include untracked files** is a checkbox that starts ticked every time the form opens, because Quarry lists untracked files under Changes and leaving them behind would surprise; it is hidden when there are no untracked files. Ignored files are never stashed. Stashing only some files, only staged changes, or "keep staged" are not part of this area.
@@ -29,7 +29,7 @@ Decisions (taken where the roadmap left the choice open):
 - Files:
   - `src/components/panels/StashSection.tsx` — `StashesSection` (section head with the Stash Changes… button), `StashForm` (message box, Stash / Cancel, Enter / Escape)
   - `src/components/panels/GitPanel.tsx` — renders `StashesSection` between the change sections and `CommitsSection`
-  - `src/lib/git.ts` — `stashChanges(root, message, untracked)` (busy label "Stashing…", notification, `checkExternalChanges`), `showStashForm()`, `useGit.stashForm`
+  - `src/lib/git.ts` — `stashChanges(root, message, untracked)` (busy label "Stashing…", the unsaved-tabs question of SAFE-003.6, notification, open tabs reloaded through `rewrite`), `showStashForm()`, `useGit.stashForm`
   - `src/lib/gitStash.ts` — pure: `stashTitle` (git's subject → what is shown), `stashDone` (notifications)
   - `src/lib/gitCommands.ts` — `git.stash`
   - `src-tauri/src/git.rs` — `stash_push` / `git_stash_push` (`stash push [--include-untracked] [--message=<message>]`; "nothing to stash" is an error), `git_stash` (the command without `--literal-pathspecs`)
@@ -151,7 +151,7 @@ Scenario: STASH-002.7 Ignored files are never stashed
 - Commands: `git.stash`
 - Files:
   - `src/lib/gitStash.ts` — `stashBlocked` (why Stash Changes / Apply / Pop cannot run now: no commit yet, a stopped operation, conflicted files, nothing to stash; the sentence shown)
-  - `src/lib/git.ts` — `stashChanges` (checks `stashBlocked` on a fresh status before anything runs; the unsaved-tabs question is not part of this story: SAFE-003.6 adds it to this function later)
+  - `src/lib/git.ts` — `stashChanges` (checks `stashBlocked` on a fresh status before anything runs; then the unsaved-tabs question of SAFE-003.6 through the shared `guard`)
   - `src/components/panels/StashSection.tsx` — disabled Stash Changes button with the reason as tooltip, disabled while `busy`
   - `src/lib/gitCommands.ts` — `git.stash` gives the same reason as a notification
   - `src/lib/gitStatus.ts` — `finishFirst(operation)` (the shared sentence naming the stopped operation, on `operationWords`; shared with MERGE-003)
@@ -328,7 +328,7 @@ Scenario: STASH-005.8 Available while actions are off
 - Status: draft
 - Commands: `git.stashApply`
 - Files:
-  - `src/lib/git.ts` — `stashAction(root, stash, "apply" | "pop" | "drop")` (guards on a fresh status, notification, `checkExternalChanges`; the unsaved-tabs question is added to apply / pop by SAFE-003.7, not here), `stashRun` (busy label, refusal as a notification, reloads the list)
+  - `src/lib/git.ts` — `stashAction(root, stash, "apply" | "pop" | "drop")` (guards on a fresh status, then for apply / pop the unsaved-tabs question of SAFE-003.7 through the shared `guard`; `withTabs` reloads open tabs afterwards, also after a conflict or a refusal; notification), `stashRun` (busy label, refusal as a notification, reloads the list)
   - `src/lib/gitStash.ts` — `stashBlocked`, `stashDone`, `stashErrorText` (git's "would be overwritten" / "already exists" output → a sentence naming the files and what to do)
   - `src/components/panels/StashSection.tsx` — "Apply" row button, disabled state and tooltip
   - `src/lib/gitCommands.ts` — `git.stashApply` (the newest stash)

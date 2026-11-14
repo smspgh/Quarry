@@ -382,12 +382,14 @@ Scenario: CONFLICT-008.4 An open tab follows
   When I take a side
   Then the tab shows the new text without asking
   And when taking the side deleted the file, its tab is closed
+  And a large-file tab or a Compare tab of the file follows in the same way
 
 Scenario: CONFLICT-008.5 Unsaved edits are asked about
   Given the tab of "store.ts" has unsaved edits
   When I click "Incoming"
   Then a dialog "Replace your edits to store.ts?" offers "Replace" and "Cancel" (default)
   And "Cancel" leaves the file and the tab as they are
+  And the same is asked for a large-file tab, or a Compare tab with unsaved edits to the file (SAFE-004.7)
 
 Scenario: CONFLICT-008.6 During a rebase the tooltips say which side is which
   Given a rebase is in progress
@@ -489,7 +491,7 @@ Scenario: CONFLICT-010.6 The button comes back
 - Files:
   - `src/components/panels/GitPanel.tsx` — operation badge (`OPERATION` labels), "Abort" beside the branch
   - `src/components/GraphView.tsx` — "Abort" in the stopped-operation strip
-  - `src/lib/git.ts` — `abortOperation` (asks, then `checkExternalChanges`; forgets a pending rewrite of pushed commits, MERGE-009)
+  - `src/lib/git.ts` — `abortOperation` (asks, naming the unsaved tabs with `lostEditsSentence`; then `rewrite`, which reloads open tabs; forgets a pending rewrite of pushed commits, MERGE-009)
   - `src-tauri/src/git.rs` — `operation` (rebase-merge / rebase-apply / MERGE_HEAD / CHERRY_PICK_HEAD / REVERT_HEAD), `abort_operation` / `git_abort`
   - `src/lib/gitApi.ts` — `git.abort`, `GitOperation`
 - Tests: `src-tauri/src/git.rs`
@@ -512,12 +514,13 @@ Scenario: CONFLICT-011.2 Abort asks first
   When I click "Abort"
   Then a dialog "Abort the cherry-pick?" says everything goes back to how it was and resolutions made so far are discarded
   And its confirm button reads "Abort Cherry-pick"
+  And when tabs of the repository have unsaved edits it adds which ones are lost too where the abort rewrites the file (SAFE-004.6)
 
 Scenario: CONFLICT-011.3 Abort
   When I confirm
   Then the branch and files are as before the cherry-pick, and Merge Changes is empty
   And a notification says "Aborted the cherry-pick."
-  And open tabs of files that changed on disk are re-checked
+  And open tabs of files that changed on disk are reloaded; the unsaved tabs the dialog named reload without a question where the abort rewrote their file
   And an aborted rebase of already-pushed commits leaves no "Force Push…" offer (MERGE-009.13)
 
 Scenario: CONFLICT-011.4 Cancel
@@ -541,7 +544,7 @@ Scenario: CONFLICT-011.6 Disabled while git is busy
 - Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — "Skip" button (not for a merge; disabled while conflicts remain), "Nothing is left to commit…" note
-  - `src/lib/git.ts` — `continueOperation(root, operation, "skip")`
+  - `src/lib/git.ts` — `continueOperation(root, operation, "skip")` (its question, then the unsaved-tabs `guard`, then `rewrite`)
   - `src-tauri/src/git.rs` — `continue_operation` / `git_continue` (`--skip`, refused for a merge, `GIT_EDITOR=true`)
   - `src/lib/gitApi.ts` — `git.continueOp`
 - Tests: `src-tauri/src/git.rs`
@@ -569,6 +572,7 @@ Scenario: CONFLICT-012.3 Skip asks first
   Then a dialog "Skip this commit?" says the commit's changes will not be on the branch
   When I confirm with "Skip Commit"
   Then that commit is left out and the rebase carries on
+  And when tabs of the repository have unsaved changes the unsaved-changes dialog follows my confirmation, before git runs (SAFE-003.9)
   And a notification says "Skipped that commit: the rebase is on its next commit." or "The rebase is finished."
 
 Scenario: CONFLICT-012.4 Nothing left to commit
@@ -613,6 +617,8 @@ Scenario: CONFLICT-013.3 The main button continues
   Then the main button reads "Continue Rebase" and is enabled without a message
   When I click it
   Then the rebase carries on with the next commit, keeping each commit's own message without opening an editor
+  And when tabs of the repository have unsaved changes the unsaved-changes dialog comes first (SAFE-003.9)
+  And open tabs show what is on disk afterwards, also when it stops again (SAFE-006.4)
   And a notification says "Continued: the rebase is on its next commit." when it stops again, or "The rebase is finished." when it is done
   And when the rebase was started with "Rebase Anyway" over already-pushed commits (MERGE-006), finishing it makes the status line offer "Force Push…" (MERGE-009.1)
 

@@ -11,7 +11,7 @@ This area is built in the first wave, so it also owns the things the later git s
 
 Decisions (taken where the roadmap left the choice open):
 
-- **Owner decisions (2026-11-13).** (1) Pushed commits: warn, then offer Force Push. A rebase that would replay pushed commits warns in a danger dialog that names them, with Cancel as the default (MERGE-006); afterwards the status line offers "Force Push…" (`git push --force-with-lease`), which asks again (MERGE-009). (2) The unsaved-tabs question (Save All / Continue Without Saving / Cancel) is specified once, in SAFE-001 to SAFE-003, and arrives with that area; nothing in this area asks about unsaved tabs.
+- **Owner decisions (2026-11-13).** (1) Pushed commits: warn, then offer Force Push. A rebase that would replay pushed commits warns in a danger dialog that names them, with Cancel as the default (MERGE-006); afterwards the status line offers "Force Push…" (`git push --force-with-lease`), which asks again (MERGE-009). (2) The unsaved-tabs question (Save All / Continue Without Saving / Cancel) is specified once, in SAFE-001 to SAFE-003, and is built: `startMerge` and `startRebase` ask it through the shared guard after their clean-state check and before their own confirmation; a Save All there leads to the clean-state refusal (SAFE-003.4, SAFE-003.12). This area defines no unsaved-tabs dialog of its own.
 - **Cancel is the default button of every merge, rebase and force-push dialog.** Enter and Escape both cancel; the action needs a click (or Tab + Enter). This follows the roadmap ground rule "the safe button as the default" and is stricter than today's cherry-pick dialog, whose confirm button is the default. `choose()` in `src/lib/dialogs.ts` already takes a per-choice `default`, so the dialogs themselves need no change.
 - **What is merged / rebased onto.** Right-clicking a commit that carries exactly one branch label other than the current branch acts on that branch by name (so the merge message reads "Merge branch 'feature' into main"). A commit with no such label, or with several, is used by its id; right-clicking one of its labels picks that branch or tag by name. A remote branch is used as it was last fetched: nothing is fetched and no local branch is created.
 - **Ref-label menu (one menu, shared with BRANCH-001).** A right-click on a ref label in the graph (in a row, or in the details pane's Refs line) selects the commit and opens a menu for that ref instead of the commit's menu. The labels that open it are: a local branch label (the current branch's included), a remote branch label and a tag label. It is headed "Branch feature", "Remote branch origin/topic" or "Tag v1.2.0". The detached "HEAD" label and a "stash" label (STASH-010) have no label menu: a right-click on them opens their row's menu. This area gives the menu its first two entries, "Merge <ref> into <current>…" and "Rebase <current> onto <ref>…" (greyed out on the current branch's own label); BRANCH-001 later adds the housekeeping entries to the same menu around them. The entries are built by the pure `refMenu(label, ctx)` in `src/lib/gitRefs.ts`, created here and extended there.
@@ -266,7 +266,7 @@ Scenario: MERGE-003.10 Rebase needs a branch
 - Commands: `git.mergeRef`
 - Files:
   - `src/lib/gitMerge.ts` — `mergeConfirm(preview, label, branch)` (title, text, buttons; Cancel default; "nothing to merge"), `mergeDone` (notifications)
-  - `src/lib/git.ts` — `startMerge` (`startCheck` → `startPreview` → dialog via `choose()` → `runStart` with busy label "Merging…" → notification, `checkExternalChanges`)
+  - `src/lib/git.ts` — `startMerge` (`startCheck` → `startPreview` → `cleanGuard`, the unsaved-tabs question of SAFE-003.4 → dialog via `choose()` → `runStart` with busy label "Merging…" → notification; open tabs reloaded through `rewrite`)
   - `src/lib/dialogs.ts` — `choose()` (unchanged: three choices, `default: true` on Cancel)
   - `src-tauri/src/git.rs` — `merge_preview` / `git_merge_preview` (commits on each side: `rev-list --left-right --count HEAD...<ref>`), `resolve_target` (a branch, remote branch or tag name or a commit id; anything else, or a name starting with `-`, is refused), `start_merge` / `git_merge` (`merge --no-edit` with `--ff-only` or `--no-ff`; `GIT_EDITOR=true`; the short branch name is given to git so the message reads "Merge branch 'feature'")
   - `src/lib/gitApi.ts` — `git.mergePreview`, `git.merge`, `GitMergePreview`, `GitMergeMode`
@@ -295,7 +295,7 @@ Scenario: MERGE-004.3 A clean merge
   Then "Merging…" shows beside the branch while it runs
   And a merge commit "Merge branch 'feature'" is on "main" without my being asked for a message (on a branch other than main / master, git's message ends "into <branch>")
   And a notification says "Merged feature into main"
-  And open tabs whose files changed on disk are re-checked
+  And open tabs whose files changed on disk are reloaded (SAFE-006.3)
 
 Scenario: MERGE-004.4 A fast-forward is possible: I choose
   Given I am on "main", "feature" has 3 commits that "main" lacks and "main" has none that "feature" lacks
@@ -345,7 +345,7 @@ Scenario: MERGE-004.10 What a merge never does
 - Commands: `git.rebaseOnto`
 - Files:
   - `src/lib/gitMerge.ts` — `rebaseConfirm(preview, label, branch)` (title, text, buttons; Cancel default; merge-commit note; "nothing to rebase"; the fast-forward variant), `rebaseDone`
-  - `src/lib/git.ts` — `startRebase` (`startCheck` → `startPreview` → dialog → `runStart` with busy label "Rebasing…" → notification, `checkExternalChanges`; the fast-forward runs `git.merge(…, "ff-only")`)
+  - `src/lib/git.ts` — `startRebase` (`startCheck` → `startPreview` → `cleanGuard`, the unsaved-tabs question of SAFE-003.4 → dialog → `runStart` with busy label "Rebasing…" → notification; open tabs reloaded through `rewrite`; the fast-forward runs `git.merge(…, "ff-only")`)
   - `src-tauri/src/git.rs` — `merge_preview` (also: how many of the commits to replay are merge commits), `start_rebase` / `git_rebase` (`rebase <ref>` with `rebase.autoStash`, `rebase.rebaseMerges` and `rebase.updateRefs` off, `GIT_EDITOR=true`, refused on a detached HEAD)
   - `src/lib/gitApi.ts` — `git.rebase`
 - Tests: `src/__tests__/gitMerge.test.ts`, `src-tauri/src/git.rs`
@@ -373,7 +373,7 @@ Scenario: MERGE-005.3 A clean rebase
   Then "Rebasing…" shows beside the branch while it runs
   And "main" consists of the commits of "feature" followed by my 2 commits, each with its own message and no editor opened
   And a notification says "Rebased main onto feature (2 commits replayed)"
-  And open tabs whose files changed on disk are re-checked
+  And open tabs whose files changed on disk are reloaded (SAFE-006.3)
 
 Scenario: MERGE-005.4 Nothing to rebase
   Given "main" already contains every commit of "feature"
@@ -469,7 +469,7 @@ Scenario: MERGE-006.7 A fast-forward rewrites nothing
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/git.ts` — `runStart`: the failure path of `startMerge` / `startRebase` (error via `gitErrorText`, fresh status, `showPanel("git")` when an operation is now in progress, `checkExternalChanges`), `abortOperation`, `continueOperation`
+  - `src/lib/git.ts` — `runStart`: the failure path of `startMerge` / `startRebase` (error via `gitErrorText`, fresh status, `showPanel("git")` when an operation is now in progress; open tabs are reloaded through `rewrite` whether it finished, stopped or failed), `abortOperation`, `continueOperation`
   - `src/lib/gitStatus.ts` — `gitErrorText` ("Stopped on a conflict…"), `operationWords` (merge / rebase wording, unchanged)
   - `src/components/panels/GitPanel.tsx` — operation badge, Skip / Abort, prefilled message, Continue Rebase (existing; must show for an operation Quarry started)
   - `src/components/GraphView.tsx` — stopped-operation strip (existing)

@@ -121,6 +121,35 @@ If the files have changed since the stash was made, in the same lines, applying 
 - **The stash is kept**, also after a Pop (git does not remove a stash that conflicted); its row says **applied with conflicts**. When the last file of a Pop is resolved, Quarry offers to drop the stash: **Keep Stash** is the default. After an Apply nothing is offered, and nothing is ever committed for you.
 - There is no Abort for this: git has none, and the general way back could discard other work. If Quarry was restarted in between, the files are still under Merge Changes and the stash is still in the list; drop it yourself when you are done.
 
+## Unsaved tabs and git
+
+Git works on the files on disk; text you have typed and not saved exists only in its tab. Quarry knows which tabs those are, so before one of its git actions rewrites files it tells you, and afterwards every open tab shows what is on disk.
+
+**Before an action that can rewrite any file.** Switching branch, checking out a commit, Pull (always, even when it turns out there was nothing to pull), merge, rebase, cherry-pick, revert, Stash Changes, applying or popping a stash, Continue and Skip of a stopped operation, and every history edit that replays commits. If open tabs of that repository have unsaved changes, a dialog lists them (by path in the repository, at most 10, then "and N more") with three buttons:
+
+- **Save All** (**Save** for one file; the default, **Enter**): saves the listed files, and only those, then runs the action. The edits are then ordinary uncommitted changes, which git carries along or refuses to overwrite, as it does for any saved change. If one of the files cannot be saved, the action does not run and a message says which file.
+- **Continue Without Saving**: runs the action and keeps your unsaved text in the tabs. Nothing is asked afterwards; one warning names the tabs whose file changed underneath them. Such a tab stays marked unsaved, and saving it writes your text over the file.
+- **Cancel** (**Escape**): nothing runs and nothing is saved.
+
+It does not matter where the action was started: panel button, graph menu, Git menu, command palette, the branch list, the status bar or a macro.
+
+- **What counts.** Text tabs, large-file tabs and the edited file side of a Compare tab, when the file is inside the repository the action runs in (a file of a nested repository belongs to the nested one). Untitled tabs, files of other repositories and tabs that are only marked unsaved because their file is missing never count.
+- **An action with its own confirmation** (cherry-pick, revert, check out a commit, Skip) asks that first and about the tabs second.
+- **Merge, rebase and history edits** only start without uncommitted changes, and Save All turns your edits into exactly that. So for these the unsaved-tabs dialog comes before their own confirmation, and after **Save All** you get **Commit or discard your changes first** instead of the merge. **Continue Without Saving** is the way to run one with the unsaved text kept in its tabs.
+- **Stash Changes** says it differently, because a stash takes the files as they are on disk: unsaved changes would not be in it. **Save** puts them in the stash.
+
+**Actions that throw work away** have no Save All (saving and then discarding is pointless). Their own confirmation says which unsaved tabs go too, **Cancel** stays the default, and confirming is the answer: no second question follows.
+
+- **Discard changes** names the tabs of the files being discarded; **Delete (to the Recycle Bin)** of an untracked file closes its tab.
+- **Reset … (Hard)…** and **Abort** list the unsaved tabs of the repository; only tabs whose file the reset or abort really rewrote lose their edits, the others keep them.
+- **Current** / **Incoming** on a conflicted file asks **Replace your edits to …?** when its text tab, large-file tab or Compare tab has unsaved edits; a file that side deleted closes its tab.
+
+**Actions that leave your files alone do not ask:** fetch, push, Force Push, commit (it warns that unsaved changes are not in the commit), stage, unstage, soft and mixed reset, Undo Last Commit, rewording the last commit, creating a branch from the current commit, everything under **Branches and Tags**, dropping a stash. Staging or discarding a single change keeps its own rule: that one file is saved first.
+
+**Afterwards.** When the action ends, also when it stopped on a conflict or failed part-way, tabs without unsaved changes whose file changed are reloaded at once: **store.ts changed on disk and was reloaded.**, or **3 open files changed on disk and were reloaded.** Files that did not change are left alone, cursor and undo history included. Large-file tabs are reopened from disk (one in follow mode is left to follow mode), and Compare tabs with a file side, or showing a tab that was reloaded, follow. A tab whose file is not in the folder any more (a branch without that file) stays open and is marked unsaved, with one warning for all of them; switch back and it is clean again, without a question.
+
+Git run in a terminal tab, a Claude tab or another program is not covered by the question: there Quarry notices the change when its window gets focus (see [Editing › External changes](editing.md#external-changes)).
+
 ## Commits
 
 Under the changes and the stashes, **Commits** lists the branch's commits, newest first (30 at a time; **Show more** loads older ones). It is how you see what a commit you just made contains.

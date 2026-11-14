@@ -5,7 +5,7 @@ prefix: SAFE
 
 # Unsaved Tabs and Git Operations
 
-What Quarry does about open tabs when a git operation rewrites the files under them: before the operation it says which tabs have unsaved changes and offers to save them, and afterwards every open tab shows what is now on disk. Roadmap item 8, "Buffer-aware safety" (`GIT-ROADMAP.md`); user documentation will be a section of `docs/git.md`. Nothing here is built yet. The stories cover the git actions that exist today and the ones specified alongside this file: Stash (`git-stash.md`), starting a merge or rebase and Force Push (`git-merge-rebase.md`), partial staging (`git-staging.md`), Edit History (`git-history-edit.md`) and branch housekeeping (`git-branches.md`). Those are built before this area, and none of them asks about unsaved tabs on its own: this area adds the one shared question to their action functions. Their command ids are defined in their own specs and listed in the Commands of the stories here that cover them.
+What Quarry does about open tabs when a git operation rewrites the files under them: before the operation it says which tabs have unsaved changes and offers to save them, and afterwards every open tab shows what is now on disk. Roadmap item 8, "Buffer-aware safety" (`GIT-ROADMAP.md`); user documentation is the section "Unsaved tabs and git" of `docs/git.md`. The stories cover every git action of Quarry: the Source Control panel and the graph, Stash (`git-stash.md`), starting a merge or rebase and Force Push (`git-merge-rebase.md`), partial staging (`git-staging.md`), Edit History (`git-history-edit.md`) and branch housekeeping (`git-branches.md`). None of those areas asks about unsaved tabs on its own: this area adds the one shared question to their action functions. Their command ids are defined in their own specs and listed in the Commands of the stories here that cover them.
 
 Operations run outside Quarry's own git actions (a terminal tab, a Claude tab, another program) are not covered: for those the existing check on window focus and tab activation (FILE-015) stays the only safety net.
 
@@ -26,41 +26,56 @@ Operations run outside Quarry's own git actions (a terminal tab, a Claude tab, a
 - **The list** shows paths relative to the repository root with backslashes, in tab order, at most 10, then "and N more".
 - **Tabs whose file is gone after the operation stay open**, as today (FILE-015.4 / .5), so that switching back brings them back clean. The per-file warnings are folded into one. A file removed because the user asked for exactly that (take-side deletion, an untracked file discarded to the Recycle Bin) closes its unedited tab instead.
 - **Reload notices are folded:** one file keeps today's wording, several files give one notice with the count.
-- **The guard lives in the action functions of `src/lib/git.ts`**, not in the buttons, so that every route (panel, graph menu, palette, shortcut, macro, hidden command) passes through it.
+- **The guard lives in the action functions of `src/lib/git.ts`**, not in the buttons, so that every route (panel, graph menu, palette, shortcut, macro, hidden command) passes through it. One exception in form, not in effect: the hard reset's confirmation is the graph's (`act()` in `GraphView.tsx`, the only caller of `commitAction`), which asks `unsavedTabs()` for the tabs to name; `commitAction` then gives those tabs up without a second question.
+- **As built (2026-11-14).** Pure rules and wording: `src/lib/gitSafety.ts`. The question and the after-operation step: `guardUnsaved` and `withTabs` in `src/lib/gitTabs.ts`, used in `git.ts` as `guard(root, op)` and `rewrite(g, label, fn)`. The answer is carried into the check that follows the operation by `answerAhead` in `actions.ts` ("keep" for Continue Without Saving, "lose" for a discarding confirmation), so a window-focus check that happens to run first does not ask either. A discarding operation reloads an unsaved tab only where git really rewrote its file (the file's modification time changed), the same rule for discard, hard reset, abort and take-a-side; a tab whose file was left alone keeps its edits. The after-operation check is not awaited by the action: when a "changed on disk" question from before is still open it queues behind it. A merge or rebase with nothing to do says so in its notification before any dialog. Reword Message and Squash into Parent ask when the message strip is submitted, not when it opens.
 
-**What the code does today (audit, 0.1.9)**
+**Audit: every action that can rewrite files, and how it is covered**
 
-Starting point for the implementer. "Check" = `checkExternalChanges()` in `src/lib/actions.ts`, which reloads clean tabs whose file is newer on disk (one notice per file), asks "Reload from disk / Keep my version" per unsaved tab, and warns once per vanished file, marking its tab unsaved.
+Redone against the code on 2026-11-14, after every other git area was built. "guard" = the unsaved-tabs dialog through `guard()` (`guardUnsaved`); "sentence" = the action's own confirmation names the unsaved tabs, which then reload without a second question; "reload" = `rewrite()` / `withTabs()`: `checkExternalChanges({ quiet: true })` after the git call whether it worked, stopped on a conflict or failed, with one folded notice per kind. `src/__tests__/gitSafetyGuard.test.ts` runs every row with an unsaved tab, and checks that no other source file calls the file-rewriting git commands.
 
-| Action (function in `src/lib/git.ts`) | Routes | About unsaved tabs today | Tabs afterwards today |
+| Action (function in `src/lib/git.ts`) | Routes | About unsaved tabs | Tabs afterwards |
 | --- | --- | --- | --- |
-| `checkout` (switch, create branch) | branch button, `git.switchBranch` palette list, hidden `git.checkoutTo` / `git.createBranch` | nothing | check, on success |
-| `checkoutRef` | "Switch to …" entries of the graph's commit menu (later also of the ref-label menu, MERGE-002 / BRANCH-001) | nothing | check, on success |
-| `commitAction` checkout / branch-switch / cherry-pick / revert | graph commit menu (`act()` in `GraphView.tsx`) | own confirmation only, no mention of tabs | check on success only: **a cherry-pick or revert that stops on a conflict returns before the check**, so tabs show stale text until the window regains focus |
-| `commitAction` reset-soft / -mixed / -hard | graph commit menu | hard reset counts uncommitted files, not tabs | check, on success |
-| `remote` pull / pull-merge / pull-rebase | panel ↓ button, `SyncStatus` buttons, `git.pull` | nothing | check on success only: **a pull that stops on a conflict returns before the check** |
-| `discard` | row button, "Discard all changes" | dialog says "Open tabs reload the committed text", but an unsaved tab is then asked a second question ("changed on disk") | check, always |
-| `takeSide` | Merge Changes row Current / Incoming | asks "Replace your edits to …?" for an unsaved **text** tab only | reloads or closes the text tab itself; no check, so a large-file or Compare tab is not updated |
-| `abortOperation` | panel Abort, graph strip Abort | own confirmation, no mention of tabs | check, on success only |
-| `continueOperation` (continue / skip) | panel Continue button, Skip | nothing | check, always |
+| `checkout(name)` | branch list (branch button, status bar, `git.switchBranch`), hidden `git.checkoutTo` (also what a macro records) | guard | reload |
+| `checkout(name, true)` | "Create branch … from here" row, hidden `git.createBranch` | none: the files do not change | nothing to reload |
+| `checkoutRef` | "Switch to …" of the graph's commit menu and ref-label menu; the "Switch to" offer after a rejected push (`refAction`) | guard | reload |
+| `commitAction` checkout / branch-switch / cherry-pick / revert | graph commit menu (`act()` in `GraphView.tsx`, after its own confirmation) | guard | reload, also when the pick or revert stops on a conflict |
+| `commitAction` reset-hard | graph commit menu | sentence, in the graph's confirmation (`unsavedTabs` → `actionConfirm`) | reload; the named tabs where the reset rewrote the file |
+| `commitAction` reset-soft / reset-mixed / branch / tag | graph commit menu | none | soft / mixed: the check runs; branch / tag: nothing to reload |
+| `remote` pull / pull-merge / pull-rebase | panel ↓ button, `SyncStatus` buttons, `git.pull`, the "Pull" offer after a rejected push | guard, always | reload, also when the pull stops on a conflict or fails |
+| `remote` fetch / push, `forcePush` | panel, graph toolbar, `git.fetch`, `git.push`, `git.forcePush` | none | nothing to reload |
+| `discard` | row button, "Discard all changes", the whole-file Discard of a Source Control comparison (`wholeFile` in gitStaging.ts) | sentence (`discardText`) | reload; the named tabs without a question; the tab of an untracked file that went to the Recycle Bin closes |
+| `takeSide` | Merge Changes row Current / Incoming (also after a stash came back with conflicts) | "Replace your edits to …?" for a text tab, a large-file tab or a Compare tab's edited side | reload; tabs of a file that side deleted close |
+| `abortOperation` | panel Abort, graph strip Abort | sentence (`lostEditsSentence`) | reload, also when the abort fails |
+| `continueOperation` (continue / skip) | panel Continue button, Skip | Skip's confirmation, then guard | reload, also when it stops again |
+| `startMerge` / `startRebase` (through `runStart`) | graph commit menu, ref-label menu, panel "Merge or Rebase" button and `git.mergeBranch` / `git.rebaseBranch` (branch list), hidden `git.mergeRef` / `git.rebaseOnto` | clean-state check, guard (`cleanGuard`: after Save All the clean-state check again), then their confirmation | reload, whether it finished, stopped or failed |
+| `stashChanges` | the Stashes form's Stash button (`git.stash` opens the form) | guard, worded for a stash | reload |
+| `stashAction` apply / pop, `stashLatest` | Stashes rows, graph stash-row menu, `git.stashApply`, `git.stashPop` | guard | reload, also after conflicts or a refusal |
+| `stashAction` drop, `settleStash` | Stashes rows, graph stash-row menu, `git.stashDrop`, the Drop Stash offer | none | nothing to reload |
+| `dropCommit`, `squashCommit`, `rewordCommit` of a commit that is not the last, `runHistoryEdit` (all through `planRun`) | graph commit menu and message strip, the Edit History list's Run | clean-state check (`historyGuard`), guard (`cleanGuard`), then their confirmation | reload, whether it finished, stopped or failed |
+| `undoLastCommit`, `rewordCommit` of the last commit | graph commit menu, `git.undoLastCommit` | none: the files are not touched | the check runs |
 | `resolveConflicts` | row +, "mark all", `git.stageFile`, last-conflict dialog | saves the file's unsaved tab first; a failed save cancels | nothing to reload |
 | `commit` | panel button, Ctrl+Enter | warning "N open files have unsaved changes that are not in this commit." | nothing to reload |
-| `stage` / `unstage` | rows, `git.stageFile`, `git.unstageFile` | nothing (the file on disk is staged) | nothing to reload |
+| `stage` / `unstage` | rows, `git.stageFile`, `git.unstageFile` | none (the file on disk is staged) | nothing to reload |
+| `applyGuarded` in `src/lib/gitStaging.ts` (one change / selected lines) | change bars, Compare toolbar, `git.stageChange` … `git.discardLines` | its own rule (STAGE-005): the file's tab or edited side is saved first, a failed save cancels | Discard: the file's tab is reloaded; comparisons follow the index |
+| `refAction` in `src/lib/gitRefActions.ts` (delete, rename, set upstream, push, delete remote branch, tags) | graph label menu, branch-list row menu, Git › Branches and Tags | none: no file is rewritten | nothing to reload |
 
-Other gaps found: `checkExternalChanges` drops a call made while another check is running (its `checking` flag), so the check after an operation is lost when a "changed on disk" question is still open; Compare tabs with a file side are never refreshed by the check; the check gives one notice per file, so a branch switch with 12 open files shows 12 notices.
+No route was left outside the guard. Not covered, by decision: git run in a terminal tab, a Claude tab or another program (FILE-015 notices those when the window gets focus).
+
+Findings of the first audit (0.1.9) and what became of them: a cherry-pick, revert or pull that stopped on a conflict returned before the check (now `rewrite` checks in a `finally`); `checkExternalChanges` dropped a call made while another check was running (now queued); Compare tabs with a file side were never refreshed (`checkCompareTabs`); `takeSide` updated text tabs only (now every kind, through the same check); discard asked a second "changed on disk" question (answered ahead); one notice per reloaded file (folded).
 
 ## SAFE-001: Be told which tabs have unsaved changes before git rewrites files
 
-- Status: planned
+- Status: draft
 - Commands: `git.switchBranch`, `git.checkoutTo`, `git.pull`
 - Files:
-  - `src/lib/gitSafety.ts` — new, pure: `tabsAtRisk(docs, root, repoRoots)` (which tabs count), `unsavedPrompt(operation, paths)` (title, text, buttons), `listPaths` (10, then "and N more")
-  - `src/lib/git.ts` — new `guardUnsaved(root, operation)` called by every whole-repository action before `run`
+  - `src/lib/gitSafety.ts` — pure: `tabsAtRisk(tabs, root, repoRoots)` and `ownerRoot` (which tabs count), `unsavedPrompt(op, tabs)` (title, text, buttons), `listPaths` (10, then "and N more")
+  - `src/lib/gitTabs.ts` — `openTabs` (the store's tabs as the rules see them: Compare sides, `missingOnly`), `riskTabs`, `guardUnsaved` (shows the dialog through `choose`)
+  - `src/lib/git.ts` — `guard(root, op)`, called by every whole-repository action before git runs
   - `src/lib/dialogs.ts` — `choose` (three buttons, default and cancel)
-  - `src/lib/actions.ts` — `snapshots` (telling an edited tab from one marked unsaved because its file is missing)
-  - `src/lib/diff.ts` — unsaved editable file side of a Compare tab (`side.dirty`, `side.path`)
+  - `src/lib/actions.ts` — `missingOnly` (a tab marked unsaved only because its file is missing: `missingWarned` and the saved `snapshots`)
+  - `src/lib/diff.ts` — unsaved editable file side of a Compare tab (`side.dirty`, `side.path`, `side.source`)
   - `src/lib/store.ts` — `Doc.dirty`, `Doc.bigInfo`
-- Tests: `src/__tests__/gitSafety.test.ts`
+- Tests: `src/__tests__/gitSafety.test.ts`, `src/__tests__/gitSafetyGuard.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer with edits I have not saved yet
@@ -87,6 +102,7 @@ Scenario: SAFE-001.3 One file
   Given only "src\store.ts" has unsaved changes
   When I pick "feature" in the branch list
   Then the dialog is titled "Unsaved changes in store.ts"
+  And it says "… and this open file has unsaved changes:", then "src\store.ts", then "Save it first, or continue and keep the unsaved text in its tab."
   And its first button reads "Save"
 
 Scenario: SAFE-001.4 A long list is cut
@@ -148,13 +164,14 @@ Scenario: SAFE-001.13 Other kinds of tabs never count
 
 ## SAFE-002: Save All, Continue Without Saving or Cancel
 
-- Status: planned
+- Status: draft
 - Commands: `git.switchBranch`, `git.checkoutTo`, `git.pull`
 - Files:
-  - `src/lib/git.ts` — `guardUnsaved` (acts on the answer; returns whether the operation may run and which tabs were kept unsaved), the after-operation step that treats kept tabs as "keep my version"
-  - `src/lib/gitSafety.ts` — `keptNotice(names)` (the warning after Continue), `notSavedNotice(operation, names)`
-  - `src/lib/actions.ts` — `saveDocument` (per listed tab; its read-only and "changed on disk" paths), `checkExternalChanges` (must not ask again about tabs the user chose to keep)
-  - `src/lib/diff.ts` — saving the file side of a Compare tab
+  - `src/lib/gitTabs.ts` — `guardUnsaved` (acts on the answer: saves the listed files, or returns the files kept unsaved; null when the operation may not run), `withTabs` (answers "keep my version" ahead for the kept tabs and words the warning afterwards)
+  - `src/lib/gitSafety.ts` — `keptNotice(names)` (the warning after Continue), `notSavedNotice(op, names)`
+  - `src/lib/actions.ts` — `saveDocument` (per listed tab; its read-only and "changed on disk" paths), `answerAhead` and `checkExternalChanges` (no question about tabs the user chose to keep; their `modifiedMs` moves on so a later save does not ask either)
+  - `src/lib/diff.ts` — `saveDiff(docId, side)` (saving the one file side of a Compare tab)
+  - `src/lib/git.ts` — `guard`, `rewrite`
 - Tests: `src/__tests__/gitSafety.test.ts`, `src/__tests__/gitSafetyGuard.test.ts`
 - Docs: `docs/git.md`
 
@@ -228,12 +245,14 @@ Scenario: SAFE-002.10 Edits made while the dialog chain was open
 
 ## SAFE-003: Every operation that can rewrite files asks
 
-- Status: planned
+- Status: draft
 - Commands: `git.switchBranch`, `git.checkoutTo`, `git.createBranch`, `git.pull`, `git.fetch`, `git.push`, `git.mergeBranch`, `git.rebaseBranch`, `git.mergeRef`, `git.rebaseOnto`, `git.stash`, `git.stashApply`, `git.stashPop`, `git.stashDrop`, `git.editHistory`, `git.undoLastCommit`, `git.forcePush`, `git.deleteBranch`, `git.renameBranch`, `git.setUpstream`, `git.pushBranch`, `git.deleteRemoteBranch`, `git.deleteTag`, `git.pushTag`
 - Files:
-  - `src/lib/git.ts` — `checkout`, `checkoutRef`, `commitAction` (checkout, branch-switch, cherry-pick, revert; not branch, tag, reset-soft, reset-mixed), `remote` (the three pulls only; not fetch, push, push-force), `continueOperation`, and the actions of the other git specs: `startMerge`, `startRebase` (MERGE), `stashChanges`, `stashAction` for apply and pop but not drop (STASH), `rewordCommit` for a commit that is not the last, `dropCommit`, `squashCommit`, `runHistoryEdit` (HISTORY; `guardHistoryEdit` holds the clean-state order); not `undoLastCommit`, `forcePush`, `refAction`
-  - `src/lib/gitSafety.ts` — `operationPhrase(kind, names)` ("Switching to feature", "Pulling", "Merging feature into main", …), `asksAboutTabs(kind)` (the table of which operations ask), `needsCleanState(kind)` (merge, rebase, history replays: the unsaved-tabs dialog comes before the confirmation and the clean-state check runs again after Save All)
-  - `src/lib/gitMerge.ts` — `startBlocked` / `dirtyRefusal` (the clean-state refusal that follows a Save All)
+  - `src/lib/git.ts` — `guard` in `checkout` (not when creating a branch), `checkoutRef`, `commitAction` (`actionOp`: checkout, branch-switch, cherry-pick, revert; not branch, tag, reset-soft, reset-mixed), `remote` (the three pulls only; not fetch, push), `continueOperation`, `stashChanges`, `stashAction` for apply and pop but not drop; `cleanGuard` (the clean-state order) in `startMerge`, `startRebase` and `planRun` (`dropCommit`, `squashCommit`, `rewordCommit` for a commit that is not the last, `runHistoryEdit`); not `undoLastCommit`, `forcePush`
+  - `src/lib/gitSafety.ts` — `operationPhrase(op)` ("Switching to feature", "Pulling", "Merging feature into main", …), `localName` (a remote branch's local name), `asksAboutTabs(kind)` (the table of which operations ask), `needsCleanState(kind)`
+  - `src/lib/gitTabs.ts` — `guardUnsaved` (passes operations that do not ask straight through)
+  - `src/lib/gitMerge.ts` — `trackedChanges` / `dirtyRefusal` (the clean-state refusal that follows a Save All)
+  - `src/lib/gitRefActions.ts` — `refAction` (never asks; its "Pull" / "Switch to" offers go through `remote` / `checkoutRef`)
   - `src/components/GraphView.tsx` — `act()` (order: own confirmation, then the action function, which holds the guard)
 - Tests: `src/__tests__/gitSafety.test.ts`, `src/__tests__/gitSafetyGuard.test.ts`
 - Docs: `docs/git.md`
@@ -266,17 +285,19 @@ Scenario: SAFE-003.4 Merge and rebase
   Then the dialog says "Merging feature into main can rewrite files in this repository" or "Rebasing main onto feature can rewrite files in this repository"
   And it appears before the "Merge feature into main?" or "Rebase main onto feature?" dialog, not after it
   And "Continue Without Saving" goes on to that dialog, and the tab keeps my unsaved text through the merge or rebase
+  And when there is nothing to merge or rebase, the notification says so and no dialog appears at all
 
 Scenario: SAFE-003.5 Editing history
   Given "src\store.ts" has unsaved changes and no uncommitted changes on disk
-  When I start Drop Commit, Squash into Parent, Reword Message of a commit that is not the last, or click "Run" in the Edit History list
+  When I choose Drop Commit, submit the message of Squash into Parent or of Reword Message for a commit that is not the last, or click "Run" in the Edit History list
   Then the dialog says "Rewriting commits can rewrite files in this repository", before the edit's own confirmation
   And "Undo Last Commit…" and Reword Message of the last commit do not ask, because they leave the files alone
 
 Scenario: SAFE-003.6 Stashing says the unsaved text would be left out
   Given "src\store.ts" has unsaved changes
   When I click "Stash" in the stash form with the message "wip"
-  Then the dialog says "A stash takes the files as they are on disk, so the unsaved changes in these open files would not be in it:" followed by "src\store.ts"
+  Then the dialog says "A stash takes the files as they are on disk, so the unsaved changes in this open file would not be in it:" followed by "src\store.ts" ("these open files" for several)
+  And it ends "Save it first to stash it too, or continue and keep the unsaved text in its tab."
   And "Save" saves the file and then stashes it, so the tab shows the committed text afterwards
   And "Continue Without Saving" stashes what is on disk and the tab keeps my unsaved text
   And "Cancel" stashes nothing and leaves the stash form open with my message
@@ -325,17 +346,18 @@ Scenario: SAFE-003.13 Uncommitted changes already on disk: one refusal, no quest
 
 ## SAFE-004: Operations that throw work away say which unsaved tabs go too
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/lib/git.ts` — `discard`, `takeSide`, `abortOperation`, `commitAction` (reset-hard): the extra sentence, and reloading the named tabs without a second question
-  - `src/lib/gitSafety.ts` — `lostEditsSentence(kind, names)`, `tabsOfPaths(docs, paths)` (the path-scoped variant of `tabsAtRisk`)
-  - `src/lib/gitGraph.ts` — `actionConfirm` (hard-reset text takes the unsaved tab names)
-  - `src/components/GraphView.tsx` — `act()` passes the unsaved tabs to `actionConfirm`
+  - `src/lib/git.ts` — `discard`, `takeSide`, `abortOperation`, `commitAction` (reset-hard): the extra sentence, and `noTabs(root, op, lose)` so the named tabs reload without a second question; `unsavedTabs(root)` for the graph
+  - `src/lib/gitSafety.ts` — `discardText`, `lostEditsSentence(kind, tabs)`, `tabsOfPaths(tabs, paths)` (the path-scoped variant of `tabsAtRisk`)
+  - `src/lib/gitTabs.ts` — `riskTabsOf`, `withTabs` (answers "reload" ahead for the tabs given up)
+  - `src/lib/gitGraph.ts` — `actionConfirm` (hard-reset text takes the unsaved tabs)
+  - `src/components/GraphView.tsx` — `act()` passes `unsavedTabs(root)` to `actionConfirm`
   - `src/components/panels/GitPanel.tsx` — discard, Current / Incoming and Abort buttons (unchanged callers)
-  - `src/lib/actions.ts` — `revertDocument`, `reloadBig`, `closeDocument`
-  - `src/lib/diff.ts` — `reloadDiff`
-- Tests: `src/__tests__/gitSafety.test.ts`, `src/__tests__/gitGraph.test.ts`, `src/__tests__/gitSafetyGuard.test.ts`
+  - `src/lib/actions.ts` — `answerAhead`, `checkExternalChanges` (reloads a tab given up where its file changed), `revertDocument`, `reloadBig`, `closeDocument`
+  - `src/lib/gitStaging.ts` — `reloadChange` (a Source Control comparison whose edits were given up)
+- Tests: `src/__tests__/gitSafety.test.ts`, `src/__tests__/gitSafetyGuard.test.ts`, `src/__tests__/gitSafetyRoutes.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer about to discard changes, reset hard, abort or take one side of a file
@@ -354,18 +376,19 @@ Scenario: SAFE-004.2 Confirming reloads the tab without a second question
   When I click "Discard"
   Then "b.ts" on disk is restored and its tab shows the restored text with no unsaved-changes dot
   And no "b.ts changed on disk" question appears
+  And had git left the file on disk as it was, its tab would keep its edits: only a rewritten file's tab is reloaded
 
 Scenario: SAFE-004.3 Discard all names the unsaved tabs among the files
   Given 4 files under Changes, of which "a.ts" and "b.ts" have unsaved edits in their tabs
   And "notes.md", which is not under Changes, also has unsaved edits
   When I click "Discard all changes"
-  Then the dialog adds "Unsaved edits in 2 open tabs are lost too: a.ts, b.ts."
+  Then the dialog says "Your changes to 4 files will be lost. Unsaved edits in 2 open tabs are lost too: a.ts, b.ts. Open tabs reload the committed text."
   And after "Discard" the "notes.md" tab still has its unsaved edits
 
 Scenario: SAFE-004.4 Hard reset
   Given "src\store.ts" and "README.md" have unsaved changes
   When I choose "Reset main to Here (Hard)…" on a commit
-  Then the dialog "Reset (hard) and discard changes?" adds "Unsaved edits in open tabs are lost too where the reset rewrites the file: src\store.ts, README.md."
+  Then the dialog "Reset (hard) and discard changes?" adds, before "This can't be undone from Quarry.", "Unsaved edits in open tabs are lost too where the reset rewrites the file: src\store.ts, README.md."
   And its default button is still the cancelling one
   And no separate unsaved-changes dialog follows "Reset and Discard"
 
@@ -386,6 +409,7 @@ Scenario: SAFE-004.7 Take a side: large-file and Compare tabs are asked about to
   When I click "Incoming" on its Merge Changes row
   Then the dialog "Replace your edits to big.csv?" offers "Replace" and "Cancel" (default), as for a text tab
   And after "Replace" the tab shows the incoming version
+  And a Compare tab with unsaved edits to that file is asked about and reloaded in the same way
 
 Scenario: SAFE-004.8 Cancel
   Given any of these confirmations is open
@@ -405,18 +429,23 @@ Scenario: SAFE-004.10 No unsaved tabs, unchanged wording
 
 ## SAFE-005: No route around the question
 
-- Status: planned
+- Status: draft
 - Commands: `git.switchBranch`, `git.checkoutTo`, `git.createBranch`, `git.pull`, `git.mergeBranch`, `git.rebaseBranch`, `git.mergeRef`, `git.rebaseOnto`, `git.stash`, `git.stashApply`, `git.stashPop`, `git.editHistory`
 - Files:
-  - `src/lib/git.ts` — the guard sits inside each exported action, so callers cannot skip it
-  - `src/lib/gitCommands.ts` — commands call the same actions (`checkout`, `remote`, `startMerge`, `startRebase`, `stashChanges`, `stashAction`, `runHistoryEdit`)
-  - `src/components/panels/GitPanel.tsx` — branch button, "Merge or Rebase" button, ↓ button, `SyncStatus` Pull buttons, Continue / Skip / Abort, discard buttons
+  - `src/lib/git.ts` — the guard sits inside each exported action, so callers cannot skip it; no other file calls the file-rewriting `git.*` functions of gitApi.ts
+  - `src/lib/gitTabs.ts` — `guardUnsaved`, `withTabs`
+  - `src/lib/gitCommands.ts` — commands call the same actions (`checkout`, `remote`, `startMerge`, `startRebase`, `stashLatest`)
+  - `src/lib/gitRefActions.ts` — the offers after a rejected push call `remote` / `checkoutRef`
+  - `src/lib/gitStaging.ts` — `wholeFile` calls `discard`
+  - `src/components/panels/GitPanel.tsx` — branch button, ↓ button, `SyncStatus` Pull buttons, Continue / Skip / Abort, discard buttons
+  - `src/components/panels/GitMergeButton.tsx` — "Merge or Rebase" button
   - `src/components/panels/StashSection.tsx` — the stash form's Stash button, row Apply / Pop
   - `src/components/GraphView.tsx` — commit menu, ref-label menu, stash row menu, stopped-operation strip
+  - `src/components/GraphHistory.tsx` — Reword / Drop / Squash entries and the message strip
   - `src/components/HistoryEditList.tsx` — Run
   - `src/components/CommandPalette.tsx` — `mode === "branch"` rows
   - `src/components/StatusBar.tsx` — branch item
-  - `src/lib/commands.ts` — macro playback and shortcuts run the same commands
+  - `src/lib/macros.ts` — playback runs the recorded commands through `runCommand`
 - Tests: `src/__tests__/gitSafetyGuard.test.ts`, `src/__tests__/gitSafetyRoutes.test.tsx`
 - Docs: `docs/git.md`
 
@@ -438,8 +467,10 @@ Scenario: SAFE-005.2 Commit graph menus
 
 Scenario: SAFE-005.3 Command palette and Git menu
   Given "src\store.ts" has unsaved changes
-  When I run Git › Pull, Switch Branch…, Merge Branch…, Rebase onto Branch…, Stash › Stash Changes…, Stash › Apply Latest Stash or Stash › Pop Latest Stash from the menu bar or the command palette
+  When I run Git › Pull, Stash › Apply Latest Stash or Stash › Pop Latest Stash from the menu bar or the command palette
   Then the unsaved-changes dialog appears before git runs
+  And Switch Branch…, Merge Branch… and Rebase onto Branch… open the branch list, where picking a branch asks
+  And Stash › Stash Changes… opens the stash form, whose "Stash" button asks
 
 Scenario: SAFE-005.4 The branch list
   Given "src\store.ts" has unsaved changes and the branch list is open
@@ -481,15 +512,17 @@ Scenario: SAFE-005.10 While the dialog is open nothing else can start
 
 ## SAFE-006: Open tabs show what is on disk after every operation
 
-- Status: planned
+- Status: draft
 - Commands: `git.discardChange`, `git.discardLines`, `git.mergeRef`, `git.rebaseOnto`, `git.stash`, `git.stashApply`, `git.stashPop`, `git.editHistory`
 - Files:
-  - `src/lib/git.ts` — one after-operation step used by every action that can rewrite files, run on success **and** on failure or a stop (today `commitAction`, `remote` and `abortOperation` skip it when git reports an error); `takeSide` uses it too
-  - `src/lib/actions.ts` — `checkExternalChanges` (a call during a running check is queued, not dropped; a quiet mode that returns what was reloaded so git can show one notice; Compare tabs), `revertDocument`, `reloadBig`
-  - `src/lib/diff.ts` — `reloadDiff` for a clean Compare tab whose file side changed
+  - `src/lib/git.ts` — `rewrite(g, label, fn)`: the one after-operation step of every action that can rewrite files, run on success **and** on failure or a stop; `runStart`, `historyRun` and `stashAction` go through it; `stashRun` also refreshes the Source Control comparisons
+  - `src/lib/gitTabs.ts` — `withTabs` / `after` (the quiet check, then one notice per kind), `tabsSettled`
+  - `src/lib/actions.ts` — `checkExternalChanges` (calls are queued, never dropped; `quiet` returns what was reloaded, missing and kept; `checkCompareTabs`), `revertDocument`, `reloadBig`
+  - `src/lib/diff.ts` — `refreshDiff` for a clean Compare tab whose file side changed
   - `src/lib/gitSafety.ts` — `reloadedNotice(names)` (one file / several files wording)
+  - `src/lib/gitStaging.ts` — `applyGuarded` (Discard Change / Lines reloads the file's tab), `reloadChange`
   - `src/components/BigFileView.tsx` — follow mode stays in charge of a following tab
-- Tests: `src/__tests__/gitSafety.test.ts`, `src/__tests__/gitSafetyGuard.test.ts`
+- Tests: `src/__tests__/gitSafety.test.ts`, `src/__tests__/gitSafetyGuard.test.ts`, `src/__tests__/gitStaging.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer whose files were just rewritten by a git operation
@@ -540,6 +573,7 @@ Scenario: SAFE-006.8 Compare tabs
   When I switch to "feature", where both files differ
   Then the first Compare tab shows the file's new text on its right side
   And the second shows the reloaded tab's text on its right side, while its left side keeps the version it was opened with
+  And a Compare tab with unsaved edits is not reloaded
 
 Scenario: SAFE-006.9 Tabs kept unsaved are not reloaded
   Given I answered "Continue Without Saving" for "src\store.ts"
@@ -550,6 +584,7 @@ Scenario: SAFE-006.10 The check after an operation is never lost
   Given a "notes.txt changed on disk" question from before is still open
   When a pull finishes and I then answer that question
   Then tabs of files the pull changed are reloaded as well
+  And the pull's own "Pulled." notification did not wait for my answer
 
 Scenario: SAFE-006.11 Both panes follow
   Given "src\store.ts" is shown in both panes of the split editor
@@ -564,12 +599,13 @@ Scenario: SAFE-006.12 Change markers and blame follow
 
 ## SAFE-007: Tabs whose file is not there after the operation
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/lib/actions.ts` — `checkExternalChanges` (`missingWarned`, the came-back path; quiet mode returning the missing files), `closeDocument`
-  - `src/lib/git.ts` — after-operation step: one folded warning; closing the tab of a file the user deleted through `discard` (untracked) or `takeSide`
-  - `src/lib/gitSafety.ts` — `missingNotice(operation, names)`
+  - `src/lib/actions.ts` — `checkExternalChanges` (`missingWarned`, the came-back path; the result lists the missing files), `missingOnly`, `closeDocument`
+  - `src/lib/gitTabs.ts` — `after`: one folded warning; `Guarded.closeGone` closes the tab of a file the user deleted through `discard` (untracked) or `takeSide`
+  - `src/lib/git.ts` — `discard`, `takeSide` (set `closeGone`)
+  - `src/lib/gitSafety.ts` — `missingNotice(op, names)`, `afterPhrase`
 - Tests: `src/__tests__/gitSafety.test.ts`, `src/__tests__/gitSafetyGuard.test.ts`
 - Docs: `docs/git.md`
 
@@ -584,6 +620,7 @@ Scenario: SAFE-007.1 The tab stays open
   Then both tabs stay open with their text and are marked as having unsaved changes
   And one warning says "old.ts and legacy.ts are not in the folder after switching to feature. Their tabs stay open; saving one recreates the file."
   And there is not a separate warning per file
+  And for one file it says "old.ts is not in the folder after switching to feature. Its tab stays open; saving it recreates the file."
 
 Scenario: SAFE-007.2 Switching back brings the tab back clean
   Given I switched to "feature" and did not type in the "old.ts" tab

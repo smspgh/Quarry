@@ -586,10 +586,11 @@ Scenario: DIFF-012.8 Nothing to save
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/diff.ts` — `reloadDiff` (files from disk, tab snapshots from the tab, a closed tab keeps its snapshot, `text` sources keep their text, folder labels kept; a Source Control comparison goes to `reloadChange`)
+  - `src/lib/diff.ts` — `reloadDiff` (files from disk, tab snapshots from the tab, a closed tab keeps its snapshot, `text` sources keep their text, folder labels kept; a Source Control comparison goes to `reloadChange`), `refreshDiff` (the same without a notice)
+  - `src/lib/actions.ts` — `checkCompareTabs` in `checkExternalChanges` (which comparisons are read again by themselves)
   - `src/lib/gitStaging.ts` — `reloadChange` (both sides of a Source Control comparison from git and the disk again)
   - `src/components/DiffView.tsx` — "Reload the files from disk" button, disabled while edited
-- Tests: `src/__tests__/diffSession.test.ts`, `src/__tests__/gitStaging.test.tsx`
+- Tests: `src/__tests__/diffSession.test.ts`, `src/__tests__/gitStaging.test.tsx`, `src/__tests__/gitSafetyGuard.test.ts`
 - Docs: `docs/compare.md`
 
 **As a** developer whose compared files changed outside the comparison
@@ -633,6 +634,13 @@ Scenario: DIFF-013.7 A file that can no longer be read
   Given one of the files was deleted
   When I reload
   Then an error starting "Can't reload:" is shown and the comparison stays as it was
+
+Scenario: DIFF-013.8 Reloaded by itself when a file side changes on disk
+  Given a comparison with a file side, nothing edited in it
+  When the file changes on disk and I switch back to the Quarry window, or one of Quarry's git operations rewrites it
+  Then the comparison shows the file's new text without my clicking Reload, and without the "Reloaded" notification
+  And a side that shows an open tab's text follows when that tab was reloaded
+  And a comparison with unsaved edits is left as it is
 ```
 
 ## DIFF-014: Preview comparisons replace each other

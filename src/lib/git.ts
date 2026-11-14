@@ -34,6 +34,9 @@ import type { GitRefInfo, GitTag } from "./gitApi";
 import type { BranchPickFor } from "./gitBranches";
 // Edit History (specs/git-history-edit.md): the actions are at the end of this file.
 import type { GitHistoryCommit, GitHistoryRange } from "./gitApi";
+// Unsaved tabs and file-rewriting operations (specs/git-safety.md): `guard` / `rewrite` below.
+import { discardText, localName, lostEditsSentence, type RiskTab, type SafetyOp } from "./gitSafety";
+import { guardUnsaved, noTabs, riskTabs, riskTabsOf, withTabs, type Guarded } from "./gitTabs";
 import { allPushed, defaultBase, editAllowed, historyConfirm, historyDone, MAX_PLAN, MOVED, movedText, planTodo, rangeEditContext, singlePlan, tooMany, type EditAction, type HistoryInfo, type HistoryKind, type PlanRow, type PlanTodo } from "./historyEdit";
 
 export interface FileHistory {
@@ -456,6 +459,38 @@ export function onGitAction(fn: () => void) {
   afterAction = fn;
 }
 
+// ---------- open tabs and operations that rewrite files (specs/git-safety.md) ----------
+// Every action below that can rewrite files in the folder goes through these two, inside the
+// action function, so no button, menu, palette row, shortcut or macro can get around them:
+// `guard` asks about the repository's unsaved tabs before git runs (Save All / Continue Without
+// Saving / Cancel; null = do not run), `rewrite` runs the git call and afterwards brings every
+// open tab in line with the disk, also when git stopped on a conflict or failed.
+
+const repoRoots = () => Object.values(useGit.getState().repos).map((r) => r.root);
+const guard = (root: string, op: SafetyOp): Promise<Guarded | null> => guardUnsaved(root, op, repoRoots());
+const rewrite = <T>(g: Guarded, label: string, fn: () => Promise<T>): Promise<T | undefined> => withTabs(g, () => run(label, fn));
+
+/** The repository's files with unsaved edits in open tabs (for a confirmation that names them). */
+export const unsavedTabs = (root: string): Promise<RiskTab[]> => riskTabs(root, repoRoots());
+
+/**
+ * The unsaved-tabs question for an operation that only starts from a clean state (merge, rebase,
+ * history edits that replay commits), asked after its clean-state check and before its own
+ * confirmation. Save All turns the edits into uncommitted changes, so the clean-state check runs
+ * again and refuses with "Commit or discard your changes first"; Continue Without Saving goes on.
+ */
+async function cleanGuard(root: string, op: SafetyOp, refusal: Parameters<typeof dirtyRefusal>[0]): Promise<Guarded | null> {
+  const g = await guard(root, op);
+  if (!g || !g.saved) return g;
+  const st = await git.status(root).catch(() => null);
+  const dirty = st ? trackedChanges(st) : 0;
+  if (!dirty) return g;
+  refreshGit(0);
+  const d = dirtyRefusal(refusal, dirty);
+  if (await choose(d.title, d.text, d.choices, false)) showPanel("git");
+  return null;
+}
+
 export const stage = (root: string, paths: string[]) => run("Staging…", () => git.stage(root, paths));
 /**
  * Mark conflicted files as resolved (stage them). A file that still contains git's conflict
@@ -500,8 +535,9 @@ export async function resolveConflicts(root: string, paths: string[]) {
  */
 export async function takeSide(root: string, f: GitFile, side: "ours" | "theirs") {
   const name = nameOf(f.path);
-  const open = useStore.getState().docs.find((d) => d.kind === "text" && d.dirty && d.path && key(d.path) === key(f.path));
-  if (open) {
+  // A text tab, a large-file tab or the edited file side of a Compare tab.
+  const open = await riskTabsOf([f.path], root);
+  if (open.length) {
     const ok = await choose(
       `Replace your edits to ${name}?`,
       `${name} has unsaved changes in its tab. Taking ${side === "ours" ? "the current" : "the incoming"} version replaces the file and discards them.`,
@@ -513,19 +549,18 @@ export async function takeSide(root: string, f: GitFile, side: "ours" | "theirs"
     );
     if (!ok) return;
   }
-  const out = await run("Resolving…", () => git.resolveSide(root, f.path, side));
+  // Confirming was the answer: the file's tabs reload without a second question, and close when
+  // the side taken had deleted the file.
+  const g = noTabs(root, { kind: "take-side" }, open);
+  const out = await rewrite(g, "Resolving…", () =>
+    git.resolveSide(root, f.path, side).then((r) => {
+      if (r === "deleted") g.closeGone.push(f.path);
+      return r;
+    }),
+  );
   if (out === undefined) return;
   const which = side === "ours" ? "current" : "incoming";
   toast(out === "deleted" ? `${name}: deleted (the ${which} side had deleted it).` : `${name}: took the ${which} version.`, "success", 3500);
-  const st = useStore.getState();
-  const doc = st.docs.find((d) => d.kind === "text" && d.path && key(d.path) === key(f.path));
-  if (doc) {
-    const { revertDocument, closeDocument } = await import("./actions");
-    if (out === "deleted") {
-      st.updateDoc(doc.id, { dirty: false });
-      await closeDocument(doc.id);
-    } else await revertDocument(doc.id, { confirm: false, silent: true });
-  }
 }
 
 /** The conflict bar's Compare: the two sides of one conflict in a (reused) Compare tab. */
@@ -551,14 +586,16 @@ async function compareSides(view: EditorView, block: ConflictBlock, n: number) {
  * stopped on. A rebase may stop again on its next commit; the message then says so.
  */
 export async function continueOperation(root: string, operation: string, how: "continue" | "skip") {
-  const { askDialog, checkExternalChanges } = await import("./actions");
+  const { askDialog } = await import("./actions");
+  const w = operationWords(operation);
   if (how === "skip") {
-    const w = operationWords(operation);
     const ok = await askDialog(`Skip this ${w.item}?`, `The ${w.item} ${w.noun} stopped on is left out: its changes will not be on the branch. ${w.noun[0].toUpperCase()}${w.noun.slice(1)} then carries on with the rest.`, `Skip ${w.item[0].toUpperCase()}${w.item.slice(1)}`);
     if (!ok) return;
   }
-  const out = await run(how === "skip" ? "Skipping…" : "Continuing…", () => git.continueOp(root, how));
-  void checkExternalChanges();
+  // Its own confirmation first, the unsaved-tabs question second (SAFE-003.9).
+  const g = await guard(root, { kind: "continue", noun: w.noun });
+  if (!g) return;
+  const out = await rewrite(g, how === "skip" ? "Skipping…" : "Continuing…", () => git.continueOp(root, how));
   if (out === undefined) return;
   // Status is refreshed by run(); a rebase that is still going shows its next step there.
   const still = await git.status(root).catch(() => null);
@@ -592,20 +629,20 @@ export const unstage = (root: string, paths: string[]) => run("Unstaging…", ()
 
 export async function discard(root: string, files: GitFile[]): Promise<void> {
   if (!files.length) return;
-  const untracked = files.filter((f) => f.untracked).length;
+  const untracked = files.filter((f) => f.untracked);
   const name = files.length === 1 ? files[0].path.slice(files[0].path.lastIndexOf("\\") + 1) : `${files.length} files`;
-  const msg =
-    untracked === files.length
-      ? `${name} ${files.length === 1 ? "is" : "are"} not tracked by git and will be moved to the Recycle Bin.`
-      : `Your changes to ${name} will be lost${untracked ? ` (${untracked} untracked file${untracked === 1 ? " goes" : "s go"} to the Recycle Bin)` : ""}. Open tabs reload the committed text.`;
-  const ok = await choose("Discard changes?", msg, [
+  // Unsaved edits in the tabs of these files go too: the one question says so (SAFE-004).
+  const open = await riskTabsOf(files.map((f) => f.path), root);
+  const ok = await choose("Discard changes?", discardText(name, files.length, untracked.length, open), [
     { label: "Discard", kind: "danger", value: true },
     { label: "Cancel", cancel: true, default: true, value: false },
   ], false);
   if (!ok) return;
-  await run("Discarding…", () => git.discard(root, files.map((f) => f.path)));
-  const { checkExternalChanges } = await import("./actions");
-  void checkExternalChanges();
+  // Confirming was the answer: those tabs reload without a "changed on disk" question, and the
+  // tab of an untracked file that went to the Recycle Bin closes.
+  const g = noTabs(root, { kind: "discard" }, open);
+  g.closeGone = untracked.map((f) => f.path);
+  await rewrite(g, "Discarding…", () => git.discard(root, files.map((f) => f.path)));
 }
 
 /** Commit what is staged (or, after asking, every change when nothing is). */
@@ -652,21 +689,21 @@ export async function remote(root: string, op: GitRemoteOp) {
   const pull = op.startsWith("pull");
   const label = op === "fetch" ? "Fetching…" : pull ? "Pulling…" : "Pushing…";
   let failure: string | null = null;
-  const out = await run(label, () =>
+  // A pull can rewrite any file: it always asks when the repository has unsaved tabs, and the
+  // tabs are checked afterwards whether it worked, stopped on a conflict or failed.
+  const g = pull ? await guard(root, { kind: "pull" }) : null;
+  if (pull && !g) return;
+  const call = () =>
     git.remote(root, op).catch((e) => {
       failure = String(e);
       throw e;
-    }),
-  );
+    });
+  const out = g ? await rewrite(g, label, call) : await run(label, call);
   if (isMissingRepo(failure)) markChecked(root, failure);
   if (out === undefined) return;
   if (op === "fetch") markChecked(root, null);
   const last = out.trim().split(/\r?\n/).filter(Boolean).pop();
   toast(op === "fetch" ? "Fetched." : pull ? (last && /up to date/i.test(last) ? "Already up to date." : "Pulled.") : "Pushed.", "success", 3000);
-  if (pull) {
-    const { checkExternalChanges } = await import("./actions");
-    void checkExternalChanges();
-  }
 }
 
 function markChecked(root: string, error: string | null) {
@@ -871,12 +908,17 @@ export async function loadRefInfo(root: string) {
 export async function checkout(name: string, create = false) {
   const repo = currentRepo();
   if (!repo) return;
-  const ok = await run(create ? `Creating ${name}…` : `Switching to ${name}…`, () => git.checkout(repo.root, name, create));
+  // A new branch from the current commit changes no file: nothing to ask, nothing to reload.
+  const g = create ? null : await guard(repo.root, switchOp(repo, name));
+  if (!create && !g) return;
+  const call = () => git.checkout(repo.root, name, create);
+  const ok = g ? await rewrite(g, `Switching to ${name}…`, call) : await run(`Creating ${name}…`, call);
   if (ok === undefined) return;
   toast(create ? `Created and switched to ${name}` : `Switched to ${name}`, "success", 2500);
-  const { checkExternalChanges } = await import("./actions");
-  void checkExternalChanges();
 }
+
+/** Switching to a branch (a remote branch is switched to under its local name). */
+const switchOp = (repo: GitStatus | undefined, name: string): SafetyOp => ({ kind: "switch", name: localName(name, repo?.remotes.map((r) => r.name) ?? []) });
 
 // ---------- comparing ----------
 
@@ -1011,38 +1053,57 @@ const ACTION_LABEL: Record<GitCommitAction, string> = {
   "reset-hard": "Resetting…",
 };
 
-/** Run a graph action on a commit. True when it worked (open files are then re-checked against disk). */
-export async function commitAction(root: string, action: GitCommitAction, sha: string, name?: string): Promise<boolean> {
-  const out = await run(ACTION_LABEL[action], () => git.commitAction(root, action, sha, name));
-  if (out === undefined) return false;
-  if (action !== "branch" && action !== "tag") {
-    const { checkExternalChanges } = await import("./actions");
-    void checkExternalChanges();
+/** What a graph action is to open tabs: it asks, says it in its own confirmation, or leaves the files alone. */
+function actionOp(action: GitCommitAction, sha: string, name?: string): SafetyOp {
+  const short = sha.slice(0, 7);
+  switch (action) {
+    case "checkout":
+      return { kind: "checkout", name: short };
+    case "branch-switch":
+      return { kind: "switch", name: name ?? short };
+    case "cherry-pick":
+    case "revert":
+      return { kind: action, name: short };
+    default:
+      return { kind: action };
   }
-  return true;
+}
+
+/**
+ * Run a graph action on a commit (the graph asked its own confirmation first). Check-out,
+ * create-branch-and-switch, cherry-pick and revert then ask about unsaved tabs; a hard reset's
+ * confirmation named them (`unsavedTabs`), so they reload where the reset rewrote the file. Open
+ * tabs are checked against the disk afterwards, also when a pick or revert stopped on a conflict.
+ * True when it worked.
+ */
+export async function commitAction(root: string, action: GitCommitAction, sha: string, name?: string): Promise<boolean> {
+  const op = actionOp(action, sha, name);
+  if (action === "branch" || action === "tag") return (await run(ACTION_LABEL[action], () => git.commitAction(root, action, sha, name))) !== undefined;
+  const g = action === "reset-hard" ? noTabs(root, op, await unsavedTabs(root)) : await guard(root, op);
+  if (!g) return false;
+  return (await rewrite(g, ACTION_LABEL[action], () => git.commitAction(root, action, sha, name))) !== undefined;
 }
 
 /** Abandon the operation in progress (a stopped merge, rebase, cherry-pick or revert), after asking. */
 export async function abortOperation(root: string, operation: string) {
-  const { askDialog, checkExternalChanges } = await import("./actions");
+  const { askDialog } = await import("./actions");
   const w = operationWords(operation);
-  const ok = await askDialog(`Abort ${w.noun}?`, `Everything goes back to how it was before ${w.noun} started. Conflict resolutions made so far are discarded.`, w.abortLabel);
+  // Unsaved edits go too where the abort rewrites the file: the one question says so (SAFE-004.6).
+  const open = await unsavedTabs(root);
+  const lost = lostEditsSentence("abort", open);
+  const ok = await askDialog(`Abort ${w.noun}?`, `Everything goes back to how it was before ${w.noun} started. Conflict resolutions made so far are discarded.${lost ? ` ${lost}` : ""}`, w.abortLabel);
   if (!ok) return;
-  const out = await run("Aborting…", () => git.abort(root));
+  const out = await rewrite(noTabs(root, { kind: "abort", noun: w.noun }, open), "Aborting…", () => git.abort(root));
   if (out === undefined) return;
   toast(operationDone(out || operation, "abort"), "info", 3000);
   pendingRewrite.delete(key(root)); // nothing was rewritten after all (MERGE-009)
-  void checkExternalChanges();
 }
 
 /** Switch to a branch from the graph (a remote branch gets a local tracking branch). */
 export async function checkoutRef(root: string, name: string): Promise<boolean> {
-  const ok = (await run(`Switching to ${name}…`, () => git.checkout(root, name).then(() => true))) === true;
-  if (ok) {
-    const { checkExternalChanges } = await import("./actions");
-    void checkExternalChanges();
-  }
-  return ok;
+  const g = await guard(root, switchOp(useGit.getState().repos[key(root)], name));
+  if (!g) return false;
+  return (await rewrite(g, `Switching to ${name}…`, () => git.checkout(root, name).then(() => true))) === true;
 }
 
 /** A commit's version of the file vs the working copy. */
@@ -1126,10 +1187,8 @@ async function startPreview(root: string, ref: string): Promise<GitMergePreview 
  * Run the merge / rebase. "stopped": it stopped on a conflict, which is finished or aborted in
  * Source Control (shown now); "failed": git refused and nothing is in progress.
  */
-async function runStart(root: string, label: string, fn: () => Promise<string>): Promise<"done" | "stopped" | "failed"> {
-  const out = await run(label, fn);
-  const { checkExternalChanges } = await import("./actions");
-  void checkExternalChanges();
+async function runStart(root: string, g: Guarded, label: string, fn: () => Promise<string>): Promise<"done" | "stopped" | "failed"> {
+  const out = await rewrite(g, label, fn);
   if (out !== undefined) return "done";
   const now = await git.status(root).catch(() => null);
   if (!now?.operation) return "failed";
@@ -1151,9 +1210,12 @@ export async function startMerge(root: string, target: StartTarget | string): Pr
     toast(plan.nothing, "info", 4000);
     return false;
   }
+  // Unsaved tabs before the confirmation: a Save All makes the tree dirty, which refuses the merge.
+  const g = await cleanGuard(root, { kind: "merge", name: t.label, branch: st.branch }, "merge");
+  if (!g) return false;
   const mode = await choose(plan.title, plan.text, plan.choices, null);
   if (!mode) return false;
-  if ((await runStart(root, "Merging…", () => git.merge(root, p.target, mode))) !== "done") return false;
+  if ((await runStart(root, g, "Merging…", () => git.merge(root, p.target, mode))) !== "done") return false;
   toast(mergeDone(mode, p, t.label, st.branch), "success", 4000);
   return true;
 }
@@ -1173,11 +1235,13 @@ export async function startRebase(root: string, target: StartTarget | string): P
     toast(plan.nothing, "info", 4000);
     return false;
   }
+  const g = await cleanGuard(root, { kind: "rebase", name: t.label, branch }, "rebase");
+  if (!g) return false;
   const how = await choose(plan.title, plan.text, plan.choices, null);
   if (!how) return false;
   // Pushed commits get new ids (or the branch was already rewritten and not force pushed yet).
   const rewrites = how === "rebase" && (p.pushed > 0 || useGit.getState().rewrotePushed[key(root)] === branch);
-  const result = await runStart(root, "Rebasing…", () => (how === "ff" ? git.merge(root, p.target, "ff-only") : git.rebase(root, p.target)));
+  const result = await runStart(root, g, "Rebasing…", () => (how === "ff" ? git.merge(root, p.target, "ff-only") : git.rebase(root, p.target)));
   if (result === "stopped" && rewrites) pendingRewrite.set(key(root), branch);
   if (result !== "done") return false;
   toast(rebaseDone(how, p, t.label, branch), "success", 4000);
@@ -1312,8 +1376,9 @@ export function showStashes() {
 
 /**
  * Stash the uncommitted changes of `root` (with `untracked`, the untracked files too). The guards
- * run on a fresh status. True when a stash was made. (The unsaved-tabs question of SAFE-003.6 is
- * not asked here yet: the files are taken as they are on disk.)
+ * run on a fresh status; then, with unsaved tabs in the repository, the unsaved-tabs question
+ * (a stash takes the files as they are on disk: Save All puts the edits in the stash, Continue
+ * Without Saving leaves them in their tabs). True when a stash was made.
  */
 export async function stashChanges(root: string, message: string, untracked: boolean): Promise<boolean> {
   if (useGit.getState().busy) return false;
@@ -1323,19 +1388,24 @@ export async function stashChanges(root: string, message: string, untracked: boo
     toast(`${why}.`, "info", 4000);
     return false;
   }
-  const n = stashCounts(st.files);
-  const files = n.tracked + (untracked ? n.untracked : 0);
+  const count = (s: GitStatus) => {
+    const n = stashCounts(s.files);
+    return n.tracked + (untracked ? n.untracked : 0);
+  };
+  let files = count(st);
   if (!files) {
     toast("Only untracked files have changed: tick the box to stash them.", "info", 4000);
     return false;
   }
-  const sha = await run("Stashing…", () => git.stashPush(root, message, untracked));
+  const g = await guard(root, { kind: "stash" });
+  if (!g) return false;
+  // Saved files are changes now: count them in.
+  if (g.saved) files = await git.status(root).then((now) => (now ? count(now) : files), () => files);
+  const sha = await rewrite(g, "Stashing…", () => git.stashPush(root, message, untracked));
   if (sha === undefined) return false;
   useGit.setState({ stashForm: false });
   toast(stashDone("stash", message, files), "success", 4000);
   await loadStashes(root);
-  const { checkExternalChanges } = await import("./actions");
-  void checkExternalChanges();
   return true;
 }
 
@@ -1350,6 +1420,7 @@ async function stashRun(label: string, root: string, sha: string, op: "apply" | 
   } finally {
     useGit.setState({ busy: null });
     refreshGit(0);
+    afterAction?.();
     await loadStashes(root);
   }
 }
@@ -1359,7 +1430,8 @@ async function stashRun(label: string, root: string, sha: string, op: "apply" | 
  * one). Drop asks first, with Cancel as the default; apply and pop are refused while an operation
  * is stopped or files are in conflict (checked on a fresh status). An apply / pop that conflicts
  * is not an error: the files go to Merge Changes and the stash is remembered in `stashPending`.
- * (The unsaved-tabs question of SAFE-003.7 is not asked here yet.) True when git ran.
+ * Apply and pop ask about the repository's unsaved tabs first, whether or not the stash touches
+ * their files; open tabs are checked against the disk afterwards. True when git ran.
  */
 export async function stashAction(root: string, stash: Pick<GitStash, "sha" | "subject" | "time">, what: "apply" | "pop" | "drop"): Promise<boolean> {
   if (useGit.getState().busy) return false;
@@ -1391,9 +1463,9 @@ export async function stashAction(root: string, stash: Pick<GitStash, "sha" | "s
     toast(`${why}.`, "info", 4000);
     return false;
   }
-  const out = await stashRun(what === "pop" ? "Popping stash…" : "Applying stash…", root, stash.sha, what);
-  const { checkExternalChanges } = await import("./actions");
-  void checkExternalChanges();
+  const g = await guard(root, { kind: "stash-apply" });
+  if (!g) return false;
+  const out = await withTabs(g, () => stashRun(what === "pop" ? "Popping stash…" : "Applying stash…", root, stash.sha, what));
   if (out === null) return false;
   if (out === "conflicts") {
     const after = await git.status(root).catch(() => null);
@@ -1572,9 +1644,9 @@ const rangeReason = (action: EditAction) => (range: GitHistoryRange): string | n
  * rewritten); "stopped": a commit conflicted, the rebase is finished or aborted in Source Control
  * (shown now); "failed": git refused and nothing is in progress.
  */
-async function historyRun(root: string, label: string, branch: string, list: boolean, fn: () => Promise<string>): Promise<"done" | "stopped" | "failed" | "moved"> {
+async function historyRun(root: string, g: Guarded, label: string, branch: string, list: boolean, fn: () => Promise<string>): Promise<"done" | "stopped" | "failed" | "moved"> {
   let moved = false;
-  const result = await runStart(root, label, async () => {
+  const result = await runStart(root, g, label, async () => {
     try {
       return await fn();
     } catch (e) {
@@ -1607,7 +1679,8 @@ export async function undoLastCommit(root: string): Promise<boolean> {
   const { range, branch } = g;
   const d = historyConfirm("undo", { branch, tip: tip.short, commit: tip, lines: [], below: range.base, pushedOn: tip.pushed ? (range.pushedOn ?? "a remote branch") : null });
   if (!(await choose(d.title, d.text, d.choices, false))) return false;
-  const result = await historyRun(root, "Undoing…", branch, false, () => git.historyRewrite(root, "undo", range.tip));
+  // A soft reset: the files are not touched, so nothing is asked about unsaved tabs.
+  const result = await historyRun(root, noTabs(root, { kind: "undo" }), "Undoing…", branch, false, () => git.historyRewrite(root, "undo", range.tip));
   if (result === "done") useGit.setState({ undone: { root, message: tip.message } });
   await historyFinish(root, branch, result, d.pushed, range.pushedOn, (stale) => historyDone("undo", { branch, was: tip.short }, stale));
   return result === "done";
@@ -1663,9 +1736,13 @@ async function planRun(root: string, g: { range: GitHistoryRange; branch: string
     toast("Nothing would change.", "info", 3000);
     return "cancelled";
   }
+  // Replaying commits rewrites files: unsaved tabs are asked about before the confirmation, and a
+  // Save All leads to the clean-state refusal (SAFE-003.5, SAFE-003.12).
+  const tabs = await cleanGuard(root, { kind: "history" }, "history");
+  if (!tabs) return "cancelled";
   const d = historyConfirm(kind, planInfo(range, branch, todo, extra));
   if (!(await choose(d.title, d.text, d.choices, false))) return "cancelled";
-  const result = await historyRun(root, label, branch, list, () => git.historyRewrite(root, "plan", range.tip, todo.base, todo.steps));
+  const result = await historyRun(root, tabs, label, branch, list, () => git.historyRewrite(root, "plan", range.tip, todo.base, todo.steps));
   const info = { branch, was: shortId(range.tip), commit: extra.commit, parent: extra.parent, count: todo.lines.length };
   await historyFinish(root, branch, result, d.pushed, range.pushedOn, (stale) => historyDone(kind, info, stale));
   return result;
@@ -1689,7 +1766,8 @@ export async function rewordCommit(root: string, sha: string, message: string): 
   if (range.commits.length > 1) return (await planRun(root, g, "reword", singlePlan("reword", range.commits, text), "Rewording…", { commit })) !== "cancelled";
   const d = historyConfirm("reword", { branch, tip: commit.short, commit, lines: [{ commit, what: "reworded", detail: text.split("\n")[0] }], below: range.base, pushedOn: range.pushedOn });
   if (!(await choose(d.title, d.text, d.choices, false))) return false;
-  const result = await historyRun(root, "Rewording…", branch, false, () => git.historyRewrite(root, "reword", range.tip, null, [], text));
+  // Amending the tip's message leaves the files alone: no unsaved-tabs question.
+  const result = await historyRun(root, noTabs(root, { kind: "reword-tip" }), "Rewording…", branch, false, () => git.historyRewrite(root, "reword", range.tip, null, [], text));
   await historyFinish(root, branch, result, d.pushed, range.pushedOn, (stale) => historyDone("reword", { branch, was: commit.short }, stale));
   return true;
 }

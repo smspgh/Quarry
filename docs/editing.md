@@ -145,9 +145,12 @@ New files use UTF-8 without a BOM and the line ending set in **Settings › Edit
 
 When Quarry's window regains focus, or you switch tabs, it checks whether open files changed on disk.
 
-- **No unsaved changes:** the file reloads, with a short notice.
-- **Unsaved changes:** Quarry asks whether to reload from disk or keep your version.
-- **File deleted or moved:** Quarry tells you. The tab stays open with your text, and saving recreates the file.
+- **No unsaved changes:** the file reloads, with a short notice. When several open files changed, one notice gives the count.
+- **Unsaved changes:** Quarry asks whether to reload from disk or keep your version. **Keep my version** is asked once: saving then writes your text.
+- **File deleted or moved:** Quarry tells you (one warning, however many files). The tab stays open with your text and is marked unsaved, and saving recreates the file. If the file comes back and you did not type in the tab meanwhile, the mark goes away, and the tab reloads when the file is newer.
+- **Compare tabs** with a file side follow as well: when the file changed and nothing in the comparison is edited, it shows the new text.
+
+The same check runs after every git action of Quarry that can rewrite files (switching branch, pull, merge, rebase, stash, discard and so on), also one that stopped on a conflict or failed. There the questions are asked before the action runs, not after it: see [Git › Unsaved tabs and git](git.md#unsaved-tabs-and-git). A check that is due while a "changed on disk" question is still open waits for your answer and then runs.
 
 The Explorer tree also updates by itself when files are added, removed or renamed in the open folder.
 

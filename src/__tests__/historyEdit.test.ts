@@ -13,7 +13,7 @@ const api = vi.hoisted(() => ({
   abort: vi.fn<(root: string) => Promise<string>>(),
 }));
 vi.mock("../lib/gitApi", () => ({ git: api }));
-vi.mock("../lib/actions", () => ({ checkExternalChanges: vi.fn(async () => {}), askDialog: vi.fn(async () => true) }));
+vi.mock("../lib/actions", () => ({ checkExternalChanges: vi.fn(async () => ({ reloaded: [], missing: [], kept: [] })), askDialog: vi.fn(async () => true), missingOnly: () => false, answerAhead: () => () => {} }));
 
 import { abortOperation, continueOperation, dropCommit, loadEditCommit, openHistoryEdit, rewordCommit, runHistoryEdit, squashCommit, undoLastCommit, useGit } from "../lib/git";
 import type { GitFile, GitHistoryCommit, GitHistoryRange, GitStatus } from "../lib/gitApi";

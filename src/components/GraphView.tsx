@@ -5,7 +5,7 @@ import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { editor } from "../editor/manager";
 import { relativeTime } from "../editor/git";
 import { askDialog, openPath } from "../lib/actions";
-import { abortOperation, checkoutRef, commitAction, openCommitFile, remote, useGit } from "../lib/git";
+import { abortOperation, checkoutRef, commitAction, openCommitFile, remote, unsavedTabs, useGit } from "../lib/git";
 import { isPanelShown, showPanel } from "../lib/panels";
 import { git, type GitCommitAction, type GitCommitDetail, type GitCommitFile, type GitGraphCommit } from "../lib/gitApi";
 import { actionConfirm, actionDone, commitMatches, layoutGraph, newGraphState, refLabels, type GraphRow, type RefLabel } from "../lib/gitGraph";
@@ -500,7 +500,9 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
 
   /** Run an action from the menu, after asking when it changes the branch or the files. */
   const act = async (action: GitCommitAction, c: GitGraphCommit, name?: string) => {
-    const ask = actionConfirm(action, c, branch, repo?.files.length ?? 0);
+    // A hard reset's question names the unsaved tabs it can overwrite; the other actions that
+    // rewrite files ask about them inside commitAction, after this confirmation (SAFE-002.9).
+    const ask = actionConfirm(action, c, branch, repo?.files.length ?? 0, action === "reset-hard" ? await unsavedTabs(root) : []);
     if (ask && !(await askDialog(ask.title, ask.text, ask.ok, ask.kind))) return;
     if (await commitAction(root, action, c.sha, name)) {
       toast(actionDone(action, c.short, name), "success", 3000);

@@ -515,6 +515,21 @@ describe("partial staging in a Source Control comparison", () => {
     expect(useStore.getState().docs.find((d) => d.id === "tab-1")?.dirty).toBe(true);
   });
 
+  it("a save that fails cancels a confirmed Discard Change too (SAFE: hunk discard keeps its save-first rule)", async () => {
+    h.repo.disk = HEAD;
+    openTab(EDITED, true);
+    h.saveOk = false;
+    await show();
+    await fire.click(barButton(0, "Discard Change"));
+    await settle();
+    await answer("Discard Change");
+    expect(h.saves).toEqual(["tab-1"]);
+    expect(applied()).toEqual([]);
+    expect(h.repo.disk).toBe(HEAD);
+    expect(h.reverts).toEqual([]);
+    expect(useStore.getState().docs.find((d) => d.id === "tab-1")?.dirty).toBe(true);
+  });
+
   it("STAGE-005.3: edits made in the comparison itself are saved to the file first", async () => {
     await show();
     const v = right();

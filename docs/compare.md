@@ -28,7 +28,7 @@ The first file is the left (original) side and the second the right (changed) si
 - **Moving between changes.** **F7** / **Shift+F7** (or the arrows in the toolbar) go to the next / previous change. The toolbar shows where you are, for example **Change 2 of 5**.
 - **Layout.** **Side by side** / **Inline** switches the layout. In inline mode the removed lines appear above the lines that replaced them.
 - **Unchanged lines.** The fold button hides long unchanged stretches. Click a folded stretch to show it.
-- **Swap** (⇄) puts each side on the other side. **Reload** reads the files from disk again and takes a tab's current text; clipboard and git versions keep the text they had, except in a comparison opened from Source Control, which reads its git side again too (it is off while a side has unsaved edits).
+- **Swap** (⇄) puts each side on the other side. **Reload** reads the files from disk again and takes a tab's current text; clipboard and git versions keep the text they had, except in a comparison opened from Source Control, which reads its git side again too (it is off while a side has unsaved edits). A comparison with a file side also reloads by itself when that file changes on disk and nothing in the comparison is edited (see [Editing › External changes](editing.md#external-changes)).
 
 ## Editing and saving
 

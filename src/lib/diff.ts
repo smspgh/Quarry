@@ -201,14 +201,14 @@ function syncDirty(docId: string) {
   if (store.docs.find((d) => d.id === docId)?.dirty !== dirty) store.updateDoc(docId, { dirty });
 }
 
-/** Save the edited side(s) back to their files. False when something failed. */
-export async function saveDiff(docId: string): Promise<boolean> {
+/** Save the edited side(s) back to their files (`only`: that side alone). False when something failed. */
+export async function saveDiff(docId: string, only?: "left" | "right"): Promise<boolean> {
   const s = diffOf(docId);
   if (!s) return false;
   let ok = true;
   for (const which of ["left", "right"] as const) {
     const side = s[which];
-    if (!side.dirty || !side.path || !side.editable) continue;
+    if (!side.dirty || !side.path || !side.editable || (only && which !== only)) continue;
     try {
       // Like a normal save: don't silently overwrite a change made since the file was read.
       const now = await fs.stat(side.path).catch(() => null);
@@ -248,6 +248,15 @@ export async function reloadDiff(docId: string) {
   if (!s) return;
   // A Source Control comparison reads its git side again too (the index may have changed).
   if (s.git) return void (await (await import("./gitStaging")).reloadChange(docId, { announce: true }));
+  await readAgain(docId, true);
+}
+
+/** The same without a notice (the changes-on-disk check, after a git operation): true when read. */
+export const refreshDiff = (docId: string): Promise<boolean> => readAgain(docId, false);
+
+async function readAgain(docId: string, announce: boolean): Promise<boolean> {
+  const s = diffOf(docId);
+  if (!s) return false;
   const again = async (side: Side): Promise<Side> => {
     if (side.source.kind === "tab" && !useStore.getState().docs.some((d) => d.id === (side.source as { docId: string }).docId)) return side;
     const next = await load(side.source);
@@ -258,9 +267,11 @@ export async function reloadDiff(docId: string) {
     const [left, right] = await Promise.all([again(s.left), again(s.right)]);
     patchDiff(docId, (cur) => ({ left, right, version: cur.version + 1 }));
     syncDirty(docId);
-    useStore.getState().toast(left.text === right.text ? "Reloaded: the two are identical." : "Reloaded", "info", 2000);
+    if (announce) useStore.getState().toast(left.text === right.text ? "Reloaded: the two are identical." : "Reloaded", "info", 2000);
+    return true;
   } catch (e) {
-    useStore.getState().toast(`Can't reload: ${e instanceof Error ? e.message : String(e)}`, "error");
+    if (announce) useStore.getState().toast(`Can't reload: ${e instanceof Error ? e.message : String(e)}`, "error");
+    return false;
   }
 }
 

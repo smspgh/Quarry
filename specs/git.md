@@ -356,7 +356,8 @@ Scenario: GIT-007.2 Switch to a local branch
   Given the branch list is open
   When I pick "feature"
   Then the repository is on "feature", a message says "Switched to feature"
-  And open tabs whose files changed on disk are re-checked
+  And open tabs whose files changed on disk are reloaded, with one notice (SAFE-006.1)
+  And when tabs of the repository have unsaved changes the unsaved-changes dialog comes before the switch (SAFE-001.1)
 
 Scenario: GIT-007.3 A remote branch becomes a local tracking branch
   Given there is no local branch "topic"
@@ -636,7 +637,7 @@ Scenario: GIT-011.7 Menu commands are greyed out when they do not apply
 - Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — row "Discard changes" / "Delete (to the Recycle Bin)" button, heading "Discard all changes" (Changes section only)
-  - `src/lib/git.ts` — `discard` (confirmation wording, `checkExternalChanges` afterwards); discarding one change or some lines of a file is STAGE-003 / STAGE-004
+  - `src/lib/git.ts` — `discard` (confirmation wording from `discardText` in gitSafety.ts, which names the unsaved tabs; then `rewrite`, so those tabs reload without a question and the tab of a deleted untracked file closes: SAFE-004, SAFE-007.6); discarding one change or some lines of a file is STAGE-003 / STAGE-004
   - `src/lib/dialogs.ts` — `choose`
   - `src-tauri/src/git.rs` — `git_discard` (`restore --worktree` for tracked files, `trash::delete_all` for untracked ones)
 - Tests: `src-tauri/src/git.rs`
@@ -652,12 +653,14 @@ Scenario: GIT-012.1 Discard asks first
   When I click "Discard changes" on its row
   Then a dialog "Discard changes?" says "Your changes to b.ts will be lost. Open tabs reload the committed text."
   And "Cancel" is the default button and leaves the file untouched
+  And when the tab of "b.ts" has unsaved edits the dialog says they are lost too (SAFE-004.1)
 
 Scenario: GIT-012.2 Discard restores the file and reloads its tab
   Given the dialog for "b.ts" is open
   When I click "Discard"
   Then "b.ts" on disk is back to its staged version, or the committed one when nothing is staged
   And "b.ts" leaves the Changes list and an open tab of it shows the restored text
+  And no "b.ts changed on disk" question follows, even when the tab had unsaved edits (SAFE-004.2)
 
 Scenario: GIT-012.3 Staged work survives a discard
   Given "a.ts" was staged and then edited again
@@ -669,12 +672,14 @@ Scenario: GIT-012.4 An untracked file goes to the Recycle Bin
   When I click its "Delete (to the Recycle Bin)" button and confirm
   Then the dialog had said "notes.txt is not tracked by git and will be moved to the Recycle Bin."
   And the file is in the Windows Recycle Bin, not permanently deleted
+  And an open tab of "notes.txt" is closed, without a "deleted or moved" warning (SAFE-007.6)
 
 Scenario: GIT-012.5 Discard all
   Given 4 files under Changes, 1 of them untracked
   When I click "Discard all changes" on the Changes heading
   Then the dialog says "Your changes to 4 files will be lost (1 untracked file goes to the Recycle Bin). Open tabs reload the committed text."
   And nothing happens unless I click "Discard"
+  And unsaved edits in the tabs of those files are named in the dialog (SAFE-004.3)
 
 Scenario: GIT-012.6 No discard for staged rows
   Given a file under Staged Changes
@@ -823,7 +828,7 @@ Scenario: GIT-014.8 Only the branch's remote is checked
 - Status: draft
 - Commands: `git.fetch`, `git.pull`, `git.push`
 - Files:
-  - `src/lib/git.ts` — `remote()` (no-remote redirect, busy labels, result toasts, `checkExternalChanges` after a pull, missing-repository detection), `run`
+  - `src/lib/git.ts` — `remote()` (no-remote redirect, busy labels, result toasts, for the pulls the unsaved-tabs `guard` before and the tab check after through `rewrite`, missing-repository detection), `run`
   - `src/components/panels/GitPanel.tsx` — header Fetch / Pull / Push buttons and tooltips, `SyncStatus` action buttons, busy label
   - `src/lib/gitCommands.ts` — `git.fetch`, `git.pull`, `git.push`
   - `src/lib/gitStatus.ts` — `gitErrorText` (hint lines dropped)
@@ -854,7 +859,8 @@ Scenario: GIT-015.3 Pull
   Given 3 commits to pull
   When I click the ↓ button, whose tooltip reads "Pull (3 incoming)", or run Git › Pull
   Then the commits are brought in and a message says "Pulled."
-  And open tabs whose files changed on disk are re-checked
+  And open tabs whose files changed on disk are reloaded, also when the pull stops on a conflict or fails (SAFE-006.4)
+  And when tabs of the repository have unsaved changes the unsaved-changes dialog comes before the pull (SAFE-003.3)
   And when there was nothing to bring in the message is "Already up to date."
 
 Scenario: GIT-015.4 Fetch

@@ -681,13 +681,15 @@ Scenario: FILE-014.4 A new file with pasted-and-removed text
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/actions.ts` — `checkExternalChanges` (per text / large-file doc with a path: stat, `missingWarned`, came-back handling for text and unedited large-file tabs, reload or ask), `installExternalChangeWatch` (window `focus`, `visibilitychange`, tab activation), `reloadBig`, `revertDocument`, the `saving` set
+  - `src/lib/actions.ts` — `checkExternalChanges` (checks run one after the other, a call during a running check is queued and plain calls share one queued check; per text / large-file doc with a path: stat, `missingWarned`, came-back handling for text and unedited large-file tabs, reload or ask; `checkCompareTabs` for Compare tabs with a file side; notices folded with `reloadedNotice` / `missingNotice`; `quiet` returns the result to a git action; `answerAhead` = answers given before a git operation, SAFE-002 / SAFE-004), `installExternalChangeWatch` (window `focus`, `visibilitychange`, tab activation), `reloadBig`, `revertDocument`, the `saving` set
+  - `src/lib/gitSafety.ts` — `reloadedNotice`, `missingNotice`, `keptNotice` (the folded wording)
+  - `src/lib/diff.ts` — `refreshDiff` (a Compare tab read again without a notice)
   - `src/App.tsx` — installs the watch (`installExternalChangeWatch`)
   - `src/lib/store.ts` — `Doc.modifiedMs`, `Doc.following`
   - `src/components/BigFileView.tsx` — follow mode keeps `Doc.modifiedMs` / `size` current as lines are appended
   - `src/lib/ipc.ts` — `fs.stat`, `big.open`, `big.close`
   - `src-tauri/src/files.rs` — `stat`, `modified_ms`
-- Tests: none
+- Tests: `src/__tests__/gitSafetyGuard.test.ts`
 - Docs: `docs/editing.md`
 
 **As a** developer whose files are also changed by git, build tools and other editors
@@ -701,6 +703,8 @@ Scenario: FILE-015.1 A clean file reloads by itself
   When I switch back to the Quarry window
   Then the tab shows the new text with no unsaved-changes marker
   And a notice says "notes.txt changed on disk and was reloaded."
+  And when several open files changed, one notice says "3 open files changed on disk and were reloaded."
+  And a Compare tab with a file side that changed, and nothing edited in it, shows the file's new text too
 
 Scenario: FILE-015.2 A file with unsaved changes asks
   Given "notes.txt" is open with unsaved changes
@@ -708,6 +712,8 @@ Scenario: FILE-015.2 A file with unsaved changes asks
   When I switch back to the Quarry window
   Then Quarry asks "notes.txt changed on disk" with "Reload from disk" and "Keep my version"
   And "Reload from disk" replaces my text with the file's
+  And a check asked for while this question is open (another focus, the end of a git operation) runs once it is answered
+  And after one of Quarry's own git operations the question is not asked: it was answered before the operation ran (SAFE-002.6, SAFE-004.2)
 
 Scenario: FILE-015.3 Keep my version is asked once
   Given Quarry asked about "notes.txt" changing on disk and I chose "Keep my version"
@@ -721,6 +727,8 @@ Scenario: FILE-015.4 The file was deleted
   Then the tab stays open with its text and is marked as having unsaved changes
   And a warning says "notes.txt was deleted or moved on disk. Saving will recreate it."
   And the warning is not repeated the next time the window gets focus
+  And when several open files are gone, one warning names them: "a.txt and b.txt were deleted or moved on disk. Their tabs stay open; saving one recreates the file."
+  And after one of Quarry's own git operations the warning is worded for that operation (SAFE-007.1)
 
 Scenario: FILE-015.5 A deleted file comes back
   Given "notes.txt" was reported deleted and I have not edited it since

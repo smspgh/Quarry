@@ -9,7 +9,7 @@ Rewriting commits of the current branch from the commit graph: Undo Last Commit,
 
 Decisions (made where the roadmap left the choice open):
 
-- **Owner decisions (2026-11-13).** (1) Pushed commits: warn, then offer Force Push. A history edit that would rewrite pushed commits warns in a danger dialog that names them, with Cancel as the default (HISTORY-006.3); afterwards the status line offers "Force Push…" (`git push --force-with-lease`), which asks again. Force Push itself (`git.forcePush`, the dialog, the status-line wording, the Rust remote operation) is specified in MERGE-009, which is built first; HISTORY-011 only adds what is particular to history edits. (2) The unsaved-tabs question (Save All / Continue Without Saving / Cancel) is specified once, in SAFE-001 to SAFE-003 (history edits: SAFE-003.5), and arrives with that area; nothing in this area asks about unsaved tabs. Open tabs are re-checked against the disk after every action, as today.
+- **Owner decisions (2026-11-13).** (1) Pushed commits: warn, then offer Force Push. A history edit that would rewrite pushed commits warns in a danger dialog that names them, with Cancel as the default (HISTORY-006.3); afterwards the status line offers "Force Push…" (`git push --force-with-lease`), which asks again. Force Push itself (`git.forcePush`, the dialog, the status-line wording, the Rust remote operation) is specified in MERGE-009, which is built first; HISTORY-011 only adds what is particular to history edits. (2) The unsaved-tabs question (Save All / Continue Without Saving / Cancel) is specified once, in SAFE-001 to SAFE-003 (history edits: SAFE-003.5), and is built: every edit that replays commits (Drop, Squash into Parent, Reword of a commit that is not the last, the list's Run) asks it through the shared guard after the clean-state check and before its own confirmation (`cleanGuard` in `planRun`); Undo Last Commit and Reword of the last commit do not ask. This area defines no unsaved-tabs dialog of its own. Open tabs are reloaded from the disk after every action, also one that stops or fails (SAFE-006).
 - **Where.** The four single-commit actions and "Edit History from Here…" are a new group in the graph's right-click menu, after the Reset entries (the planned order of the whole menu is in `specs/git-merge-rebase.md`, Decisions). Entries that cannot run are shown disabled with a tooltip that says why, never hidden, except Undo Last Commit, which only shows on the tip commit. `git.undoLastCommit` and `git.editHistory` are in the palette and in a Git › Edit History submenu ("Undo Last Commit…", "Edit History…"), which sits after Branches and Tags in the Git menu (same layout reference).
 - **Only the current branch.** A commit qualifies when it is an ancestor of (or is) the tip of the checked-out branch. With a detached HEAD nothing in this area runs.
 - **"Already pushed"** means: reachable from any remote-tracking branch as last fetched (not only the branch's own upstream, so a branch with no upstream is still protected). It is the definition of MERGE-006 and the same Rust helper, `pushed_commits` in `src-tauri/src/git.rs`. `git_unpushed` returns nothing without an upstream, so it is not enough on its own.
@@ -118,7 +118,7 @@ Scenario: HISTORY-001.10 Git is busy
   - `src/lib/gitCommands.ts` — `git.undoLastCommit` ("Undo Last Commit…", `enabled` from `commandBlocked`)
   - `src/components/MenuBar.tsx` — Git › Edit History submenu (Undo Last Commit…, Edit History…), after Branches and Tags
   - `src/lib/historyEdit.ts` — `commandBlocked("undo", repo, busy)`, `historyConfirm("undo", …)`, `historyDone`
-  - `src/lib/git.ts` — `undoLastCommit(root)` (guard, asks, runs, sets `useGit().undone`, `checkExternalChanges`)
+  - `src/lib/git.ts` — `undoLastCommit(root)` (guard, asks, runs, sets `useGit().undone`; no unsaved-tabs question: the files are not touched)
   - `src/components/panels/GitPanel.tsx` — the message box takes `useGit().undone` (the undone commit's message) when it is empty
   - `src/lib/gitApi.ts` — `GitStatus.headParents` (the tip is the first commit or a merge: the command is greyed out)
   - `src-tauri/src/git/history.rs` — `history_rewrite` action `undo` (`reset --soft HEAD~1`; refuses a merge or root tip, a detached HEAD, an operation in progress and a tip that moved), `tip_parents`
@@ -260,7 +260,7 @@ Scenario: HISTORY-003.9 Cancel
 - Files:
   - `src/components/GraphHistory.tsx` — "Drop Commit…" entry (dangerous style)
   - `src/lib/historyEdit.ts` — `singlePlan("drop", …)`, `planTodo`, `historyConfirm("drop", …)` (danger), `historyDone`
-  - `src/lib/git.ts` — `dropCommit(root, sha)` (guards of HISTORY-006, busy label "Dropping…", `checkExternalChanges`)
+  - `src/lib/git.ts` — `dropCommit(root, sha)` (guards of HISTORY-006, the unsaved-tabs question of SAFE-003.5 in `planRun`, busy label "Dropping…", open tabs reloaded through `rewrite`)
   - `src-tauri/src/git/history.rs` — `history_rewrite` with a `drop` step (the commit is left out of the todo; the tip alone = `reset --hard` to its parent, tracked files being clean)
 - Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/graphHistory.test.tsx`, `src-tauri/src/git/history.rs`
 - Docs: `docs/git.md`
@@ -283,7 +283,7 @@ Scenario: HISTORY-004.2 Drop a commit in the middle
   Then "main" no longer has "Fix typo" and its changes are gone from my files
   And "Add tab limit tests" is still the tip, with a new id and the same changes
   And a notification says "Dropped \"Fix typo\". main was at e5f6a7b."
-  And open tabs of files that changed on disk are re-checked
+  And open tabs of files that changed on disk are reloaded (SAFE-006.3)
 
 Scenario: HISTORY-004.3 Drop the last commit
   When I drop the tip commit e5f6a7b and confirm
@@ -648,7 +648,7 @@ Scenario: HISTORY-008.17 The keys only act while the list has focus
 - Files:
   - `src/components/HistoryEditList.tsx` — "Run" / "Cancel", closes on success or a stop, stays open on a refusal, reloads when the branch moved
   - `src/lib/historyEdit.ts` — `planTodo` (rows → steps, oldest first, starting at the lowest changed row), `historyConfirm("plan", …)` (one line per commit: new id / moved / reworded / folded into / dropped), `historyDone`
-  - `src/lib/git.ts` — `runHistoryEdit(root, opened, rows)` (`historyGuard`, pushed flags read fresh, busy label "Rewriting history…", `checkExternalChanges`, graph reload through the status)
+  - `src/lib/git.ts` — `runHistoryEdit(root, opened, rows)` (`historyGuard`, pushed flags read fresh, the unsaved-tabs question of SAFE-003.5 in `planRun`, busy label "Rewriting history…", open tabs reloaded through `rewrite`, graph reload through the status)
   - `src/lib/gitApi.ts` — `git.historyRewrite(root, "plan", expectedTip, base, steps)`
   - `src-tauri/src/git/history.rs` — `history_rewrite` → `run_plan`: writes the todo (`todo_text`) to a file in a temporary folder, runs `rebase -i --empty=keep` with `GIT_SEQUENCE_EDITOR` = `cp '<that file>'` and `GIT_EDITOR=true`, with autoStash / rebaseMerges / updateRefs / autoSquash / missingCommitsCheck switched off; messages are `exec` lines of the todo; the temporary folder is removed when the command returns
 - Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/historyEditList.test.tsx`, `src-tauri/src/git/history.rs`

@@ -9,6 +9,7 @@
  *   down) shows an up arrow where the line comes back in. Without this, every branch that forked
  *   from an old commit keeps a lane for the whole distance (150+ lanes on git.git).
  */
+import { lostEditsSentence } from "./gitSafety";
 
 export interface GraphInput {
   sha: string;
@@ -194,7 +195,7 @@ export type GraphAction = "checkout" | "branch" | "branch-switch" | "tag" | "che
  * (creating a branch or tag). `branch` is the current branch (null when detached), `dirty` the
  * number of uncommitted changes.
  */
-export function actionConfirm(action: GraphAction, c: { short: string; summary: string }, branch: string | null, dirty: number): { title: string; text: string; ok: string; kind: "primary" | "danger" } | null {
+export function actionConfirm(action: GraphAction, c: { short: string; summary: string }, branch: string | null, dirty: number, unsaved: { rel: string; name: string }[] = []): { title: string; text: string; ok: string; kind: "primary" | "danger" } | null {
   const on = branch ? `"${branch}"` : "the current commit (not on a branch)";
   const what = `${c.short} "${c.summary}"`;
   switch (action) {
@@ -207,7 +208,7 @@ export function actionConfirm(action: GraphAction, c: { short: string; summary: 
     case "reset-mixed":
       return { title: "Reset (mixed)?", text: `Moves ${on} back to ${what}. The commits after it leave the branch; their changes stay in your files, unstaged.`, ok: "Reset (Mixed)", kind: "primary" };
     case "reset-hard":
-      return { title: "Reset (hard) and discard changes?", text: `Moves ${on} back to ${what} and makes every tracked file match it. The commits after it leave the branch${dirty ? `, and your ${dirty} uncommitted change${dirty === 1 ? "" : "s"} to tracked files ${dirty === 1 ? "is" : "are"} lost` : ""}. This can't be undone from Quarry.`, ok: "Reset and Discard", kind: "danger" };
+      return { title: "Reset (hard) and discard changes?", text: `Moves ${on} back to ${what} and makes every tracked file match it. The commits after it leave the branch${dirty ? `, and your ${dirty} uncommitted change${dirty === 1 ? "" : "s"} to tracked files ${dirty === 1 ? "is" : "are"} lost` : ""}.${unsaved.length ? ` ${lostEditsSentence("reset-hard", unsaved)}` : ""} This can't be undone from Quarry.`, ok: "Reset and Discard", kind: "danger" };
     case "checkout":
       return { title: "Check out this commit?", text: `Your files become ${what}, and you are no longer on a branch ("detached"). Commits made here belong to no branch until you create one. Switch back with the branch button.`, ok: "Check Out", kind: "primary" };
     default:

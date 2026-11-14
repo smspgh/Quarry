@@ -10,7 +10,8 @@ import { bus } from "./bus";
 import { claudeBusy, disposeClaude, openClaudeTab, stopAllClaude } from "./claude";
 import { disposeTerminal, terminalPty } from "./terminal";
 import { stopAllServers } from "./lsp";
-import { disposeDiff, saveDiff } from "./diff";
+import { disposeDiff, patchDiff, refreshDiff, saveDiff, useDiff } from "./diff";
+import { keptNotice, missingNotice, reloadedNotice } from "./gitSafety";
 import { clampBottomHeight, showPanel } from "./panels";
 import { makeRoom, markUsed } from "./tabLimit";
 import { popClosed, pushClosed, type ClosedTab } from "./closedTabs";
@@ -530,6 +531,7 @@ export async function closeDocument(docId?: string, force = false, remember = tr
   if (remember) rememberClosed(doc);
   editor.dispose(doc.id);
   snapshots.delete(doc.id);
+  missingWarned.delete(doc.id);
   store.removeDoc(doc.id);
   saveSession();
   return true;
@@ -678,76 +680,205 @@ function askSaveChanges(title: string, message = "Your changes will be lost if y
 // ---------- external changes ----------
 
 const missingWarned = new Set<string>();
-let checking = false;
 /** Documents being written right now: the check must not take Quarry's own write for an outside change. */
 const saving = new Set<string>();
 
+/** No edits of the user's own: a text tab equals its saved snapshot, a large-file tab has no edited lines. */
+function unedited(doc: Doc): boolean {
+  if (doc.kind === "big") return !doc.bigInfo?.dirty;
+  const snap = snapshots.get(doc.id);
+  const now = editor.docOf(doc.id);
+  return !!snap && !!now && now.eq(snap.doc) && doc.eol === snap.eol && doc.encoding === snap.encoding && doc.bom === snap.bom;
+}
+
+/** The tab is marked unsaved only because its file went missing (FILE-015.4) and was not edited since. */
+export function missingOnly(docId: string): boolean {
+  const doc = useStore.getState().docs.find((d) => d.id === docId);
+  return !!doc && missingWarned.has(docId) && unedited(doc);
+}
+
+/** What a check did, by file name: reloaded from disk, found missing (first time), kept unsaved over a changed file. */
+export interface CheckResult {
+  reloaded: string[];
+  missing: string[];
+  kept: string[];
+}
+
+export interface CheckOptions {
+  /** Only this tab (tab activation). */
+  only?: string;
+  /** No notices: the caller (a git action) words them from the result. */
+  quiet?: boolean;
+}
+
 /**
- * Compare every file-backed text document with the disk. Clean documents whose file changed are
- * reloaded silently (with a toast); dirty ones ask. Deleted files are flagged once.
- * Called on window focus, on tab activation and before a save.
+ * Answers given before the file changes (a git operation): "keep" = Keep my version (Continue
+ * Without Saving), "lose" = reload from disk (the confirmation of a discarding operation said
+ * so). Keyed by normalised path; any check that meets such a tab uses the answer instead of asking.
  */
-export async function checkExternalChanges(onlyDocId?: string): Promise<void> {
-  if (checking) return;
-  checking = true;
-  try {
-    const store = useStore.getState();
-    const docs = store.docs.filter((d) => (d.kind === "text" || d.kind === "big") && d.path && (!onlyDocId || d.id === onlyDocId));
-    for (const doc of docs) {
-      if (saving.has(doc.id)) continue;
-      let stat: FileStat;
-      try {
-        stat = await fs.stat(doc.path!);
-      } catch {
-        if (!missingWarned.has(doc.id)) {
-          missingWarned.add(doc.id);
-          store.toast(`${doc.name} was deleted or moved on disk. Saving will recreate it.`, "warning", 8000);
-          store.updateDoc(doc.id, { dirty: true });
+const answered = new Map<string, "keep" | "lose">();
+
+/** Answer the "changed on disk" question ahead for these files. Returns the function that withdraws the answers. */
+export function answerAhead(paths: string[], answer: "keep" | "lose"): () => void {
+  const keys = paths.map(normalizePath);
+  for (const k of keys) answered.set(k, answer);
+  return () => {
+    for (const k of keys) if (answered.get(k) === answer) answered.delete(k);
+  };
+}
+
+let chain: Promise<unknown> = Promise.resolve();
+/** A check of every tab that is waiting for its turn: further plain calls join it. */
+let waiting: Promise<CheckResult> | null = null;
+
+/**
+ * Compare every file-backed text / large-file document, and every Compare tab with a file side,
+ * with the disk. Clean ones whose file changed are reloaded (one notice, folded); unsaved ones ask
+ * (unless answered ahead); missing files are flagged once. Called on window focus, on tab
+ * activation and after every git action that can rewrite files. Checks run one after the other: a
+ * call made while one is running (perhaps waiting on its question) is queued, never dropped.
+ */
+export function checkExternalChanges(arg?: string | CheckOptions): Promise<CheckResult> {
+  const opts: CheckOptions = typeof arg === "string" ? { only: arg } : (arg ?? {});
+  const plain = !opts.only && !opts.quiet;
+  if (plain && waiting) return waiting;
+  const run = chain.then(() => {
+    if (plain) waiting = null;
+    return doCheck(opts);
+  });
+  if (plain) waiting = run;
+  chain = run.catch(() => {});
+  return run;
+}
+
+async function doCheck(opts: CheckOptions): Promise<CheckResult> {
+  const result: CheckResult = { reloaded: [], missing: [], kept: [] };
+  const store = useStore.getState();
+  const onlyDocId = opts.only;
+  /** Text tabs reloaded in this pass: Compare tabs showing their text follow. */
+  const reloadedDocs = new Set<string>();
+  const counted = new Set<string>();
+  const note = (list: keyof CheckResult, path: string, name: string) => {
+    const k = `${list}|${normalizePath(path)}`;
+    if (counted.has(k)) return;
+    counted.add(k);
+    result[list].push(name);
+  };
+  const docs = store.docs.filter((d) => (d.kind === "text" || d.kind === "big") && d.path && (!onlyDocId || d.id === onlyDocId));
+  for (const doc of docs) {
+    if (saving.has(doc.id)) continue;
+    let stat: FileStat;
+    try {
+      stat = await fs.stat(doc.path!);
+    } catch {
+      if (!missingWarned.has(doc.id) && useStore.getState().docs.some((d) => d.id === doc.id)) {
+        missingWarned.add(doc.id);
+        note("missing", doc.path!, doc.name);
+        store.updateDoc(doc.id, { dirty: true });
+      }
+      continue;
+    }
+    const cameBack = missingWarned.has(doc.id);
+    if (doc.following) {
+      missingWarned.delete(doc.id);
+      continue; // follow mode picks up appended lines (and reloads a rotated file) itself
+    }
+    // The document as it is now (a save may have finished while earlier files were checked).
+    const cur = useStore.getState().docs.find((d) => d.id === doc.id);
+    if (!cur || saving.has(doc.id)) continue;
+    const reloadFromDisk = async () => {
+      const ok = await (doc.kind === "big" ? reloadBig(doc.id) : revertDocument(doc.id, { confirm: false, silent: true }));
+      if (ok) reloadedDocs.add(doc.id);
+      return ok;
+    };
+    // The file is back (a branch switch, a tool rewriting it). Going missing marked the tab
+    // dirty; if it wasn't edited since, that flag means nothing: clear it, or reload if newer.
+    const backUnedited = cameBack && unedited(cur);
+    missingWarned.delete(doc.id);
+    if (backUnedited) {
+      if (cur.modifiedMs && stat.modifiedMs > cur.modifiedMs) {
+        await reloadFromDisk();
+        if (opts.quiet) note("reloaded", doc.path!, doc.name);
+        else store.toast(`${doc.name} is back on disk and was reloaded.`, "info", 4000);
+      } else store.updateDoc(doc.id, { dirty: false });
+      continue;
+    }
+    if (!cur.modifiedMs || stat.modifiedMs <= cur.modifiedMs) continue;
+    const ahead = answered.get(normalizePath(doc.path!));
+    if (!cur.dirty || ahead === "lose") {
+      if (await reloadFromDisk()) note("reloaded", doc.path!, doc.name);
+    } else if (ahead === "keep") {
+      store.updateDoc(doc.id, { modifiedMs: stat.modifiedMs }); // keep mine, answered before the operation ran
+      note("kept", doc.path!, doc.name);
+    } else {
+      const reload = await askDialog(
+        `${doc.name} changed on disk`,
+        "The file was modified by another program and you also have unsaved changes here. Reload it from disk (losing your edits) or keep your version?",
+        "Reload from disk",
+        "danger",
+        "Keep my version",
+      );
+      if (reload) {
+        if (await reloadFromDisk()) store.toast(`Reverted ${doc.name} to the version on disk`, "info", 2500);
+      } else store.updateDoc(doc.id, { modifiedMs: stat.modifiedMs }); // keep mine: stop re-asking
+    }
+  }
+  await checkCompareTabs(onlyDocId, reloadedDocs, note);
+  if (!opts.quiet) {
+    if (result.reloaded.length) store.toast(reloadedNotice(result.reloaded), "info", 4000);
+    if (result.missing.length) store.toast(missingNotice(null, result.missing), "warning", 8000);
+    if (result.kept.length) store.toast(keptNotice(result.kept), "warning", 8000);
+  }
+  return result;
+}
+
+/**
+ * Compare tabs: a file side whose file changed on disk, or a side showing a tab that was just
+ * reloaded, is read again when nothing in the comparison is edited (or the edits were given up
+ * ahead). An edited side that was kept ahead is only noted: saving it then overwrites the file.
+ */
+async function checkCompareTabs(only: string | undefined, reloadedDocs: Set<string>, note: (list: keyof CheckResult, path: string, name: string) => void) {
+  for (const [id, s] of Object.entries(useDiff.getState().sessions)) {
+    if (only && id !== only) continue;
+    let reload = false;
+    let blocked = false;
+    const changed: { path: string; name: string }[] = [];
+    for (const which of ["left", "right"] as const) {
+      const side = s[which];
+      if (side.source.kind === "tab") {
+        if (reloadedDocs.has(side.source.docId)) reload = true;
+        continue;
+      }
+      if (side.source.kind !== "file" || !side.path) {
+        if (side.dirty) blocked = true;
+        continue;
+      }
+      const stat = await fs.stat(side.path).catch(() => null);
+      const newer = !!stat && !!side.modifiedMs && stat.modifiedMs > side.modifiedMs;
+      const name = side.path.split(/[\\/]/).pop() || side.path;
+      if (!side.dirty) {
+        if (newer) {
+          reload = true;
+          changed.push({ path: side.path, name });
         }
         continue;
       }
-      const cameBack = missingWarned.delete(doc.id);
-      if (doc.following) continue; // follow mode picks up appended lines (and reloads a rotated file) itself
-      // The document as it is now (a save may have finished while earlier files were checked).
-      const cur = useStore.getState().docs.find((d) => d.id === doc.id);
-      if (!cur || saving.has(doc.id)) continue;
-      if (cameBack) {
-        // The file is back (a branch switch, a tool rewriting it). Going missing marked the tab
-        // dirty; if it wasn't edited since, that flag means nothing: clear it, or reload if newer.
-        let unedited = false;
-        if (cur.kind === "text") {
-          const snap = snapshots.get(doc.id);
-          const now = editor.docOf(doc.id);
-          unedited = !!snap && !!now && now.eq(snap.doc);
-        } else unedited = !cur.bigInfo?.dirty;
-        if (unedited) {
-          if (cur.modifiedMs && stat.modifiedMs > cur.modifiedMs) {
-            if (cur.kind === "big") await reloadBig(doc.id);
-            else await revertDocument(doc.id, { confirm: false, silent: true });
-            store.toast(`${doc.name} is back on disk and was reloaded.`, "info", 4000);
-          } else store.updateDoc(doc.id, { dirty: false });
-          continue;
+      const ahead = answered.get(normalizePath(side.path));
+      if (ahead === "lose" && newer) {
+        reload = true;
+        changed.push({ path: side.path, name });
+      } else {
+        blocked = true;
+        if (ahead === "keep" && newer && stat) {
+          const modifiedMs = stat.modifiedMs;
+          patchDiff(id, (cur) => ({ [which]: { ...cur[which], modifiedMs } }));
+          note("kept", side.path, name);
         }
       }
-      if (!cur.modifiedMs || stat.modifiedMs <= cur.modifiedMs) continue;
-      const reloadFromDisk = () => (doc.kind === "big" ? reloadBig(doc.id) : revertDocument(doc.id, { confirm: false, silent: doc.kind === "text" && !cur.dirty }));
-      if (!cur.dirty) {
-        await reloadFromDisk();
-        store.toast(`${doc.name} changed on disk and was reloaded.`, "info", 4000);
-      } else {
-        const reload = await askDialog(
-          `${doc.name} changed on disk`,
-          "The file was modified by another program and you also have unsaved changes here. Reload it from disk (losing your edits) or keep your version?",
-          "Reload from disk",
-          "danger",
-          "Keep my version",
-        );
-        if (reload) await reloadFromDisk();
-        else store.updateDoc(doc.id, { modifiedMs: stat.modifiedMs }); // keep mine: stop re-asking
-      }
     }
-  } finally {
-    checking = false;
+    if (!reload || blocked) continue;
+    const ok = s.git ? await (await import("./gitStaging")).reloadChange(id) : await refreshDiff(id);
+    if (ok) for (const c of changed) note("reloaded", c.path, c.name);
   }
 }
 
