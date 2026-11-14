@@ -1672,6 +1672,8 @@ button {
 .dialog p {
   margin: 0;
   color: var(--text-2);
+  /* A path or URL in a git message has no spaces: break it rather than let it run past the edge. */
+  overflow-wrap: anywhere;
 }
 .dialog .actions {
   display: flex;
@@ -1707,6 +1709,8 @@ button {
 }
 .toast .msg {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
   white-space: pre-wrap;
   user-select: text;
 }
