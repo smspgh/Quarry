@@ -35,7 +35,9 @@ It prints each story's id, title and `spec file:line` (and, for a story id, its 
 | Prefix | Area | File | Stories |
 | --- | --- | --- | --- |
 | `BIG` | Large Files | [large-files.md](large-files.md) | 20 |
+| `BRANCH` | Branch and Tag Housekeeping | [git-branches.md](git-branches.md) | 9 |
 | `CLAUDE` | Claude Code Tabs | [claude-code.md](claude-code.md) | 20 |
+| `COMMITCMP` | Compare Commits | [git-compare-commits.md](git-compare-commits.md) | 6 |
 | `CONFLICT` | Merge Conflicts and Stopped Operations | [git-conflicts.md](git-conflicts.md) | 14 |
 | `DIFF` | Compare | [compare.md](compare.md) | 14 |
 | `EDIT` | Text Editing | [editing.md](editing.md) | 23 |
@@ -44,16 +46,23 @@ It prints each story's id, title and `spec file:line` (and, for a story id, its 
 | `FIND` | Find and Replace in a Document | [find.md](find.md) | 10 |
 | `FMT` | Formatting | [formatting.md](formatting.md) | 10 |
 | `GIT` | Source Control | [git.md](git.md) | 28 |
-| `GRAPH` | Commit Graph | [git-graph.md](git-graph.md) | 14 |
+| `GITAI` | Claude-Assisted Git | [git-claude.md](git-claude.md) | 9 |
+| `GRAPH` | Commit Graph | [git-graph.md](git-graph.md) | 19 |
+| `HISTORY` | Edit History | [git-history-edit.md](git-history-edit.md) | 11 |
 | `JSON` | JSON Tools | [json.md](json.md) | 14 |
 | `LSP` | Code Intelligence | [code-intelligence.md](code-intelligence.md) | 17 |
 | `MACRO` | Macros | [macros.md](macros.md) | 13 |
+| `MERGE` | Start a Merge or Rebase | [git-merge-rebase.md](git-merge-rebase.md) | 9 |
+| `SAFE` | Unsaved Tabs and Git Operations | [git-safety.md](git-safety.md) | 7 |
 | `SCRIPT` | Scripts | [scripting.md](scripting.md) | 15 |
 | `SEARCH` | Find in Files | [search.md](search.md) | 16 |
 | `SET` | Settings | [settings.md](settings.md) | 18 |
 | `SPLIT` | Split Editor | [split.md](split.md) | 7 |
+| `STAGE` | Hunk and Line Staging | [git-staging.md](git-staging.md) | 9 |
+| `STASH` | Stash | [git-stash.md](git-stash.md) | 11 |
 | `TAB` | Tabs | [tabs.md](tabs.md) | 10 |
 | `TERM` | Claude CLI Terminal Tabs | [terminal.md](terminal.md) | 9 |
+| `THREEWAY` | Three-Way Merge View (deferred) | [git-merge-editor.md](git-merge-editor.md) | 5 |
 | `UI` | Application Shell | [app-shell.md](app-shell.md) | 25 |
 | `UPD` | Updates and About | [updates.md](updates.md) | 8 |
 <!-- areas:end -->
@@ -106,7 +115,7 @@ Scenario: GIT-012.2 Nothing to commit
 Rules (the index script enforces the mechanical ones):
 
 - **Ids are permanent.** `PREFIX-NNN`, three digits, numbered in file order when first written. Never renumber or reuse; a removed story's number stays retired. New stories take the next free number. Scenario ids are `<story id>.<n>`, in order.
-- **Status.** `draft` = written from the code, describes what the application does today, not yet confirmed by the owner as what it *should* do. `verified` = confirmed. Only the owner sets `verified`. When code and a `verified` story disagree, the code is wrong; when code and a `draft` story disagree, ask.
+- **Status.** `planned` = not built yet: the story says what the feature must do, and may name files, tests and command ids that do not exist yet (the check skips them). Whoever builds it sets `draft` in the same commit, and from then on every listed file and command must exist. `draft` = written from the code, describes what the application does today, not yet confirmed by the owner as what it *should* do. `verified` = confirmed. Only the owner sets `verified`. When code and a `verified` story disagree, the code is wrong; when code and a `draft` story disagree, ask.
 - **Commands.** The command ids (`src/lib/commands.ts`, `gitCommands.ts`, …) that start this behaviour, or `none`.
 - **Files.** Every file a change to this story would probably touch, one per line, with a short note naming the function, component or Tauri command that matters. Repository-relative, forward slashes. List shared files (`store.ts`, `commands.ts`, `types.ts`, `app.css`) only when real logic for the story lives in them.
 - **Tests.** Test files that exercise the story (`src/__tests__/*.test.ts`, or the Rust file whose `#[cfg(test)]` module does), or `none`.

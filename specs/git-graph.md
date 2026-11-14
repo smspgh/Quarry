@@ -784,3 +784,434 @@ Scenario: GRAPH-014.5 Abort from the strip
   When I click "Abort" in the strip
   Then I am asked "Abort the cherry-pick?" before anything is undone
 ```
+
+### Decisions (planned stories)
+
+GRAPH-015 to GRAPH-019 are `planned`: they come from `GIT-ROADMAP.md` ("7. Graph polish" and the `git.graph` fix in "0."). The roadmap left some choices open; these are the ones the stories below assume.
+
+- **Uncommitted row (GRAPH-015).** The row is laid out as one extra commit whose only parent is the current commit, placed first in the list. It therefore takes the first lane, and so does the current commit's line below it; the first lane is never cut (GRAPH-003.4), so the row's line always reaches the current commit, however far down that is. The row replaces the uncommitted-changes strip of GRAPH-014.1; the stopped-operation strip with Abort stays, and the row shows during a stopped operation too. The row has no right-click menu. The count is the number of changed files, as in the strip today. Next to the other planned git specs: the warning strip a stash leaves when it came back with conflicts (STASH-009.12) stays a strip, like the stopped-operation strip; the row is not a commit, so none of the entries other specs add to the commit menu (merge, rebase, compare, edit history, Summarise with Claude) applies to it, and it cannot be picked with Ctrl+click for Compare Commits (COMMITCMP-001: Compare with Working Tree on a commit is the way to compare with uncommitted work); while the Edit History list is open (HISTORY-007) it replaces every row, this one included; a file clicked in the row's details pane opens the Source Control comparison, so it has the partial-staging controls of STAGE-001.
+- **Results divider (GRAPH-016).** Same kind of divider as the details pane. Limits: at least 80 px, never taller than its content, and the commit list always keeps 156 px (6 rows). A dragged height is the user's choice: it is kept for the tab, and clicking a result no longer shrinks the list. Not saved across restarts (graph tabs are not in the session).
+- **Lanes beyond 16 (GRAPH-017): horizontal scroll of the lane column**, not a wider cap and not smarter cutting. A wider cap takes the room from the Commit column on every row (44 lanes = 534 px) for the sake of a few rows; smarter cutting means changing `layoutGraph`, whose results must stay identical page by page (GRAPH-003.5) and keep lane 0 uncut. Scrolling is drawing only: every lane gets its own position (none share a column), the column still shows at most 16 lanes (198 px), and the layout is untouched. To make hidden lanes hard to miss: faded edges, a scroll bar under the column heading, and selecting a commit scrolls its dot into view.
+- **Date order (GRAPH-018).** "Small" = the whole history in the scope shown (Current branch or All branches) is 300 commits or fewer, i.e. it fits the first page. Above that the button is disabled and says why. The order is git's author-date order (newest first, but a commit is never listed above one of its children), so the rows follow the Date column, which shows author dates. Per graph tab, off by default, not saved. Long lines are still cut after 40 rows.
+- **Palette entry without a repository (GRAPH-019).** `git.graph` loses its `enabled` condition, so it is available everywhere (palette, Git menu, a recorded macro), and running it with no repository shows one notification, "Open a folder in a git repository", whether or not a folder is open. The other repository commands (Fetch, Pull, Push, Switch Branch…, Add Remote…) keep their condition.
+- **Shared with the other planned git specs.** The planned order of the commit's right-click menu and of the Git menu, the ref-label menu (a right-click on a branch or tag label, MERGE-002 / BRANCH-001) and the branch picker's purposes are written down once, in the Decisions of `specs/git-merge-rebase.md`. None of the four owner decisions of 2026-11-13 (Force Push after rewriting pushed commits, the one unsaved-tabs dialog, the git helpers' own Claude model, drafting from all changes) changes GRAPH-015 to GRAPH-019.
+
+## GRAPH-015: Uncommitted changes as the first row of the graph
+
+- Status: planned
+- Commands: none
+- Files:
+  - `src/components/GraphView.tsx` — the uncommitted row (first row of the list, hollow dot, dashed line), its details pane (file list instead of commit details), selection / keyboard / find / right-click over a row that is not a commit; the uncommitted-changes `.graph-strip` goes away
+  - `src/lib/gitGraph.ts` — new `withUncommitted` (prepends the extra row with the current commit as its parent before `layoutGraph`), row index ↔ commit index helpers
+  - `src/lib/git.ts` — `openChange` (reused for a click on a file), `useGit` repository `files` (the row follows it without reloading the history)
+  - `src/lib/gitStatus.ts` — grouping into Merge Changes / Staged Changes / Changes shared with the panel
+  - `src/components/panels/GitPanel.tsx` — shares the grouping and the file row
+  - `src/styles/app.css` — `.graph-row.uncommitted`, hollow dot and dashed line
+- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphView.test.tsx`
+- Docs: `docs/git.md`
+
+**As a** developer with work that is not committed yet
+**I want** that work to be the top row of the graph, on the commit it sits on
+**So that** I see where my changes belong and can look at the changed files without leaving the graph
+
+```gherkin
+Scenario: GRAPH-015.1 The row
+  Given I am on "main" with 4 changed files and the newest commit of "main" is "18bc71d"
+  When I open the graph
+  Then the first row of the list reads "Uncommitted changes (4)" with a hollow dot in the first lane
+  And a dashed line joins it to the commit "18bc71d" below it
+  And its Author, Date and Id columns are empty
+  And no strip under the toolbar mentions uncommitted changes
+
+Scenario: GRAPH-015.2 Nothing to commit
+  Given the working folder has no changes
+  When I open the graph
+  Then the first row is the newest commit
+  And there is no "Uncommitted changes" row
+
+Scenario: GRAPH-015.3 The current commit is not the newest row
+  Given "origin/main" has 2 commits I have not pulled and I have 1 changed file
+  When I open the graph
+  Then "Uncommitted changes (1)" is the first row, above the 2 incoming commits
+  And its line runs down the first lane past them and ends at the commit labelled "main"
+  And the 2 incoming commits sit in the second lane
+
+Scenario: GRAPH-015.4 The current commit is far down
+  Given "All branches" is selected and the commit I am on is 500 rows down
+  When I look at the top of the graph
+  Then the row's line runs down the first lane, never cut by an arrow, until it reaches that commit
+
+Scenario: GRAPH-015.5 Select the row
+  Given 1 staged file "store.ts" and 2 unstaged files "app.css" and "notes.txt" (new)
+  When I click the "Uncommitted changes (3)" row
+  Then the details pane is headed "Uncommitted changes on main"
+  And it lists "store.ts" under "Staged Changes" and "app.css" and "notes.txt" under "Changes", each with the letter Source Control shows for it
+  And it has a "Based on" row with the short id "18bc71d", which selects that commit when clicked
+  And it shows no message, author, parent or copy-id button
+  And when Source Control is not showing it has an "Open Source Control" button
+
+Scenario: GRAPH-015.6 Open a changed file
+  Given the uncommitted row is selected
+  When I click "app.css" in the details pane
+  Then the Compare tab that Source Control opens for that file opens, with "app.css (HEAD)" on the left and the working file on the right
+  And clicking the new file "notes.txt" opens the file itself
+  And double-clicking a file opens it from the working folder
+
+Scenario: GRAPH-015.7 The row follows my work
+  Given the graph shows "Uncommitted changes (3)" and I have scrolled 200 rows down with a commit selected
+  When I save an edit to a fourth file
+  Then the row reads "Uncommitted changes (4)"
+  And the scroll position and the selected commit are unchanged
+
+Scenario: GRAPH-015.8 The changes go away
+  Given the uncommitted row is selected and its details pane is open
+  When I commit or discard every change
+  Then the row disappears and the details pane closes
+  And the newest commit is the first row
+
+Scenario: GRAPH-015.9 No commit actions on the row
+  When I right-click the uncommitted row
+  Then the row is selected
+  And no menu opens: nothing offers to cherry-pick, revert, check out, reset to, branch from or tag it
+
+Scenario: GRAPH-015.10 Keyboard
+  Given the commit list has focus and the first commit is selected
+  When I press Up
+  Then the uncommitted row is selected and its files are shown
+  And Home selects it too, and Down moves back to the first commit
+
+Scenario: GRAPH-015.11 Find and counts leave the row out
+  Given 300 commits are loaded and I have 4 changed files
+  When I type "uncommitted" in the Find box
+  Then the count says "0 in 300 loaded" and the toolbar still says "300+ commits"
+  And the uncommitted row is dimmed like the commits that do not match
+  And Enter never steps onto it
+
+Scenario: GRAPH-015.12 During a stopped operation
+  Given a cherry-pick stopped with 1 conflicted file and 2 other changed files
+  When I look at the graph tab
+  Then the warning strip with "Abort" is shown under the toolbar as before
+  And the first row reads "Uncommitted changes (3)"
+  And selecting it lists the conflicted file under "Merge Changes", and clicking that file opens the file itself with its conflict bars
+
+Scenario: GRAPH-015.13 Detached HEAD
+  Given HEAD is detached on a commit and I have 2 changed files
+  When I select the uncommitted row
+  Then the details pane is headed "Uncommitted changes (not on a branch)"
+  And the row's line ends at the commit labelled "HEAD"
+
+Scenario: GRAPH-015.14 A repository without commits
+  Given nothing has been committed yet and 5 new files exist
+  When I open the graph
+  Then the list shows the row "Uncommitted changes (5)" with no line below it, above "No commits yet."
+
+Scenario: GRAPH-015.15 The row scrolls with the list
+  Given the graph shows the uncommitted row
+  When I scroll 100 rows down
+  Then the row has scrolled out of view with the commits; it is not pinned to the top
+
+Scenario: GRAPH-015.16 The row cannot be picked for a comparison
+  Given commit "18bc71d" is selected and the uncommitted row is showing
+  When I Ctrl+click the uncommitted row
+  Then the row is selected alone, as with a plain click, and its file list shows
+  And no comparison of two commits opens
+```
+
+## GRAPH-016: Drag the height of the Search All History results
+
+- Status: planned
+- Commands: none
+- Files:
+  - `src/components/GraphView.tsx` — results list height (`hitsH`, new `startHitsResize` beside `startResize`), divider under `.graph-hits`, how `hitsOpen` / Show Fewer / Show More and `pickHit` behave once a height was dragged
+  - `src/lib/gitGraph.ts` — new pure `clampHitsHeight(wanted, content, available)`
+  - `src/styles/app.css` — `.graph-hits` (the fixed `max-height: 34%` / compact 100 px become the defaults only), divider reusing `.graph-resizer`
+- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphView.test.tsx`
+- Docs: `docs/git.md`
+
+**As a** developer going through many search results
+**I want** to drag the edge between the results and the graph
+**So that** I decide how much room each gets, as I already can for the details pane
+
+```gherkin
+Scenario: GRAPH-016.1 Drag the divider
+  Given a search of the whole history lists 60 results in a list 220 px tall
+  When I drag the divider under the results 150 px down
+  Then the results list is 370 px tall and the commit list below is 150 px shorter
+  And the pointer shows the up-down resize cursor over the divider
+
+Scenario: GRAPH-016.2 Limits
+  Given the results list is showing
+  When I drag the divider as far up as it goes
+  Then the results list stops at 80 px: its heading and one result stay visible
+  When I drag it as far down as it goes
+  Then it stops while the commit list still has 156 px (6 rows)
+
+Scenario: GRAPH-016.3 Never taller than its content
+  Given a search found 2 results
+  When I drag the divider down
+  Then the results list does not grow beyond its heading and 2 rows: no empty space opens under them
+
+Scenario: GRAPH-016.4 A dragged height stays when I pick a result
+  Given I dragged the results list to 370 px
+  When I click a result
+  Then its details open and the results list is still 370 px tall
+  And the clicked result is still in view
+
+Scenario: GRAPH-016.5 Before any drag nothing changes
+  Given I have not dragged the divider in this tab
+  When I click a result
+  Then the results list shrinks to a few rows as before, and "Show More" opens it again
+
+Scenario: GRAPH-016.6 Show Fewer and Show More after a drag
+  Given I dragged the results list to 370 px
+  When I click "Show Fewer"
+  Then the list shrinks to a few rows
+  When I click "Show More"
+  Then it is 370 px tall again
+
+Scenario: GRAPH-016.7 The height is kept for the tab
+  Given I dragged the results list to 370 px and closed the results
+  When I search the whole history for another text in the same graph tab
+  Then the new results open 370 px tall, or as tall as their content when that is less
+  But after Quarry restarts and the graph is opened again the results use the default height
+
+Scenario: GRAPH-016.8 Double-click resets
+  Given I dragged the results list to 370 px
+  When I double-click the divider
+  Then the results list goes back to its default height and shrinks again when a result is picked
+
+Scenario: GRAPH-016.9 The window gets smaller
+  Given the results list is 370 px tall
+  When I shrink the window until 370 px no longer leaves 156 px for the commit list
+  Then the results list becomes shorter so the commit list keeps 156 px
+
+Scenario: GRAPH-016.10 No divider without results
+  Given no whole-history search has been run, or its results were closed
+  When I look at the graph tab
+  Then there is no results divider
+  And the details pane's own divider works as before
+```
+
+## GRAPH-017: Scroll sideways through a graph wider than 16 lanes
+
+- Status: planned
+- Commands: none
+- Files:
+  - `src/components/GraphView.tsx` — `x()` no longer clamps a lane to `MAX_LANES - 1`; `RowGraph` drawn at the full width and shifted by a shared `laneScroll`; `MAX_LANES` = 16 stays the visible width; Shift+wheel on the lane column, scroll bar in `.graph-head`, reveal of the selected dot, faded edges
+  - `src/lib/gitGraph.ts` — new pure `revealLane(scroll, lane, visibleLanes, totalLanes)`; `layoutGraph` is not changed
+  - `src/styles/app.css` — `.graph-lane-cell` (clipping, edge fades), lane scroll bar
+- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphView.test.tsx`
+- Docs: `docs/git.md`
+
+**As a** developer reading a history with dozens of branches open at once
+**I want** every lane to keep its own place, with the lane column scrolling sideways
+**So that** lines past the 16th are not drawn on top of each other and the Commit column keeps its room
+
+```gherkin
+Scenario: GRAPH-017.1 Lanes past the 16th keep their own place
+  Given a row with commits or lines in lanes 17, 20 and 33
+  When I scroll the lane column all the way to the right
+  Then the three are drawn in three different places, 12 px per lane apart
+  And no two lanes are ever drawn in the same place
+
+Scenario: GRAPH-017.2 The column does not grow
+  Given the widest loaded row needs 44 lanes
+  When I look at the graph
+  Then the lane column is 16 lanes (198 px) wide, showing lanes 1 to 16
+  And the Commit, Author, Date and Id columns are where they are in a 16-lane graph
+
+Scenario: GRAPH-017.3 Scroll sideways
+  Given the widest loaded row needs 44 lanes
+  When I hold Shift and turn the mouse wheel over the lane column, or drag the scroll bar under the lane column's heading
+  Then the lanes of every row move sideways together
+  And the text columns do not move
+  And the list does not scroll up or down
+
+Scenario: GRAPH-017.4 Hidden lanes are signalled
+  Given the widest loaded row needs 44 lanes and the column shows lanes 1 to 16
+  When I look at the lane column
+  Then its right edge is faded
+  When I scroll it to lanes 10 to 25
+  Then both edges are faded
+  And at lanes 29 to 44 only the left edge is faded
+
+Scenario: GRAPH-017.5 Selecting a commit brings its dot into view
+  Given the column shows lanes 1 to 16
+  When I select a commit in lane 30 by clicking its text, with the arrow keys, by stepping through Find matches or with "Show in Graph"
+  Then the lane column scrolls just far enough to show its dot
+  When I then select a commit in lane 1
+  Then the column scrolls back to show lane 1
+
+Scenario: GRAPH-017.6 Narrow histories are unchanged
+  Given no loaded row needs more than 16 lanes
+  When I look at the graph
+  Then there is no lane scroll bar and no faded edge
+  And Shift+wheel over the lane column does nothing
+  And the column is only as wide as the widest row, as before
+
+Scenario: GRAPH-017.7 The scroll bar appears when a wider page loads
+  Given the first 300 commits need 9 lanes
+  When a later page with a row of 22 lanes is loaded
+  Then the lane column is 16 lanes wide and its scroll bar appears
+  And the lanes shown do not jump: lanes 1 to 16 are still in view
+
+Scenario: GRAPH-017.8 The layout itself is the same
+  Given a history whose worst row needs 44 lanes
+  When I compare it with the graph before this change
+  Then every commit is in the same lane with the same lines, cut arrows and colours
+  And lines are still cut after 40 rows
+
+Scenario: GRAPH-017.9 Reload and switching scope
+  Given the lane column is scrolled to lanes 10 to 25
+  When the graph reloads after a commit
+  Then lanes 10 to 25 are still in view if the graph is still that wide
+  When I switch between "Current branch" and "All branches"
+  Then the column starts again at lane 1
+```
+
+## GRAPH-018: List a small history by date
+
+- Status: planned
+- Commands: none
+- Files:
+  - `src/components/GraphView.tsx` — "Date order" toggle in the toolbar (`byDate` state, off by default), enabled only while the whole history is loaded in one page of at most 300 commits (asks for `PAGE + 1` to tell 300 from more), falls back to branch order when the history grows past it
+  - `src-tauri/src/git.rs` — `graph` / `git_graph` take the order (`--topo-order` or `--author-date-order`)
+  - `src/lib/gitApi.ts` — `git.graph` order argument
+  - `src/lib/gitGraph.ts` — new pure `dateOrderAllowed(count, more)`; `layoutGraph` unchanged (works on any children-before-parents order)
+- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphView.test.tsx`, `src-tauri/src/git.rs`
+- Docs: `docs/git.md`
+
+**As a** developer in a small repository
+**I want** to list the commits newest first across branches
+**So that** I can read what happened in the order it happened, where that does not spread the graph over many lanes
+
+```gherkin
+Scenario: GRAPH-018.1 Branch order is the default
+  Given a repository with 40 commits
+  When I open the graph
+  Then the "Date order" button in the toolbar is not pressed
+  And commits are listed branch by branch, as before
+
+Scenario: GRAPH-018.2 Date order interleaves branches
+  Given "main" has commits authored at 10:00 and 12:00, branch "feature" has one authored at 11:00, and "feature" was merged into "main" at 13:00
+  When I click "Date order"
+  Then the rows from the top are: the 13:00 merge, the 12:00 commit, the 11:00 "feature" commit, the 10:00 commit
+  And the lines still join each commit to its parents, with "main" in the first lane
+  When I click "Date order" again
+  Then the "feature" commit is listed directly under the merge again
+
+Scenario: GRAPH-018.3 A commit is never above its child
+  Given a commit whose author date is later than that of the commit made on top of it (a clock was wrong, or it was amended)
+  When "Date order" is on
+  Then the commit made on top is still listed above it
+
+Scenario: GRAPH-018.4 The order follows the Date column
+  Given a commit authored on 1 March was cherry-picked onto "main" on 20 March, above commits authored on 10 March
+  When "Date order" is on and nothing else forces its place
+  Then it is listed by 1 March, the date its Date column shows
+
+Scenario: GRAPH-018.5 Only for small histories
+  Given the history shown has more than 300 commits (the toolbar says "300+ commits")
+  When I look at the toolbar
+  Then "Date order" is disabled
+  And its tooltip says "Only for histories of 300 commits or fewer: in larger ones date order spreads the branches over many more lanes."
+  And the graph is in branch order
+
+Scenario: GRAPH-018.6 Exactly at the limit
+  Given the history shown has exactly 300 commits
+  When I look at the toolbar
+  Then the toolbar says "300 commits" and "Date order" can be turned on
+  And with 301 commits it is disabled
+
+Scenario: GRAPH-018.7 The limit applies to what is shown
+  Given "Current branch" shows 120 commits and "Date order" is on
+  When I click "All branches", which has 2,000 commits
+  Then the graph is in branch order and "Date order" is disabled and not pressed
+  And a notification says "Date order is off: this history has more than 300 commits."
+  When I go back to "Current branch"
+  Then "Date order" is enabled but stays off until I click it
+
+Scenario: GRAPH-018.8 The history grows past the limit
+  Given "Date order" is on with 298 commits shown
+  When a fetch brings 5 more commits into the graph
+  Then the graph reloads in branch order with "Date order" disabled
+  And the same notification is shown once
+
+Scenario: GRAPH-018.9 Switching keeps my place
+  Given a commit is selected and its details pane is open
+  When I turn "Date order" on or off
+  Then the same commit is still selected, scrolled into view, with its details showing
+
+Scenario: GRAPH-018.10 Everything else works the same
+  Given "Date order" is on
+  When I use Find, the right-click actions, the details pane or the uncommitted-changes row
+  Then they behave as in branch order
+  And a reload after a commit keeps "Date order" on
+  And a line that would run 40 rows is still cut with arrows
+
+Scenario: GRAPH-018.11 Not remembered
+  Given "Date order" is on in a graph tab
+  When I close the tab and open the graph again
+  Then the graph is in branch order
+
+Scenario: GRAPH-018.12 While loading
+  Given the first page has not arrived yet
+  When I look at the toolbar
+  Then "Date order" is disabled until the commit count is known
+```
+
+## GRAPH-019: Show Commit Graph is in the palette without a repository
+
+- Status: planned
+- Commands: `git.graph`
+- Files:
+  - `src/lib/gitCommands.ts` — `git.graph` registered without `enabled: hasRepo`
+  - `src/lib/git.ts` — `openGraph()`: the notification when there is no repository
+  - `src/components/MenuBar.tsx` — Git menu item (no change expected: it follows the command)
+- Tests: `src/__tests__/gitCommands.test.ts`
+- Docs: `docs/git.md`
+
+**As a** developer who has not opened a repository yet
+**I want** Show Commit Graph to be in the command palette anyway and tell me what it needs
+**So that** I find the feature when I search for it instead of concluding Quarry has no commit graph
+
+```gherkin
+Scenario: GRAPH-019.1 Listed with nothing open
+  Given no folder and no file is open
+  When I open the command palette and type "graph"
+  Then "Git: Show Commit Graph" is listed
+
+Scenario: GRAPH-019.2 Running it says what is needed
+  Given no folder and no file is open
+  When I run "Show Commit Graph" from the palette
+  Then no tab opens
+  And a notification says "Open a folder in a git repository"
+
+Scenario: GRAPH-019.3 A folder that is not a repository
+  Given the open folder "C:\notes" is not inside a git repository
+  When I run "Show Commit Graph" from the palette
+  Then no tab opens
+  And the notification says "Open a folder in a git repository"
+
+Scenario: GRAPH-019.4 The same from the Git menu
+  Given nothing open is inside a git repository
+  When I open the Git menu
+  Then "Show Commit Graph" is not greyed out
+  And choosing it shows the same notification and opens nothing
+
+Scenario: GRAPH-019.5 With a repository nothing changes
+  Given the folder "C:\work\quarry" is a git repository
+  When I run "Show Commit Graph" from the palette
+  Then the tab "Graph · quarry" opens and no notification is shown
+
+Scenario: GRAPH-019.6 Other repository commands stay out of the palette
+  Given nothing open is inside a git repository
+  When I open the command palette and type "git"
+  Then Fetch, Pull, Push, Switch Branch… and Add Remote… are not listed
+  And "Show Commit Graph", "Show Source Control" and "Refresh Git Status" are
+
+Scenario: GRAPH-019.7 Not recorded as a failure
+  Given nothing open is inside a git repository
+  When I run "Show Commit Graph" several times
+  Then each run shows the notification once and nothing else happens: no error, no empty graph tab
+```

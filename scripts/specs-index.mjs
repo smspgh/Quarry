@@ -73,7 +73,7 @@ function parseSpec(rel, errors) {
   const closeStory = () => {
     if (!story) return;
     const at = story.line - 1;
-    if (!story.status) err(at, `${story.id} needs "- Status: draft" or "- Status: verified"`);
+    if (!story.status) err(at, `${story.id} needs "- Status: planned", "- Status: draft" or "- Status: verified"`);
     if (!story.seen.commands) err(at, `${story.id} needs a "- Commands:" line (use "none" when there is no command)`);
     if (!story.files.length) err(at, `${story.id} lists no files`);
     if (!story.seen.tests) err(at, `${story.id} needs a "- Tests:" line (use "none")`);
@@ -149,7 +149,7 @@ function parseSpec(rel, errors) {
     if (field) {
       const [, key, value] = field;
       if (key === "Status") {
-        if (value !== "draft" && value !== "verified") err(i, 'Status must be "draft" or "verified"');
+        if (value !== "planned" && value !== "draft" && value !== "verified") err(i, 'Status must be "planned", "draft" or "verified"');
         story.status = value;
       } else if (key === "Commands") {
         story.seen.commands = true;
@@ -204,7 +204,8 @@ export function build(specFiles) {
       const paths = [...s.files.map((f) => f.path), ...s.tests, ...s.docs];
       for (const p of paths) {
         if (p.includes("\\")) errors.push(`${rel}:${s.line} ${s.id}: use forward slashes in ${p}`);
-        else if (!existsSync(join(ROOT, p))) errors.push(`${rel}:${s.line} ${s.id}: no such file ${p}`);
+        // A planned story (not built yet) may name files that its implementation will create.
+        else if (s.status !== "planned" && !existsSync(join(ROOT, p))) errors.push(`${rel}:${s.line} ${s.id}: no such file ${p}`);
       }
     }
   }
@@ -249,7 +250,8 @@ function gaps(index) {
   for (const rel of walk("src/__tests__")) if (rel !== "src/__tests__/specs.test.ts" && !rel.startsWith("src/__tests__/helpers/") && !index.tests[rel]) out.push(`no story lists the test ${rel}`);
   for (const id of [...known].sort()) if (!index.commands[id]) out.push(`no story covers the command ${id}`);
   for (const id of Object.keys(index.commands))
-    if (!known.has(id)) out.push(`command ${id} (${index.commands[id].join(", ")}) is not registered anywhere`);
+    // …unless every story naming it is still planned: the command arrives with the implementation.
+    if (!known.has(id) && index.commands[id].some((s) => index.stories[s].status !== "planned")) out.push(`command ${id} (${index.commands[id].join(", ")}) is not registered anywhere`);
   return out;
 }
 

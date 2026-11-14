@@ -8,10 +8,22 @@
       "stories": 20
     },
     {
+      "prefix": "BRANCH",
+      "title": "Branch and Tag Housekeeping",
+      "spec": "specs/git-branches.md",
+      "stories": 9
+    },
+    {
       "prefix": "CLAUDE",
       "title": "Claude Code Tabs",
       "spec": "specs/claude-code.md",
       "stories": 20
+    },
+    {
+      "prefix": "COMMITCMP",
+      "title": "Compare Commits",
+      "spec": "specs/git-compare-commits.md",
+      "stories": 6
     },
     {
       "prefix": "CONFLICT",
@@ -62,10 +74,22 @@
       "stories": 28
     },
     {
+      "prefix": "GITAI",
+      "title": "Claude-Assisted Git",
+      "spec": "specs/git-claude.md",
+      "stories": 9
+    },
+    {
       "prefix": "GRAPH",
       "title": "Commit Graph",
       "spec": "specs/git-graph.md",
-      "stories": 14
+      "stories": 19
+    },
+    {
+      "prefix": "HISTORY",
+      "title": "Edit History",
+      "spec": "specs/git-history-edit.md",
+      "stories": 11
     },
     {
       "prefix": "JSON",
@@ -84,6 +108,18 @@
       "title": "Macros",
       "spec": "specs/macros.md",
       "stories": 13
+    },
+    {
+      "prefix": "MERGE",
+      "title": "Start a Merge or Rebase",
+      "spec": "specs/git-merge-rebase.md",
+      "stories": 9
+    },
+    {
+      "prefix": "SAFE",
+      "title": "Unsaved Tabs and Git Operations",
+      "spec": "specs/git-safety.md",
+      "stories": 7
     },
     {
       "prefix": "SCRIPT",
@@ -110,6 +146,18 @@
       "stories": 7
     },
     {
+      "prefix": "STAGE",
+      "title": "Hunk and Line Staging",
+      "spec": "specs/git-staging.md",
+      "stories": 9
+    },
+    {
+      "prefix": "STASH",
+      "title": "Stash",
+      "spec": "specs/git-stash.md",
+      "stories": 11
+    },
+    {
       "prefix": "TAB",
       "title": "Tabs",
       "spec": "specs/tabs.md",
@@ -120,6 +168,12 @@
       "title": "Claude CLI Terminal Tabs",
       "spec": "specs/terminal.md",
       "stories": 9
+    },
+    {
+      "prefix": "THREEWAY",
+      "title": "Three-Way Merge View (deferred)",
+      "spec": "specs/git-merge-editor.md",
+      "stories": 5
     },
     {
       "prefix": "UI",
@@ -1213,6 +1267,644 @@
         }
       ]
     },
+    "BRANCH-001": {
+      "id": "BRANCH-001",
+      "title": "Right-click a branch or tag label in the graph",
+      "area": "BRANCH",
+      "spec": "specs/git-branches.md",
+      "line": 30,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/GraphView.tsx",
+        "src/lib/gitRefs.ts",
+        "src/lib/gitGraph.ts",
+        "src/lib/git.ts",
+        "src/styles/app.css"
+      ],
+      "tests": [
+        "src/__tests__/gitRefs.test.ts",
+        "src/__tests__/graphView.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "BRANCH-001.1",
+          "title": "A local branch label"
+        },
+        {
+          "id": "BRANCH-001.2",
+          "title": "The label of the branch I am on"
+        },
+        {
+          "id": "BRANCH-001.3",
+          "title": "A remote branch label"
+        },
+        {
+          "id": "BRANCH-001.4",
+          "title": "A tag label"
+        },
+        {
+          "id": "BRANCH-001.5",
+          "title": "Right-clicking the row beside the labels still gives the commit menu"
+        },
+        {
+          "id": "BRANCH-001.6",
+          "title": "The detached HEAD label has no ref actions"
+        },
+        {
+          "id": "BRANCH-001.7",
+          "title": "Labels in the details pane work the same way"
+        },
+        {
+          "id": "BRANCH-001.8",
+          "title": "Copy the name"
+        },
+        {
+          "id": "BRANCH-001.9",
+          "title": "Closing the menu"
+        },
+        {
+          "id": "BRANCH-001.10",
+          "title": "Nothing can be started while git is busy"
+        },
+        {
+          "id": "BRANCH-001.11",
+          "title": "The graph follows the change"
+        }
+      ]
+    },
+    "BRANCH-002": {
+      "id": "BRANCH-002",
+      "title": "Manage branches and tags from the branch picker and the Git menu",
+      "area": "BRANCH",
+      "spec": "specs/git-branches.md",
+      "line": 116,
+      "status": "planned",
+      "commands": [
+        "git.deleteBranch",
+        "git.renameBranch",
+        "git.setUpstream",
+        "git.pushBranch",
+        "git.deleteRemoteBranch",
+        "git.deleteTag",
+        "git.pushTag"
+      ],
+      "files": [
+        "src/components/CommandPalette.tsx",
+        "src/lib/git.ts",
+        "src/lib/gitCommands.ts",
+        "src/lib/gitRefs.ts",
+        "src/components/MenuBar.tsx",
+        "src/lib/gitApi.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/gitRefs.test.ts",
+        "src/__tests__/branchPicker.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "BRANCH-002.1",
+          "title": "Row menu in the branch picker"
+        },
+        {
+          "id": "BRANCH-002.2",
+          "title": "Row menu from the keyboard"
+        },
+        {
+          "id": "BRANCH-002.3",
+          "title": "The row menu matches the kind of row"
+        },
+        {
+          "id": "BRANCH-002.4",
+          "title": "Enter and click still switch"
+        },
+        {
+          "id": "BRANCH-002.5",
+          "title": "Choosing an action closes the picker"
+        },
+        {
+          "id": "BRANCH-002.6",
+          "title": "The Git menu"
+        },
+        {
+          "id": "BRANCH-002.7",
+          "title": "A command without a target asks which one"
+        },
+        {
+          "id": "BRANCH-002.8",
+          "title": "Each command lists only what it can act on"
+        },
+        {
+          "id": "BRANCH-002.9",
+          "title": "Nothing to choose from"
+        },
+        {
+          "id": "BRANCH-002.10",
+          "title": "Escape leaves everything as it was"
+        },
+        {
+          "id": "BRANCH-002.11",
+          "title": "Unavailable without a repository"
+        },
+        {
+          "id": "BRANCH-002.12",
+          "title": "The picker shows a change made elsewhere"
+        }
+      ]
+    },
+    "BRANCH-003": {
+      "id": "BRANCH-003",
+      "title": "Delete a local branch",
+      "area": "BRANCH",
+      "spec": "specs/git-branches.md",
+      "line": 207,
+      "status": "planned",
+      "commands": [
+        "git.deleteBranch"
+      ],
+      "files": [
+        "src/lib/gitRefs.ts",
+        "src/lib/git.ts",
+        "src/lib/gitApi.ts",
+        "src-tauri/src/git.rs",
+        "src/components/GraphView.tsx",
+        "src/components/CommandPalette.tsx"
+      ],
+      "tests": [
+        "src/__tests__/gitRefs.test.ts",
+        "src-tauri/src/git.rs",
+        "src/__tests__/graphView.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "BRANCH-003.1",
+          "title": "Delete a merged branch"
+        },
+        {
+          "id": "BRANCH-003.2",
+          "title": "Enter does not delete"
+        },
+        {
+          "id": "BRANCH-003.3",
+          "title": "An unmerged branch needs a second confirmation"
+        },
+        {
+          "id": "BRANCH-003.4",
+          "title": "Cancelling the second question keeps the branch"
+        },
+        {
+          "id": "BRANCH-003.5",
+          "title": "A branch with an upstream is compared with its upstream"
+        },
+        {
+          "id": "BRANCH-003.6",
+          "title": "Unpushed commits on a tracking branch count as unmerged"
+        },
+        {
+          "id": "BRANCH-003.7",
+          "title": "The current branch cannot be deleted"
+        },
+        {
+          "id": "BRANCH-003.8",
+          "title": "Detached HEAD"
+        },
+        {
+          "id": "BRANCH-003.9",
+          "title": "Only the local branch goes"
+        },
+        {
+          "id": "BRANCH-003.10",
+          "title": "My files are not touched"
+        },
+        {
+          "id": "BRANCH-003.11",
+          "title": "Git refuses for another reason"
+        },
+        {
+          "id": "BRANCH-003.12",
+          "title": "The branch changed between the question and the answer"
+        }
+      ]
+    },
+    "BRANCH-004": {
+      "id": "BRANCH-004",
+      "title": "Rename a local branch",
+      "area": "BRANCH",
+      "spec": "specs/git-branches.md",
+      "line": 300,
+      "status": "planned",
+      "commands": [
+        "git.renameBranch"
+      ],
+      "files": [
+        "src/components/GraphView.tsx",
+        "src/components/CommandPalette.tsx",
+        "src/lib/gitRefs.ts",
+        "src/lib/git.ts",
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitRefs.test.ts",
+        "src-tauri/src/git.rs",
+        "src/__tests__/graphView.test.tsx",
+        "src/__tests__/branchPicker.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "BRANCH-004.1",
+          "title": "Rename from the graph"
+        },
+        {
+          "id": "BRANCH-004.2",
+          "title": "Rename from the branch picker"
+        },
+        {
+          "id": "BRANCH-004.3",
+          "title": "Rename the branch I am on"
+        },
+        {
+          "id": "BRANCH-004.4",
+          "title": "Same or empty name"
+        },
+        {
+          "id": "BRANCH-004.5",
+          "title": "The name is taken"
+        },
+        {
+          "id": "BRANCH-004.6",
+          "title": "Invalid names"
+        },
+        {
+          "id": "BRANCH-004.7",
+          "title": "Change only the letter case"
+        },
+        {
+          "id": "BRANCH-004.8",
+          "title": "The remote branch keeps its name"
+        },
+        {
+          "id": "BRANCH-004.9",
+          "title": "Cancel"
+        },
+        {
+          "id": "BRANCH-004.10",
+          "title": "Remote branches and tags cannot be renamed"
+        },
+        {
+          "id": "BRANCH-004.11",
+          "title": "Git refuses"
+        }
+      ]
+    },
+    "BRANCH-005": {
+      "id": "BRANCH-005",
+      "title": "Set or clear a branch's upstream",
+      "area": "BRANCH",
+      "spec": "specs/git-branches.md",
+      "line": 387,
+      "status": "planned",
+      "commands": [
+        "git.setUpstream"
+      ],
+      "files": [
+        "src/components/CommandPalette.tsx",
+        "src/lib/gitRefs.ts",
+        "src/lib/git.ts",
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts",
+        "src/components/GraphView.tsx"
+      ],
+      "tests": [
+        "src/__tests__/gitRefs.test.ts",
+        "src-tauri/src/git.rs",
+        "src/__tests__/branchPicker.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "BRANCH-005.1",
+          "title": "Choose an upstream"
+        },
+        {
+          "id": "BRANCH-005.2",
+          "title": "The status line follows"
+        },
+        {
+          "id": "BRANCH-005.3",
+          "title": "Change an upstream"
+        },
+        {
+          "id": "BRANCH-005.4",
+          "title": "Stop tracking"
+        },
+        {
+          "id": "BRANCH-005.5",
+          "title": "Picking what it already tracks changes nothing"
+        },
+        {
+          "id": "BRANCH-005.6",
+          "title": "A remote exists but has no branches yet"
+        },
+        {
+          "id": "BRANCH-005.7",
+          "title": "No remote configured"
+        },
+        {
+          "id": "BRANCH-005.8",
+          "title": "Only local branches have an upstream"
+        },
+        {
+          "id": "BRANCH-005.9",
+          "title": "The remote branch disappeared"
+        }
+      ]
+    },
+    "BRANCH-006": {
+      "id": "BRANCH-006",
+      "title": "Push a branch",
+      "area": "BRANCH",
+      "spec": "specs/git-branches.md",
+      "line": 462,
+      "status": "planned",
+      "commands": [
+        "git.pushBranch"
+      ],
+      "files": [
+        "src/lib/gitRefs.ts",
+        "src/lib/git.ts",
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts",
+        "src/lib/gitStatus.ts",
+        "src/components/GraphView.tsx"
+      ],
+      "tests": [
+        "src/__tests__/gitRefs.test.ts",
+        "src-tauri/src/git.rs",
+        "src/__tests__/gitRemote.test.ts"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "BRANCH-006.1",
+          "title": "Push a branch that tracks a remote branch"
+        },
+        {
+          "id": "BRANCH-006.2",
+          "title": "Publish a branch that has no upstream"
+        },
+        {
+          "id": "BRANCH-006.3",
+          "title": "No remote called origin"
+        },
+        {
+          "id": "BRANCH-006.4",
+          "title": "The upstream has another name"
+        },
+        {
+          "id": "BRANCH-006.5",
+          "title": "Nothing to push"
+        },
+        {
+          "id": "BRANCH-006.6",
+          "title": "Pushing the current branch"
+        },
+        {
+          "id": "BRANCH-006.7",
+          "title": "No remote configured"
+        },
+        {
+          "id": "BRANCH-006.8",
+          "title": "The remote has commits the branch does not have"
+        },
+        {
+          "id": "BRANCH-006.9",
+          "title": "Other failures"
+        },
+        {
+          "id": "BRANCH-006.10",
+          "title": "One action at a time"
+        },
+        {
+          "id": "BRANCH-006.11",
+          "title": "Only local branches are pushed from here"
+        }
+      ]
+    },
+    "BRANCH-007": {
+      "id": "BRANCH-007",
+      "title": "Delete a branch on the remote",
+      "area": "BRANCH",
+      "spec": "specs/git-branches.md",
+      "line": 550,
+      "status": "planned",
+      "commands": [
+        "git.deleteRemoteBranch"
+      ],
+      "files": [
+        "src/lib/gitRefs.ts",
+        "src/lib/git.ts",
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts",
+        "src/components/GraphView.tsx"
+      ],
+      "tests": [
+        "src/__tests__/gitRefs.test.ts",
+        "src-tauri/src/git.rs",
+        "src/__tests__/graphView.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "BRANCH-007.1",
+          "title": "The question names the remote"
+        },
+        {
+          "id": "BRANCH-007.2",
+          "title": "Confirm"
+        },
+        {
+          "id": "BRANCH-007.3",
+          "title": "Enter or Escape keeps it"
+        },
+        {
+          "id": "BRANCH-007.4",
+          "title": "Commits that exist nowhere else are spelled out"
+        },
+        {
+          "id": "BRANCH-007.5",
+          "title": "The local branch is kept"
+        },
+        {
+          "id": "BRANCH-007.6",
+          "title": "Deleting the upstream of the branch I am on"
+        },
+        {
+          "id": "BRANCH-007.7",
+          "title": "A remote's default branch is protected"
+        },
+        {
+          "id": "BRANCH-007.8",
+          "title": "The right remote and the whole branch name"
+        },
+        {
+          "id": "BRANCH-007.9",
+          "title": "It was already gone"
+        },
+        {
+          "id": "BRANCH-007.10",
+          "title": "The remote refuses"
+        },
+        {
+          "id": "BRANCH-007.11",
+          "title": "Only remote branches have this entry"
+        },
+        {
+          "id": "BRANCH-007.12",
+          "title": "One action at a time"
+        }
+      ]
+    },
+    "BRANCH-008": {
+      "id": "BRANCH-008",
+      "title": "Delete a tag",
+      "area": "BRANCH",
+      "spec": "specs/git-branches.md",
+      "line": 641,
+      "status": "planned",
+      "commands": [
+        "git.deleteTag"
+      ],
+      "files": [
+        "src/lib/gitRefs.ts",
+        "src/lib/git.ts",
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts",
+        "src/components/GraphView.tsx"
+      ],
+      "tests": [
+        "src/__tests__/gitRefs.test.ts",
+        "src-tauri/src/git.rs",
+        "src/__tests__/graphView.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "BRANCH-008.1",
+          "title": "Delete a tag from the graph"
+        },
+        {
+          "id": "BRANCH-008.2",
+          "title": "Delete a tag from the Git menu"
+        },
+        {
+          "id": "BRANCH-008.3",
+          "title": "Enter or Escape keeps the tag"
+        },
+        {
+          "id": "BRANCH-008.4",
+          "title": "Nothing is sent to the remote"
+        },
+        {
+          "id": "BRANCH-008.5",
+          "title": "A branch with the same name is safe"
+        },
+        {
+          "id": "BRANCH-008.6",
+          "title": "The tag is already gone"
+        },
+        {
+          "id": "BRANCH-008.7",
+          "title": "Annotated tags"
+        }
+      ]
+    },
+    "BRANCH-009": {
+      "id": "BRANCH-009",
+      "title": "Push a tag",
+      "area": "BRANCH",
+      "spec": "specs/git-branches.md",
+      "line": 699,
+      "status": "planned",
+      "commands": [
+        "git.pushTag"
+      ],
+      "files": [
+        "src/lib/gitRefs.ts",
+        "src/lib/git.ts",
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts",
+        "src/lib/gitStatus.ts",
+        "src/components/GraphView.tsx"
+      ],
+      "tests": [
+        "src/__tests__/gitRefs.test.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "BRANCH-009.1",
+          "title": "Push a tag from the graph"
+        },
+        {
+          "id": "BRANCH-009.2",
+          "title": "Only that tag is pushed"
+        },
+        {
+          "id": "BRANCH-009.3",
+          "title": "Push a tag from the Git menu"
+        },
+        {
+          "id": "BRANCH-009.4",
+          "title": "Which remote"
+        },
+        {
+          "id": "BRANCH-009.5",
+          "title": "The tag is already there"
+        },
+        {
+          "id": "BRANCH-009.6",
+          "title": "The remote has the tag on another commit"
+        },
+        {
+          "id": "BRANCH-009.7",
+          "title": "No remote configured"
+        },
+        {
+          "id": "BRANCH-009.8",
+          "title": "Other failures"
+        },
+        {
+          "id": "BRANCH-009.9",
+          "title": "One action at a time"
+        }
+      ]
+    },
     "CLAUDE-001": {
       "id": "CLAUDE-001",
       "title": "Turn the Claude Code integration off and on",
@@ -2204,6 +2896,424 @@
         {
           "id": "CLAUDE-020.6",
           "title": "Quarry started from a Claude Code session"
+        }
+      ]
+    },
+    "COMMITCMP-001": {
+      "id": "COMMITCMP-001",
+      "title": "Pick a second commit with Ctrl+click",
+      "area": "COMMITCMP",
+      "spec": "specs/git-compare-commits.md",
+      "line": 26,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/GraphView.tsx",
+        "src/lib/gitCompare.ts",
+        "src/styles/app.css"
+      ],
+      "tests": [
+        "src/__tests__/gitCompare.test.ts",
+        "src/__tests__/graphView.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "COMMITCMP-001.1",
+          "title": "Ctrl+click adds a second commit"
+        },
+        {
+          "id": "COMMITCMP-001.2",
+          "title": "Ctrl+click with nothing selected"
+        },
+        {
+          "id": "COMMITCMP-001.3",
+          "title": "A third Ctrl+click replaces the second commit"
+        },
+        {
+          "id": "COMMITCMP-001.4",
+          "title": "Ctrl+click a selected commit takes it out"
+        },
+        {
+          "id": "COMMITCMP-001.5",
+          "title": "A plain click ends the comparison"
+        },
+        {
+          "id": "COMMITCMP-001.6",
+          "title": "Escape and the arrow keys end the comparison"
+        },
+        {
+          "id": "COMMITCMP-001.7",
+          "title": "Close the pane"
+        },
+        {
+          "id": "COMMITCMP-001.8",
+          "title": "From the right-click menu"
+        },
+        {
+          "id": "COMMITCMP-001.9",
+          "title": "Search results are not Ctrl+clickable"
+        },
+        {
+          "id": "COMMITCMP-001.10",
+          "title": "The pair survives a reload"
+        },
+        {
+          "id": "COMMITCMP-001.11",
+          "title": "Selecting does not touch the repository"
+        },
+        {
+          "id": "COMMITCMP-001.12",
+          "title": "Rows that are not commits cannot be picked"
+        }
+      ]
+    },
+    "COMMITCMP-002": {
+      "id": "COMMITCMP-002",
+      "title": "See which files differ between two commits",
+      "area": "COMMITCMP",
+      "spec": "specs/git-compare-commits.md",
+      "line": 112,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/GraphCompare.tsx",
+        "src/components/GraphView.tsx",
+        "src/lib/gitCompare.ts",
+        "src/lib/gitStatus.ts",
+        "src-tauri/src/git.rs",
+        "src-tauri/src/lib.rs",
+        "src/lib/gitApi.ts",
+        "src/styles/app.css"
+      ],
+      "tests": [
+        "src/__tests__/gitCompare.test.ts",
+        "src/__tests__/graphCompare.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "COMMITCMP-002.1",
+          "title": "The list of differing files"
+        },
+        {
+          "id": "COMMITCMP-002.2",
+          "title": "The older commit is on the left whatever the click order"
+        },
+        {
+          "id": "COMMITCMP-002.3",
+          "title": "Commits on two branches"
+        },
+        {
+          "id": "COMMITCMP-002.4",
+          "title": "A renamed file"
+        },
+        {
+          "id": "COMMITCMP-002.5",
+          "title": "Swap Sides"
+        },
+        {
+          "id": "COMMITCMP-002.6",
+          "title": "No differences"
+        },
+        {
+          "id": "COMMITCMP-002.7",
+          "title": "A binary file is listed"
+        },
+        {
+          "id": "COMMITCMP-002.8",
+          "title": "A very long list"
+        },
+        {
+          "id": "COMMITCMP-002.9",
+          "title": "A merge commit is compared as a snapshot"
+        },
+        {
+          "id": "COMMITCMP-002.10",
+          "title": "Changing the pair discards a late answer"
+        },
+        {
+          "id": "COMMITCMP-002.11",
+          "title": "git fails"
+        },
+        {
+          "id": "COMMITCMP-002.12",
+          "title": "Resize"
+        }
+      ]
+    },
+    "COMMITCMP-003": {
+      "id": "COMMITCMP-003",
+      "title": "Open a differing file in a Compare tab",
+      "area": "COMMITCMP",
+      "spec": "specs/git-compare-commits.md",
+      "line": 207,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/GraphCompare.tsx",
+        "src/lib/git.ts",
+        "src/lib/gitCompare.ts",
+        "src/lib/diff.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/gitCompare.test.ts",
+        "src/__tests__/graphCompare.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md",
+        "docs/compare.md"
+      ],
+      "scenarios": [
+        {
+          "id": "COMMITCMP-003.1",
+          "title": "Click a modified file"
+        },
+        {
+          "id": "COMMITCMP-003.2",
+          "title": "After Swap Sides"
+        },
+        {
+          "id": "COMMITCMP-003.3",
+          "title": "The next file reuses the tab"
+        },
+        {
+          "id": "COMMITCMP-003.4",
+          "title": "Keep a comparison"
+        },
+        {
+          "id": "COMMITCMP-003.5",
+          "title": "Added and deleted files"
+        },
+        {
+          "id": "COMMITCMP-003.6",
+          "title": "A renamed file"
+        },
+        {
+          "id": "COMMITCMP-003.7",
+          "title": "A binary file"
+        },
+        {
+          "id": "COMMITCMP-003.8",
+          "title": "Keyboard"
+        },
+        {
+          "id": "COMMITCMP-003.9",
+          "title": "Open the file as it is now"
+        },
+        {
+          "id": "COMMITCMP-003.10",
+          "title": "Opening files changes nothing on disk"
+        }
+      ]
+    },
+    "COMMITCMP-004": {
+      "id": "COMMITCMP-004",
+      "title": "Compare a commit with the working tree",
+      "area": "COMMITCMP",
+      "spec": "specs/git-compare-commits.md",
+      "line": 279,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/GraphView.tsx",
+        "src/components/GraphCompare.tsx",
+        "src/lib/git.ts",
+        "src/lib/gitCompare.ts",
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitCompare.test.ts",
+        "src/__tests__/graphCompare.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md",
+        "docs/compare.md"
+      ],
+      "scenarios": [
+        {
+          "id": "COMMITCMP-004.1",
+          "title": "Compare with Working Tree"
+        },
+        {
+          "id": "COMMITCMP-004.2",
+          "title": "The working tree is always on the right"
+        },
+        {
+          "id": "COMMITCMP-004.3",
+          "title": "Open a file that is not open in a tab"
+        },
+        {
+          "id": "COMMITCMP-004.4",
+          "title": "Open a file that is open with unsaved edits"
+        },
+        {
+          "id": "COMMITCMP-004.5",
+          "title": "A file deleted in the working tree"
+        },
+        {
+          "id": "COMMITCMP-004.6",
+          "title": "A file renamed since the commit"
+        },
+        {
+          "id": "COMMITCMP-004.7",
+          "title": "Untracked files are not compared"
+        },
+        {
+          "id": "COMMITCMP-004.8",
+          "title": "The list follows my work"
+        },
+        {
+          "id": "COMMITCMP-004.9",
+          "title": "The current commit with a clean folder"
+        },
+        {
+          "id": "COMMITCMP-004.10",
+          "title": "A conflicted file during a stopped merge"
+        },
+        {
+          "id": "COMMITCMP-004.11",
+          "title": "Ctrl+click while comparing with the working tree"
+        },
+        {
+          "id": "COMMITCMP-004.12",
+          "title": "Nothing is staged, stashed or checked out"
+        }
+      ]
+    },
+    "COMMITCMP-005": {
+      "id": "COMMITCMP-005",
+      "title": "Compare with a branch",
+      "area": "COMMITCMP",
+      "spec": "specs/git-compare-commits.md",
+      "line": 365,
+      "status": "planned",
+      "commands": [
+        "git.compareWithBranch",
+        "git.compareBranchPick"
+      ],
+      "files": [
+        "src/lib/gitCommands.ts",
+        "src/lib/git.ts",
+        "src/components/CommandPalette.tsx",
+        "src/components/GraphView.tsx",
+        "src/components/GraphCompare.tsx",
+        "src/lib/gitCompare.ts",
+        "src/components/MenuBar.tsx",
+        "src/lib/store.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/gitCompare.test.ts",
+        "src/__tests__/graphCompare.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "COMMITCMP-005.1",
+          "title": "Compare with Branch… from the Git menu"
+        },
+        {
+          "id": "COMMITCMP-005.2",
+          "title": "My uncommitted changes are not part of it"
+        },
+        {
+          "id": "COMMITCMP-005.3",
+          "title": "The picked branch has moved on too"
+        },
+        {
+          "id": "COMMITCMP-005.4",
+          "title": "The picked branch is ahead of me"
+        },
+        {
+          "id": "COMMITCMP-005.5",
+          "title": "From a commit's right-click menu"
+        },
+        {
+          "id": "COMMITCMP-005.6",
+          "title": "The branch's commit is not loaded in the graph"
+        },
+        {
+          "id": "COMMITCMP-005.7",
+          "title": "The branch I am on"
+        },
+        {
+          "id": "COMMITCMP-005.8",
+          "title": "No branch is created from the picker"
+        },
+        {
+          "id": "COMMITCMP-005.9",
+          "title": "Cancel"
+        },
+        {
+          "id": "COMMITCMP-005.10",
+          "title": "No repository"
+        },
+        {
+          "id": "COMMITCMP-005.11",
+          "title": "Detached HEAD"
+        },
+        {
+          "id": "COMMITCMP-005.12",
+          "title": "I stay where I am"
+        }
+      ]
+    },
+    "COMMITCMP-006": {
+      "id": "COMMITCMP-006",
+      "title": "Comparing never changes the repository",
+      "area": "COMMITCMP",
+      "spec": "specs/git-compare-commits.md",
+      "line": 456,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src-tauri/src/git.rs",
+        "src/lib/git.ts",
+        "src/components/GraphCompare.tsx"
+      ],
+      "tests": [
+        "src-tauri/src/git.rs",
+        "src/__tests__/graphCompare.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "COMMITCMP-006.1",
+          "title": "Branch, commit and index are untouched"
+        },
+        {
+          "id": "COMMITCMP-006.2",
+          "title": "Nothing is written inside .git"
+        },
+        {
+          "id": "COMMITCMP-006.3",
+          "title": "During a stopped rebase"
+        },
+        {
+          "id": "COMMITCMP-006.4",
+          "title": "No confirmation is needed"
+        },
+        {
+          "id": "COMMITCMP-006.5",
+          "title": "Only the editable working-tree side can change a file"
+        },
+        {
+          "id": "COMMITCMP-006.6",
+          "title": "A hostile branch name is not run as an option"
         }
       ]
     },
@@ -8773,6 +9883,654 @@
         }
       ]
     },
+    "GITAI-001": {
+      "id": "GITAI-001",
+      "title": "Claude-assisted git exists only while Claude Code is switched on",
+      "area": "GITAI",
+      "spec": "specs/git-claude.md",
+      "line": 29,
+      "status": "planned",
+      "commands": [
+        "git.draftMessage",
+        "git.explainConflict",
+        "git.summariseBranch",
+        "git.stopClaude"
+      ],
+      "files": [
+        "src/lib/gitCommands.ts",
+        "src/lib/claude.ts",
+        "src/components/panels/GitPanel.tsx",
+        "src/editor/conflicts.ts",
+        "src/lib/git.ts",
+        "src/components/GraphView.tsx",
+        "src/components/MenuBar.tsx",
+        "src/components/panels/SettingsPanel.tsx",
+        "src/lib/gitAssist.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitAssist.test.ts",
+        "src/__tests__/ui.test.ts"
+      ],
+      "docs": [
+        "docs/git.md",
+        "docs/claude-code.md"
+      ],
+      "scenarios": [
+        {
+          "id": "GITAI-001.1",
+          "title": "On: where the helpers are"
+        },
+        {
+          "id": "GITAI-001.2",
+          "title": "Off hides all of it"
+        },
+        {
+          "id": "GITAI-001.3",
+          "title": "Off stops what is running and removes open suggestions"
+        },
+        {
+          "id": "GITAI-001.4",
+          "title": "On brings it back without a restart"
+        },
+        {
+          "id": "GITAI-001.5",
+          "title": "Commands outside their context are unavailable"
+        }
+      ]
+    },
+    "GITAI-002": {
+      "id": "GITAI-002",
+      "title": "Know what is sent to Claude before it goes",
+      "area": "GITAI",
+      "spec": "specs/git-claude.md",
+      "line": 89,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/lib/gitAssist.ts",
+        "src/lib/gitAi.ts",
+        "src/lib/types.ts",
+        "src/lib/actions.ts",
+        "src/components/panels/SettingsPanel.tsx",
+        "src/components/panels/GitPanel.tsx",
+        "src/editor/conflicts.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitAi.test.ts",
+        "src/__tests__/gitAssist.test.ts"
+      ],
+      "docs": [
+        "docs/git.md",
+        "docs/claude-code.md"
+      ],
+      "scenarios": [
+        {
+          "id": "GITAI-002.1",
+          "title": "The first draft asks"
+        },
+        {
+          "id": "GITAI-002.2",
+          "title": "Cancel sends nothing"
+        },
+        {
+          "id": "GITAI-002.3",
+          "title": "Send asks again next time"
+        },
+        {
+          "id": "GITAI-002.4",
+          "title": "Don't ask again covers all three helpers"
+        },
+        {
+          "id": "GITAI-002.5",
+          "title": "The question can be turned back on"
+        },
+        {
+          "id": "GITAI-002.6",
+          "title": "The conflict dialog names what it sends"
+        },
+        {
+          "id": "GITAI-002.7",
+          "title": "The summary dialog names what it sends"
+        },
+        {
+          "id": "GITAI-002.8",
+          "title": "The tooltips say it too"
+        },
+        {
+          "id": "GITAI-002.9",
+          "title": "Only the described text is sent"
+        },
+        {
+          "id": "GITAI-002.10",
+          "title": "Nothing staged: the dialog says that untracked files are sent too"
+        }
+      ]
+    },
+    "GITAI-003": {
+      "id": "GITAI-003",
+      "title": "Draft a commit message from the changes about to be committed",
+      "area": "GITAI",
+      "spec": "specs/git-claude.md",
+      "line": 170,
+      "status": "planned",
+      "commands": [
+        "git.draftMessage"
+      ],
+      "files": [
+        "src/components/panels/GitPanel.tsx",
+        "src/lib/gitAssist.ts",
+        "src/lib/gitAi.ts",
+        "src/lib/gitCommands.ts",
+        "src/lib/gitApi.ts",
+        "src-tauri/src/git.rs",
+        "src-tauri/src/claude.rs",
+        "src/lib/types.ts",
+        "src/lib/actions.ts",
+        "src/components/panels/SettingsPanel.tsx",
+        "src/components/MenuBar.tsx"
+      ],
+      "tests": [
+        "src/__tests__/gitAi.test.ts",
+        "src/__tests__/gitAssist.test.ts",
+        "src-tauri/src/git.rs",
+        "src-tauri/src/claude.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "GITAI-003.1",
+          "title": "Draft from the staged changes"
+        },
+        {
+          "id": "GITAI-003.2",
+          "title": "The draft is ordinary text"
+        },
+        {
+          "id": "GITAI-003.3",
+          "title": "Nothing is committed without me"
+        },
+        {
+          "id": "GITAI-003.4",
+          "title": "An existing message is not overwritten silently"
+        },
+        {
+          "id": "GITAI-003.5",
+          "title": "The old message survives a failed or stopped draft"
+        },
+        {
+          "id": "GITAI-003.6",
+          "title": "The box cannot be edited while the draft is running"
+        },
+        {
+          "id": "GITAI-003.7",
+          "title": "Nothing staged: the draft covers what Commit All would take"
+        },
+        {
+          "id": "GITAI-003.8",
+          "title": "Nothing to commit"
+        },
+        {
+          "id": "GITAI-003.9",
+          "title": "Amend describes the amended commit"
+        },
+        {
+          "id": "GITAI-003.10",
+          "title": "Not during a rebase or with conflicts"
+        },
+        {
+          "id": "GITAI-003.11",
+          "title": "A merge's prepared message counts as my message"
+        },
+        {
+          "id": "GITAI-003.12",
+          "title": "The draft is cleaned up"
+        },
+        {
+          "id": "GITAI-003.13",
+          "title": "From the palette"
+        },
+        {
+          "id": "GITAI-003.14",
+          "title": "Unsaved tabs"
+        },
+        {
+          "id": "GITAI-003.15",
+          "title": "The git helpers have their own model, Haiku by default"
+        },
+        {
+          "id": "GITAI-003.16",
+          "title": "Choosing another model for the git helpers"
+        }
+      ]
+    },
+    "GITAI-004": {
+      "id": "GITAI-004",
+      "title": "Draft a message for a very large change",
+      "area": "GITAI",
+      "spec": "specs/git-claude.md",
+      "line": 291,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/lib/gitAi.ts",
+        "src/lib/gitAssist.ts",
+        "src/components/panels/GitPanel.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/gitAi.test.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "GITAI-004.1",
+          "title": "Under the limit everything is sent"
+        },
+        {
+          "id": "GITAI-004.2",
+          "title": "One very long file is cut"
+        },
+        {
+          "id": "GITAI-004.3",
+          "title": "Too many files for the total"
+        },
+        {
+          "id": "GITAI-004.4",
+          "title": "Every file is always named"
+        },
+        {
+          "id": "GITAI-004.5",
+          "title": "Binary files"
+        },
+        {
+          "id": "GITAI-004.6",
+          "title": "The note stays until the message changes hands"
+        },
+        {
+          "id": "GITAI-004.7",
+          "title": "The limit is never exceeded"
+        }
+      ]
+    },
+    "GITAI-005": {
+      "id": "GITAI-005",
+      "title": "See that Claude is working, and stop it",
+      "area": "GITAI",
+      "spec": "specs/git-claude.md",
+      "line": 349,
+      "status": "planned",
+      "commands": [
+        "git.stopClaude"
+      ],
+      "files": [
+        "src/lib/gitAssist.ts",
+        "src-tauri/src/claude.rs",
+        "src/components/StatusBar.tsx",
+        "src/components/panels/GitPanel.tsx",
+        "src/editor/conflicts.ts",
+        "src/lib/gitCommands.ts",
+        "src/lib/actions.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitAssist.test.ts",
+        "src-tauri/src/claude.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "GITAI-005.1",
+          "title": "A running request is visible"
+        },
+        {
+          "id": "GITAI-005.2",
+          "title": "Stop a draft"
+        },
+        {
+          "id": "GITAI-005.3",
+          "title": "A late answer is ignored"
+        },
+        {
+          "id": "GITAI-005.4",
+          "title": "One request at a time"
+        },
+        {
+          "id": "GITAI-005.5",
+          "title": "Time limit"
+        },
+        {
+          "id": "GITAI-005.6",
+          "title": "Editing goes on meanwhile"
+        },
+        {
+          "id": "GITAI-005.7",
+          "title": "Closing what the request belongs to stops it"
+        },
+        {
+          "id": "GITAI-005.8",
+          "title": "Quitting ends it"
+        },
+        {
+          "id": "GITAI-005.9",
+          "title": "The answer arrives while I am elsewhere"
+        }
+      ]
+    },
+    "GITAI-006": {
+      "id": "GITAI-006",
+      "title": "Be told why Claude could not answer",
+      "area": "GITAI",
+      "spec": "specs/git-claude.md",
+      "line": 422,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/lib/gitAi.ts",
+        "src/lib/gitAssist.ts",
+        "src-tauri/src/claude.rs",
+        "src/lib/commands.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitAi.test.ts",
+        "src/__tests__/gitAssist.test.ts",
+        "src-tauri/src/claude.rs"
+      ],
+      "docs": [
+        "docs/git.md",
+        "docs/claude-code.md"
+      ],
+      "scenarios": [
+        {
+          "id": "GITAI-006.1",
+          "title": "Claude Code is not installed"
+        },
+        {
+          "id": "GITAI-006.2",
+          "title": "A location I set that does not exist"
+        },
+        {
+          "id": "GITAI-006.3",
+          "title": "Not signed in"
+        },
+        {
+          "id": "GITAI-006.4",
+          "title": "Usage limit or another refusal from Claude Code"
+        },
+        {
+          "id": "GITAI-006.5",
+          "title": "The process fails"
+        },
+        {
+          "id": "GITAI-006.6",
+          "title": "An empty answer"
+        },
+        {
+          "id": "GITAI-006.7",
+          "title": "A failure changes nothing"
+        },
+        {
+          "id": "GITAI-006.8",
+          "title": "Errors for a conflict appear in its panel"
+        },
+        {
+          "id": "GITAI-006.9",
+          "title": "Trying again works after the cause is fixed"
+        }
+      ]
+    },
+    "GITAI-007": {
+      "id": "GITAI-007",
+      "title": "Have a conflict explained and a resolution proposed",
+      "area": "GITAI",
+      "spec": "specs/git-claude.md",
+      "line": 487,
+      "status": "planned",
+      "commands": [
+        "git.explainConflict"
+      ],
+      "files": [
+        "src/editor/conflicts.ts",
+        "src/lib/conflicts.ts",
+        "src/lib/gitAi.ts",
+        "src/lib/gitAssist.ts",
+        "src/lib/git.ts",
+        "src/lib/gitCommands.ts",
+        "src/components/MenuBar.tsx",
+        "src/styles/app.css"
+      ],
+      "tests": [
+        "src/__tests__/gitAi.test.ts",
+        "src/__tests__/conflicts.test.ts",
+        "src/__tests__/conflictsEditor.test.ts",
+        "src/__tests__/gitAssist.test.ts"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "GITAI-007.1",
+          "title": "Explain one conflict"
+        },
+        {
+          "id": "GITAI-007.2",
+          "title": "Only that conflict is sent"
+        },
+        {
+          "id": "GITAI-007.3",
+          "title": "Apply the suggestion"
+        },
+        {
+          "id": "GITAI-007.4",
+          "title": "Applying is one undo step"
+        },
+        {
+          "id": "GITAI-007.5",
+          "title": "Discard"
+        },
+        {
+          "id": "GITAI-007.6",
+          "title": "Never applied by itself"
+        },
+        {
+          "id": "GITAI-007.7",
+          "title": "Applying the last one leads to the usual question"
+        },
+        {
+          "id": "GITAI-007.8",
+          "title": "The conflict changed while Claude was thinking"
+        },
+        {
+          "id": "GITAI-007.9",
+          "title": "The conflict changes after the answer"
+        },
+        {
+          "id": "GITAI-007.10",
+          "title": "A suggestion that still has markers is not offered"
+        },
+        {
+          "id": "GITAI-007.11",
+          "title": "Claude gives no resolution"
+        },
+        {
+          "id": "GITAI-007.12",
+          "title": "A conflict too large to send"
+        },
+        {
+          "id": "GITAI-007.13",
+          "title": "diff3 conflicts"
+        },
+        {
+          "id": "GITAI-007.14",
+          "title": "What is on screen is what is sent"
+        },
+        {
+          "id": "GITAI-007.15",
+          "title": "From the menu or palette, for the conflict at the cursor"
+        },
+        {
+          "id": "GITAI-007.16",
+          "title": "One suggestion per conflict, kept while I look around"
+        },
+        {
+          "id": "GITAI-007.17",
+          "title": "The split editor"
+        }
+      ]
+    },
+    "GITAI-008": {
+      "id": "GITAI-008",
+      "title": "Keep Current and Incoming straight in Claude's explanation",
+      "area": "GITAI",
+      "spec": "specs/git-claude.md",
+      "line": 606,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/lib/gitAi.ts",
+        "src/lib/gitStatus.ts",
+        "src/lib/gitStash.ts",
+        "src/editor/conflicts.ts",
+        "src/lib/gitAssist.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitAi.test.ts",
+        "src/__tests__/conflictsEditor.test.ts"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "GITAI-008.1",
+          "title": "During a merge"
+        },
+        {
+          "id": "GITAI-008.2",
+          "title": "During a rebase"
+        },
+        {
+          "id": "GITAI-008.3",
+          "title": "While applying patches"
+        },
+        {
+          "id": "GITAI-008.4",
+          "title": "The explanation uses the bar's words"
+        },
+        {
+          "id": "GITAI-008.5",
+          "title": "A conflict outside any operation"
+        },
+        {
+          "id": "GITAI-008.6",
+          "title": "The note follows the operation"
+        },
+        {
+          "id": "GITAI-008.7",
+          "title": "A stash that came back with conflicts"
+        }
+      ]
+    },
+    "GITAI-009": {
+      "id": "GITAI-009",
+      "title": "Summarise a branch or a range of commits",
+      "area": "GITAI",
+      "spec": "specs/git-claude.md",
+      "line": 666,
+      "status": "planned",
+      "commands": [
+        "git.summariseBranch"
+      ],
+      "files": [
+        "src/lib/gitAssist.ts",
+        "src/lib/gitAi.ts",
+        "src/lib/gitCommands.ts",
+        "src/lib/git.ts",
+        "src/components/CommandPalette.tsx",
+        "src/components/GraphView.tsx",
+        "src/lib/actions.ts",
+        "src/lib/gitApi.ts",
+        "src-tauri/src/git.rs",
+        "src/components/MenuBar.tsx"
+      ],
+      "tests": [
+        "src/__tests__/gitAi.test.ts",
+        "src/__tests__/gitAssist.test.ts",
+        "src/__tests__/graphView.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "GITAI-009.1",
+          "title": "Summarise the current branch"
+        },
+        {
+          "id": "GITAI-009.2",
+          "title": "What the summary tab contains"
+        },
+        {
+          "id": "GITAI-009.3",
+          "title": "The summary is only a document"
+        },
+        {
+          "id": "GITAI-009.4",
+          "title": "From a branch label in the graph"
+        },
+        {
+          "id": "GITAI-009.5",
+          "title": "A range of commits from the graph"
+        },
+        {
+          "id": "GITAI-009.6",
+          "title": "No range entry for a commit that is not in the current history"
+        },
+        {
+          "id": "GITAI-009.7",
+          "title": "What is sent"
+        },
+        {
+          "id": "GITAI-009.8",
+          "title": "Cut diffs are stated in the document"
+        },
+        {
+          "id": "GITAI-009.9",
+          "title": "Nothing to summarise"
+        },
+        {
+          "id": "GITAI-009.10",
+          "title": "Too many commits"
+        },
+        {
+          "id": "GITAI-009.11",
+          "title": "Cancelling the picker"
+        },
+        {
+          "id": "GITAI-009.12",
+          "title": "Stopping or failing opens no tab"
+        },
+        {
+          "id": "GITAI-009.13",
+          "title": "The tab limit applies"
+        },
+        {
+          "id": "GITAI-009.14",
+          "title": "A detached HEAD or no repository"
+        },
+        {
+          "id": "GITAI-009.15",
+          "title": "Each summary gets its own tab"
+        }
+      ]
+    },
     "GRAPH-001": {
       "id": "GRAPH-001",
       "title": "Open the commit graph in a tab",
@@ -9474,6 +11232,1045 @@
         {
           "id": "GRAPH-014.5",
           "title": "Abort from the strip"
+        }
+      ]
+    },
+    "GRAPH-015": {
+      "id": "GRAPH-015",
+      "title": "Uncommitted changes as the first row of the graph",
+      "area": "GRAPH",
+      "spec": "specs/git-graph.md",
+      "line": 799,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/GraphView.tsx",
+        "src/lib/gitGraph.ts",
+        "src/lib/git.ts",
+        "src/lib/gitStatus.ts",
+        "src/components/panels/GitPanel.tsx",
+        "src/styles/app.css"
+      ],
+      "tests": [
+        "src/__tests__/gitGraph.test.ts",
+        "src/__tests__/graphView.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "GRAPH-015.1",
+          "title": "The row"
+        },
+        {
+          "id": "GRAPH-015.2",
+          "title": "Nothing to commit"
+        },
+        {
+          "id": "GRAPH-015.3",
+          "title": "The current commit is not the newest row"
+        },
+        {
+          "id": "GRAPH-015.4",
+          "title": "The current commit is far down"
+        },
+        {
+          "id": "GRAPH-015.5",
+          "title": "Select the row"
+        },
+        {
+          "id": "GRAPH-015.6",
+          "title": "Open a changed file"
+        },
+        {
+          "id": "GRAPH-015.7",
+          "title": "The row follows my work"
+        },
+        {
+          "id": "GRAPH-015.8",
+          "title": "The changes go away"
+        },
+        {
+          "id": "GRAPH-015.9",
+          "title": "No commit actions on the row"
+        },
+        {
+          "id": "GRAPH-015.10",
+          "title": "Keyboard"
+        },
+        {
+          "id": "GRAPH-015.11",
+          "title": "Find and counts leave the row out"
+        },
+        {
+          "id": "GRAPH-015.12",
+          "title": "During a stopped operation"
+        },
+        {
+          "id": "GRAPH-015.13",
+          "title": "Detached HEAD"
+        },
+        {
+          "id": "GRAPH-015.14",
+          "title": "A repository without commits"
+        },
+        {
+          "id": "GRAPH-015.15",
+          "title": "The row scrolls with the list"
+        },
+        {
+          "id": "GRAPH-015.16",
+          "title": "The row cannot be picked for a comparison"
+        }
+      ]
+    },
+    "GRAPH-016": {
+      "id": "GRAPH-016",
+      "title": "Drag the height of the Search All History results",
+      "area": "GRAPH",
+      "spec": "specs/git-graph.md",
+      "line": 920,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/GraphView.tsx",
+        "src/lib/gitGraph.ts",
+        "src/styles/app.css"
+      ],
+      "tests": [
+        "src/__tests__/gitGraph.test.ts",
+        "src/__tests__/graphView.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "GRAPH-016.1",
+          "title": "Drag the divider"
+        },
+        {
+          "id": "GRAPH-016.2",
+          "title": "Limits"
+        },
+        {
+          "id": "GRAPH-016.3",
+          "title": "Never taller than its content"
+        },
+        {
+          "id": "GRAPH-016.4",
+          "title": "A dragged height stays when I pick a result"
+        },
+        {
+          "id": "GRAPH-016.5",
+          "title": "Before any drag nothing changes"
+        },
+        {
+          "id": "GRAPH-016.6",
+          "title": "Show Fewer and Show More after a drag"
+        },
+        {
+          "id": "GRAPH-016.7",
+          "title": "The height is kept for the tab"
+        },
+        {
+          "id": "GRAPH-016.8",
+          "title": "Double-click resets"
+        },
+        {
+          "id": "GRAPH-016.9",
+          "title": "The window gets smaller"
+        },
+        {
+          "id": "GRAPH-016.10",
+          "title": "No divider without results"
+        }
+      ]
+    },
+    "GRAPH-017": {
+      "id": "GRAPH-017",
+      "title": "Scroll sideways through a graph wider than 16 lanes",
+      "area": "GRAPH",
+      "spec": "specs/git-graph.md",
+      "line": 995,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/GraphView.tsx",
+        "src/lib/gitGraph.ts",
+        "src/styles/app.css"
+      ],
+      "tests": [
+        "src/__tests__/gitGraph.test.ts",
+        "src/__tests__/graphView.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "GRAPH-017.1",
+          "title": "Lanes past the 16th keep their own place"
+        },
+        {
+          "id": "GRAPH-017.2",
+          "title": "The column does not grow"
+        },
+        {
+          "id": "GRAPH-017.3",
+          "title": "Scroll sideways"
+        },
+        {
+          "id": "GRAPH-017.4",
+          "title": "Hidden lanes are signalled"
+        },
+        {
+          "id": "GRAPH-017.5",
+          "title": "Selecting a commit brings its dot into view"
+        },
+        {
+          "id": "GRAPH-017.6",
+          "title": "Narrow histories are unchanged"
+        },
+        {
+          "id": "GRAPH-017.7",
+          "title": "The scroll bar appears when a wider page loads"
+        },
+        {
+          "id": "GRAPH-017.8",
+          "title": "The layout itself is the same"
+        },
+        {
+          "id": "GRAPH-017.9",
+          "title": "Reload and switching scope"
+        }
+      ]
+    },
+    "GRAPH-018": {
+      "id": "GRAPH-018",
+      "title": "List a small history by date",
+      "area": "GRAPH",
+      "spec": "specs/git-graph.md",
+      "line": 1072,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/GraphView.tsx",
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts",
+        "src/lib/gitGraph.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitGraph.test.ts",
+        "src/__tests__/graphView.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "GRAPH-018.1",
+          "title": "Branch order is the default"
+        },
+        {
+          "id": "GRAPH-018.2",
+          "title": "Date order interleaves branches"
+        },
+        {
+          "id": "GRAPH-018.3",
+          "title": "A commit is never above its child"
+        },
+        {
+          "id": "GRAPH-018.4",
+          "title": "The order follows the Date column"
+        },
+        {
+          "id": "GRAPH-018.5",
+          "title": "Only for small histories"
+        },
+        {
+          "id": "GRAPH-018.6",
+          "title": "Exactly at the limit"
+        },
+        {
+          "id": "GRAPH-018.7",
+          "title": "The limit applies to what is shown"
+        },
+        {
+          "id": "GRAPH-018.8",
+          "title": "The history grows past the limit"
+        },
+        {
+          "id": "GRAPH-018.9",
+          "title": "Switching keeps my place"
+        },
+        {
+          "id": "GRAPH-018.10",
+          "title": "Everything else works the same"
+        },
+        {
+          "id": "GRAPH-018.11",
+          "title": "Not remembered"
+        },
+        {
+          "id": "GRAPH-018.12",
+          "title": "While loading"
+        }
+      ]
+    },
+    "GRAPH-019": {
+      "id": "GRAPH-019",
+      "title": "Show Commit Graph is in the palette without a repository",
+      "area": "GRAPH",
+      "spec": "specs/git-graph.md",
+      "line": 1163,
+      "status": "planned",
+      "commands": [
+        "git.graph"
+      ],
+      "files": [
+        "src/lib/gitCommands.ts",
+        "src/lib/git.ts",
+        "src/components/MenuBar.tsx"
+      ],
+      "tests": [
+        "src/__tests__/gitCommands.test.ts"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "GRAPH-019.1",
+          "title": "Listed with nothing open"
+        },
+        {
+          "id": "GRAPH-019.2",
+          "title": "Running it says what is needed"
+        },
+        {
+          "id": "GRAPH-019.3",
+          "title": "A folder that is not a repository"
+        },
+        {
+          "id": "GRAPH-019.4",
+          "title": "The same from the Git menu"
+        },
+        {
+          "id": "GRAPH-019.5",
+          "title": "With a repository nothing changes"
+        },
+        {
+          "id": "GRAPH-019.6",
+          "title": "Other repository commands stay out of the palette"
+        },
+        {
+          "id": "GRAPH-019.7",
+          "title": "Not recorded as a failure"
+        }
+      ]
+    },
+    "HISTORY-001": {
+      "id": "HISTORY-001",
+      "title": "Edit-history entries in a commit's right-click menu",
+      "area": "HISTORY",
+      "spec": "specs/git-history-edit.md",
+      "line": 30,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/GraphView.tsx",
+        "src/lib/historyEdit.ts",
+        "src/lib/gitStatus.ts",
+        "src/lib/git.ts",
+        "src/lib/gitApi.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/historyEdit.test.ts",
+        "src/__tests__/graphView.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "HISTORY-001.1",
+          "title": "The entries"
+        },
+        {
+          "id": "HISTORY-001.2",
+          "title": "Undo Last Commit only on the tip"
+        },
+        {
+          "id": "HISTORY-001.3",
+          "title": "A commit that is not on the current branch"
+        },
+        {
+          "id": "HISTORY-001.4",
+          "title": "Detached HEAD"
+        },
+        {
+          "id": "HISTORY-001.5",
+          "title": "A merge commit"
+        },
+        {
+          "id": "HISTORY-001.6",
+          "title": "A merge between the commit and the tip"
+        },
+        {
+          "id": "HISTORY-001.7",
+          "title": "The root commit"
+        },
+        {
+          "id": "HISTORY-001.8",
+          "title": "The only commit cannot be undone"
+        },
+        {
+          "id": "HISTORY-001.9",
+          "title": "An operation is in progress"
+        },
+        {
+          "id": "HISTORY-001.10",
+          "title": "Git is busy"
+        }
+      ]
+    },
+    "HISTORY-002": {
+      "id": "HISTORY-002",
+      "title": "Undo Last Commit",
+      "area": "HISTORY",
+      "spec": "specs/git-history-edit.md",
+      "line": 109,
+      "status": "planned",
+      "commands": [
+        "git.undoLastCommit"
+      ],
+      "files": [
+        "src/components/GraphView.tsx",
+        "src/lib/gitCommands.ts",
+        "src/components/MenuBar.tsx",
+        "src/lib/historyEdit.ts",
+        "src/lib/git.ts",
+        "src/components/panels/GitPanel.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/historyEdit.test.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "HISTORY-002.1",
+          "title": "Undo asks first"
+        },
+        {
+          "id": "HISTORY-002.2",
+          "title": "Undo"
+        },
+        {
+          "id": "HISTORY-002.3",
+          "title": "The message comes back"
+        },
+        {
+          "id": "HISTORY-002.4",
+          "title": "Uncommitted changes are kept"
+        },
+        {
+          "id": "HISTORY-002.5",
+          "title": "From the command palette or the Git menu"
+        },
+        {
+          "id": "HISTORY-002.6",
+          "title": "The command is greyed out when it cannot run"
+        },
+        {
+          "id": "HISTORY-002.7",
+          "title": "The last commit is already pushed"
+        },
+        {
+          "id": "HISTORY-002.8",
+          "title": "Cancel"
+        }
+      ]
+    },
+    "HISTORY-003": {
+      "id": "HISTORY-003",
+      "title": "Reword a commit's message",
+      "area": "HISTORY",
+      "spec": "specs/git-history-edit.md",
+      "line": 173,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/GraphView.tsx",
+        "src/lib/historyEdit.ts",
+        "src/lib/git.ts",
+        "src/lib/gitApi.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/historyEdit.test.ts",
+        "src/__tests__/graphView.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "HISTORY-003.1",
+          "title": "The message strip"
+        },
+        {
+          "id": "HISTORY-003.2",
+          "title": "Reword the last commit"
+        },
+        {
+          "id": "HISTORY-003.3",
+          "title": "Reword an older commit lists what gets a new id"
+        },
+        {
+          "id": "HISTORY-003.4",
+          "title": "Keyboard"
+        },
+        {
+          "id": "HISTORY-003.5",
+          "title": "An empty message is not accepted"
+        },
+        {
+          "id": "HISTORY-003.6",
+          "title": "The last commit with uncommitted changes"
+        },
+        {
+          "id": "HISTORY-003.7",
+          "title": "The first commit"
+        },
+        {
+          "id": "HISTORY-003.8",
+          "title": "No editor ever opens"
+        },
+        {
+          "id": "HISTORY-003.9",
+          "title": "Cancel"
+        }
+      ]
+    },
+    "HISTORY-004": {
+      "id": "HISTORY-004",
+      "title": "Drop a commit",
+      "area": "HISTORY",
+      "spec": "specs/git-history-edit.md",
+      "line": 247,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/GraphView.tsx",
+        "src/lib/historyEdit.ts",
+        "src/lib/git.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/historyEdit.test.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "HISTORY-004.1",
+          "title": "Drop asks first and says the changes are gone"
+        },
+        {
+          "id": "HISTORY-004.2",
+          "title": "Drop a commit in the middle"
+        },
+        {
+          "id": "HISTORY-004.3",
+          "title": "Drop the last commit"
+        },
+        {
+          "id": "HISTORY-004.4",
+          "title": "Later commits depend on it"
+        },
+        {
+          "id": "HISTORY-004.5",
+          "title": "Cancel"
+        },
+        {
+          "id": "HISTORY-004.6",
+          "title": "Untracked files are left alone"
+        }
+      ]
+    },
+    "HISTORY-005": {
+      "id": "HISTORY-005",
+      "title": "Squash a commit into its parent",
+      "area": "HISTORY",
+      "spec": "specs/git-history-edit.md",
+      "line": 300,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/GraphView.tsx",
+        "src/lib/historyEdit.ts",
+        "src/lib/git.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/historyEdit.test.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "HISTORY-005.1",
+          "title": "The combined message"
+        },
+        {
+          "id": "HISTORY-005.2",
+          "title": "Squash"
+        },
+        {
+          "id": "HISTORY-005.3",
+          "title": "Squash the last commit"
+        },
+        {
+          "id": "HISTORY-005.4",
+          "title": "The parent is a merge commit"
+        },
+        {
+          "id": "HISTORY-005.5",
+          "title": "The parent is pushed but the commit is not"
+        },
+        {
+          "id": "HISTORY-005.6",
+          "title": "Cancel"
+        },
+        {
+          "id": "HISTORY-005.7",
+          "title": "No stop for a message"
+        }
+      ]
+    },
+    "HISTORY-006": {
+      "id": "HISTORY-006",
+      "title": "Guards on every history edit",
+      "area": "HISTORY",
+      "spec": "specs/git-history-edit.md",
+      "line": 356,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/lib/historyEdit.ts",
+        "src/lib/gitMerge.ts",
+        "src/lib/git.ts",
+        "src/lib/dialogs.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/historyEdit.test.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "HISTORY-006.1",
+          "title": "The confirmation lists every rewritten commit"
+        },
+        {
+          "id": "HISTORY-006.2",
+          "title": "A long list is shortened, not hidden"
+        },
+        {
+          "id": "HISTORY-006.3",
+          "title": "Pushed commits get a loud warning"
+        },
+        {
+          "id": "HISTORY-006.4",
+          "title": "Pushed on another remote branch"
+        },
+        {
+          "id": "HISTORY-006.5",
+          "title": "Nothing is pushed when there is no remote"
+        },
+        {
+          "id": "HISTORY-006.6",
+          "title": "Uncommitted changes block a replay"
+        },
+        {
+          "id": "HISTORY-006.7",
+          "title": "The branch moved while I was deciding"
+        },
+        {
+          "id": "HISTORY-006.8",
+          "title": "An operation started in the meantime"
+        },
+        {
+          "id": "HISTORY-006.9",
+          "title": "No route skips the guards"
+        },
+        {
+          "id": "HISTORY-006.10",
+          "title": "What is never done"
+        }
+      ]
+    },
+    "HISTORY-007": {
+      "id": "HISTORY-007",
+      "title": "Open the Edit History list",
+      "area": "HISTORY",
+      "spec": "specs/git-history-edit.md",
+      "line": 435,
+      "status": "planned",
+      "commands": [
+        "git.editHistory"
+      ],
+      "files": [
+        "src/components/HistoryEditList.tsx",
+        "src/components/GraphView.tsx",
+        "src/lib/gitCommands.ts",
+        "src/components/MenuBar.tsx",
+        "src/lib/historyEdit.ts",
+        "src/lib/git.ts",
+        "src-tauri/src/git.rs",
+        "src/styles/app.css"
+      ],
+      "tests": [
+        "src/__tests__/historyEdit.test.ts",
+        "src/__tests__/historyEditList.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "HISTORY-007.1",
+          "title": "Open from a commit"
+        },
+        {
+          "id": "HISTORY-007.2",
+          "title": "Nothing has happened yet"
+        },
+        {
+          "id": "HISTORY-007.3",
+          "title": "Pushed rows are marked"
+        },
+        {
+          "id": "HISTORY-007.4",
+          "title": "Open from the command palette or the Git menu"
+        },
+        {
+          "id": "HISTORY-007.5",
+          "title": "The command when everything is pushed"
+        },
+        {
+          "id": "HISTORY-007.6",
+          "title": "The command with no repository or no branch"
+        },
+        {
+          "id": "HISTORY-007.7",
+          "title": "Uncommitted changes"
+        },
+        {
+          "id": "HISTORY-007.8",
+          "title": "Too many commits"
+        },
+        {
+          "id": "HISTORY-007.9",
+          "title": "From the first commit"
+        },
+        {
+          "id": "HISTORY-007.10",
+          "title": "The rest of the application stays usable"
+        }
+      ]
+    },
+    "HISTORY-008": {
+      "id": "HISTORY-008",
+      "title": "Plan the changes in the list",
+      "area": "HISTORY",
+      "spec": "specs/git-history-edit.md",
+      "line": 513,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/HistoryEditList.tsx",
+        "src/components/Select.tsx",
+        "src/lib/historyEdit.ts"
+      ],
+      "tests": [
+        "src/__tests__/historyEdit.test.ts",
+        "src/__tests__/historyEditList.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "HISTORY-008.1",
+          "title": "Choose an action"
+        },
+        {
+          "id": "HISTORY-008.2",
+          "title": "Reorder by dragging"
+        },
+        {
+          "id": "HISTORY-008.3",
+          "title": "Reorder by keyboard"
+        },
+        {
+          "id": "HISTORY-008.4",
+          "title": "Move and mark with keys only"
+        },
+        {
+          "id": "HISTORY-008.5",
+          "title": "Reword in place"
+        },
+        {
+          "id": "HISTORY-008.6",
+          "title": "Reword with the message unchanged"
+        },
+        {
+          "id": "HISTORY-008.7",
+          "title": "Squash folds into the row below"
+        },
+        {
+          "id": "HISTORY-008.8",
+          "title": "Fixup throws its message away"
+        },
+        {
+          "id": "HISTORY-008.9",
+          "title": "Several rows fold into one"
+        },
+        {
+          "id": "HISTORY-008.10",
+          "title": "The bottom row cannot be squashed"
+        },
+        {
+          "id": "HISTORY-008.11",
+          "title": "A squash that ends up with nothing below it"
+        },
+        {
+          "id": "HISTORY-008.12",
+          "title": "A squash skips dropped rows"
+        },
+        {
+          "id": "HISTORY-008.13",
+          "title": "Dropping everything is not a rebase"
+        },
+        {
+          "id": "HISTORY-008.14",
+          "title": "Run only when something changes"
+        },
+        {
+          "id": "HISTORY-008.15",
+          "title": "Start over"
+        },
+        {
+          "id": "HISTORY-008.16",
+          "title": "An empty reword or squash message"
+        },
+        {
+          "id": "HISTORY-008.17",
+          "title": "The keys only act while the list has focus"
+        }
+      ]
+    },
+    "HISTORY-009": {
+      "id": "HISTORY-009",
+      "title": "Run or cancel the Edit History list",
+      "area": "HISTORY",
+      "spec": "specs/git-history-edit.md",
+      "line": 629,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/HistoryEditList.tsx",
+        "src/lib/historyEdit.ts",
+        "src/lib/git.ts",
+        "src/lib/gitApi.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/historyEdit.test.ts",
+        "src/__tests__/historyEditList.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "HISTORY-009.1",
+          "title": "Run shows the plan first"
+        },
+        {
+          "id": "HISTORY-009.2",
+          "title": "Run"
+        },
+        {
+          "id": "HISTORY-009.3",
+          "title": "Reordered commits"
+        },
+        {
+          "id": "HISTORY-009.4",
+          "title": "Rows below the lowest change keep their ids"
+        },
+        {
+          "id": "HISTORY-009.5",
+          "title": "Pushed commits in the plan"
+        },
+        {
+          "id": "HISTORY-009.6",
+          "title": "Cancelling the dialog keeps the plan"
+        },
+        {
+          "id": "HISTORY-009.7",
+          "title": "Cancel an untouched list"
+        },
+        {
+          "id": "HISTORY-009.8",
+          "title": "Cancel a list with changes"
+        },
+        {
+          "id": "HISTORY-009.9",
+          "title": "The branch changed while the list was open"
+        },
+        {
+          "id": "HISTORY-009.10",
+          "title": "Uncommitted changes appeared"
+        },
+        {
+          "id": "HISTORY-009.11",
+          "title": "Run is disabled while git is busy"
+        },
+        {
+          "id": "HISTORY-009.12",
+          "title": "A failure that is not a conflict"
+        }
+      ]
+    },
+    "HISTORY-010": {
+      "id": "HISTORY-010",
+      "title": "A history edit that stops on a conflict",
+      "area": "HISTORY",
+      "spec": "specs/git-history-edit.md",
+      "line": 715,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/gitStatus.ts",
+        "src/components/panels/GitPanel.tsx",
+        "src/components/GraphView.tsx",
+        "src/components/HistoryEditList.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src-tauri/src/git.rs",
+        "src/__tests__/historyEdit.test.ts"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "HISTORY-010.1",
+          "title": "The edit stops"
+        },
+        {
+          "id": "HISTORY-010.2",
+          "title": "The list closes when a run stops"
+        },
+        {
+          "id": "HISTORY-010.3",
+          "title": "The sides are explained"
+        },
+        {
+          "id": "HISTORY-010.4",
+          "title": "Continue"
+        },
+        {
+          "id": "HISTORY-010.5",
+          "title": "Messages typed before the run survive a stop"
+        },
+        {
+          "id": "HISTORY-010.6",
+          "title": "It stops again"
+        },
+        {
+          "id": "HISTORY-010.7",
+          "title": "Skip"
+        },
+        {
+          "id": "HISTORY-010.8",
+          "title": "Abort puts everything back"
+        },
+        {
+          "id": "HISTORY-010.9",
+          "title": "No new edit while stopped"
+        },
+        {
+          "id": "HISTORY-010.10",
+          "title": "Quarry is closed while stopped"
+        }
+      ]
+    },
+    "HISTORY-011": {
+      "id": "HISTORY-011",
+      "title": "Force Push is offered after a history edit of pushed commits",
+      "area": "HISTORY",
+      "spec": "specs/git-history-edit.md",
+      "line": 793,
+      "status": "planned",
+      "commands": [
+        "git.forcePush"
+      ],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/historyEdit.ts",
+        "src/lib/gitStatus.ts"
+      ],
+      "tests": [
+        "src/__tests__/historyEdit.test.ts",
+        "src/__tests__/gitRemote.test.ts"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "HISTORY-011.1",
+          "title": "Offered after rewriting pushed commits"
+        },
+        {
+          "id": "HISTORY-011.2",
+          "title": "The same Force Push"
+        },
+        {
+          "id": "HISTORY-011.3",
+          "title": "Undo of a pushed commit"
+        },
+        {
+          "id": "HISTORY-011.4",
+          "title": "Not offered when nothing pushed was rewritten"
+        },
+        {
+          "id": "HISTORY-011.5",
+          "title": "An edit that stopped on a conflict"
         }
       ]
     },
@@ -11567,6 +14364,1129 @@
         {
           "id": "MACRO-013.9",
           "title": "Macros from an old version are imported once"
+        }
+      ]
+    },
+    "MERGE-001": {
+      "id": "MERGE-001",
+      "title": "Merge and rebase from a commit's right-click menu in the graph",
+      "area": "MERGE",
+      "spec": "specs/git-merge-rebase.md",
+      "line": 54,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/GraphView.tsx",
+        "src/lib/gitMerge.ts",
+        "src/lib/git.ts",
+        "src/lib/gitGraph.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitMerge.test.ts",
+        "src/__tests__/graphView.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "MERGE-001.1",
+          "title": "The entries name the current branch"
+        },
+        {
+          "id": "MERGE-001.2",
+          "title": "A commit with one branch label is treated as that branch"
+        },
+        {
+          "id": "MERGE-001.3",
+          "title": "A commit with several branch labels is used by its id"
+        },
+        {
+          "id": "MERGE-001.4",
+          "title": "The commit I am on"
+        },
+        {
+          "id": "MERGE-001.5",
+          "title": "Detached HEAD"
+        },
+        {
+          "id": "MERGE-001.6",
+          "title": "Greyed out while something else is going on"
+        },
+        {
+          "id": "MERGE-001.7",
+          "title": "Starting from the graph refreshes the graph"
+        }
+      ]
+    },
+    "MERGE-002": {
+      "id": "MERGE-002",
+      "title": "Merge and rebase from a branch or tag label in the graph",
+      "area": "MERGE",
+      "spec": "specs/git-merge-rebase.md",
+      "line": 111,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/GraphView.tsx",
+        "src/lib/gitRefs.ts",
+        "src/lib/gitMerge.ts",
+        "src/lib/gitGraph.ts",
+        "src/lib/git.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitRefs.test.ts",
+        "src/__tests__/gitMerge.test.ts",
+        "src/__tests__/graphView.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "MERGE-002.1",
+          "title": "The label menu of a local branch"
+        },
+        {
+          "id": "MERGE-002.2",
+          "title": "A remote branch label"
+        },
+        {
+          "id": "MERGE-002.3",
+          "title": "A tag label"
+        },
+        {
+          "id": "MERGE-002.4",
+          "title": "The label of the branch I am on"
+        },
+        {
+          "id": "MERGE-002.5",
+          "title": "Labels without a label menu"
+        },
+        {
+          "id": "MERGE-002.6",
+          "title": "Labels in the details pane"
+        },
+        {
+          "id": "MERGE-002.7",
+          "title": "Closing the label menu"
+        },
+        {
+          "id": "MERGE-002.8",
+          "title": "Same disabled states as the commit menu"
+        }
+      ]
+    },
+    "MERGE-003": {
+      "id": "MERGE-003",
+      "title": "Merge Branch… and Rebase onto Branch… from the panel, the Git menu and the palette",
+      "area": "MERGE",
+      "spec": "specs/git-merge-rebase.md",
+      "line": 179,
+      "status": "planned",
+      "commands": [
+        "git.mergeBranch",
+        "git.rebaseBranch",
+        "git.mergeRef",
+        "git.rebaseOnto"
+      ],
+      "files": [
+        "src/lib/gitCommands.ts",
+        "src/lib/git.ts",
+        "src/components/CommandPalette.tsx",
+        "src/components/panels/GitPanel.tsx",
+        "src/components/MenuBar.tsx",
+        "src/lib/gitMerge.ts",
+        "src/lib/gitStatus.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitMerge.test.ts",
+        "src/__tests__/gitPanel.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "MERGE-003.1",
+          "title": "Merge Branch… opens the branch list"
+        },
+        {
+          "id": "MERGE-003.2",
+          "title": "Picking a branch asks before merging"
+        },
+        {
+          "id": "MERGE-003.3",
+          "title": "Rebase onto Branch…"
+        },
+        {
+          "id": "MERGE-003.4",
+          "title": "Typing a name that is not a branch"
+        },
+        {
+          "id": "MERGE-003.5",
+          "title": "Closing the list"
+        },
+        {
+          "id": "MERGE-003.6",
+          "title": "From the Source Control panel"
+        },
+        {
+          "id": "MERGE-003.7",
+          "title": "Only one other branch is needed"
+        },
+        {
+          "id": "MERGE-003.8",
+          "title": "Greyed out without a repository"
+        },
+        {
+          "id": "MERGE-003.9",
+          "title": "Greyed out during a stopped operation or while git is busy"
+        },
+        {
+          "id": "MERGE-003.10",
+          "title": "Rebase needs a branch"
+        }
+      ]
+    },
+    "MERGE-004": {
+      "id": "MERGE-004",
+      "title": "Merge asks first, then merges",
+      "area": "MERGE",
+      "spec": "specs/git-merge-rebase.md",
+      "line": 259,
+      "status": "planned",
+      "commands": [
+        "git.mergeRef"
+      ],
+      "files": [
+        "src/lib/gitMerge.ts",
+        "src/lib/git.ts",
+        "src/lib/dialogs.ts",
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitMerge.test.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "MERGE-004.1",
+          "title": "Both branches have commits: one way to merge"
+        },
+        {
+          "id": "MERGE-004.2",
+          "title": "Cancel is the default"
+        },
+        {
+          "id": "MERGE-004.3",
+          "title": "A clean merge"
+        },
+        {
+          "id": "MERGE-004.4",
+          "title": "A fast-forward is possible: I choose"
+        },
+        {
+          "id": "MERGE-004.5",
+          "title": "Fast-forward"
+        },
+        {
+          "id": "MERGE-004.6",
+          "title": "Always a merge commit"
+        },
+        {
+          "id": "MERGE-004.7",
+          "title": "Already up to date"
+        },
+        {
+          "id": "MERGE-004.8",
+          "title": "Merging a commit by its id"
+        },
+        {
+          "id": "MERGE-004.9",
+          "title": "Merging on a detached HEAD"
+        },
+        {
+          "id": "MERGE-004.10",
+          "title": "What a merge never does"
+        }
+      ]
+    },
+    "MERGE-005": {
+      "id": "MERGE-005",
+      "title": "Rebase asks first, then rebases",
+      "area": "MERGE",
+      "spec": "specs/git-merge-rebase.md",
+      "line": 338,
+      "status": "planned",
+      "commands": [
+        "git.rebaseOnto"
+      ],
+      "files": [
+        "src/lib/gitMerge.ts",
+        "src/lib/git.ts",
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitMerge.test.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "MERGE-005.1",
+          "title": "The dialog says what will be replayed"
+        },
+        {
+          "id": "MERGE-005.2",
+          "title": "Cancel is the default"
+        },
+        {
+          "id": "MERGE-005.3",
+          "title": "A clean rebase"
+        },
+        {
+          "id": "MERGE-005.4",
+          "title": "Nothing to rebase"
+        },
+        {
+          "id": "MERGE-005.5",
+          "title": "No commits of my own: a fast-forward"
+        },
+        {
+          "id": "MERGE-005.6",
+          "title": "Merge commits are not kept"
+        },
+        {
+          "id": "MERGE-005.7",
+          "title": "Rebasing onto a commit"
+        },
+        {
+          "id": "MERGE-005.8",
+          "title": "What a rebase never does"
+        }
+      ]
+    },
+    "MERGE-006": {
+      "id": "MERGE-006",
+      "title": "Rebase warns when commits to replay are already pushed",
+      "area": "MERGE",
+      "spec": "specs/git-merge-rebase.md",
+      "line": 404,
+      "status": "planned",
+      "commands": [
+        "git.rebaseOnto"
+      ],
+      "files": [
+        "src/lib/gitMerge.ts",
+        "src/lib/git.ts",
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitMerge.test.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "MERGE-006.1",
+          "title": "The warning"
+        },
+        {
+          "id": "MERGE-006.2",
+          "title": "Cancel"
+        },
+        {
+          "id": "MERGE-006.3",
+          "title": "Rebase anyway"
+        },
+        {
+          "id": "MERGE-006.4",
+          "title": "Nothing pushed: the ordinary dialog"
+        },
+        {
+          "id": "MERGE-006.5",
+          "title": "Pushed somewhere other than the upstream"
+        },
+        {
+          "id": "MERGE-006.6",
+          "title": "Every entry point gets the warning"
+        },
+        {
+          "id": "MERGE-006.7",
+          "title": "A fast-forward rewrites nothing"
+        }
+      ]
+    },
+    "MERGE-007": {
+      "id": "MERGE-007",
+      "title": "A merge or rebase that stops on a conflict",
+      "area": "MERGE",
+      "spec": "specs/git-merge-rebase.md",
+      "line": 463,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/gitStatus.ts",
+        "src/components/panels/GitPanel.tsx",
+        "src/components/GraphView.tsx",
+        "src/lib/panels.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src-tauri/src/git.rs",
+        "src/__tests__/gitMerge.test.ts"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "MERGE-007.1",
+          "title": "A merge stops"
+        },
+        {
+          "id": "MERGE-007.2",
+          "title": "Finishing the merge"
+        },
+        {
+          "id": "MERGE-007.3",
+          "title": "Aborting the merge"
+        },
+        {
+          "id": "MERGE-007.4",
+          "title": "A rebase stops"
+        },
+        {
+          "id": "MERGE-007.5",
+          "title": "Continuing the rebase"
+        },
+        {
+          "id": "MERGE-007.6",
+          "title": "Aborting the rebase"
+        },
+        {
+          "id": "MERGE-007.7",
+          "title": "The graph shows the stop"
+        },
+        {
+          "id": "MERGE-007.8",
+          "title": "A conflicted file that is open"
+        },
+        {
+          "id": "MERGE-007.9",
+          "title": "No second operation on top"
+        }
+      ]
+    },
+    "MERGE-008": {
+      "id": "MERGE-008",
+      "title": "Refuse to start when it is not safe",
+      "area": "MERGE",
+      "spec": "specs/git-merge-rebase.md",
+      "line": 535,
+      "status": "planned",
+      "commands": [
+        "git.mergeBranch",
+        "git.rebaseBranch",
+        "git.mergeRef",
+        "git.rebaseOnto"
+      ],
+      "files": [
+        "src/lib/gitMerge.ts",
+        "src/lib/gitStatus.ts",
+        "src/lib/git.ts",
+        "src/lib/gitCommands.ts",
+        "src/lib/dialogs.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/gitMerge.test.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "MERGE-008.1",
+          "title": "Uncommitted changes block a merge"
+        },
+        {
+          "id": "MERGE-008.2",
+          "title": "Uncommitted changes block a rebase"
+        },
+        {
+          "id": "MERGE-008.3",
+          "title": "Untracked files do not block"
+        },
+        {
+          "id": "MERGE-008.4",
+          "title": "An untracked file in the way"
+        },
+        {
+          "id": "MERGE-008.5",
+          "title": "An operation is already in progress"
+        },
+        {
+          "id": "MERGE-008.6",
+          "title": "Rebase on a detached HEAD"
+        },
+        {
+          "id": "MERGE-008.7",
+          "title": "A repository with no commits yet"
+        },
+        {
+          "id": "MERGE-008.8",
+          "title": "Histories that have nothing in common"
+        },
+        {
+          "id": "MERGE-008.9",
+          "title": "The branch went away"
+        },
+        {
+          "id": "MERGE-008.10",
+          "title": "Things changed while the dialog was open"
+        },
+        {
+          "id": "MERGE-008.11",
+          "title": "One action at a time"
+        }
+      ]
+    },
+    "MERGE-009": {
+      "id": "MERGE-009",
+      "title": "Force Push after pushed commits were rewritten",
+      "area": "MERGE",
+      "spec": "specs/git-merge-rebase.md",
+      "line": 616,
+      "status": "planned",
+      "commands": [
+        "git.forcePush"
+      ],
+      "files": [
+        "src/lib/gitCommands.ts",
+        "src/lib/git.ts",
+        "src/lib/gitMerge.ts",
+        "src/lib/gitStatus.ts",
+        "src/components/panels/GitPanel.tsx",
+        "src/components/MenuBar.tsx",
+        "src/lib/gitApi.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/gitMerge.test.ts",
+        "src/__tests__/gitRemote.test.ts",
+        "src/__tests__/gitPanel.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "MERGE-009.1",
+          "title": "The status line offers Force Push after the rewrite"
+        },
+        {
+          "id": "MERGE-009.2",
+          "title": "Force Push asks on its own"
+        },
+        {
+          "id": "MERGE-009.3",
+          "title": "Cancel"
+        },
+        {
+          "id": "MERGE-009.4",
+          "title": "Force Push"
+        },
+        {
+          "id": "MERGE-009.5",
+          "title": "Someone pushed in the meantime"
+        },
+        {
+          "id": "MERGE-009.6",
+          "title": "A long list is shortened"
+        },
+        {
+          "id": "MERGE-009.7",
+          "title": "The plain Push never forces"
+        },
+        {
+          "id": "MERGE-009.8",
+          "title": "Not offered when nothing pushed was rewritten"
+        },
+        {
+          "id": "MERGE-009.9",
+          "title": "A branch that differs from its remote for another reason"
+        },
+        {
+          "id": "MERGE-009.10",
+          "title": "After a restart"
+        },
+        {
+          "id": "MERGE-009.11",
+          "title": "Nothing on the remote to replace"
+        },
+        {
+          "id": "MERGE-009.12",
+          "title": "The command is greyed out when it cannot run"
+        },
+        {
+          "id": "MERGE-009.13",
+          "title": "The rebase was aborted"
+        },
+        {
+          "id": "MERGE-009.14",
+          "title": "Only this branch, only its upstream"
+        }
+      ]
+    },
+    "SAFE-001": {
+      "id": "SAFE-001",
+      "title": "Be told which tabs have unsaved changes before git rewrites files",
+      "area": "SAFE",
+      "spec": "specs/git-safety.md",
+      "line": 52,
+      "status": "planned",
+      "commands": [
+        "git.switchBranch",
+        "git.checkoutTo",
+        "git.pull"
+      ],
+      "files": [
+        "src/lib/gitSafety.ts",
+        "src/lib/git.ts",
+        "src/lib/dialogs.ts",
+        "src/lib/actions.ts",
+        "src/lib/diff.ts",
+        "src/lib/store.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitSafety.test.ts"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "SAFE-001.1",
+          "title": "The dialog names the files"
+        },
+        {
+          "id": "SAFE-001.2",
+          "title": "Save All is the default, Escape cancels"
+        },
+        {
+          "id": "SAFE-001.3",
+          "title": "One file"
+        },
+        {
+          "id": "SAFE-001.4",
+          "title": "A long list is cut"
+        },
+        {
+          "id": "SAFE-001.5",
+          "title": "Nothing unsaved, no dialog"
+        },
+        {
+          "id": "SAFE-001.6",
+          "title": "Untitled tabs never count"
+        },
+        {
+          "id": "SAFE-001.7",
+          "title": "Only tabs inside this repository count"
+        },
+        {
+          "id": "SAFE-001.8",
+          "title": "A file in a nested repository belongs to the nested one"
+        },
+        {
+          "id": "SAFE-001.9",
+          "title": "Large-file tabs count"
+        },
+        {
+          "id": "SAFE-001.10",
+          "title": "A Compare tab with unsaved edits to a file counts"
+        },
+        {
+          "id": "SAFE-001.11",
+          "title": "The same file open twice is listed once"
+        },
+        {
+          "id": "SAFE-001.12",
+          "title": "A tab whose file is merely missing does not count"
+        },
+        {
+          "id": "SAFE-001.13",
+          "title": "Other kinds of tabs never count"
+        }
+      ]
+    },
+    "SAFE-002": {
+      "id": "SAFE-002",
+      "title": "Save All, Continue Without Saving or Cancel",
+      "area": "SAFE",
+      "spec": "specs/git-safety.md",
+      "line": 149,
+      "status": "planned",
+      "commands": [
+        "git.switchBranch",
+        "git.checkoutTo",
+        "git.pull"
+      ],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/gitSafety.ts",
+        "src/lib/actions.ts",
+        "src/lib/diff.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitSafety.test.ts",
+        "src/__tests__/gitSafetyGuard.test.ts"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "SAFE-002.1",
+          "title": "Save All saves the listed files, then runs the operation"
+        },
+        {
+          "id": "SAFE-002.2",
+          "title": "Save All does not save other tabs"
+        },
+        {
+          "id": "SAFE-002.3",
+          "title": "Git refuses after the save"
+        },
+        {
+          "id": "SAFE-002.4",
+          "title": "A file cannot be saved: the operation does not run"
+        },
+        {
+          "id": "SAFE-002.5",
+          "title": "Declining to overwrite counts as not saved"
+        },
+        {
+          "id": "SAFE-002.6",
+          "title": "Continue Without Saving keeps the text in the tabs"
+        },
+        {
+          "id": "SAFE-002.7",
+          "title": "After Continue the question is not asked later either"
+        },
+        {
+          "id": "SAFE-002.8",
+          "title": "Cancel leaves everything untouched"
+        },
+        {
+          "id": "SAFE-002.9",
+          "title": "The operation's own confirmation comes first"
+        },
+        {
+          "id": "SAFE-002.10",
+          "title": "Edits made while the dialog chain was open"
+        }
+      ]
+    },
+    "SAFE-003": {
+      "id": "SAFE-003",
+      "title": "Every operation that can rewrite files asks",
+      "area": "SAFE",
+      "spec": "specs/git-safety.md",
+      "line": 229,
+      "status": "planned",
+      "commands": [
+        "git.switchBranch",
+        "git.checkoutTo",
+        "git.createBranch",
+        "git.pull",
+        "git.fetch",
+        "git.push",
+        "git.mergeBranch",
+        "git.rebaseBranch",
+        "git.mergeRef",
+        "git.rebaseOnto",
+        "git.stash",
+        "git.stashApply",
+        "git.stashPop",
+        "git.stashDrop",
+        "git.editHistory",
+        "git.undoLastCommit",
+        "git.forcePush",
+        "git.deleteBranch",
+        "git.renameBranch",
+        "git.setUpstream",
+        "git.pushBranch",
+        "git.deleteRemoteBranch",
+        "git.deleteTag",
+        "git.pushTag"
+      ],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/gitSafety.ts",
+        "src/lib/gitMerge.ts",
+        "src/components/GraphView.tsx"
+      ],
+      "tests": [
+        "src/__tests__/gitSafety.test.ts",
+        "src/__tests__/gitSafetyGuard.test.ts"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "SAFE-003.1",
+          "title": "Switching branch"
+        },
+        {
+          "id": "SAFE-003.2",
+          "title": "Checking out a commit"
+        },
+        {
+          "id": "SAFE-003.3",
+          "title": "Pull"
+        },
+        {
+          "id": "SAFE-003.4",
+          "title": "Merge and rebase"
+        },
+        {
+          "id": "SAFE-003.5",
+          "title": "Editing history"
+        },
+        {
+          "id": "SAFE-003.6",
+          "title": "Stashing says the unsaved text would be left out"
+        },
+        {
+          "id": "SAFE-003.7",
+          "title": "Applying or popping a stash"
+        },
+        {
+          "id": "SAFE-003.8",
+          "title": "Cherry-pick and revert"
+        },
+        {
+          "id": "SAFE-003.9",
+          "title": "Continue and Skip of a stopped operation"
+        },
+        {
+          "id": "SAFE-003.10",
+          "title": "Operations that leave the files alone do not ask"
+        },
+        {
+          "id": "SAFE-003.11",
+          "title": "Commit keeps its own warning"
+        },
+        {
+          "id": "SAFE-003.12",
+          "title": "Save All before a merge, rebase or history edit leads to the clean-state refusal"
+        },
+        {
+          "id": "SAFE-003.13",
+          "title": "Uncommitted changes already on disk: one refusal, no question"
+        }
+      ]
+    },
+    "SAFE-004": {
+      "id": "SAFE-004",
+      "title": "Operations that throw work away say which unsaved tabs go too",
+      "area": "SAFE",
+      "spec": "specs/git-safety.md",
+      "line": 326,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/gitSafety.ts",
+        "src/lib/gitGraph.ts",
+        "src/components/GraphView.tsx",
+        "src/components/panels/GitPanel.tsx",
+        "src/lib/actions.ts",
+        "src/lib/diff.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitSafety.test.ts",
+        "src/__tests__/gitGraph.test.ts",
+        "src/__tests__/gitSafetyGuard.test.ts"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "SAFE-004.1",
+          "title": "Discard a file whose tab has unsaved edits"
+        },
+        {
+          "id": "SAFE-004.2",
+          "title": "Confirming reloads the tab without a second question"
+        },
+        {
+          "id": "SAFE-004.3",
+          "title": "Discard all names the unsaved tabs among the files"
+        },
+        {
+          "id": "SAFE-004.4",
+          "title": "Hard reset"
+        },
+        {
+          "id": "SAFE-004.5",
+          "title": "After a hard reset only rewritten files lose their tab edits"
+        },
+        {
+          "id": "SAFE-004.6",
+          "title": "Abort"
+        },
+        {
+          "id": "SAFE-004.7",
+          "title": "Take a side: large-file and Compare tabs are asked about too"
+        },
+        {
+          "id": "SAFE-004.8",
+          "title": "Cancel"
+        },
+        {
+          "id": "SAFE-004.9",
+          "title": "Soft and mixed reset do not mention tabs"
+        },
+        {
+          "id": "SAFE-004.10",
+          "title": "No unsaved tabs, unchanged wording"
+        }
+      ]
+    },
+    "SAFE-005": {
+      "id": "SAFE-005",
+      "title": "No route around the question",
+      "area": "SAFE",
+      "spec": "specs/git-safety.md",
+      "line": 406,
+      "status": "planned",
+      "commands": [
+        "git.switchBranch",
+        "git.checkoutTo",
+        "git.createBranch",
+        "git.pull",
+        "git.mergeBranch",
+        "git.rebaseBranch",
+        "git.mergeRef",
+        "git.rebaseOnto",
+        "git.stash",
+        "git.stashApply",
+        "git.stashPop",
+        "git.editHistory"
+      ],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/gitCommands.ts",
+        "src/components/panels/GitPanel.tsx",
+        "src/components/panels/StashSection.tsx",
+        "src/components/GraphView.tsx",
+        "src/components/HistoryEditList.tsx",
+        "src/components/CommandPalette.tsx",
+        "src/components/StatusBar.tsx",
+        "src/lib/commands.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitSafetyGuard.test.ts",
+        "src/__tests__/gitSafetyRoutes.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "SAFE-005.1",
+          "title": "Source Control panel buttons"
+        },
+        {
+          "id": "SAFE-005.2",
+          "title": "Commit graph menus"
+        },
+        {
+          "id": "SAFE-005.3",
+          "title": "Command palette and Git menu"
+        },
+        {
+          "id": "SAFE-005.4",
+          "title": "The branch list"
+        },
+        {
+          "id": "SAFE-005.5",
+          "title": "The status bar branch"
+        },
+        {
+          "id": "SAFE-005.6",
+          "title": "Keyboard"
+        },
+        {
+          "id": "SAFE-005.7",
+          "title": "A macro that switches branch"
+        },
+        {
+          "id": "SAFE-005.8",
+          "title": "\"All\" buttons"
+        },
+        {
+          "id": "SAFE-005.9",
+          "title": "Pull started from the Add-and-Push or publish flows is not affected"
+        },
+        {
+          "id": "SAFE-005.10",
+          "title": "While the dialog is open nothing else can start"
+        }
+      ]
+    },
+    "SAFE-006": {
+      "id": "SAFE-006",
+      "title": "Open tabs show what is on disk after every operation",
+      "area": "SAFE",
+      "spec": "specs/git-safety.md",
+      "line": 482,
+      "status": "planned",
+      "commands": [
+        "git.discardChange",
+        "git.discardLines",
+        "git.mergeRef",
+        "git.rebaseOnto",
+        "git.stash",
+        "git.stashApply",
+        "git.stashPop",
+        "git.editHistory"
+      ],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/actions.ts",
+        "src/lib/diff.ts",
+        "src/lib/gitSafety.ts",
+        "src/components/BigFileView.tsx"
+      ],
+      "tests": [
+        "src/__tests__/gitSafety.test.ts",
+        "src/__tests__/gitSafetyGuard.test.ts"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "SAFE-006.1",
+          "title": "Clean tabs reload after a branch switch"
+        },
+        {
+          "id": "SAFE-006.2",
+          "title": "One file keeps the familiar notice"
+        },
+        {
+          "id": "SAFE-006.3",
+          "title": "Every file-rewriting operation reloads"
+        },
+        {
+          "id": "SAFE-006.4",
+          "title": "An operation that stops on a conflict reloads too"
+        },
+        {
+          "id": "SAFE-006.5",
+          "title": "An operation that fails part-way reloads what it changed"
+        },
+        {
+          "id": "SAFE-006.6",
+          "title": "Unchanged files are not reloaded"
+        },
+        {
+          "id": "SAFE-006.7",
+          "title": "Large-file tabs"
+        },
+        {
+          "id": "SAFE-006.8",
+          "title": "Compare tabs"
+        },
+        {
+          "id": "SAFE-006.9",
+          "title": "Tabs kept unsaved are not reloaded"
+        },
+        {
+          "id": "SAFE-006.10",
+          "title": "The check after an operation is never lost"
+        },
+        {
+          "id": "SAFE-006.11",
+          "title": "Both panes follow"
+        },
+        {
+          "id": "SAFE-006.12",
+          "title": "Change markers and blame follow"
+        }
+      ]
+    },
+    "SAFE-007": {
+      "id": "SAFE-007",
+      "title": "Tabs whose file is not there after the operation",
+      "area": "SAFE",
+      "spec": "specs/git-safety.md",
+      "line": 565,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/lib/actions.ts",
+        "src/lib/git.ts",
+        "src/lib/gitSafety.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitSafety.test.ts",
+        "src/__tests__/gitSafetyGuard.test.ts"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "SAFE-007.1",
+          "title": "The tab stays open"
+        },
+        {
+          "id": "SAFE-007.2",
+          "title": "Switching back brings the tab back clean"
+        },
+        {
+          "id": "SAFE-007.3",
+          "title": "The warning is given once"
+        },
+        {
+          "id": "SAFE-007.4",
+          "title": "An unsaved tab whose file vanished keeps its edits"
+        },
+        {
+          "id": "SAFE-007.5",
+          "title": "A large-file tab"
+        },
+        {
+          "id": "SAFE-007.6",
+          "title": "A file I deleted on purpose closes its tab"
+        },
+        {
+          "id": "SAFE-007.7",
+          "title": "A deleted file with unsaved edits is said so first"
+        },
+        {
+          "id": "SAFE-007.8",
+          "title": "Other operations that remove files"
         }
       ]
     },
@@ -14310,6 +18230,1273 @@
         }
       ]
     },
+    "STAGE-001": {
+      "id": "STAGE-001",
+      "title": "Stage one change of a file",
+      "area": "STAGE",
+      "spec": "specs/git-staging.md",
+      "line": 28,
+      "status": "planned",
+      "commands": [
+        "git.stageChange"
+      ],
+      "files": [
+        "src/lib/gitHunks.ts",
+        "src/lib/git.ts",
+        "src/lib/diff.ts",
+        "src/components/DiffView.tsx",
+        "src/lib/gitApi.ts",
+        "src-tauri/src/git.rs",
+        "src-tauri/src/lib.rs",
+        "src/components/panels/GitPanel.tsx",
+        "src/styles/app.css"
+      ],
+      "tests": [
+        "src/__tests__/gitHunks.test.ts",
+        "src/__tests__/diffView.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md",
+        "docs/compare.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STAGE-001.1",
+          "title": "Every change has a Stage button"
+        },
+        {
+          "id": "STAGE-001.2",
+          "title": "Stage one change"
+        },
+        {
+          "id": "STAGE-001.3",
+          "title": "The file is in both lists and the Commit button counts it"
+        },
+        {
+          "id": "STAGE-001.4",
+          "title": "The comparison follows"
+        },
+        {
+          "id": "STAGE-001.5",
+          "title": "Stage the last change"
+        },
+        {
+          "id": "STAGE-001.6",
+          "title": "One staged, one discarded, one left"
+        },
+        {
+          "id": "STAGE-001.7",
+          "title": "Inline layout"
+        },
+        {
+          "id": "STAGE-001.8",
+          "title": "A file that already has something staged"
+        },
+        {
+          "id": "STAGE-001.9",
+          "title": "No question is asked"
+        }
+      ]
+    },
+    "STAGE-002": {
+      "id": "STAGE-002",
+      "title": "Unstage one change",
+      "area": "STAGE",
+      "spec": "specs/git-staging.md",
+      "line": 105,
+      "status": "planned",
+      "commands": [
+        "git.unstageChange"
+      ],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/gitHunks.ts",
+        "src/components/DiffView.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/gitHunks.test.ts",
+        "src/__tests__/diffView.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md",
+        "docs/compare.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STAGE-002.1",
+          "title": "The staged comparison offers Unstage only"
+        },
+        {
+          "id": "STAGE-002.2",
+          "title": "Unstage one change"
+        },
+        {
+          "id": "STAGE-002.3",
+          "title": "Unstage the last staged change"
+        },
+        {
+          "id": "STAGE-002.4",
+          "title": "No question, no save"
+        },
+        {
+          "id": "STAGE-002.5",
+          "title": "A newly added file"
+        },
+        {
+          "id": "STAGE-002.6",
+          "title": "A staged rename with edits"
+        }
+      ]
+    },
+    "STAGE-003": {
+      "id": "STAGE-003",
+      "title": "Discard one change, after asking",
+      "area": "STAGE",
+      "spec": "specs/git-staging.md",
+      "line": 160,
+      "status": "planned",
+      "commands": [
+        "git.discardChange"
+      ],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/gitHunks.ts",
+        "src/lib/dialogs.ts",
+        "src/components/DiffView.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/gitHunks.test.ts",
+        "src/__tests__/diffView.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md",
+        "docs/compare.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STAGE-003.1",
+          "title": "Discard asks first"
+        },
+        {
+          "id": "STAGE-003.2",
+          "title": "Cancel, Escape and Enter leave the file alone"
+        },
+        {
+          "id": "STAGE-003.3",
+          "title": "Discard restores those lines only"
+        },
+        {
+          "id": "STAGE-003.4",
+          "title": "An open tab shows the restored text"
+        },
+        {
+          "id": "STAGE-003.5",
+          "title": "With something staged, the lines go back to the staged version"
+        },
+        {
+          "id": "STAGE-003.6",
+          "title": "Removed lines are put back"
+        },
+        {
+          "id": "STAGE-003.7",
+          "title": "Discarding the last change"
+        },
+        {
+          "id": "STAGE-003.8",
+          "title": "No Discard in the staged comparison"
+        }
+      ]
+    },
+    "STAGE-004": {
+      "id": "STAGE-004",
+      "title": "Stage, unstage or discard selected lines",
+      "area": "STAGE",
+      "spec": "specs/git-staging.md",
+      "line": 224,
+      "status": "planned",
+      "commands": [
+        "git.stageLines",
+        "git.unstageLines",
+        "git.discardLines"
+      ],
+      "files": [
+        "src/lib/gitHunks.ts",
+        "src/lib/git.ts",
+        "src/components/DiffView.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/gitHunks.test.ts",
+        "src/__tests__/diffView.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md",
+        "docs/compare.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STAGE-004.1",
+          "title": "Stage some of the added lines"
+        },
+        {
+          "id": "STAGE-004.2",
+          "title": "One line of a block changed line for line"
+        },
+        {
+          "id": "STAGE-004.3",
+          "title": "A block replaced by a different number of lines"
+        },
+        {
+          "id": "STAGE-004.4",
+          "title": "A selection across several changes"
+        },
+        {
+          "id": "STAGE-004.5",
+          "title": "Removed lines come along only when the selection spans them"
+        },
+        {
+          "id": "STAGE-004.6",
+          "title": "Unstage selected lines"
+        },
+        {
+          "id": "STAGE-004.7",
+          "title": "Discard selected lines asks first"
+        },
+        {
+          "id": "STAGE-004.8",
+          "title": "A selection that touches no change"
+        },
+        {
+          "id": "STAGE-004.9",
+          "title": "The selection is read from the right side"
+        },
+        {
+          "id": "STAGE-004.10",
+          "title": "The change bar always takes the whole change"
+        }
+      ]
+    },
+    "STAGE-005": {
+      "id": "STAGE-005",
+      "title": "Unsaved edits are saved first",
+      "area": "STAGE",
+      "spec": "specs/git-staging.md",
+      "line": 304,
+      "status": "planned",
+      "commands": [
+        "git.stageChange",
+        "git.stageLines",
+        "git.discardChange",
+        "git.discardLines"
+      ],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/diff.ts",
+        "src/lib/actions.ts"
+      ],
+      "tests": [
+        "src/__tests__/diffSession.test.ts",
+        "src/__tests__/diffView.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STAGE-005.1",
+          "title": "Stage with an unsaved tab saves it first"
+        },
+        {
+          "id": "STAGE-005.2",
+          "title": "The save fails or is cancelled"
+        },
+        {
+          "id": "STAGE-005.3",
+          "title": "Edits made in the comparison itself"
+        },
+        {
+          "id": "STAGE-005.4",
+          "title": "Discard says that it will save"
+        },
+        {
+          "id": "STAGE-005.5",
+          "title": "Typed more since the comparison was opened"
+        },
+        {
+          "id": "STAGE-005.6",
+          "title": "Unsaved edits in other files are left alone"
+        }
+      ]
+    },
+    "STAGE-006": {
+      "id": "STAGE-006",
+      "title": "Line endings, encoding and the end of the file are preserved",
+      "area": "STAGE",
+      "spec": "specs/git-staging.md",
+      "line": 359,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src-tauri/src/git.rs",
+        "src/lib/gitHunks.ts"
+      ],
+      "tests": [
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [],
+      "scenarios": [
+        {
+          "id": "STAGE-006.1",
+          "title": "A CRLF file committed with CRLF"
+        },
+        {
+          "id": "STAGE-006.2",
+          "title": "CRLF on disk, LF in the repository"
+        },
+        {
+          "id": "STAGE-006.3",
+          "title": "Selected lines in a CRLF file"
+        },
+        {
+          "id": "STAGE-006.4",
+          "title": "No newline at the end of the file"
+        },
+        {
+          "id": "STAGE-006.5",
+          "title": "A final newline was added or removed"
+        },
+        {
+          "id": "STAGE-006.6",
+          "title": "A file that is not UTF-8"
+        },
+        {
+          "id": "STAGE-006.7",
+          "title": "Change on the first or the last line"
+        }
+      ]
+    },
+    "STAGE-007": {
+      "id": "STAGE-007",
+      "title": "Where partial staging is offered",
+      "area": "STAGE",
+      "spec": "specs/git-staging.md",
+      "line": 416,
+      "status": "planned",
+      "commands": [
+        "git.stageChange",
+        "git.unstageChange",
+        "git.discardChange",
+        "git.stageLines",
+        "git.unstageLines",
+        "git.discardLines"
+      ],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/gitStatus.ts",
+        "src/lib/diff.ts",
+        "src/components/DiffView.tsx",
+        "src/lib/gitCommands.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitHunks.test.ts",
+        "src/__tests__/diffView.test.tsx",
+        "src/__tests__/splitGit.test.ts"
+      ],
+      "docs": [
+        "docs/git.md",
+        "docs/compare.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STAGE-007.1",
+          "title": "Other comparisons have no staging controls"
+        },
+        {
+          "id": "STAGE-007.2",
+          "title": "Conflicted files"
+        },
+        {
+          "id": "STAGE-007.3",
+          "title": "Untracked files"
+        },
+        {
+          "id": "STAGE-007.4",
+          "title": "A staged new file that was edited again"
+        },
+        {
+          "id": "STAGE-007.5",
+          "title": "A deleted file"
+        },
+        {
+          "id": "STAGE-007.6",
+          "title": "Swapped sides"
+        },
+        {
+          "id": "STAGE-007.7",
+          "title": "While git is busy"
+        },
+        {
+          "id": "STAGE-007.8",
+          "title": "Nothing left to act on"
+        },
+        {
+          "id": "STAGE-007.9",
+          "title": "The copy arrows are unchanged"
+        },
+        {
+          "id": "STAGE-007.10",
+          "title": "During a merge or rebase, for files without conflicts"
+        }
+      ]
+    },
+    "STAGE-008": {
+      "id": "STAGE-008",
+      "title": "Partial staging from the menu, the palette and the keyboard",
+      "area": "STAGE",
+      "spec": "specs/git-staging.md",
+      "line": 492,
+      "status": "planned",
+      "commands": [
+        "git.stageChange",
+        "git.unstageChange",
+        "git.discardChange",
+        "git.stageLines",
+        "git.unstageLines",
+        "git.discardLines"
+      ],
+      "files": [
+        "src/lib/gitCommands.ts",
+        "src/components/MenuBar.tsx",
+        "src/components/DiffView.tsx",
+        "src/lib/git.ts"
+      ],
+      "tests": [
+        "src/__tests__/diffView.test.tsx",
+        "src/__tests__/ui.test.ts"
+      ],
+      "docs": [
+        "docs/git.md",
+        "docs/keyboard-shortcuts.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STAGE-008.1",
+          "title": "The commands are in the Git menu and the palette"
+        },
+        {
+          "id": "STAGE-008.2",
+          "title": "Review and stage with the keyboard"
+        },
+        {
+          "id": "STAGE-008.3",
+          "title": "Selected lines with the keyboard"
+        },
+        {
+          "id": "STAGE-008.4",
+          "title": "Discard from the palette asks the same question"
+        },
+        {
+          "id": "STAGE-008.5",
+          "title": "Discard has no keyboard shortcut"
+        },
+        {
+          "id": "STAGE-008.6",
+          "title": "Commands that do not fit the comparison are greyed out"
+        },
+        {
+          "id": "STAGE-008.7",
+          "title": "The cursor is not in a change"
+        },
+        {
+          "id": "STAGE-008.8",
+          "title": "Not on a Compare tab"
+        },
+        {
+          "id": "STAGE-008.9",
+          "title": "Commands save first too"
+        },
+        {
+          "id": "STAGE-008.10",
+          "title": "Shortcuts do not collide"
+        }
+      ]
+    },
+    "STAGE-009": {
+      "id": "STAGE-009",
+      "title": "The comparison stays true to the index",
+      "area": "STAGE",
+      "spec": "specs/git-staging.md",
+      "line": 563,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/diff.ts",
+        "src/components/DiffView.tsx",
+        "src-tauri/src/git.rs",
+        "src/lib/gitStatus.ts"
+      ],
+      "tests": [
+        "src/__tests__/diffSession.test.ts",
+        "src/__tests__/diffView.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/compare.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STAGE-009.1",
+          "title": "The index changed outside Quarry"
+        },
+        {
+          "id": "STAGE-009.2",
+          "title": "The file changed on disk"
+        },
+        {
+          "id": "STAGE-009.3",
+          "title": "Staging from the panel refreshes the comparison"
+        },
+        {
+          "id": "STAGE-009.4",
+          "title": "Both comparisons of one file stay in step"
+        },
+        {
+          "id": "STAGE-009.5",
+          "title": "After a commit"
+        },
+        {
+          "id": "STAGE-009.6",
+          "title": "Reload reads git again"
+        },
+        {
+          "id": "STAGE-009.7",
+          "title": "A comparison with unsaved edits is not refreshed under me"
+        },
+        {
+          "id": "STAGE-009.8",
+          "title": "All or nothing"
+        },
+        {
+          "id": "STAGE-009.9",
+          "title": "The file was closed, renamed or deleted meanwhile"
+        }
+      ]
+    },
+    "STASH-001": {
+      "id": "STASH-001",
+      "title": "Stash uncommitted changes",
+      "area": "STASH",
+      "spec": "specs/git-stash.md",
+      "line": 24,
+      "status": "planned",
+      "commands": [
+        "git.stash"
+      ],
+      "files": [
+        "src/components/panels/StashSection.tsx",
+        "src/components/panels/GitPanel.tsx",
+        "src/lib/git.ts",
+        "src/lib/gitStash.ts",
+        "src/lib/gitCommands.ts",
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitStash.test.ts",
+        "src/__tests__/stashSection.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STASH-001.1",
+          "title": "Open the form"
+        },
+        {
+          "id": "STASH-001.2",
+          "title": "Stash with a message"
+        },
+        {
+          "id": "STASH-001.3",
+          "title": "Enter stashes, Escape cancels"
+        },
+        {
+          "id": "STASH-001.4",
+          "title": "No message"
+        },
+        {
+          "id": "STASH-001.5",
+          "title": "Open tabs follow the files"
+        },
+        {
+          "id": "STASH-001.6",
+          "title": "Cancel"
+        },
+        {
+          "id": "STASH-001.7",
+          "title": "git refuses"
+        }
+      ]
+    },
+    "STASH-002": {
+      "id": "STASH-002",
+      "title": "Choose whether untracked files go into the stash",
+      "area": "STASH",
+      "spec": "specs/git-stash.md",
+      "line": 89,
+      "status": "planned",
+      "commands": [
+        "git.stash"
+      ],
+      "files": [
+        "src/components/panels/StashSection.tsx",
+        "src/lib/gitStash.ts",
+        "src/lib/git.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/gitStash.test.ts",
+        "src/__tests__/stashSection.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STASH-002.1",
+          "title": "The option is on by default"
+        },
+        {
+          "id": "STASH-002.2",
+          "title": "Untracked files are stashed"
+        },
+        {
+          "id": "STASH-002.3",
+          "title": "Untracked files are left alone"
+        },
+        {
+          "id": "STASH-002.4",
+          "title": "No untracked files, no option"
+        },
+        {
+          "id": "STASH-002.5",
+          "title": "Only untracked files, option off"
+        },
+        {
+          "id": "STASH-002.6",
+          "title": "The option starts ticked again next time"
+        },
+        {
+          "id": "STASH-002.7",
+          "title": "Ignored files are never stashed"
+        }
+      ]
+    },
+    "STASH-003": {
+      "id": "STASH-003",
+      "title": "Guards before stashing",
+      "area": "STASH",
+      "spec": "specs/git-stash.md",
+      "line": 146,
+      "status": "planned",
+      "commands": [
+        "git.stash"
+      ],
+      "files": [
+        "src/lib/gitStash.ts",
+        "src/lib/git.ts",
+        "src/components/panels/StashSection.tsx",
+        "src/lib/gitCommands.ts",
+        "src/lib/gitStatus.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitStash.test.ts",
+        "src/__tests__/stashSection.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STASH-003.1",
+          "title": "Nothing to stash"
+        },
+        {
+          "id": "STASH-003.2",
+          "title": "Not during a stopped operation"
+        },
+        {
+          "id": "STASH-003.3",
+          "title": "Not while files are in conflict"
+        },
+        {
+          "id": "STASH-003.4",
+          "title": "Disabled while git is busy"
+        },
+        {
+          "id": "STASH-003.5",
+          "title": "A repository with no commits"
+        }
+      ]
+    },
+    "STASH-004": {
+      "id": "STASH-004",
+      "title": "See the stashes of the repository",
+      "area": "STASH",
+      "spec": "specs/git-stash.md",
+      "line": 191,
+      "status": "planned",
+      "commands": [
+        "git.showStashes"
+      ],
+      "files": [
+        "src/components/panels/StashSection.tsx",
+        "src/lib/git.ts",
+        "src/lib/gitStash.ts",
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts",
+        "src/editor/git.ts",
+        "src/lib/gitCommands.ts",
+        "src/styles/app.css"
+      ],
+      "tests": [
+        "src/__tests__/gitStash.test.ts",
+        "src/__tests__/stashSection.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STASH-004.1",
+          "title": "Where the section is"
+        },
+        {
+          "id": "STASH-004.2",
+          "title": "The list"
+        },
+        {
+          "id": "STASH-004.3",
+          "title": "A stash without a message"
+        },
+        {
+          "id": "STASH-004.4",
+          "title": "No stashes"
+        },
+        {
+          "id": "STASH-004.5",
+          "title": "Row buttons"
+        },
+        {
+          "id": "STASH-004.6",
+          "title": "A stash made outside Quarry appears"
+        },
+        {
+          "id": "STASH-004.7",
+          "title": "Collapse"
+        },
+        {
+          "id": "STASH-004.8",
+          "title": "Show Stashes command"
+        },
+        {
+          "id": "STASH-004.9",
+          "title": "The section follows the repository"
+        }
+      ]
+    },
+    "STASH-005": {
+      "id": "STASH-005",
+      "title": "See what a stash holds",
+      "area": "STASH",
+      "spec": "specs/git-stash.md",
+      "line": 260,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/panels/StashSection.tsx",
+        "src/lib/git.ts",
+        "src/lib/gitStatus.ts",
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts",
+        "src/lib/diff.ts"
+      ],
+      "tests": [
+        "src/__tests__/stashSection.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STASH-005.1",
+          "title": "Expand a stash to its files"
+        },
+        {
+          "id": "STASH-005.2",
+          "title": "Untracked files are listed too"
+        },
+        {
+          "id": "STASH-005.3",
+          "title": "See what the stash changed in a file"
+        },
+        {
+          "id": "STASH-005.4",
+          "title": "A new or untracked file"
+        },
+        {
+          "id": "STASH-005.5",
+          "title": "Looking changes nothing"
+        },
+        {
+          "id": "STASH-005.6",
+          "title": "Open the file as it is now"
+        },
+        {
+          "id": "STASH-005.7",
+          "title": "A binary file"
+        },
+        {
+          "id": "STASH-005.8",
+          "title": "Available while actions are off"
+        }
+      ]
+    },
+    "STASH-006": {
+      "id": "STASH-006",
+      "title": "Apply a stash and keep it",
+      "area": "STASH",
+      "spec": "specs/git-stash.md",
+      "line": 322,
+      "status": "planned",
+      "commands": [
+        "git.stashApply"
+      ],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/gitStash.ts",
+        "src/components/panels/StashSection.tsx",
+        "src/lib/gitCommands.ts",
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitStash.test.ts",
+        "src/__tests__/stashSection.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STASH-006.1",
+          "title": "Apply"
+        },
+        {
+          "id": "STASH-006.2",
+          "title": "What was staged comes back unstaged"
+        },
+        {
+          "id": "STASH-006.3",
+          "title": "Untracked files come back"
+        },
+        {
+          "id": "STASH-006.4",
+          "title": "Open tabs follow the files"
+        },
+        {
+          "id": "STASH-006.5",
+          "title": "Apply on top of other changes"
+        },
+        {
+          "id": "STASH-006.6",
+          "title": "My changes to the same file are in the way"
+        },
+        {
+          "id": "STASH-006.7",
+          "title": "An untracked file already exists"
+        },
+        {
+          "id": "STASH-006.8",
+          "title": "Not during a stopped operation or with conflicts"
+        },
+        {
+          "id": "STASH-006.9",
+          "title": "Disabled while git is busy"
+        },
+        {
+          "id": "STASH-006.10",
+          "title": "A stale list still acts on the right stash"
+        },
+        {
+          "id": "STASH-006.11",
+          "title": "The stash is gone"
+        }
+      ]
+    },
+    "STASH-007": {
+      "id": "STASH-007",
+      "title": "Pop a stash",
+      "area": "STASH",
+      "spec": "specs/git-stash.md",
+      "line": 404,
+      "status": "planned",
+      "commands": [
+        "git.stashPop"
+      ],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/gitStash.ts",
+        "src/components/panels/StashSection.tsx",
+        "src/lib/gitCommands.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/gitStash.test.ts",
+        "src/__tests__/stashSection.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STASH-007.1",
+          "title": "Pop"
+        },
+        {
+          "id": "STASH-007.2",
+          "title": "Pop does not ask"
+        },
+        {
+          "id": "STASH-007.3",
+          "title": "Pop a stash that is not the newest"
+        },
+        {
+          "id": "STASH-007.4",
+          "title": "A pop that cannot start keeps the stash"
+        },
+        {
+          "id": "STASH-007.5",
+          "title": "Popping the last stash"
+        }
+      ]
+    },
+    "STASH-008": {
+      "id": "STASH-008",
+      "title": "Drop a stash",
+      "area": "STASH",
+      "spec": "specs/git-stash.md",
+      "line": 451,
+      "status": "planned",
+      "commands": [
+        "git.stashDrop"
+      ],
+      "files": [
+        "src/lib/gitStash.ts",
+        "src/lib/git.ts",
+        "src/lib/dialogs.ts",
+        "src/components/panels/StashSection.tsx",
+        "src/lib/gitCommands.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/gitStash.test.ts",
+        "src/__tests__/stashSection.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STASH-008.1",
+          "title": "Drop asks first"
+        },
+        {
+          "id": "STASH-008.2",
+          "title": "Drop"
+        },
+        {
+          "id": "STASH-008.3",
+          "title": "Cancel"
+        },
+        {
+          "id": "STASH-008.4",
+          "title": "Enter does not drop"
+        },
+        {
+          "id": "STASH-008.5",
+          "title": "Delete key"
+        },
+        {
+          "id": "STASH-008.6",
+          "title": "Drop works during a stopped operation"
+        },
+        {
+          "id": "STASH-008.7",
+          "title": "The right stash is dropped from a stale list"
+        },
+        {
+          "id": "STASH-008.8",
+          "title": "No way to drop every stash at once"
+        }
+      ]
+    },
+    "STASH-009": {
+      "id": "STASH-009",
+      "title": "A stash that conflicts when it comes back",
+      "area": "STASH",
+      "spec": "specs/git-stash.md",
+      "line": 513,
+      "status": "planned",
+      "commands": [
+        "git.stashApply",
+        "git.stashPop"
+      ],
+      "files": [
+        "src/lib/git.ts",
+        "src/lib/gitStash.ts",
+        "src/lib/gitStatus.ts",
+        "src/components/panels/GitPanel.tsx",
+        "src/components/panels/StashSection.tsx",
+        "src/components/GraphView.tsx",
+        "src/editor/conflicts.ts",
+        "src-tauri/src/git.rs"
+      ],
+      "tests": [
+        "src/__tests__/gitStash.test.ts",
+        "src/__tests__/stashSection.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STASH-009.1",
+          "title": "A pop that conflicts"
+        },
+        {
+          "id": "STASH-009.2",
+          "title": "The stash is kept"
+        },
+        {
+          "id": "STASH-009.3",
+          "title": "The panel says what is going on"
+        },
+        {
+          "id": "STASH-009.4",
+          "title": "The conflict bars say which side is which"
+        },
+        {
+          "id": "STASH-009.5",
+          "title": "Resolving the last file of a pop offers the drop"
+        },
+        {
+          "id": "STASH-009.6",
+          "title": "Drop Stash"
+        },
+        {
+          "id": "STASH-009.7",
+          "title": "Keep Stash"
+        },
+        {
+          "id": "STASH-009.8",
+          "title": "Nothing is committed for me"
+        },
+        {
+          "id": "STASH-009.9",
+          "title": "Save and Mark Resolved does not talk about committing"
+        },
+        {
+          "id": "STASH-009.10",
+          "title": "Keep my version of a file"
+        },
+        {
+          "id": "STASH-009.11",
+          "title": "An Apply that conflicts"
+        },
+        {
+          "id": "STASH-009.12",
+          "title": "The graph tab"
+        },
+        {
+          "id": "STASH-009.13",
+          "title": "No new stash, apply or pop until the conflicts are resolved"
+        },
+        {
+          "id": "STASH-009.14",
+          "title": "After restarting Quarry"
+        },
+        {
+          "id": "STASH-009.15",
+          "title": "Nothing is written into the repository to remember this"
+        },
+        {
+          "id": "STASH-009.16",
+          "title": "The stash was dropped in the meantime"
+        }
+      ]
+    },
+    "STASH-010": {
+      "id": "STASH-010",
+      "title": "Stashes in the commit graph",
+      "area": "STASH",
+      "spec": "specs/git-stash.md",
+      "line": 629,
+      "status": "planned",
+      "commands": [
+        "git.graph"
+      ],
+      "files": [
+        "src-tauri/src/git.rs",
+        "src/lib/gitGraph.ts",
+        "src/components/GraphView.tsx",
+        "src/lib/git.ts",
+        "src/lib/gitApi.ts",
+        "src/styles/app.css",
+        "src/styles/tokens.css"
+      ],
+      "tests": [
+        "src/__tests__/gitGraph.test.ts",
+        "src/__tests__/graphView.test.tsx",
+        "src-tauri/src/git.rs"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STASH-010.1",
+          "title": "A stash is a node on its base commit"
+        },
+        {
+          "id": "STASH-010.2",
+          "title": "One row per stash"
+        },
+        {
+          "id": "STASH-010.3",
+          "title": "Not in the current-branch view"
+        },
+        {
+          "id": "STASH-010.4",
+          "title": "A stash on an older commit"
+        },
+        {
+          "id": "STASH-010.5",
+          "title": "Several stashes on one commit"
+        },
+        {
+          "id": "STASH-010.6",
+          "title": "Details of a stash"
+        },
+        {
+          "id": "STASH-010.7",
+          "title": "The right-click menu of a stash"
+        },
+        {
+          "id": "STASH-010.8",
+          "title": "Actions from the graph use the same guards"
+        },
+        {
+          "id": "STASH-010.9",
+          "title": "The graph follows the stash list"
+        },
+        {
+          "id": "STASH-010.10",
+          "title": "Find"
+        },
+        {
+          "id": "STASH-010.11",
+          "title": "Search All History leaves stashes out"
+        },
+        {
+          "id": "STASH-010.12",
+          "title": "No stashes"
+        }
+      ]
+    },
+    "STASH-011": {
+      "id": "STASH-011",
+      "title": "Stash from the menu and the command palette",
+      "area": "STASH",
+      "spec": "specs/git-stash.md",
+      "line": 712,
+      "status": "planned",
+      "commands": [
+        "git.stash",
+        "git.stashApply",
+        "git.stashPop",
+        "git.stashDrop",
+        "git.showStashes"
+      ],
+      "files": [
+        "src/lib/gitCommands.ts",
+        "src/components/MenuBar.tsx",
+        "src/lib/git.ts",
+        "src/lib/gitStash.ts",
+        "src/lib/panels.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitStash.test.ts",
+        "src/__tests__/ui.test.ts"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "STASH-011.1",
+          "title": "The Git menu"
+        },
+        {
+          "id": "STASH-011.2",
+          "title": "Stash Changes from the palette"
+        },
+        {
+          "id": "STASH-011.3",
+          "title": "Apply and pop the latest stash"
+        },
+        {
+          "id": "STASH-011.4",
+          "title": "Drop Latest Stash asks too"
+        },
+        {
+          "id": "STASH-011.5",
+          "title": "Greyed out with no stashes"
+        },
+        {
+          "id": "STASH-011.6",
+          "title": "Greyed out with no repository"
+        },
+        {
+          "id": "STASH-011.7",
+          "title": "The commands cannot go round the guards"
+        },
+        {
+          "id": "STASH-011.8",
+          "title": "Nothing to stash, from the palette"
+        },
+        {
+          "id": "STASH-011.9",
+          "title": "No shortcuts are taken"
+        }
+      ]
+    },
     "TAB-001": {
       "id": "TAB-001",
       "title": "See the open documents in the tab strip",
@@ -15264,6 +20451,314 @@
         {
           "id": "TERM-009.7",
           "title": "Available without Claude Code"
+        }
+      ]
+    },
+    "THREEWAY-001": {
+      "id": "THREEWAY-001",
+      "title": "Open a conflicted file in the merge view",
+      "area": "THREEWAY",
+      "spec": "specs/git-merge-editor.md",
+      "line": 22,
+      "status": "planned",
+      "commands": [
+        "git.openMergeView"
+      ],
+      "files": [
+        "src/components/MergeView.tsx",
+        "src/lib/mergeModel.ts",
+        "src/lib/mergeView.ts",
+        "src/lib/conflicts.ts",
+        "src/lib/gitCommands.ts",
+        "src/components/MenuBar.tsx",
+        "src/components/panels/GitPanel.tsx",
+        "src/lib/types.ts",
+        "src/lib/actions.ts",
+        "src/App.tsx",
+        "src/components/TitleBar.tsx",
+        "src/lib/git.ts",
+        "src/styles/app.css"
+      ],
+      "tests": [
+        "src/__tests__/mergeModel.test.ts",
+        "src/__tests__/mergeView.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "THREEWAY-001.1",
+          "title": "Open from the menu"
+        },
+        {
+          "id": "THREEWAY-001.2",
+          "title": "Open from the Source Control panel"
+        },
+        {
+          "id": "THREEWAY-001.3",
+          "title": "The inline bars stay the default"
+        },
+        {
+          "id": "THREEWAY-001.4",
+          "title": "The sides are read-only and line up"
+        },
+        {
+          "id": "THREEWAY-001.5",
+          "title": "Base is shown when the file carries it"
+        },
+        {
+          "id": "THREEWAY-001.6",
+          "title": "No base without diff3 markers"
+        },
+        {
+          "id": "THREEWAY-001.7",
+          "title": "Unsaved edits of the text tab are used"
+        },
+        {
+          "id": "THREEWAY-001.8",
+          "title": "One merge tab per file"
+        },
+        {
+          "id": "THREEWAY-001.9",
+          "title": "Disabled without conflicts"
+        },
+        {
+          "id": "THREEWAY-001.10",
+          "title": "Not restored after a restart"
+        }
+      ]
+    },
+    "THREEWAY-002": {
+      "id": "THREEWAY-002",
+      "title": "Accept a side or both for each conflict",
+      "area": "THREEWAY",
+      "spec": "specs/git-merge-editor.md",
+      "line": 109,
+      "status": "planned",
+      "commands": [
+        "git.acceptCurrent",
+        "git.acceptIncoming",
+        "git.acceptBoth",
+        "git.nextConflict",
+        "git.prevConflict"
+      ],
+      "files": [
+        "src/components/MergeView.tsx",
+        "src/lib/mergeModel.ts",
+        "src/lib/conflicts.ts",
+        "src/lib/mergeView.ts",
+        "src/lib/gitCommands.ts"
+      ],
+      "tests": [
+        "src/__tests__/mergeModel.test.ts",
+        "src/__tests__/mergeView.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "THREEWAY-002.1",
+          "title": "Accept Current"
+        },
+        {
+          "id": "THREEWAY-002.2",
+          "title": "Accept Incoming"
+        },
+        {
+          "id": "THREEWAY-002.3",
+          "title": "Accept Both keeps current first"
+        },
+        {
+          "id": "THREEWAY-002.4",
+          "title": "Change my mind"
+        },
+        {
+          "id": "THREEWAY-002.5",
+          "title": "One undo step"
+        },
+        {
+          "id": "THREEWAY-002.6",
+          "title": "An empty side"
+        },
+        {
+          "id": "THREEWAY-002.7",
+          "title": "Commands and shortcuts work on the Result"
+        },
+        {
+          "id": "THREEWAY-002.8",
+          "title": "Which side was taken is visible"
+        }
+      ]
+    },
+    "THREEWAY-003": {
+      "id": "THREEWAY-003",
+      "title": "Edit the result by hand",
+      "area": "THREEWAY",
+      "spec": "specs/git-merge-editor.md",
+      "line": 173,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/MergeView.tsx",
+        "src/lib/mergeModel.ts",
+        "src/lib/mergeView.ts",
+        "src/editor/cmSetup.ts"
+      ],
+      "tests": [
+        "src/__tests__/mergeModel.test.ts",
+        "src/__tests__/mergeView.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "THREEWAY-003.1",
+          "title": "Type in the Result"
+        },
+        {
+          "id": "THREEWAY-003.2",
+          "title": "Resolve a conflict by hand"
+        },
+        {
+          "id": "THREEWAY-003.3",
+          "title": "Edits outside conflicts"
+        },
+        {
+          "id": "THREEWAY-003.4",
+          "title": "Reset one conflict"
+        },
+        {
+          "id": "THREEWAY-003.5",
+          "title": "Undo and redo"
+        }
+      ]
+    },
+    "THREEWAY-004": {
+      "id": "THREEWAY-004",
+      "title": "Complete the merge of a file, or cancel",
+      "area": "THREEWAY",
+      "spec": "specs/git-merge-editor.md",
+      "line": 221,
+      "status": "planned",
+      "commands": [
+        "git.completeMergeView",
+        "git.cancelMergeView",
+        "file.save",
+        "file.close"
+      ],
+      "files": [
+        "src/lib/mergeView.ts",
+        "src/lib/git.ts",
+        "src/lib/gitStatus.ts",
+        "src/components/MergeView.tsx",
+        "src/lib/gitCommands.ts",
+        "src/lib/commands.ts",
+        "src/lib/actions.ts",
+        "src/lib/dialogs.ts"
+      ],
+      "tests": [
+        "src/__tests__/mergeView.test.tsx",
+        "src/__tests__/gitRemote.test.ts"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "THREEWAY-004.1",
+          "title": "Complete with every conflict resolved"
+        },
+        {
+          "id": "THREEWAY-004.2",
+          "title": "Complete with conflicts left asks"
+        },
+        {
+          "id": "THREEWAY-004.3",
+          "title": "Markers typed by hand are caught too"
+        },
+        {
+          "id": "THREEWAY-004.4",
+          "title": "The save fails"
+        },
+        {
+          "id": "THREEWAY-004.5",
+          "title": "The file's tab follows"
+        },
+        {
+          "id": "THREEWAY-004.6",
+          "title": "Ctrl+S completes"
+        },
+        {
+          "id": "THREEWAY-004.7",
+          "title": "Cancel without changes"
+        },
+        {
+          "id": "THREEWAY-004.8",
+          "title": "Cancel with a changed Result asks"
+        },
+        {
+          "id": "THREEWAY-004.9",
+          "title": "Closing the tab with an unsaved Result asks"
+        },
+        {
+          "id": "THREEWAY-004.10",
+          "title": "The file changed underneath"
+        },
+        {
+          "id": "THREEWAY-004.11",
+          "title": "The operation ended meanwhile"
+        },
+        {
+          "id": "THREEWAY-004.12",
+          "title": "What is left to do"
+        }
+      ]
+    },
+    "THREEWAY-005": {
+      "id": "THREEWAY-005",
+      "title": "Know which side is which during a rebase",
+      "area": "THREEWAY",
+      "spec": "specs/git-merge-editor.md",
+      "line": 319,
+      "status": "planned",
+      "commands": [],
+      "files": [
+        "src/components/MergeView.tsx",
+        "src/lib/gitStatus.ts",
+        "src/lib/conflicts.ts",
+        "src/lib/mergeView.ts",
+        "src/lib/git.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitRemote.test.ts",
+        "src/__tests__/mergeView.test.tsx"
+      ],
+      "docs": [
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "THREEWAY-005.1",
+          "title": "The note during a rebase"
+        },
+        {
+          "id": "THREEWAY-005.2",
+          "title": "The tooltips say it too"
+        },
+        {
+          "id": "THREEWAY-005.3",
+          "title": "A patch series is not called a rebase"
+        },
+        {
+          "id": "THREEWAY-005.4",
+          "title": "No note for a merge or cherry-pick"
+        },
+        {
+          "id": "THREEWAY-005.5",
+          "title": "Same words as the inline bars"
         }
       ]
     },
@@ -16922,6 +22417,9 @@
       "CLAUDE-017",
       "CLAUDE-018",
       "CLAUDE-020",
+      "GITAI-003",
+      "GITAI-005",
+      "GITAI-006",
       "TERM-001",
       "TERM-002",
       "TERM-008"
@@ -16942,6 +22440,19 @@
       "SEARCH-013"
     ],
     "src-tauri/src/git.rs": [
+      "BRANCH-002",
+      "BRANCH-003",
+      "BRANCH-004",
+      "BRANCH-005",
+      "BRANCH-006",
+      "BRANCH-007",
+      "BRANCH-008",
+      "BRANCH-009",
+      "COMMITCMP-002",
+      "COMMITCMP-003",
+      "COMMITCMP-004",
+      "COMMITCMP-005",
+      "COMMITCMP-006",
       "CONFLICT-007",
       "CONFLICT-008",
       "CONFLICT-010",
@@ -16971,6 +22482,9 @@
       "GIT-022",
       "GIT-023",
       "GIT-024",
+      "GITAI-003",
+      "GITAI-004",
+      "GITAI-009",
       "GRAPH-002",
       "GRAPH-004",
       "GRAPH-005",
@@ -16980,7 +22494,38 @@
       "GRAPH-010",
       "GRAPH-011",
       "GRAPH-012",
-      "GRAPH-013"
+      "GRAPH-013",
+      "GRAPH-018",
+      "HISTORY-001",
+      "HISTORY-002",
+      "HISTORY-003",
+      "HISTORY-004",
+      "HISTORY-005",
+      "HISTORY-006",
+      "HISTORY-007",
+      "HISTORY-009",
+      "HISTORY-010",
+      "MERGE-004",
+      "MERGE-005",
+      "MERGE-006",
+      "MERGE-007",
+      "MERGE-008",
+      "MERGE-009",
+      "STAGE-001",
+      "STAGE-002",
+      "STAGE-003",
+      "STAGE-004",
+      "STAGE-006",
+      "STAGE-009",
+      "STASH-001",
+      "STASH-002",
+      "STASH-004",
+      "STASH-005",
+      "STASH-006",
+      "STASH-007",
+      "STASH-008",
+      "STASH-009",
+      "STASH-010"
     ],
     "src-tauri/src/json_tools.rs": [
       "BIG-017",
@@ -17007,6 +22552,7 @@
       "BIG-016",
       "BIG-017",
       "BIG-018",
+      "COMMITCMP-002",
       "EXPL-001",
       "EXPL-007",
       "EXPL-008",
@@ -17036,6 +22582,7 @@
       "SET-002",
       "SET-003",
       "SET-005",
+      "STAGE-001",
       "UI-006",
       "UI-023",
       "UI-024",
@@ -17137,6 +22684,7 @@
       "TAB-005",
       "TERM-001",
       "TERM-003",
+      "THREEWAY-001",
       "UI-002",
       "UI-008",
       "UI-009",
@@ -17166,6 +22714,7 @@
       "BIG-015",
       "BIG-020",
       "FILE-015",
+      "SAFE-006",
       "UI-021"
     ],
     "src/components/BigFilterPane.tsx": [
@@ -17213,11 +22762,19 @@
     ],
     "src/components/CommandPalette.tsx": [
       "BIG-005",
+      "BRANCH-002",
+      "BRANCH-003",
+      "BRANCH-004",
+      "BRANCH-005",
+      "COMMITCMP-005",
       "EDIT-016",
       "EDIT-018",
       "FILE-005",
       "FILE-009",
       "GIT-007",
+      "GITAI-009",
+      "MERGE-003",
+      "SAFE-005",
       "UI-005",
       "UI-006",
       "UI-007",
@@ -17231,6 +22788,13 @@
       "DIFF-011",
       "DIFF-012",
       "DIFF-013",
+      "STAGE-001",
+      "STAGE-002",
+      "STAGE-003",
+      "STAGE-004",
+      "STAGE-007",
+      "STAGE-008",
+      "STAGE-009",
       "UI-021"
     ],
     "src/components/EditorMenu.tsx": [
@@ -17259,9 +22823,30 @@
       "FIND-007",
       "FIND-010"
     ],
+    "src/components/GraphCompare.tsx": [
+      "COMMITCMP-002",
+      "COMMITCMP-003",
+      "COMMITCMP-004",
+      "COMMITCMP-005",
+      "COMMITCMP-006"
+    ],
     "src/components/GraphView.tsx": [
+      "BRANCH-001",
+      "BRANCH-003",
+      "BRANCH-004",
+      "BRANCH-005",
+      "BRANCH-006",
+      "BRANCH-007",
+      "BRANCH-008",
+      "BRANCH-009",
+      "COMMITCMP-001",
+      "COMMITCMP-002",
+      "COMMITCMP-004",
+      "COMMITCMP-005",
       "CONFLICT-011",
       "CONFLICT-014",
+      "GITAI-001",
+      "GITAI-009",
       "GRAPH-001",
       "GRAPH-002",
       "GRAPH-003",
@@ -17276,10 +22861,36 @@
       "GRAPH-012",
       "GRAPH-013",
       "GRAPH-014",
+      "GRAPH-015",
+      "GRAPH-016",
+      "GRAPH-017",
+      "GRAPH-018",
+      "HISTORY-001",
+      "HISTORY-002",
+      "HISTORY-003",
+      "HISTORY-004",
+      "HISTORY-005",
+      "HISTORY-007",
+      "HISTORY-010",
+      "MERGE-001",
+      "MERGE-002",
+      "MERGE-007",
+      "SAFE-003",
+      "SAFE-004",
+      "SAFE-005",
+      "STASH-009",
+      "STASH-010",
       "UI-021"
     ],
     "src/components/GridCells.tsx": [
       "BIG-015"
+    ],
+    "src/components/HistoryEditList.tsx": [
+      "HISTORY-007",
+      "HISTORY-008",
+      "HISTORY-009",
+      "HISTORY-010",
+      "SAFE-005"
     ],
     "src/components/HistoryMenu.tsx": [
       "FIND-007"
@@ -17299,9 +22910,11 @@
       "CLAUDE-014"
     ],
     "src/components/MenuBar.tsx": [
+      "BRANCH-002",
       "CLAUDE-001",
       "CLAUDE-003",
       "CLAUDE-013",
+      "COMMITCMP-005",
       "CONFLICT-002",
       "DIFF-001",
       "DIFF-006",
@@ -17330,17 +22943,29 @@
       "FMT-001",
       "GIT-004",
       "GIT-006",
+      "GITAI-001",
+      "GITAI-003",
+      "GITAI-007",
+      "GITAI-009",
       "GRAPH-001",
+      "GRAPH-019",
+      "HISTORY-002",
+      "HISTORY-007",
       "JSON-014",
       "MACRO-010",
+      "MERGE-003",
+      "MERGE-009",
       "SCRIPT-001",
       "SCRIPT-014",
       "SET-001",
       "SET-006",
       "SPLIT-001",
+      "STAGE-008",
+      "STASH-011",
       "TAB-006",
       "TAB-010",
       "TERM-001",
+      "THREEWAY-001",
       "UI-002",
       "UI-003",
       "UI-004",
@@ -17350,9 +22975,17 @@
       "UPD-001",
       "UPD-004"
     ],
+    "src/components/MergeView.tsx": [
+      "THREEWAY-001",
+      "THREEWAY-002",
+      "THREEWAY-003",
+      "THREEWAY-004",
+      "THREEWAY-005"
+    ],
     "src/components/Select.tsx": [
       "GIT-023",
       "GIT-025",
+      "HISTORY-008",
       "SET-007",
       "SET-015",
       "SET-017"
@@ -17390,10 +23023,12 @@
       "GIT-015",
       "GIT-025",
       "GIT-026",
+      "GITAI-005",
       "LSP-004",
       "MACRO-001",
       "MACRO-004",
       "MACRO-007",
+      "SAFE-005",
       "SCRIPT-012",
       "SET-008",
       "UI-007",
@@ -17439,6 +23074,7 @@
       "TAB-007",
       "TAB-008",
       "TERM-001",
+      "THREEWAY-001",
       "UI-001",
       "UI-002",
       "UI-014"
@@ -17509,7 +23145,24 @@
       "GIT-018",
       "GIT-019",
       "GIT-025",
-      "GRAPH-001"
+      "GITAI-001",
+      "GITAI-002",
+      "GITAI-003",
+      "GITAI-004",
+      "GITAI-005",
+      "GRAPH-001",
+      "GRAPH-015",
+      "HISTORY-002",
+      "HISTORY-010",
+      "MERGE-003",
+      "MERGE-007",
+      "MERGE-009",
+      "SAFE-004",
+      "SAFE-005",
+      "STAGE-001",
+      "STASH-001",
+      "STASH-009",
+      "THREEWAY-001"
     ],
     "src/components/panels/GitRepoSettings.tsx": [
       "GIT-016",
@@ -17593,6 +23246,9 @@
       "FILE-006",
       "FILE-016",
       "FIND-007",
+      "GITAI-001",
+      "GITAI-002",
+      "GITAI-003",
       "LSP-003",
       "LSP-005",
       "LSP-016",
@@ -17618,6 +23274,18 @@
       "TAB-009",
       "TERM-007",
       "UPD-002"
+    ],
+    "src/components/panels/StashSection.tsx": [
+      "SAFE-005",
+      "STASH-001",
+      "STASH-002",
+      "STASH-003",
+      "STASH-004",
+      "STASH-005",
+      "STASH-006",
+      "STASH-007",
+      "STASH-008",
+      "STASH-009"
     ],
     "src/editor/bulkEdit.ts": [
       "EDIT-003",
@@ -17652,6 +23320,7 @@
       "SET-002",
       "SET-007",
       "SET-008",
+      "THREEWAY-003",
       "UI-018"
     ],
     "src/editor/columnMode.ts": [
@@ -17665,7 +23334,13 @@
       "CONFLICT-004",
       "CONFLICT-005",
       "CONFLICT-006",
-      "CONFLICT-013"
+      "CONFLICT-013",
+      "GITAI-001",
+      "GITAI-002",
+      "GITAI-005",
+      "GITAI-007",
+      "GITAI-008",
+      "STASH-009"
     ],
     "src/editor/findReplace.ts": [
       "FIND-004",
@@ -17680,7 +23355,8 @@
       "GIT-003",
       "GIT-004",
       "GIT-005",
-      "GIT-017"
+      "GIT-017",
+      "STASH-004"
     ],
     "src/editor/lineMenu.ts": [
       "EDIT-002",
@@ -17795,12 +23471,21 @@
       "FILE-018",
       "FILE-019",
       "FILE-020",
+      "GITAI-002",
+      "GITAI-003",
+      "GITAI-005",
+      "GITAI-009",
       "GRAPH-001",
       "GRAPH-012",
       "LSP-009",
       "LSP-016",
       "LSP-017",
       "MACRO-010",
+      "SAFE-001",
+      "SAFE-002",
+      "SAFE-004",
+      "SAFE-006",
+      "SAFE-007",
       "SEARCH-008",
       "SET-002",
       "SET-003",
@@ -17810,6 +23495,7 @@
       "SET-014",
       "SET-015",
       "SPLIT-007",
+      "STAGE-005",
       "TAB-002",
       "TAB-004",
       "TAB-005",
@@ -17819,6 +23505,8 @@
       "TAB-009",
       "TAB-010",
       "TERM-007",
+      "THREEWAY-001",
+      "THREEWAY-004",
       "UI-002",
       "UI-013",
       "UI-015",
@@ -17870,6 +23558,7 @@
       "CLAUDE-019",
       "CLAUDE-020",
       "FILE-017",
+      "GITAI-001",
       "SET-015",
       "TAB-005",
       "TERM-007",
@@ -17960,6 +23649,7 @@
       "FIND-010",
       "FMT-001",
       "FMT-010",
+      "GITAI-006",
       "JSON-005",
       "JSON-006",
       "JSON-008",
@@ -17987,6 +23677,7 @@
       "MACRO-009",
       "MACRO-010",
       "MACRO-011",
+      "SAFE-005",
       "SCRIPT-002",
       "SCRIPT-003",
       "SCRIPT-004",
@@ -18013,6 +23704,7 @@
       "TAB-010",
       "TERM-001",
       "TERM-002",
+      "THREEWAY-004",
       "UI-001",
       "UI-003",
       "UI-005",
@@ -18034,7 +23726,11 @@
     "src/lib/conflicts.ts": [
       "CONFLICT-001",
       "CONFLICT-002",
-      "CONFLICT-003"
+      "CONFLICT-003",
+      "GITAI-007",
+      "THREEWAY-001",
+      "THREEWAY-002",
+      "THREEWAY-005"
     ],
     "src/lib/convert.ts": [
       "JSON-011",
@@ -18052,15 +23748,23 @@
       "FILE-010",
       "FILE-017",
       "GIT-012",
+      "HISTORY-006",
       "MACRO-009",
+      "MERGE-004",
+      "MERGE-008",
+      "SAFE-001",
       "SCRIPT-005",
       "SEARCH-012",
+      "STAGE-003",
+      "STASH-008",
       "TAB-009",
+      "THREEWAY-004",
       "UI-010",
       "UPD-001",
       "UPD-004"
     ],
     "src/lib/diff.ts": [
+      "COMMITCMP-003",
       "CONFLICT-005",
       "DIFF-001",
       "DIFF-002",
@@ -18076,6 +23780,15 @@
       "EXPL-017",
       "FILE-010",
       "GRAPH-010",
+      "SAFE-001",
+      "SAFE-002",
+      "SAFE-004",
+      "SAFE-006",
+      "STAGE-001",
+      "STAGE-005",
+      "STAGE-007",
+      "STAGE-009",
+      "STASH-005",
       "TAB-005",
       "TAB-007"
     ],
@@ -18104,6 +23817,19 @@
       "UI-006"
     ],
     "src/lib/git.ts": [
+      "BRANCH-001",
+      "BRANCH-002",
+      "BRANCH-003",
+      "BRANCH-004",
+      "BRANCH-005",
+      "BRANCH-006",
+      "BRANCH-007",
+      "BRANCH-008",
+      "BRANCH-009",
+      "COMMITCMP-003",
+      "COMMITCMP-004",
+      "COMMITCMP-005",
+      "COMMITCMP-006",
       "CONFLICT-005",
       "CONFLICT-006",
       "CONFLICT-007",
@@ -18142,28 +23868,129 @@
       "GIT-026",
       "GIT-027",
       "GIT-028",
+      "GITAI-001",
+      "GITAI-007",
+      "GITAI-009",
       "GRAPH-001",
       "GRAPH-010",
       "GRAPH-011",
       "GRAPH-012",
       "GRAPH-013",
       "GRAPH-014",
-      "TAB-007"
+      "GRAPH-015",
+      "GRAPH-019",
+      "HISTORY-001",
+      "HISTORY-002",
+      "HISTORY-003",
+      "HISTORY-004",
+      "HISTORY-005",
+      "HISTORY-006",
+      "HISTORY-007",
+      "HISTORY-009",
+      "HISTORY-010",
+      "HISTORY-011",
+      "MERGE-001",
+      "MERGE-002",
+      "MERGE-003",
+      "MERGE-004",
+      "MERGE-005",
+      "MERGE-006",
+      "MERGE-007",
+      "MERGE-008",
+      "MERGE-009",
+      "SAFE-001",
+      "SAFE-002",
+      "SAFE-003",
+      "SAFE-004",
+      "SAFE-005",
+      "SAFE-006",
+      "SAFE-007",
+      "STAGE-001",
+      "STAGE-002",
+      "STAGE-003",
+      "STAGE-004",
+      "STAGE-005",
+      "STAGE-007",
+      "STAGE-008",
+      "STAGE-009",
+      "STASH-001",
+      "STASH-002",
+      "STASH-003",
+      "STASH-004",
+      "STASH-005",
+      "STASH-006",
+      "STASH-007",
+      "STASH-008",
+      "STASH-009",
+      "STASH-010",
+      "STASH-011",
+      "TAB-007",
+      "THREEWAY-001",
+      "THREEWAY-004",
+      "THREEWAY-005"
+    ],
+    "src/lib/gitAi.ts": [
+      "GITAI-002",
+      "GITAI-003",
+      "GITAI-004",
+      "GITAI-006",
+      "GITAI-007",
+      "GITAI-008",
+      "GITAI-009"
     ],
     "src/lib/gitApi.ts": [
+      "BRANCH-002",
+      "BRANCH-003",
+      "BRANCH-004",
+      "BRANCH-005",
+      "BRANCH-006",
+      "BRANCH-007",
+      "BRANCH-008",
+      "BRANCH-009",
+      "COMMITCMP-002",
+      "COMMITCMP-004",
       "CONFLICT-008",
       "CONFLICT-011",
       "CONFLICT-012",
       "GIT-001",
       "GIT-014",
       "GIT-022",
+      "GITAI-003",
+      "GITAI-009",
       "GRAPH-002",
       "GRAPH-006",
       "GRAPH-008",
       "GRAPH-009",
-      "GRAPH-011"
+      "GRAPH-011",
+      "GRAPH-018",
+      "HISTORY-001",
+      "HISTORY-003",
+      "HISTORY-009",
+      "MERGE-004",
+      "MERGE-005",
+      "MERGE-006",
+      "MERGE-009",
+      "STAGE-001",
+      "STASH-001",
+      "STASH-004",
+      "STASH-005",
+      "STASH-006",
+      "STASH-010"
+    ],
+    "src/lib/gitAssist.ts": [
+      "GITAI-001",
+      "GITAI-002",
+      "GITAI-003",
+      "GITAI-004",
+      "GITAI-005",
+      "GITAI-006",
+      "GITAI-007",
+      "GITAI-008",
+      "GITAI-009"
     ],
     "src/lib/gitCommands.ts": [
+      "BRANCH-002",
+      "COMMITCMP-005",
       "CONFLICT-002",
       "CONFLICT-003",
       "CONFLICT-004",
@@ -18181,19 +24008,113 @@
       "GIT-018",
       "GIT-020",
       "GIT-028",
+      "GITAI-001",
+      "GITAI-003",
+      "GITAI-005",
+      "GITAI-007",
+      "GITAI-009",
       "GRAPH-001",
-      "TAB-007"
+      "GRAPH-019",
+      "HISTORY-002",
+      "HISTORY-007",
+      "MERGE-003",
+      "MERGE-008",
+      "MERGE-009",
+      "SAFE-005",
+      "STAGE-007",
+      "STAGE-008",
+      "STASH-001",
+      "STASH-003",
+      "STASH-004",
+      "STASH-006",
+      "STASH-007",
+      "STASH-008",
+      "STASH-011",
+      "TAB-007",
+      "THREEWAY-001",
+      "THREEWAY-002",
+      "THREEWAY-004"
+    ],
+    "src/lib/gitCompare.ts": [
+      "COMMITCMP-001",
+      "COMMITCMP-002",
+      "COMMITCMP-003",
+      "COMMITCMP-004",
+      "COMMITCMP-005"
     ],
     "src/lib/gitGraph.ts": [
+      "BRANCH-001",
       "GRAPH-002",
       "GRAPH-003",
       "GRAPH-005",
       "GRAPH-007",
       "GRAPH-011",
       "GRAPH-012",
-      "GRAPH-013"
+      "GRAPH-013",
+      "GRAPH-015",
+      "GRAPH-016",
+      "GRAPH-017",
+      "GRAPH-018",
+      "MERGE-001",
+      "MERGE-002",
+      "SAFE-004",
+      "STASH-010"
+    ],
+    "src/lib/gitHunks.ts": [
+      "STAGE-001",
+      "STAGE-002",
+      "STAGE-003",
+      "STAGE-004",
+      "STAGE-006"
+    ],
+    "src/lib/gitMerge.ts": [
+      "HISTORY-006",
+      "MERGE-001",
+      "MERGE-002",
+      "MERGE-003",
+      "MERGE-004",
+      "MERGE-005",
+      "MERGE-006",
+      "MERGE-008",
+      "MERGE-009",
+      "SAFE-003"
+    ],
+    "src/lib/gitRefs.ts": [
+      "BRANCH-001",
+      "BRANCH-002",
+      "BRANCH-003",
+      "BRANCH-004",
+      "BRANCH-005",
+      "BRANCH-006",
+      "BRANCH-007",
+      "BRANCH-008",
+      "BRANCH-009",
+      "MERGE-002"
+    ],
+    "src/lib/gitSafety.ts": [
+      "SAFE-001",
+      "SAFE-002",
+      "SAFE-003",
+      "SAFE-004",
+      "SAFE-006",
+      "SAFE-007"
+    ],
+    "src/lib/gitStash.ts": [
+      "GITAI-008",
+      "STASH-001",
+      "STASH-002",
+      "STASH-003",
+      "STASH-004",
+      "STASH-006",
+      "STASH-007",
+      "STASH-008",
+      "STASH-009",
+      "STASH-011"
     ],
     "src/lib/gitStatus.ts": [
+      "BRANCH-006",
+      "BRANCH-009",
+      "COMMITCMP-002",
       "CONFLICT-007",
       "CONFLICT-009",
       "CONFLICT-010",
@@ -18212,11 +24133,39 @@
       "GIT-022",
       "GIT-026",
       "GIT-027",
+      "GITAI-008",
       "GRAPH-009",
-      "GRAPH-012"
+      "GRAPH-012",
+      "GRAPH-015",
+      "HISTORY-001",
+      "HISTORY-010",
+      "HISTORY-011",
+      "MERGE-003",
+      "MERGE-007",
+      "MERGE-008",
+      "MERGE-009",
+      "STAGE-007",
+      "STAGE-009",
+      "STASH-003",
+      "STASH-005",
+      "STASH-009",
+      "THREEWAY-004",
+      "THREEWAY-005"
     ],
     "src/lib/goto.ts": [
       "EDIT-016"
+    ],
+    "src/lib/historyEdit.ts": [
+      "HISTORY-001",
+      "HISTORY-002",
+      "HISTORY-003",
+      "HISTORY-004",
+      "HISTORY-005",
+      "HISTORY-006",
+      "HISTORY-007",
+      "HISTORY-008",
+      "HISTORY-009",
+      "HISTORY-011"
     ],
     "src/lib/ipc.ts": [
       "BIG-001",
@@ -18357,12 +24306,26 @@
     "src/lib/markdown.ts": [
       "CLAUDE-014"
     ],
+    "src/lib/mergeModel.ts": [
+      "THREEWAY-001",
+      "THREEWAY-002",
+      "THREEWAY-003"
+    ],
+    "src/lib/mergeView.ts": [
+      "THREEWAY-001",
+      "THREEWAY-002",
+      "THREEWAY-003",
+      "THREEWAY-004",
+      "THREEWAY-005"
+    ],
     "src/lib/panels.ts": [
       "EXPL-015",
       "GIT-028",
       "GRAPH-014",
+      "MERGE-007",
       "SEARCH-001",
       "SET-001",
+      "STASH-011",
       "TAB-007",
       "UI-012",
       "UI-013",
@@ -18422,6 +24385,7 @@
       "BIG-006",
       "BIG-014",
       "CLAUDE-016",
+      "COMMITCMP-005",
       "EDIT-006",
       "EDIT-022",
       "EXPL-001",
@@ -18438,6 +24402,7 @@
       "FIND-010",
       "GRAPH-001",
       "MACRO-001",
+      "SAFE-001",
       "SCRIPT-001",
       "SCRIPT-013",
       "SEARCH-001",
@@ -18503,6 +24468,8 @@
       "FILE-006",
       "FILE-008",
       "FILE-016",
+      "GITAI-002",
+      "GITAI-003",
       "LSP-016",
       "MACRO-002",
       "MACRO-009",
@@ -18517,6 +24484,7 @@
       "SET-013",
       "SET-016",
       "TAB-009",
+      "THREEWAY-001",
       "UI-002",
       "UI-018",
       "UI-019",
@@ -18541,8 +24509,11 @@
       "BIG-012",
       "BIG-013",
       "BIG-015",
+      "BRANCH-001",
       "CLAUDE-014",
       "CLAUDE-019",
+      "COMMITCMP-001",
+      "COMMITCMP-002",
       "CONFLICT-001",
       "DIFF-001",
       "DIFF-011",
@@ -18560,7 +24531,12 @@
       "GIT-013",
       "GIT-025",
       "GIT-027",
+      "GITAI-007",
       "GRAPH-002",
+      "GRAPH-015",
+      "GRAPH-016",
+      "GRAPH-017",
+      "HISTORY-007",
       "JSON-007",
       "LSP-010",
       "MACRO-010",
@@ -18573,10 +24549,14 @@
       "SPLIT-001",
       "SPLIT-002",
       "SPLIT-006",
+      "STAGE-001",
+      "STASH-004",
+      "STASH-010",
       "TAB-001",
       "TAB-004",
       "TAB-008",
       "TERM-005",
+      "THREEWAY-001",
       "UI-001",
       "UI-002",
       "UI-003",
@@ -18598,6 +24578,7 @@
       "GIT-002",
       "GIT-027",
       "SET-006",
+      "STASH-010",
       "TERM-005",
       "UI-012",
       "UI-019"
@@ -18625,7 +24606,10 @@
       "CLAUDE-012",
       "CLAUDE-016",
       "CLAUDE-017",
-      "CLAUDE-018"
+      "CLAUDE-018",
+      "GITAI-003",
+      "GITAI-005",
+      "GITAI-006"
     ],
     "src-tauri/src/fileops.rs": [
       "EXPL-011"
@@ -18638,6 +24622,18 @@
       "FILE-010"
     ],
     "src-tauri/src/git.rs": [
+      "BRANCH-002",
+      "BRANCH-003",
+      "BRANCH-004",
+      "BRANCH-005",
+      "BRANCH-006",
+      "BRANCH-007",
+      "BRANCH-008",
+      "BRANCH-009",
+      "COMMITCMP-002",
+      "COMMITCMP-004",
+      "COMMITCMP-005",
+      "COMMITCMP-006",
       "CONFLICT-008",
       "CONFLICT-010",
       "CONFLICT-011",
@@ -18665,6 +24661,9 @@
       "GIT-022",
       "GIT-023",
       "GIT-024",
+      "GITAI-003",
+      "GITAI-004",
+      "GITAI-009",
       "GRAPH-002",
       "GRAPH-004",
       "GRAPH-005",
@@ -18673,7 +24672,38 @@
       "GRAPH-009",
       "GRAPH-011",
       "GRAPH-012",
-      "GRAPH-013"
+      "GRAPH-013",
+      "GRAPH-018",
+      "HISTORY-001",
+      "HISTORY-002",
+      "HISTORY-003",
+      "HISTORY-004",
+      "HISTORY-005",
+      "HISTORY-006",
+      "HISTORY-007",
+      "HISTORY-009",
+      "HISTORY-010",
+      "MERGE-004",
+      "MERGE-005",
+      "MERGE-006",
+      "MERGE-007",
+      "MERGE-008",
+      "MERGE-009",
+      "STAGE-001",
+      "STAGE-002",
+      "STAGE-003",
+      "STAGE-004",
+      "STAGE-006",
+      "STAGE-009",
+      "STASH-001",
+      "STASH-002",
+      "STASH-004",
+      "STASH-005",
+      "STASH-006",
+      "STASH-007",
+      "STASH-008",
+      "STASH-009",
+      "STASH-010"
     ],
     "src-tauri/src/json_tools.rs": [
       "BIG-017",
@@ -18733,6 +24763,11 @@
       "BIG-008",
       "BIG-011"
     ],
+    "src/__tests__/branchPicker.test.tsx": [
+      "BRANCH-002",
+      "BRANCH-004",
+      "BRANCH-005"
+    ],
     "src/__tests__/bulkedit.test.ts": [
       "EDIT-003",
       "EDIT-004",
@@ -18778,13 +24813,16 @@
     "src/__tests__/conflicts.test.ts": [
       "CONFLICT-001",
       "CONFLICT-002",
-      "CONFLICT-003"
+      "CONFLICT-003",
+      "GITAI-007"
     ],
     "src/__tests__/conflictsEditor.test.ts": [
       "CONFLICT-001",
       "CONFLICT-002",
       "CONFLICT-003",
-      "CONFLICT-004"
+      "CONFLICT-004",
+      "GITAI-007",
+      "GITAI-008"
     ],
     "src/__tests__/csv-hostile.test.ts": [
       "JSON-011",
@@ -18806,13 +24844,23 @@
       "DIFF-010",
       "DIFF-012",
       "DIFF-013",
-      "DIFF-014"
+      "DIFF-014",
+      "STAGE-005",
+      "STAGE-009"
     ],
     "src/__tests__/diffView.test.tsx": [
       "DIFF-008",
       "DIFF-009",
       "DIFF-010",
-      "DIFF-011"
+      "DIFF-011",
+      "STAGE-001",
+      "STAGE-002",
+      "STAGE-003",
+      "STAGE-004",
+      "STAGE-005",
+      "STAGE-007",
+      "STAGE-008",
+      "STAGE-009"
     ],
     "src/__tests__/findReplace.test.ts": [
       "FIND-003",
@@ -18834,6 +24882,34 @@
       "FMT-008",
       "FMT-009"
     ],
+    "src/__tests__/gitAi.test.ts": [
+      "GITAI-002",
+      "GITAI-003",
+      "GITAI-004",
+      "GITAI-006",
+      "GITAI-007",
+      "GITAI-008",
+      "GITAI-009"
+    ],
+    "src/__tests__/gitAssist.test.ts": [
+      "GITAI-001",
+      "GITAI-002",
+      "GITAI-003",
+      "GITAI-005",
+      "GITAI-006",
+      "GITAI-007",
+      "GITAI-009"
+    ],
+    "src/__tests__/gitCommands.test.ts": [
+      "GRAPH-019"
+    ],
+    "src/__tests__/gitCompare.test.ts": [
+      "COMMITCMP-001",
+      "COMMITCMP-002",
+      "COMMITCMP-003",
+      "COMMITCMP-004",
+      "COMMITCMP-005"
+    ],
     "src/__tests__/gitGraph.test.ts": [
       "GRAPH-002",
       "GRAPH-003",
@@ -18841,18 +24917,59 @@
       "GRAPH-007",
       "GRAPH-011",
       "GRAPH-012",
-      "GRAPH-013"
+      "GRAPH-013",
+      "GRAPH-015",
+      "GRAPH-016",
+      "GRAPH-017",
+      "GRAPH-018",
+      "SAFE-004",
+      "STASH-010"
+    ],
+    "src/__tests__/gitHunks.test.ts": [
+      "STAGE-001",
+      "STAGE-002",
+      "STAGE-003",
+      "STAGE-004",
+      "STAGE-007"
+    ],
+    "src/__tests__/gitMerge.test.ts": [
+      "MERGE-001",
+      "MERGE-002",
+      "MERGE-003",
+      "MERGE-004",
+      "MERGE-005",
+      "MERGE-006",
+      "MERGE-007",
+      "MERGE-008",
+      "MERGE-009"
     ],
     "src/__tests__/gitNav.test.ts": [
       "GIT-004",
       "GIT-026"
+    ],
+    "src/__tests__/gitPanel.test.tsx": [
+      "MERGE-003",
+      "MERGE-009"
     ],
     "src/__tests__/gitRefresh.test.ts": [
       "GIT-001",
       "GIT-025",
       "GIT-028"
     ],
+    "src/__tests__/gitRefs.test.ts": [
+      "BRANCH-001",
+      "BRANCH-002",
+      "BRANCH-003",
+      "BRANCH-004",
+      "BRANCH-005",
+      "BRANCH-006",
+      "BRANCH-007",
+      "BRANCH-008",
+      "BRANCH-009",
+      "MERGE-002"
+    ],
     "src/__tests__/gitRemote.test.ts": [
+      "BRANCH-006",
       "CONFLICT-007",
       "CONFLICT-010",
       "CONFLICT-013",
@@ -18864,18 +24981,93 @@
       "GIT-016",
       "GIT-021",
       "GIT-022",
-      "GRAPH-012"
+      "GRAPH-012",
+      "HISTORY-011",
+      "MERGE-009",
+      "THREEWAY-004",
+      "THREEWAY-005"
+    ],
+    "src/__tests__/gitSafety.test.ts": [
+      "SAFE-001",
+      "SAFE-002",
+      "SAFE-003",
+      "SAFE-004",
+      "SAFE-006",
+      "SAFE-007"
+    ],
+    "src/__tests__/gitSafetyGuard.test.ts": [
+      "SAFE-002",
+      "SAFE-003",
+      "SAFE-004",
+      "SAFE-005",
+      "SAFE-006",
+      "SAFE-007"
+    ],
+    "src/__tests__/gitSafetyRoutes.test.tsx": [
+      "SAFE-005"
+    ],
+    "src/__tests__/gitStash.test.ts": [
+      "STASH-001",
+      "STASH-002",
+      "STASH-003",
+      "STASH-004",
+      "STASH-006",
+      "STASH-007",
+      "STASH-008",
+      "STASH-009",
+      "STASH-011"
     ],
     "src/__tests__/goto.test.ts": [
       "EDIT-016"
     ],
+    "src/__tests__/graphCompare.test.tsx": [
+      "COMMITCMP-002",
+      "COMMITCMP-003",
+      "COMMITCMP-004",
+      "COMMITCMP-005",
+      "COMMITCMP-006"
+    ],
     "src/__tests__/graphView.test.tsx": [
+      "BRANCH-001",
+      "BRANCH-003",
+      "BRANCH-004",
+      "BRANCH-007",
+      "BRANCH-008",
+      "COMMITCMP-001",
+      "GITAI-009",
       "GRAPH-001",
       "GRAPH-009",
-      "GRAPH-011"
+      "GRAPH-011",
+      "GRAPH-015",
+      "GRAPH-016",
+      "GRAPH-017",
+      "GRAPH-018",
+      "HISTORY-001",
+      "HISTORY-003",
+      "MERGE-001",
+      "MERGE-002",
+      "STASH-010"
     ],
     "src/__tests__/history.test.ts": [
       "FIND-007"
+    ],
+    "src/__tests__/historyEdit.test.ts": [
+      "HISTORY-001",
+      "HISTORY-002",
+      "HISTORY-003",
+      "HISTORY-004",
+      "HISTORY-005",
+      "HISTORY-006",
+      "HISTORY-007",
+      "HISTORY-008",
+      "HISTORY-009",
+      "HISTORY-010",
+      "HISTORY-011"
+    ],
+    "src/__tests__/historyEditList.test.tsx": [
+      "HISTORY-007",
+      "HISTORY-008",
+      "HISTORY-009"
     ],
     "src/__tests__/hostile.test.ts": [
       "JSON-001",
@@ -18911,6 +25103,18 @@
     "src/__tests__/lspStatus.test.tsx": [
       "LSP-004",
       "LSP-005"
+    ],
+    "src/__tests__/mergeModel.test.ts": [
+      "THREEWAY-001",
+      "THREEWAY-002",
+      "THREEWAY-003"
+    ],
+    "src/__tests__/mergeView.test.tsx": [
+      "THREEWAY-001",
+      "THREEWAY-002",
+      "THREEWAY-003",
+      "THREEWAY-004",
+      "THREEWAY-005"
     ],
     "src/__tests__/panels.test.ts": [
       "EXPL-001",
@@ -18993,10 +25197,22 @@
       "SPLIT-001",
       "SPLIT-002",
       "SPLIT-004",
-      "SPLIT-007"
+      "SPLIT-007",
+      "STAGE-007"
     ],
     "src/__tests__/splitHistory.test.ts": [
       "SPLIT-005"
+    ],
+    "src/__tests__/stashSection.test.tsx": [
+      "STASH-001",
+      "STASH-002",
+      "STASH-003",
+      "STASH-004",
+      "STASH-005",
+      "STASH-006",
+      "STASH-007",
+      "STASH-008",
+      "STASH-009"
     ],
     "src/__tests__/tabLimit.test.ts": [
       "SET-010",
@@ -19029,11 +25245,14 @@
       "UI-006"
     ],
     "src/__tests__/ui.test.ts": [
+      "GITAI-001",
       "SEARCH-007",
       "SET-001",
       "SET-004",
       "SET-007",
       "SET-017",
+      "STAGE-008",
+      "STASH-011",
       "TAB-003",
       "UI-004"
     ]
@@ -19303,7 +25522,8 @@
     ],
     "file.close": [
       "TAB-005",
-      "TAB-007"
+      "TAB-007",
+      "THREEWAY-004"
     ],
     "file.closeAll": [
       "TAB-006",
@@ -19371,7 +25591,8 @@
     "file.save": [
       "BIG-010",
       "DIFF-012",
-      "FILE-010"
+      "FILE-010",
+      "THREEWAY-004"
     ],
     "file.saveAll": [
       "FILE-012"
@@ -19437,43 +25658,133 @@
       "CONFLICT-003"
     ],
     "git.acceptBoth": [
-      "CONFLICT-002"
+      "CONFLICT-002",
+      "THREEWAY-002"
     ],
     "git.acceptCurrent": [
-      "CONFLICT-002"
+      "CONFLICT-002",
+      "THREEWAY-002"
     ],
     "git.acceptIncoming": [
-      "CONFLICT-002"
+      "CONFLICT-002",
+      "THREEWAY-002"
     ],
     "git.addRemote": [
       "GIT-020"
     ],
+    "git.cancelMergeView": [
+      "THREEWAY-004"
+    ],
     "git.checkoutTo": [
-      "GIT-007"
+      "GIT-007",
+      "SAFE-001",
+      "SAFE-002",
+      "SAFE-003",
+      "SAFE-005"
+    ],
+    "git.compareBranchPick": [
+      "COMMITCMP-005"
+    ],
+    "git.compareWithBranch": [
+      "COMMITCMP-005"
     ],
     "git.compareWithHead": [
       "DIFF-006",
       "GIT-006",
       "TAB-007"
     ],
+    "git.completeMergeView": [
+      "THREEWAY-004"
+    ],
     "git.createBranch": [
-      "GIT-007"
+      "GIT-007",
+      "SAFE-003",
+      "SAFE-005"
+    ],
+    "git.deleteBranch": [
+      "BRANCH-002",
+      "BRANCH-003",
+      "SAFE-003"
+    ],
+    "git.deleteRemoteBranch": [
+      "BRANCH-002",
+      "BRANCH-007",
+      "SAFE-003"
+    ],
+    "git.deleteTag": [
+      "BRANCH-002",
+      "BRANCH-008",
+      "SAFE-003"
+    ],
+    "git.discardChange": [
+      "SAFE-006",
+      "STAGE-003",
+      "STAGE-005",
+      "STAGE-007",
+      "STAGE-008"
+    ],
+    "git.discardLines": [
+      "SAFE-006",
+      "STAGE-004",
+      "STAGE-005",
+      "STAGE-007",
+      "STAGE-008"
+    ],
+    "git.draftMessage": [
+      "GITAI-001",
+      "GITAI-003"
+    ],
+    "git.editHistory": [
+      "HISTORY-007",
+      "SAFE-003",
+      "SAFE-005",
+      "SAFE-006"
+    ],
+    "git.explainConflict": [
+      "GITAI-001",
+      "GITAI-007"
     ],
     "git.fetch": [
-      "GIT-015"
+      "GIT-015",
+      "SAFE-003"
     ],
     "git.fileHistory": [
       "GIT-018",
       "TAB-007"
     ],
+    "git.forcePush": [
+      "HISTORY-011",
+      "MERGE-009",
+      "SAFE-003"
+    ],
     "git.graph": [
-      "GRAPH-001"
+      "GRAPH-001",
+      "GRAPH-019",
+      "STASH-010"
+    ],
+    "git.mergeBranch": [
+      "MERGE-003",
+      "MERGE-008",
+      "SAFE-003",
+      "SAFE-005"
+    ],
+    "git.mergeRef": [
+      "MERGE-003",
+      "MERGE-004",
+      "MERGE-008",
+      "SAFE-003",
+      "SAFE-005",
+      "SAFE-006"
     ],
     "git.nextChange": [
       "GIT-004"
     ],
     "git.nextConflict": [
-      "CONFLICT-004"
+      "CONFLICT-004",
+      "THREEWAY-002"
+    ],
+    "git.openMergeView": [
+      "THREEWAY-001"
     ],
     "git.peekChange": [
       "GIT-003"
@@ -19482,16 +25793,52 @@
       "GIT-004"
     ],
     "git.prevConflict": [
-      "CONFLICT-004"
+      "CONFLICT-004",
+      "THREEWAY-002"
     ],
     "git.pull": [
-      "GIT-015"
+      "GIT-015",
+      "SAFE-001",
+      "SAFE-002",
+      "SAFE-003",
+      "SAFE-005"
     ],
     "git.push": [
-      "GIT-015"
+      "GIT-015",
+      "SAFE-003"
+    ],
+    "git.pushBranch": [
+      "BRANCH-002",
+      "BRANCH-006",
+      "SAFE-003"
+    ],
+    "git.pushTag": [
+      "BRANCH-002",
+      "BRANCH-009",
+      "SAFE-003"
+    ],
+    "git.rebaseBranch": [
+      "MERGE-003",
+      "MERGE-008",
+      "SAFE-003",
+      "SAFE-005"
+    ],
+    "git.rebaseOnto": [
+      "MERGE-003",
+      "MERGE-005",
+      "MERGE-006",
+      "MERGE-008",
+      "SAFE-003",
+      "SAFE-005",
+      "SAFE-006"
     ],
     "git.refresh": [
       "GIT-001"
+    ],
+    "git.renameBranch": [
+      "BRANCH-002",
+      "BRANCH-004",
+      "SAFE-003"
     ],
     "git.revertChange": [
       "GIT-003"
@@ -19499,21 +25846,98 @@
     "git.setContext": [
       "GIT-028"
     ],
+    "git.setUpstream": [
+      "BRANCH-002",
+      "BRANCH-005",
+      "SAFE-003"
+    ],
     "git.showPanel": [
       "GIT-008"
+    ],
+    "git.showStashes": [
+      "STASH-004",
+      "STASH-011"
+    ],
+    "git.stageChange": [
+      "STAGE-001",
+      "STAGE-005",
+      "STAGE-007",
+      "STAGE-008"
     ],
     "git.stageFile": [
       "CONFLICT-007",
       "GIT-011"
     ],
+    "git.stageLines": [
+      "STAGE-004",
+      "STAGE-005",
+      "STAGE-007",
+      "STAGE-008"
+    ],
+    "git.stash": [
+      "SAFE-003",
+      "SAFE-005",
+      "SAFE-006",
+      "STASH-001",
+      "STASH-002",
+      "STASH-003",
+      "STASH-011"
+    ],
+    "git.stashApply": [
+      "SAFE-003",
+      "SAFE-005",
+      "SAFE-006",
+      "STASH-006",
+      "STASH-009",
+      "STASH-011"
+    ],
+    "git.stashDrop": [
+      "SAFE-003",
+      "STASH-008",
+      "STASH-011"
+    ],
+    "git.stashPop": [
+      "SAFE-003",
+      "SAFE-005",
+      "SAFE-006",
+      "STASH-007",
+      "STASH-009",
+      "STASH-011"
+    ],
+    "git.stopClaude": [
+      "GITAI-001",
+      "GITAI-005"
+    ],
+    "git.summariseBranch": [
+      "GITAI-001",
+      "GITAI-009"
+    ],
     "git.switchBranch": [
-      "GIT-007"
+      "GIT-007",
+      "SAFE-001",
+      "SAFE-002",
+      "SAFE-003",
+      "SAFE-005"
     ],
     "git.toggleBlame": [
       "GIT-005"
     ],
+    "git.undoLastCommit": [
+      "HISTORY-002",
+      "SAFE-003"
+    ],
+    "git.unstageChange": [
+      "STAGE-002",
+      "STAGE-007",
+      "STAGE-008"
+    ],
     "git.unstageFile": [
       "GIT-011"
+    ],
+    "git.unstageLines": [
+      "STAGE-004",
+      "STAGE-007",
+      "STAGE-008"
     ],
     "goto.line": [
       "BIG-005",
