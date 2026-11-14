@@ -446,7 +446,7 @@ export function CommandPalette() {
               lastWasRecent = !!it.recent;
               const label = showRecentLabel ? "recently used" : showAllLabel ? "all commands" : null;
               return (
-                <div key={it.key} className={`palette-item ${i === active ? "active" : ""} ${label ? "has-label" : ""}`} data-label={label ?? undefined} onMouseEnter={() => setActive(i)} onClick={() => pick(i)} onContextMenu={it.branch ? (e) => { e.preventDefault(); openRowMenu(i, { x: e.clientX, y: e.clientY }); } : undefined}>
+                <div key={it.key} className={`palette-item ${i === active ? "active" : ""} ${label ? "has-label" : ""}`} data-label={label ?? undefined} onMouseMove={() => { if (i !== active) setActive(i); }} onClick={() => pick(i)} onContextMenu={it.branch ? (e) => { e.preventDefault(); openRowMenu(i, { x: e.clientX, y: e.clientY }); } : undefined}>
                   {it.cmd ? (
                     <>
                       <span className="title">

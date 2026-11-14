@@ -21227,7 +21227,8 @@
         "src/styles/app.css"
       ],
       "tests": [
-        "src/__tests__/text.test.ts"
+        "src/__tests__/text.test.ts",
+        "src/__tests__/branchPicker.test.tsx"
       ],
       "docs": [
         "docs/editing.md",
@@ -21261,6 +21262,10 @@
         {
           "id": "UI-005.7",
           "title": "Nothing matches"
+        },
+        {
+          "id": "UI-005.8",
+          "title": "The pointer highlights a row only when it moves"
         }
       ]
     },
@@ -21269,7 +21274,7 @@
       "title": "Quick Open a file by name",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 378,
+      "line": 385,
       "status": "draft",
       "commands": [
         "file.quickOpen"
@@ -21315,7 +21320,7 @@
       "title": "Go to Line from the palette",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 428,
+      "line": 435,
       "status": "draft",
       "commands": [
         "goto.line"
@@ -21368,7 +21373,7 @@
       "title": "One command registry behind menus, shortcuts and the palette",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 492,
+      "line": 499,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21405,7 +21410,7 @@
       "title": "Global keyboard shortcuts",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 537,
+      "line": 544,
       "status": "draft",
       "commands": [
         "ui.escape"
@@ -21465,7 +21470,7 @@
       "title": "Modal dialogs",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 617,
+      "line": 624,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21511,7 +21516,7 @@
       "title": "Notifications",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 679,
+      "line": 686,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21546,7 +21551,7 @@
       "title": "Panel rail",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 719,
+      "line": 726,
       "status": "draft",
       "commands": [
         "view.explorer",
@@ -21603,7 +21608,7 @@
       "title": "Floating and pinned side panels",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 778,
+      "line": 785,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21667,7 +21672,7 @@
       "title": "Collapse and restore the side panels",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 860,
+      "line": 867,
       "status": "draft",
       "commands": [
         "view.toggleSidebar"
@@ -21714,7 +21719,7 @@
       "title": "Side panel widths",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 910,
+      "line": 917,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21753,7 +21758,7 @@
       "title": "Bottom panel",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 955,
+      "line": 962,
       "status": "draft",
       "commands": [
         "view.togglePanel",
@@ -21817,7 +21822,7 @@
       "title": "Status bar position and document facts",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1027,
+      "line": 1034,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21864,7 +21869,7 @@
       "title": "Status bar pickers for indentation, encoding, line endings and language",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1081,
+      "line": 1088,
       "status": "draft",
       "commands": [
         "view.setTabSize",
@@ -21931,7 +21936,7 @@
       "title": "Light and dark themes",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1163,
+      "line": 1170,
       "status": "draft",
       "commands": [
         "view.toggleTheme"
@@ -21981,7 +21986,7 @@
       "title": "Zoom and editor view toggles",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1218,
+      "line": 1225,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -22039,7 +22044,7 @@
       "title": "Keyboard focus returns to the active tab",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1282,
+      "line": 1289,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22085,7 +22090,7 @@
       "title": "Tab key can leave the editor",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1333,
+      "line": 1340,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -22125,7 +22130,7 @@
       "title": "Single instance and files handed over by Windows",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1378,
+      "line": 1385,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22177,7 +22182,7 @@
       "title": "Window size and position are remembered",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1437,
+      "line": 1444,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22215,7 +22220,7 @@
       "title": "Notice after an unexpected exit",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1479,
+      "line": 1486,
       "status": "draft",
       "commands": [],
       "files": [
@@ -25103,7 +25108,8 @@
     "src/__tests__/branchPicker.test.tsx": [
       "COMMITCMP-005",
       "GIT-007",
-      "MERGE-003"
+      "MERGE-003",
+      "UI-005"
     ],
     "src/__tests__/branchPickerRefs.test.tsx": [
       "BRANCH-002",

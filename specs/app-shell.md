@@ -319,7 +319,7 @@ Scenario: UI-004.13 Hidden menu bar
   - `src/lib/commands.ts` — `allCommands` (leaves out hidden and disabled commands), `runCommand`, `prettyKeys`; `view.commandPalette` (Ctrl+Shift+P) and `view.commandPaletteF1` (F1)
   - `src/lib/store.ts` — `palette: PaletteMode`
   - `src/styles/app.css` — `.overlay`, `.palette`, `.palette-item`, `.palette-empty`
-- Tests: `src/__tests__/text.test.ts`
+- Tests: `src/__tests__/text.test.ts`, `src/__tests__/branchPicker.test.tsx`
 - Docs: `docs/editing.md`, `docs/keyboard-shortcuts.md`
 
 **As a** user who does not remember where a feature is
@@ -373,6 +373,13 @@ Scenario: UI-005.7 Nothing matches
   When I type "qqqq" in the palette
   Then the list shows "No matches"
   And Enter does nothing
+
+Scenario: UI-005.8 The pointer highlights a row only when it moves
+  Given the pointer rests where the palette, or a list opened from a menu (a branch list, Set Upstream…), is about to appear
+  When the list opens under the pointer
+  Then the first row is highlighted, not the row under the pointer, so Enter picks the first row
+  When I move the pointer over another row
+  Then that row is highlighted
 ```
 
 ## UI-006: Quick Open a file by name

@@ -118,6 +118,20 @@ describe("branch picker", () => {
     expect(spy.runCommand).toHaveBeenCalledWith("git.compareBranchPick", "origin/topic");
   });
 
+  it("a list that opens under a resting pointer keeps its first row; a pointer that moves highlights (UI-005.8)", async () => {
+    await open("merge");
+    const rows = () => [...document.querySelectorAll<HTMLElement>(".palette-list .palette-item")];
+    const active = () => rows().findIndex((r) => r.classList.contains("active"));
+    expect(active()).toBe(0);
+    // What the browser sends when the list appears under a pointer that did not move: over / enter, no move.
+    await act(async () => { rows()[1].dispatchEvent(new MouseEvent("mouseover", { bubbles: true })); });
+    expect(active()).toBe(0);
+    await act(async () => { rows()[1].dispatchEvent(new MouseEvent("mousemove", { bubbles: true })); });
+    expect(active()).toBe(1);
+    await fire.keyDown(input(), "Enter");
+    expect(spy.runCommand).toHaveBeenCalledWith("git.mergeRef", "origin/topic");
+  });
+
   it("compare: Escape closes the picker and nothing runs", async () => {
     await open("compare");
     await fire.keyDown(input(), "Escape");
