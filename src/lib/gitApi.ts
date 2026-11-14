@@ -233,6 +233,26 @@ export interface GitForcePushPreview {
 }
 // ----- end -----
 
+// ----- Compare commits (specs/git-compare-commits.md) -----
+/** What differs between two commits, or between a commit and the working tree (`right` null). */
+export interface GitCompare {
+  left: GitGraphCommit;
+  right: GitGraphCommit | null;
+  /** Working tree: short id of the commit the files are on. */
+  head: string | null;
+  /** Letters read left to right (A = only in the right side); "U" = a conflicted file (working tree). */
+  files: GitCommitFile[];
+  insertions: number;
+  deletions: number;
+  /** Commits the right side (the current commit, for the working tree) has that the left lacks, and
+   *  the other way round; `behind === 0` means the left commit is an ancestor of the right. */
+  ahead: number;
+  behind: number;
+  /** Working tree: untracked files, which are not compared. */
+  untracked: number;
+}
+// ----- end -----
+
 export const git = {
   /** `git version ...`, or null when git cannot be run. */
   available: () => invoke<string | null>("git_available"),
@@ -323,4 +343,9 @@ export const git = {
   /** Apply, pop or drop the stash with this commit id. "conflicts": an apply / pop left conflicted
    *  files (the stash is kept, also for a pop). Rejects when the id is no longer a stash. */
   stashOp: (root: string, sha: string, op: "apply" | "pop" | "drop") => invoke<"ok" | "conflicts">("git_stash_op", { root, sha, op }),
+  // ---- compare commits ----
+  /** The files that differ between two commits (`git diff A B`, renames detected), or between `left`
+   *  and the working tree when `right` is left out. A side is a commit id, "HEAD" or a branch name.
+   *  Read-only: nothing is checked out, staged or written inside `.git`. */
+  diffFiles: (root: string, left: string, right?: string) => invoke<GitCompare>("git_diff_files", { root, left, right: right ?? null }),
 };

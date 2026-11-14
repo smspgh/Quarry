@@ -203,6 +203,10 @@ interface AppState {
   tabMovesFocus: boolean;
   /** What the last Replace in Files changed on disk, for Find > Undo Replace in Files. */
   replaceUndo: { entries: UndoEntry[]; summary: string } | null;
+  /** A comparison asked for from outside a graph tab (Compare with Branch…): the graph tab of
+   *  `root` takes it over and clears it. `first` / `second` are commit ids; `result` is what git
+   *  answered for them, so the pane shows at once (specs/git-compare-commits.md). */
+  graphCompare: { root: string; first: string; second: string; names: { first?: string; second?: string }; result: import("./gitApi").GitCompare } | null;
   cursor: CursorInfo;
   bigViewState: Record<string, BigViewState>;
   jsonPathText: string;
@@ -295,6 +299,7 @@ export const useStore = create<AppState>((set, get) => ({
   columnMode: false,
   tabMovesFocus: false,
   replaceUndo: null,
+  graphCompare: null,
   cursor: { line: 1, col: 1, selections: 1, selectedChars: 0 },
   bigViewState: {},
   jsonPathText: "",

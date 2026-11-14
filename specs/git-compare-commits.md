@@ -5,32 +5,33 @@ prefix: COMMITCMP
 
 # Compare Commits
 
-Comparing two points of a repository from the commit graph tab: two commits picked with Ctrl+click, a commit against the working tree, or a commit against a branch. The details pane becomes a comparison pane listing the files that differ, and each file opens in a Compare tab. Nothing here is built yet (roadmap item 5 in `GIT-ROADMAP.md`); user documentation will go in `docs/git.md` ("Commit graph") and `docs/compare.md`. Selecting one commit and opening one commit's files are in `specs/git-graph.md` (GRAPH-009, GRAPH-010); Compare tabs themselves are in `specs/compare.md`.
+Comparing two points of a repository from the commit graph tab: two commits picked with Ctrl+click, a commit against the working tree, or a commit against a branch. The details pane becomes a comparison pane listing the files that differ, and each file opens in a Compare tab. Roadmap item 5 in `GIT-ROADMAP.md`; user documentation is in `docs/git.md` ("Comparing commits") and `docs/compare.md`. Selecting one commit and opening one commit's files are in `specs/git-graph.md` (GRAPH-009, GRAPH-010); Compare tabs themselves are in `specs/compare.md`.
 
 Decisions (the roadmap left these open):
 
 - **Where the result shows.** The graph's details pane switches to a comparison pane (same place, same resizer). There is no new tab kind and no new side panel.
 - **Selection model.** A plain click selects one commit, as today. Ctrl+click on another row adds it as the second commit. At most two: a third Ctrl+click replaces the second commit and keeps the first. Ctrl+click on either selected commit takes it out, leaving the other selected alone. A plain click, an arrow key or Escape ends the comparison. Ctrl+click only works on commit rows of the graph: not on Search All History results (Show in Graph first), not on a stash row (STASH-010) and not on the uncommitted-changes row (GRAPH-015; Compare with Working Tree is the way to compare with uncommitted work). On those a Ctrl+click is a plain click.
-- **Graph menu.** The three entries (Compare with <short id>, Compare with Working Tree, Compare with Branch…) form one group in the commit's right-click menu, after Check Out This Commit… and before Cherry-pick (the planned order of the whole menu is in `specs/git-merge-rebase.md`, Decisions). They are not on a stash row or the uncommitted-changes row, and not in the ref-label menu of MERGE-002.
-- **Which side is which.** Left = the older state, right = the newer one. When one commit is an ancestor of the other, the ancestor is on the left whatever the click order. When neither is (two branches), the first selected commit is on the left and the Ctrl+clicked one on the right. A Swap Sides button flips them. The working tree is always on the right.
+- **Graph menu.** The three entries (Compare with <short id>, Compare with Working Tree, Compare with Branch…) form one group in the commit's right-click menu, after Check Out This Commit… and before Cherry-pick (the planned order of the whole menu is in `specs/git-merge-rebase.md`, Decisions). They are not on a stash row or the uncommitted-changes row, and not in the ref-label menu of MERGE-002. A right-click still selects the commit it is on (GRAPH-011.1), which ends a comparison that was showing; "Compare with <short id>" names the commit that was selected before the right-click.
+- **Which side is which.** Left = the older state, right = the newer one. When one commit is an ancestor of the other, the ancestor is on the left whatever the click order. When neither is (two branches), the first selected commit is on the left and the Ctrl+clicked one on the right. A Swap Sides button flips them. The working tree is always on the right. Until git has answered, the heading shows the two ids in the order they were picked.
 - **What "differs" means.** The direct difference between the two snapshots (`git diff A B`), not "changes since the common ancestor" (`A...B`). The pane's header says how many commits each side has that the other lacks, so a diverged pair is not misread.
 - **Letters** (A, M, D, R) read left to right: A = only in the right side. Renames are detected (`-M`) and shown as one R row with the old path.
 - **Compare tabs** follow the existing commit-file tabs (GRAPH-010, DIFF-014): labels `name @ shortid`, both sides read-only, opened as preview tabs that replace each other. A working-tree side behaves as in Compare with Last Commit (DIFF-006): the open tab's text (read-only snapshot) or the file on disk (editable).
 - **Binary files** are listed like any other file; clicking one opens no tab and says "This file is binary.", as today.
 - **Long lists** are never cut off: every differing file is listed, and only the rows on screen are drawn.
+- **Reloads keep the comparison.** The graph reloads its first page whenever the repository moves and every time its tab comes back to the front (after looking at a Compare tab, for one). A comparison stays through that, also when one of its commits is then not among the loaded rows: that side simply has no highlighted row and offers Show in Graph. (The first draft closed the pane then, which lost the comparison on every return from a Compare tab for commits beyond the first page.)
 - **Working tree** means tracked files as they are on disk, staged or not. Untracked files are not listed; the pane says how many there are.
 - **Compare with Branch…** (Git menu, palette, graph right-click) reuses the branch picker. From the menu or palette it compares the picked branch's tip with the current commit (HEAD), not with uncommitted work. The picked branch is on the left unless it is ahead of the other commit. In the Git menu it sits directly after Compare with Last Commit (HEAD) (group 2 of the planned Git menu, `specs/git-merge-rebase.md` Decisions).
 - **Branch picker.** There is one branch picker: palette mode `branch`, opened by `pickBranch(purpose)` in `src/lib/git.ts` (the purpose is introduced by MERGE-003; the table of all purposes is in `specs/git-merge-rebase.md`, Decisions). This area adds the purpose `compare`: local branches, then remote ones, the current branch included, with the prompt "Compare with a branch…". As with every purpose other than `switch` there is no "Create branch" row and no row menu, and the picked row runs a hidden command (`git.compareBranchPick`) with the name. There is no separate palette mode for it.
-- **Read-only.** No comparison checks anything out, moves a branch, stages a file or writes inside `.git` (git runs with `GIT_OPTIONAL_LOCKS=0` so even the index's cached file times are not refreshed).
+- **Read-only.** No comparison checks anything out, moves a branch, stages a file or writes inside `.git`. git runs with `GIT_OPTIONAL_LOCKS=0`; that alone is not enough, because `git diff` against the working tree rewrites the index it reads when it meets files whose cached times are stale, so a working-tree comparison gives git a scratch copy of the index in the temp folder (`GIT_INDEX_FILE`) and the repository's own index is never touched.
 
 ## COMMITCMP-001: Pick a second commit with Ctrl+click
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — row `onClick` (Ctrl key), new `compare` state beside `selected`, row classes / `aria-selected` for both commits, `onKeyDown` (Escape, arrows end the comparison), reload effect keeps or drops the pair, `GraphMenu` entry "Compare with <short id>"
-  - `src/lib/gitCompare.ts` — new, pure: `compareClick` (selection reducer: add, replace the second, remove one), `orderSides` (ancestor left, else first selected left)
-  - `src/styles/app.css` — `.graph-row.compare` (mark of the second commit; colours from `src/styles/tokens.css`)
+  - `src/components/GraphView.tsx` — row `onClick` (Ctrl key → `ctrlClick`), `compare` state beside `selected` (`setSelected` = a plain selection, which ends the comparison; `comparePair` sets both), row classes / `aria-selected` for both commits, `onKeyDown` (Escape; arrows go through `select`), `noteMenuOther` + the commit menu's entry "Compare with <short id>", `rowOf` (a stash row is never a side)
+  - `src/lib/gitCompare.ts` — pure: `compareClick` (selection reducer: add, replace the second, remove one), `orderSides` (ancestor left, else first selected left), `WORKTREE`
+  - `src/styles/app.css` — `.graph-row.compare` (dashed outline on the second commit; colours from `src/styles/tokens.css`)
 - Tests: `src/__tests__/gitCompare.test.ts`, `src/__tests__/graphView.test.tsx`
 - Docs: `docs/git.md`
 
@@ -95,7 +96,7 @@ Scenario: COMMITCMP-001.10 The pair survives a reload
   Given two commits on the first page are being compared
   When the graph reloads after a fetch
   Then both are still highlighted and the comparison pane is unchanged
-  And when either commit is no longer among the loaded rows the comparison pane closes
+  And when either commit is no longer among the loaded rows the comparison pane stays as it is, that commit's row is simply not highlighted, and its side has a "Show in Graph" button
 
 Scenario: COMMITCMP-001.11 Selecting does not touch the repository
   Given I am on "main" with 2 uncommitted changes
@@ -111,16 +112,16 @@ Scenario: COMMITCMP-001.12 Rows that are not commits cannot be picked
 
 ## COMMITCMP-002: See which files differ between two commits
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphCompare.tsx` — new: comparison pane (header with both commits, counts line, Swap Sides, close), windowed file rows, empty / loading / error states
-  - `src/components/GraphView.tsx` — renders `GraphCompare` instead of the details pane while two sides are set; shares `startResize` / `detailH`
-  - `src/lib/gitCompare.ts` — `compareHeading`, `countsLine` (ahead / behind wording), `swapFile` (A ↔ D, rename direction), `compareSummary`
-  - `src/lib/gitStatus.ts` — `commitFileKind`, `KIND_LETTER`, `KIND_LABEL` (reused for the letters)
-  - `src-tauri/src/git.rs` — new `diff_files` / `git_diff_files`: `diff --name-status -z -M A B` through `parse_commit_files`, `--shortstat`, `rev-list --left-right --count A...B`, `merge-base --is-ancestor`; both ids checked with `is_sha`
+  - `src/components/GraphCompare.tsx` — comparison pane (heading, both commits with labels and first message line, counts line, Swap Sides, close), windowed file rows (`CompareFile`, 24 px, `OVERSCAN`), empty / loading / error states; a late answer for a changed pair is dropped
+  - `src/components/GraphView.tsx` — renders `GraphCompare` instead of the details pane while `selected` and `compare` are set; shares `startResize` / `detailH`
+  - `src/lib/gitCompare.ts` — `arrange` (`orderSides`, then Swap Sides), `swapCompare` / `swapFile` (A ↔ D, rename direction, insertions ↔ deletions), `compareHeading`, `countsLine` (ahead / behind wording), `compareSummary`, `noDifferences`, `compareFileKind`
+  - `src/lib/gitStatus.ts` — `commitFileKind`, `KIND_LETTER`, `KIND_LABEL` (reused for the letters), `gitErrorText`
+  - `src-tauri/src/git.rs` — `diff_files` / `git_diff_files`: `diff --name-status -z -M A B` through `parse_commit_files`, `--shortstat` (as `insertions` / `deletions`), `rev-list --left-right --count A...B` (`behind == 0` means the left commit is an ancestor, so no separate `merge-base` call), `compare_commit` (each side's labels and message); sides checked by `compare_side`
   - `src-tauri/src/lib.rs` — registers `git_diff_files`
-  - `src/lib/gitApi.ts` — `git.diffFiles`, `GitCompare` (`files`, `stat`, `ahead`, `behind`, `ancestor`)
+  - `src/lib/gitApi.ts` — `git.diffFiles`, `GitCompare` (`left`, `right`, `head`, `files`, `insertions`, `deletions`, `ahead`, `behind`, `untracked`)
   - `src/styles/app.css` — `.graph-compare-*`
 - Tests: `src/__tests__/gitCompare.test.ts`, `src/__tests__/graphCompare.test.tsx`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
@@ -206,11 +207,11 @@ Scenario: COMMITCMP-002.12 Resize
 
 ## COMMITCMP-003: Open a differing file in a Compare tab
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphCompare.tsx` — file row: click / Enter opens the comparison, double-click opens the file itself
-  - `src/lib/git.ts` — new `openCompareFile(root, left, right, file)`: `git.show` of each side (`origRel` on the left for a rename), binary check, labels, `preview: true`; a working-tree right side as in `compareWithHead`
+  - `src/components/GraphCompare.tsx` — `CompareFile`: click / Enter opens the comparison, double-click opens the file itself, Up / Down move between rows
+  - `src/lib/git.ts` — `openCompareFile(left, right, file)`: `git.show` of each side (`origRel` on the left for a rename), binary check, labels, `preview: true`; a working-tree right side as in `compareWithHead`
   - `src/lib/gitCompare.ts` — `sideLabel` (`name @ shortid`, old name on the left of a rename)
   - `src/lib/diff.ts` — `openCompare(a, b, { preview: true })` (unchanged: replaces the previous clean preview Compare tab)
   - `src-tauri/src/git.rs` — `show` / `git_show` (unchanged)
@@ -278,14 +279,14 @@ Scenario: COMMITCMP-003.10 Opening files changes nothing on disk
 
 ## COMMITCMP-004: Compare a commit with the working tree
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — `GraphMenu` entry "Compare with Working Tree", `compare` state with a working-tree side, refresh on the repository's status change
-  - `src/components/GraphCompare.tsx` — "Working tree" side in the header (no Swap Sides), untracked-files note
-  - `src/lib/git.ts` — `openCompareFile` with a working-tree right side: open tab → `tab` source, file on disk → `file` source, missing → "(deleted)"; conflicted file → `openPath`
-  - `src/lib/gitCompare.ts` — `compareHeading` / `countsLine` for a working-tree side
-  - `src-tauri/src/git.rs` — `diff_files` with no right-hand commit: `diff --name-status -z -M <sha>` (tracked files, staged and unstaged), unmerged entries reported as conflicts
+  - `src/components/GraphView.tsx` — commit menu entry "Compare with Working Tree" (`comparePair(sha, WORKTREE)`), passes the repository's status object as `tick`
+  - `src/components/GraphCompare.tsx` — "Working tree" side in the header (no Swap Sides), untracked-files note, reads again 250 ms after `tick` changes while keeping the list on screen
+  - `src/lib/git.ts` — `openCompareFile` with a working-tree right side (`right` null): open tab → `tab` source, file on disk → `file` source, missing → "(deleted)"; conflicted file → `openPath`
+  - `src/lib/gitCompare.ts` — `compareHeading` / `countsLine` / `noDifferences` for a working-tree side, `untrackedNote`
+  - `src-tauri/src/git.rs` — `diff_files` with no right-hand commit: `diff --name-status -z -M <sha>` (tracked files, staged and unstaged) over a scratch copy of the index (`scratch_index`), files unmerged in the index (`ls-files -u`) marked "U", untracked files counted with `ls-files --others --exclude-standard`, `head` and the counts taken against HEAD
   - `src/lib/gitApi.ts` — `git.diffFiles(root, left, right?)`
 - Tests: `src/__tests__/gitCompare.test.ts`, `src/__tests__/graphCompare.test.tsx`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`, `docs/compare.md`
@@ -360,23 +361,36 @@ Scenario: COMMITCMP-004.12 Nothing is staged, stashed or checked out
   Given 1 staged and 1 unstaged change
   When I compare a commit with the working tree and open files from the list
   Then the same 1 change is staged and 1 unstaged afterwards, and I am on the same branch and commit
+
+Scenario: COMMITCMP-004.13 A binary file in the working tree
+  Given "logo.png" is binary in the commit
+  When I click its row
+  Then no tab opens and a notification says "This file is binary."
+  But for a binary file that only exists in the folder (letter A) the notification is the Compare tab's own: "Can't compare: logo.png looks like a binary file"
+
+Scenario: COMMITCMP-004.14 How the folder relates to the commit
+  Given my current commit "e4f5a6b" is 2 commits after "a1b2c3d"
+  When I compare "a1b2c3d" with the working tree
+  Then the counts line says "Your files are on e4f5a6b, 2 commits ahead of a1b2c3d."
+  And comparing my current commit itself says "e4f5a6b is the commit you are on."
 ```
 
 ## COMMITCMP-005: Compare with a branch
 
-- Status: planned
+- Status: draft
 - Commands: `git.compareWithBranch`, `git.compareBranchPick`
 - Files:
   - `src/lib/gitCommands.ts` — registers `git.compareWithBranch` ("Compare with Branch…", enabled only with a repository) and hidden `git.compareBranchPick` (run with the picked branch name, like `git.checkoutTo`)
-  - `src/lib/git.ts` — `pickBranch("compare", { sha })`: the shared picker of MERGE-003 gains the purpose `compare` (the commit to compare with is kept in `branchPick`); new `compareWithBranch(name, sha?)`: opens / reuses the graph tab (`openGraph`) and hands it the two sides
-  - `src/components/CommandPalette.tsx` — `mode === "branch"`, purpose `compare`: the branch list without the "Create branch" row, placeholder "Compare with a branch…", picked row runs `git.compareBranchPick`
-  - `src/components/GraphView.tsx` — `GraphMenu` entry "Compare with Branch…"; accepts a requested comparison whose commits are not among the loaded rows (as `picked` does for search results)
-  - `src/components/GraphCompare.tsx` — branch name beside a side's short id; "Show in Graph" for a side that is not loaded
-  - `src/lib/gitCompare.ts` — `orderSides` for a branch (picked branch left unless it is ahead of the other commit)
+  - `src/lib/git.ts` — `pickBranch("compare", { root, sha })`: the shared picker of MERGE-003 with the purpose `compare` (the graph commit to compare with is kept in the module's `compareFrom`; without it the current commit is used); `compareWithBranch(name)`: asks `git.diffFiles(root, sha ?? "HEAD", name)`, opens / reuses the graph tab (`openGraph`) and hands it the two commits with git's answer (`store.graphCompare`)
+  - `src/lib/gitRefs.ts` — `branchPick` / `pickList` for the purpose `compare`: every branch, placeholder "Compare with a branch…", no "Create branch" row, picked row runs `git.compareBranchPick`
+  - `src/components/CommandPalette.tsx` — `mode === "branch"` renders whatever the purpose gives (unchanged by this story)
+  - `src/components/GraphView.tsx` — commit menu entry "Compare with Branch…"; the `pending` effect takes over `store.graphCompare` for its repository, whose commits need not be among the loaded rows; `goTo(sha, keep)` for Show in Graph
+  - `src/components/GraphCompare.tsx` — branch name beside a side's short id (`names`), `initial` (git's answer already in hand), "Show in Graph" for a side that is not loaded
+  - `src/lib/gitCompare.ts` — `orderSides(…, picked)` (picked branch left unless it is ahead of the other commit), `noDifferences` for the same commit on both sides
   - `src/components/MenuBar.tsx` — Git menu item directly after Compare with Last Commit (HEAD)
-  - `src/lib/store.ts` — pending comparison for a graph tab (no new palette mode)
-  - `src-tauri/src/git.rs` — `diff_files` resolves a branch name to its commit (`rev-parse --verify <name>^{commit}`, name checked with `valid_ref_name`)
-- Tests: `src/__tests__/gitCompare.test.ts`, `src/__tests__/graphCompare.test.tsx`, `src-tauri/src/git.rs`
+  - `src/lib/store.ts` — `graphCompare`: the pending comparison for a graph tab (no new palette mode)
+  - `src-tauri/src/git.rs` — `compare_side` resolves "HEAD" or a branch name to its commit (name checked with `valid_ref_name`, then `refs/heads/<name>` or `refs/remotes/<name>` through `rev-parse --verify`)
+- Tests: `src/__tests__/gitCompare.test.ts`, `src/__tests__/graphCompare.test.tsx`, `src/__tests__/graphView.test.tsx`, `src/__tests__/branchPicker.test.tsx`, `src/__tests__/gitRefs.test.ts`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 
 **As a** developer working on a branch
@@ -451,14 +465,19 @@ Scenario: COMMITCMP-005.12 I stay where I am
   Given I am on "feature"
   When I compare with "main" and open files from the list
   Then I am still on "feature", "main" has not moved and nothing was fetched
+
+Scenario: COMMITCMP-005.13 The branch points at the commit I right-clicked
+  Given "main" points at commit "77e0f12" and I am on another commit
+  When I right-click "77e0f12", choose "Compare with Branch…" and pick "main"
+  Then the pane says "No differences: both sides are the commit 77e0f12."
 ```
 
 ## COMMITCMP-006: Comparing never changes the repository
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src-tauri/src/git.rs` — `diff_files`: read-only git commands only (`diff`, `rev-list`, `merge-base`, `rev-parse`), run with `GIT_OPTIONAL_LOCKS=0`; ids through `is_sha`, names through `valid_ref_name`, always passed after `--end-of-options` or as checked values so a name can't be read as an option
+  - `src-tauri/src/git.rs` — `diff_files`: read-only git commands only (`diff`, `rev-list`, `rev-parse`, `log`, `ls-files`) through `compare_git` (`GIT_OPTIONAL_LOCKS=0`); a working-tree comparison reads a scratch copy of the index (`scratch_index`, `GIT_INDEX_FILE`) because `git diff` would otherwise rewrite the index; `compare_side`: ids through `is_sha`, names through `valid_ref_name`, and git is only ever given the id, "HEAD" or the full `refs/…` name, so a name can't be read as an option
   - `src/lib/git.ts` — `openCompareFile`, `compareWithBranch`: no call to `git.checkout`, `git.stage`, `commitAction` or any write
   - `src/components/GraphCompare.tsx` — no button that acts on the repository
 - Tests: `src-tauri/src/git.rs`, `src/__tests__/graphCompare.test.tsx`

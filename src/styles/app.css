@@ -5032,6 +5032,20 @@ select optgroup {
 .graph-meta dd { margin: 0; color: var(--text-2); overflow-wrap: anywhere; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
 .graph-files-head { padding: 4px 14px 6px; font-size: 11.5px; color: var(--text-3); }
 .scm-row.graph-file { padding-left: 14px; padding-right: 14px; }
+/* Compare commits (specs/git-compare-commits.md): the second commit's mark, and the comparison pane. */
+.graph-row.compare { outline: 1px dashed var(--accent); outline-offset: -1px; }
+.graph-compare-title { font-weight: 600; color: var(--text); }
+.graph-compare-side { display: flex; align-items: center; gap: 6px; min-width: 0; margin-top: 6px; font-size: 12px; color: var(--text-2); }
+.graph-compare-side > svg, .graph-compare-side > .btn { flex: none; }
+.graph-compare-id { flex: none; color: var(--text); }
+.graph-compare-msg { flex: 1 1 auto; min-width: 0; }
+.graph-compare-counts { margin-top: 8px; font-size: 12px; color: var(--text-3); }
+.graph-compare-error { color: var(--danger); white-space: pre-wrap; overflow-wrap: anywhere; }
+.graph-detail-files.graph-compare-files { display: flex; flex-direction: column; overflow: hidden; padding-bottom: 0; }
+.graph-compare-files > .graph-files-head { flex: none; }
+.graph-compare-list { flex: 1 1 auto; min-height: 0; overflow: auto; }
+.graph-compare-rows { position: relative; }
+.scm-row.graph-compare-file { position: absolute; left: 0; right: 0; }
 .graph-menu-head { padding: 4px 10px 6px; font-size: 11.5px; color: var(--text-3); max-width: 320px; border-bottom: 1px solid var(--divider); margin-bottom: 4px; }
 .ctx-menu .palette-item.danger, .ctx-menu .palette-item.danger .title { color: var(--danger); }
 .scm-actions.always { display: inline-flex; }

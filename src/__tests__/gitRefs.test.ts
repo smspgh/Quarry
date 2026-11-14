@@ -55,4 +55,8 @@ describe("the branch picker's purposes", () => {
     for (const purpose of ["merge", "rebase"] as const) expect(pickList(purpose, list).map((b) => b.name)).toEqual(["feature", "origin/main", "origin/topic"]);
     expect(pickList("merge", [branch("main", { current: true })])).toEqual([]);
   });
+  it("compare: every branch, the current one included, no Create row (COMMITCMP-005)", () => {
+    expect(branchPick("compare", "main")).toEqual({ prompt: "Compare with a branch…", command: "git.compareBranchPick", create: false });
+    expect(pickList("compare", list)).toEqual(list);
+  });
 });

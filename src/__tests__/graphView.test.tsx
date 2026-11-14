@@ -5,7 +5,7 @@ import type { Doc } from "../lib/store";
 // GraphView rendered in jsdom with the Tauri side replaced: `git_graph` serves one page,
 // `git_commit_detail` the details pane.
 const calls = vi.hoisted(() => [] as { cmd: string; args: Record<string, unknown> }[]);
-const answers = vi.hoisted(() => ({ page: [] as unknown[], detail: null as unknown, held: [] as unknown[], status: null as unknown }));
+const answers = vi.hoisted(() => ({ page: [] as unknown[], detail: null as unknown, held: [] as unknown[], status: null as unknown, compare: null as unknown, hits: [] as unknown[] }));
 vi.mock("@tauri-apps/api/core", () => ({
   invoke: async (cmd: string, args: Record<string, unknown> = {}) => {
     calls.push({ cmd, args });
@@ -16,6 +16,8 @@ vi.mock("@tauri-apps/api/core", () => ({
     if (cmd === "git_stash_list") return [];
     if (cmd === "git_status") return answers.status;
     if (cmd === "git_stash_op") return "ok";
+    if (cmd === "git_diff_files") return typeof answers.compare === "function" ? (answers.compare as (a: unknown) => unknown)(args) : answers.compare;
+    if (cmd === "git_graph_search") return answers.hits;
     return undefined;
   },
 }));
@@ -284,5 +286,269 @@ describe("GraphView stash rows", () => {
     const now = [...document.querySelectorAll<HTMLElement>(".graph-strip")];
     expect(now).toHaveLength(1);
     expect(byText(now[0], "button", "Abort")).toHaveLength(1);
+  });
+});
+
+// Compare commits: the two-commit selection and the commit menu's compare entries (COMMITCMP-001, -004, -005).
+describe("GraphView compare selection", () => {
+  const status = (extra: object = {}) => ({ root: ROOT, branch: "main", head: "1111111", upstream: null, upstreamGone: false, ahead: 0, behind: 0, files: [], operation: null, operationMessage: null, operationStep: null, remotes: [], ...extra });
+  const STASH = commit(7, { parents: [sha(2)], refs: ["refs/stash"], summary: "On main: WIP parser", stash: true });
+  const all = [...PAGE, commit(8), commit(9)];
+  const by = (id: string) => all.find((c) => c.sha === id)!;
+  /** git's answer for (left, right): the lower commit number is the newer one. */
+  const compared = (args: { left: string; right: string | null }) => {
+    const [l, r] = [all.findIndex((c) => c.sha === args.left), args.right ? all.findIndex((c) => c.sha === args.right) : 0];
+    return { left: by(args.left), right: args.right ? by(args.right) : null, head: args.right ? null : "1111111", files: [{ path: `${ROOT}\\a.ts`, rel: "a.ts", status: "M", origRel: null }], insertions: 1, deletions: 0, ahead: Math.max(0, l - r), behind: Math.max(0, r - l), untracked: 0 };
+  };
+  const highlighted = () => [...document.querySelectorAll<HTMLElement>(".graph-list [aria-selected=true]")].map((r) => r.querySelector(".graph-c-sha")?.textContent);
+  const marked = () => [...document.querySelectorAll<HTMLElement>(".graph-row.compare")].map((r) => r.querySelector(".graph-c-sha")?.textContent);
+  const comparison = () => document.querySelector<HTMLElement>(".graph-compare");
+  const details = () => document.querySelector<HTMLElement>(".graph-detail:not(.graph-compare)");
+  const heading = () => comparison()?.querySelector(".graph-compare-title")?.textContent;
+  const menuItems = () => [...document.querySelectorAll<HTMLButtonElement>(".graph-menu [role=menuitem]")].map((b) => b.textContent);
+  const ctrl = { ctrlKey: true };
+  const diffCalls = () => calls.filter((c) => c.cmd === "git_diff_files").map((c) => c.args);
+
+  beforeEach(() => {
+    calls.length = 0;
+    answers.page = PAGE;
+    answers.detail = null;
+    answers.compare = compared;
+    answers.hits = [];
+    answers.status = status();
+    useStore.setState({ toasts: [], dialog: null, graphCompare: null, docs: [] });
+    useGit.setState({ busy: null, stashPending: null, repos: { [ROOT.toLowerCase()]: status() as never } });
+  });
+  afterEach(async () => {
+    await cleanup();
+    useGit.setState({ repos: {} });
+  });
+
+  it("Ctrl+click adds a second commit: both rows highlighted, the second marked, the comparison pane in place of the details", async () => {
+    await render(<GraphView doc={doc} visible />);
+    await flush();
+    // With nothing selected a Ctrl+click is a plain click.
+    await fire.click(rows()[2], ctrl);
+    await flush();
+    expect(highlighted()).toEqual(["3333333"]);
+    expect(comparison()).toBeNull();
+    expect(details()).not.toBeNull();
+    await fire.click(rows()[0], ctrl);
+    await flush();
+    expect(highlighted()).toEqual(["1111111", "3333333"]);
+    expect(marked()).toEqual(["1111111"]);
+    expect(details()).toBeNull();
+    // The ancestor (the older commit) is on the left; the other click order gives the same heading.
+    expect(heading()).toBe("3333333 ↔ 1111111");
+    expect(diffCalls()).toEqual([{ root: ROOT, left: sha(3), right: sha(1) }]);
+    await fire.click(rows()[0]);
+    await fire.click(rows()[2], ctrl);
+    await flush();
+    expect(heading()).toBe("3333333 ↔ 1111111");
+    expect(marked()).toEqual(["3333333"]);
+  });
+
+  it("a third Ctrl+click replaces the second commit; Ctrl+click on a selected one takes it out", async () => {
+    await render(<GraphView doc={doc} visible />);
+    await flush();
+    await fire.click(rows()[0]);
+    await fire.click(rows()[1], ctrl);
+    await fire.click(rows()[3], ctrl);
+    await flush();
+    expect(highlighted()).toEqual(["1111111", "4444444"]);
+    expect(marked()).toEqual(["4444444"]);
+    expect(heading()).toBe("4444444 ↔ 1111111");
+    // The second one out: the first alone, with its ordinary details pane.
+    await fire.click(rows()[3], ctrl);
+    await flush();
+    expect(highlighted()).toEqual(["1111111"]);
+    expect(comparison()).toBeNull();
+    expect(details()?.querySelector(".graph-full-sha")?.textContent).toBe(sha(1));
+    // The first one out: the other stays selected alone.
+    await fire.click(rows()[3], ctrl);
+    await fire.click(rows()[0], ctrl);
+    await flush();
+    expect(highlighted()).toEqual(["4444444"]);
+    expect(marked()).toEqual([]);
+    expect(details()?.querySelector(".graph-full-sha")?.textContent).toBe(sha(4));
+  });
+
+  it("a plain click, Escape, an arrow key and the close button end the comparison", async () => {
+    await render(<GraphView doc={doc} visible />);
+    await flush();
+    const pair = async () => {
+      await fire.click(rows()[1]);
+      await fire.click(rows()[3], ctrl);
+      await flush();
+      expect(highlighted()).toHaveLength(2);
+    };
+    await pair();
+    await fire.click(rows()[4]);
+    expect(highlighted()).toEqual(["5555555"]);
+    expect(comparison()).toBeNull();
+    await pair();
+    await fire.keyDown(list(), "Escape");
+    expect(highlighted()).toEqual(["2222222"]);
+    expect(comparison()).toBeNull();
+    expect(details()).not.toBeNull();
+    await pair();
+    await fire.keyDown(list(), "ArrowDown");
+    expect(highlighted()).toEqual(["3333333"]);
+    expect(comparison()).toBeNull();
+    await pair();
+    await fire.click(comparison()!.querySelector('[title="Close the comparison"]')!);
+    expect(highlighted()).toEqual([]);
+    expect(comparison()).toBeNull();
+    expect(details()).toBeNull();
+    // Selecting, replacing and clearing asked nothing and ran nothing but reads.
+    expect(useStore.getState().dialog).toBeNull();
+    expect(calls.every((c) => ["git_graph", "git_graph_indexed", "git_commit_detail", "git_diff_files"].includes(c.cmd))).toBe(true);
+  });
+
+  it("the commit menu has the compare group after Check Out; Compare with <id> only for another selected commit", async () => {
+    await render(<GraphView doc={doc} visible />);
+    await flush();
+    // Nothing else selected: no "Compare with <id>".
+    await fire.contextMenu(rows()[2]);
+    expect(menuItems().filter((t) => t?.startsWith("Compare with"))).toEqual(["Compare with Working Tree", "Compare with Branch…"]);
+    const at = menuItems().indexOf("Check Out This Commit…");
+    expect(menuItems().slice(at + 1, at + 4)).toEqual(["Compare with Working Tree", "Compare with Branch…", "Cherry-pick onto main…"]);
+    // Right-clicking the selected commit itself: still none.
+    await fire.contextMenu(rows()[2]);
+    expect(menuItems()).not.toContain("Compare with 3333333");
+    await fire.keyDown(window, "Escape");
+    // Another commit selected: the entry compares the two exactly as Ctrl+click does.
+    await fire.contextMenu(rows()[0]);
+    expect(menuItems().slice(menuItems().indexOf("Check Out This Commit…") + 1)[0]).toBe("Compare with 3333333");
+    await fire.click(byText(document.body, "[role=menuitem]", "Compare with 3333333")[0]);
+    await flush();
+    expect(document.querySelector(".graph-menu")).toBeNull();
+    expect(highlighted()).toEqual(["1111111", "3333333"]);
+    expect(marked()).toEqual(["1111111"]);
+    expect(diffCalls()).toEqual([{ root: ROOT, left: sha(3), right: sha(1) }]);
+  });
+
+  it("Compare with Working Tree: only that commit highlighted, no Swap Sides; a Ctrl+click then compares two commits", async () => {
+    await render(<GraphView doc={doc} visible />);
+    await flush();
+    await fire.contextMenu(rows()[2]);
+    await fire.click(byText(document.body, "[role=menuitem]", "Compare with Working Tree")[0]);
+    await flush();
+    expect(diffCalls()).toEqual([{ root: ROOT, left: sha(3), right: null }]);
+    expect(highlighted()).toEqual(["3333333"]);
+    expect(heading()).toBe("3333333 ↔ Working tree");
+    expect(byText(comparison()!, "button", "Swap Sides")).toHaveLength(0);
+    await fire.click(rows()[0], ctrl);
+    await flush();
+    expect(highlighted()).toEqual(["1111111", "3333333"]);
+    expect(heading()).toBe("3333333 ↔ 1111111");
+    expect(byText(comparison()!, "button", "Swap Sides")).toHaveLength(1);
+  });
+
+  it("Compare with Branch… opens the branch picker for that commit", async () => {
+    await render(<GraphView doc={doc} visible />);
+    await flush();
+    await fire.contextMenu(rows()[3]);
+    await fire.click(byText(document.body, "[role=menuitem]", "Compare with Branch…")[0]);
+    await flush();
+    expect(useStore.getState().palette).toBe("branch");
+    expect(useGit.getState().branchPick).toBe("compare");
+    expect(comparison()).toBeNull(); // nothing is compared until a branch is picked
+    await act(async () => useStore.setState({ palette: null }));
+  });
+
+  it("a stash row cannot be picked: Ctrl+click on it, or with it selected, is a plain click", async () => {
+    answers.page = [PAGE[0], STASH, ...PAGE.slice(1)];
+    await render(<GraphView doc={doc} visible />);
+    await flush();
+    await fire.click(rows()[0]);
+    await fire.click(rows()[1], ctrl);
+    await flush();
+    expect(highlighted()).toEqual(["7777777"]);
+    expect(comparison()).toBeNull();
+    await fire.click(rows()[2], ctrl);
+    await flush();
+    expect(highlighted()).toEqual(["2222222"]);
+    expect(comparison()).toBeNull();
+    // Its menu has no compare entries, also with a commit selected.
+    await fire.contextMenu(rows()[1]);
+    expect(menuItems().some((t) => t?.startsWith("Compare"))).toBe(false);
+    await fire.keyDown(window, "Escape");
+    expect(diffCalls()).toEqual([]);
+  });
+
+  it("a Search All History result is not Ctrl+clickable", async () => {
+    answers.hits = [commit(9)];
+    await render(<GraphView doc={doc} visible />);
+    await flush();
+    await fire.click(rows()[0]);
+    const box = document.querySelector<HTMLInputElement>(".graph-search input")!;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(box, "zzz");
+      box.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await fire.keyDown(box, "Enter");
+    await flush();
+    const hit = document.querySelector<HTMLElement>(".graph-hit")!;
+    hit.scrollIntoView = () => {};
+    await fire.click(hit, ctrl);
+    await flush();
+    expect(hit.className).toContain("selected");
+    expect(highlighted()).toEqual([]);
+    expect(comparison()).toBeNull();
+    expect(diffCalls()).toEqual([]);
+  });
+
+  it("the pair survives a reload, also when one of its commits is no longer among the loaded rows", async () => {
+    await render(<GraphView doc={doc} visible />);
+    await flush();
+    await fire.click(rows()[0]);
+    await fire.click(rows()[2], ctrl);
+    await flush();
+    // The repository moved (a fetch): the graph reloads.
+    await act(async () => useGit.setState({ repos: { [ROOT.toLowerCase()]: status({ behind: 2 }) as never } }));
+    await flush();
+    expect(calls.filter((c) => c.cmd === "git_graph")).toHaveLength(2);
+    expect(highlighted()).toEqual(["1111111", "3333333"]);
+    expect(heading()).toBe("3333333 ↔ 1111111");
+    expect(diffCalls()).toHaveLength(1); // the pane was not read again
+    answers.page = [PAGE[0], PAGE[1]];
+    await act(async () => useGit.setState({ repos: { [ROOT.toLowerCase()]: status({ behind: 3 }) as never } }));
+    await flush();
+    // Commit 3 is not loaded any more (as after returning to the tab from further down the
+    // history): the comparison stays, that side offers Show in Graph.
+    expect(heading()).toBe("3333333 ↔ 1111111");
+    expect(highlighted()).toEqual(["1111111"]);
+    expect(byText(comparison()!, "button", "Show in Graph")).toHaveLength(1);
+    expect(diffCalls()).toHaveLength(1);
+  });
+
+  it("a comparison handed over by Compare with Branch… shows at once, also when its commits are not loaded", async () => {
+    const result = compared({ left: sha(8), right: sha(9) });
+    useStore.setState({ graphCompare: { root: ROOT, first: sha(8), second: sha(9), names: { first: "feature", second: "old-release" }, result: result as never } });
+    await render(<GraphView doc={doc} visible />);
+    await flush();
+    expect(useStore.getState().graphCompare).toBeNull();
+    // The picked branch is behind the other commit: it is on the left.
+    expect(heading()).toBe("9999999 old-release ↔ 8888888 feature");
+    expect(diffCalls()).toEqual([]);
+    expect(calls.filter((c) => c.cmd === "git_graph")).toHaveLength(1);
+    expect(highlighted()).toEqual([]);
+    const showIn = byText(comparison()!, "button", "Show in Graph");
+    expect(showIn).toHaveLength(2);
+    // A reload does not close a comparison whose commits were never among the loaded rows.
+    await act(async () => useGit.setState({ repos: { [ROOT.toLowerCase()]: status({ behind: 1 }) as never } }));
+    await flush();
+    expect(heading()).toBe("9999999 old-release ↔ 8888888 feature");
+    // Show in Graph loads back; the comparison stays whatever it finds.
+    answers.page = [];
+    await fire.click(byText(comparison()!, "button", "Show in Graph")[0]);
+    await flush(6);
+    expect(comparison()).not.toBeNull();
+    // A request for another repository's graph is left alone.
+    await act(async () => useStore.setState({ graphCompare: { root: "C:\\other", first: sha(1), second: sha(2), names: {}, result: result as never } }));
+    await flush();
+    expect(useStore.getState().graphCompare).not.toBeNull();
+    useStore.setState({ graphCompare: null });
   });
 });

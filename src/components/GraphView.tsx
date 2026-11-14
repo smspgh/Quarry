@@ -19,6 +19,12 @@ import { refMenu as refMenuOf } from "../lib/gitRefs";
 import { stashMenu } from "../lib/gitGraph";
 import { isStashConflict, stashBlocked, stashConflictStrip, stashTitle } from "../lib/gitStash";
 import { fs } from "../lib/ipc";
+// Compare commits (specs/git-compare-commits.md): Ctrl+click a second commit, the comparison pane.
+import { ArrowLeftRight } from "lucide-react";
+import { pickBranch } from "../lib/git";
+import type { GitCompare } from "../lib/gitApi";
+import { compareClick, WORKTREE, type CompareNames } from "../lib/gitCompare";
+import { GraphCompare } from "./GraphCompare";
 
 const PAGE = 300;
 /** A page slower than this means git is walking the whole history for it. */
@@ -109,7 +115,14 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   const [more, setMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelectedOnly] = useState<string | null>(null);
+  // Compare commits: `selected` is the first commit, `compare` the second side (a commit id, or
+  // WORKTREE). Every plain selection (`setSelected`) ends the comparison.
+  const [compare, setCompare] = useState<string | null>(null);
+  const setSelected = (sha: string | null) => {
+    setCompare(null);
+    setSelectedOnly(sha);
+  };
   /** A commit selected from a whole-history search that is not among the loaded pages (yet). */
   const [picked, setPicked] = useState<GitGraphCommit | null>(null);
   const [detail, setDetail] = useState<GitCommitDetail | null>(null);
@@ -264,7 +277,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
     // Centre it: the commits around it are the context.
     el.scrollTop = Math.max(0, i * ROW - el.clientHeight / 2 + ROW);
   }, [revealTick, commits.length]);
-  const goTo = async (sha: string) => {
+  const goTo = async (sha: string, keep = false) => {
     let i = indexOf.current.get(sha) ?? -1;
     if (i < 0) {
       setSeeking(true);
@@ -280,7 +293,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
       toast(all ? "That commit is not in this history." : "That commit is not on this branch. Switch to All branches to see it.", "info", 5000);
       return;
     }
-    setSelected(sha);
+    if (!keep) setSelected(sha);
     // The list only becomes tall enough once the new pages are rendered (see the effect below).
     revealWanted.current = sha;
     setRevealTick((t) => t + 1);
@@ -323,7 +336,9 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   const onKeyDown = (e: React.KeyboardEvent) => {
     if ((e.target as HTMLElement).tagName === "INPUT") return;
     const page = Math.max(1, Math.floor(viewH / ROW) - 1);
-    if (e.key === "ArrowDown") select(index + 1);
+    if (e.key === "Escape" && !compare) return;
+    if (e.key === "Escape") setCompare(null); // back to the first commit alone (COMMITCMP-001.6)
+    else if (e.key === "ArrowDown") select(index + 1);
     else if (e.key === "ArrowUp") select(index <= 0 ? 0 : index - 1);
     else if (e.key === "PageDown") select(index + page);
     else if (e.key === "PageUp") select(Math.max(0, index - page));
@@ -382,6 +397,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   const onRefContext = (e: React.MouseEvent, c: GitGraphCommit, label: RefLabel) => {
     e.preventDefault();
     e.stopPropagation();
+    noteMenuOther(c);
     setSelected(c.sha);
     const at = { x: e.clientX, y: e.clientY, commit: c };
     const has = !c.stash && !!refMenuOf(label, { repo, busy }); // a stash row only ever gets its own menu
@@ -395,6 +411,43 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
       <GitMerge size={13} /><span className="title">{e.label}</span>
     </button>
   );
+
+  // ----- Compare commits (specs/git-compare-commits.md) -----
+  /** What a comparison started by Compare with Branch… carries: names beside the ids, the branch ordering rule, git's answer. */
+  const [cmp, setCmp] = useState<{ names: CompareNames; picked: boolean; initial: GitCompare | null }>({ names: {}, picked: false, initial: null });
+  /** The commit that was selected when the commit menu opened: "Compare with <short id>". */
+  const [menuOther, setMenuOther] = useState<GitGraphCommit | null>(null);
+  const comparePair = (firstSha: string | null, second: string | null) => {
+    setSelectedOnly(firstSha);
+    setCompare(second);
+    setCmp({ names: {}, picked: false, initial: null });
+  };
+  const rowOf = (sha: string) => {
+    const i = indexOf.current.get(sha);
+    return i !== undefined ? commits[i] : picked?.sha === sha ? picked : null;
+  };
+  /** Ctrl+click on a commit row. A stash cannot be compared (nor compared with): a plain click then. */
+  const ctrlClick = (c: GitGraphCommit) => {
+    if (c.stash || !selected || rowOf(selected)?.stash) return setSelected(c.sha);
+    const next = compareClick({ first: selected, second: compare }, c.sha);
+    comparePair(next.first, next.second);
+  };
+  /** Call before a right-click moves the selection to `c`. */
+  const noteMenuOther = (c: GitGraphCommit) => {
+    const other = selected && selected !== c.sha && !c.stash ? rowOf(selected) : null;
+    setMenuOther(other && !other.stash ? other : null);
+  };
+  // A comparison asked for from outside (Compare with Branch…): its commits need not be loaded.
+  const pending = useStore((s) => s.graphCompare);
+  useEffect(() => {
+    if (!pending || pending.root.toLowerCase() !== root.toLowerCase()) return;
+    useStore.getState().set({ graphCompare: null });
+    setSelectedOnly(pending.first);
+    setCompare(pending.second);
+    setCmp({ names: pending.names, picked: true, initial: pending.result });
+  }, [pending, root]);
+  // A reload (every return to this tab reloads the first page) keeps the comparison: a side that is
+  // not among the loaded rows any more just has no highlighted row, and offers Show in Graph.
 
   const startResize = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -597,12 +650,13 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
               <div
                 key={c.sha}
                 role="option"
-                aria-selected={c.sha === selected}
-                className={`graph-row ${c.sha === selected ? "selected" : ""} ${dim ? "dim" : ""} ${isHead ? "head" : ""} ${c.stash ? "stash" : ""}`}
+                aria-selected={c.sha === selected || c.sha === compare}
+                className={`graph-row ${c.sha === selected ? "selected" : ""} ${dim ? "dim" : ""} ${isHead ? "head" : ""} ${c.stash ? "stash" : ""} ${c.sha === compare ? "selected compare" : ""}`}
                 style={{ top: i * ROW, height: ROW }}
-                onClick={() => { setSelected(c.sha); listRef.current?.focus(); }}
+                onClick={(e) => { if (e.ctrlKey) ctrlClick(c); else setSelected(c.sha); listRef.current?.focus(); }}
                 onContextMenu={(e) => {
                   e.preventDefault();
+                  noteMenuOther(c);
                   setSelected(c.sha);
                   setMenu({ x: e.clientX, y: e.clientY, commit: c });
                 }}
@@ -621,7 +675,27 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
         </div>
       </div>
 
-      {sel && (
+      {/* Two sides set: the comparison pane takes the details pane's place (same resizer and height). */}
+      {selected && compare && (
+        <>
+          <div className="graph-resizer" onMouseDown={startResize} />
+          <GraphCompare
+            root={root}
+            first={selected}
+            second={compare}
+            names={cmp.names}
+            picked={cmp.picked}
+            initial={cmp.initial}
+            height={detailH}
+            tick={repo}
+            loaded={(sha) => indexOf.current.has(sha)}
+            seeking={seeking}
+            onShowInGraph={(sha) => void goTo(sha, true)}
+            onClose={() => setSelected(null)}
+          />
+        </>
+      )}
+      {sel && !compare && (
         <>
           <div className="graph-resizer" onMouseDown={startResize} />
           <div className="graph-detail selectable" style={{ height: detailH }}>
@@ -699,6 +773,11 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
           {item("Create Branch Here (Don't Switch)…", GitBranch, () => { setNewName(""); setNaming({ action: "branch", commit: menu.commit }); }, "A new branch starting at this commit; you stay where you are")}
           {item("Create Tag Here…", Tag, () => { setNewName(""); setNaming({ action: "tag", commit: menu.commit }); })}
           {item("Check Out This Commit…", GitCommitHorizontal, () => void act("checkout", menu.commit), "Look at the files as they were (detached: not on a branch)")}
+          {/* Compare commits: read-only, so never greyed out. */}
+          <div className="menu-sep" />
+          {menuOther && item(`Compare with ${menuOther.short}`, ArrowLeftRight, () => comparePair(menuOther.sha, menu.commit.sha), `The files that differ between ${menuOther.short} and this commit`)}
+          {item("Compare with Working Tree", ArrowLeftRight, () => comparePair(menu.commit.sha, WORKTREE), "The files that differ between this commit and your files as they are now (tracked files, staged or not)")}
+          {item("Compare with Branch…", ArrowLeftRight, () => void pickBranch("compare", { root, sha: menu.commit.sha }), "Pick a branch: the files that differ between its latest commit and this one")}
           <div className="menu-sep" />
           {item(`Cherry-pick onto ${branch ?? "Here"}…`, GitCommitHorizontal, () => void act("cherry-pick", menu.commit), "Copy this commit's changes onto the current branch as a new commit")}
           {item("Revert This Commit…", Undo2, () => void act("revert", menu.commit), "Add a commit that undoes this one")}

@@ -252,6 +252,7 @@ const MENUS: Menu[] = [
       { cmd: "git.refresh" },
       { sep: true },
       { cmd: "git.compareWithHead" },
+      { cmd: "git.compareWithBranch" },
       { cmd: "git.fileHistory" },
       { cmd: "git.toggleBlame" },
       { sep: true },

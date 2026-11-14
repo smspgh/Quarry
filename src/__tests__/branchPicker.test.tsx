@@ -31,7 +31,7 @@ async function type(text: string) {
     input().dispatchEvent(new Event("input", { bubbles: true }));
   });
 }
-async function open(purpose: "switch" | "merge" | "rebase", status: GitStatus = repo(), branches: GitBranch[] = BRANCHES) {
+async function open(purpose: "switch" | "merge" | "rebase" | "compare", status: GitStatus = repo(), branches: GitBranch[] = BRANCHES) {
   useGit.setState({ repos: { [KEY]: status }, current: KEY, branches, branchPick: purpose });
   useStore.setState({ palette: "branch" });
   await render(<CommandPalette />);
@@ -101,5 +101,27 @@ describe("branch picker", () => {
     expect(rowTexts()).toEqual(['Create branch "new-idea" from here']);
     await fire.keyDown(input(), "Enter");
     expect(spy.runCommand).toHaveBeenCalledWith("git.createBranch", "new-idea");
+  });
+
+  // Compare with Branch… (COMMITCMP-005.1, .8, .9).
+  it("compare: local then remote branches with the current one, no Create row, and a picked row runs the compare command", async () => {
+    await open("compare");
+    expect(input().placeholder).toBe("Compare with a branch…");
+    expect(rowTexts()).toEqual(["current: main", "feature", "remote: origin/topic"]);
+    await type("does-not-exist");
+    expect(rowTexts()).toEqual([]);
+    expect(empty()).toBe("No matches");
+    await fire.keyDown(input(), "Enter");
+    expect(spy.runCommand).not.toHaveBeenCalled();
+    await type("topic");
+    await fire.keyDown(input(), "Enter");
+    expect(spy.runCommand).toHaveBeenCalledWith("git.compareBranchPick", "origin/topic");
+  });
+
+  it("compare: Escape closes the picker and nothing runs", async () => {
+    await open("compare");
+    await fire.keyDown(input(), "Escape");
+    expect(useStore.getState().palette).toBeNull();
+    expect(spy.runCommand).not.toHaveBeenCalled();
   });
 });

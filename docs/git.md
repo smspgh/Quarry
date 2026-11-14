@@ -136,12 +136,24 @@ Right-click a commit for the actions:
 | Create Branch Here (Don't Switch)… | A new branch starting at that commit; you stay on the branch you are on. |
 | Create Tag Here… | A tag on that commit. |
 | Check Out This Commit… | Your files become that commit, on no branch ("detached"). Switch back with the branch button. |
+| Compare with *id* / Compare with Working Tree / Compare with Branch… | Lists the files that differ between that commit and the commit selected before, your files as they are now, or a branch you pick. Nothing is changed; see [Comparing commits](#comparing-commits). |
 | Cherry-pick onto *branch*… | Copies that commit's changes onto your branch as a new commit. |
 | Revert This Commit… | Adds a commit that undoes it; history is kept. |
 | Merge … into *branch*… / Rebase *branch* onto This… | Start a merge or a rebase with that commit (or the one branch on it); see [Merge and rebase](#merge-and-rebase). Right-click a branch or tag label for the same two by name. |
 | Reset *branch* to Here (Soft / Mixed / Hard)… | Moves your branch back to that commit. **Soft** keeps the later changes staged, **Mixed** keeps them in your files unstaged, **Hard** discards them along with uncommitted changes to tracked files. |
 
 Everything that moves your branch or files asks first and says what will happen. A cherry-pick or revert that hits a conflict stops part-way: Source Control shows the operation (**Cherry-picking**) with the conflicted files under **Merge Changes**. The graph tab shows the same thing in a strip at its top. Resolve and commit them, or press **Abort** (in the strip, or beside the branch in Source Control) to go back to how things were. Abort also works for a merge or rebase that stopped. 
+
+### Comparing commits
+
+The graph can show what differs between any two points of the history. The details pane then becomes a **comparison pane**: both sides with their labels and first message line, a list of every file that differs, and a summary of lines added and removed. Comparing never changes anything: nothing is checked out, staged or fetched, and nothing inside `.git` is written, so it is safe with uncommitted work or in the middle of a stopped merge or rebase.
+
+- **Two commits.** Click one commit, then **Ctrl+click** another (or right-click it › **Compare with *id***). Both rows are highlighted; the second has a dashed outline. Ctrl+click a third commit to replace the second; Ctrl+click one of the two to take it out. A plain click, an arrow key or **Escape** ends the comparison. Stash rows and Search All History results can't be picked this way (use **Show in Graph** on a result first).
+- **A commit and your files.** Right-click a commit › **Compare with Working Tree**: that commit against your tracked files as they are on disk, staged or not. Untracked files are not compared (the pane says how many there are). The list follows your work: it is read again when you save or commit.
+- **A commit and a branch.** **Git › Compare with Branch…** (also in the command palette) asks for a branch and compares its latest commit with the commit you are on; uncommitted changes are not part of it. **Compare with Branch…** in a commit's right-click menu compares the branch with that commit instead. The graph tab opens (or comes to the front) with the result, also when the branch's commit is far back in the history: its side then has a **Show in Graph** button.
+- **Which side is which.** The older state is on the left. When one commit is an ancestor of the other it goes on the left, whatever order you picked them in; for two commits on different branches the first one you selected is on the left (a picked branch goes on the left unless it is ahead). **Swap Sides** flips them. The working tree is always on the right. A line under the two sides says how they relate, for example **18bc71d is 3 commits ahead of a1b2c3d**, or how many commits each has that the other lacks.
+- **The list** is the direct difference between the two snapshots (what `git diff A B` shows), with the usual letters read from left to right: **A** only in the right side, **D** only in the left, **M** modified, **R** renamed (the tooltip names the old path). A conflicted file in the working tree shows **!**. Long lists are complete; only the rows on screen are drawn.
+- **Opening a file.** Click a file (or press Enter on it) for a [Compare tab](compare.md) with `name @ id` on each side, both read-only. Against the working tree the right side is your open tab's text (read-only), or the file on disk, which you can edit and save. Clicking the next file reuses the tab; double-click the tab to keep it. Double-click a file in the list to open the file itself. Binary files are listed but not opened.
 
 ### Resolving a conflict
 

@@ -2904,8 +2904,8 @@
       "title": "Pick a second commit with Ctrl+click",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 26,
-      "status": "planned",
+      "line": 27,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -2975,8 +2975,8 @@
       "title": "See which files differ between two commits",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 112,
-      "status": "planned",
+      "line": 113,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/GraphCompare.tsx",
@@ -3052,8 +3052,8 @@
       "title": "Open a differing file in a Compare tab",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 207,
-      "status": "planned",
+      "line": 208,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/GraphCompare.tsx",
@@ -3118,8 +3118,8 @@
       "title": "Compare a commit with the working tree",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 279,
-      "status": "planned",
+      "line": 280,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -3186,6 +3186,14 @@
         {
           "id": "COMMITCMP-004.12",
           "title": "Nothing is staged, stashed or checked out"
+        },
+        {
+          "id": "COMMITCMP-004.13",
+          "title": "A binary file in the working tree"
+        },
+        {
+          "id": "COMMITCMP-004.14",
+          "title": "How the folder relates to the commit"
         }
       ]
     },
@@ -3194,8 +3202,8 @@
       "title": "Compare with a branch",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 365,
-      "status": "planned",
+      "line": 378,
+      "status": "draft",
       "commands": [
         "git.compareWithBranch",
         "git.compareBranchPick"
@@ -3203,6 +3211,7 @@
       "files": [
         "src/lib/gitCommands.ts",
         "src/lib/git.ts",
+        "src/lib/gitRefs.ts",
         "src/components/CommandPalette.tsx",
         "src/components/GraphView.tsx",
         "src/components/GraphCompare.tsx",
@@ -3214,6 +3223,9 @@
       "tests": [
         "src/__tests__/gitCompare.test.ts",
         "src/__tests__/graphCompare.test.tsx",
+        "src/__tests__/graphView.test.tsx",
+        "src/__tests__/branchPicker.test.tsx",
+        "src/__tests__/gitRefs.test.ts",
         "src-tauri/src/git.rs"
       ],
       "docs": [
@@ -3267,6 +3279,10 @@
         {
           "id": "COMMITCMP-005.12",
           "title": "I stay where I am"
+        },
+        {
+          "id": "COMMITCMP-005.13",
+          "title": "The branch points at the commit I right-clicked"
         }
       ]
     },
@@ -3275,8 +3291,8 @@
       "title": "Comparing never changes the repository",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 456,
-      "status": "planned",
+      "line": 475,
+      "status": "draft",
       "commands": [],
       "files": [
         "src-tauri/src/git.rs",
@@ -10787,7 +10803,7 @@
       "title": "Speed up a very large history",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 284,
+      "line": 285,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10833,7 +10849,7 @@
       "title": "Find among the loaded commits",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 335,
+      "line": 336,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10878,7 +10894,7 @@
       "title": "Search the whole history and go to a result",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 386,
+      "line": 387,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10944,7 +10960,7 @@
       "title": "See a commit's details",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 462,
+      "line": 463,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11000,7 +11016,7 @@
       "title": "Open what a commit changed in a file",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 523,
+      "line": 528,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11046,7 +11062,7 @@
       "title": "Copy, switch, branch and tag from a commit's right-click menu",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 572,
+      "line": 577,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11108,7 +11124,7 @@
       "title": "Check out, cherry-pick or revert a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 647,
+      "line": 652,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11163,7 +11179,7 @@
       "title": "Reset the branch to a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 706,
+      "line": 711,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11207,7 +11223,7 @@
       "title": "See uncommitted work and a stopped operation above the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 752,
+      "line": 757,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11254,7 +11270,7 @@
       "title": "Uncommitted changes as the first row of the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 814,
+      "line": 819,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11344,7 +11360,7 @@
       "title": "Drag the height of the Search All History results",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 935,
+      "line": 940,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11407,7 +11423,7 @@
       "title": "Scroll sideways through a graph wider than 16 lanes",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1010,
+      "line": 1015,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11466,7 +11482,7 @@
       "title": "List a small history by date",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1087,
+      "line": 1092,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11539,7 +11555,7 @@
       "title": "Show Commit Graph is in the palette without a repository",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1178,
+      "line": 1183,
       "status": "draft",
       "commands": [
         "git.graph"
@@ -24139,6 +24155,7 @@
       "BRANCH-007",
       "BRANCH-008",
       "BRANCH-009",
+      "COMMITCMP-005",
       "GIT-007",
       "MERGE-002",
       "MERGE-003"
@@ -24839,6 +24856,7 @@
       "BRANCH-002",
       "BRANCH-004",
       "BRANCH-005",
+      "COMMITCMP-005",
       "GIT-007",
       "MERGE-003"
     ],
@@ -25029,6 +25047,7 @@
       "BRANCH-007",
       "BRANCH-008",
       "BRANCH-009",
+      "COMMITCMP-005",
       "GIT-007",
       "MERGE-002",
       "MERGE-003"
@@ -25115,6 +25134,7 @@
       "BRANCH-007",
       "BRANCH-008",
       "COMMITCMP-001",
+      "COMMITCMP-005",
       "GITAI-009",
       "GRAPH-001",
       "GRAPH-009",

@@ -16,6 +16,9 @@ A **Compare** tab shows two versions of a text side by side, or in one editor wi
 | Explorer | Select two files (Ctrl+click) › right-click › **Compare Selected** |
 | Tab right-click | **Compare with Saved** (your unsaved edits against the file on disk), **Compare with Clipboard**, **Select for Compare** / **Compare with Selected** |
 | File › Compare | **Compare Two Files…**, **Compare Active File With…**, **Compare with Saved**, **Compare with Clipboard** |
+| Commit graph | Click a file of a commit, or of a comparison of two commits, of a commit with your files, or with a branch ([Comparing commits](git.md#comparing-commits)) |
+
+Comparisons opened from the commit graph are labelled `name @ commit id` and reuse one tab as you click through the files (double-click the tab to keep it). Versions from a commit are read-only; when a commit is compared with your files, the right side is the file on disk and can be edited and saved.
 
 The first file is the left (original) side and the second the right (changed) side. If the two have the same name, each side is labelled with its folder, as in `old\stats.ts` and `new\stats.ts`.
 

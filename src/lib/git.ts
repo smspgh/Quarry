@@ -27,6 +27,8 @@ import type { BranchPurpose } from "./gitRefs";
 import type { GitStash } from "./gitApi";
 import { dropConfirm, dropOffer, isStashConflict, STASH_CONFLICT, stashBlocked, stashConflictWarning, stashCounts, stashDone, stashErrorText, stashTitle } from "./gitStash";
 import { relativeTime } from "../editor/git";
+// Compare commits (specs/git-compare-commits.md): the actions are at the end of this file.
+import { sideLabel } from "./gitCompare";
 
 export interface FileHistory {
   path: string;
@@ -791,15 +793,18 @@ export async function saveIdentity(root: string, name: string, email: string, gl
 /**
  * Open the branch picker (palette mode "branch"). The purpose sets its prompt, which rows it lists
  * and the command a picked row runs (`branchPick` / `pickList` in gitRefs.ts): "switch" (the
- * default), or "merge" / "rebase", which are refused here when they cannot start.
+ * default), or "merge" / "rebase", which are refused here when they cannot start. "compare"
+ * (COMMITCMP-005) only reads; `from` is the graph commit the picked branch is compared with
+ * (and its repository), else the current commit.
  */
-export async function pickBranch(purpose: BranchPurpose = "switch") {
-  const repo = currentRepo();
+export async function pickBranch(purpose: BranchPurpose = "switch", from?: { root: string; sha: string }) {
+  const repo = (from && useGit.getState().repos[key(from.root)]) || currentRepo();
   if (!repo) {
     toast("The open folder is not in a git repository.", "info");
     return;
   }
-  if (purpose !== "switch") {
+  compareFrom = purpose === "compare" && from ? from : null;
+  if (purpose === "merge" || purpose === "rebase") {
     const blocked = startBlocked(repo, purpose, useGit.getState().busy);
     if (blocked) {
       toast(`${blocked}.`, "info", 4000);
@@ -1392,4 +1397,66 @@ export async function openStashFile(stash: Pick<GitStash, "sha" | "short" | "bas
   }
   const name = nameOf(f.rel.replace(/\//g, "\\"));
   await openCompare({ kind: "text", label: `${name} @ ${stash.base.slice(0, 7)}`, text: a?.text ?? "" }, { kind: "text", label: `${name} @ stash ${stash.short}`, text: b?.text ?? "" }, { preview: true });
+}
+
+// ---------- compare commits (specs/git-compare-commits.md) ----------
+// Everything here only reads: no checkout, no staging, no commit action.
+
+/** Compare with Branch… asked from a graph commit: the repository and commit the picked branch is
+ *  compared with. null: the current commit of the current repository (Git menu, palette). */
+let compareFrom: { root: string; sha: string } | null = null;
+
+/**
+ * Compare a branch (picked by name) with the commit Compare with Branch… was asked from, or with
+ * the current commit (HEAD; uncommitted changes are not part of it). Opens the repository's graph
+ * tab, or brings it to the front, and hands it the two commits.
+ */
+export async function compareWithBranch(name: string): Promise<boolean> {
+  const from = compareFrom;
+  compareFrom = null;
+  const repo = (from && useGit.getState().repos[key(from.root)]) || currentRepo();
+  if (!repo) {
+    toast("Open a folder in a git repository", "info");
+    return false;
+  }
+  const result = await git.diffFiles(repo.root, from?.sha ?? "HEAD", name).catch((e) => {
+    toast(gitErrorText(String(e)), "error");
+    return null;
+  });
+  if (!result?.right) return false;
+  openGraph(repo.root);
+  useStore.getState().set({ graphCompare: { root: repo.root, first: result.left.sha, second: result.right.sha, names: { first: from ? undefined : (repo.branch ?? "HEAD"), second: name }, result } });
+  return true;
+}
+
+/**
+ * A file of the comparison pane in a Compare tab (a preview tab, like a commit's files): its text
+ * at the left commit against the right commit (both read-only), or, with `right` null, against
+ * the working tree as in Compare with Last Commit: the open tab's text (a read-only snapshot),
+ * else the file on disk (editable). A conflicted file opens itself, with its conflict bars.
+ */
+export async function openCompareFile(left: { sha: string; short: string }, right: { sha: string; short: string } | null, f: GitCommitFile) {
+  const { openCompare } = await import("./diff");
+  if (!right && f.status === "U" && (await fs.exists(f.path))) {
+    const { openPath } = await import("./actions");
+    void openPath(f.path);
+    return;
+  }
+  const [a, b] = await Promise.all([
+    f.status === "A" ? null : git.show(f.path, left.sha, f.origRel ?? f.rel).catch(() => null),
+    !right || f.status === "D" ? null : git.show(f.path, right.sha, f.rel).catch(() => null),
+  ]);
+  if (a?.binary || b?.binary) {
+    toast("This file is binary.", "info");
+    return;
+  }
+  const old = { kind: "text" as const, label: sideLabel(f.origRel ?? f.rel, left.short), text: a?.text ?? "" };
+  if (right) {
+    await openCompare(old, { kind: "text", label: sideLabel(f.rel, right.short), text: b?.text ?? "" }, { preview: true });
+    return;
+  }
+  const doc = useStore.getState().docs.find((d) => d.kind === "text" && d.path && key(d.path) === key(f.path));
+  if (doc) await openCompare(old, { kind: "tab", docId: doc.id }, { preview: true });
+  else if (await fs.exists(f.path)) await openCompare(old, { kind: "file", path: f.path }, { preview: true });
+  else await openCompare(old, { kind: "text", label: `${nameOf(f.path)} (deleted)`, text: "" }, { preview: true });
 }

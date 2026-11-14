@@ -60,7 +60,7 @@ export function refMenu(label: RefLabel, ctx: RefMenuCtx): RefMenu | null {
 // ---------- the branch picker ----------
 
 /** Why the branch picker is open. Later features add their purposes here. */
-export type BranchPurpose = "switch" | "merge" | "rebase";
+export type BranchPurpose = "switch" | "merge" | "rebase" | "compare";
 
 export interface BranchPick {
   /** The input's placeholder. */
@@ -75,10 +75,12 @@ export interface BranchPick {
 export function branchPick(purpose: BranchPurpose, branch: string | null): BranchPick {
   if (purpose === "merge") return { prompt: `Merge which branch into ${branch ?? "the current commit"}?`, command: "git.mergeRef", create: false };
   if (purpose === "rebase") return { prompt: `Rebase ${branch ?? "the current branch"} onto which branch?`, command: "git.rebaseOnto", create: false };
+  // Compare with Branch… (COMMITCMP-005): every branch, the current one included.
+  if (purpose === "compare") return { prompt: "Compare with a branch…", command: "git.compareBranchPick", create: false };
   return { prompt: "Switch to a branch, or type a name to create one…", command: "git.checkoutTo", create: true };
 }
 
 /** The rows a purpose lists, in the order git gave them (local first, then remote, each newest first). */
 export function pickList(purpose: BranchPurpose, branches: GitBranch[]): GitBranch[] {
-  return purpose === "switch" ? branches : branches.filter((b) => !b.current);
+  return purpose === "switch" || purpose === "compare" ? branches : branches.filter((b) => !b.current);
 }

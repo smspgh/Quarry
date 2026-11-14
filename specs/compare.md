@@ -641,7 +641,7 @@ Scenario: DIFF-013.7 A file that can no longer be read
 - Commands: none
 - Files:
   - `src/lib/diff.ts` — `openCompare(a, b, { preview: true })`: closes the previous Compare tab that is `preview` and not dirty
-  - `src/lib/git.ts` — `openCommitFile`, `compareSides` open with `preview: true`
+  - `src/lib/git.ts` — `openCommitFile`, `compareSides`, `openCompareFile` (the graph's comparison pane, COMMITCMP-003) open with `preview: true`
   - `src/components/TitleBar.tsx` — double-click on a tab clears `Doc.preview`
 - Tests: `src/__tests__/diffSession.test.ts`
 - Docs: `docs/git.md`

@@ -279,6 +279,7 @@ Scenario: GRAPH-005.9 What a reload keeps
   When the repository changes (a commit, pull, push, checkout, a fetch that moves the upstream, or an operation starting or ending) and the graph reloads from the first page
   Then the scroll position, the selected commit and its details pane are kept
   And a selected commit beyond the first page (300 rows, or the grown page size) is no longer shown: its details pane closes and the list is left at the end of the first page, where scrolling loads the next page
+  And two commits being compared stay compared, with the comparison pane unchanged, also when one is beyond the first page (COMMITCMP-001.10)
 ```
 
 ## GRAPH-006: Speed up a very large history
@@ -478,7 +479,9 @@ Scenario: GRAPH-008.11 Search by branch or tag name
 ```gherkin
 Scenario: GRAPH-009.1 Select a commit
   When I click a commit in the graph
-  Then a details pane opens below with the full commit id, the whole message, the author with e-mail and date, its parents, its branch and tag labels
+  Then that commit alone is selected (a comparison of two commits that was showing ends, COMMITCMP-001.5)
+  And a details pane opens below with the full commit id, the whole message, the author with e-mail and date, its parents, its branch and tag labels
+  But a Ctrl+click on another commit keeps the first and compares the two: the comparison pane takes the details pane's place (COMMITCMP-001.1)
   And it lists the changed files with their letter (A, M, D, R) under a summary such as "3 files changed, 10 insertions(+), 2 deletions(-)"
   And for a stash row it shows the stash's message, who stashed it and when, the commit it was made on as its only Parent, and the files it holds under "2 files in this stash" (STASH-010.6)
 
@@ -487,6 +490,7 @@ Scenario: GRAPH-009.2 Move with the keyboard
   When I press Down, Up, PageDown, PageUp, Home or End
   Then the selection moves by one row, by one screen, or to the first / last loaded commit
   And the selected row is scrolled into view and the details follow
+  And while two commits are being compared the move starts from the first of them and ends the comparison, and Escape ends it leaving the first selected (COMMITCMP-001.6)
 
 Scenario: GRAPH-009.3 Copy the id
   When I click the copy button beside the full id
@@ -518,6 +522,7 @@ Scenario: GRAPH-009.8 Resize and close
   When I drag the top edge of the details pane
   Then its height follows, between 120 px and 70% of the window height
   And the pane's close button clears the selection and hides the pane
+  And the comparison pane of COMMITCMP-002 uses the same edge and the same height
 ```
 
 ## GRAPH-010: Open what a commit changed in a file
@@ -527,7 +532,7 @@ Scenario: GRAPH-009.8 Resize and close
 - Files:
   - `src/components/GraphView.tsx` — `DetailFile` (click / Enter, double-click)
   - `src/lib/git.ts` — `openCommitFile` (parent's text vs the commit's, `preview: true`)
-  - `src/lib/diff.ts` — `openCompare` replaces the previous clean preview Compare tab
+  - `src/lib/diff.ts` — `openCompare` replaces the previous clean preview Compare tab (also one opened from the comparison pane, `openCompareFile`, COMMITCMP-003)
   - `src-tauri/src/git.rs` — `show` / `git_show`
 - Tests: none
 - Docs: `docs/git.md`, `docs/compare.md`
@@ -545,7 +550,7 @@ Scenario: GRAPH-010.1 Click a file
 
 Scenario: GRAPH-010.2 The next file reuses the tab
   Given that Compare tab is open and untouched
-  When I click another file of the commit
+  When I click another file of the commit, or a file in the comparison pane of two commits (COMMITCMP-003.3)
   Then its comparison replaces the previous one instead of adding a tab
 
 Scenario: GRAPH-010.3 Keep a comparison
@@ -589,9 +594,9 @@ Scenario: GRAPH-010.6 Open the file as it is now
 ```gherkin
 Scenario: GRAPH-011.1 The menu
   When I right-click a commit
-  Then the commit is selected
+  Then the commit is selected (alone: a comparison of two commits that was showing ends)
   And a menu opens headed by its short id and message
-  And it offers Copy Commit Id, Copy Message, Create Branch Here…, Create Branch Here (Don't Switch)…, Create Tag Here…, Check Out This Commit…, Cherry-pick, Revert This Commit…, the merge and rebase entries of MERGE-001 and three Reset entries
+  And it offers Copy Commit Id, Copy Message, Create Branch Here…, Create Branch Here (Don't Switch)…, Create Tag Here…, Check Out This Commit…, the compare entries (Compare with <short id> when another commit was selected, Compare with Working Tree, Compare with Branch…; COMMITCMP-001.8, COMMITCMP-004, COMMITCMP-005), Cherry-pick, Revert This Commit…, the merge and rebase entries of MERGE-001 and three Reset entries
   And a stash row gets none of these: its menu is Apply Stash, Pop Stash, Drop Stash… and Copy Message (STASH-010.7)
   And it closes on Escape or a click elsewhere
   And a right-click on a branch or tag label of the row opens that label's menu instead (MERGE-002)

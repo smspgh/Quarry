@@ -11,6 +11,7 @@ import { forcePush, startMerge, startRebase } from "./git";
 import { forcePushBlocked, startBlocked, type StartKind } from "./gitMerge";
 import { showStashes, showStashForm, stashLatest } from "./git";
 import { applyChange, applySelection, canApply, type ApplyAction, type ApplyScope } from "./gitStaging";
+import { compareWithBranch } from "./git";
 import { showPanel } from "./panels";
 import { activeDoc, useStore } from "./store";
 
@@ -230,4 +231,9 @@ export function registerGitCommands() {
   register({ id: "git.stashPop", title: "Pop Latest Stash", category: "Git", enabled: hasStash, run: () => void stashLatest("pop") });
   register({ id: "git.stashDrop", title: "Drop Latest Stash…", category: "Git", enabled: hasStash, run: () => void stashLatest("drop") });
   register({ id: "git.showStashes", title: "Show Stashes", category: "Git", enabled: hasRepo, run: showStashes });
+
+  // ---- compare commits (specs/git-compare-commits.md): read-only, so never blocked by an operation ----
+  register({ id: "git.compareWithBranch", title: "Compare with Branch…", category: "Git", enabled: hasRepo, run: () => void pickBranch("compare") });
+  // What a picked row of the branch list runs: the branch name.
+  register({ id: "git.compareBranchPick", title: "Compare with Branch", category: "Git", hidden: true, run: (name) => { if (typeof name !== "string" || !name.trim()) return false; void compareWithBranch(name.trim()); } });
 }
