@@ -4840,7 +4840,8 @@ select optgroup {
 .scm-stash-drop:not(:disabled):hover { background: var(--danger-soft); }
 .scm-stash-mark { color: var(--warning); }
 .graph-ref.stash { background: var(--git-stash-soft); border-color: transparent; color: var(--git-stash); }
-.graph-row.stash .graph-c-msg > .truncate { font-style: italic; }
+/* padding: the slant of the last italic letter is cut off by `overflow: hidden` without it. */
+.graph-row.stash .graph-c-msg > .truncate { font-style: italic; padding-right: 3px; }
 /* A stash is not a commit: its dot is hollow. */
 .gn.stash.gl-0, .gn.stash.gl-1, .gn.stash.gl-2, .gn.stash.gl-3, .gn.stash.gl-4, .gn.stash.gl-5, .gn.stash.gl-6, .gn.stash.gl-7 { fill: var(--editor-bg); stroke: var(--git-stash); stroke-width: 1.5; }
 
@@ -5100,7 +5101,7 @@ select optgroup {
 /* Graph polish (GRAPH-015..018). The uncommitted-changes row: hollow dot, dashed line down to the current commit. */
 .gl.dashed { stroke-dasharray: 3 3; }
 .gn.uncommitted.gl-0 { fill: var(--editor-bg); stroke: var(--panel-search); stroke-width: 1.5; }
-.graph-row.uncommitted .graph-c-msg > .truncate { font-style: italic; color: var(--text-2); }
+.graph-row.uncommitted .graph-c-msg > .truncate { font-style: italic; padding-right: 3px; color: var(--text-2); }
 .graph-row.uncommitted .graph-c-msg > svg { flex: none; }
 .graph-uncommitted-title { font-weight: 600; color: var(--text); }
 .graph-uncommitted-meta { margin-top: 8px; }
