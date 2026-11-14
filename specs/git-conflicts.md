@@ -238,9 +238,9 @@ Scenario: CONFLICT-005.3 diff3 conflicts
 - Commands: none
 - Files:
   - `src/editor/conflicts.ts` — update listener in `conflictExtensions` (`hooks.cleared` when the count goes from some to none)
-  - `src/lib/git.ts` — `conflictsCleared` (only for a file git lists as conflicted; `stashLastFile` words the last file of a stash conflict), then `resolveConflicts`
+  - `src/lib/git.ts` — `conflictsCleared` (only for a file git lists as conflicted, asked of git at that moment because a reload comes before the stored status is refreshed; `stashLastFile` words the last file of a stash conflict), then `resolveConflicts`
   - `src/lib/dialogs.ts` — `choose`
-- Tests: none
+- Tests: `src/__tests__/conflictsCleared.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer who just resolved the last conflict in a file
@@ -279,6 +279,11 @@ Scenario: CONFLICT-006.5 Deleting the markers by hand counts too
 Scenario: CONFLICT-006.6 Not for files git does not list as conflicted
   Given an untitled document, or a file that is not under Merge Changes, containing a conflict block
   When I resolve its last block
+  Then no dialog appears
+
+Scenario: CONFLICT-006.7 Not when the markers went because the operation did
+  Given "store.ts" is open with a conflict and a rebase is stopped on it
+  When I abort the rebase, or take one side of the whole file from its row, and the tab reloads without markers
   Then no dialog appears
 ```
 

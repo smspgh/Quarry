@@ -604,13 +604,18 @@ export async function continueOperation(root: string, operation: string, how: "c
 }
 
 /** The last conflict of a document was just resolved in the editor: offer to finish the file. */
-async function conflictsCleared(view: EditorView) {
+export async function conflictsCleared(view: EditorView) {
   const st = useStore.getState();
   const doc = st.docs.find((d) => d.kind === "text" && editor.viewOf(d.id) === view) ?? st.docs.find((d) => d.id === st.activeId);
   if (!doc?.path) return;
-  const repo = repoOf(doc.path);
-  const file = repo?.files.find((f) => f.conflicted && key(f.path) === key(doc.path!));
-  if (!repo || !file) return;
+  const known = repoOf(doc.path);
+  const listed = (r: GitStatus | null) => !!r?.files.some((f) => f.conflicted && key(f.path) === key(doc.path!));
+  if (!known || !listed(known)) return;
+  // The markers also go when the tab reloads after an Abort or after taking one side of the whole
+  // file, and the reload comes before the status in the store is refreshed: ask git itself, so the
+  // offer is only made for a file that is still in conflict.
+  const repo = await git.status(known.root).catch(() => known);
+  if (!repo || !listed(repo)) return;
   const name = nameOf(doc.path);
   const left = repo.files.filter((f) => f.conflicted).length - 1;
   const ok = await choose(

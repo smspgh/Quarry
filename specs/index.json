@@ -3610,7 +3610,9 @@
         "src/lib/git.ts",
         "src/lib/dialogs.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/conflictsCleared.test.ts"
+      ],
       "docs": [
         "docs/git.md"
       ],
@@ -3638,6 +3640,10 @@
         {
           "id": "CONFLICT-006.6",
           "title": "Not for files git does not list as conflicted"
+        },
+        {
+          "id": "CONFLICT-006.7",
+          "title": "Not when the markers went because the operation did"
         }
       ]
     },
@@ -3646,7 +3652,7 @@
       "title": "Mark a conflicted file as resolved",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 285,
+      "line": 290,
       "status": "draft",
       "commands": [
         "git.stageFile"
@@ -3700,7 +3706,7 @@
       "title": "Take one side's version of a whole file",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 343,
+      "line": 348,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3749,7 +3755,7 @@
       "title": "Open a conflicted file from Merge Changes",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 402,
+      "line": 407,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3783,7 +3789,7 @@
       "title": "Commit only when every conflict is resolved",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 435,
+      "line": 440,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3831,7 +3837,7 @@
       "title": "Abort a stopped operation",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 487,
+      "line": 492,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3879,7 +3885,7 @@
       "title": "Skip the commit an operation stopped on",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 541,
+      "line": 546,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3918,7 +3924,7 @@
       "title": "Carry on with a rebase",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 585,
+      "line": 590,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3967,7 +3973,7 @@
       "title": "Carry on with a patch series (git am)",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 644,
+      "line": 649,
       "status": "draft",
       "commands": [],
       "files": [
@@ -25134,6 +25140,9 @@
       "CONFLICT-001",
       "CONFLICT-002",
       "CONFLICT-003"
+    ],
+    "src/__tests__/conflictsCleared.test.ts": [
+      "CONFLICT-006"
     ],
     "src/__tests__/conflictsEditor.test.ts": [
       "CONFLICT-001",
