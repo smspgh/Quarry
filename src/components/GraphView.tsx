@@ -758,7 +758,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
         </span>
         <span className="grow" />
         {(busy || loading || seeking) && <span className="muted row graph-busy"><Loader2 size={13} className="spin" /> {busy ?? (seeking ? "Loading back to that commit…" : "Loading…")}</span>}
-        <span className="muted graph-count">{total}{more ? "+" : ""} commits</span>
+        <span className="muted graph-count">{total}{more ? "+" : ""} {total === 1 && !more ? "commit" : "commits"}</span>
         <button className="icon-btn" title="Fetch from all remotes" disabled={!!busy} onClick={() => void remote(root, "fetch").then(() => load(true))}><CloudDownload size={15} /></button>
         <button className="icon-btn" title="Reload the graph" onClick={() => void load(true)}><RefreshCw size={15} /></button>
       </div>

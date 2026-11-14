@@ -69,6 +69,13 @@ describe("GraphView", () => {
     expect(document.querySelector(".graph-toolbar")?.textContent).toContain("5 commits");
   });
 
+  it("a single commit is counted as \"1 commit\"", async () => {
+    answers.page = PAGE.slice(-1);
+    await render(<GraphView doc={doc} visible />);
+    await flush();
+    expect(document.querySelector(".graph-toolbar .graph-count:last-of-type")?.textContent).toBe("1 commit");
+  });
+
   it("an empty history says so", async () => {
     answers.page = [];
     await render(<GraphView doc={doc} visible />);
