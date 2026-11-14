@@ -254,6 +254,8 @@ Anything that replays commits needs a clean working folder: with uncommitted cha
 
 No editor ever opens, whatever git's `core.editor` is, and the repository's commit hooks are not run for a reworded message.
 
+If git stops part-way for any reason other than a conflict (most often commit signing is on, `commit.gpgsign`, and signing fails), the edit is undone at once: the branch stays where it was, no rebase is left in progress, and an error says why. Your typed message stays in its box (the Edit History list keeps your choices), so you can fix the cause and try again. If a conflict stopped the edit first and a new message then fails on **Continue Rebase**, the rebase stays stopped with that message step next: fix the cause and continue again, or **Abort**.
+
 ### The Edit History list
 
 **Edit History from Here…** replaces the graph's rows with a list of the commits from that one up to the newest, newest at the top, at most 100. **Git › Edit History › Edit History…** (also in the palette) opens it over the commits you have not pushed yet. Nothing happens to the repository until you press **Run**.

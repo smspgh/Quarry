@@ -186,13 +186,31 @@ export function commitFileKind(status: string): GitKind {
   return status === "A" ? "added" : status === "D" ? "deleted" : status === "R" || status === "C" ? "renamed" : "modified";
 }
 
+/** Start of Rust's error for a history edit that stopped without a conflict and was aborted (git/history.rs `HALTED`). */
+export const HALTED = "quarry-halted";
+/** Start of Rust's error for a Continue whose new commit message could not be set (`MESSAGE_FAILED`). */
+export const MESSAGE_FAILED = "quarry-message-failed";
+const HALTED_TEXTS = [
+  [HALTED, "Git could not make one of the new commits, so the history edit was undone: nothing was rewritten."],
+  [MESSAGE_FAILED, "Git could not give the commit its new message. The rebase is still stopped: Continue Rebase tries the message again, Abort puts the branch back as it was."],
+] as const;
+const SIGNING_NOTE = " Commit signing is on (commit.gpgsign) and git could not sign: fix signing, or turn it off for this repository, and try again.";
+
 /**
  * What to show when git fails: its message without the `hint:` lines (they name command-line
  * steps Quarry has buttons for). An operation that stopped on a conflict gets a plain sentence
- * saying where to go, with git's CONFLICT lines kept.
+ * saying where to go, with git's CONFLICT lines kept. A history edit that stopped without a
+ * conflict (Rust aborted it) or whose new message failed on Continue gets its own sentence.
  */
 export function gitErrorText(raw: string): string {
-  const lines = raw.replace(/^Error: /, "").split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !/^hint:/i.test(l));
+  const text = raw.replace(/^Error: /, "");
+  for (const [mark, say] of HALTED_TEXTS) {
+    if (text.startsWith(`${mark}: `)) {
+      const reason = text.slice(mark.length + 2).trim();
+      return `${say}${/gpg|sign/i.test(reason) ? SIGNING_NOTE : ""}${reason ? `\n\n${reason}` : ""}`;
+    }
+  }
+  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !/^hint:/i.test(l));
   const conflicts = lines.filter((l) => /^CONFLICT /.test(l));
   if (conflicts.length) {
     const shown = conflicts.slice(0, 3).join("\n") + (conflicts.length > 3 ? `\n… and ${conflicts.length - 3} more` : "");

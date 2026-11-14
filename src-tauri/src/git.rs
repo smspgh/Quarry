@@ -1482,7 +1482,21 @@ fn continue_operation(root: &Path, how: &str) -> Result<String, String> {
     // Each commit keeps its own message: never wait on an editor.
     cmd.env("GIT_EDITOR", "true").args([op.as_str(), flag]);
     let out = exec(cmd, None)?;
-    if out.ok { Ok(op) } else { Err(combined(&out)) }
+    if out.ok {
+        return Ok(op);
+    }
+    let text = combined(&out);
+    // A history edit's new message could not be set (signing failed, …): say so plainly. The step
+    // stays on the todo, so the next Continue tries it again.
+    if op == "rebase" && operation(root).is_some() && !has_unmerged(root) {
+        if let Ok(dir) = run_text(root, true, &["rev-parse", "--git-path", "rebase-merge"]) {
+            let dir = root.join(dir.trim());
+            if history::message_step_failed(&dir) {
+                return Err(format!("{}: {}", history::MESSAGE_FAILED, history::failure_reason(&text)));
+            }
+        }
+    }
+    Err(text)
 }
 
 /// Abandon the merge / rebase / cherry-pick / revert in progress: back to how things were before it.

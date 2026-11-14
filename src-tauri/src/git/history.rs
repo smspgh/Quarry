@@ -10,13 +10,18 @@
 //! continued later (even by another program, or after Quarry was restarted), and nothing of
 //! Quarry's has to be cleaned up afterwards.
 
-use super::{blocking, combined, commit_refs, exec, git, has_head, is_sha, operation, pushed_commits, run, run_text, GitCommitRef};
+use super::{abort_operation, blocking, combined, commit_refs, exec, git, has_head, has_unmerged, is_sha, operation, pushed_commits, run, run_text, GitCommitRef};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::path::Path;
 
 /// Start of the error when the branch is not where the UI saw it (a commit was made meanwhile).
 pub const MOVED: &str = "quarry-moved";
+/// Start of the error when a history edit stopped without a conflict (a commit could not be made,
+/// e.g. signing failed) and was aborted: nothing was rewritten.
+pub const HALTED: &str = "quarry-halted";
+/// Start of the error when Continue stopped again on a new message (Quarry's `exec` line failed).
+pub const MESSAGE_FAILED: &str = "quarry-message-failed";
 
 /// Commits listed by `history_range` at most (the Edit History list takes fewer; see `total`).
 const LISTED: usize = 1000;
@@ -336,13 +341,46 @@ fn run_plan(root: &Path, base: Option<&str>, steps: &[HistoryStep]) -> Result<St
     for c in ["rebase.autoStash=false", "rebase.rebaseMerges=false", "rebase.updateRefs=false", "rebase.autoSquash=false", "rebase.missingCommitsCheck=ignore", "rebase.abbreviateCommands=false"] {
         cmd.args(["-c", c]);
     }
-    cmd.args(["rebase", "-i", "--empty=keep"]);
+    // A failed message step goes back on the todo, so Continue retries it rather than finishing
+    // with the old message (the option is kept in the rebase's state for every later Continue).
+    cmd.args(["rebase", "-i", "--empty=keep", "--reschedule-failed-exec"]);
     match base {
         Some(b) => cmd.arg(b),
         None => cmd.arg("--root"),
     };
     let out = exec(cmd, None)?;
-    if out.ok { Ok(combined(&out)) } else { Err(combined(&out)) }
+    if out.ok {
+        return Ok(combined(&out));
+    }
+    let text = combined(&out);
+    // Stopped on a conflict: the user resolves it, then Continue / Skip / Abort.
+    if operation(root).is_none() || has_unmerged(root) {
+        return Err(text);
+    }
+    // Stopped without a conflict: a commit could not be made (signing, a hook of git's own, …).
+    // Nothing to resolve, so put everything back rather than leave a half-done rewrite.
+    let reason = failure_reason(&text);
+    match abort_operation(root) {
+        Ok(_) => Err(format!("{HALTED}: {reason}")),
+        Err(e) => Err(format!("{text}\n{e}")),
+    }
+}
+
+/// The lines of git's output that say why it stopped (its `error:` / `fatal:` lines, else the last
+/// line), without the todo line it was running.
+pub(super) fn failure_reason(text: &str) -> String {
+    let lines: Vec<&str> = text.lines().map(str::trim).filter(|l| !l.is_empty()).collect();
+    let said: Vec<&str> = lines.iter().copied().filter(|l| l.starts_with("error:") || l.starts_with("fatal:")).collect();
+    let pick = if said.is_empty() { lines.last().copied().into_iter().collect() } else { said };
+    pick.join("\n")
+}
+
+/// After a Continue that failed with the rebase still stopped and nothing conflicted: was it one
+/// of Quarry's message steps (rescheduled to the top of the todo)? `dir`: `.git/rebase-merge`.
+pub(super) fn message_step_failed(dir: &Path) -> bool {
+    let next = std::fs::read_to_string(dir.join("git-rebase-todo")).unwrap_or_default();
+    let first = next.lines().map(str::trim).find(|l| !l.is_empty() && !l.starts_with('#')).unwrap_or("");
+    first.starts_with("exec printf ") && first.contains("git commit --amend --no-verify --cleanup=whitespace -q -F -")
 }
 
 #[tauri::command]
@@ -738,5 +776,47 @@ mod tests {
         plan(&root, Some(&ids[1]), &[step(&ids[2], "drop", None), step(&ids[3], "pick", None), step(&ids[4], "pick", None)]).unwrap();
         assert_eq!(subjects(&root), vec!["c5", "c4", "c2", "c1"]);
         assert_eq!((rev(&root, "keep"), rev(&root, "v1")), (ids[3].clone(), ids[4].clone()));
+    }
+
+    /// Signing switched on with a signing program that does not exist: every new commit fails.
+    fn signing_fails(root: &Path) {
+        git_ok(root, &["config", "commit.gpgsign", "true"]);
+        git_ok(root, &["config", "gpg.program", "quarry-no-such-signing-program"]);
+    }
+
+    #[test]
+    fn a_stop_without_a_conflict_is_aborted_and_says_why() {
+        let Some((_d, root, ids)) = five() else { return };
+        signing_fails(&root);
+        let tip = rev(&root, "HEAD");
+        // Reword an older commit: the message step cannot make its commit.
+        let err = plan(&root, Some(&ids[1]), &[step(&ids[2], "pick", Some("new words")), step(&ids[3], "pick", None), step(&ids[4], "pick", None)]).unwrap_err();
+        assert!(err.starts_with(HALTED), "{err}");
+        assert!(operation(&root).is_none(), "no rebase is left in progress");
+        assert_eq!((rev(&root, "HEAD"), subjects(&root)[2].as_str()), (tip.clone(), "c3"));
+        assert_eq!(run_text(&root, true, &["symbolic-ref", "--short", "HEAD"]).unwrap().trim(), "main");
+        // Squash: the fold itself cannot be committed.
+        let err = plan(&root, Some(&ids[2]), &[step(&ids[3], "pick", Some("c4 and c5")), step(&ids[4], "fixup", None)]).unwrap_err();
+        assert!(err.starts_with(HALTED), "{err}");
+        assert!(operation(&root).is_none() && status(&root).unwrap().unwrap().files.is_empty());
+        assert_eq!(rev(&root, "HEAD"), tip);
+        // The tip's reword fails cleanly too, and nothing changes.
+        assert!(history_rewrite(&root, "reword", &tip, None, &[], Some("tip words")).is_err());
+        assert_eq!((rev(&root, "HEAD"), message(&root, "HEAD")), (tip, "c5".to_string()));
+    }
+
+    #[test]
+    fn the_reason_and_the_failed_message_step_are_recognised() {
+        assert_eq!(failure_reason("Executing: x\nerror: gpg failed to sign the data\nfatal: failed to write commit object\nhint: …"), "error: gpg failed to sign the data\nfatal: failed to write commit object");
+        assert_eq!(failure_reason("one\n\nlast words\n"), "last words");
+        let d = tempfile::tempdir().unwrap();
+        let todo = todo_text(&[step(&"a".repeat(40), "pick", Some("m"))]).unwrap();
+        let exec_line = todo.lines().nth(1).unwrap().to_string();
+        std::fs::write(d.path().join("git-rebase-todo"), format!("# rescheduled\n{exec_line}\npick {}\n", "b".repeat(40))).unwrap();
+        assert!(message_step_failed(d.path()));
+        std::fs::write(d.path().join("git-rebase-todo"), format!("pick {}\n{exec_line}\n", "b".repeat(40))).unwrap();
+        assert!(!message_step_failed(d.path()));
+        std::fs::write(d.path().join("git-rebase-todo"), "exec make test\n").unwrap();
+        assert!(!message_step_failed(d.path()));
     }
 }

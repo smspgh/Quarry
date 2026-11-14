@@ -252,6 +252,11 @@ Scenario: HISTORY-003.9 Cancel
   When I cancel the "Reword this commit?" dialog
   Then git is not run and the strip stays open with my text
   And the keyboard focus is back in the strip's box, so Ctrl+Enter and Escape still work
+Scenario: HISTORY-003.10 Git fails
+  Given git refuses the new message (for example commit signing fails)
+  When I reword the tip commit and confirm
+  Then an error shows git's message and the commit is unchanged
+  And the strip stays open with my text
 ```
 
 ## HISTORY-004: Drop a commit
@@ -735,14 +740,14 @@ Scenario: HISTORY-009.12 A failure that is not a conflict
 - Commands: none
 - Files:
   - `src/lib/git.ts` — `historyRun` → `runStart` (reports a stop through `gitErrorText` and shows Source Control with `showPanel("git")`, as `startMerge` / `startRebase` do in MERGE-007); `continueOperation`, `abortOperation` (existing)
-  - `src/lib/gitStatus.ts` — `gitErrorText` ("Stopped on a conflict…"), `operationWords("rebase")`, `operationDone`
+  - `src/lib/gitStatus.ts` — `gitErrorText` ("Stopped on a conflict…"; `HALTED` / `MESSAGE_FAILED` sentences), `operationWords("rebase")`, `operationDone`
   - `src/components/panels/GitPanel.tsx` — existing badge "Rebasing 2 of 4", Continue Rebase, Skip, Abort
   - `src/components/GraphView.tsx` — existing stopped-operation strip
   - `src/components/GraphHistory.tsx` — closes the Edit History list and the message strip when an operation is stopped
   - `src/components/HistoryEditList.tsx` — closes on a stop
-  - `src-tauri/src/git/history.rs` — `todo_text` (messages live in the todo as `exec` lines, so `continue_operation` with `GIT_EDITOR=true` still applies them), `rebase_step` (the badge counts commits, not the `exec` lines)
-  - `src-tauri/src/git.rs` — `operation`, `operation_step` (uses `history::rebase_step` for an interactive rebase), `continue_operation`, `abort_operation`
-- Tests: `src-tauri/src/git/history.rs`, `src/__tests__/historyEdit.test.ts`, `src/__tests__/historyEditList.test.tsx`, `src/__tests__/graphHistory.test.tsx`
+  - `src-tauri/src/git/history.rs` — `todo_text` (messages live in the todo as `exec` lines, so `continue_operation` with `GIT_EDITOR=true` still applies them), `rebase_step` (the badge counts commits, not the `exec` lines), `run_plan` (`--reschedule-failed-exec`; a stop with nothing conflicted is aborted and returns `HALTED`), `failure_reason`, `message_step_failed`
+  - `src-tauri/src/git.rs` — `operation`, `operation_step` (uses `history::rebase_step` for an interactive rebase), `continue_operation` (a failed message step → `MESSAGE_FAILED`), `abort_operation`
+- Tests: `src-tauri/src/git/history.rs`, `src/__tests__/historyEdit.test.ts`, `src/__tests__/historyEditList.test.tsx`, `src/__tests__/graphHistory.test.tsx`, `src/__tests__/gitRemote.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer whose history edit hit a conflict part-way
@@ -807,6 +812,20 @@ Scenario: HISTORY-010.10 Quarry is closed while stopped
   Given a history edit is stopped and I restart Quarry
   When I open the Source Control panel
   Then the rebase is still shown as in progress and Continue Rebase, Skip and Abort work as before
+
+Scenario: HISTORY-010.11 A stop without a conflict is undone
+  Given the repository has commit.gpgsign on and signing fails
+  When I reword an older commit, squash, drop or run the Edit History list, and confirm
+  Then the rebase is aborted at once, no rebase is left in progress and the branch is at the commit it was at before
+  And an error says "Git could not make one of the new commits, so the history edit was undone: nothing was rewritten.", a sentence about commit signing, and git's error lines
+  And the message strip keeps my text (the Edit History list keeps my choices)
+
+Scenario: HISTORY-010.12 A new message fails after a conflict stop
+  Given a history edit stopped on a conflict and a later commit gets a new message
+  And signing starts failing before I click "Continue Rebase"
+  When the message step fails
+  Then an error says "Git could not give the commit its new message. The rebase is still stopped: Continue Rebase tries the message again, Abort puts the branch back as it was."
+  And the rebase is still in progress with the message step next, so a later Continue Rebase applies the message rather than finishing without it
 ```
 
 ## HISTORY-011: Force Push is offered after a history edit of pushed commits

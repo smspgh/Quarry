@@ -11900,6 +11900,10 @@
         {
           "id": "HISTORY-003.9",
           "title": "Cancel"
+        },
+        {
+          "id": "HISTORY-003.10",
+          "title": "Git fails"
         }
       ]
     },
@@ -11908,7 +11912,7 @@
       "title": "Drop a commit",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 257,
+      "line": 262,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11957,7 +11961,7 @@
       "title": "Squash a commit into its parent",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 310,
+      "line": 315,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12010,7 +12014,7 @@
       "title": "Guards on every history edit",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 366,
+      "line": 371,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12076,7 +12080,7 @@
       "title": "Open the Edit History list",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 447,
+      "line": 452,
       "status": "draft",
       "commands": [
         "git.editHistory"
@@ -12149,7 +12153,7 @@
       "title": "Plan the changes in the list",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 526,
+      "line": 531,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12241,7 +12245,7 @@
       "title": "Run or cancel the Edit History list",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 645,
+      "line": 650,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12315,7 +12319,7 @@
       "title": "A history edit that stops on a conflict",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 732,
+      "line": 737,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12332,7 +12336,8 @@
         "src-tauri/src/git/history.rs",
         "src/__tests__/historyEdit.test.ts",
         "src/__tests__/historyEditList.test.tsx",
-        "src/__tests__/graphHistory.test.tsx"
+        "src/__tests__/graphHistory.test.tsx",
+        "src/__tests__/gitRemote.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -12377,6 +12382,14 @@
         {
           "id": "HISTORY-010.10",
           "title": "Quarry is closed while stopped"
+        },
+        {
+          "id": "HISTORY-010.11",
+          "title": "A stop without a conflict is undone"
+        },
+        {
+          "id": "HISTORY-010.12",
+          "title": "A new message fails after a conflict stop"
         }
       ]
     },
@@ -12385,7 +12398,7 @@
       "title": "Force Push is offered after a history edit of pushed commits",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 812,
+      "line": 831,
       "status": "draft",
       "commands": [
         "git.forcePush"
@@ -25356,6 +25369,7 @@
       "GIT-021",
       "GIT-022",
       "GRAPH-012",
+      "HISTORY-010",
       "THREEWAY-004",
       "THREEWAY-005"
     ],

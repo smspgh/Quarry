@@ -63,6 +63,15 @@ describe("git error text", () => {
     expect(gitErrorText("Error: fatal: a branch named 'x' already exists\nhint: use -f")).toBe("fatal: a branch named 'x' already exists");
     expect(gitErrorText("plain")).toBe("plain");
   });
+  it("explains a history edit that stopped without a conflict, or whose message failed (HISTORY-010.11 / .12)", () => {
+    const halted = gitErrorText("Error: quarry-halted: error: gpg failed to sign the data\nfatal: failed to write commit object");
+    expect(halted).toMatch(/^Git could not make one of the new commits, so the history edit was undone: nothing was rewritten\. Commit signing is on/);
+    expect(halted).toMatch(/\n\nerror: gpg failed to sign the data\nfatal: failed to write commit object$/);
+    expect(gitErrorText("quarry-halted: error: cannot lock ref")).toBe("Git could not make one of the new commits, so the history edit was undone: nothing was rewritten.\n\nerror: cannot lock ref");
+    const message = gitErrorText("quarry-message-failed: error: gpg failed to sign the data");
+    expect(message).toMatch(/^Git could not give the commit its new message\. The rebase is still stopped: Continue Rebase tries the message again, Abort puts the branch back as it was\. Commit signing/);
+    expect(message).not.toMatch(/quarry-/);
+  });
 });
 
 describe("conflicts", () => {

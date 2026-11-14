@@ -1760,7 +1760,7 @@ async function planRun(root: string, g: { range: GitHistoryRange; branch: string
 /**
  * Give a commit of the current branch a new message, after asking. The tip is amended (staged
  * changes stay staged); an older commit is replayed with the commits after it. False when nothing
- * ran (cancelled or refused: the strip keeps the text).
+ * ran or git failed (cancelled, refused, failed, moved: the strip keeps the text).
  */
 export async function rewordCommit(root: string, sha: string, message: string): Promise<boolean> {
   const g = await historyGuard(root, sha, rangeReason("reword"), (r) => r.commits.length > 1);
@@ -1772,14 +1772,17 @@ export async function rewordCommit(root: string, sha: string, message: string): 
     toast(text ? "The message is unchanged." : "A commit needs a message.", "info", 3000);
     return false;
   }
-  if (range.commits.length > 1) return (await planRun(root, g, "reword", singlePlan("reword", range.commits, text), "Rewording…", { commit })) !== "cancelled";
+  if (range.commits.length > 1) return ran(await planRun(root, g, "reword", singlePlan("reword", range.commits, text), "Rewording…", { commit }));
   const d = historyConfirm("reword", { branch, tip: commit.short, commit, lines: [{ commit, what: "reworded", detail: text.split("\n")[0] }], below: range.base, pushedOn: range.pushedOn });
   if (!(await choose(d.title, d.text, d.choices, false))) return false;
   // Amending the tip's message leaves the files alone: no unsaved-tabs question.
   const result = await historyRun(root, noTabs(root, { kind: "reword-tip" }), "Rewording…", branch, false, () => git.historyRewrite(root, "reword", range.tip, null, [], text));
   await historyFinish(root, branch, result, d.pushed, range.pushedOn, (stale) => historyDone("reword", { branch, was: commit.short }, stale));
-  return true;
+  return ran(result);
 }
+
+/** The edit went ahead (finished, or stopped on a conflict): the message strip may close. */
+const ran = (result: string) => result === "done" || result === "stopped";
 
 /** Remove a commit of the current branch and replay the ones after it, after asking. */
 export async function dropCommit(root: string, sha: string): Promise<boolean> {
@@ -1797,7 +1800,7 @@ export async function squashCommit(root: string, sha: string, message: string): 
   const n = g.range.commits.length;
   const [commit, parent] = [g.range.commits[n - 2], g.range.commits[n - 1]];
   if (!commit || commit.sha !== sha || !message.trim()) return false;
-  return (await planRun(root, g, "squash", singlePlan("squash", g.range.commits, message), "Squashing…", { commit, parent })) !== "cancelled";
+  return ran(await planRun(root, g, "squash", singlePlan("squash", g.range.commits, message), "Squashing…", { commit, parent }));
 }
 
 /**
