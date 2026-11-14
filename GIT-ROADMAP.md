@@ -10,7 +10,7 @@ Owner decisions, 2026-11-13: build items 0-9, item 10 gets a spec only; one loca
 
 | # | Item | Spec file | Spec | Built | Live |
 | --- | --- | --- | --- | --- | --- |
-| 0 | Verification debt + `git.graph` in the palette | `git-graph.md` (GRAPH-019); live checks of CONFLICT-008 / 012 / 013 | indexed | no | no |
+| 0 | Verification debt + `git.graph` in the palette | `git-graph.md` (GRAPH-019); live checks of CONFLICT-008 / 012 / 013 | indexed; GRAPH-019 is `draft` | palette fix yes (5eacf9b; 465 Vitest tests pass); nothing else to build | no: the menu item (GRAPH-019.4) and the three verification-debt checks wait for the live pass |
 | 1 | Hunk and line staging | `git-staging.md` (STAGE-001..009) | indexed; 2 owner questions (partial staging of removed lines, silent save on Stage); to check in review: its Ctrl+K chord shortcuts | no | no |
 | 2 | Stash | `git-stash.md` (STASH-001..011) | indexed; 2 owner questions (no Abort for a conflicted pop, untracked files included by default) | no | no |
 | 3 | Start a merge or a rebase | `git-merge-rebase.md` (MERGE-001..009; 009 = Force Push, shared with item 6) | indexed; open default: merge is blocked on a dirty tree | no | no |
@@ -23,6 +23,8 @@ Owner decisions, 2026-11-13: build items 0-9, item 10 gets a spec only; one loca
 | 10 | Three-way merge view | `git-merge-editor.md` (THREEWAY-001..005) | indexed; 3 owner questions parked in the agent report (base pane without diff3, row button, Ctrl+S = Complete) | deferred | deferred |
 
 Spec phase, 2026-11-13: all eleven items have stories (80 new, all `planned`), indexed with 0 problems (422 stories in total). A reconciliation pass then aligned the ten new spec files with each other (one ref-label menu, one branch picker, one unsaved-tabs dialog, one force push, one Git menu layout; the shared pieces are written once in the Decisions of `specs/git-merge-rebase.md`): 423 stories, 0 problems. Owner answers the same day: rewriting pushed commits warns, then offers Force Push (with lease); Claude git helpers get their own model setting, default Haiku; Draft Commit Message with nothing staged covers all changes; the unsaved-tabs dialog defaults to Save All and Pull always asks. Questions the spec agents left open are recorded in the rows above and in each file's Decisions list; the specified default stands until the owner says otherwise.
+
+Build phase: the specs were committed locally as 021d25f. Wave 1 (items 0, 1, 2, 3) started 2026-11-13, one agent per item in its own worktree; the Built column changes when an item is merged into local main with tsc, Vitest and Rust tests passing.
 
 Build order (agents work in parallel inside a wave, each in its own worktree; waves are merged before the next starts because they share `GraphView.tsx`, `git.ts` and `git.rs`): wave 1 = items 0, 1, 2, 3; wave 2 = 4, 5, 9; wave 3 = 6, 7; wave 4 = 8 (audits every action, so it goes last); then the live pass.
 
