@@ -176,6 +176,22 @@ describe("Stashes section", () => {
     expect(called("git_stash_push").map((c) => c.args.message)).toEqual(["WIP parser"]);
   });
 
+  it("Escape closes the form from the checkbox too, and another repository closes it", async () => {
+    const m = await show(status({ files: [file("a.ts"), untracked("notes.txt")] }));
+    await fire.click(newButton());
+    await fire.click(box()!);
+    await fire.keyDown(box()!, "Escape");
+    expect(form()).toBeNull();
+
+    await fire.click(newButton());
+    await type(input(), "for proj");
+    const tools = status({ root: "C:\\work\\tools", files: [file("b.ts")] });
+    useGit.setState((g) => ({ repos: { ...g.repos, "c:\\work\\tools": tools }, stashes: { ...g.stashes, "c:\\work\\tools": [] } }));
+    await m.rerender(<StashesSection repo={tools} />);
+    expect(form()).toBeNull();
+    expect(called("git_stash_push")).toHaveLength(0);
+  });
+
   it("keeps the form and the message when git refuses", async () => {
     answers.push = "fail";
     await show(status({ files: [file("a.ts")] }));

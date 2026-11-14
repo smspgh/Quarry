@@ -80,12 +80,18 @@ Scenario: STASH-001.6 Cancel
   Given the form is open
   When I click "Cancel"
   Then the form closes, no stash is made and my changes are still listed
+  And pressing Escape with the focus on the checkbox or a button of the form closes it too
 
 Scenario: STASH-001.7 git refuses
   Given git fails to create the stash
   When I click "Stash"
   Then an error shows git's message without its "hint:" lines
   And my changes are still listed and the form stays open with my message
+
+Scenario: STASH-001.8 The form belongs to its repository
+  Given the form is open for repository "app" with a message typed
+  When I open another folder, or switch the panel to repository "tools"
+  Then the form is closed and nothing was stashed
 ```
 
 ## STASH-002: Choose whether untracked files go into the stash

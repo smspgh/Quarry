@@ -11,6 +11,9 @@ import { fs } from "../../lib/ipc";
 /** The last Show Stashes request this section acted on (it outlives the panel being closed). */
 let revealed = 0;
 
+/** The repository the open Stash Changes form was opened for (null: no form). */
+let formRoot: string | null = null;
+
 /** The Stash Changes form: an optional message and whether untracked files go along. */
 function StashForm({ repo, busy }: { repo: GitStatus; busy: boolean }) {
   const [message, setMessage] = useState("");
@@ -25,8 +28,28 @@ function StashForm({ repo, busy }: { repo: GitStatus; busy: boolean }) {
     if (can) void stashChanges(repo.root, message, withUntracked);
   };
   const cancel = () => useGit.setState({ stashForm: false });
+  // The form belongs to the repository it was opened for: shown for another one (the section is
+  // drawn again for the new repository while `stashForm` is still set) it closes itself.
+  useEffect(() => {
+    if (formRoot !== null && formRoot !== repo.root) cancel();
+    else formRoot = repo.root;
+    return () => {
+      if (!useGit.getState().stashForm) formRoot = null;
+    };
+  }, [repo.root]);
   return (
-    <div className="scm-form scm-stash-form" role="form" aria-label="Stash changes">
+    <div
+      className="scm-form scm-stash-form"
+      role="form"
+      aria-label="Stash changes"
+      // Escape closes the form from the checkbox and the buttons too, not only from the message box.
+      onKeyDown={(e) => {
+        if (e.key !== "Escape") return;
+        e.preventDefault();
+        e.stopPropagation();
+        cancel();
+      }}
+    >
       <input
         autoFocus
         className="input"
@@ -35,12 +58,10 @@ function StashForm({ repo, busy }: { repo: GitStatus; busy: boolean }) {
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter") submit();
-          if (e.key === "Escape") cancel();
-          if (e.key === "Enter" || e.key === "Escape") {
-            e.preventDefault();
-            e.stopPropagation();
-          }
+          if (e.key !== "Enter") return;
+          e.preventDefault();
+          e.stopPropagation();
+          submit();
         }}
       />
       {n.untracked > 0 && (

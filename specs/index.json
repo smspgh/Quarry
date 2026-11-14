@@ -19044,6 +19044,10 @@
         {
           "id": "STASH-001.7",
           "title": "git refuses"
+        },
+        {
+          "id": "STASH-001.8",
+          "title": "The form belongs to its repository"
         }
       ]
     },
@@ -19052,7 +19056,7 @@
       "title": "Choose whether untracked files go into the stash",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 91,
+      "line": 97,
       "status": "draft",
       "commands": [
         "git.stash"
@@ -19107,7 +19111,7 @@
       "title": "Guards before stashing",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 148,
+      "line": 154,
       "status": "draft",
       "commands": [
         "git.stash"
@@ -19156,7 +19160,7 @@
       "title": "See the stashes of the repository",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 194,
+      "line": 200,
       "status": "draft",
       "commands": [
         "git.showStashes"
@@ -19223,7 +19227,7 @@
       "title": "See what a stash holds",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 263,
+      "line": 269,
       "status": "draft",
       "commands": [],
       "files": [
@@ -19283,7 +19287,7 @@
       "title": "Apply a stash and keep it",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 326,
+      "line": 332,
       "status": "draft",
       "commands": [
         "git.stashApply"
@@ -19356,7 +19360,7 @@
       "title": "Pop a stash",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 408,
+      "line": 414,
       "status": "draft",
       "commands": [
         "git.stashPop"
@@ -19404,7 +19408,7 @@
       "title": "Drop a stash",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 455,
+      "line": 461,
       "status": "draft",
       "commands": [
         "git.stashDrop"
@@ -19465,7 +19469,7 @@
       "title": "A stash that conflicts when it comes back",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 517,
+      "line": 523,
       "status": "draft",
       "commands": [
         "git.stashApply",
@@ -19562,7 +19566,7 @@
       "title": "Stashes in the commit graph",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 637,
+      "line": 643,
       "status": "draft",
       "commands": [
         "git.graph"
@@ -19650,7 +19654,7 @@
       "title": "Stash from the menu and the command palette",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 731,
+      "line": 737,
       "status": "draft",
       "commands": [
         "git.stash",
