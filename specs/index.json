@@ -3834,6 +3834,10 @@
         {
           "id": "CONFLICT-010.7",
           "title": "The prepared message goes when the operation is aborted"
+        },
+        {
+          "id": "CONFLICT-010.8",
+          "title": "A merge that changes none of my files is still committed"
         }
       ]
     },
@@ -3842,7 +3846,7 @@
       "title": "Abort a stopped operation",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 498,
+      "line": 505,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3890,7 +3894,7 @@
       "title": "Skip the commit an operation stopped on",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 552,
+      "line": 559,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3929,7 +3933,7 @@
       "title": "Carry on with a rebase",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 596,
+      "line": 603,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3978,7 +3982,7 @@
       "title": "Carry on with a patch series (git am)",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 655,
+      "line": 662,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11164,7 +11168,8 @@
       "tests": [
         "src-tauri/src/git.rs",
         "src/__tests__/gitGraph.test.ts",
-        "src/__tests__/graphView.test.tsx"
+        "src/__tests__/graphView.test.tsx",
+        "src/__tests__/graphMenuStyle.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -25409,6 +25414,9 @@
       "HISTORY-005",
       "HISTORY-007",
       "HISTORY-010"
+    ],
+    "src/__tests__/graphMenuStyle.test.ts": [
+      "GRAPH-011"
     ],
     "src/__tests__/graphMerge.test.tsx": [
       "BRANCH-001",

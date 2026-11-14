@@ -197,4 +197,25 @@ describe("Source Control panel: the message git prepared for a stopped merge", (
     await setStatus(repo());
     expect(box().value).toBe("my own message");
   });
+
+  // Seen live: "Current" on a file the other branch deleted leaves the tree as it was. The panel then
+  // said "Abort to end it." with the button off, so the merge could not be finished in Quarry.
+  it("a merge that changes no file can still be committed", async () => {
+    calls.length = 0;
+    await show(repo({ operation: "merge", operationMessage: "Merge branch 'feature'" }));
+    const button = document.querySelector<HTMLButtonElement>(".scm-top .btn-primary.grow")!;
+    expect(button.textContent).toBe("Commit Merge");
+    expect(button.disabled).toBe(false);
+    expect(document.querySelector(".panel-note")!.textContent).toBe("The merge changes none of your files: what it brings is already on the branch. Commit to record the merge, or Abort.");
+    await fire.click(button);
+    await flush();
+    expect(useStore.getState().dialog).toBeNull(); // no "Nothing is staged" question
+    expect(calls.find((c) => c.cmd === "git_commit")?.args).toMatchObject({ message: "Merge branch 'feature'" });
+  });
+
+  it("a cherry-pick with nothing left still points at Skip, and cannot be committed", async () => {
+    await show(repo({ operation: "cherry-pick", operationMessage: "Add the parser" }));
+    expect(document.querySelector<HTMLButtonElement>(".scm-top .btn-primary.grow")!.disabled).toBe(true);
+    expect(document.querySelector(".panel-note")!.textContent).toBe("Nothing is left to commit for this cherry-pick: its changes are already on the branch. Press Skip to move on, or Abort.");
+  });
 });

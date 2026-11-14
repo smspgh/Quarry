@@ -622,7 +622,7 @@ export function GitPanel() {
           <div className="row">
             <button
               className="btn btn-primary small grow"
-              disabled={!!busy || draft.drafting || groups.conflict.length > 0 || (!rebasing && !message.trim() && !amend) || (!rebasing && !amend && repo.files.length === 0)}
+              disabled={!!busy || draft.drafting || groups.conflict.length > 0 || (!rebasing && !message.trim() && !amend) || (!rebasing && !amend && repo.files.length === 0 && repo.operation !== "merge")}
               title={groups.conflict.length && !repo.operation ? STASH_CONFLICT.commitTitle : groups.conflict.length ? "Open each file under Merge Changes, fix the conflict, save, and mark it resolved with +. Then commit to finish, or Abort to go back." : undefined}
               onClick={() => void doCommit()}
             >
@@ -647,7 +647,10 @@ export function GitPanel() {
         {repo.files.length === 0 && (
           <div className="panel-note">
             {repo.operation && !rebasing
-              ? `Nothing is left to commit for ${opWords!.noun.replace(/^the /, "this ")}: its changes are already on the branch. ${repo.operation === "merge" ? "Abort to end it." : "Press Skip to move on, or Abort."}`
+              ? repo.operation === "merge"
+                ? // Not a dead end: git still wants the merge commit ("All conflicts fixed but you are still merging").
+                  "The merge changes none of your files: what it brings is already on the branch. Commit to record the merge, or Abort."
+                : `Nothing is left to commit for ${opWords!.noun.replace(/^the /, "this ")}: its changes are already on the branch. Press Skip to move on, or Abort.`
               : "No uncommitted changes."}
           </div>
         )}

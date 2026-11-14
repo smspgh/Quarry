@@ -443,8 +443,8 @@ Scenario: CONFLICT-009.3 A file that is not in the folder
 - Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — Commit button `disabled` / tooltip, message prefill effect (`offered`, `opKey`; `offeredText`: the unedited prepared message is taken out again when the operation ends without a commit)
-  - `src/lib/gitStatus.ts` — `commitLabel` ("Resolve N Conflict(s) First")
-  - `src/lib/git.ts` — `commit()` refuses while conflicted files exist
+  - `src/lib/gitStatus.ts` — `commitLabel` ("Resolve N Conflict(s) First"; "Commit Merge" for a merge that changes no file)
+  - `src/lib/git.ts` — `commit()` refuses while conflicted files exist; commits a merge with nothing to stage
   - `src-tauri/src/git.rs` — `operation_message` (MERGE_MSG without `#` lines) in `GitStatus.operationMessage`
 - Tests: `src/__tests__/gitRemote.test.ts`, `src/__tests__/gitPanel.test.tsx`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
@@ -493,6 +493,13 @@ Scenario: CONFLICT-010.7 The prepared message goes when the operation is aborted
   When I abort the merge, or switch Source Control to another repository
   Then the message box is empty again
   And a prepared message I edited stays in the box
+
+Scenario: CONFLICT-010.8 A merge that changes none of my files is still committed
+  Given a merge stopped on "old.ts", which the other branch deleted and I changed
+  When I take "Current" for it, so that my files are exactly as before the merge
+  Then the panel says "The merge changes none of your files: what it brings is already on the branch. Commit to record the merge, or Abort."
+  And the main button reads "Commit Merge" and is enabled
+  And clicking it creates the merge commit without a "Nothing is staged" question, and the "Merging" badge goes away
 ```
 
 ## CONFLICT-011: Abort a stopped operation
@@ -590,7 +597,7 @@ Scenario: CONFLICT-012.4 Nothing left to commit
   Given a cherry-pick is stopped and resolving left no changes at all
   When I look at the list of changes in the panel
   Then the panel says "Nothing is left to commit for this cherry-pick: its changes are already on the branch. Press Skip to move on, or Abort."
-  And for a merge it says "Abort to end it." instead
+  And a merge is not skipped or aborted for this: it is committed (CONFLICT-010.8)
 ```
 
 ## CONFLICT-013: Carry on with a rebase

@@ -111,6 +111,8 @@ export function commitLabel(staged: number, total: number, amend: boolean, confl
   const cont = operation ? operationWords(operation).continueLabel : null;
   if (cont) return cont;
   if (amend) return "Amend Last Commit";
+  // A merge whose resolution left every file as it was still has to be committed to end it.
+  if (operation === "merge" && !total) return "Commit Merge";
   if (staged) return `Commit ${staged} Staged`;
   return total ? `Commit All (${count(total, "file")})` : "Commit All";
 }

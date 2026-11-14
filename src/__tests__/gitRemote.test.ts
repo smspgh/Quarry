@@ -43,6 +43,10 @@ describe("source control status line", () => {
     expect(commitLabel(3, 14, false)).toBe("Commit 3 Staged");
     expect(commitLabel(0, 1, false)).toBe("Commit All (1 file)");
     expect(commitLabel(0, 0, false)).toBe("Commit All");
+    // A merge whose resolution left the files as they were is still committed to end it.
+    expect(commitLabel(0, 0, false, 0, "merge")).toBe("Commit Merge");
+    expect(commitLabel(2, 2, false, 0, "merge")).toBe("Commit 2 Staged");
+    expect(commitLabel(0, 0, false, 0, "cherry-pick")).toBe("Commit All");
     expect(commitLabel(3, 14, true)).toBe("Amend Last Commit");
   });
 });

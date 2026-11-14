@@ -592,12 +592,12 @@ Scenario: GRAPH-010.6 Open the file as it is now
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — `GraphMenu` (kept inside the window; closes on outside click, Escape, window blur), naming strip (`Naming`, `commitNaming`; it also renames a branch, BRANCH-004), `act`
+  - `src/components/GraphView.tsx` — `GraphMenu` (kept inside the window, as tall as the window allows and scrolling beyond that: `.graph-menu` in app.css; closes on outside click, Escape, window blur), naming strip (`Naming`, `commitNaming`; it also renames a branch, BRANCH-004), `act`
   - `src/lib/gitGraph.ts` — `actionDone` (success notifications)
   - `src/lib/git.ts` — `commitAction`, `checkoutRef`
   - `src-tauri/src/git.rs` — `commit_action` / `git_commit_action` (`branch` = `branch`, `branch-switch` = `switch -c`, `tag`), `valid_ref_name`, `checkout`
   - `src/lib/gitApi.ts` — `GitCommitAction`, `git.commitAction`
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphView.test.tsx`
+- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphView.test.tsx`, `src/__tests__/graphMenuStyle.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer

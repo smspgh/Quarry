@@ -666,16 +666,20 @@ export async function commit(root: string, message: string, amend = false): Prom
   const staged = repo?.files.filter((f) => !f.untracked && f.index !== "." && !f.conflicted) ?? [];
   if (!amend && staged.length === 0) {
     const changed = repo?.files.filter((f) => !f.conflicted) ?? [];
-    if (!changed.length) {
+    // A merge whose resolution left the files as they were still needs its commit: git says "All
+    // conflicts fixed but you are still merging", and Abort would throw the resolution away.
+    if (!changed.length && repo?.operation !== "merge") {
       toast("There is nothing to commit.", "info");
       return false;
     }
-    const all = await choose("Nothing is staged", `Stage all ${changed.length} changed file${changed.length === 1 ? "" : "s"} and commit them?`, [
-      { label: "Stage All and Commit", kind: "primary", default: true, value: true },
-      { label: "Cancel", cancel: true, value: false },
-    ], false);
-    if (!all) return false;
-    if ((await stage(root, changed.map((f) => f.path))) === undefined) return false;
+    if (changed.length) {
+      const all = await choose("Nothing is staged", `Stage all ${changed.length} changed file${changed.length === 1 ? "" : "s"} and commit them?`, [
+        { label: "Stage All and Commit", kind: "primary", default: true, value: true },
+        { label: "Cancel", cancel: true, value: false },
+      ], false);
+      if (!all) return false;
+      if ((await stage(root, changed.map((f) => f.path))) === undefined) return false;
+    }
   }
   const dirty = useStore.getState().docs.filter((d) => d.dirty && d.path && under(d.path, root));
   if (dirty.length) toast(`${dirty.length} open file${dirty.length === 1 ? " has" : "s have"} unsaved changes that are not in this commit.`, "warning", 6000);
