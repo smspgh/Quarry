@@ -4833,6 +4833,9 @@ select optgroup {
 .scm-stash-form { padding: 6px 12px 8px 26px; }
 .scm-stash:focus-within .scm-actions { display: inline-flex; }
 .scm-stash .scm-actions { gap: 3px; flex-shrink: 0; }
+/* The row keeps its height when Apply / Pop / Drop appear on hover (`.btn.small` is 26px high). */
+.scm-stash .scm-commit-line { min-height: 20px; }
+.scm-stash .scm-actions .btn { height: 20px; padding: 0 6px; font-size: 11px; }
 .scm-stash-drop:not(:disabled) { color: var(--danger); }
 .scm-stash-drop:not(:disabled):hover { background: var(--danger-soft); }
 .scm-stash-mark { color: var(--warning); }
