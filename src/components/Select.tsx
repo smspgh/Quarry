@@ -8,6 +8,8 @@ export interface SelectOption {
   /** Optional group heading shown above the first option of each group. */
   group?: string;
   hint?: string;
+  /** Why the option cannot be chosen (its tooltip); it is shown greyed out. */
+  disabled?: string;
 }
 
 interface Props {
@@ -113,6 +115,7 @@ export function Select({ value, options, onChange, title, className = "", style,
   }, [hi, open]);
 
   const pick = (v: string) => {
+    if (options.find((o) => o.value === v)?.disabled) return;
     onChange(v);
     setOpen(false);
     btnRef.current?.focus();
@@ -126,7 +129,7 @@ export function Select({ value, options, onChange, title, className = "", style,
     const i = typeAheadIndex(options, text, hi);
     if (i >= 0) {
       setHi(i);
-      if (!open) onChange(options[i].value);
+      if (!open && !options[i].disabled) onChange(options[i].value);
     }
   };
 
@@ -206,7 +209,9 @@ export function Select({ value, options, onChange, title, className = "", style,
                     id={optId(i)}
                     tabIndex={-1}
                     aria-selected={o.value === value}
-                    className={`select-option ${i === hi ? "hi" : ""} ${o.value === value ? "selected" : ""}`}
+                    aria-disabled={o.disabled ? true : undefined}
+                    title={o.disabled ?? o.hint}
+                    className={`select-option ${i === hi ? "hi" : ""} ${o.value === value ? "selected" : ""} ${o.disabled ? "disabled" : ""}`}
                     onMouseEnter={() => setHi(i)}
                     onClick={() => pick(o.value)}
                   >

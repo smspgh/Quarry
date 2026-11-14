@@ -5189,3 +5189,48 @@ select optgroup {
 .scm-context svg { flex-shrink: 0; align-self: center; color: var(--text-3); }
 .scm-context-name { font-weight: 600; color: var(--text); overflow-wrap: anywhere; }
 .scm-context-path { flex-basis: 100%; font-size: 11px; color: var(--text-3); overflow-wrap: anywhere; }
+
+/* ---------- Edit History (specs/git-history-edit.md): the list in the graph tab, the message strip ---------- */
+.graph-message-strip { align-items: flex-start; }
+.graph-message-strip > span { padding-top: 5px; white-space: nowrap; }
+.graph-naming.graph-message-strip textarea.input { flex: 1; min-width: 200px; max-width: 720px; width: auto; height: auto; resize: vertical; font-family: inherit; line-height: 1.4; padding: 5px 8px; }
+/* While the list is open it replaces the rows: header, rows, search results, find box and the panes below. */
+.graph-view.editing-history > .graph-head,
+.graph-view.editing-history > .graph-list,
+.graph-view.editing-history > .graph-hits,
+.graph-view.editing-history > .graph-resizer,
+.graph-view.editing-history > .graph-resizer:not(.graph-hits-resizer) ~ *, /* the panes under the rows; not what follows the results divider (the list itself) */
+.graph-view.editing-history .graph-search { display: none; }
+.history-edit { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.he-head { display: flex; align-items: baseline; gap: 12px; padding: 7px 14px; border-bottom: 1px solid var(--divider); flex: none; }
+.he-title { font-weight: 600; }
+.he-keys { font-size: 11.5px; margin-left: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.he-list { flex: 1; min-height: 0; overflow-y: auto; outline: none; padding: 2px 0; }
+.he-item { position: relative; }
+.he-item.drop-before::before, .he-item.drop-after::after { content: ""; position: absolute; left: 8px; right: 8px; height: 2px; background: var(--accent); z-index: 1; }
+.he-item.drop-before::before { top: -1px; }
+.he-item.drop-after::after { bottom: -1px; }
+.he-row { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 14px 0 6px; min-width: 0; cursor: default; }
+.he-row:hover { background: var(--accent-hover-soft); }
+.he-row.selected { background: var(--accent-soft); }
+.he-list:focus-visible .he-row.selected { box-shadow: inset 2px 0 0 var(--focus-ring); }
+.he-row.dragging { opacity: 0.5; }
+.he-handle { display: inline-flex; color: var(--text-3); cursor: grab; flex: none; padding: 4px 2px; touch-action: none; }
+.he-action { flex: none; width: 104px; }
+.he-row.fold .he-action { margin-left: 18px; }
+.he-arrow { display: inline-flex; align-items: center; gap: 3px; color: var(--text-3); font-size: 11px; flex: none; }
+.he-sha { color: var(--text-3); flex: none; }
+.he-msg { flex: 1; min-width: 60px; }
+.he-row.drop .he-msg, .he-row.drop .he-sha { text-decoration: line-through; }
+.he-row.drop > :not(.he-action):not(.he-handle) { opacity: 0.5; }
+.he-row.fixup .he-msg { color: var(--text-3); }
+.he-badge { flex: none; font-size: 10.5px; padding: 0 6px; border-radius: var(--radius-s); background: var(--accent-soft); color: var(--text-2); line-height: 16px; }
+.he-badge.pushed { background: var(--warning-soft); color: var(--warning); }
+.he-problem { flex: none; font-size: 11.5px; color: var(--danger); }
+.he-author { flex: none; width: 120px; color: var(--text-2); }
+.he-date { flex: none; width: 96px; color: var(--text-3); }
+textarea.input.he-box { display: block; width: calc(100% - 160px); max-width: 760px; height: auto; margin: 2px 14px 6px 146px; resize: vertical; font-family: inherit; font-size: 12px; line-height: 1.4; padding: 5px 8px; }
+.he-foot { display: flex; align-items: center; gap: 8px; padding: 7px 14px; border-top: 1px solid var(--divider); flex: none; }
+.he-below { color: var(--text-3); min-width: 0; }
+.he-note { color: var(--warning); }
+.select-option.disabled { opacity: 0.45; cursor: default; }

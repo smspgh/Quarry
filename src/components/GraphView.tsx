@@ -36,6 +36,8 @@ import { SummariseItems } from "./GraphSummarise";
 import { clampHitsHeight, clampLaneScroll, DATE_ORDER_OFF, DATE_ORDER_WHY, dateOrderAllowed, isUncommitted, LIST_MIN, revealLane, rowOffset, takePage, UNCOMMITTED, uncommittedLineEnd, withoutUncommitted, withUncommitted } from "../lib/gitGraph";
 import { GraphLaneScroll } from "./GraphLaneScroll";
 import { GraphUncommitted } from "./GraphUncommitted";
+// Edit History (specs/git-history-edit.md): the commit menu's group, the message strip, the list.
+import { useGraphHistory } from "./GraphHistory";
 
 const PAGE = 300;
 /** A page slower than this means git is walking the whole history for it. */
@@ -685,8 +687,13 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
     </button>
   );
 
+  // ----- Edit History (specs/git-history-edit.md) -----
+  // The menu group after the Reset entries, the Reword / Squash message strip, and the Edit History
+  // list, which takes the place of the rows (CSS hides them while `editing-history`).
+  const historyEdit = useGraphHistory(root, visible, repo, busy, commits, () => setMenu(null));
+
   return (
-    <div className="graph-view" hidden={!visible}>
+    <div className={`graph-view ${historyEdit.editing ? "editing-history" : ""}`} hidden={!visible}>
       <div className="graph-toolbar">
         <History size={15} className="muted" />
         <span className="graph-title truncate" title={root}>{root.split(/[\\/]/).pop()}</span>
@@ -838,6 +845,9 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
           <button className="icon-btn xs" title="Cancel" onClick={() => setNaming(null)}><X size={14} /></button>
         </div>
       )}
+      {/* Edit History: the Reword / Squash message strip, and the list in place of the rows. */}
+      {historyEdit.strip}
+      {historyEdit.list}
 
       <div className="graph-head" style={{ paddingLeft: graphW + 8 }}>
         <span className="graph-c-msg">Commit</span>
@@ -1021,6 +1031,8 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
           {item(`Reset ${branch ?? "HEAD"} to Here (Soft)…`, RotateCcw, () => void act("reset-soft", menu.commit), "Keep later changes staged")}
           {item(`Reset ${branch ?? "HEAD"} to Here (Mixed)…`, RotateCcw, () => void act("reset-mixed", menu.commit), "Keep later changes in the files, unstaged")}
           {item(`Reset ${branch ?? "HEAD"} to Here (Hard)…`, RotateCcw, () => void act("reset-hard", menu.commit), "Discard later commits and uncommitted changes", true)}
+          {/* Edit History: Undo Last Commit (tip only), Reword, Squash into Parent, Drop, Edit History from Here. */}
+          {historyEdit.menu(menu.commit)}
           {/* Claude git helpers: the Summarise entries, always the last group (specs/git-claude.md). */}
           <SummariseItems root={root} commits={commits} commit={menu.commit} branch={branch} close={() => setMenu(null)} />
         </GraphMenu>,

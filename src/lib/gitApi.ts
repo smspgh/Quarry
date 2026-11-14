@@ -40,6 +40,8 @@ export interface GitStatus {
    *  there are. Together they change whenever a stash is made, popped or dropped. */
   stash?: string | null;
   stashCount?: number;
+  /** Edit History: how many parents the HEAD commit has (0 = the first commit, 2 or more = a merge). */
+  headParents?: number | null;
 }
 
 /** A stash: uncommitted work put aside (STASH-004). */
@@ -310,6 +312,51 @@ export interface GitPushRef {
 }
 // ----- end -----
 
+// ----- Edit History (specs/git-history-edit.md; src-tauri/src/git/history.rs) -----
+/** A commit of the current branch, as the Edit History list and the confirmations show it. */
+export interface GitHistoryCommit {
+  sha: string;
+  short: string;
+  summary: string;
+  /** Subject and body. */
+  message: string;
+  author: string;
+  email: string;
+  /** Author time, unix seconds. */
+  time: number;
+  parents: string[];
+  /** Reachable from a remote-tracking branch as last fetched. */
+  pushed: boolean;
+}
+
+/** The commits from a commit up to the tip of the current branch. */
+export interface GitHistoryRange {
+  /** The checked-out branch; null on a detached HEAD. */
+  branch: string | null;
+  /** Full id of HEAD. */
+  tip: string;
+  operation: GitOperation | null;
+  /** The commit asked about is the tip or one of its ancestors. */
+  onBranch: boolean;
+  /** Newest first, from the tip down to the commit asked about (at most 1000). */
+  commits: GitHistoryCommit[];
+  /** How many commits the range has (more than `commits` when it was cut short). */
+  total: number;
+  /** The commit below the oldest one; null when the range goes down to the first commit. */
+  base: GitCommitRef | null;
+  /** A remote branch that holds the pushed commits. */
+  pushedOn: string | null;
+}
+
+/** One line of a plan, oldest first. A "fixup" folds into the nearest earlier step that is kept;
+ *  `message` (on a pick) is what that commit ends up with, null keeps its own. */
+export interface GitHistoryStep {
+  sha: string;
+  action: "pick" | "fixup" | "drop";
+  message: string | null;
+}
+// ----- end of Edit History -----
+
 export const git = {
   /** `git version ...`, or null when git cannot be run. */
   available: () => invoke<string | null>("git_available"),
@@ -420,6 +467,16 @@ export const git = {
   /** Push one branch ("branch") or one tag ("tag"), or delete a remote branch ("delete", `name` =
    *  `origin/topic`). Never forces. */
   pushRef: (root: string, kind: "branch" | "tag" | "delete", name: string) => invoke<GitPushRef>("git_push_ref", { root, kind, name }),
+  // ---- Edit History (specs/git-history-edit.md) ----
+  /** The commits from `from` (a commit id) up to the tip, with merges and pushed ones marked;
+   *  without `from`: the tip's commits that no remote has. Read-only. */
+  historyRange: (root: string, from: string | null = null) => invoke<GitHistoryRange>("git_history_range", { root, from }),
+  /** "undo" (the tip, changes stay staged), "reword" (the tip, `message`) or "plan" (replay the
+   *  commits after `base` as `steps` say; `base` null = from the first commit). `expectedTip`: the
+   *  branch's commit when the user was asked; rejects starting with `quarry-moved` when it moved.
+   *  A plan that stops on a conflict rejects with git's output and leaves the rebase in progress. */
+  historyRewrite: (root: string, action: "undo" | "reword" | "plan", expectedTip: string, base: string | null = null, steps: GitHistoryStep[] = [], message: string | null = null) =>
+    invoke<string>("git_history_rewrite", { root, action, expectedTip, base, steps, message }),
   // ---- Claude git helpers (specs/git-claude.md): what a request is built from; nothing is changed ----
   /** What a commit made now would hold, per file, with the first lines of the last 10 commit
    *  messages. "staged": the index; "all": every change plus untracked files that are not ignored

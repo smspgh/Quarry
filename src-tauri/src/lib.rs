@@ -887,6 +887,9 @@ pub fn run() {
             git::ai::git_default_branch,
             claude::claude_oneshot,
             claude::claude_oneshot_cancel,
+            // edit history
+            git::history::git_history_range,
+            git::history::git_history_rewrite,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

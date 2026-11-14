@@ -393,7 +393,7 @@ Scenario: GIT-007.7 Unavailable without a repository or while git is busy
 - Status: draft
 - Commands: `git.showPanel`
 - Files:
-  - `src/components/panels/GitPanel.tsx` — `GitPanel`: message box (Ctrl+Enter), Commit button and its disabled rule, `doCommit`, "as name <email>" hint
+  - `src/components/panels/GitPanel.tsx` — `GitPanel`: message box (Ctrl+Enter; when empty it takes the message of a commit taken back with Undo Last Commit, HISTORY-002.3), Commit button and its disabled rule, `doCommit`, "as name <email>" hint
   - `src/components/panels/GitDraft.tsx` — `useDraft`: the Draft button, the box while Claude drafts (GITAI-003)
   - `src/lib/git.ts` — `commit()` (message check, Stage All and Commit dialog, unsaved-tabs warning, success toast), `run` (busy label)
   - `src/lib/gitStatus.ts` — `commitLabel`, `groupFiles`

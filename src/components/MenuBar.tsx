@@ -273,6 +273,8 @@ const MENUS: Menu[] = [
       { cmd: "git.mergeBranch" },
       { cmd: "git.rebaseBranch" },
       { label: "Branches and Tags", submenu: () => [{ cmd: "git.renameBranch" }, { cmd: "git.deleteBranch" }, { cmd: "git.setUpstream" }, { cmd: "git.pushBranch" }, { cmd: "git.deleteRemoteBranch" }, { sep: true }, { cmd: "git.deleteTag" }, { cmd: "git.pushTag" }] },
+      // Edit History (specs/git-history-edit.md).
+      { label: "Edit History", submenu: () => [{ cmd: "git.undoLastCommit" }, { cmd: "git.editHistory" }] },
       { sep: true },
       { cmd: "git.fetch" },
       { cmd: "git.pull" },

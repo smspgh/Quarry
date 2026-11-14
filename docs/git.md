@@ -205,7 +205,55 @@ Applying a patch series with `git am` works the same way when a patch does not a
 
 While any file is still in conflict, the Commit button is disabled and reads **Resolve 1 Conflict First**. The message box is filled in with the message git prepared (the picked commit's own message, or "Merge branch …"), unless you had already typed one. Marking a file resolved (**+** under Merge Changes) checks it first: if it still contains git's `<<<<<<<` / `>>>>>>>` conflict lines, Quarry asks before staging it.
 
-Not in the graph: dropping a commit from the middle of a branch and interactive rebase. Starting a merge or a rebase is described under [Merge and rebase](#merge-and-rebase).
+Starting a merge or a rebase is described under [Merge and rebase](#merge-and-rebase); changing commits that already exist under [Edit history](#edit-history).
+
+## Edit history
+
+Commits of the branch you are on can be changed from the commit graph. Right-click a commit; after the Reset entries the menu has:
+
+- **Undo Last Commit…** (on the newest commit only; also **Git › Edit History › Undo Last Commit…** and the palette). The commit leaves the branch, its changes stay staged and your files are not touched. Its message goes back into the commit box when that is empty, so you can fix things and commit again. Other uncommitted changes are kept.
+- **Reword Message…** opens a strip with the whole message. Change it and press **Reword** (Ctrl+Enter; Enter adds a line, Escape closes the strip).
+- **Squash into Parent…** folds the commit into the one before it. The strip starts with both messages; edit it to the message the combined commit should have, then **Squash**.
+- **Drop Commit…** removes the commit and its changes from the branch. The changes are not kept anywhere in your files.
+- **Edit History from Here…** opens the list described below.
+
+An entry that cannot run is greyed out and its tooltip says why: the commit is on another branch, you are not on a branch, it is a merge commit or a merge comes after it (Quarry does not rewrite across a merge), it is the first commit (which can be reworded but not dropped or squashed), or a merge / rebase is stopped part-way.
+
+Every one of them asks first. The dialog lists each commit that gets a new id (the commit you edit and every commit after it), says where the branch is now so you can put it back with **Reset … to Here**, and has **Cancel** as its default button. No backup branch is made. Tags and other branches that pointed at a rewritten commit keep pointing at the old one, and nothing is pushed or fetched.
+
+Anything that replays commits needs a clean working folder: with uncommitted changes to tracked files you get **Commit or discard your changes first** and nothing runs (untracked files do not count). Undo Last Commit and rewording the newest commit work with uncommitted changes.
+
+No editor ever opens, whatever git's `core.editor` is, and the repository's commit hooks are not run for a reworded message.
+
+### The Edit History list
+
+**Edit History from Here…** replaces the graph's rows with a list of the commits from that one up to the newest, newest at the top, at most 100. **Git › Edit History › Edit History…** (also in the palette) opens it over the commits you have not pushed yet. Nothing happens to the repository until you press **Run**.
+
+Each row has an action:
+
+| Action | Key | What it does |
+| --- | --- | --- |
+| Pick | P | Keeps the commit |
+| Reword | R | Keeps it with a new message, typed in a box under the row (Ctrl+Enter or a click elsewhere closes the box) |
+| Squash | S | Folds it into the nearest kept commit below; that row gets a box with the joined messages to edit |
+| Fixup | F | Folds it in the same way and throws its message away |
+| Drop | D | Removes the commit and its changes |
+
+Drag a row by its handle to move it, or press Alt+Up / Alt+Down. Up and Down move the selection, Ctrl+Enter is Run and Escape is Cancel. These keys only act while the list itself has the keyboard focus: in a message box they are text, and anywhere else in Quarry they mean what they always do.
+
+A row that cannot work as marked says so (a squash with nothing below to fold into, an empty message) and **Run** stays off until it is fixed; it is also off while nothing would change. **Reset List** puts every row back. **Cancel** closes the list, after asking when you had made choices.
+
+**Run** shows the plan first: one line per commit (new id, moved, reworded, folded into, dropped). Commits below the lowest change keep their ids. If the branch changed since the list was opened, nothing is rewritten and the list reloads.
+
+### When a commit conflicts
+
+If a commit no longer applies while it is replayed (for example after dropping a commit that later ones build on), the rewrite stops exactly like a [rebase](#rebase): Source Control opens with the badge **Rebasing 2 of 4**, the file under Merge Changes, and **Continue Rebase**, **Skip** and **Abort**. Messages you typed before the run are still applied to the commits that come after the stop. **Abort** puts the branch back exactly as it was.
+
+### Commits that are already pushed
+
+Quarry marks commits that are on a remote branch (as last fetched) as **pushed**. Editing them is allowed, but the question is a danger dialog, **Rewrite commits that are already pushed?**, which names them and the remote branch, with **Cancel** as the default. Anyone who pulled those commits will have to repair their copy; **Revert This Commit…** is the safe way to undo a pushed commit.
+
+After such an edit the status line offers **Force Push…** instead of Pull, exactly as after [rebasing pushed commits](#rebasing-commits-that-are-already-pushed). The edit itself pushes nothing.
 
 ## Claude-assisted git
 

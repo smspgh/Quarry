@@ -11330,6 +11330,10 @@
         {
           "id": "GRAPH-014.6",
           "title": "Conflicts left by a stash"
+        },
+        {
+          "id": "GRAPH-014.7",
+          "title": "While the Edit History list is open"
         }
       ]
     },
@@ -11338,7 +11342,7 @@
       "title": "Uncommitted changes as the first row of the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 838,
+      "line": 844,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11432,7 +11436,7 @@
       "title": "Drag the height of the Search All History results",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 961,
+      "line": 967,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11495,7 +11499,7 @@
       "title": "Scroll sideways through a graph wider than 16 lanes",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1036,
+      "line": 1042,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11555,7 +11559,7 @@
       "title": "List a small history by date",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1114,
+      "line": 1120,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11629,7 +11633,7 @@
       "title": "Show Commit Graph is in the palette without a repository",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1207,
+      "line": 1213,
       "status": "draft",
       "commands": [
         "git.graph"
@@ -11680,21 +11684,23 @@
       "title": "Edit-history entries in a commit's right-click menu",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 30,
-      "status": "planned",
+      "line": 31,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
+        "src/components/GraphHistory.tsx",
         "src/lib/historyEdit.ts",
         "src/lib/gitStatus.ts",
         "src/lib/git.ts",
         "src/lib/gitApi.ts",
+        "src-tauri/src/git/history.rs",
         "src-tauri/src/git.rs"
       ],
       "tests": [
         "src/__tests__/historyEdit.test.ts",
-        "src/__tests__/graphView.test.tsx",
-        "src-tauri/src/git.rs"
+        "src/__tests__/graphHistory.test.tsx",
+        "src-tauri/src/git/history.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -11747,23 +11753,26 @@
       "title": "Undo Last Commit",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 109,
-      "status": "planned",
+      "line": 112,
+      "status": "draft",
       "commands": [
         "git.undoLastCommit"
       ],
       "files": [
-        "src/components/GraphView.tsx",
+        "src/components/GraphHistory.tsx",
         "src/lib/gitCommands.ts",
         "src/components/MenuBar.tsx",
         "src/lib/historyEdit.ts",
         "src/lib/git.ts",
         "src/components/panels/GitPanel.tsx",
+        "src/lib/gitApi.ts",
+        "src-tauri/src/git/history.rs",
         "src-tauri/src/git.rs"
       ],
       "tests": [
         "src/__tests__/historyEdit.test.ts",
-        "src-tauri/src/git.rs"
+        "src/__tests__/graphHistory.test.tsx",
+        "src-tauri/src/git/history.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -11808,20 +11817,23 @@
       "title": "Reword a commit's message",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 173,
-      "status": "planned",
+      "line": 178,
+      "status": "draft",
       "commands": [],
       "files": [
+        "src/components/GraphHistory.tsx",
         "src/components/GraphView.tsx",
         "src/lib/historyEdit.ts",
         "src/lib/git.ts",
         "src/lib/gitApi.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/history.rs",
+        "src/App.tsx",
+        "src/styles/app.css"
       ],
       "tests": [
         "src/__tests__/historyEdit.test.ts",
-        "src/__tests__/graphView.test.tsx",
-        "src-tauri/src/git.rs"
+        "src/__tests__/graphHistory.test.tsx",
+        "src-tauri/src/git/history.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -11870,18 +11882,19 @@
       "title": "Drop a commit",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 247,
-      "status": "planned",
+      "line": 256,
+      "status": "draft",
       "commands": [],
       "files": [
-        "src/components/GraphView.tsx",
+        "src/components/GraphHistory.tsx",
         "src/lib/historyEdit.ts",
         "src/lib/git.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/history.rs"
       ],
       "tests": [
         "src/__tests__/historyEdit.test.ts",
-        "src-tauri/src/git.rs"
+        "src/__tests__/graphHistory.test.tsx",
+        "src-tauri/src/git/history.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -11918,18 +11931,19 @@
       "title": "Squash a commit into its parent",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 300,
-      "status": "planned",
+      "line": 309,
+      "status": "draft",
       "commands": [],
       "files": [
-        "src/components/GraphView.tsx",
+        "src/components/GraphHistory.tsx",
         "src/lib/historyEdit.ts",
         "src/lib/git.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/history.rs"
       ],
       "tests": [
         "src/__tests__/historyEdit.test.ts",
-        "src-tauri/src/git.rs"
+        "src/__tests__/graphHistory.test.tsx",
+        "src-tauri/src/git/history.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -11970,19 +11984,20 @@
       "title": "Guards on every history edit",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 356,
-      "status": "planned",
+      "line": 365,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/lib/historyEdit.ts",
         "src/lib/gitMerge.ts",
         "src/lib/git.ts",
         "src/lib/dialogs.ts",
+        "src-tauri/src/git/history.rs",
         "src-tauri/src/git.rs"
       ],
       "tests": [
         "src/__tests__/historyEdit.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/history.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -12035,25 +12050,27 @@
       "title": "Open the Edit History list",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 435,
-      "status": "planned",
+      "line": 446,
+      "status": "draft",
       "commands": [
         "git.editHistory"
       ],
       "files": [
         "src/components/HistoryEditList.tsx",
+        "src/components/GraphHistory.tsx",
         "src/components/GraphView.tsx",
         "src/lib/gitCommands.ts",
         "src/components/MenuBar.tsx",
         "src/lib/historyEdit.ts",
         "src/lib/git.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/history.rs",
         "src/styles/app.css"
       ],
       "tests": [
         "src/__tests__/historyEdit.test.ts",
         "src/__tests__/historyEditList.test.tsx",
-        "src-tauri/src/git.rs"
+        "src/__tests__/graphHistory.test.tsx",
+        "src-tauri/src/git/history.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -12106,11 +12123,12 @@
       "title": "Plan the changes in the list",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 513,
-      "status": "planned",
+      "line": 525,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/HistoryEditList.tsx",
+        "src/App.tsx",
         "src/components/Select.tsx",
         "src/lib/historyEdit.ts"
       ],
@@ -12197,20 +12215,20 @@
       "title": "Run or cancel the Edit History list",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 629,
-      "status": "planned",
+      "line": 644,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/HistoryEditList.tsx",
         "src/lib/historyEdit.ts",
         "src/lib/git.ts",
         "src/lib/gitApi.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/history.rs"
       ],
       "tests": [
         "src/__tests__/historyEdit.test.ts",
         "src/__tests__/historyEditList.test.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/history.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -12271,20 +12289,24 @@
       "title": "A history edit that stops on a conflict",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 715,
-      "status": "planned",
+      "line": 730,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/lib/git.ts",
         "src/lib/gitStatus.ts",
         "src/components/panels/GitPanel.tsx",
         "src/components/GraphView.tsx",
+        "src/components/GraphHistory.tsx",
         "src/components/HistoryEditList.tsx",
+        "src-tauri/src/git/history.rs",
         "src-tauri/src/git.rs"
       ],
       "tests": [
-        "src-tauri/src/git.rs",
-        "src/__tests__/historyEdit.test.ts"
+        "src-tauri/src/git/history.rs",
+        "src/__tests__/historyEdit.test.ts",
+        "src/__tests__/historyEditList.test.tsx",
+        "src/__tests__/graphHistory.test.tsx"
       ],
       "docs": [
         "docs/git.md"
@@ -12337,19 +12359,19 @@
       "title": "Force Push is offered after a history edit of pushed commits",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 793,
-      "status": "planned",
+      "line": 810,
+      "status": "draft",
       "commands": [
         "git.forcePush"
       ],
       "files": [
         "src/lib/git.ts",
         "src/lib/historyEdit.ts",
-        "src/lib/gitStatus.ts"
+        "src/lib/gitStatus.ts",
+        "src/lib/gitMerge.ts"
       ],
       "tests": [
-        "src/__tests__/historyEdit.test.ts",
-        "src/__tests__/gitRemote.test.ts"
+        "src/__tests__/historyEdit.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -17998,6 +18020,10 @@
         {
           "id": "SET-017.8",
           "title": "The list follows the theme"
+        },
+        {
+          "id": "SET-017.9",
+          "title": "An option that cannot be chosen"
         }
       ]
     },
@@ -18006,7 +18032,7 @@
       "title": "Help \"i\" icons",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 913,
+      "line": 919,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22651,12 +22677,7 @@
       "GRAPH-018",
       "HISTORY-001",
       "HISTORY-002",
-      "HISTORY-003",
-      "HISTORY-004",
-      "HISTORY-005",
       "HISTORY-006",
-      "HISTORY-007",
-      "HISTORY-009",
       "HISTORY-010",
       "MERGE-004",
       "MERGE-005",
@@ -22675,6 +22696,17 @@
       "STASH-008",
       "STASH-009",
       "STASH-010"
+    ],
+    "src-tauri/src/git/history.rs": [
+      "HISTORY-001",
+      "HISTORY-002",
+      "HISTORY-003",
+      "HISTORY-004",
+      "HISTORY-005",
+      "HISTORY-006",
+      "HISTORY-007",
+      "HISTORY-009",
+      "HISTORY-010"
     ],
     "src-tauri/src/git/staging.rs": [
       "STAGE-001",
@@ -22829,6 +22861,8 @@
       "FIND-008",
       "GIT-001",
       "GRAPH-001",
+      "HISTORY-003",
+      "HISTORY-008",
       "LSP-001",
       "MACRO-001",
       "MACRO-013",
@@ -22996,6 +23030,15 @@
       "COMMITCMP-005",
       "COMMITCMP-006"
     ],
+    "src/components/GraphHistory.tsx": [
+      "HISTORY-001",
+      "HISTORY-002",
+      "HISTORY-003",
+      "HISTORY-004",
+      "HISTORY-005",
+      "HISTORY-007",
+      "HISTORY-010"
+    ],
     "src/components/GraphLaneScroll.tsx": [
       "GRAPH-017"
     ],
@@ -23042,10 +23085,7 @@
       "GRAPH-017",
       "GRAPH-018",
       "HISTORY-001",
-      "HISTORY-002",
       "HISTORY-003",
-      "HISTORY-004",
-      "HISTORY-005",
       "HISTORY-007",
       "HISTORY-010",
       "MERGE-001",
@@ -24135,6 +24175,7 @@
       "GRAPH-015",
       "GRAPH-018",
       "HISTORY-001",
+      "HISTORY-002",
       "HISTORY-003",
       "HISTORY-009",
       "MERGE-004",
@@ -24251,6 +24292,7 @@
     ],
     "src/lib/gitMerge.ts": [
       "HISTORY-006",
+      "HISTORY-011",
       "MERGE-001",
       "MERGE-002",
       "MERGE-003",
@@ -24748,6 +24790,7 @@
       "GRAPH-016",
       "GRAPH-017",
       "GRAPH-018",
+      "HISTORY-003",
       "HISTORY-007",
       "JSON-007",
       "LSP-010",
@@ -24890,15 +24933,6 @@
       "GRAPH-013",
       "GRAPH-015",
       "GRAPH-018",
-      "HISTORY-001",
-      "HISTORY-002",
-      "HISTORY-003",
-      "HISTORY-004",
-      "HISTORY-005",
-      "HISTORY-006",
-      "HISTORY-007",
-      "HISTORY-009",
-      "HISTORY-010",
       "MERGE-004",
       "MERGE-005",
       "MERGE-006",
@@ -24915,6 +24949,17 @@
       "STASH-008",
       "STASH-009",
       "STASH-010"
+    ],
+    "src-tauri/src/git/history.rs": [
+      "HISTORY-001",
+      "HISTORY-002",
+      "HISTORY-003",
+      "HISTORY-004",
+      "HISTORY-005",
+      "HISTORY-006",
+      "HISTORY-007",
+      "HISTORY-009",
+      "HISTORY-010"
     ],
     "src-tauri/src/git/staging.rs": [
       "STAGE-001",
@@ -25229,7 +25274,6 @@
       "GIT-021",
       "GIT-022",
       "GRAPH-012",
-      "HISTORY-011",
       "THREEWAY-004",
       "THREEWAY-005"
     ],
@@ -25295,6 +25339,15 @@
       "COMMITCMP-005",
       "COMMITCMP-006"
     ],
+    "src/__tests__/graphHistory.test.tsx": [
+      "HISTORY-001",
+      "HISTORY-002",
+      "HISTORY-003",
+      "HISTORY-004",
+      "HISTORY-005",
+      "HISTORY-007",
+      "HISTORY-010"
+    ],
     "src/__tests__/graphMerge.test.tsx": [
       "BRANCH-001",
       "MERGE-001",
@@ -25316,8 +25369,6 @@
       "GRAPH-011",
       "GRAPH-014",
       "GRAPH-015",
-      "HISTORY-001",
-      "HISTORY-003",
       "STASH-009",
       "STASH-010"
     ],
@@ -25340,7 +25391,8 @@
     "src/__tests__/historyEditList.test.tsx": [
       "HISTORY-007",
       "HISTORY-008",
-      "HISTORY-009"
+      "HISTORY-009",
+      "HISTORY-010"
     ],
     "src/__tests__/hostile.test.ts": [
       "JSON-001",

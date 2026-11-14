@@ -14,6 +14,8 @@ use std::process::{Command, Stdio};
 
 // Staging / unstaging / discarding part of a file (git/staging.rs, specs/git-staging.md).
 pub mod staging;
+// Edit History: undo, reword, drop, squash, the interactive rebase list (git/history.rs, specs/git-history-edit.md).
+pub mod history;
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -42,6 +44,9 @@ pub struct GitStatus {
     /// Together they change whenever a stash is made, popped or dropped.
     pub stash: Option<String>,
     pub stash_count: u32,
+    /// Edit History: how many parents the HEAD commit has (0 = the first commit, 2+ = a merge), so
+    /// Undo Last Commit can be greyed out without asking git again. None before the first commit.
+    pub head_parents: Option<u32>,
 }
 
 #[derive(Serialize, Debug)]
@@ -321,6 +326,10 @@ fn operation_step(root: &Path) -> Option<(u32, u32)> {
     let num = |p: PathBuf| std::fs::read_to_string(p).ok()?.trim().parse::<u32>().ok();
     let merge = dir.join("rebase-merge");
     let apply = dir.join("rebase-apply");
+    // Edit History: the `exec` lines that set a message are not commits (git/history.rs).
+    if let Some(step) = history::rebase_step(&merge) {
+        return Some(step);
+    }
     if merge.is_dir() { Some((num(merge.join("msgnum"))?, num(merge.join("end"))?)) } else if apply.is_dir() { Some((num(apply.join("next"))?, num(apply.join("last"))?)) } else { None }
 }
 
@@ -342,6 +351,7 @@ fn parse_status(root: &Path, out: &[u8]) -> GitStatus {
         remotes: Vec::new(),
         stash: None,
         stash_count: 0,
+        head_parents: None,
     };
     let mut saw_ab = false;
     let mut recs = text.split('\0');
@@ -420,6 +430,10 @@ fn status(path: &Path) -> Result<Option<GitStatus>, String> {
     let stashes = stash_ids(&root);
     st.stash_count = stashes.len() as u32;
     st.stash = stashes.into_iter().next();
+    // Edit History: is the tip the first commit or a merge?
+    if st.head.is_some() {
+        st.head_parents = history::tip_parents(&root);
+    }
     Ok(Some(st))
 }
 

@@ -609,7 +609,7 @@ Scenario: GRAPH-011.1 The menu
   When I right-click a commit
   Then the commit is selected (alone: a comparison of two commits that was showing ends)
   And a menu opens headed by its short id and message
-  And it offers Copy Commit Id, Copy Message, Create Branch Here…, Create Branch Here (Don't Switch)…, Create Tag Here…, Check Out This Commit…, the compare entries (Compare with <short id> when another commit was selected, Compare with Working Tree, Compare with Branch…; COMMITCMP-001.8, COMMITCMP-004, COMMITCMP-005), Cherry-pick, Revert This Commit…, the merge and rebase entries of MERGE-001 and three Reset entries
+  And it offers Copy Commit Id, Copy Message, Create Branch Here…, Create Branch Here (Don't Switch)…, Create Tag Here…, Check Out This Commit…, the compare entries (Compare with <short id> when another commit was selected, Compare with Working Tree, Compare with Branch…; COMMITCMP-001.8, COMMITCMP-004, COMMITCMP-005), Cherry-pick, Revert This Commit…, the merge and rebase entries of MERGE-001, three Reset entries, and the edit-history group (Undo Last Commit… on the tip commit only, Reword Message…, Squash into Parent…, Drop Commit…, Edit History from Here…; HISTORY-001)
   And while Claude Code is switched on, its last group holds the "Summarise … with Claude" entries that apply to the commit (GITAI-009.4 to GITAI-009.6)
   And a stash row gets none of these: its menu is Apply Stash, Pop Stash, Drop Stash… and Copy Message (STASH-010.7)
   And it closes on Escape or a click elsewhere
@@ -820,6 +820,12 @@ Scenario: GRAPH-014.6 Conflicts left by a stash
   Then a warning strip says "A stash was applied with conflicts: 2 files have conflicts. Resolve them in Source Control."
   And it has no "Abort" button
   And the 2 files are counted in the uncommitted-changes row, the first row of the list
+
+Scenario: GRAPH-014.7 While the Edit History list is open
+  Given the Edit History list is open in the graph tab (HISTORY-007)
+  When I look at the graph tab
+  Then the strips are still shown above the list
+  And when an operation stops part-way the list closes and the commit rows are back under the stopped-operation strip
 ```
 
 ### Decisions (planned stories)

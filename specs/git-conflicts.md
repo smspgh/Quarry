@@ -587,7 +587,7 @@ Scenario: CONFLICT-012.4 Nothing left to commit
   - `src/lib/gitStatus.ts` — `commitLabel(..., operation)` → "Continue Rebase"
   - `src/lib/git.ts` — `continueOperation(root, "rebase", "continue")` (then `rewriteContinued`, MERGE-009), `note` hook in `installGit` (rebase / am wording, or the stash note)
   - `src/editor/conflicts.ts` — `ConflictHooks.note`, note shown in each bar
-  - `src-tauri/src/git.rs` — `operation_step` (msgnum / end, next / last), `continue_operation` (`rebase --continue`, `GIT_EDITOR=true`)
+  - `src-tauri/src/git.rs` — `operation_step` (msgnum / end, next / last; for an interactive rebase the commands of `done` and `git-rebase-todo` without `exec` lines, so the steps are commits: `history::rebase_step`, HISTORY-010), `continue_operation` (`rebase --continue`, `GIT_EDITOR=true`)
 - Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 

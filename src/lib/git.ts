@@ -32,6 +32,9 @@ import { sideLabel } from "./gitCompare";
 // Branch and tag housekeeping (specs/git-branches.md): the actions are in gitRefActions.ts.
 import type { GitRefInfo, GitTag } from "./gitApi";
 import type { BranchPickFor } from "./gitBranches";
+// Edit History (specs/git-history-edit.md): the actions are at the end of this file.
+import type { GitHistoryCommit, GitHistoryRange } from "./gitApi";
+import { allPushed, defaultBase, editAllowed, historyConfirm, historyDone, MAX_PLAN, MOVED, movedText, planTodo, rangeEditContext, singlePlan, tooMany, type EditAction, type HistoryInfo, type HistoryKind, type PlanRow, type PlanTodo } from "./historyEdit";
 
 export interface FileHistory {
   path: string;
@@ -102,6 +105,12 @@ interface GitState {
   refInfo: Record<string, GitRefInfo>;
   /** Bumped after every branch / tag action: open graphs reload (refs do not change the status). */
   refsTick: number;
+  // ---- Edit History (specs/git-history-edit.md) ----
+  /** The Edit History list a graph tab shows in place of its rows (`openHistoryEdit`): the commits
+   *  it opened with. `seq` changes with every opening. In memory only. */
+  historyEdit: { root: string; range: GitHistoryRange; seq: number } | null;
+  /** The message of the commit Undo Last Commit just took back: the commit box takes it when it is empty. */
+  undone: { root: string; message: string } | null;
 }
 
 export const useGit = create<GitState>(() => ({
@@ -134,6 +143,9 @@ export const useGit = create<GitState>(() => ({
   tags: null,
   refInfo: {},
   refsTick: 0,
+  // Edit History
+  historyEdit: null,
+  undone: null,
 }));
 
 const key = (p: string) => p.toLowerCase();
@@ -1500,4 +1512,262 @@ export async function openCompareFile(left: { sha: string; short: string }, righ
   if (doc) await openCompare(old, { kind: "tab", docId: doc.id }, { preview: true });
   else if (await fs.exists(f.path)) await openCompare(old, { kind: "file", path: f.path }, { preview: true });
   else await openCompare(old, { kind: "text", label: `${nameOf(f.path)} (deleted)`, text: "" }, { preview: true });
+}
+
+// ---------- Edit History (specs/git-history-edit.md) ----------
+// Undo Last Commit, Reword, Drop, Squash into Parent and the Edit History list. Every way in
+// (graph menu, Git › Edit History, palette, the list's Run) goes through `historyGuard` on a fresh
+// status and a fresh range, then a dialog from pure `historyConfirm` (Cancel is always the
+// default); Rust `history_rewrite` checks again, against the tip the dialog named.
+
+const full = (reason: string) => (/[.!?…]$/.test(reason) ? reason : `${reason}.`);
+
+/**
+ * The checks before a history edit, on what git says now: nothing running or stopped, on a branch,
+ * the commit still editable (`check`), and for an edit that replays commits no uncommitted changes
+ * to tracked files. `from`: the oldest commit of the range to read ("HEAD": the tip alone). Null
+ * when it may not run (said in a notification or the "Commit or discard your changes first" dialog).
+ */
+async function historyGuard(root: string, from: string, check: (range: GitHistoryRange) => string | null, replay: (range: GitHistoryRange) => boolean): Promise<{ st: GitStatus; range: GitHistoryRange; branch: string } | null> {
+  if (useGit.getState().busy) {
+    toast("Another git action is running.", "info", 4000);
+    return null;
+  }
+  let st: GitStatus | null;
+  let range: GitHistoryRange;
+  try {
+    st = await git.status(root);
+    if (!st) throw new Error("The open folder is not in a git repository");
+    range = await git.historyRange(root, from);
+  } catch (e) {
+    toast(gitErrorText(String(e)), "error", 8000);
+    return null;
+  }
+  // More commits than are read at once: the oldest one listed is then not the commit asked about.
+  const reason = check(range) ?? (range.total > range.commits.length ? `There are ${range.total} commits from that one to the tip, and at most ${range.commits.length} are rewritten at a time: pick a more recent commit` : null);
+  if (reason || !range.branch) {
+    toast(full(reason ?? "You are not on a branch. Switch to a branch to edit its history."), "info", 6000);
+    return null;
+  }
+  if (replay(range)) {
+    const dirty = trackedChanges(st);
+    if (dirty) {
+      const d = dirtyRefusal("history", dirty);
+      if (await choose(d.title, d.text, d.choices, false)) showPanel("git");
+      return null;
+    }
+  }
+  return { st, range, branch: range.branch };
+}
+
+/** Why the oldest commit of `range` cannot be edited this way, or null. */
+const rangeReason = (action: EditAction) => (range: GitHistoryRange): string | null => {
+  const commit = range.commits[range.commits.length - 1];
+  // Not on the branch (the range is then empty), detached, or stopped: the context says which.
+  return editAllowed(action, commit ?? { parents: [""] }, rangeEditContext(range, null));
+};
+
+/**
+ * Run a confirmed history edit. "moved": the branch was not where the dialog said (nothing was
+ * rewritten); "stopped": a commit conflicted, the rebase is finished or aborted in Source Control
+ * (shown now); "failed": git refused and nothing is in progress.
+ */
+async function historyRun(root: string, label: string, branch: string, list: boolean, fn: () => Promise<string>): Promise<"done" | "stopped" | "failed" | "moved"> {
+  let moved = false;
+  const result = await runStart(root, label, async () => {
+    try {
+      return await fn();
+    } catch (e) {
+      if (!String(e).includes(MOVED)) throw e;
+      moved = true;
+      return "";
+    }
+  });
+  if (!moved) return result;
+  toast(movedText(branch, list), "error", 8000);
+  return "moved";
+}
+
+/** After the run: the notification, and the Force Push offer when pushed commits were rewritten (HISTORY-011). */
+async function historyFinish(root: string, branch: string, result: "done" | "stopped" | "failed" | "moved", pushed: boolean, on: string | null, done: (stale: { upstream: string | null; on: string | null } | null) => string) {
+  if (result === "stopped" && pushed) pendingRewrite.set(key(root), branch); // counts once Continue finishes it (MERGE-009)
+  if (result !== "done") return;
+  const now = await git.status(root).catch(() => null);
+  toast(done(pushed ? { upstream: now?.upstream && !now.upstreamGone ? now.upstream : null, on } : null), "success", pushed ? 9000 : 5000);
+  if (pushed) markRewritten(root, now, branch);
+}
+
+const shortId = (sha: string) => sha.slice(0, 7);
+
+/** Take the last commit back and keep its changes staged, after asking. True when it was undone. */
+export async function undoLastCommit(root: string): Promise<boolean> {
+  const g = await historyGuard(root, "HEAD", rangeReason("undo"), () => false);
+  const tip = g?.range.commits[0];
+  if (!g || !tip) return false;
+  const { range, branch } = g;
+  const d = historyConfirm("undo", { branch, tip: tip.short, commit: tip, lines: [], below: range.base, pushedOn: tip.pushed ? (range.pushedOn ?? "a remote branch") : null });
+  if (!(await choose(d.title, d.text, d.choices, false))) return false;
+  const result = await historyRun(root, "Undoing…", branch, false, () => git.historyRewrite(root, "undo", range.tip));
+  if (result === "done") useGit.setState({ undone: { root, message: tip.message } });
+  await historyFinish(root, branch, result, d.pushed, range.pushedOn, (stale) => historyDone("undo", { branch, was: tip.short }, stale));
+  return result === "done";
+}
+
+/** The parent to read a squash's range from; null (said why) when the commit cannot be squashed. */
+async function squashFrom(root: string, sha: string): Promise<string | null> {
+  try {
+    const r = await git.historyRange(root, sha);
+    const c = r.commits[r.commits.length - 1];
+    const reason = rangeReason("squash")(r);
+    if (!reason && c?.parents.length === 1) return c.parents[0];
+    toast(full(reason ?? "This is the first commit: it has no parent."), "info", 6000);
+  } catch (e) {
+    toast(gitErrorText(String(e)), "error", 8000);
+  }
+  return null;
+}
+
+/** For a range whose bottom row is the parent and the row above it the commit to fold in. */
+const squashReason = (range: GitHistoryRange): string | null => {
+  const n = range.commits.length;
+  const [child, parent] = [range.commits[n - 2], range.commits[n - 1]];
+  if (!child || !parent) return rangeReason("squash")(range);
+  return editAllowed("squash", child, rangeEditContext({ ...range, commits: range.commits.slice(0, -1) }, null, parent));
+};
+
+/**
+ * What the message strip of Reword / Squash into Parent starts with, read fresh: the commit, and
+ * for a squash its parent. Null when the edit cannot run (said the same way as when it is submitted,
+ * uncommitted changes included), so the strip only opens for an edit that can go ahead.
+ */
+export async function loadEditCommit(root: string, sha: string, kind: "reword" | "squash"): Promise<{ commit: GitHistoryCommit; parent: GitHistoryCommit | null } | null> {
+  const from = kind === "squash" ? await squashFrom(root, sha) : sha;
+  if (!from) return null;
+  const g = await historyGuard(root, from, kind === "squash" ? squashReason : rangeReason("reword"), (r) => kind === "squash" || r.commits.length > 1);
+  if (!g) return null;
+  const n = g.range.commits.length;
+  return kind === "squash" ? { commit: g.range.commits[n - 2], parent: g.range.commits[n - 1] } : { commit: g.range.commits[n - 1], parent: null };
+}
+
+/** The dialog's facts for a plan over `range`. */
+function planInfo(range: GitHistoryRange, branch: string, todo: PlanTodo, extra: Partial<HistoryInfo> = {}): HistoryInfo {
+  const below = todo.base ? (range.commits.find((c) => c.sha === todo.base) ?? (range.base?.sha === todo.base ? range.base : { short: shortId(todo.base) })) : null;
+  return { branch, tip: shortId(range.tip), lines: todo.lines, below, pushedOn: range.pushedOn, ...extra };
+}
+
+/** Confirm and run a plan built over a fresh range. */
+async function planRun(root: string, g: { range: GitHistoryRange; branch: string }, kind: HistoryKind, rows: PlanRow[], label: string, extra: Partial<HistoryInfo>, list = false): Promise<"done" | "stopped" | "failed" | "moved" | "cancelled"> {
+  const { range, branch } = g;
+  const todo = planTodo(rows, range.commits, range.base?.sha ?? null);
+  if (!todo) {
+    toast("Nothing would change.", "info", 3000);
+    return "cancelled";
+  }
+  const d = historyConfirm(kind, planInfo(range, branch, todo, extra));
+  if (!(await choose(d.title, d.text, d.choices, false))) return "cancelled";
+  const result = await historyRun(root, label, branch, list, () => git.historyRewrite(root, "plan", range.tip, todo.base, todo.steps));
+  const info = { branch, was: shortId(range.tip), commit: extra.commit, parent: extra.parent, count: todo.lines.length };
+  await historyFinish(root, branch, result, d.pushed, range.pushedOn, (stale) => historyDone(kind, info, stale));
+  return result;
+}
+
+/**
+ * Give a commit of the current branch a new message, after asking. The tip is amended (staged
+ * changes stay staged); an older commit is replayed with the commits after it. False when nothing
+ * ran (cancelled or refused: the strip keeps the text).
+ */
+export async function rewordCommit(root: string, sha: string, message: string): Promise<boolean> {
+  const g = await historyGuard(root, sha, rangeReason("reword"), (r) => r.commits.length > 1);
+  const commit = g?.range.commits[g.range.commits.length - 1];
+  if (!g || !commit) return false;
+  const { range, branch } = g;
+  const text = message.replace(/\r/g, "").trim();
+  if (!text || text === commit.message.trim()) {
+    toast(text ? "The message is unchanged." : "A commit needs a message.", "info", 3000);
+    return false;
+  }
+  if (range.commits.length > 1) return (await planRun(root, g, "reword", singlePlan("reword", range.commits, text), "Rewording…", { commit })) !== "cancelled";
+  const d = historyConfirm("reword", { branch, tip: commit.short, commit, lines: [{ commit, what: "reworded", detail: text.split("\n")[0] }], below: range.base, pushedOn: range.pushedOn });
+  if (!(await choose(d.title, d.text, d.choices, false))) return false;
+  const result = await historyRun(root, "Rewording…", branch, false, () => git.historyRewrite(root, "reword", range.tip, null, [], text));
+  await historyFinish(root, branch, result, d.pushed, range.pushedOn, (stale) => historyDone("reword", { branch, was: commit.short }, stale));
+  return true;
+}
+
+/** Remove a commit of the current branch and replay the ones after it, after asking. */
+export async function dropCommit(root: string, sha: string): Promise<boolean> {
+  const g = await historyGuard(root, sha, rangeReason("drop"), () => true);
+  const commit = g?.range.commits[g.range.commits.length - 1];
+  if (!g || !commit) return false;
+  return (await planRun(root, g, "drop", singlePlan("drop", g.range.commits), "Dropping…", { commit })) === "done";
+}
+
+/** Fold a commit into its parent with the message given, after asking. False when nothing ran. */
+export async function squashCommit(root: string, sha: string, message: string): Promise<boolean> {
+  const from = await squashFrom(root, sha);
+  const g = from && (await historyGuard(root, from, squashReason, () => true));
+  if (!g) return false;
+  const n = g.range.commits.length;
+  const [commit, parent] = [g.range.commits[n - 2], g.range.commits[n - 1]];
+  if (!commit || commit.sha !== sha || !message.trim()) return false;
+  return (await planRun(root, g, "squash", singlePlan("squash", g.range.commits, message), "Squashing…", { commit, parent })) !== "cancelled";
+}
+
+/**
+ * Open the Edit History list in the repository's graph tab: the commits from `fromSha` up to the
+ * tip, or without one the commits not pushed yet. Nothing is changed until the list is run.
+ */
+export async function openHistoryEdit(root: string, fromSha?: string): Promise<boolean> {
+  let from = fromSha ?? null;
+  if (!from) {
+    // The commits no remote has, from the tip down (stopping at a merge commit).
+    try {
+      const st = await git.status(root);
+      const blocked = st ? editAllowed("list", { parents: [""] }, { branch: st.branch, operation: st.operation, busy: useGit.getState().busy, onBranch: true, mergeAfter: null, parentMerge: false }) : "The open folder is not in a git repository";
+      if (blocked || !st) {
+        toast(full(blocked ?? ""), "info", 6000);
+        return false;
+      }
+      const unpushed = await git.historyRange(root, null);
+      from = defaultBase(unpushed);
+      if (!from) {
+        toast(unpushed.total === 0 ? allPushed(st.branch ?? "the branch") : `The last commit on ${st.branch} is a merge commit: there is nothing after it to edit here.`, "info", 9000);
+        return false;
+      }
+    } catch (e) {
+      toast(gitErrorText(String(e)), "error", 8000);
+      return false;
+    }
+  }
+  const g = await historyGuard(root, from, (r) => rangeReason("list")(r) ?? (r.total > MAX_PLAN ? tooMany(r.total) : null), () => true);
+  if (!g) return false;
+  openGraph(root);
+  useGit.setState((s) => ({ historyEdit: { root, range: g.range, seq: (s.historyEdit?.seq ?? 0) + 1 } }));
+  return true;
+}
+
+/** Close the Edit History list of a repository (Cancel, a finished or stopped run). */
+export function closeHistoryEdit(root: string) {
+  if (key(useGit.getState().historyEdit?.root ?? "") === key(root)) useGit.setState({ historyEdit: null });
+}
+
+/**
+ * Run the plan of the Edit History list, after the same checks and confirmation as every history
+ * edit. "done" / "stopped": the list closes; "moved": the branch changed since the list opened
+ * (the list reloads); "cancelled" / "failed": the list keeps its choices.
+ */
+export async function runHistoryEdit(root: string, opened: GitHistoryRange, rows: PlanRow[]): Promise<"done" | "stopped" | "failed" | "moved" | "cancelled"> {
+  const bottom = opened.commits[opened.commits.length - 1];
+  if (!bottom) return "cancelled";
+  const g = await historyGuard(root, bottom.sha, rangeReason("list"), () => true);
+  if (!g) return "cancelled";
+  const branch = g.branch;
+  if (g.range.tip !== opened.tip) {
+    toast(movedText(branch, true), "error", 8000);
+    return "moved";
+  }
+  // What is pushed is read now, not when the list opened (a fetch or push may have happened since).
+  const pushed = new Map(g.range.commits.map((c) => [c.sha, c.pushed]));
+  const fresh = rows.map((r) => ({ ...r, commit: { ...r.commit, pushed: pushed.get(r.commit.sha) ?? r.commit.pushed } }));
+  return planRun(root, { range: g.range, branch }, "plan", fresh, "Rewriting history…", {}, true);
 }

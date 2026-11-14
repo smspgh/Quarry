@@ -126,6 +126,9 @@ export default function App() {
       if (target?.closest?.(".tabs [role=tab]") && (e.key === "Delete" || (e.ctrlKey && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "w"))) return;
       // The Explorer tree's Ctrl+C / X / V copy, cut and paste files, not editor text.
       if (target?.closest?.("[data-file-keys]") && e.ctrlKey && !e.shiftKey && !e.altKey && ["c", "x", "v"].includes(e.key.toLowerCase())) return;
+      // The Edit History list and its message strip handle their own keys (specs/git-history-edit.md):
+      // Alt+Up / Alt+Down move a row there, not a line in an editor; Ctrl+Enter runs, Escape cancels.
+      if (target?.closest?.("[data-history-keys]") && ((e.altKey && !e.ctrlKey && (e.key === "ArrowDown" || e.key === "ArrowUp")) || (e.ctrlKey && !e.altKey && e.key === "Enter") || e.key === "Escape")) return;
       // An open find / replace history list handles its own keys (arrows, Enter, Delete, Escape).
       if (target?.closest?.(".history-menu")) return;
       // Alt+↑/↓ in a text field belongs to the field (Alt+↓ opens find / replace history), not Move Line.

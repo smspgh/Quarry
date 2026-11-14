@@ -16,6 +16,9 @@ import { refCommand, refRepo, type RefCommandId } from "./gitRefActions";
 import { askForDraft, cancelAssist, draftRepo, explainAtCursor, summariseBranch, summarisePicked, useGitAssist } from "./gitAssist";
 import { BUSY_ELSEWHERE, draftState } from "./gitAi";
 import { showPanel } from "./panels";
+// Edit History (specs/git-history-edit.md).
+import { openHistoryEdit, undoLastCommit } from "./git";
+import { commandBlocked } from "./historyEdit";
 import { activeDoc, useStore } from "./store";
 
 /** The `path` of a command's `{ path }` argument, if any. Pure. */
@@ -295,4 +298,11 @@ export function registerGitCommands() {
     },
   });
   register({ id: "git.stopClaude", title: "Stop Claude Request", category: "Git", enabled: () => claudeOn() && !!assist(), run: () => cancelAssist() });
+
+  // ----- Edit History (specs/git-history-edit.md) -----
+  // Greyed out on a detached HEAD, during a stopped operation, and (Undo) when the tip is the first
+  // commit or a merge. Both ask before anything changes; the single-commit edits (reword, drop,
+  // squash) need a commit and are entries of the graph's right-click menu, not commands.
+  register({ id: "git.undoLastCommit", title: "Undo Last Commit…", category: "Git", enabled: () => !commandBlocked("undo", currentRepo(), busy()), run: () => { const repo = currentRepo(); if (repo) void undoLastCommit(repo.root); } });
+  register({ id: "git.editHistory", title: "Edit History…", category: "Git", enabled: () => !commandBlocked("list", currentRepo(), busy()), run: () => { const repo = currentRepo(); if (repo) void openHistoryEdit(repo.root); } });
 }

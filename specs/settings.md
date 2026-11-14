@@ -908,6 +908,12 @@ Scenario: SET-017.8 The list follows the theme
   Given the dark theme
   When I open any dropdown
   Then its list is drawn with the dark theme's colours
+
+Scenario: SET-017.9 An option that cannot be chosen
+  Given a dropdown one of whose options is disabled with a reason (Squash on the bottom row of the Edit History list, HISTORY-008.10)
+  When I open the list
+  Then that option is greyed out and its tooltip gives the reason
+  And clicking it, Enter on it or typing its first letter does not choose it
 ```
 
 ## SET-018: Help "i" icons

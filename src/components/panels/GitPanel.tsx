@@ -452,6 +452,14 @@ export function GitPanel() {
     setMessage((cur) => (cur.trim() ? cur : repo!.operationMessage!));
   }, [opKey]);
 
+  // Edit History: Undo Last Commit hands the undone commit's message back, into an empty box only (HISTORY-002.3).
+  const undone = g.undone;
+  useEffect(() => {
+    if (!undone || !repo || undone.root.toLowerCase() !== repo.root.toLowerCase()) return;
+    useGit.setState({ undone: null });
+    setMessage((cur) => (cur.trim() ? cur : undone.message));
+  }, [undone, repo?.root]);
+
   const opWords = repo?.operation ? operationWords(repo.operation) : null;
   // A rebase or am is continued by the main button instead of committed.
   const rebasing = !!opWords?.continueLabel;

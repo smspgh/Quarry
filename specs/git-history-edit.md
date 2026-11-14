@@ -5,7 +5,7 @@ prefix: HISTORY
 
 # Edit History
 
-Rewriting commits of the current branch from the commit graph: Undo Last Commit, Reword Message, Drop Commit and Squash into Parent on one commit, and an Edit History list (interactive rebase) to reorder commits and mark each pick / reword / squash / fixup / drop before running. None of it is built yet (roadmap item 6 in `GIT-ROADMAP.md`); user documentation will go in `docs/git.md`.
+Rewriting commits of the current branch from the commit graph: Undo Last Commit, Reword Message, Drop Commit and Squash into Parent on one commit, and an Edit History list (interactive rebase) to reorder commits and mark each pick / reword / squash / fixup / drop before running. Built as roadmap item 6 of `GIT-ROADMAP.md`; user documentation is in `docs/git.md` (Edit history).
 
 Decisions (made where the roadmap left the choice open):
 
@@ -25,20 +25,23 @@ Decisions (made where the roadmap left the choice open):
 - **The list lives in the graph tab** (it replaces every row of the graph, the uncommitted-changes row of GRAPH-015 and stash rows included, until Run or Cancel); it is not a dialog and not a new tab kind, and it is not kept in the session. At most 100 commits.
 - **The list's keys are its own.** P, R, S, F, D, Up, Down, Alt+Up, Alt+Down, Ctrl+Enter and Escape act on the list only while the list itself has the keyboard focus; they are not commands and not global shortcuts. With the focus in a message box of the list they are text or do what that box says; with the focus anywhere else (another tab, a panel, the palette) they keep their usual meaning, so Alt+Up / Alt+Down still move a line in an editor (`edit.moveLineUp` / `edit.moveLineDown`).
 - **Only what changed is rewritten.** Rows below the lowest changed row keep their ids; the confirmation says so.
+- **How it runs (decided while building).** A plan is `git rebase -i` with a todo Quarry wrote: `GIT_SEQUENCE_EDITOR` is `cp '<temporary file>'` (git runs it through its own sh; checked on Windows with spaces, parentheses, an apostrophe and backslashes in the path), `GIT_EDITOR=true`, and the user's `rebase.autoStash` / `rebaseMerges` / `updateRefs` / `autoSquash` / `missingCommitsCheck` are switched off for the run. A dropped commit is simply left out of the todo. A new message is an `exec` line after the commit (and after everything folded into it) that pipes the text into `git commit --amend -F -`; it is part of the rebase's own state, so it survives a conflict stop, Continue, and a restart of Quarry, and nothing of Quarry's is left behind. Squash is therefore `fixup` plus that line. The badge "Rebasing 2 of 4" counts commits, not these lines. Commit hooks (`pre-commit`, `commit-msg`) are not run for a reworded message (`--no-verify`): the changes were committed before, and a failing hook would stop the rebase half-way with no button for it. A commit that becomes empty is kept (`--empty=keep`). Dropping the tip commit alone replays nothing: the branch is moved back to its parent. At most 1000 commits are replayed by one edit.
 - **Conflicts** use the existing stopped-rebase flow unchanged (badge "Rebasing 2 of 4", Continue Rebase, Skip, Abort; CONFLICT-011 to CONFLICT-013). Source Control is shown when the edit stops, as for a merge or rebase started in Quarry (MERGE-007).
 
 ## HISTORY-001: Edit-history entries in a commit's right-click menu
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — new menu group after the Reset entries and before the Summarise … with Claude entries of GITAI-009 (`item(...)` with `disabled` + tooltip), passes the commit's context to `editAllowed`
-  - `src/lib/historyEdit.ts` — new; pure `editAllowed(action, commit, ctx)` → the reason an entry is off, or null (current branch, detached, merge, root, operation, busy)
-  - `src/lib/gitStatus.ts` — `finishFirst(operation)` (the shared "Finish or abort the rebase first" sentence, introduced by MERGE-003)
-  - `src/lib/git.ts` — `historyRange` loader (which commits are on the current branch, pushed, merges), `busy`
-  - `src/lib/gitApi.ts` — `git.historyRange`, `GitHistoryCommit`
-  - `src-tauri/src/git.rs` — new `history_range` / `git_history_range` (`merge-base --is-ancestor`, `rev-list --parents`; which commits are pushed comes from `pushed_commits`, the helper of MERGE-006)
-- Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/graphView.test.tsx`, `src-tauri/src/git.rs`
+  - `src/components/GraphView.tsx` — hosts the group after the Reset entries (`historyEdit.menu(commit)`)
+  - `src/components/GraphHistory.tsx` — new; `useGraphHistory`: the menu group (`ENTRIES`; disabled entries carry the reason as their tooltip, Undo only on the tip), the message strip, the list host
+  - `src/lib/historyEdit.ts` — new; pure `editAllowed(action, commit, ctx)` → the reason an entry is off, or null (busy, operation, detached, not on the branch, merge, merge after, root, merge parent); `graphEditContext` (a commit's place from the graph's loaded rows), `rangeEditContext` (the same from a fresh range)
+  - `src/lib/gitStatus.ts` — `finishFirst(operation)` (the shared "Finish or abort the rebase first" sentence)
+  - `src/lib/git.ts` — `historyGuard` (the fresh re-check when an entry is chosen), `busy`
+  - `src/lib/gitApi.ts` — `git.historyRange`, `GitHistoryCommit`, `GitHistoryRange`
+  - `src-tauri/src/git/history.rs` — new; `history_range` / `git_history_range` (`merge-base --is-ancestor`, `log --topo-order` with parents; pushed = the definition of `pushed_commits`)
+  - `src-tauri/src/git.rs` — `pushed_commits` (which remote branch holds the pushed commits), `pub mod history`
+- Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/graphHistory.test.tsx`, `src-tauri/src/git/history.rs`
 - Docs: `docs/git.md`
 
 **As a** developer looking at a commit in the graph
@@ -108,17 +111,19 @@ Scenario: HISTORY-001.10 Git is busy
 
 ## HISTORY-002: Undo Last Commit
 
-- Status: planned
+- Status: draft
 - Commands: `git.undoLastCommit`
 - Files:
-  - `src/components/GraphView.tsx` — "Undo Last Commit…" entry on the tip commit
-  - `src/lib/gitCommands.ts` — `git.undoLastCommit` ("Undo Last Commit…", `enabled` from `editAllowed`)
+  - `src/components/GraphHistory.tsx` — "Undo Last Commit…" entry on the tip commit
+  - `src/lib/gitCommands.ts` — `git.undoLastCommit` ("Undo Last Commit…", `enabled` from `commandBlocked`)
   - `src/components/MenuBar.tsx` — Git › Edit History submenu (Undo Last Commit…, Edit History…), after Branches and Tags
-  - `src/lib/historyEdit.ts` — `historyConfirm("undo", …)`, `historyDone`
-  - `src/lib/git.ts` — new `undoLastCommit(root)` (asks, runs, puts the message back in the commit box, `checkExternalChanges`)
-  - `src/components/panels/GitPanel.tsx` — message box takes the undone commit's message when it is empty
-  - `src-tauri/src/git.rs` — `history_rewrite` action `undo` (`reset --soft HEAD~1`; refuses a merge or root tip, a detached HEAD and an operation in progress)
-- Tests: `src/__tests__/historyEdit.test.ts`, `src-tauri/src/git.rs`
+  - `src/lib/historyEdit.ts` — `commandBlocked("undo", repo, busy)`, `historyConfirm("undo", …)`, `historyDone`
+  - `src/lib/git.ts` — `undoLastCommit(root)` (guard, asks, runs, sets `useGit().undone`, `checkExternalChanges`)
+  - `src/components/panels/GitPanel.tsx` — the message box takes `useGit().undone` (the undone commit's message) when it is empty
+  - `src/lib/gitApi.ts` — `GitStatus.headParents` (the tip is the first commit or a merge: the command is greyed out)
+  - `src-tauri/src/git/history.rs` — `history_rewrite` action `undo` (`reset --soft HEAD~1`; refuses a merge or root tip, a detached HEAD, an operation in progress and a tip that moved), `tip_parents`
+  - `src-tauri/src/git.rs` — `GitStatus.head_parents`
+- Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/graphHistory.test.tsx`, `src-tauri/src/git/history.rs`
 - Docs: `docs/git.md`
 
 **As a** developer who committed too early
@@ -172,15 +177,18 @@ Scenario: HISTORY-002.8 Cancel
 
 ## HISTORY-003: Reword a commit's message
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — "Reword Message…" entry, message strip (multi-line, like the naming strip: `MessageStrip`), submits to `rewordCommit`
-  - `src/lib/historyEdit.ts` — `planTodo` (a one-commit plan), `rewriteSet`, `historyConfirm("reword", …)`, `historyDone`
-  - `src/lib/git.ts` — new `rewordCommit(root, sha, message)` (guards of HISTORY-006, busy label "Rewording…")
+  - `src/components/GraphHistory.tsx` — "Reword Message…" entry, `MessageStrip` (multi-line; Ctrl+Enter submits, Escape closes), submits to `rewordCommit`
+  - `src/components/GraphView.tsx` — renders the strip above the rows
+  - `src/lib/historyEdit.ts` — `singlePlan("reword", …)`, `planTodo`, `historyConfirm("reword", …)`, `historyDone`
+  - `src/lib/git.ts` — `loadEditCommit` (the whole message, read fresh; refuses before the strip opens), `rewordCommit(root, sha, message)` (guards of HISTORY-006, busy label "Rewording…")
   - `src/lib/gitApi.ts` — `git.historyRewrite`, `GitHistoryStep`
-  - `src-tauri/src/git.rs` — `history_rewrite` / `git_history_rewrite`: tip = `commit --amend --only -F <file>`; older = `rebase -i` with `GIT_SEQUENCE_EDITOR` copying a todo Quarry wrote (`--root` for the first commit); the new message is carried by the todo itself so it survives a stop
-- Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/graphView.test.tsx`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/history.rs` — `history_rewrite` / `git_history_rewrite`: tip = `commit --amend --only -F -`; older = `rebase -i` with `GIT_SEQUENCE_EDITOR` copying a todo Quarry wrote (`--root` for the first commit); the new message is an `exec` line of that todo (`todo_text`), so it survives a stop
+  - `src/App.tsx` — leaves Ctrl+Enter and Escape to the strip (`data-history-keys`)
+  - `src/styles/app.css` — `.graph-message-strip`
+- Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/graphHistory.test.tsx`, `src-tauri/src/git/history.rs`
 - Docs: `docs/git.md`
 
 **As a** developer who spots a wrong commit message a few commits back
@@ -206,8 +214,8 @@ Scenario: HISTORY-003.2 Reword the last commit
 Scenario: HISTORY-003.3 Reword an older commit lists what gets a new id
   Given c3d4e5f "Add tab limit" has 2 commits after it, d4e5f6a "Fix typo" and e5f6a7b "Add tab limit tests", none pushed
   When I reword c3d4e5f to "Add a limit on open tabs"
-  Then the dialog says "3 commits on main get new ids:" and lists c3d4e5f "Add tab limit" (reworded), d4e5f6a "Fix typo" and e5f6a7b "Add tab limit tests"
-  And it says "main is now at e5f6a7b" so I can put it back
+  Then the dialog says "3 commits on main get new ids:" and lists c3d4e5f "Add tab limit" (reworded to "Add a limit on open tabs"), d4e5f6a "Fix typo" (new id) and e5f6a7b "Add tab limit tests" (new id)
+  And it says "main is now at e5f6a7b: Reset main to Here on that commit puts it back."
   When I confirm with "Reword"
   Then the three commits are replaced by three with the same changes, authors and dates, the first with the new message
   And b2c3d4e and everything before it keep their ids
@@ -238,6 +246,7 @@ Scenario: HISTORY-003.8 No editor ever opens
   Given git's configured editor is a program that would wait for input
   When I reword any commit
   Then it finishes without that program being started
+  And the repository's pre-commit and commit-msg hooks are not run for the new message
 
 Scenario: HISTORY-003.9 Cancel
   When I cancel the "Reword this commit?" dialog
@@ -246,14 +255,14 @@ Scenario: HISTORY-003.9 Cancel
 
 ## HISTORY-004: Drop a commit
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — "Drop Commit…" entry (dangerous style)
-  - `src/lib/historyEdit.ts` — `planTodo` (drop), `rewriteSet`, `historyConfirm("drop", …)` (danger), `historyDone`
-  - `src/lib/git.ts` — new `dropCommit(root, sha)` (guards of HISTORY-006, busy label "Dropping…", `checkExternalChanges`)
-  - `src-tauri/src/git.rs` — `history_rewrite` with a `drop` step (`rebase -i` over the written todo)
-- Tests: `src/__tests__/historyEdit.test.ts`, `src-tauri/src/git.rs`
+  - `src/components/GraphHistory.tsx` — "Drop Commit…" entry (dangerous style)
+  - `src/lib/historyEdit.ts` — `singlePlan("drop", …)`, `planTodo`, `historyConfirm("drop", …)` (danger), `historyDone`
+  - `src/lib/git.ts` — `dropCommit(root, sha)` (guards of HISTORY-006, busy label "Dropping…", `checkExternalChanges`)
+  - `src-tauri/src/git/history.rs` — `history_rewrite` with a `drop` step (the commit is left out of the todo; the tip alone = `reset --hard` to its parent, tracked files being clean)
+- Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/graphHistory.test.tsx`, `src-tauri/src/git/history.rs`
 - Docs: `docs/git.md`
 
 **As a** developer with a commit on my branch that should never have been made
@@ -299,14 +308,14 @@ Scenario: HISTORY-004.6 Untracked files are left alone
 
 ## HISTORY-005: Squash a commit into its parent
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — "Squash into Parent…" entry, message strip prefilled with the joined message
-  - `src/lib/historyEdit.ts` — `squashMessage(parent, child)`, `planTodo` (squash), `rewriteSet`, `historyConfirm("squash", …)`, `historyDone`
-  - `src/lib/git.ts` — new `squashCommit(root, sha, message)` (guards of HISTORY-006, busy label "Squashing…")
-  - `src-tauri/src/git.rs` — `history_rewrite` with a `squash` step and its message; `history_range` reports the parent (merge / pushed)
-- Tests: `src/__tests__/historyEdit.test.ts`, `src-tauri/src/git.rs`
+  - `src/components/GraphHistory.tsx` — "Squash into Parent…" entry, message strip prefilled with the joined message
+  - `src/lib/historyEdit.ts` — `squashMessage(parent, child)`, `singlePlan("squash", …)`, `planTodo`, `historyConfirm("squash", …)`, `historyDone`
+  - `src/lib/git.ts` — `loadEditCommit(root, sha, "squash")`, `squashCommit(root, sha, message)` (reads the range from the parent; guards of HISTORY-006, busy label "Squashing…")
+  - `src-tauri/src/git/history.rs` — `history_rewrite` with a `fixup` step and the message on the parent's `pick`; `history_range` from the parent (merge / pushed)
+- Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/graphHistory.test.tsx`, `src-tauri/src/git/history.rs`
 - Docs: `docs/git.md`
 
 **As a** developer who made a small follow-up commit
@@ -323,7 +332,7 @@ Scenario: HISTORY-005.1 The combined message
 Scenario: HISTORY-005.2 Squash
   Given none of the commits are pushed and the working tree is clean
   When I shorten the message to "Add tab limit" and click "Squash"
-  Then a dialog "Squash into the parent?" says d4e5f6a "Fix typo" is folded into c3d4e5f "Add tab limit", and lists the commits that get new ids: c3d4e5f, d4e5f6a (folded in) and e5f6a7b "Add tab limit tests"
+  Then a dialog "Squash into the parent?" says d4e5f6a "Fix typo" is folded into c3d4e5f "Add tab limit", and lists the commits that get new ids: c3d4e5f (takes in the commits folded into it), d4e5f6a (folded into c3d4e5f) and e5f6a7b "Add tab limit tests" (new id)
   When I confirm with "Squash"
   Then "main" has one commit "Add tab limit" holding the changes of both, with the author and date of c3d4e5f
   And "Add tab limit tests" follows it with the same changes
@@ -355,15 +364,16 @@ Scenario: HISTORY-005.7 No stop for a message
 
 ## HISTORY-006: Guards on every history edit
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/lib/historyEdit.ts` — `rewriteSet` (the edited commit and everything after it), `historyConfirm` (list of up to 12 lines + "and N more", previous tip, pushed variant with `kind: "danger"`)
-  - `src/lib/gitMerge.ts` — `dirtyRefusal("history", count)` (the "Commit or discard your changes first" dialog of MERGE-008.1, worded for a history edit)
-  - `src/lib/git.ts` — `guardHistoryEdit(root, plan)` used by every entry point (menu actions, the list's Run, the commands): fresh `historyRange`, dirty check, operation check, then the dialog
+  - `src/lib/historyEdit.ts` — `planTodo` (the lowest changed commit and everything after it), `historyConfirm` (list of up to 12 lines + "and N more", current tip, pushed variant with `kind: "danger"`), `rewriteList`, `movedText`
+  - `src/lib/gitMerge.ts` — `dirtyRefusal("history", count)` (the "Commit or discard your changes first" dialog of MERGE-008.1, worded for a history edit), `trackedChanges`, `LISTED`
+  - `src/lib/git.ts` — `historyGuard(root, from, check, replay)` used by every entry point (menu actions, the list's Run, the commands): fresh status and `historyRange`, busy / operation / branch / merge checks, dirty check, then the dialog; `historyRun` (maps `quarry-moved`)
   - `src/lib/dialogs.ts` — `choose()` (unchanged: `default: true` on Cancel)
-  - `src-tauri/src/git.rs` — `history_range` (pushed = reachable from any remote-tracking branch, and which one: `pushed_commits`, shared with MERGE-006), `history_rewrite` re-checks before running: expected tip id, clean tracked files, no operation, on a branch, no merge in the range
-- Tests: `src/__tests__/historyEdit.test.ts`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/history.rs` — `history_range` (pushed = reachable from any remote-tracking branch, and which one: `pushed_commits`), `history_rewrite` re-checks before running: expected tip id (`MOVED`), clean tracked files, no operation, on a branch, the steps name exactly the commits of the range, no merge among them
+  - `src-tauri/src/git.rs` — `pushed_commits` (shared with MERGE-006)
+- Tests: `src/__tests__/historyEdit.test.ts`, `src-tauri/src/git/history.rs`
 - Docs: `docs/git.md`
 
 **As a** developer about to change commits that exist
@@ -404,7 +414,8 @@ Scenario: HISTORY-006.5 Nothing is pushed when there is no remote
 Scenario: HISTORY-006.6 Uncommitted changes block a replay
   Given I have 3 uncommitted changes to tracked files
   When I choose "Drop Commit…", "Squash into Parent…" or "Reword Message…" on a commit that is not the tip
-  Then the dialog "Commit or discard your changes first" of MERGE-008.1 says there are 3 uncommitted changes and that commits are only replayed from a clean state so that Abort can bring everything back
+  Then the dialog "Commit or discard your changes first" of MERGE-008.1 says there are 3 uncommitted changes to tracked files and that a history edit is only started from a clean state, so that Abort can bring everything back exactly as it was
+  And for Reword and Squash it comes before the message strip opens
   And its buttons are "Show Source Control" and "Close", with "Close" the default
   And git is not run, and my changes are not stashed, staged or touched
 
@@ -434,18 +445,19 @@ Scenario: HISTORY-006.10 What is never done
 
 ## HISTORY-007: Open the Edit History list
 
-- Status: planned
+- Status: draft
 - Commands: `git.editHistory`
 - Files:
-  - `src/components/HistoryEditList.tsx` — new; the list shown in the graph tab in place of the commit rows (header, rows, Run / Cancel)
-  - `src/components/GraphView.tsx` — "Edit History from Here…" entry, hosts `HistoryEditList`, hides the commit rows and find bar while it is open
+  - `src/components/HistoryEditList.tsx` — new; the list shown in the graph tab in place of the commit rows (header, rows, Reset List / Cancel / Run)
+  - `src/components/GraphHistory.tsx` — "Edit History from Here…" entry; hosts `HistoryEditList` for `useGit().historyEdit`; closes it when the tab closes or an operation stops
+  - `src/components/GraphView.tsx` — renders the list; the class `editing-history` hides the commit rows, the find box, the search results and the panes below while it is open
   - `src/lib/gitCommands.ts` — `git.editHistory` ("Edit History…": opens the graph tab with the list over the commits not yet pushed)
   - `src/components/MenuBar.tsx` — Git › Edit History › Edit History… (the submenu of HISTORY-002)
-  - `src/lib/historyEdit.ts` — `MAX_PLAN` = 100, `initialPlan(commits)` (every row pick), `defaultBase(range)` (oldest commit not pushed)
-  - `src/lib/git.ts` — `openHistoryEdit(root, fromSha?)`, `openGraph`
-  - `src-tauri/src/git.rs` — `history_range` (commits from a base to the tip with message, author, date, pushed, merge)
-  - `src/styles/app.css` — `.history-edit` rows (colours from tokens.css)
-- Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/historyEditList.test.tsx`, `src-tauri/src/git.rs`
+  - `src/lib/historyEdit.ts` — `MAX_PLAN` = 100, `initialPlan(commits)` (every row pick), `defaultBase(range)` (oldest commit not pushed, stopping at a merge), `listWords`, `tooMany`, `allPushed`, `commandBlocked("list", …)`
+  - `src/lib/git.ts` — `openHistoryEdit(root, fromSha?)`, `closeHistoryEdit`, `useGit().historyEdit`, `openGraph`
+  - `src-tauri/src/git/history.rs` — `history_range` (commits from a commit to the tip with message, author, date, pushed, parents; without a commit: the ones no remote has)
+  - `src/styles/app.css` — `.history-edit`, `.he-*` rows (colours from tokens.css)
+- Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/historyEditList.test.tsx`, `src/__tests__/graphHistory.test.tsx`, `src-tauri/src/git/history.rs`
 - Docs: `docs/git.md`
 
 **As a** developer cleaning up a branch before sharing it
@@ -512,12 +524,13 @@ Scenario: HISTORY-007.10 The rest of the application stays usable
 
 ## HISTORY-008: Plan the changes in the list
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/HistoryEditList.tsx` — rows (drag handle with pointer drag, action `Select`, inline message editor), problem markers, "Reset List"; key handling in the list's own `onKeyDown`, only while the list (not a message box inside it) has the focus: the keys are not registered as commands, and the list stops them from reaching the global shortcut handler in `src/App.tsx` (as the Explorer tree does with `data-file-keys`), so Alt+Up / Alt+Down do not also run `edit.moveLineUp` / `edit.moveLineDown`
-  - `src/components/Select.tsx` — the action picker (no native select)
-  - `src/lib/historyEdit.ts` — `PlanRow`, `moveRow`, `setAction`, `squashTarget` (nearest row below that is not dropped), `groupMessage`, `planProblems`, `planChanged`
+  - `src/components/HistoryEditList.tsx` — rows (drag handle with pointer drag, action `Select`, message boxes), problem markers, "Reset List"; key handling in the list's own `onKeyDown`, only while the list element itself (not a message box or the action picker inside it) has the focus: the keys are not registered as commands
+  - `src/App.tsx` — the global shortcut handler leaves Alt+Up / Alt+Down, Ctrl+Enter and Escape alone inside `[data-history-keys]` (as it does for the Explorer tree's `data-file-keys`), so Alt+Up / Alt+Down do not also run `edit.moveLineUp` / `edit.moveLineDown`
+  - `src/components/Select.tsx` — the action picker (no native select); an option can be `disabled` with the reason as its tooltip, and a `hint` is also the option's tooltip
+  - `src/lib/historyEdit.ts` — `PlanRow`, `ROW_ACTIONS`, `moveRow`, `setAction`, `setMessage`, `squashTarget` (nearest row below that is kept as a commit), `foldedInto`, `groupMessage`, `boxMessage`, `finalMessage`, `planProblems`, `allDropped`, `planChanged`
 - Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/historyEditList.test.tsx`
 - Docs: `docs/git.md`
 
@@ -558,7 +571,8 @@ Scenario: HISTORY-008.5 Reword in place
   When I set d4e5f6a "Fix typo" to "Reword"
   Then a multi-line message box opens under the row holding its whole message, with focus
   When I type "Fix a typo in the tab limit dialog" and press Ctrl+Enter or click outside the box
-  Then the row shows the new message with a "reworded" mark, and the old one in its tooltip
+  Then the box closes and the row shows the new message with a "reworded" mark, and the old one in its tooltip
+  And Enter on the selected row, or a double-click on its message, opens the box again
   And letter keys typed in the box are text, not actions
 
 Scenario: HISTORY-008.6 Reword with the message unchanged
@@ -569,13 +583,13 @@ Scenario: HISTORY-008.6 Reword with the message unchanged
 Scenario: HISTORY-008.7 Squash folds into the row below
   Given the order e5f6a7b, d4e5f6a "Fix typo", c3d4e5f "Add tab limit"
   When I set d4e5f6a to "Squash"
-  Then the row is indented with an arrow pointing at c3d4e5f
+  Then the row is indented with an arrow and the short id c3d4e5f
   And c3d4e5f shows a message box containing "Add tab limit", a blank line, then "Fix typo", which I can edit
   And the tooltip of "Squash" says "Fold into the commit below and join the messages"
 
 Scenario: HISTORY-008.8 Fixup throws its message away
   When I set d4e5f6a to "Fixup"
-  Then the row is indented with an arrow pointing at c3d4e5f
+  Then the row is indented with an arrow and the short id c3d4e5f
   And c3d4e5f keeps the message "Add tab limit" with no message box
   And the tooltip of "Fixup" says "Fold into the commit below and discard this message"
 
@@ -622,21 +636,22 @@ Scenario: HISTORY-008.17 The keys only act while the list has focus
   Given the Edit History list is open with the row d4e5f6a selected and set to "Pick"
   When I click into the Source Control panel's message box, or switch to a text tab, and press D, S or Alt+Down there
   Then no row of the list changes its action or its place
+  And with the focus on a row's action picker the letters are that picker's type-ahead (they choose an action for that row only)
   And the letters are typed as text, and Alt+Down in the text tab moves the editor's line down as usual
   And with the focus in the list, Alt+Down moves the selected row and no line in any editor
 ```
 
 ## HISTORY-009: Run or cancel the Edit History list
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/HistoryEditList.tsx` — "Run" / "Cancel", closes on success, stays open on a refusal
-  - `src/lib/historyEdit.ts` — `planTodo` (rows → steps, oldest first, starting at the lowest changed row), `rewriteSet`, `historyConfirm("plan", …)` (one line per commit: kept / moved / reworded / folded into / dropped), `historyDone`
-  - `src/lib/git.ts` — `runHistoryEdit(root, plan)` (`guardHistoryEdit`, busy label "Rewriting history…", `checkExternalChanges`, graph reload)
-  - `src/lib/gitApi.ts` — `git.historyRewrite(root, base, expectedTip, steps)`
-  - `src-tauri/src/git.rs` — `history_rewrite`: writes the todo to a temp file, runs `rebase -i` with `GIT_SEQUENCE_EDITOR` copying it over git's todo and `GIT_EDITOR=true`; messages applied from files named in the todo; temp files removed when the rebase ends
-- Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/historyEditList.test.tsx`, `src-tauri/src/git.rs`
+  - `src/components/HistoryEditList.tsx` — "Run" / "Cancel", closes on success or a stop, stays open on a refusal, reloads when the branch moved
+  - `src/lib/historyEdit.ts` — `planTodo` (rows → steps, oldest first, starting at the lowest changed row), `historyConfirm("plan", …)` (one line per commit: new id / moved / reworded / folded into / dropped), `historyDone`
+  - `src/lib/git.ts` — `runHistoryEdit(root, opened, rows)` (`historyGuard`, pushed flags read fresh, busy label "Rewriting history…", `checkExternalChanges`, graph reload through the status)
+  - `src/lib/gitApi.ts` — `git.historyRewrite(root, "plan", expectedTip, base, steps)`
+  - `src-tauri/src/git/history.rs` — `history_rewrite` → `run_plan`: writes the todo (`todo_text`) to a file in a temporary folder, runs `rebase -i --empty=keep` with `GIT_SEQUENCE_EDITOR` = `cp '<that file>'` and `GIT_EDITOR=true`, with autoStash / rebaseMerges / updateRefs / autoSquash / missingCommitsCheck switched off; messages are `exec` lines of the todo; the temporary folder is removed when the command returns
+- Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/historyEditList.test.tsx`, `src-tauri/src/git/history.rs`
 - Docs: `docs/git.md`
 
 **As a** developer who has planned changes in the Edit History list
@@ -647,8 +662,8 @@ Scenario: HISTORY-008.17 The keys only act while the list has focus
 Scenario: HISTORY-009.1 Run shows the plan first
   Given the list, newest first, is e5f6a7b (Pick), d4e5f6a "Fix typo" (Fixup), c3d4e5f "Add tab limit" (Reword to "Add a limit on open tabs"), and nothing is pushed
   When I click "Run"
-  Then a dialog "Rewrite 3 commits on main?" lists, oldest first: c3d4e5f reworded to "Add a limit on open tabs"; d4e5f6a "Fix typo" folded into it; e5f6a7b "Add tab limit tests" kept, new id
-  And it says "main is now at e5f6a7b" and "b2c3d4e and earlier commits are not changed"
+  Then a dialog "Rewrite 3 commits on main?" lists, oldest first: c3d4e5f "Add tab limit" (reworded to "Add a limit on open tabs"); d4e5f6a "Fix typo" (folded into c3d4e5f, its message discarded); e5f6a7b "Add tab limit tests" (new id)
+  And it says "main is now at e5f6a7b: Reset main to Here on that commit puts it back." and "b2c3d4e and earlier commits are not changed."
   And its buttons are "Cancel" (default) and "Rewrite 3 Commits"
 
 Scenario: HISTORY-009.2 Run
@@ -691,8 +706,8 @@ Scenario: HISTORY-009.8 Cancel a list with changes
 
 Scenario: HISTORY-009.9 The branch changed while the list was open
   Given the list was opened with "main" at e5f6a7b and a commit has since been added to "main"
-  When I click "Run" and confirm
-  Then nothing is rewritten and an error says "main has changed since this list was opened. Nothing was rewritten."
+  When I click "Run"
+  Then nothing is rewritten and an error says "main has changed since this list was opened. Nothing was rewritten." (before the confirmation when the change is already there, after it when the commit arrived while the dialog was open)
   And the list reloads from the same base with every row "Pick"
 
 Scenario: HISTORY-009.10 Uncommitted changes appeared
@@ -714,16 +729,18 @@ Scenario: HISTORY-009.12 A failure that is not a conflict
 
 ## HISTORY-010: A history edit that stops on a conflict
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/lib/git.ts` — `runHistoryEdit` / `dropCommit` / `squashCommit` / `rewordCommit` report a stop through `gitErrorText` and show Source Control (`showPanel("git")`, as `startMerge` / `startRebase` do in MERGE-007); `continueOperation`, `abortOperation` (existing)
+  - `src/lib/git.ts` — `historyRun` → `runStart` (reports a stop through `gitErrorText` and shows Source Control with `showPanel("git")`, as `startMerge` / `startRebase` do in MERGE-007); `continueOperation`, `abortOperation` (existing)
   - `src/lib/gitStatus.ts` — `gitErrorText` ("Stopped on a conflict…"), `operationWords("rebase")`, `operationDone`
   - `src/components/panels/GitPanel.tsx` — existing badge "Rebasing 2 of 4", Continue Rebase, Skip, Abort
-  - `src/components/GraphView.tsx` — existing stopped-operation strip; the Edit History list closes when the rebase stops
+  - `src/components/GraphView.tsx` — existing stopped-operation strip
+  - `src/components/GraphHistory.tsx` — closes the Edit History list and the message strip when an operation is stopped
   - `src/components/HistoryEditList.tsx` — closes on a stop
-  - `src-tauri/src/git.rs` — `history_rewrite` (messages live in the todo, so `continue_operation` with `GIT_EDITOR=true` still applies them), `operation`, `operation_step`, `continue_operation`, `abort_operation`
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/historyEdit.test.ts`
+  - `src-tauri/src/git/history.rs` — `todo_text` (messages live in the todo as `exec` lines, so `continue_operation` with `GIT_EDITOR=true` still applies them), `rebase_step` (the badge counts commits, not the `exec` lines)
+  - `src-tauri/src/git.rs` — `operation`, `operation_step` (uses `history::rebase_step` for an interactive rebase), `continue_operation`, `abort_operation`
+- Tests: `src-tauri/src/git/history.rs`, `src/__tests__/historyEdit.test.ts`, `src/__tests__/historyEditList.test.tsx`, `src/__tests__/graphHistory.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer whose history edit hit a conflict part-way
@@ -734,7 +751,7 @@ Scenario: HISTORY-009.12 A failure that is not a conflict
 Scenario: HISTORY-010.1 The edit stops
   Given I drop d4e5f6a and the later commit e5f6a7b changes the same lines
   When I confirm
-  Then an error says "Stopped on a conflict. Resolve the files under Merge Changes in Source Control and continue, or press Abort to go back." followed by git's CONFLICT lines
+  Then an error says "Stopped on a conflict. Resolve the files under Merge Changes in Source Control and commit, or press Abort to go back." followed by git's CONFLICT lines (the sentence every stopped operation uses, GRAPH-012.5)
   And the Source Control panel is showing (it opens when it was not), with the badge "Rebasing 1 of 1", "Skip" and "Abort", and the file under Merge Changes
   And the graph tab shows the stopped-operation strip with "Abort"
 
@@ -792,13 +809,14 @@ Scenario: HISTORY-010.10 Quarry is closed while stopped
 
 ## HISTORY-011: Force Push is offered after a history edit of pushed commits
 
-- Status: planned
+- Status: draft
 - Commands: `git.forcePush`
 - Files:
-  - `src/lib/git.ts` — `runHistoryEdit`, `rewordCommit`, `dropCommit`, `squashCommit` and `undoLastCommit` set the `rewrotePushed` marker of MERGE-009 when the confirmed edit rewrote pushed commits and it finished (also when it finished through Continue Rebase); nothing else is added here: `forcePush`, its dialog, the status-line wording and the `"push-force"` remote operation are MERGE-009's
-  - `src/lib/historyEdit.ts` — `historyDone` (the finished notification's extra sentence after a rewrite of pushed commits)
-  - `src/lib/gitStatus.ts` — `syncLine` (the rewritten case of MERGE-009 must also show when the branch is only behind its upstream, as after Undo Last Commit)
-- Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/gitRemote.test.ts`
+  - `src/lib/git.ts` — `historyFinish`: after a confirmed edit that rewrote pushed commits, `markRewritten` (the `rewrotePushed` marker of MERGE-009) when it finished, `pendingRewrite` when it stopped (the marker is then set by Continue Rebase, forgotten by Abort); nothing else is added here: `forcePush`, its dialog, the status-line wording and the `"push-force"` remote operation are MERGE-009's
+  - `src/lib/historyEdit.ts` — `historyDone` (the finished notification's extra sentence after a rewrite of pushed commits), `historyConfirm` (`pushed`: the danger dialog was shown)
+  - `src/lib/gitStatus.ts` — `syncLine` (the rewritten case of MERGE-009 also shows when the branch is only behind its upstream, as after Undo Last Commit)
+  - `src/lib/gitMerge.ts` — `isRewritten`
+- Tests: `src/__tests__/historyEdit.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer who knowingly edited commits that were already pushed
@@ -829,6 +847,7 @@ Scenario: HISTORY-011.4 Not offered when nothing pushed was rewritten
   Given I rewrote only commits that were never pushed
   When the rewrite finishes
   Then the status line counts the commits to push as usual, with no "Force Push…", and the ordinary "Push" works
+  And when the pushed commits are on another remote branch and "main" has no upstream, the notification ends "origin/release still has the old commits." and no Force Push is offered (there is no upstream to replace)
 
 Scenario: HISTORY-011.5 An edit that stopped on a conflict
   Given I confirmed "Rewrite Pushed Commits" and the rebase stopped on a conflict
