@@ -19,14 +19,14 @@ Owner decisions, 2026-11-13: build items 0-9, item 10 gets a spec only; one loca
 | 6 | Edit history | `git-history-edit.md` (HISTORY-001..011) | indexed; owner decided: warn, then Force Push (built with item 3) | no | no |
 | 7 | Graph polish | `git-graph.md` (GRAPH-015..018) | indexed; no blocking questions | no | no |
 | 8 | Buffer-aware safety | `git-safety.md` (SAFE-001..007) | written and indexed | no | no |
-| 9 | Claude-assisted git | `git-claude.md` (GITAI-001..009) | indexed; owner decided: own model setting (default Haiku), draft covers all changes | no | no |
+| 9 | Claude-assisted git | `git-claude.md` (GITAI-001..009) | indexed; owner decided: own model setting (default Haiku), draft covers all changes | yes (f18a829; on main: 944 Vitest + 173 Rust tests pass; stories `draft`; flags checked against Claude Code 2.1.325 with 2 real requests, everything else against a fake) | no: 12 live checks; signed-out / usage-limit errors are unverified |
 | 10 | Three-way merge view | `git-merge-editor.md` (THREEWAY-001..005) | indexed; 3 owner questions parked in the agent report (base pane without diff3, row button, Ctrl+S = Complete) | deferred | deferred |
 
 Spec phase, 2026-11-13: all eleven items have stories (80 new, all `planned`), indexed with 0 problems (422 stories in total). A reconciliation pass then aligned the ten new spec files with each other (one ref-label menu, one branch picker, one unsaved-tabs dialog, one force push, one Git menu layout; the shared pieces are written once in the Decisions of `specs/git-merge-rebase.md`): 423 stories, 0 problems. Owner answers the same day: rewriting pushed commits warns, then offers Force Push (with lease); Claude git helpers get their own model setting, default Haiku; Draft Commit Message with nothing staged covers all changes; the unsaved-tabs dialog defaults to Save All and Pull always asks. Questions the spec agents left open are recorded in the rows above and in each file's Decisions list; the specified default stands until the owner says otherwise.
 
 Build phase: the specs were committed locally as 021d25f. Wave 1 (items 0, 1, 2, 3) started 2026-11-13, one agent per item in its own worktree; the Built column changes when an item is merged into local main with tsc, Vitest and Rust tests passing.
 
-Resumed 2026-11-13: item 2 (stash) merged as b8660bf (on main: 610 Vitest + 132 Rust tests pass). Item 1 merged the same day (wave 1 complete). Wave 2: items 4 and 5 merged; item 9 still building. Wave 3 (items 6, 7) started on top of item 4.
+Resumed 2026-11-13: item 2 (stash) merged as b8660bf (on main: 610 Vitest + 132 Rust tests pass). Item 1 merged the same day (wave 1 complete). Wave 2 complete (items 4, 5, 9 merged). Wave 3 (items 6, 7) started on top of item 4.
 
 Build order (agents work in parallel inside a wave, each in its own worktree; waves are merged before the next starts because they share `GraphView.tsx`, `git.ts` and `git.rs`): wave 1 = items 0, 1, 2, 3; wave 2 = 4, 5, 9; wave 3 = 6, 7; wave 4 = 8 (audits every action, so it goes last); then the live pass.
 
