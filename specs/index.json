@@ -10590,7 +10590,7 @@
       "title": "Read branches and merges as lanes with labels",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 67,
+      "line": 68,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10647,7 +10647,7 @@
       "title": "Long branch lines are cut short",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 135,
+      "line": 136,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10688,7 +10688,7 @@
       "title": "Show the current branch or all branches",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 179,
+      "line": 180,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10721,7 +10721,7 @@
       "title": "Load a long history in pages",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 212,
+      "line": 213,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10780,7 +10780,7 @@
       "title": "Speed up a very large history",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 280,
+      "line": 281,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10826,7 +10826,7 @@
       "title": "Find among the loaded commits",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 331,
+      "line": 332,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10871,7 +10871,7 @@
       "title": "Search the whole history and go to a result",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 382,
+      "line": 383,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10937,7 +10937,7 @@
       "title": "See a commit's details",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 458,
+      "line": 459,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10993,7 +10993,7 @@
       "title": "Open what a commit changed in a file",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 518,
+      "line": 519,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11039,7 +11039,7 @@
       "title": "Copy, switch, branch and tag from a commit's right-click menu",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 567,
+      "line": 568,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11101,7 +11101,7 @@
       "title": "Check out, cherry-pick or revert a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 640,
+      "line": 641,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11156,7 +11156,7 @@
       "title": "Reset the branch to a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 699,
+      "line": 700,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11200,7 +11200,7 @@
       "title": "See uncommitted work and a stopped operation above the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 745,
+      "line": 746,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11240,7 +11240,7 @@
       "title": "Uncommitted changes as the first row of the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 799,
+      "line": 800,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11330,7 +11330,7 @@
       "title": "Drag the height of the Search All History results",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 920,
+      "line": 921,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11393,7 +11393,7 @@
       "title": "Scroll sideways through a graph wider than 16 lanes",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 995,
+      "line": 996,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11452,7 +11452,7 @@
       "title": "List a small history by date",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1072,
+      "line": 1073,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11525,15 +11525,14 @@
       "title": "Show Commit Graph is in the palette without a repository",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1163,
-      "status": "planned",
+      "line": 1164,
+      "status": "draft",
       "commands": [
         "git.graph"
       ],
       "files": [
         "src/lib/gitCommands.ts",
-        "src/lib/git.ts",
-        "src/components/MenuBar.tsx"
+        "src/lib/git.ts"
       ],
       "tests": [
         "src/__tests__/gitCommands.test.ts"
@@ -22948,7 +22947,6 @@
       "GITAI-007",
       "GITAI-009",
       "GRAPH-001",
-      "GRAPH-019",
       "HISTORY-002",
       "HISTORY-007",
       "JSON-014",

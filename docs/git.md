@@ -48,7 +48,7 @@ The header also counts commits **to pull**, and its graph button opens the commi
 
 ## Commit graph
 
-**Git › Show Commit Graph** (or the graph button on the Commits section) opens the repository's history in a full-width tab, so nothing is squeezed into the side panel.
+**Git › Show Commit Graph** (or the graph button on the Commits section) opens the repository's history in a full-width tab, so nothing is squeezed into the side panel. The command is always in the menu and the command palette; with no repository open it says **Open a folder in a git repository** and opens nothing.
 
 - **The graph.** Each commit is a dot on its branch's line; lines fork where a branch starts and join where it is merged. Commits are listed branch by branch (a merged branch's commits sit together under the merge), not strictly by date. A branch's own line stays in its lane, and a lane is reused as soon as its branch ends. Columns show the message, author, date and short id.
 - **Long lines are cut short.** A line that would run more than 40 rows to reach its commit (a branch that forked from something old) ends in a small down arrow, and the commit it leads to shows an up arrow where it comes back in. This is what keeps a busy history readable: on the Git project's own repository it takes the graph from about 130 lanes to about 10. Select the commit at either end to follow the line: its **Parent** link jumps down to the other end, and **Continues** in the details lists the commits whose cut lines lead to it.

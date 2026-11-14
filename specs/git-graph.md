@@ -12,8 +12,8 @@ The commit graph tab (`kind: "graph"`): a repository's history as a lane graph w
 - Status: draft
 - Commands: `git.graph`
 - Files:
-  - `src/lib/gitCommands.ts` — registers `git.graph` (enabled only with a repository)
-  - `src/lib/git.ts` — `openGraph()`: reuses the repository's open graph tab, tab name `Graph · <folder>`
+  - `src/lib/gitCommands.ts` — registers `git.graph` (always enabled, GRAPH-019)
+  - `src/lib/git.ts` — `openGraph()`: reuses the repository's open graph tab, tab name `Graph · <folder>`; a notification when there is no repository
   - `src/components/GraphView.tsx` — `GraphView`, toolbar (Fetch, Reload), reload effect keyed on the repository `stamp`, `editor.registerFocus`
   - `src/components/panels/GitPanel.tsx` — graph button in `CommitsSection`
   - `src/components/MenuBar.tsx` — Git menu item
@@ -48,8 +48,9 @@ Scenario: GRAPH-001.3 An open graph is reused
 
 Scenario: GRAPH-001.4 No repository
   Given nothing open is inside a git repository
-  When I open the Git menu or the command palette
-  Then Show Commit Graph is greyed out in the menu and the palette
+  When I run Show Commit Graph from the Git menu or the command palette
+  Then no tab opens
+  And a notification says "Open a folder in a git repository"
 
 Scenario: GRAPH-001.5 The graph follows the repository
   Given the graph tab is showing
@@ -1162,12 +1163,11 @@ Scenario: GRAPH-018.12 While loading
 
 ## GRAPH-019: Show Commit Graph is in the palette without a repository
 
-- Status: planned
+- Status: draft
 - Commands: `git.graph`
 - Files:
   - `src/lib/gitCommands.ts` — `git.graph` registered without `enabled: hasRepo`
   - `src/lib/git.ts` — `openGraph()`: the notification when there is no repository
-  - `src/components/MenuBar.tsx` — Git menu item (no change expected: it follows the command)
 - Tests: `src/__tests__/gitCommands.test.ts`
 - Docs: `docs/git.md`
 

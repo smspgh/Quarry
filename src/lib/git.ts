@@ -887,7 +887,7 @@ export async function openCommitFile(entry: GitLogEntry, f: GitCommitFile) {
 export function openGraph(root?: string) {
   const repo = root ? useGit.getState().repos[key(root)] : currentRepo();
   if (!repo) {
-    toast("The open folder is not in a git repository.", "info");
+    toast("Open a folder in a git repository", "info");
     return;
   }
   const st = useStore.getState();

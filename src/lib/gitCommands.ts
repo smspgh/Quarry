@@ -84,7 +84,7 @@ export function registerGitCommands() {
   register({ id: "git.acceptAllCurrent", title: "Accept All Current in This File", category: "Git", enabled: hasConflicts, run: acceptEvery("current") });
   register({ id: "git.acceptAllIncoming", title: "Accept All Incoming in This File", category: "Git", enabled: hasConflicts, run: acceptEvery("incoming") });
   register({ id: "git.showPanel", title: "Show Source Control", category: "Git", keys: "Ctrl+Shift+G", run: () => showPanel("git") });
-  register({ id: "git.graph", title: "Show Commit Graph", category: "Git", enabled: hasRepo, run: () => openGraph() });
+  register({ id: "git.graph", title: "Show Commit Graph", category: "Git", run: () => openGraph() });
   register({ id: "git.refresh", title: "Refresh Git Status", category: "Git", run: rescanGit });
   // `{ path }` = a folder (the Explorer's right-click menu); without one, the open folder.
   register({
