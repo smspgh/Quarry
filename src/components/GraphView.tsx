@@ -401,6 +401,11 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
     if (i * ROW < el.scrollTop) el.scrollTop = i * ROW;
     else if ((i + 1) * ROW > el.scrollTop + el.clientHeight) el.scrollTop = (i + 1) * ROW - el.clientHeight;
   };
+  // The details pane takes its room from the list when it opens: the row just picked must not end up behind it.
+  const paneOpen = selected !== null;
+  useLayoutEffect(() => {
+    if (paneOpen && index >= 0) reveal(index);
+  }, [paneOpen]);
   const select = (i: number) => {
     const at = Math.max(0, Math.min(commits.length - 1, i));
     const c = commits[at];
