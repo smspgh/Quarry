@@ -388,7 +388,7 @@ describe("history edit dialogs and notifications", () => {
     expect(defaults(d)).toEqual(["Cancel"]);
     expect(d.pushed).toBe(true);
     // Another remote branch is named; without a name it is still a warning.
-    expect(historyConfirm("drop", { branch: "main", tip: "e5f6a7b", commit: c, lines: lines(singlePlan("drop", [E, D, c]), [E, D, c], B.sha), below: B, pushedOn: "origin/release" }).text).toContain("1 of the 3 commits are already on origin/release");
+    expect(historyConfirm("drop", { branch: "main", tip: "e5f6a7b", commit: c, lines: lines(singlePlan("drop", [E, D, c]), [E, D, c], B.sha), below: B, pushedOn: "origin/release" }).text).toContain("1 of the 3 commits is already on origin/release");
     // Squash into a pushed parent names the parent; the plan uses the same dialog.
     const squash = historyConfirm("squash", { branch: "main", tip: "e5f6a7b", commit: D, parent: c, lines: lines(singlePlan("squash", [E, D, c], "x"), [E, D, c], B.sha), below: B, pushedOn: "origin/main" });
     expect(squash.text).toContain("c3d4e5f  Add tab limit\n");

@@ -452,7 +452,7 @@ export function historyConfirm(kind: HistoryKind, info: HistoryInfo): HistoryDia
   if (pushed.length) {
     const where = info.pushedOn ?? "a remote branch";
     const total = kind === "undo" ? 1 : lines.length;
-    const which = total === 1 ? "This commit is" : pushed.length === total ? `All ${total} commits are` : `${pushed.length} of the ${total} commits are`;
+    const which = total === 1 ? "This commit is" : pushed.length === total ? `All ${total} commits are` : `${pushed.length} of the ${total} commits ${pushed.length === 1 ? "is" : "are"}`;
     const shown = pushed.slice(0, LISTED).map((p) => `${p.short}  ${p.summary}`).join("\n") + (pushed.length > LISTED ? `\nand ${pushed.length - LISTED} more` : "");
     return {
       title: "Rewrite commits that are already pushed?",
