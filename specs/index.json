@@ -1996,7 +1996,7 @@
       "title": "Find the Claude Code installation",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 68,
+      "line": 70,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2043,7 +2043,7 @@
       "title": "Open a Claude tab for a folder",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 115,
+      "line": 117,
       "status": "draft",
       "commands": [
         "claude.openHere",
@@ -2107,7 +2107,7 @@
       "title": "Send messages and read streamed replies",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 186,
+      "line": 188,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2164,7 +2164,7 @@
       "title": "Stop the running task",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 250,
+      "line": 252,
       "status": "draft",
       "commands": [
         "claude.stop"
@@ -2205,7 +2205,7 @@
       "title": "See each step Claude takes",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 289,
+      "line": 291,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2251,7 +2251,7 @@
       "title": "See what an edit changes",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 336,
+      "line": 338,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2301,7 +2301,7 @@
       "title": "Answer permission requests",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 385,
+      "line": 387,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2353,7 +2353,7 @@
       "title": "Choose how much Claude may do without asking",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 436,
+      "line": 438,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2403,7 +2403,7 @@
       "title": "Answer Claude's questions",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 487,
+      "line": 489,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2445,7 +2445,7 @@
       "title": "Follow Claude's task list",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 533,
+      "line": 535,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2482,7 +2482,7 @@
       "title": "Attach pictures to a message",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 566,
+      "line": 568,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2536,7 +2536,7 @@
       "title": "Point Claude at files and selections",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 624,
+      "line": 626,
       "status": "draft",
       "commands": [
         "claude.addSelection",
@@ -2600,7 +2600,7 @@
       "title": "Read formatted replies",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 693,
+      "line": 695,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2651,7 +2651,7 @@
       "title": "Start a new conversation in the same folder",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 745,
+      "line": 747,
       "status": "draft",
       "commands": [
         "claude.newSession"
@@ -2691,7 +2691,7 @@
       "title": "Continue a conversation after restarting Quarry",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 783,
+      "line": 785,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2745,7 +2745,7 @@
       "title": "Browse and reopen past conversations",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 837,
+      "line": 839,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2805,7 +2805,7 @@
       "title": "Choose the model",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 902,
+      "line": 904,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2848,6 +2848,10 @@
         {
           "id": "CLAUDE-018.6",
           "title": "The hint says when it applies"
+        },
+        {
+          "id": "CLAUDE-018.7",
+          "title": "The Model is for Claude tabs only"
         }
       ]
     },
@@ -2856,7 +2860,7 @@
       "title": "Know what background Claude tabs are doing",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 953,
+      "line": 961,
       "status": "draft",
       "commands": [],
       "files": [
@@ -2892,7 +2896,7 @@
       "title": "Closing tabs, quitting and a process that stops",
       "area": "CLAUDE",
       "spec": "specs/claude-code.md",
-      "line": 989,
+      "line": 997,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3428,7 +3432,7 @@
       "title": "Accept one side of a conflict",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 68,
+      "line": 69,
       "status": "draft",
       "commands": [
         "git.acceptCurrent",
@@ -3484,7 +3488,7 @@
       "title": "Resolve every conflict in a file one way",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 122,
+      "line": 125,
       "status": "draft",
       "commands": [
         "git.acceptAllCurrent",
@@ -3526,7 +3530,7 @@
       "title": "Jump between conflicts",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 159,
+      "line": 162,
       "status": "draft",
       "commands": [
         "git.nextConflict",
@@ -3566,7 +3570,7 @@
       "title": "Compare the two sides of a conflict",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 197,
+      "line": 200,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3598,7 +3602,7 @@
       "title": "Finish a file when its last conflict is gone",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 231,
+      "line": 235,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3642,7 +3646,7 @@
       "title": "Mark a conflicted file as resolved",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 280,
+      "line": 285,
       "status": "draft",
       "commands": [
         "git.stageFile"
@@ -3696,7 +3700,7 @@
       "title": "Take one side's version of a whole file",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 338,
+      "line": 343,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3745,7 +3749,7 @@
       "title": "Open a conflicted file from Merge Changes",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 395,
+      "line": 400,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3779,7 +3783,7 @@
       "title": "Commit only when every conflict is resolved",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 428,
+      "line": 433,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3827,7 +3831,7 @@
       "title": "Abort a stopped operation",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 480,
+      "line": 485,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3875,7 +3879,7 @@
       "title": "Skip the commit an operation stopped on",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 533,
+      "line": 538,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3914,7 +3918,7 @@
       "title": "Carry on with a rebase",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 576,
+      "line": 581,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3963,7 +3967,7 @@
       "title": "Carry on with a patch series (git am)",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 633,
+      "line": 638,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8869,6 +8873,7 @@
       ],
       "files": [
         "src/components/panels/GitPanel.tsx",
+        "src/components/panels/GitDraft.tsx",
         "src/lib/git.ts",
         "src/lib/gitStatus.ts",
         "src/lib/gitCommands.ts",
@@ -8914,6 +8919,10 @@
         {
           "id": "GIT-008.8",
           "title": "Ctrl+Enter while the button is disabled says why"
+        },
+        {
+          "id": "GIT-008.9",
+          "title": "The Draft button and a draft in progress"
         }
       ]
     },
@@ -8922,7 +8931,7 @@
       "title": "Amend the last commit",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 460,
+      "line": 467,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8961,7 +8970,7 @@
       "title": "See the changed files and open their changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 499,
+      "line": 506,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9019,7 +9028,7 @@
       "title": "Stage and unstage files",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 569,
+      "line": 576,
       "status": "draft",
       "commands": [
         "git.stageFile",
@@ -9073,7 +9082,7 @@
       "title": "Discard changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 626,
+      "line": 633,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9120,7 +9129,7 @@
       "title": "Status line: where the branch stands against its remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 678,
+      "line": 685,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9180,7 +9189,7 @@
       "title": "Background check of the remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 749,
+      "line": 756,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9235,7 +9244,7 @@
       "title": "Fetch, pull, push and publish a branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 814,
+      "line": 821,
       "status": "draft",
       "commands": [
         "git.fetch",
@@ -9297,7 +9306,7 @@
       "title": "Recover when the remote repository is gone",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 882,
+      "line": 889,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9341,7 +9350,7 @@
       "title": "Commits of the current branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 927,
+      "line": 934,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9406,7 +9415,7 @@
       "title": "File history",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1003,
+      "line": 1010,
       "status": "draft",
       "commands": [
         "git.fileHistory"
@@ -9460,7 +9469,7 @@
       "title": "Commit identity (name and email)",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1058,
+      "line": 1065,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9507,7 +9516,7 @@
       "title": "Add a remote by URL",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1109,
+      "line": 1116,
       "status": "draft",
       "commands": [
         "git.addRemote"
@@ -9556,7 +9565,7 @@
       "title": "See, open and change remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1161,
+      "line": 1168,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9608,7 +9617,7 @@
       "title": "Create a repository on GitHub and push to it",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1220,
+      "line": 1227,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9665,7 +9674,7 @@
       "title": "GitHub accounts",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1287,
+      "line": 1294,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9712,7 +9721,7 @@
       "title": "Private / Public badge on GitHub remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1339,
+      "line": 1346,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9754,7 +9763,7 @@
       "title": "Work with more than one repository",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1383,
+      "line": 1390,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9810,7 +9819,7 @@
       "title": "Branch in the status bar",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1502,
+      "line": 1509,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9856,7 +9865,7 @@
       "title": "Git decorations in the Explorer",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1553,
+      "line": 1560,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9900,7 +9909,7 @@
       "title": "Set a folder as the Source Control context",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1452,
+      "line": 1459,
       "status": "draft",
       "commands": [
         "git.setContext"
@@ -9950,8 +9959,8 @@
       "title": "Claude-assisted git exists only while Claude Code is switched on",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 29,
-      "status": "planned",
+      "line": 33,
+      "status": "draft",
       "commands": [
         "git.draftMessage",
         "git.explainConflict",
@@ -9960,18 +9969,21 @@
       ],
       "files": [
         "src/lib/gitCommands.ts",
-        "src/lib/claude.ts",
+        "src/lib/gitAssist.ts",
+        "src/components/panels/GitDraft.tsx",
         "src/components/panels/GitPanel.tsx",
         "src/editor/conflicts.ts",
-        "src/lib/git.ts",
+        "src/components/GraphSummarise.tsx",
         "src/components/GraphView.tsx",
         "src/components/MenuBar.tsx",
-        "src/components/panels/SettingsPanel.tsx",
-        "src/lib/gitAssist.ts"
+        "src/components/panels/SettingsPanel.tsx"
       ],
       "tests": [
         "src/__tests__/gitAssist.test.ts",
-        "src/__tests__/ui.test.ts"
+        "src/__tests__/ui.test.ts",
+        "src/__tests__/gitDraft.test.tsx",
+        "src/__tests__/conflictSuggest.test.ts",
+        "src/__tests__/graphView.test.tsx"
       ],
       "docs": [
         "docs/git.md",
@@ -10005,8 +10017,8 @@
       "title": "Know what is sent to Claude before it goes",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 89,
-      "status": "planned",
+      "line": 93,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/lib/gitAssist.ts",
@@ -10014,12 +10026,15 @@
         "src/lib/types.ts",
         "src/lib/actions.ts",
         "src/components/panels/SettingsPanel.tsx",
-        "src/components/panels/GitPanel.tsx",
+        "src/components/panels/GitDraft.tsx",
         "src/editor/conflicts.ts"
       ],
       "tests": [
         "src/__tests__/gitAi.test.ts",
-        "src/__tests__/gitAssist.test.ts"
+        "src/__tests__/gitAssist.test.ts",
+        "src/__tests__/gitDraft.test.tsx",
+        "src/__tests__/conflictSuggest.test.ts",
+        "src-tauri/src/git.rs"
       ],
       "docs": [
         "docs/git.md",
@@ -10073,17 +10088,19 @@
       "title": "Draft a commit message from the changes about to be committed",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 170,
-      "status": "planned",
+      "line": 174,
+      "status": "draft",
       "commands": [
         "git.draftMessage"
       ],
       "files": [
+        "src/components/panels/GitDraft.tsx",
         "src/components/panels/GitPanel.tsx",
         "src/lib/gitAssist.ts",
         "src/lib/gitAi.ts",
         "src/lib/gitCommands.ts",
         "src/lib/gitApi.ts",
+        "src-tauri/src/git_ai.rs",
         "src-tauri/src/git.rs",
         "src-tauri/src/claude.rs",
         "src/lib/types.ts",
@@ -10094,6 +10111,7 @@
       "tests": [
         "src/__tests__/gitAi.test.ts",
         "src/__tests__/gitAssist.test.ts",
+        "src/__tests__/gitDraft.test.tsx",
         "src-tauri/src/git.rs",
         "src-tauri/src/claude.rs"
       ],
@@ -10172,17 +10190,19 @@
       "title": "Draft a message for a very large change",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 291,
-      "status": "planned",
+      "line": 297,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/lib/gitAi.ts",
         "src/lib/gitAssist.ts",
-        "src/components/panels/GitPanel.tsx",
-        "src-tauri/src/git.rs"
+        "src/components/panels/GitDraft.tsx",
+        "src-tauri/src/git_ai.rs"
       ],
       "tests": [
         "src/__tests__/gitAi.test.ts",
+        "src/__tests__/gitAssist.test.ts",
+        "src/__tests__/gitDraft.test.tsx",
         "src-tauri/src/git.rs"
       ],
       "docs": [
@@ -10216,6 +10236,10 @@
         {
           "id": "GITAI-004.7",
           "title": "The limit is never exceeded"
+        },
+        {
+          "id": "GITAI-004.8",
+          "title": "Files cut and files left out at once"
         }
       ]
     },
@@ -10224,22 +10248,25 @@
       "title": "See that Claude is working, and stop it",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 349,
-      "status": "planned",
+      "line": 360,
+      "status": "draft",
       "commands": [
         "git.stopClaude"
       ],
       "files": [
         "src/lib/gitAssist.ts",
+        "src/lib/gitAi.ts",
         "src-tauri/src/claude.rs",
+        "src/components/GitAssistStatus.tsx",
         "src/components/StatusBar.tsx",
-        "src/components/panels/GitPanel.tsx",
+        "src/components/panels/GitDraft.tsx",
         "src/editor/conflicts.ts",
-        "src/lib/gitCommands.ts",
-        "src/lib/actions.ts"
+        "src/lib/gitCommands.ts"
       ],
       "tests": [
         "src/__tests__/gitAssist.test.ts",
+        "src/__tests__/gitDraft.test.tsx",
+        "src/__tests__/gitAi.test.ts",
         "src-tauri/src/claude.rs"
       ],
       "docs": [
@@ -10289,8 +10316,8 @@
       "title": "Be told why Claude could not answer",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 422,
-      "status": "planned",
+      "line": 434,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/lib/gitAi.ts",
@@ -10351,8 +10378,8 @@
       "title": "Have a conflict explained and a resolution proposed",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 487,
-      "status": "planned",
+      "line": 499,
+      "status": "draft",
       "commands": [
         "git.explainConflict"
       ],
@@ -10361,15 +10388,13 @@
         "src/lib/conflicts.ts",
         "src/lib/gitAi.ts",
         "src/lib/gitAssist.ts",
-        "src/lib/git.ts",
         "src/lib/gitCommands.ts",
         "src/components/MenuBar.tsx",
         "src/styles/app.css"
       ],
       "tests": [
         "src/__tests__/gitAi.test.ts",
-        "src/__tests__/conflicts.test.ts",
-        "src/__tests__/conflictsEditor.test.ts",
+        "src/__tests__/conflictSuggest.test.ts",
         "src/__tests__/gitAssist.test.ts"
       ],
       "docs": [
@@ -10451,19 +10476,21 @@
       "title": "Keep Current and Incoming straight in Claude's explanation",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 606,
-      "status": "planned",
+      "line": 618,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/lib/gitAi.ts",
         "src/lib/gitStatus.ts",
         "src/lib/gitStash.ts",
+        "src/lib/git.ts",
         "src/editor/conflicts.ts",
         "src/lib/gitAssist.ts"
       ],
       "tests": [
         "src/__tests__/gitAi.test.ts",
-        "src/__tests__/conflictsEditor.test.ts"
+        "src/__tests__/conflictSuggest.test.ts",
+        "src/__tests__/gitAssist.test.ts"
       ],
       "docs": [
         "docs/git.md"
@@ -10504,8 +10531,8 @@
       "title": "Summarise a branch or a range of commits",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 666,
-      "status": "planned",
+      "line": 679,
+      "status": "draft",
       "commands": [
         "git.summariseBranch"
       ],
@@ -10513,12 +10540,14 @@
         "src/lib/gitAssist.ts",
         "src/lib/gitAi.ts",
         "src/lib/gitCommands.ts",
+        "src/lib/gitRefs.ts",
         "src/lib/git.ts",
-        "src/components/CommandPalette.tsx",
+        "src/components/GraphSummarise.tsx",
         "src/components/GraphView.tsx",
         "src/lib/actions.ts",
+        "src/lib/tabLimit.ts",
         "src/lib/gitApi.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git_ai.rs",
         "src/components/MenuBar.tsx"
       ],
       "tests": [
@@ -11163,7 +11192,7 @@
       "title": "Check out, cherry-pick or revert a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 654,
+      "line": 655,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11218,7 +11247,7 @@
       "title": "Reset the branch to a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 713,
+      "line": 714,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11262,7 +11291,7 @@
       "title": "See uncommitted work and a stopped operation above the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 759,
+      "line": 760,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11309,7 +11338,7 @@
       "title": "Uncommitted changes as the first row of the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 821,
+      "line": 822,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11399,7 +11428,7 @@
       "title": "Drag the height of the Search All History results",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 942,
+      "line": 943,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11462,7 +11491,7 @@
       "title": "Scroll sideways through a graph wider than 16 lanes",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1017,
+      "line": 1018,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11521,7 +11550,7 @@
       "title": "List a small history by date",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1094,
+      "line": 1095,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11594,7 +11623,7 @@
       "title": "Show Commit Graph is in the palette without a repository",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1185,
+      "line": 1186,
       "status": "draft",
       "commands": [
         "git.graph"
@@ -17834,6 +17863,8 @@
         "src/components/panels/SettingsPanel.tsx",
         "src/lib/claude.ts",
         "src/lib/actions.ts",
+        "src/lib/types.ts",
+        "src/lib/gitAi.ts",
         "src/components/Select.tsx"
       ],
       "tests": [],
@@ -17873,6 +17904,14 @@
         {
           "id": "SET-015.8",
           "title": "Permissions"
+        },
+        {
+          "id": "SET-015.9",
+          "title": "Model for git helpers"
+        },
+        {
+          "id": "SET-015.10",
+          "title": "Ask before sending git content to Claude"
         }
       ]
     },
@@ -17881,7 +17920,7 @@
       "title": "JSON pretty-print indent",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 804,
+      "line": 818,
       "status": "draft",
       "commands": [],
       "files": [
@@ -17909,7 +17948,7 @@
       "title": "Themed dropdown lists",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 831,
+      "line": 845,
       "status": "draft",
       "commands": [],
       "files": [
@@ -17961,7 +18000,7 @@
       "title": "Help \"i\" icons",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 899,
+      "line": 913,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21696,6 +21735,7 @@
       "commands": [],
       "files": [
         "src/components/StatusBar.tsx",
+        "src/components/GitAssistStatus.tsx",
         "src/lib/store.ts",
         "src/editor/manager.ts",
         "src/lib/actions.ts",
@@ -21725,6 +21765,10 @@
         {
           "id": "UI-017.5",
           "title": "No document"
+        },
+        {
+          "id": "UI-017.6",
+          "title": "A running Claude git request"
         }
       ]
     },
@@ -21733,7 +21777,7 @@
       "title": "Status bar pickers for indentation, encoding, line endings and language",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1068,
+      "line": 1075,
       "status": "draft",
       "commands": [
         "view.setTabSize",
@@ -21800,7 +21844,7 @@
       "title": "Light and dark themes",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1150,
+      "line": 1157,
       "status": "draft",
       "commands": [
         "view.toggleTheme"
@@ -21850,7 +21894,7 @@
       "title": "Zoom and editor view toggles",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1205,
+      "line": 1212,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -21908,7 +21952,7 @@
       "title": "Keyboard focus returns to the active tab",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1269,
+      "line": 1276,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21954,7 +21998,7 @@
       "title": "Tab key can leave the editor",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1320,
+      "line": 1327,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -21994,7 +22038,7 @@
       "title": "Single instance and files handed over by Windows",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1365,
+      "line": 1372,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22046,7 +22090,7 @@
       "title": "Window size and position are remembered",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1424,
+      "line": 1431,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22084,7 +22128,7 @@
       "title": "Notice after an unexpected exit",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1466,
+      "line": 1473,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22587,8 +22631,6 @@
       "GIT-023",
       "GIT-024",
       "GITAI-003",
-      "GITAI-004",
-      "GITAI-009",
       "GRAPH-002",
       "GRAPH-004",
       "GRAPH-005",
@@ -22634,6 +22676,11 @@
       "STAGE-004",
       "STAGE-006",
       "STAGE-009"
+    ],
+    "src-tauri/src/git_ai.rs": [
+      "GITAI-003",
+      "GITAI-004",
+      "GITAI-009"
     ],
     "src-tauri/src/json_tools.rs": [
       "BIG-017",
@@ -22881,7 +22928,6 @@
       "FILE-005",
       "FILE-009",
       "GIT-007",
-      "GITAI-009",
       "MERGE-003",
       "SAFE-005",
       "UI-005",
@@ -22932,12 +22978,20 @@
       "FIND-007",
       "FIND-010"
     ],
+    "src/components/GitAssistStatus.tsx": [
+      "GITAI-005",
+      "UI-017"
+    ],
     "src/components/GraphCompare.tsx": [
       "COMMITCMP-002",
       "COMMITCMP-003",
       "COMMITCMP-004",
       "COMMITCMP-005",
       "COMMITCMP-006"
+    ],
+    "src/components/GraphSummarise.tsx": [
+      "GITAI-001",
+      "GITAI-009"
     ],
     "src/components/GraphView.tsx": [
       "BRANCH-001",
@@ -23229,6 +23283,14 @@
       "TAB-008",
       "TERM-001"
     ],
+    "src/components/panels/GitDraft.tsx": [
+      "GIT-008",
+      "GITAI-001",
+      "GITAI-002",
+      "GITAI-003",
+      "GITAI-004",
+      "GITAI-005"
+    ],
     "src/components/panels/GitMergeButton.tsx": [
       "MERGE-003"
     ],
@@ -23257,10 +23319,7 @@
       "GIT-019",
       "GIT-025",
       "GITAI-001",
-      "GITAI-002",
       "GITAI-003",
-      "GITAI-004",
-      "GITAI-005",
       "GRAPH-001",
       "GRAPH-015",
       "HISTORY-002",
@@ -23584,7 +23643,6 @@
       "FILE-020",
       "GITAI-002",
       "GITAI-003",
-      "GITAI-005",
       "GITAI-009",
       "GRAPH-001",
       "GRAPH-012",
@@ -23669,7 +23727,6 @@
       "CLAUDE-019",
       "CLAUDE-020",
       "FILE-017",
-      "GITAI-001",
       "SET-015",
       "TAB-005",
       "TERM-007",
@@ -23972,8 +24029,7 @@
       "GIT-026",
       "GIT-027",
       "GIT-028",
-      "GITAI-001",
-      "GITAI-007",
+      "GITAI-008",
       "GITAI-009",
       "GRAPH-001",
       "GRAPH-010",
@@ -24032,10 +24088,12 @@
       "GITAI-002",
       "GITAI-003",
       "GITAI-004",
+      "GITAI-005",
       "GITAI-006",
       "GITAI-007",
       "GITAI-008",
-      "GITAI-009"
+      "GITAI-009",
+      "SET-015"
     ],
     "src/lib/gitApi.ts": [
       "BRANCH-001",
@@ -24208,6 +24266,7 @@
       "BRANCH-007",
       "COMMITCMP-005",
       "GIT-007",
+      "GITAI-009",
       "MERGE-002",
       "MERGE-003"
     ],
@@ -24578,6 +24637,7 @@
       "CLAUDE-003",
       "EXPL-014",
       "FILE-002",
+      "GITAI-009",
       "SET-010",
       "TAB-008",
       "TAB-009",
@@ -24618,6 +24678,7 @@
       "SET-010",
       "SET-012",
       "SET-013",
+      "SET-015",
       "SET-016",
       "TAB-009",
       "THREEWAY-001",
@@ -24800,6 +24861,7 @@
       "GIT-022",
       "GIT-023",
       "GIT-024",
+      "GITAI-002",
       "GITAI-003",
       "GITAI-004",
       "GITAI-009",
@@ -24959,19 +25021,22 @@
       "EDIT-006",
       "EDIT-007"
     ],
+    "src/__tests__/conflictSuggest.test.ts": [
+      "GITAI-001",
+      "GITAI-002",
+      "GITAI-007",
+      "GITAI-008"
+    ],
     "src/__tests__/conflicts.test.ts": [
       "CONFLICT-001",
       "CONFLICT-002",
-      "CONFLICT-003",
-      "GITAI-007"
+      "CONFLICT-003"
     ],
     "src/__tests__/conflictsEditor.test.ts": [
       "CONFLICT-001",
       "CONFLICT-002",
       "CONFLICT-003",
-      "CONFLICT-004",
-      "GITAI-007",
-      "GITAI-008"
+      "CONFLICT-004"
     ],
     "src/__tests__/csv-hostile.test.ts": [
       "JSON-011",
@@ -25025,6 +25090,7 @@
       "GITAI-002",
       "GITAI-003",
       "GITAI-004",
+      "GITAI-005",
       "GITAI-006",
       "GITAI-007",
       "GITAI-008",
@@ -25034,9 +25100,11 @@
       "GITAI-001",
       "GITAI-002",
       "GITAI-003",
+      "GITAI-004",
       "GITAI-005",
       "GITAI-006",
       "GITAI-007",
+      "GITAI-008",
       "GITAI-009"
     ],
     "src/__tests__/gitBranches.test.ts": [
@@ -25059,6 +25127,13 @@
       "COMMITCMP-003",
       "COMMITCMP-004",
       "COMMITCMP-005"
+    ],
+    "src/__tests__/gitDraft.test.tsx": [
+      "GITAI-001",
+      "GITAI-002",
+      "GITAI-003",
+      "GITAI-004",
+      "GITAI-005"
     ],
     "src/__tests__/gitGraph.test.ts": [
       "GRAPH-002",
@@ -25213,6 +25288,7 @@
     "src/__tests__/graphView.test.tsx": [
       "COMMITCMP-001",
       "COMMITCMP-005",
+      "GITAI-001",
       "GITAI-009",
       "GRAPH-001",
       "GRAPH-009",

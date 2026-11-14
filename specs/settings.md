@@ -748,7 +748,9 @@ Scenario: SET-014.6 The filter covers servers
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — `ClaudeSection` (`setEnabled` closes Claude tabs after asking, location row with detection hint and "Browse…", `CLAUDE_MODELS`, permissions segmented control)
   - `src/lib/claude.ts` — `detectClaude`
-  - `src/lib/actions.ts` — `closeDocument`, `askDialog`, `sanitizeSettings` (`claudeEnabled`, `claudePath`, `claudeModel`, `claudePermissionMode`)
+  - `src/lib/actions.ts` — `closeDocument`, `askDialog`, `sanitizeSettings` (`claudeEnabled`, `claudePath`, `claudeModel`, `claudePermissionMode`, `claudeGitModel`, `claudeGitConfirm`)
+  - `src/lib/types.ts` — `claudeGitModel` (default `"haiku"`), `claudeGitConfirm` (default on)
+  - `src/lib/gitAi.ts` — `SENDS_TIP` (the "i" beside the confirm row)
   - `src/components/Select.tsx` — the model list
 - Tests: none
 - Docs: `docs/settings.md`, `docs/claude-code.md`
@@ -761,7 +763,7 @@ Scenario: SET-014.6 The filter covers servers
 Scenario: SET-015.1 Turning Claude Code off hides its settings
   Given no Claude Code tabs are open
   When I turn the "Claude Code" switch off
-  Then the rows "Claude Code location", "Model" and "Permissions" disappear
+  Then the rows "Claude Code location", "Model", "Model for git helpers", "Ask before sending git content to Claude" and "Permissions" disappear
   And the Explorer's right-click menu no longer offers "Work with Claude Code Here"
 
 Scenario: SET-015.2 Turning it off with Claude tabs open asks first
@@ -799,6 +801,18 @@ Scenario: SET-015.8 Permissions
   Given "Permissions" is "Auto-accept edits"
   When I choose "Ask first"
   Then the hint reads "Claude asks before every edit and command"
+
+Scenario: SET-015.9 Model for git helpers
+  Given a fresh installation
+  When I look at the row "Model for git helpers", directly under "Model"
+  Then it shows "Haiku" and offers Default, Opus, Sonnet and Haiku
+  And choosing another entry does not change "Model", and Restore default sets it back to "Haiku" (GITAI-003.16)
+
+Scenario: SET-015.10 Ask before sending git content to Claude
+  Given the switch "Ask before sending git content to Claude" is on, as it is by default
+  When I hover or click the "i" beside it
+  Then it lists what Draft, Explain and Summarise each send, and that it goes through my Claude Code account only when I click
+  And switching it off, here or with "Send and Don't Ask Again" in the dialog, makes the git helpers send without asking (GITAI-002.4)
 ```
 
 ## SET-016: JSON pretty-print indent

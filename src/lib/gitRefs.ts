@@ -9,6 +9,7 @@ import type { RefLabel } from "./gitGraph";
 import { startEntries, type StartRepo } from "./gitMerge";
 // Branch and tag housekeeping (specs/git-branches.md).
 import { defaultRemote, housekeepingPrompt, isHousekeeping, ON_THIS_BRANCH, pushLabel, pushTarget, splitRemoteRef, type BranchPickFor, type HousekeepingPurpose } from "./gitBranches";
+import { baseRows, suggestBase } from "./gitAi";
 
 // ---------- the graph's ref-label menu ----------
 
@@ -128,7 +129,7 @@ export function rowMenu(branch: Pick<GitBranch, "name" | "remote" | "current">, 
 // ---------- the branch picker ----------
 
 /** Why the branch picker is open. Later features add their purposes here. */
-export type BranchPurpose = "switch" | "merge" | "rebase" | "compare" | HousekeepingPurpose;
+export type BranchPurpose = "switch" | "merge" | "rebase" | "compare" | HousekeepingPurpose | SummarisePurpose;
 
 export interface BranchPick {
   /** The input's placeholder. */
@@ -143,6 +144,7 @@ export interface BranchPick {
 export function branchPick(purpose: BranchPurpose, branch: string | null, pick: BranchPickFor | null = null): BranchPick {
   // Housekeeping (specs/git-branches.md): the command comes with the purpose (`pickBranch(purpose, for)`).
   if (isHousekeeping(purpose)) return { prompt: housekeepingPrompt(purpose, pick), command: pick?.command ?? "", create: false };
+  if (purpose === "summarise" || purpose === "summarise-base") return summarisePrompt(purpose);
   if (purpose === "merge") return { prompt: `Merge which branch into ${branch ?? "the current commit"}?`, command: "git.mergeRef", create: false };
   if (purpose === "rebase") return { prompt: `Rebase ${branch ?? "the current branch"} onto which branch?`, command: "git.rebaseOnto", create: false };
   // Compare with Branch… (COMMITCMP-005): every branch, the current one included.
@@ -157,5 +159,36 @@ export function pickList(purpose: BranchPurpose, branches: GitBranch[]): GitBran
   if (purpose === "local-branch") return [...branches.filter((b) => !b.remote && b.current), ...branches.filter((b) => !b.remote && !b.current)];
   if (purpose === "remote-branch" || purpose === "upstream") return branches.filter((b) => b.remote);
   if (purpose === "tag" || purpose === "new-name") return [];
+  if (purpose === "summarise" || purpose === "summarise-base") return summariseRows(purpose, branches);
   return purpose === "switch" || purpose === "compare" ? branches : branches.filter((b) => !b.current);
+}
+
+// ----- Claude git helpers: the two pickers of Summarise Branch (specs/git-claude.md, GITAI-009) -----
+
+/** "summarise": which branch to summarise (asked only on a detached HEAD); "summarise-base": what to compare it with. */
+export type SummarisePurpose = "summarise" | "summarise-base";
+
+/** What the summary pickers are about: set by `summariseBranch` just before the picker opens. */
+export interface SummarisePick {
+  root: string;
+  /** The branch being summarised (null while that is still being picked). */
+  branch: string | null;
+  /** The remote's default branch as last fetched (`origin/main`), if known: the suggested base. */
+  remoteDefault: string | null;
+}
+
+let summarisePick: SummarisePick = { root: "", branch: null, remoteDefault: null };
+export const setSummarisePick = (p: SummarisePick) => void (summarisePick = p);
+export const getSummarisePick = (): SummarisePick => summarisePick;
+
+function summarisePrompt(purpose: SummarisePurpose, pick: SummarisePick = summarisePick): BranchPick {
+  const prompt = purpose === "summarise" ? "Summarise which branch with Claude?" : `Summarise ${pick.branch ?? "the branch"} compared with which branch?`;
+  return { prompt, command: "git.summariseBranch", create: false };
+}
+
+/** "summarise": local branches. "summarise-base": every branch but the summarised one, the suggested base first. */
+export function summariseRows(purpose: SummarisePurpose, branches: GitBranch[], pick: SummarisePick = summarisePick): GitBranch[] {
+  if (purpose === "summarise") return branches.filter((b) => !b.remote);
+  const subject = pick.branch ?? "";
+  return baseRows(branches, subject, suggestBase(branches, subject, pick.remoteDefault));
 }

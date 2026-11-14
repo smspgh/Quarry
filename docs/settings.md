@@ -90,6 +90,8 @@ A folder that doesn't exist yet is created. If a folder you choose can't be used
 | Claude Code | On | The whole [Claude Code integration](claude-code.md): Explorer items, menu items, commands, Claude and Claude CLI tabs. Turning it off closes those tabs, after asking. The other Claude settings are hidden while it's off. |
 | Claude Code location | Found automatically | `claude.exe` or `claude.cmd`. Empty means search PATH and the usual install folders. The line under the name shows what was found and its version. |
 | Model | Default | Default (Claude Code's own choice), Opus, Sonnet or Haiku. Applies the next time Claude Code starts for a tab, including when a conversation continues (a new tab, a past conversation, the first message after Claude Code was stopped). A Claude Code process that is already running keeps its model. |
+| Model for git helpers | Haiku | The model of the [Claude git helpers](git.md#claude-assisted-git) (draft a commit message, explain a conflict, summarise): Default, Opus, Sonnet or Haiku. Separate from Model above; each helper is one short request on your Claude Code plan. |
+| Ask before sending git content to Claude | On | Before a git helper sends anything, a dialog says exactly what leaves your computer. "Send and Don't Ask Again" in that dialog turns this off. The "i" lists what each helper sends. |
 | Permissions | Auto-accept edits | **Auto-accept edits**: file edits go ahead without asking, and commands and web access ask first. **Ask first**: Claude asks before every edit too. Open Claude tabs switch too: an idle tab continues its conversation with the new setting from its next message; a tab where Claude is working finishes the task first. |
 
 ## Data

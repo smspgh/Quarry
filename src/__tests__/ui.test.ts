@@ -59,6 +59,19 @@ describe("menu mnemonics", () => {
     expect(stash.some((l) => l.includes("keys:"))).toBe(false);
     expect(/Drop All|stashClear|stashDropAll/i.test(menu + cmds)).toBe(false);
   });
+  it("Git › Claude is the last group of the Git menu, left out while Claude Code is off, with no shortcuts", () => {
+    const menu = readFileSync("src/components/MenuBar.tsx", "utf8");
+    // The whole submenu is inside the claudeEnabled condition (left out, not greyed), right before the Git menu ends.
+    const sub = /\.\.\.\(useStore\.getState\(\)\.settings\.claudeEnabled\s*\? \(\[\{ sep: true \}, \{ label: "Claude", submenu: \(\) => \[([^\]]*)\] \}\] as Item\[\]\)\s*: \[\]\),\s*\],\s*\},\s*\{\s*label: "JSON"/.exec(menu);
+    expect(sub).not.toBeNull();
+    expect([...sub![1].matchAll(/cmd: "([^"]+)"/g)].map((m) => m[1])).toEqual(["git.draftMessage", "git.explainConflict", "git.summariseBranch", "git.stopClaude"]);
+    // Explain is not also in the Conflicts submenu.
+    expect(/label: "Conflicts", submenu: \(\) => \[[^\]]*explainConflict/.test(menu)).toBe(false);
+    const cmds = readFileSync("src/lib/gitCommands.ts", "utf8");
+    const mine = cmds.split("\n").filter((l) => /id: "git\.(draftMessage|explainConflict|summariseBranch|stopClaude)"/.test(l));
+    expect(mine).toHaveLength(4);
+    expect(mine.some((l) => l.includes("keys:"))).toBe(false);
+  });
   it("reads the letter from the physical key and only for a bare Alt", () => {
     expect(mnemonicKey(key("KeyF"))).toBe("f");
     expect(mnemonicKey({ ...key("KeyF"), key: "ƒ" })).toBe("f");

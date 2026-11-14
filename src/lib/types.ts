@@ -199,6 +199,10 @@ export interface Settings {
   claudeModel: string;
   /** `acceptEdits`: file edits go ahead without asking; `default`: ask before edits too. */
   claudePermissionMode: "acceptEdits" | "default";
+  /** Model of the Claude git helpers (draft a commit message, explain a conflict, summarise): an alias or name passed as `--model`; empty = Claude Code's own default. Not the Claude tabs' `claudeModel`. */
+  claudeGitModel: string;
+  /** Ask before a Claude git helper sends repository content (the dialog's "Send and Don't Ask Again" turns it off). */
+  claudeGitConfirm: boolean;
   /** Code intelligence: completion, hover, go to definition, problems... from language servers. */
   lspEnabled: boolean;
   /** Language servers switched off (ids from lspServers.ts SERVERS). */
@@ -236,6 +240,8 @@ export const DEFAULT_SETTINGS: Settings = {
   claudePath: "",
   claudeModel: "",
   claudePermissionMode: "acceptEdits",
+  claudeGitModel: "haiku",
+  claudeGitConfirm: true,
   lspEnabled: true,
   lspDisabled: [],
   lspCommands: {},

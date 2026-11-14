@@ -1024,6 +1024,7 @@ Scenario: UI-016.8 A saved height that no longer fits
 - Commands: none
 - Files:
   - `src/components/StatusBar.tsx` — `StatusBar`: "Ln, Col" item with selection / cursor counts, large-file size and indexing item, "Read-only", static encoding and line-ending items for large files
+  - `src/components/GitAssistStatus.tsx` — `GitAssistStatusItem` (the running Claude git request and its stop button)
   - `src/lib/store.ts` — `cursor: CursorInfo` (`line`, `col`, `selections`, `selectedChars`)
   - `src/editor/manager.ts` — `publishCursor` feeds `cursor` from the focused pane
   - `src/lib/actions.ts` — `formatBytes`
@@ -1063,6 +1064,12 @@ Scenario: UI-017.4 Read-only file
 Scenario: UI-017.5 No document
   When no document is open
   Then the status bar shows no cursor, encoding, line-ending or language items
+
+Scenario: UI-017.6 A running Claude git request
+  Given a Claude git helper is running (GITAI-005)
+  When I look at the left part of the status bar, whatever tab is active
+  Then an item reads "Claude: drafting a commit message… 12s", counting up, with a stop button
+  And it is gone when the request ends or is stopped
 ```
 
 ## UI-018: Status bar pickers for indentation, encoding, line endings and language

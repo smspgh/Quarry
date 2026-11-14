@@ -16,6 +16,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { restartServers } from "../../lib/lsp";
 import { SERVERS, splitCommand } from "../../lib/lspServers";
 import { installServer, resolveInstall } from "../../lib/lspInstall";
+import { InfoTip } from "../InfoTip";
+import { SENDS_TIP } from "../../lib/gitAi";
 
 /** Pure helper (testable): does a row with this label/hint match the filter text? */
 export function rowMatches(query: string, label: string, hint?: string, section?: string): boolean {
@@ -324,6 +326,7 @@ function ClaudeSection({ change }: { change: <K extends keyof Settings>(key: K, 
     if (picked && !Array.isArray(picked)) change("claudePath", picked);
   };
   const models = CLAUDE_MODELS.some((m) => m.value === s.claudeModel) ? CLAUDE_MODELS : [...CLAUDE_MODELS, { value: s.claudeModel, label: s.claudeModel }];
+  const gitModels = CLAUDE_MODELS.some((m) => m.value === s.claudeGitModel) ? CLAUDE_MODELS : [...CLAUDE_MODELS, { value: s.claudeGitModel, label: s.claudeGitModel }];
 
   return (
     <Section title="Claude Code">
@@ -343,6 +346,14 @@ function ClaudeSection({ change }: { change: <K extends keyof Settings>(key: K, 
           </Row>
           <Row label="Model" hint="Applies the next time Claude Code starts for a tab, including when a conversation continues; a running one keeps its model" k="claudeModel">
             <Select value={s.claudeModel} options={models} title="Claude model" onChange={(v) => change("claudeModel", v)} />
+          </Row>
+          {/* Claude git helpers (specs/git-claude.md): their own model, and the question before anything is sent. */}
+          <Row label="Model for git helpers" hint="Used by Draft (commit message), Explain (conflict) and Summarise in Source Control; each is one short request on your Claude Code plan. Claude tabs keep their own Model" k="claudeGitModel">
+            <Select value={s.claudeGitModel} options={gitModels} title="Claude model for git helpers" onChange={(v) => change("claudeGitModel", v)} />
+          </Row>
+          <Row label="Ask before sending git content to Claude" hint="Each git helper first says exactly what it sends: diffs, a conflict or commit messages leave your computer through Claude Code" k="claudeGitConfirm">
+            <InfoTip text={SENDS_TIP} label="What the git helpers send" />
+            <Switch on={s.claudeGitConfirm} onChange={(v) => change("claudeGitConfirm", v)} />
           </Row>
           <Row label="Permissions" hint={`${s.claudePermissionMode === "acceptEdits" ? "File edits are applied without asking; commands and web access ask first" : "Claude asks before every edit and command"}. Open Claude tabs switch from their next message, once the current task ends`} k="claudePermissionMode">
             <Segmented items={[["acceptEdits", "Auto-accept edits"], ["default", "Ask first"]] as const} value={s.claudePermissionMode} onChange={(v) => change("claudePermissionMode", v)} />

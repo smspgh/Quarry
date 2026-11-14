@@ -23,6 +23,7 @@ import { appIpc, big } from "./lib/ipc";
 import { installClaudeEvents } from "./lib/claude";
 import { installLsp } from "./lib/lsp";
 import { installGit } from "./lib/git";
+import { installGitAssist } from "./lib/gitAssist";
 import { bus } from "./lib/bus";
 import { useShallow } from "zustand/react/shallow";
 import { installRecorderHooks, loadMacros } from "./lib/macros";
@@ -76,6 +77,7 @@ export default function App() {
         installClaudeEvents();
         installLsp();
         installGit();
+        installGitAssist();
         installRecorderHooks();
         setReady(true);
         await Promise.all([loadMacros(), migrateLegacyScripts()]);

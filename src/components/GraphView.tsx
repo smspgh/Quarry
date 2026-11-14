@@ -30,6 +30,8 @@ import { CloudUpload, Link2, Pencil, Trash2 } from "lucide-react";
 import { runCommand } from "../lib/commands";
 import { loadRefInfo } from "../lib/git";
 import { REF_COMMANDS, type RefMenuEntry } from "../lib/gitRefs";
+// Claude git helpers: the Summarise entries of the commit menu (specs/git-claude.md).
+import { SummariseItems } from "./GraphSummarise";
 
 const PAGE = 300;
 /** A page slower than this means git is walking the whole history for it. */
@@ -830,6 +832,8 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
           {item(`Reset ${branch ?? "HEAD"} to Here (Soft)…`, RotateCcw, () => void act("reset-soft", menu.commit), "Keep later changes staged")}
           {item(`Reset ${branch ?? "HEAD"} to Here (Mixed)…`, RotateCcw, () => void act("reset-mixed", menu.commit), "Keep later changes in the files, unstaged")}
           {item(`Reset ${branch ?? "HEAD"} to Here (Hard)…`, RotateCcw, () => void act("reset-hard", menu.commit), "Discard later commits and uncommitted changes", true)}
+          {/* Claude git helpers: the Summarise entries, always the last group (specs/git-claude.md). */}
+          <SummariseItems root={root} commits={commits} commit={menu.commit} branch={branch} close={() => setMenu(null)} />
         </GraphMenu>,
         document.body,
       )}

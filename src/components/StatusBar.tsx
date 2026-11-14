@@ -11,6 +11,7 @@ import { useActiveDoc, useStore } from "../lib/store";
 import { ENCODINGS } from "../lib/types";
 import { ScriptStatusItem } from "./panels/ScriptsPanel";
 import { LspStatusItem } from "./LspStatus";
+import { GitAssistStatusItem } from "./GitAssistStatus";
 
 
 /** Where to put a popup of `width` so it sits above the status-bar segment and stays inside the window. */
@@ -142,6 +143,7 @@ export function StatusBar() {
       )}
       <GitStatusItem />
       <ScriptStatusItem />
+      <GitAssistStatusItem />
       {recording && (
         <span className="status-item rec" title="Recording macro — Ctrl+Shift+R to stop">
           <CircleDot size={12} /> REC {recordingSteps}

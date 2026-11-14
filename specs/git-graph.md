@@ -598,6 +598,7 @@ Scenario: GRAPH-011.1 The menu
   Then the commit is selected (alone: a comparison of two commits that was showing ends)
   And a menu opens headed by its short id and message
   And it offers Copy Commit Id, Copy Message, Create Branch Here…, Create Branch Here (Don't Switch)…, Create Tag Here…, Check Out This Commit…, the compare entries (Compare with <short id> when another commit was selected, Compare with Working Tree, Compare with Branch…; COMMITCMP-001.8, COMMITCMP-004, COMMITCMP-005), Cherry-pick, Revert This Commit…, the merge and rebase entries of MERGE-001 and three Reset entries
+  And while Claude Code is switched on, its last group holds the "Summarise … with Claude" entries that apply to the commit (GITAI-009.4 to GITAI-009.6)
   And a stash row gets none of these: its menu is Apply Stash, Pop Stash, Drop Stash… and Copy Message (STASH-010.7)
   And it closes on Escape or a click elsewhere
   And a right-click on a branch or tag label of the row opens that label's menu instead (MERGE-002; its rename, upstream, push and delete entries are BRANCH-001)

@@ -814,7 +814,7 @@ const clampInt = (v: unknown, min: number, max: number, dflt: number) =>
   typeof v === "number" && Number.isFinite(v) ? Math.round(Math.max(min, Math.min(max, v))) : dflt;
 
 /** Clamp numeric settings read from disk to the same bounds the Settings panel enforces. */
-const BOOLEAN_SETTINGS = ["insertSpaces", "wordWrap", "lineNumbers", "highlightActiveLine", "bracketMatching", "autoCloseBrackets", "renderWhitespace", "restoreSession", "mica", "confirmRuns", "autoUpdateCheck", "bigHighlight", "claudeEnabled", "lspEnabled"] as const;
+const BOOLEAN_SETTINGS = ["insertSpaces", "wordWrap", "lineNumbers", "highlightActiveLine", "bracketMatching", "autoCloseBrackets", "renderWhitespace", "restoreSession", "mica", "confirmRuns", "autoUpdateCheck", "bigHighlight", "claudeEnabled", "lspEnabled", "claudeGitConfirm"] as const;
 
 export function sanitizeSettings(s: Settings): Settings {
   const switches = Object.fromEntries(BOOLEAN_SETTINGS.map((k) => [k, typeof s[k] === "boolean" ? s[k] : DEFAULT_SETTINGS[k]]));
@@ -831,6 +831,7 @@ export function sanitizeSettings(s: Settings): Settings {
     claudePath: typeof s.claudePath === "string" ? s.claudePath : DEFAULT_SETTINGS.claudePath,
     claudeModel: typeof s.claudeModel === "string" ? s.claudeModel : DEFAULT_SETTINGS.claudeModel,
     claudePermissionMode: s.claudePermissionMode === "default" ? "default" : DEFAULT_SETTINGS.claudePermissionMode,
+    claudeGitModel: typeof s.claudeGitModel === "string" ? s.claudeGitModel.trim() : DEFAULT_SETTINGS.claudeGitModel,
     lspDisabled: Array.isArray(s.lspDisabled) ? s.lspDisabled.filter((x): x is string => typeof x === "string") : [],
     lspCommands: s.lspCommands && typeof s.lspCommands === "object" && !Array.isArray(s.lspCommands) ? Object.fromEntries(Object.entries(s.lspCommands).filter(([, v]) => typeof v === "string")) : {},
     theme: (["system", "light", "dark"] as const).includes(s.theme) ? s.theme : DEFAULT_SETTINGS.theme,

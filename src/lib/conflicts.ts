@@ -86,3 +86,38 @@ export function sideLabel(side: "current" | "incoming", label: string): string {
   const l = label.trim();
   return l ? `${name} (${l.length > 48 ? l.slice(0, 47) + "…" : l})` : name;
 }
+
+// ----- Claude git helpers (specs/git-claude.md): what is sent for one conflict -----
+
+/** One conflict with the lines around it. Line numbers are 1-based. */
+export interface ConflictExcerpt {
+  /** Up to `context` lines above the block, and below it. */
+  before: string[];
+  after: string[];
+  current: string[];
+  /** The common ancestor's lines (diff3 conflicts), else null. */
+  base: string[] | null;
+  incoming: string[];
+  /** The block's first and last line (its marker lines). */
+  fromLine: number;
+  toLine: number;
+}
+
+/**
+ * Both sides of one block (and its base section, if any) with up to `context` lines of the file
+ * above and below it. Null when all of it is longer than `limit` characters: too large to send.
+ */
+export function conflictExcerpt(lines: readonly string[], b: ConflictBlock, context = 30, limit = 60_000): ConflictExcerpt | null {
+  const x: ConflictExcerpt = {
+    before: lines.slice(Math.max(0, b.start - context), b.start),
+    after: lines.slice(b.end + 1, b.end + 1 + context),
+    current: lines.slice(b.start + 1, b.base ?? b.mid),
+    base: b.base === null ? null : lines.slice(b.base + 1, b.mid),
+    incoming: lines.slice(b.mid + 1, b.end),
+    fromLine: b.start + 1,
+    toLine: b.end + 1,
+  };
+  let size = 0;
+  for (const part of [x.before, x.after, x.current, x.base ?? [], x.incoming]) for (const l of part) size += l.length + 1;
+  return size > limit ? null : x;
+}

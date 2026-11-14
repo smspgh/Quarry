@@ -879,6 +879,13 @@ pub fn run() {
             git::git_branch_info,
             git::git_ref_action,
             git::git_push_ref,
+            // Claude git helpers (specs/git-claude.md)
+            git::ai::git_commit_diff,
+            git::ai::git_range_log,
+            git::ai::git_range_diff,
+            git::ai::git_default_branch,
+            claude::claude_oneshot,
+            claude::claude_oneshot_cancel,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

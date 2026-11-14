@@ -394,6 +394,7 @@ Scenario: GIT-007.7 Unavailable without a repository or while git is busy
 - Commands: `git.showPanel`
 - Files:
   - `src/components/panels/GitPanel.tsx` — `GitPanel`: message box (Ctrl+Enter), Commit button and its disabled rule, `doCommit`, "as name <email>" hint
+  - `src/components/panels/GitDraft.tsx` — `useDraft`: the Draft button, the box while Claude drafts (GITAI-003)
   - `src/lib/git.ts` — `commit()` (message check, Stage All and Commit dialog, unsaved-tabs warning, success toast), `run` (busy label)
   - `src/lib/gitStatus.ts` — `commitLabel`, `groupFiles`
   - `src/lib/gitCommands.ts` — `git.showPanel` (Ctrl+Shift+G)
@@ -455,6 +456,12 @@ Scenario: GIT-008.8 Ctrl+Enter while the button is disabled says why
   Then no commit is made
   And a message says why: "Write a commit message first." with an empty box, "There is nothing to commit." with no changes, or the conflicts warning (CONFLICT-010.2)
   And while a git action is running nothing happens
+
+Scenario: GIT-008.9 The Draft button and a draft in progress
+  Given Claude Code is switched on
+  When I look at the row under the message box
+  Then a "Draft" button sits between the Commit button and "Amend" (GITAI-003); with Claude Code switched off it is not there
+  And while Claude is drafting, the message box is read-only, reads "Claude is drafting a message…", and the Commit button and Ctrl+Enter do nothing
 ```
 
 ## GIT-009: Amend the last commit

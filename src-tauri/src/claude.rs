@@ -16,6 +16,10 @@ use tauri::{AppHandle, Emitter, State};
 pub struct Sessions {
     next_id: AtomicU32,
     procs: Mutex<HashMap<u32, Proc>>,
+    /// One-off requests of the git helpers (`claude_oneshot`), by the id the UI gave them.
+    oneshots: Mutex<HashMap<u32, Arc<Mutex<Child>>>>,
+    /// Requests stopped before their process was started.
+    oneshot_cancelled: Mutex<std::collections::HashSet<u32>>,
 }
 
 struct Proc {
@@ -280,6 +284,11 @@ pub fn claude_stop(state: State<'_, crate::AppState>, id: u32) {
 pub fn claude_stop_all(state: State<'_, crate::AppState>) {
     let all: Vec<Proc> = state.claude.procs.lock().drain().map(|(_, p)| p).collect();
     crate::writer::run_all(all, |p| kill_tree(&p.child));
+    // A running git-helper request ends with them.
+    let oneshots: Vec<Arc<Mutex<Child>>> = state.claude.oneshots.lock().drain().map(|(_, c)| c).collect();
+    for c in &oneshots {
+        kill_tree(c);
+    }
 }
 
 // ---------- conversation history (Claude Code's own transcripts) ----------
@@ -467,6 +476,160 @@ pub fn base64(bytes: &[u8]) -> String {
     out
 }
 
+// ---------- one-off requests (the Claude git helpers, specs/git-claude.md) ----------
+
+/// What every one-off request is told first. It stays one line without quotes or percent signs:
+/// npm's `claude.cmd` is a batch file, and such an argument passes through cmd.exe unchanged.
+pub const ONESHOT_SYSTEM: &str = "You are a git assistant built into the Quarry text editor. Work only from the text in the message: you have no tools and cannot read files or run commands. Reply with exactly what the message asks for and nothing else.";
+
+/// Command-line arguments of a one-off request, checked against Claude Code 2.1.325: print mode
+/// with one JSON result, every built-in tool off (`--tools ""`), no MCP servers, no skills or
+/// commands, no CLAUDE.md / hooks / plugins (`--safe-mode`, which leaves sign-in and model choice
+/// alone; `--bare` would not use the user's login), nothing saved to the conversation history, and
+/// Quarry's own short system prompt. With no tools there is nothing to take a second turn for, so
+/// no turn limit is passed. The prompt itself goes in on stdin.
+pub fn oneshot_args(model: &str) -> Vec<String> {
+    let mut args: Vec<String> =
+        ["-p", "--output-format", "json", "--tools", "", "--strict-mcp-config", "--disable-slash-commands", "--safe-mode", "--no-session-persistence", "--system-prompt", ONESHOT_SYSTEM].iter().map(|s| s.to_string()).collect();
+    let model = model.trim();
+    // A model alias or name only: nothing that could be read as another option.
+    if !model.is_empty() && !model.starts_with('-') && model.chars().all(|c| c.is_ascii_alphanumeric() || "-._:[]".contains(c)) {
+        args.extend(["--model".into(), model.into()]);
+    }
+    args
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OneshotArgs {
+    /// The UI's id for this request (what `claude_oneshot_cancel` names).
+    pub id: u32,
+    /// The `claude` executable from Settings; empty = look it up.
+    #[serde(default)]
+    pub exe: String,
+    #[serde(default)]
+    pub model: String,
+    pub prompt: String,
+    pub timeout_secs: u64,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OneshotResult {
+    pub stdout: String,
+    /// The end of what the process wrote to stderr.
+    pub stderr: String,
+    pub code: Option<i32>,
+    /// It was ended because it ran longer than the time limit.
+    pub timed_out: bool,
+    /// It was ended by `claude_oneshot_cancel` (or the window closing).
+    pub cancelled: bool,
+}
+
+/// An empty folder of Quarry's own to run one-off requests in, so Claude Code is never started
+/// inside the repository (nothing of it is read, and nothing lands in its conversation history).
+fn oneshot_dir() -> Result<PathBuf, String> {
+    let dir = std::env::temp_dir().join("quarry-claude-git");
+    std::fs::create_dir_all(&dir).map_err(|e| format!("could not create {}: {e}", dir.display()))?;
+    Ok(dir)
+}
+
+fn read_all(mut r: impl Read + Send + 'static) -> std::thread::JoinHandle<Vec<u8>> {
+    std::thread::spawn(move || {
+        let mut out = Vec::new();
+        let _ = r.read_to_end(&mut out);
+        out
+    })
+}
+
+/// Start `exe` with `args` in `cwd`, write `prompt` to its stdin, and wait for it to end, for at
+/// most `timeout`. The child is in `sessions.oneshots` under `id` while it runs.
+pub fn run_oneshot(sessions: &Sessions, id: u32, exe: &Path, args: &[String], cwd: &Path, prompt: String, timeout: std::time::Duration) -> Result<OneshotResult, String> {
+    use std::io::Write;
+    let mut child = command(exe)
+        .args(args)
+        .current_dir(cwd)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| format!("could not start Claude Code ({}): {e}", exe.display()))?;
+    let mut stdin = child.stdin.take().ok_or("no stdin")?;
+    let stdout = read_all(child.stdout.take().ok_or("no stdout")?);
+    let stderr = read_all(child.stderr.take().ok_or("no stderr")?);
+    // From its own thread: a long prompt must not wait on a process that is not reading yet.
+    std::thread::spawn(move || {
+        let _ = stdin.write_all(prompt.as_bytes());
+    });
+    let child = Arc::new(Mutex::new(child));
+    sessions.oneshots.lock().insert(id, child.clone());
+    let deadline = std::time::Instant::now() + timeout;
+    let mut timed_out = false;
+    let code = loop {
+        if let Ok(Some(st)) = child.lock().try_wait() {
+            break st.code();
+        }
+        // Stopped before the process existed: end it now.
+        if sessions.oneshot_cancelled.lock().contains(&id) {
+            kill_tree(&child);
+        } else if !timed_out && std::time::Instant::now() >= deadline {
+            timed_out = true;
+            kill_tree(&child);
+        }
+        std::thread::sleep(std::time::Duration::from_millis(40));
+    };
+    // Still listed = it ended by itself; `cancel_oneshot` takes it out before ending it.
+    let listed = sessions.oneshots.lock().remove(&id).is_some();
+    let cancelled = sessions.oneshot_cancelled.lock().remove(&id) || (!listed && !timed_out);
+    let stdout = String::from_utf8_lossy(&stdout.join().unwrap_or_default()).into_owned();
+    let err = String::from_utf8_lossy(&stderr.join().unwrap_or_default()).trim().to_string();
+    let tail = err.len().saturating_sub(4096);
+    let tail = (tail..err.len()).find(|&i| err.is_char_boundary(i)).unwrap_or(err.len());
+    Ok(OneshotResult { stdout, stderr: err[tail..].to_string(), code, timed_out, cancelled })
+}
+
+/// One prompt, one answer, then the process ends: no tools, no conversation, not in the repository.
+#[tauri::command]
+pub async fn claude_oneshot(app: AppHandle, args: OneshotArgs) -> Result<OneshotResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let state = tauri::Manager::state::<crate::AppState>(&app);
+        let sessions = &state.claude;
+        if sessions.oneshot_cancelled.lock().remove(&args.id) {
+            return Ok(OneshotResult { stdout: String::new(), stderr: String::new(), code: None, timed_out: false, cancelled: true });
+        }
+        // The same wording as `claude_start`.
+        let exe = find_exe(&args.exe).ok_or_else(|| {
+            if args.exe.trim().is_empty() {
+                "Claude Code was not found. Install it, or set its location in Settings › Claude Code.".to_string()
+            } else {
+                format!("Claude Code was not found at {}. Check Settings › Claude Code.", args.exe.trim())
+            }
+        })?;
+        let cwd = oneshot_dir()?;
+        run_oneshot(sessions, args.id, &exe, &oneshot_args(&args.model), &cwd, args.prompt, std::time::Duration::from_secs(args.timeout_secs.clamp(1, 900)))
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+/// End a one-off request at once (Stop, or the tab or folder it belonged to went away).
+#[tauri::command]
+pub fn claude_oneshot_cancel(state: State<'_, crate::AppState>, id: u32) {
+    cancel_oneshot(&state.claude, id);
+}
+
+pub fn cancel_oneshot(sessions: &Sessions, id: u32) {
+    match sessions.oneshots.lock().remove(&id) {
+        Some(child) => {
+            std::thread::spawn(move || kill_tree(&child));
+        }
+        // Not started yet: `claude_oneshot` / `run_oneshot` sees the mark and sends nothing.
+        None => {
+            sessions.oneshot_cancelled.lock().insert(id);
+        }
+    }
+}
+
 fn kill_tree(child: &Arc<Mutex<Child>>) {
     let mut c = child.lock();
     if let Ok(Some(_)) = c.try_wait() {
@@ -560,5 +723,117 @@ mod tests {
         let exe = dir.path().join("claude.exe");
         std::fs::write(&exe, b"").unwrap();
         assert_eq!(find_exe(&format!("\"{}\"", exe.display())), Some(exe));
+    }
+
+    // ----- one-off requests (specs/git-claude.md) -----
+
+    #[test]
+    fn oneshot_is_toolless_single_answer_and_not_saved() {
+        let a = oneshot_args("");
+        assert_eq!(a[0], "-p");
+        assert_eq!(after(&a, "--output-format"), Some("json"));
+        // Every built-in tool off, no MCP servers, no skills, no project or user customisation.
+        assert_eq!(after(&a, "--tools"), Some(""));
+        for flag in ["--strict-mcp-config", "--disable-slash-commands", "--safe-mode", "--no-session-persistence"] {
+            assert!(a.contains(&flag.to_string()), "{flag}");
+        }
+        assert_eq!(after(&a, "--system-prompt"), Some(ONESHOT_SYSTEM));
+        // Nothing of a Claude tab: no streaming input, no permission prompts, no resume, no --bare (it would skip the login).
+        for flag in ["--input-format", "--permission-prompt-tool", "--permission-mode", "--resume", "--bare", "--model", "--dangerously-skip-permissions"] {
+            assert!(!a.contains(&flag.to_string()), "{flag}");
+        }
+        // Safe as a batch-file argument (npm's claude.cmd).
+        assert!(!ONESHOT_SYSTEM.contains(['"', '%', '\n', '\r', '^', '&', '|', '<', '>']));
+    }
+
+    #[test]
+    fn oneshot_model_is_passed_unless_empty_or_odd() {
+        assert_eq!(after(&oneshot_args(" haiku "), "--model"), Some("haiku"));
+        assert_eq!(after(&oneshot_args("claude-sonnet-4-5[1m]"), "--model"), Some("claude-sonnet-4-5[1m]"));
+        assert!(!oneshot_args("").contains(&"--model".to_string()));
+        assert!(!oneshot_args("--dangerously-skip-permissions").contains(&"--model".to_string()));
+        assert!(!oneshot_args("haiku --resume x").contains(&"--model".to_string()));
+    }
+
+    /// The real thing, by hand only (`cargo test real_claude_oneshot -- --ignored --nocapture`): one
+    /// tiny request on the cheapest model through the installed, signed-in Claude Code, to check
+    /// the flags of `oneshot_args` against the CLI that is really there. Never part of a normal run.
+    #[test]
+    #[ignore = "makes one real Claude Code request; run by hand"]
+    fn real_claude_oneshot() {
+        let exe = find_exe("").expect("Claude Code is not installed");
+        let s = Sessions::default();
+        let r = run_oneshot(&s, 1, &exe, &oneshot_args("haiku"), &oneshot_dir().unwrap(), "Reply with the single word: ok".into(), std::time::Duration::from_secs(120)).unwrap();
+        println!("exit {:?}\nstdout: {}\nstderr: {}", r.code, r.stdout, r.stderr);
+        let v: serde_json::Value = serde_json::from_str(r.stdout.trim()).expect("one JSON object on stdout");
+        assert_eq!(v["type"], "result");
+        assert_eq!(v["is_error"], false);
+        assert_eq!(v["num_turns"], 1);
+        assert!(v["result"].as_str().unwrap().to_lowercase().contains("ok"));
+    }
+
+    /// A stand-in for `claude`: a batch file (what npm installs is one too).
+    fn fake(dir: &Path, body: &str) -> PathBuf {
+        let exe = dir.join("claude.cmd");
+        std::fs::write(&exe, format!("@echo off\r\n{body}\r\n")).unwrap();
+        exe
+    }
+
+    #[test]
+    fn oneshot_feeds_the_prompt_on_stdin_and_returns_the_answer() {
+        let dir = tempfile::tempdir().unwrap();
+        // Echo stdin, then the working folder and whether a session marker got through.
+        let exe = fake(dir.path(), "findstr \"^\"\r\necho cwd=%CD%\r\necho marker=[%CLAUDECODE%]\r\necho oops 1>&2\r\nexit /b 3");
+        let cwd = tempfile::tempdir().unwrap();
+        // Every marker of a surrounding Claude Code session is taken out of the child's environment.
+        let cmd = command(&exe);
+        for v in SESSION_ENV {
+            assert!(cmd.get_envs().any(|(k, val)| k == std::ffi::OsStr::new(v) && val.is_none()), "{v}");
+        }
+        let s = Sessions::default();
+        let r = run_oneshot(&s, 7, &exe, &oneshot_args("haiku"), cwd.path(), "diff --git a/x b/x\n+one \"quoted\" line\n".into(), std::time::Duration::from_secs(30)).unwrap();
+        assert!(r.stdout.contains("diff --git a/x b/x"), "{:?}", r);
+        assert!(r.stdout.contains("+one \"quoted\" line"));
+        assert!(r.stdout.to_lowercase().contains(&format!("cwd={}", cwd.path().display()).to_lowercase()), "{:?}", r.stdout);
+        // SESSION_ENV is stripped.
+        assert!(r.stdout.contains("marker=[]"), "{:?}", r.stdout);
+        assert_eq!(r.stderr, "oops");
+        assert_eq!(r.code, Some(3));
+        assert!(!r.timed_out && !r.cancelled);
+        assert!(s.oneshots.lock().is_empty());
+    }
+
+    #[test]
+    fn oneshot_ends_at_the_time_limit() {
+        let dir = tempfile::tempdir().unwrap();
+        let exe = fake(dir.path(), "ping -n 30 127.0.0.1 >nul");
+        let s = Sessions::default();
+        let started = std::time::Instant::now();
+        let r = run_oneshot(&s, 1, &exe, &[], dir.path(), "x".into(), std::time::Duration::from_millis(400)).unwrap();
+        assert!(r.timed_out && !r.cancelled);
+        assert!(started.elapsed() < std::time::Duration::from_secs(15));
+    }
+
+    #[test]
+    fn oneshot_can_be_stopped_while_running_or_before_it_starts() {
+        let dir = tempfile::tempdir().unwrap();
+        let exe = fake(dir.path(), "ping -n 30 127.0.0.1 >nul");
+        let s = Arc::new(Sessions::default());
+        let (s2, exe2, cwd) = (s.clone(), exe.clone(), dir.path().to_path_buf());
+        let run = std::thread::spawn(move || run_oneshot(&s2, 5, &exe2, &[], &cwd, "x".into(), std::time::Duration::from_secs(60)).unwrap());
+        let started = std::time::Instant::now();
+        while s.oneshots.lock().is_empty() && started.elapsed() < std::time::Duration::from_secs(10) {
+            std::thread::sleep(std::time::Duration::from_millis(20));
+        }
+        cancel_oneshot(&s, 5);
+        let r = run.join().unwrap();
+        assert!(r.cancelled && !r.timed_out);
+        assert!(started.elapsed() < std::time::Duration::from_secs(20));
+
+        // Stopped first: the process is ended as soon as it exists.
+        cancel_oneshot(&s, 6);
+        let r = run_oneshot(&s, 6, &exe, &[], dir.path(), "x".into(), std::time::Duration::from_secs(60)).unwrap();
+        assert!(r.cancelled);
+        assert!(s.oneshot_cancelled.lock().is_empty());
     }
 }

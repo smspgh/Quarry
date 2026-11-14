@@ -34,6 +34,7 @@ Scenario: CLAUDE-001.1 Off hides it everywhere
   And the command palette lists no "Claude Code" commands
   And Ctrl+Alt+L does nothing
   And the Claude Code section of Settings shows only the switch
+  And the Claude git helpers are gone too: no "Draft" button in Source Control, no "Explain" on conflict bars, no Git › Claude submenu and no "Summarise … with Claude" entries in the graph (GITAI-001)
 
 Scenario: CLAUDE-001.2 Turning it off with tabs open asks first
   Given 1 Claude tab and 1 Claude CLI tab are open
@@ -62,7 +63,8 @@ Scenario: CLAUDE-001.6 On brings it back
   Given the setting is off
   When I switch "Claude Code" on
   Then the menu items, Explorer items and commands are available again
-  And the location, Model and Permissions rows are shown again with their earlier values
+  And the location, Model, "Model for git helpers", "Ask before sending git content to Claude" and Permissions rows are shown again with their earlier values
+  And the Claude git helpers are back (GITAI-001.4)
 ```
 
 ## CLAUDE-002: Find the Claude Code installation
@@ -948,6 +950,12 @@ Scenario: CLAUDE-018.5 A continued conversation uses the new model
 Scenario: CLAUDE-018.6 The hint says when it applies
   When I look at Settings › Claude Code › Model
   Then its hint says it applies the next time Claude Code starts for a tab, including when a conversation continues
+
+Scenario: CLAUDE-018.7 The Model is for Claude tabs only
+  Given Model is "Opus"
+  When a Claude git helper (draft a commit message, explain a conflict, summarise) sends a request
+  Then it uses "Model for git helpers" (Haiku unless changed), not "Opus" (GITAI-003.15)
+  And changing either row leaves the other as it was
 ```
 
 ## CLAUDE-019: Know what background Claude tabs are doing
@@ -1022,6 +1030,7 @@ Scenario: CLAUDE-020.3 Quitting ends everything
   Given 2 Claude tabs with running processes
   When I quit Quarry
   Then both Claude Code processes and the commands they started are ended before the window closes
+  And a running Claude git request (GITAI-005.8) is ended with them
 
 Scenario: CLAUDE-020.4 Claude Code stops by itself
   When the Claude Code process of a tab exits with code 1 after printing an error

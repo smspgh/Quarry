@@ -30,6 +30,7 @@ Scenario: CONFLICT-001.1 A conflict is marked
   Then my lines (current) are tinted green and the incoming lines blue
   And the three marker lines are shown muted and in italics
   And a bar above the block reads "Conflict 1 of 1" with the buttons Accept Current, Accept Incoming and Accept Both
+  And while Claude Code is switched on the bar also has "Explain" as its last button (GITAI-007); with it switched off there is none
 
 Scenario: CONFLICT-001.2 Several conflicts are numbered
   Given a file with 2 conflicts
@@ -107,6 +108,7 @@ Scenario: CONFLICT-002.5 From the menu, for the conflict at the cursor
   When I choose Git › Conflicts › Accept Incoming (Conflict at Cursor)
   Then the second conflict is resolved to its incoming side
   And with the cursor between conflicts the next one below is resolved, and below the last one the first
+  And a suggestion panel Claude put under that conflict (GITAI-007) closes with it
 
 Scenario: CONFLICT-002.6 An empty side
   Given a conflict whose current side has no lines
@@ -117,6 +119,7 @@ Scenario: CONFLICT-002.7 No conflicts in the file
   Given the active document has no conflicts, or the active tab is not a text tab
   When I open the Git › Conflicts menu or the command palette
   Then the Accept commands are greyed out in the menu and the palette
+  And so is Git › Claude › "Explain Conflict at Cursor with Claude" (GITAI-001.5)
 ```
 
 ## CONFLICT-003: Resolve every conflict in a file one way
@@ -216,6 +219,7 @@ Scenario: CONFLICT-005.1 Compare from the bar
   Then a Compare tab opens with "store.ts · conflict 2 · current" on the left and "store.ts · conflict 2 · incoming" on the right
   And both sides are read-only
   And the conflicted document itself is unchanged
+  And "Compare" comes after the three Accept buttons and before "Explain" (GITAI-007), when that is shown
 
 Scenario: CONFLICT-005.2 The tab is reused
   Given that Compare tab is open and untouched
@@ -270,6 +274,7 @@ Scenario: CONFLICT-006.5 Deleting the markers by hand counts too
   Given I edit the text and delete the last marker lines myself
   When the last marker line is gone
   Then the same dialog appears
+  And it also appears when the last conflict is resolved with "Apply Suggestion" (GITAI-007.7): nothing is saved or staged before I answer
 
 Scenario: CONFLICT-006.6 Not for files git does not list as conflicted
   Given an untitled document, or a file that is not under Merge Changes, containing a conflict block

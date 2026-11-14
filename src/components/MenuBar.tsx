@@ -279,6 +279,10 @@ const MENUS: Menu[] = [
       { cmd: "git.push" },
       { cmd: "git.forcePush" },
       { cmd: "git.addRemote" },
+      // Claude git helpers: the last group; left out (not greyed) while Claude Code is switched off.
+      ...(useStore.getState().settings.claudeEnabled
+        ? ([{ sep: true }, { label: "Claude", submenu: () => [{ cmd: "git.draftMessage" }, { cmd: "git.explainConflict" }, { cmd: "git.summariseBranch" }, { sep: true }, { cmd: "git.stopClaude" }] }] as Item[])
+        : []),
     ],
   },
   {

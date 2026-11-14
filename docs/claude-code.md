@@ -14,6 +14,7 @@ Both use your own Claude Code installation and login. Quarry doesn't store API k
 - [Pictures and context](#pictures-and-context)
 - [Past conversations](#past-conversations)
 - [Claude CLI tabs](#claude-cli-tabs)
+- [Git helpers](#git-helpers)
 - [Turning it off](#turning-it-off)
 
 ## Requirements
@@ -82,6 +83,14 @@ A Claude CLI tab runs `claude` in a Windows pseudo console, so slash commands, `
 - When Claude Code exits, press **Enter** to start it again. Closing the tab ends it and anything it started.
 
 Claude CLI tabs aren't restored when Quarry restarts. Use `claude --resume` (or `/resume`) in a new one to continue a conversation.
+
+## Git helpers
+
+With Claude Code on, Source Control gets three helpers: **Draft** a commit message from the changes about to be committed, **Explain** a conflict and suggest its resolution, and **Summarise** a branch or a run of commits. They are described under [Claude-assisted git](git.md#claude-assisted-git).
+
+They are not Claude tabs: each is a single request with no tools and no conversation, started outside your repository, and nothing is saved to Claude Code's history. What is sent is the diff of the files to commit (with nothing staged, of all changed files, new untracked files included) and the first lines of the last 10 commit messages; or one conflict with up to 30 lines around it and the file's name; or the commits of a range with their diff. A dialog says so before the first request of each kind. It leaves your computer through your Claude Code account, and only when you click; nothing a helper returns is committed or applied by itself.
+
+The helpers use **Model for git helpers** (Haiku by default), not the Model of the Claude tabs. Each request counts against your Claude Code plan like one message.
 
 ## Turning it off
 

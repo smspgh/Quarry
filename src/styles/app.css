@@ -5120,6 +5120,51 @@ select optgroup {
 .scm-side { height: 20px; padding: 0 6px; font-size: 11px; }
 .cm-conflict-note { margin-left: 8px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
+/* Claude git helpers (specs/git-claude.md): the Explain button, the suggestion panel under a
+   conflict, the Draft button beside the commit box and the status-bar item. */
+.cm-conflict-btn.explain { border-color: var(--claude-accent); }
+.cm-conflict-btn:disabled { opacity: 0.5; cursor: default; }
+.cm-conflict-btn:disabled:hover { background: transparent; }
+.cm-conflict-suggestion {
+  padding: 6px 10px 8px;
+  font-family: var(--font-ui, "Segoe UI Variable Text", "Segoe UI", sans-serif);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text);
+  background: var(--claude-user-bg);
+  border-top: 1px solid var(--claude-user-stroke);
+  border-bottom: 1px solid var(--claude-user-stroke);
+  border-left: 3px solid var(--claude-accent);
+  user-select: text;
+  white-space: normal;
+}
+.cm-conflict-suggestion-head { display: flex; align-items: baseline; gap: 4px; min-width: 0; font-size: 11.5px; color: var(--text-2); margin-bottom: 4px; }
+.cm-conflict-suggestion-sides { font-weight: 600; white-space: nowrap; }
+.cm-conflict-suggestion-working { display: flex; align-items: center; gap: 10px; color: var(--text-2); }
+.cm-conflict-suggestion-text { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 110ch; }
+.cm-conflict-suggestion-label { margin-top: 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-3); }
+.cm-conflict-suggestion-code {
+  margin: 3px 0 0;
+  padding: 5px 8px;
+  max-height: 260px;
+  overflow: auto;
+  font-family: var(--font-mono, "Cascadia Code", Consolas, monospace);
+  font-size: 12px;
+  white-space: pre;
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  border-radius: 4px;
+}
+.cm-conflict-suggestion-note { margin-top: 6px; color: var(--warning); }
+.cm-conflict-suggestion-error { color: var(--danger); white-space: pre-wrap; overflow-wrap: anywhere; }
+.cm-conflict-suggestion-actions { display: flex; gap: 6px; margin-top: 8px; }
+.cm-conflict-btn.apply { border-color: var(--claude-accent); font-weight: 600; }
+.scm-draft { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.scm-draft svg { color: var(--claude-accent); }
+.scm-draft-note { color: var(--warning); overflow-wrap: anywhere; }
+.status-item.git-assist { gap: 5px; }
+.status-item.git-assist svg { color: var(--claude-accent); }
+
 /* Source Control: the folder the panel is about, under the header buttons; wraps instead of cutting off. */
 .scm-context { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; padding: 6px 12px 2px; min-width: 0; color: var(--text-2); }
 .scm-context svg { flex-shrink: 0; align-self: center; color: var(--text-3); }
