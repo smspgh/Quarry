@@ -53,14 +53,14 @@ Decisions (taken where the roadmap left the choice open):
 
 ## MERGE-001: Merge and rebase from a commit's right-click menu in the graph
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — two new entries in the commit menu, directly after Cherry-pick / Revert and before the Reset entries (the planned order of the whole menu is in this file's Decisions), their disabled states and tooltips, calls `startMerge` / `startRebase`
-  - `src/lib/gitMerge.ts` — new, pure: `targetOf(commit, branch)` (one other branch label → that branch, else the commit id), `entryLabels`, `startBlocked` (why an entry is disabled)
-  - `src/lib/git.ts` — new `startMerge(root, target)`, `startRebase(root, target)`
+  - `src/components/GraphView.tsx` — two entries in the commit menu, directly after Cherry-pick / Revert and before the Reset entries (the planned order of the whole menu is in this file's Decisions): `startItem` (disabled state, tooltip), calls `startMerge` / `startRebase`
+  - `src/lib/gitMerge.ts` — pure: `targetOf(commit, branch)` (one other branch label → that branch, else the commit id), `entryLabels`, `startEntries` (the two entries with their disabled reason), `startBlocked` (why a merge / rebase cannot start)
+  - `src/lib/git.ts` — `startMerge(root, target)`, `startRebase(root, target)`
   - `src/lib/gitGraph.ts` — `refLabels` (which labels a commit carries)
-- Tests: `src/__tests__/gitMerge.test.ts`, `src/__tests__/graphView.test.tsx`
+- Tests: `src/__tests__/gitMerge.test.ts`, `src/__tests__/graphMerge.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer looking at the commit graph
@@ -110,15 +110,15 @@ Scenario: MERGE-001.7 Starting from the graph refreshes the graph
 
 ## MERGE-002: Merge and rebase from a branch or tag label in the graph
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — `RefBadge` gets its own right-click, in the row list and in the details pane (selects the commit, stops the row's menu); new `RefMenu` state beside `Menu`, rendered with `GraphMenu` and headed by the kind and name of the ref. BRANCH-001 adds its entries to this same menu
-  - `src/lib/gitRefs.ts` — new, pure: `refMenu(label, ctx)` (which labels have a menu, its heading and its entries; here only the merge and rebase entries)
-  - `src/lib/gitMerge.ts` — `entryLabels` for a named branch or tag, `startBlocked`
+  - `src/components/GraphView.tsx` — `RefBadge` gets its own right-click, in the row list and in the details pane (`onRefContext`: selects the commit, stops the row's menu; a label without a menu opens the commit's); `RefMenu` state beside `Menu`, rendered with `GraphMenu` (`head`) and headed by the kind and name of the ref; entries are dispatched by their `id`. BRANCH-001 adds its entries to this same menu
+  - `src/lib/gitRefs.ts` — pure: `refMenu(label, ctx)` (which labels have a menu, its heading and its entries; here only the merge and rebase entries), `RefMenu`, `RefMenuEntry`
+  - `src/lib/gitMerge.ts` — `startEntries` / `entryLabels` for a named branch or tag, `startBlocked`
   - `src/lib/gitGraph.ts` — `refLabels` / `RefLabel` (the kinds the menu is built from)
   - `src/lib/git.ts` — `startMerge`, `startRebase`
-- Tests: `src/__tests__/gitRefs.test.ts`, `src/__tests__/gitMerge.test.ts`, `src/__tests__/graphView.test.tsx`
+- Tests: `src/__tests__/gitRefs.test.ts`, `src/__tests__/gitMerge.test.ts`, `src/__tests__/graphMerge.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer looking at a commit that several branches point at
@@ -178,17 +178,20 @@ Scenario: MERGE-002.8 Same disabled states as the commit menu
 
 ## MERGE-003: Merge Branch… and Rebase onto Branch… from the panel, the Git menu and the palette
 
-- Status: planned
+- Status: draft
 - Commands: `git.mergeBranch`, `git.rebaseBranch`, `git.mergeRef`, `git.rebaseOnto`
 - Files:
   - `src/lib/gitCommands.ts` — `git.mergeBranch` ("Merge Branch…"), `git.rebaseBranch` ("Rebase onto Branch…") with `enabled()`; hidden `git.mergeRef` / `git.rebaseOnto` taking the picked name (like `git.checkoutTo`), which run the same guards
-  - `src/lib/git.ts` — `pickBranch(purpose)`: today's `pickBranch()` gains the purpose (`"switch"` by default, here also `"merge"` and `"rebase"`), kept in `useGit` as `branchPick`; later specs add their purposes to it (table in this file's Decisions); `startMerge`, `startRebase`
+  - `src/lib/git.ts` — `pickBranch(purpose)` (`"switch"` by default, here also `"merge"` and `"rebase"`, which are refused when they cannot start), kept in `useGit` as `branchPick`; later specs add their purposes to it (table in this file's Decisions); `startMerge`, `startRebase`
+  - `src/lib/gitRefs.ts` — pure: `BranchPurpose`, `branchPick(purpose, branch)` (prompt, the command a picked row runs, whether a "Create branch" row is offered), `pickList(purpose, branches)` (which rows are listed)
   - `src/components/CommandPalette.tsx` — `mode === "branch"`: prompt, rows and the command of a picked row from the purpose; no current branch and no "Create branch" row when merging / rebasing, picked row runs `git.mergeRef` / `git.rebaseOnto`
-  - `src/components/panels/GitPanel.tsx` — "Merge or Rebase" button directly after the branch button (before the operation / "Stash conflicts" badge) with a two-entry menu, disabled states
+  - `src/components/panels/GitMergeButton.tsx` — `MergeRebaseButton`: the "Merge or Rebase" button with its two-entry menu (runs the two commands), disabled states and tooltips
+  - `src/components/panels/GitPanel.tsx` — places `MergeRebaseButton` directly after the branch button (before the operation / "Stash conflicts" badge)
   - `src/components/MenuBar.tsx` — the two commands in the Git menu directly after Switch Branch… (group 6 of the planned layout in this file's Decisions)
   - `src/lib/gitMerge.ts` — `startBlocked` (shared reason text for the disabled states)
-  - `src/lib/gitStatus.ts` — new pure `finishFirst(operation)` ("Finish or abort the merge first"), on `operationWords`
-- Tests: `src/__tests__/gitMerge.test.ts`, `src/__tests__/gitPanel.test.tsx`
+  - `src/lib/gitStatus.ts` — pure `finishFirst(operation)` ("Finish or abort the merge first"), on `operationWords`
+  - `src/styles/app.css` — `.scm-merge-btn`, `.scm-merge-menu`
+- Tests: `src/__tests__/gitMerge.test.ts`, `src/__tests__/gitRefs.test.ts`, `src/__tests__/gitPanel.test.tsx`, `src/__tests__/branchPicker.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer who knows which branch they want
@@ -240,7 +243,7 @@ Scenario: MERGE-003.8 Greyed out without a repository
   Given no repository is known
   When I open the Git menu
   Then Merge Branch… and Rebase onto Branch… are greyed out
-  And in the command palette they are greyed out too
+  And the command palette does not list them
 
 Scenario: MERGE-003.9 Greyed out during a stopped operation or while git is busy
   Given a merge is stopped on a conflict
@@ -258,13 +261,13 @@ Scenario: MERGE-003.10 Rebase needs a branch
 
 ## MERGE-004: Merge asks first, then merges
 
-- Status: planned
+- Status: draft
 - Commands: `git.mergeRef`
 - Files:
-  - `src/lib/gitMerge.ts` — `mergeConfirm(preview, target, branch)` (title, text, buttons; Cancel default), `mergeDone` (notifications)
-  - `src/lib/git.ts` — `startMerge` (preview → dialog via `choose()` → run with busy label "Merging…" → notification, `checkExternalChanges`)
+  - `src/lib/gitMerge.ts` — `mergeConfirm(preview, label, branch)` (title, text, buttons; Cancel default; "nothing to merge"), `mergeDone` (notifications)
+  - `src/lib/git.ts` — `startMerge` (`startCheck` → `startPreview` → dialog via `choose()` → `runStart` with busy label "Merging…" → notification, `checkExternalChanges`)
   - `src/lib/dialogs.ts` — `choose()` (unchanged: three choices, `default: true` on Cancel)
-  - `src-tauri/src/git.rs` — new `merge_preview` / `git_merge_preview` (commits on each side: `rev-list --count --left-right HEAD...<ref>`), new `start_merge` / `git_merge` (`merge --no-edit`, with `--ff-only` or `--no-ff` on request; `GIT_EDITOR=true`; ref validated)
+  - `src-tauri/src/git.rs` — `merge_preview` / `git_merge_preview` (commits on each side: `rev-list --left-right --count HEAD...<ref>`), `resolve_target` (a branch, remote branch or tag name or a commit id; anything else, or a name starting with `-`, is refused), `start_merge` / `git_merge` (`merge --no-edit` with `--ff-only` or `--no-ff`; `GIT_EDITOR=true`; the short branch name is given to git so the message reads "Merge branch 'feature'")
   - `src/lib/gitApi.ts` — `git.mergePreview`, `git.merge`, `GitMergePreview`, `GitMergeMode`
 - Tests: `src/__tests__/gitMerge.test.ts`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
@@ -289,7 +292,7 @@ Scenario: MERGE-004.3 A clean merge
   Given the dialog "Merge feature into main?" is open and the changes do not conflict
   When I click "Merge"
   Then "Merging…" shows beside the branch while it runs
-  And a merge commit "Merge branch 'feature' into main" is on "main" without my being asked for a message
+  And a merge commit "Merge branch 'feature'" is on "main" without my being asked for a message (on a branch other than main / master, git's message ends "into <branch>")
   And a notification says "Merged feature into main"
   And open tabs whose files changed on disk are re-checked
 
@@ -308,7 +311,7 @@ Scenario: MERGE-004.5 Fast-forward
 Scenario: MERGE-004.6 Always a merge commit
   Given the fast-forward dialog for "feature" is open
   When I click "Create a Merge Commit"
-  Then a merge commit "Merge branch 'feature' into main" is on "main" with "feature" as its second parent
+  Then a merge commit "Merge branch 'feature'" is on "main" with "feature" as its second parent
   And a notification says "Merged feature into main"
 
 Scenario: MERGE-004.7 Already up to date
@@ -337,12 +340,12 @@ Scenario: MERGE-004.10 What a merge never does
 
 ## MERGE-005: Rebase asks first, then rebases
 
-- Status: planned
+- Status: draft
 - Commands: `git.rebaseOnto`
 - Files:
-  - `src/lib/gitMerge.ts` — `rebaseConfirm(preview, target, branch)` (title, text, buttons; Cancel default; merge-commit note), `rebaseDone`
-  - `src/lib/git.ts` — `startRebase` (preview → dialog → run with busy label "Rebasing…" → notification, `checkExternalChanges`)
-  - `src-tauri/src/git.rs` — `merge_preview` (also: how many of the commits to replay are merge commits), new `start_rebase` / `git_rebase` (`rebase <ref>`, `GIT_EDITOR=true`, refused on a detached HEAD)
+  - `src/lib/gitMerge.ts` — `rebaseConfirm(preview, label, branch)` (title, text, buttons; Cancel default; merge-commit note; "nothing to rebase"; the fast-forward variant), `rebaseDone`
+  - `src/lib/git.ts` — `startRebase` (`startCheck` → `startPreview` → dialog → `runStart` with busy label "Rebasing…" → notification, `checkExternalChanges`; the fast-forward runs `git.merge(…, "ff-only")`)
+  - `src-tauri/src/git.rs` — `merge_preview` (also: how many of the commits to replay are merge commits), `start_rebase` / `git_rebase` (`rebase <ref>` with `rebase.autoStash`, `rebase.rebaseMerges` and `rebase.updateRefs` off, `GIT_EDITOR=true`, refused on a detached HEAD)
   - `src/lib/gitApi.ts` — `git.rebase`
 - Tests: `src/__tests__/gitMerge.test.ts`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
@@ -403,13 +406,13 @@ Scenario: MERGE-005.8 What a rebase never does
 
 ## MERGE-006: Rebase warns when commits to replay are already pushed
 
-- Status: planned
+- Status: draft
 - Commands: `git.rebaseOnto`
 - Files:
-  - `src/lib/gitMerge.ts` — `rebaseConfirm` (danger variant: counts, the remote branch named, "Rebase Anyway")
-  - `src/lib/git.ts` — `startRebase` (uses the preview's pushed count; one dialog, never two; after "Rebase Anyway" finished it sets the `rewrotePushed` marker of MERGE-009)
-  - `src-tauri/src/git.rs` — new `pushed_commits(root, range)`: the commits of a range that are reachable from any remote-tracking branch (`rev-list <range>` minus `rev-list <range> --not --remotes`), and the first remote branch that holds them. It is the one "already pushed" helper: `merge_preview` uses it for `<ref>..HEAD` (`pushed`, `pushedOn`), and `history_range` of HISTORY-006 uses it too. Not `unpushed` / `git_unpushed`, which only looks at the upstream and returns nothing without one
-  - `src/lib/gitApi.ts` — `GitMergePreview.pushed`, `pushedOn`
+  - `src/lib/gitMerge.ts` — `rebaseConfirm` (danger variant: counts, the remote branch named, the commits listed by `commitLines`, "Rebase Anyway")
+  - `src/lib/git.ts` — `startRebase` (uses the preview's pushed count; one dialog, never two; after "Rebase Anyway" finished it sets the `rewrotePushed` marker of MERGE-009 through `markRewritten`)
+  - `src-tauri/src/git.rs` — `pushed_commits(root, range)` → `GitPushed { count, on, commits }`: the commits of a range that are reachable from any remote-tracking branch (`rev-list <range>` minus `rev-list <range> --not --remotes`), and a remote branch that holds the newest of them (the upstream when it does). It is the one "already pushed" helper: `merge_preview` uses it for `<ref>..HEAD` (`pushed`, `pushedOn`, `pushedCommits`), and `history_range` of HISTORY-006 uses it too. Not `unpushed` / `git_unpushed`, which only looks at the upstream and returns nothing without one
+  - `src/lib/gitApi.ts` — `GitMergePreview.pushed`, `pushedOn`, `pushedCommits`, `GitCommitRef`
 - Tests: `src/__tests__/gitMerge.test.ts`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 
@@ -462,10 +465,10 @@ Scenario: MERGE-006.7 A fast-forward rewrites nothing
 
 ## MERGE-007: A merge or rebase that stops on a conflict
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/lib/git.ts` — `startMerge` / `startRebase` failure path (error via `gitErrorText`, status refresh, `showPanel("git")`, `checkExternalChanges`), `abortOperation`, `continueOperation`
+  - `src/lib/git.ts` — `runStart`: the failure path of `startMerge` / `startRebase` (error via `gitErrorText`, fresh status, `showPanel("git")` when an operation is now in progress, `checkExternalChanges`), `abortOperation`, `continueOperation`
   - `src/lib/gitStatus.ts` — `gitErrorText` ("Stopped on a conflict…"), `operationWords` (merge / rebase wording, unchanged)
   - `src/components/panels/GitPanel.tsx` — operation badge, Skip / Abort, prefilled message, Continue Rebase (existing; must show for an operation Quarry started)
   - `src/components/GraphView.tsx` — stopped-operation strip (existing)
@@ -489,7 +492,7 @@ Scenario: MERGE-007.1 A merge stops
 Scenario: MERGE-007.2 Finishing the merge
   Given the merge of "feature" is stopped and I have resolved notes.txt and marked it resolved
   When I look at the commit box
-  Then the message box holds "Merge branch 'feature' into main"
+  Then the message box holds "Merge branch 'feature'"
   And clicking the Commit button creates the merge commit and the "Merging" badge goes away
 
 Scenario: MERGE-007.3 Aborting the merge
@@ -534,15 +537,15 @@ Scenario: MERGE-007.9 No second operation on top
 
 ## MERGE-008: Refuse to start when it is not safe
 
-- Status: planned
+- Status: draft
 - Commands: `git.mergeBranch`, `git.rebaseBranch`, `git.mergeRef`, `git.rebaseOnto`
 - Files:
-  - `src/lib/gitMerge.ts` — `startBlocked(repo, kind)` (operation in progress, detached HEAD for rebase, no commits yet, uncommitted tracked changes) and its wording; `dirtyRefusal(kind, count)` (the "Commit or discard your changes first" dialog, shared with HISTORY-006.6)
+  - `src/lib/gitMerge.ts` — `startBlocked(repo, kind, busy)` (no repository, git busy, operation in progress, no commits yet, detached HEAD for rebase) and its wording; `trackedChanges(repo)` (uncommitted changes do not grey anything out: the start refuses); `dirtyRefusal(what, count)` (the "Commit or discard your changes first" dialog, shared with HISTORY-006.6)
   - `src/lib/gitStatus.ts` — `finishFirst(operation)`
-  - `src/lib/git.ts` — `startMerge` / `startRebase` call `startBlocked` on a fresh status before the preview (covers every entry point, including the hidden commands and recorded macros); errors through `gitErrorText`
-  - `src/lib/gitCommands.ts` — `enabled()` of the four commands
+  - `src/lib/git.ts` — `startCheck`: `startMerge` / `startRebase` call `startBlocked` and `trackedChanges` on a fresh status before the preview (covers every entry point, including the hidden commands and recorded macros); errors through `gitErrorText`
+  - `src/lib/gitCommands.ts` — `enabled()` of `git.mergeBranch` / `git.rebaseBranch`; the hidden two always run and are refused by `startCheck`
   - `src/lib/dialogs.ts` — `choose()` for the "uncommitted changes" refusal with its Show Source Control button
-  - `src-tauri/src/git.rs` — `start_merge` / `start_rebase` refuse again on their side (operation in progress, changed tracked files, detached HEAD for rebase)
+  - `src-tauri/src/git.rs` — `start_guard`: `start_merge` / `start_rebase` refuse again on their side (operation in progress, changed tracked files; detached HEAD for rebase)
 - Tests: `src/__tests__/gitMerge.test.ts`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 
@@ -615,18 +618,18 @@ Scenario: MERGE-008.11 One action at a time
 
 ## MERGE-009: Force Push after pushed commits were rewritten
 
-- Status: planned
+- Status: draft
 - Commands: `git.forcePush`
 - Files:
   - `src/lib/gitCommands.ts` — `git.forcePush` ("Force Push (Replace Remote Branch)…", enabled on a branch that has an upstream, with no operation stopped and git not busy)
-  - `src/lib/git.ts` — new `forcePush(root)` (fresh status, asks, then `remote(root, "push-force")`, notification); `rewrotePushed` per repository and branch in `useGit` (in memory only): set by `startRebase` after "Rebase Anyway" finished (also when it finished through Continue Rebase), cleared by a successful force push, an Abort, a branch switch, or when the upstream no longer has commits the branch lacks. HISTORY-011 sets the same marker for history edits
-  - `src/lib/gitMerge.ts` — `forcePushConfirm(branch, upstream, lost)` (danger dialog: the commits that are only on the remote, up to 12 lines then "and N more"; Cancel default), `forcePushDone`
+  - `src/lib/git.ts` — `forcePush(root)` (fresh status, `git.forcePushPreview`, asks, then `git.remote(root, "push-force")` under the busy label "Pushing…", notification); `rewrotePushed` per repository and branch in `useGit` (in memory only): set through `markRewritten` by `startRebase` after "Rebase Anyway" finished (also when it finished through Continue Rebase: `pendingRewrite`, `rewriteContinued`), cleared by a successful force push, an Abort, and by `pruneRewritten` on a branch switch or when the upstream no longer has commits the branch lacks. HISTORY-011 sets the same marker for history edits
+  - `src/lib/gitMerge.ts` — `forcePushConfirm(preview)` (danger dialog: the commits that are only on the remote, up to 12 lines then "and N more" from `commitLines`; Cancel default; "nothing to replace"), `forcePushDone`, `forcePushBlocked` (why the command is greyed out), `isRewritten` (does the status line offer Force Push)
   - `src/lib/gitStatus.ts` — `syncLine` gains the rewritten case ("… was rewritten: … still has the N old commits", no "Pull first")
   - `src/components/panels/GitPanel.tsx` — `SyncStatus`: "Force Push…" as the action of the rewritten case, in place of Pull (Merge) / Pull (Rebase)
   - `src/components/MenuBar.tsx` — Git menu item after Push
-  - `src/lib/gitApi.ts` — `GitRemoteOp` gains `"push-force"`
-  - `src-tauri/src/git.rs` — `remote_op` `"push-force"` = `push --force-with-lease=<branch>:<upstream tip as last fetched> <remote> <branch>:<upstream branch>` (never a bare `--force`, never another branch); `pushed_commits` (the shared "already pushed" helper, see MERGE-006)
-- Tests: `src/__tests__/gitMerge.test.ts`, `src/__tests__/gitRemote.test.ts`, `src/__tests__/gitPanel.test.tsx`, `src-tauri/src/git.rs`
+  - `src/lib/gitApi.ts` — `GitRemoteOp` gains `"push-force"`; `git.forcePushPreview`, `GitForcePushPreview`
+  - `src-tauri/src/git.rs` — `remote_op` `"push-force"` → `force_push`: `push --force-with-lease=refs/heads/<upstream branch>:<upstream tip as last fetched> <remote> refs/heads/<branch>:refs/heads/<upstream branch>` (never a bare `--force`, never another branch; git's "stale info" refusal becomes "… has commits you have not fetched"); `upstream_parts`; `force_push_preview` / `git_force_push_preview` (the commits only the upstream has); `pushed_commits` (the shared "already pushed" helper, see MERGE-006)
+- Tests: `src/__tests__/gitMerge.test.ts`, `src/__tests__/gitPanel.test.tsx`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 
 **As a** developer who knowingly rewrote commits that were already pushed
@@ -702,7 +705,7 @@ Scenario: MERGE-009.11 Nothing on the remote to replace
 Scenario: MERGE-009.12 The command is greyed out when it cannot run
   Given the current branch has no upstream, or HEAD is detached, or an operation is stopped on a conflict, or another git action is running
   When I open the Git menu or the command palette
-  Then "Force Push (Replace Remote Branch)…" is greyed out
+  Then "Force Push (Replace Remote Branch)…" is greyed out in the Git menu and is not listed in the command palette
 
 Scenario: MERGE-009.13 The rebase was aborted
   Given I confirmed "Rebase Anyway", the rebase stopped on a conflict and I aborted it

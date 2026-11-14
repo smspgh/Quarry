@@ -20,6 +20,10 @@ import { displayUrl, gitErrorText, hasConflictMarkers, isMissingRepo, KIND_RANK,
 export { isMissingRepo, KIND_LABEL, KIND_LETTER, kindOf, type GitKind } from "./gitStatus";
 import { choose } from "./dialogs";
 import { showPanel } from "./panels";
+// Start a merge or rebase, force push (specs/git-merge-rebase.md): the actions are at the end of this file.
+import type { GitForcePushPreview, GitMergePreview } from "./gitApi";
+import { dirtyRefusal, forcePushBlocked, forcePushConfirm, forcePushDone, isRewritten, mergeConfirm, mergeDone, rebaseConfirm, rebaseDone, startBlocked, trackedChanges, type StartKind, type StartTarget } from "./gitMerge";
+import type { BranchPurpose } from "./gitRefs";
 
 export interface FileHistory {
   path: string;
@@ -64,6 +68,11 @@ interface GitState {
   remoteCheck: Record<string, { at: number; checking: boolean; error: string | null }>;
   /** The remote whose Change form is open in the panel, and which choice it starts on. */
   editRemote: { name: string; how: "github" | "url" } | null;
+  /** Why the branch picker is open (`pickBranch(purpose)`): sets its prompt, rows and the command a row runs. */
+  branchPick: BranchPurpose;
+  /** Branches on which Quarry rewrote commits that were already pushed (lower-case root → branch);
+   *  the status line then offers Force Push. In memory only; pruned by `pruneRewritten`. */
+  rewrotePushed: Record<string, string>;
 }
 
 export const useGit = create<GitState>(() => ({
@@ -83,6 +92,8 @@ export const useGit = create<GitState>(() => ({
   remoteInfo: {},
   remoteCheck: {},
   editRemote: null,
+  branchPick: "switch",
+  rewrotePushed: {},
 }));
 
 const key = (p: string) => p.toLowerCase();
@@ -488,6 +499,7 @@ export async function continueOperation(root: string, operation: string, how: "c
   // Status is refreshed by run(); a rebase that is still going shows its next step there.
   const still = await git.status(root).catch(() => null);
   toast(operationDone(out || operation, how, !!still?.operation), "success", 3500);
+  rewriteContinued(root, still); // a rebase of pushed commits that finished this way (MERGE-009)
 }
 
 /** The last conflict of a document was just resolved in the editor: offer to finish the file. */
@@ -746,14 +758,25 @@ export async function saveIdentity(root: string, name: string, email: string, gl
   return !!ok;
 }
 
-/** Open the branch picker (palette mode "branch"). */
-export async function pickBranch() {
+/**
+ * Open the branch picker (palette mode "branch"). The purpose sets its prompt, which rows it lists
+ * and the command a picked row runs (`branchPick` / `pickList` in gitRefs.ts): "switch" (the
+ * default), or "merge" / "rebase", which are refused here when they cannot start.
+ */
+export async function pickBranch(purpose: BranchPurpose = "switch") {
   const repo = currentRepo();
   if (!repo) {
     toast("The open folder is not in a git repository.", "info");
     return;
   }
-  useGit.setState({ branches: null });
+  if (purpose !== "switch") {
+    const blocked = startBlocked(repo, purpose, useGit.getState().busy);
+    if (blocked) {
+      toast(`${blocked}.`, "info", 4000);
+      return;
+    }
+  }
+  useGit.setState({ branches: null, branchPick: purpose });
   useStore.getState().set({ palette: "branch" });
   const list = await git.branches(repo.root).catch((e) => {
     toast(String(e), "error");
@@ -934,6 +957,7 @@ export async function abortOperation(root: string, operation: string) {
   const out = await run("Aborting…", () => git.abort(root));
   if (out === undefined) return;
   toast(operationDone(out || operation, "abort"), "info", 3000);
+  pendingRewrite.delete(key(root)); // nothing was rewritten after all (MERGE-009)
   void checkExternalChanges();
 }
 
@@ -958,4 +982,162 @@ export async function compareCommitWithCurrent(h: FileHistory, i: number) {
   const left = { kind: "text" as const, label: `${name} @ ${e.short}`, text: b?.text ?? "" };
   if (doc) await openCompare(left, { kind: "tab", docId: doc.id });
   else await openCompare(left, { kind: "file", path: h.path });
+}
+
+// ---------- start a merge or rebase, force push (specs/git-merge-rebase.md) ----------
+
+/** Rebases of pushed commits that stopped on a conflict (lower-case root → branch): once they
+ *  finish through Continue, the branch counts as rewritten; an Abort forgets them. */
+const pendingRewrite = new Map<string, string>();
+
+/** The branch was rewritten and its upstream still has the old commits: the status line offers Force Push. */
+function markRewritten(root: string, st: GitStatus | null, branch: string) {
+  if (!st || !isRewritten(branch, st)) return;
+  useGit.setState((g) => ({ repos: { ...g.repos, [key(root)]: st }, rewrotePushed: { ...g.rewrotePushed, [key(root)]: branch } }));
+}
+
+function rewriteContinued(root: string, st: GitStatus | null) {
+  const branch = pendingRewrite.get(key(root));
+  if (!branch || st?.operation) return; // not one of these, or it stopped again
+  pendingRewrite.delete(key(root));
+  markRewritten(root, st, branch);
+}
+
+/** Drop the "rewritten" marks that no longer hold: another branch is checked out, or the upstream
+ *  has no commits left that the branch lacks (force pushed, pulled, or the upstream is gone). */
+function pruneRewritten(g: GitState) {
+  let next: Record<string, string> | null = null;
+  for (const [k, branch] of Object.entries(g.rewrotePushed)) {
+    const repo = g.repos[k];
+    if (repo && isRewritten(branch, repo)) continue;
+    next ??= { ...g.rewrotePushed };
+    delete next[k];
+  }
+  if (next) useGit.setState({ rewrotePushed: next });
+}
+useGit.subscribe(pruneRewritten);
+
+/**
+ * The checks every way of starting a merge or rebase goes through (graph menus, panel, Git menu,
+ * palette, the hidden commands in a macro), on a fresh status: nothing running or stopped, a branch
+ * for a rebase, and no uncommitted changes to tracked files. Null when it may not start (said in a
+ * notification or the "Commit or discard your changes first" dialog).
+ */
+async function startCheck(root: string, kind: StartKind): Promise<GitStatus | null> {
+  const st = await git.status(root).catch(() => null);
+  const blocked = startBlocked(st, kind, useGit.getState().busy);
+  if (blocked || !st) {
+    toast(`${blocked}.`, "info", 4000);
+    return null;
+  }
+  const dirty = trackedChanges(st);
+  if (dirty) {
+    const d = dirtyRefusal(kind, dirty);
+    if (await choose(d.title, d.text, d.choices, false)) showPanel("git");
+    return null;
+  }
+  return st;
+}
+
+async function startPreview(root: string, ref: string): Promise<GitMergePreview | null> {
+  try {
+    return await git.mergePreview(root, ref);
+  } catch (e) {
+    toast(gitErrorText(String(e)), "error", 8000);
+    return null;
+  }
+}
+
+/**
+ * Run the merge / rebase. "stopped": it stopped on a conflict, which is finished or aborted in
+ * Source Control (shown now); "failed": git refused and nothing is in progress.
+ */
+async function runStart(root: string, label: string, fn: () => Promise<string>): Promise<"done" | "stopped" | "failed"> {
+  const out = await run(label, fn);
+  const { checkExternalChanges } = await import("./actions");
+  void checkExternalChanges();
+  if (out !== undefined) return "done";
+  const now = await git.status(root).catch(() => null);
+  if (!now?.operation) return "failed";
+  useGit.setState((g) => ({ repos: { ...g.repos, [key(root)]: now } }));
+  showPanel("git");
+  return "stopped";
+}
+
+const asTarget = (t: StartTarget | string): StartTarget => (typeof t === "string" ? { ref: t, label: t, named: true } : t);
+
+/** Merge a branch, tag or commit into the current branch, after asking. True when it finished. */
+export async function startMerge(root: string, target: StartTarget | string): Promise<boolean> {
+  const t = asTarget(target);
+  const st = await startCheck(root, "merge");
+  const p = st && (await startPreview(root, t.ref));
+  if (!st || !p) return false;
+  const plan = mergeConfirm(p, t.label, st.branch);
+  if (plan.nothing !== undefined) {
+    toast(plan.nothing, "info", 4000);
+    return false;
+  }
+  const mode = await choose(plan.title, plan.text, plan.choices, null);
+  if (!mode) return false;
+  if ((await runStart(root, "Merging…", () => git.merge(root, p.target, mode))) !== "done") return false;
+  toast(mergeDone(mode, p, t.label, st.branch), "success", 4000);
+  return true;
+}
+
+/**
+ * Rebase the current branch onto a branch, tag or commit, after asking (a danger dialog when
+ * commits to replay are already pushed). True when it finished.
+ */
+export async function startRebase(root: string, target: StartTarget | string): Promise<boolean> {
+  const t = asTarget(target);
+  const st = await startCheck(root, "rebase");
+  const p = st && (await startPreview(root, t.ref));
+  if (!st?.branch || !p) return false;
+  const branch = st.branch;
+  const plan = rebaseConfirm(p, t.label, branch);
+  if (plan.nothing !== undefined) {
+    toast(plan.nothing, "info", 4000);
+    return false;
+  }
+  const how = await choose(plan.title, plan.text, plan.choices, null);
+  if (!how) return false;
+  // Pushed commits get new ids (or the branch was already rewritten and not force pushed yet).
+  const rewrites = how === "rebase" && (p.pushed > 0 || useGit.getState().rewrotePushed[key(root)] === branch);
+  const result = await runStart(root, "Rebasing…", () => (how === "ff" ? git.merge(root, p.target, "ff-only") : git.rebase(root, p.target)));
+  if (result === "stopped" && rewrites) pendingRewrite.set(key(root), branch);
+  if (result !== "done") return false;
+  toast(rebaseDone(how, p, t.label, branch), "success", 4000);
+  if (rewrites) markRewritten(root, await git.status(root).catch(() => null), branch);
+  return true;
+}
+
+/**
+ * Replace the current branch's upstream with the branch (`push --force-with-lease`), after a
+ * danger dialog that lists the commits the remote loses. Never forces anything else.
+ */
+export async function forcePush(root: string): Promise<boolean> {
+  const st = await git.status(root).catch(() => null);
+  const blocked = forcePushBlocked(st, useGit.getState().busy);
+  if (blocked || !st) {
+    toast(`${blocked}.`, "info", 4000);
+    return false;
+  }
+  let p: GitForcePushPreview;
+  try {
+    p = await git.forcePushPreview(root);
+  } catch (e) {
+    toast(gitErrorText(String(e)), "error", 8000);
+    return false;
+  }
+  const plan = forcePushConfirm(p);
+  if (plan.nothing !== undefined) {
+    toast(plan.nothing, "info", 4000);
+    return false;
+  }
+  if (!(await choose(plan.title, plan.text, plan.choices, null))) return false;
+  if ((await run("Pushing…", () => git.remote(root, "push-force"))) === undefined) return false;
+  useGit.setState((g) => ({ rewrotePushed: Object.fromEntries(Object.entries(g.rewrotePushed).filter(([k]) => k !== key(root))) }));
+  markChecked(root, null);
+  toast(forcePushDone(p), "success", 4000);
+  return true;
 }

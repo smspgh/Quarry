@@ -8,6 +8,9 @@ import { relativeTime } from "../../editor/git";
 import { useStore } from "../../lib/store";
 import { Select } from "../Select";
 import { RepoSettings } from "./GitRepoSettings";
+import { MergeRebaseButton } from "./GitMergeButton";
+import { forcePush } from "../../lib/git";
+import { isRewritten } from "../../lib/gitMerge";
 
 const nameOf = (p: string) => p.slice(p.lastIndexOf("\\") + 1);
 
@@ -318,6 +321,7 @@ function HistorySection() {
 function SyncStatus({ repo }: { repo: GitStatus }) {
   const check = useGit((s) => s.remoteCheck[repo.root.toLowerCase()]);
   const busy = useGit((s) => s.busy);
+  const rewritten = useGit((s) => isRewritten(s.rewrotePushed[repo.root.toLowerCase()], repo));
   const hasRemote = repo.remotes.length > 0;
   useEffect(() => {
     if (!hasRemote) return;
@@ -368,10 +372,18 @@ function SyncStatus({ repo }: { repo: GitStatus }) {
     actions = act("Push to Recreate It", "push", `Push ${repo.branch} to the remote again and track it`, true);
   } else {
     // Uncommitted work and commits to push / pull are separate things: say both.
-    const line = syncLine(repo.files.length, repo.ahead, repo.behind, up);
+    // After Quarry rewrote pushed commits (MERGE-009) a pull would bring the old ones back: the
+    // line says so and its only action is Force Push, which asks on its own.
+    const line = syncLine(repo.files.length, repo.ahead, repo.behind, up, rewritten ? repo.branch : null);
     kind = line.kind;
     text = line.text;
-    if (repo.ahead && repo.behind) {
+    if (rewritten) {
+      actions = (
+        <button className="btn small btn-danger" title={`Replace ${up} with your ${repo.branch} (asks first; refused if ${up} changed since it was last fetched)`} disabled={!!busy || !!check?.checking} onClick={() => void forcePush(repo.root)}>
+          Force Push…
+        </button>
+      );
+    } else if (repo.ahead && repo.behind) {
       actions = (
         <>
           {act("Pull (Merge)", "pull-merge", "Pull and join both histories with a merge commit", true)}
@@ -537,6 +549,7 @@ export function GitPanel() {
               <button className="btn small" title="Switch branch or create one" disabled={!!busy} onClick={() => void pickBranch()}>
                 <GitBranch size={13} /> <span className="truncate">{branchLabel}</span>
               </button>
+              <MergeRebaseButton repo={repo} />
               {repo.operation && <span className="scm-op" title="Stopped part-way, usually on a conflict: resolve the files under Merge Changes and commit, or abort">{opWords!.badge}{repo.operationStep ? ` ${repo.operationStep[0]} of ${repo.operationStep[1]}` : ""}</span>}
               {repo.operation && repo.operation !== "merge" && (
                 <button className="btn small" disabled={!!busy || groups.conflict.length > 0} title={groups.conflict.length ? "Resolve the conflicts first (or Abort)" : `Leave out the ${opWords!.item} ${opWords!.noun} stopped on and carry on`} onClick={() => void continueOperation(repo.root, repo.operation!, "skip")}>

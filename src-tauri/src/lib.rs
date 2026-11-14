@@ -863,6 +863,10 @@ pub fn run() {
             git::git_graph_index,
             git::git_commit_detail,
             git::git_commit_action,
+            git::git_merge_preview,
+            git::git_merge,
+            git::git_rebase,
+            git::git_force_push_preview,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

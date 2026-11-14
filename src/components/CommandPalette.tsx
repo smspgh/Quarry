@@ -2,7 +2,8 @@ import { EditorView } from "@codemirror/view";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { allLanguageNames } from "../editor/cmSetup";
 import { editor } from "../editor/manager";
-import { useGit } from "../lib/git";
+import { currentRepo, useGit } from "../lib/git";
+import { branchPick, pickList } from "../lib/gitRefs";
 import { openPath } from "../lib/actions";
 import { bus } from "../lib/bus";
 import { allCommands, prettyKeys, runCommand, type Command } from "../lib/commands";
@@ -74,6 +75,7 @@ export function CommandPalette() {
   const folder = useStore((s) => s.folder);
   const fileListCache = useStore((s) => s.fileListCache);
   const branches = useGit((s) => s.branches);
+  const branchPurpose = useGit((s) => s.branchPick);
   const cursorLine = useStore((s) => s.cursor.line);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
@@ -187,22 +189,24 @@ export function CommandPalette() {
       return scored.slice(0, 100);
     }
     if (mode === "branch") {
-      const list = branches ?? [];
+      // What is listed and what a picked row runs depend on why the picker was opened (gitRefs.ts).
+      const pick = branchPick(branchPurpose, null);
+      const list = pickList(branchPurpose, branches ?? []);
       const out: Item[] = [];
       const name = query.trim().replace(/\s+/g, "-");
-      if (name && !list.some((b) => b.name === name)) {
+      if (pick.create && name && !list.some((b) => b.name === name)) {
         out.push({ key: "create", cmd: { id: "git.createBranch", title: `Create branch "${name}" from here`, category: "", run: () => {} } as Command, arg: name, idx: [] });
       }
       for (const b of list) {
         const m = fuzzy(query, b.name);
         if (!m) continue;
         const category = b.current ? "current" : b.remote ? "remote" : "";
-        out.push({ key: b.name, cmd: { id: "git.checkoutTo", title: b.name, category, run: () => {} } as Command, arg: b.name, idx: category ? m.idx.map((i) => i + category.length + 2) : m.idx });
+        out.push({ key: b.name, cmd: { id: pick.command, title: b.name, category, run: () => {} } as Command, arg: b.name, idx: category ? m.idx.map((i) => i + category.length + 2) : m.idx });
       }
       return out;
     }
     return [];
-  }, [mode, query, fileListCache, folder, branches]);
+  }, [mode, query, fileListCache, folder, branches, branchPurpose]);
 
   useEffect(() => {
     setActive(0);
@@ -295,7 +299,7 @@ export function CommandPalette() {
         : mode === "encoding"
           ? "Reopen with encoding…"
         : mode === "branch"
-          ? "Switch to a branch, or type a name to create one…"
+          ? branchPick(branchPurpose, currentRepo()?.branch ?? null).prompt
         : mode === "files"
           ? folder
             ? "Search files in folder by name…"

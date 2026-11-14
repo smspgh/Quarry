@@ -35,6 +35,42 @@ Open it from the rail (branch icon), **Git › Show Source Control** or **Ctrl+S
 
 **Git › Switch Branch…**, the panel's branch button or the branch in the status bar open a list of branches: local ones first, then remote ones (marked *remote*), the current one marked *current*. Pick one to switch to it; a remote branch is checked out as a new local branch tracking it. Type a name that doesn't exist and pick **Create branch "…" from here** to create it from the current commit and switch to it. Git refuses a switch that would overwrite uncommitted changes; the message says which files.
 
+## Merge and rebase
+
+**Merge** brings another branch's commits into the branch you are on; nothing is rewritten. **Rebase** replays your branch's own commits on top of another branch, so they get new ids. Both can be started from four places, and all of them ask first:
+
+- **Git › Merge Branch…** and **Git › Rebase onto Branch…** (also in the command palette) open the branch list without the branch you are on: local branches first, then remote ones. Pick one.
+- The **Merge or Rebase** button right after the branch button in Source Control offers the same two.
+- In the commit graph, right-click a commit: **Merge … into *branch*…** and **Rebase *branch* onto …** sit under Cherry-pick and Revert. A commit that carries exactly one other branch label stands for that branch (the entries then name it); otherwise the commit is used by its id.
+- In the commit graph, right-click a **branch or tag label** (in a row, or under Refs in the details): a menu for that label opens, headed **Branch feature**, **Remote branch origin/topic** or **Tag v1.2.0**, with the same two entries by name. The label of the branch you are on has them greyed out.
+
+A remote branch is used as it was last fetched: nothing is fetched and no local branch is created.
+
+**The merge dialog** says how many commits come in. When your branch has commits of its own there is one outcome, a merge commit, and one **Merge** button. When it has none, you choose: **Fast-forward** just moves your branch forward, **Create a Merge Commit** records that the other branch was separate. The message ("Merge branch 'feature'") is git's own; you are not asked for one. When your branch already contains the other one, Quarry says so and does nothing.
+
+**The rebase dialog** says how many of your commits are replayed. When one of them is a merge commit it says that a rebase does not keep it. With no commits of your own a rebase is just a fast-forward, and is offered as one. When the branch is already based on the other, Quarry says so and does nothing.
+
+**Cancel is the default button** of all these dialogs: Enter and Escape both cancel.
+
+**When they refuse to start:**
+
+- *Uncommitted changes to tracked files*: the dialog **Commit or discard your changes first** opens (with **Show Source Control**). A merge or rebase only starts from a clean state, so that **Abort** always brings back exactly what was there. Untracked files do not block. Nothing is stashed for you.
+- *A merge, rebase, cherry-pick or revert is stopped*: finish or abort it first. The entries are greyed out and say so.
+- *Detached HEAD*: merge works ("into the current commit"); rebase is off, because it moves a branch.
+- *Another git action is running*: one at a time.
+
+**A conflict** stops the merge or rebase part-way and opens Source Control: the files are under **Merge Changes**, and **Abort** (and for a rebase **Skip** and **Continue Rebase**) work as described under *Resolving a conflict* and *Rebase* below.
+
+### Rebasing commits that are already pushed
+
+When some of the commits a rebase would replay are already on a remote branch (any remote branch, as last fetched), the ordinary dialog is replaced by a warning, **Rebase commits that are already pushed?** It lists those commits, says that the branch and its remote will no longer agree and that anyone who pulled them will have to repair their copy, and suggests a merge instead. **Rebase Anyway** runs it; the rebase itself pushes nothing.
+
+Afterwards the status line in Source Control reads **main was rewritten: origin/main still has the 3 old commits. Force Push replaces them with yours.** and its only button is **Force Push…** (a Pull would bring the old commits back, so it is not offered).
+
+**Force Push** (**Git › Force Push (Replace Remote Branch)…**, also in the palette) replaces the branch on the remote with yours. It asks again, in a dialog that lists the commits the remote will lose, with Cancel as the default. It only ever touches the current branch's own remote branch, and it is refused when that remote branch has changed since Quarry last fetched it (someone else pushed): fetch, look at their commits, then decide. The plain **Push** never forces.
+
+Quarry remembers that it rewrote a branch only until you force push, switch branch or restart; after that the status line is the ordinary one, and Force Push is still in the Git menu.
+
 ## Commits
 
 Under the changes, **Commits** lists the branch's commits, newest first (30 at a time; **Show more** loads older ones). It is how you see what a commit you just made contains.
@@ -72,6 +108,7 @@ Right-click a commit for the actions:
 | Check Out This Commit… | Your files become that commit, on no branch ("detached"). Switch back with the branch button. |
 | Cherry-pick onto *branch*… | Copies that commit's changes onto your branch as a new commit. |
 | Revert This Commit… | Adds a commit that undoes it; history is kept. |
+| Merge … into *branch*… / Rebase *branch* onto This… | Start a merge or a rebase with that commit (or the one branch on it); see [Merge and rebase](#merge-and-rebase). Right-click a branch or tag label for the same two by name. |
 | Reset *branch* to Here (Soft / Mixed / Hard)… | Moves your branch back to that commit. **Soft** keeps the later changes staged, **Mixed** keeps them in your files unstaged, **Hard** discards them along with uncommitted changes to tracked files. |
 
 Everything that moves your branch or files asks first and says what will happen. A cherry-pick or revert that hits a conflict stops part-way: Source Control shows the operation (**Cherry-picking**) with the conflicted files under **Merge Changes**. The graph tab shows the same thing in a strip at its top. Resolve and commit them, or press **Abort** (in the strip, or beside the branch in Source Control) to go back to how things were. Abort also works for a merge or rebase that stopped. 
@@ -102,7 +139,7 @@ Applying a patch series with `git am` works the same way when a patch does not a
 
 While any file is still in conflict, the Commit button is disabled and reads **Resolve 1 Conflict First**. The message box is filled in with the message git prepared (the picked commit's own message, or "Merge branch …"), unless you had already typed one. Marking a file resolved (**+** under Merge Changes) checks it first: if it still contains git's `<<<<<<<` / `>>>>>>>` conflict lines, Quarry asks before staging it.
 
-Not in the graph: dropping a commit from the middle of a branch and interactive rebase.
+Not in the graph: dropping a commit from the middle of a branch and interactive rebase. Starting a merge or a rebase is described under [Merge and rebase](#merge-and-rebase).
 
 ## File history
 

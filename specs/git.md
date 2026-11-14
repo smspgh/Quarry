@@ -330,12 +330,13 @@ Scenario: GIT-006.5 Binary files
 - Status: draft
 - Commands: `git.switchBranch`, `git.checkoutTo`, `git.createBranch`
 - Files:
-  - `src/lib/git.ts` — `pickBranch` (opens palette mode `branch`, loads `branches`), `checkout`
-  - `src/components/CommandPalette.tsx` — `mode === "branch"` item list ("Create branch …" row, `current` / `remote` labels), placeholder, "Loading branches…"
+  - `src/lib/git.ts` — `pickBranch(purpose)` (opens palette mode `branch` for the purpose `"switch"`, the default; loads `branches`; the other purposes are MERGE-003's), `checkout`
+  - `src/lib/gitRefs.ts` — `branchPick("switch", …)` (prompt, `git.checkoutTo`, the "Create branch" row), `pickList`
+  - `src/components/CommandPalette.tsx` — `mode === "branch"` item list from the purpose in `useGit().branchPick` ("Create branch …" row, `current` / `remote` labels), placeholder, "Loading branches…"
   - `src/lib/gitCommands.ts` — `git.switchBranch`, hidden `git.checkoutTo` / `git.createBranch`
-  - `src/components/panels/GitPanel.tsx` — branch button (`branchLabel`, disabled while busy)
+  - `src/components/panels/GitPanel.tsx` — branch button (`branchLabel`, disabled while busy); the "Merge or Rebase" button after it is MERGE-003's
   - `src-tauri/src/git.rs` — `git_branches` (`for-each-ref`, local first, newest first, symbolic refs skipped), `git_checkout` (`switch`, `switch -c`, `switch --track`)
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git.rs`, `src/__tests__/branchPicker.test.tsx`, `src/__tests__/gitRefs.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer working on several branches
@@ -672,8 +673,8 @@ Scenario: GIT-012.6 No discard for staged rows
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/gitStatus.ts` — `syncLine`, `SyncKind`
-  - `src/components/panels/GitPanel.tsx` — `SyncStatus` (text, icon per kind, action buttons, "Checking the remote…")
+  - `src/lib/gitStatus.ts` — `syncLine` (its `rewritten` case is MERGE-009's), `SyncKind`
+  - `src/components/panels/GitPanel.tsx` — `SyncStatus` (text, icon per kind, action buttons, "Checking the remote…"; "Force Push…" after a rewrite of pushed commits, MERGE-009)
   - `src-tauri/src/git.rs` — `parse_status` (`branch.upstream`, `branch.ab`, `upstream_gone`)
   - `src/styles/app.css` — `.scm-sync`, `.scm-status-row`
 - Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git.rs`
@@ -712,6 +713,7 @@ Scenario: GIT-013.5 Diverged branches offer both ways to pull
   When I look at the status line
   Then it shows a warning and "Diverged from origin/main: 2 commits to push, 1 to pull. Pull first, then push."
   And the buttons "Pull (Merge)" and "Pull (Rebase)" are offered
+  And when the branch differs because Quarry rewrote commits that were already pushed, the line offers "Force Push…" instead (MERGE-009.1)
 
 Scenario: GIT-013.6 Pull (Merge) and Pull (Rebase)
   Given diverged branches
@@ -810,7 +812,7 @@ Scenario: GIT-014.8 Only the branch's remote is checked
   - `src/components/panels/GitPanel.tsx` — header Fetch / Pull / Push buttons and tooltips, `SyncStatus` action buttons, busy label
   - `src/lib/gitCommands.ts` — `git.fetch`, `git.pull`, `git.push`
   - `src/lib/gitStatus.ts` — `gitErrorText` (hint lines dropped)
-  - `src-tauri/src/git.rs` — `git_remote` / `remote_op` (`fetch --all --prune`, `pull`, `pull --no-rebase`, `pull --rebase`, `push`, `push --set-upstream <origin or first remote> HEAD`)
+  - `src-tauri/src/git.rs` — `git_remote` / `remote_op` (`fetch --all --prune`, `pull`, `pull --no-rebase`, `pull --rebase`, `push`, `push --set-upstream <origin or first remote> HEAD`; `"push-force"` is Force Push, MERGE-009: none of these ever forces)
   - `src/components/StatusBar.tsx` — busy label after the branch
 - Tests: `src-tauri/src/git.rs`, `src/__tests__/gitRemote.test.ts`
 - Docs: `docs/git.md`

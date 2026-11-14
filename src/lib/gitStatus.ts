@@ -79,8 +79,13 @@ export type SyncKind = "ok" | "local" | "todo" | "warn";
  * The Source Control status line for a branch that has an upstream: uncommitted work and the
  * commits to push / pull are told apart, so "matches the remote" is never read as "all saved".
  */
-export function syncLine(changes: number, ahead: number, behind: number, upstream: string): { kind: SyncKind; text: string } {
+export function syncLine(changes: number, ahead: number, behind: number, upstream: string, rewritten: string | null = null): { kind: SyncKind; text: string } {
   const local = changes ? count(changes, "uncommitted change") : "";
+  // `rewritten` (the branch's name): Quarry rewrote commits that were already pushed (MERGE-009).
+  // The upstream's commits are the old ones: a pull would bring them back, so Force Push is advised.
+  if (rewritten && behind) {
+    return { kind: "warn", text: `${local ? local + ". " : ""}${rewritten} was rewritten: ${upstream} still has the ${behind === 1 ? "old commit" : `${behind} old commits`}. Force Push replaces ${behind === 1 ? "it" : "them"} with yours.` };
+  }
   if (ahead && behind) {
     return { kind: "warn", text: `${local ? local + ". " : ""}Diverged from ${upstream}: ${count(ahead, "commit")} to push, ${behind} to pull. Pull first, then push.` };
   }
@@ -155,6 +160,14 @@ const OPERATIONS: Record<string, OperationWords> = {
 /** Wording for a stopped operation; an unknown one is named by git's word for it. */
 export function operationWords(operation: string): OperationWords {
   return OPERATIONS[operation] ?? { badge: operation, noun: `the ${operation}`, item: "commit", continueLabel: null, abortLabel: `Abort ${(operation[0] ?? "").toUpperCase()}${operation.slice(1)}`, placeholder: null, sidesNote: "" };
+}
+
+/**
+ * "Finish or abort the rebase first": why something cannot start while an operation is stopped
+ * (merge / rebase entries, Stash, Edit History). No full stop: add one for a notification.
+ */
+export function finishFirst(operation: string): string {
+  return `Finish or abort ${operationWords(operation).noun} first`;
 }
 
 /** The notification after Continue / Skip (`still` = the operation stopped again) or Abort. */

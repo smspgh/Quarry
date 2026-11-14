@@ -481,7 +481,7 @@ Scenario: CONFLICT-010.6 The button comes back
 - Files:
   - `src/components/panels/GitPanel.tsx` — operation badge (`OPERATION` labels), "Abort" beside the branch
   - `src/components/GraphView.tsx` — "Abort" in the stopped-operation strip
-  - `src/lib/git.ts` — `abortOperation` (asks, then `checkExternalChanges`)
+  - `src/lib/git.ts` — `abortOperation` (asks, then `checkExternalChanges`; forgets a pending rewrite of pushed commits, MERGE-009)
   - `src-tauri/src/git.rs` — `operation` (rebase-merge / rebase-apply / MERGE_HEAD / CHERRY_PICK_HEAD / REVERT_HEAD), `abort_operation` / `git_abort`
   - `src/lib/gitApi.ts` — `git.abort`, `GitOperation`
 - Tests: `src-tauri/src/git.rs`
@@ -495,8 +495,9 @@ Scenario: CONFLICT-010.6 The button comes back
 Scenario: CONFLICT-011.1 The panel shows the operation
   Given a cherry-pick stopped on a conflict
   When I open the Source Control panel
-  Then a badge "Cherry-picking" shows beside the branch button, with an "Abort" button
+  Then a badge "Cherry-picking" shows after the branch button and the "Merge or Rebase" button, with an "Abort" button
   And a merge shows "Merging", a revert "Reverting" and a rebase "Rebasing"
+  And it is the same for a merge or rebase started in Quarry (MERGE-007)
 
 Scenario: CONFLICT-011.2 Abort asks first
   When I click "Abort"
@@ -508,6 +509,7 @@ Scenario: CONFLICT-011.3 Abort
   Then the branch and files are as before the cherry-pick, and Merge Changes is empty
   And a notification says "Aborted the cherry-pick."
   And open tabs of files that changed on disk are re-checked
+  And an aborted rebase of already-pushed commits leaves no "Force Push…" offer (MERGE-009.13)
 
 Scenario: CONFLICT-011.4 Cancel
   When I cancel the dialog
@@ -574,7 +576,7 @@ Scenario: CONFLICT-012.4 Nothing left to commit
 - Files:
   - `src/components/panels/GitPanel.tsx` — `rebasing`, disabled message box and its placeholder, `doCommit` → `continueOperation`, "Rebasing 2 of 5" from `operationStep`
   - `src/lib/gitStatus.ts` — `commitLabel(..., operation)` → "Continue Rebase"
-  - `src/lib/git.ts` — `continueOperation(root, "rebase", "continue")`, rebase `note` hook in `installGit`
+  - `src/lib/git.ts` — `continueOperation(root, "rebase", "continue")` (then `rewriteContinued`, MERGE-009), rebase `note` hook in `installGit`
   - `src/editor/conflicts.ts` — `ConflictHooks.note`, note shown in each bar
   - `src-tauri/src/git.rs` — `operation_step` (msgnum / end, next / last), `continue_operation` (`rebase --continue`, `GIT_EDITOR=true`)
 - Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git.rs`
@@ -603,6 +605,7 @@ Scenario: CONFLICT-013.3 The main button continues
   When I click it
   Then the rebase carries on with the next commit, keeping each commit's own message without opening an editor
   And a notification says "Continued: the rebase is on its next commit." when it stops again, or "The rebase is finished." when it is done
+  And when the rebase was started with "Rebase Anyway" over already-pushed commits (MERGE-006), finishing it makes the status line offer "Force Push…" (MERGE-009.1)
 
 Scenario: CONFLICT-013.4 Conflicts first
   Given 1 file is still under Merge Changes during the rebase

@@ -7,6 +7,8 @@ import type { EditorView } from "@codemirror/view";
 import { register, targetDoc } from "./commands";
 import { compareWithHead, currentRepo, checkout, openGraph, resolveConflicts, fileStatus, pickBranch, remote, repoOf, rescanGit, setSourceControlContext, showAddRemote, showHistory, stage, toggleBlame, unstage, useGit } from "./git";
 import { nextChangeIndex } from "./gitStatus";
+import { forcePush, startMerge, startRebase } from "./git";
+import { forcePushBlocked, startBlocked, type StartKind } from "./gitMerge";
 import { showPanel } from "./panels";
 import { activeDoc, useStore } from "./store";
 
@@ -167,6 +169,31 @@ export function registerGitCommands() {
       }
       revertChange(at.view, at.c);
       return true;
+    },
+  });
+
+  // ----- Start a merge or rebase, force push (specs/git-merge-rebase.md) -----
+  const busy = () => useGit.getState().busy;
+  const canStart = (kind: StartKind) => () => !startBlocked(currentRepo(), kind, busy());
+  register({ id: "git.mergeBranch", title: "Merge Branch…", category: "Git", enabled: canStart("merge"), run: () => void pickBranch("merge") });
+  register({ id: "git.rebaseBranch", title: "Rebase onto Branch…", category: "Git", enabled: canStart("rebase"), run: () => void pickBranch("rebase") });
+  // What a picked row of the branch list runs (and what a macro records): the name of a branch or
+  // tag, or a commit id. They go through every guard and dialog of startMerge / startRebase.
+  const startWith = (start: (root: string, target: string) => Promise<boolean>) => (name: unknown) => {
+    const repo = currentRepo();
+    if (typeof name !== "string" || !name.trim() || !repo) return false;
+    void start(repo.root, name.trim());
+  };
+  register({ id: "git.mergeRef", title: "Merge into Current Branch", category: "Git", hidden: true, run: startWith(startMerge) });
+  register({ id: "git.rebaseOnto", title: "Rebase Current Branch onto", category: "Git", hidden: true, run: startWith(startRebase) });
+  register({
+    id: "git.forcePush",
+    title: "Force Push (Replace Remote Branch)…",
+    category: "Git",
+    enabled: () => !forcePushBlocked(currentRepo(), busy()),
+    run: () => {
+      const repo = currentRepo();
+      if (repo) void forcePush(repo.root);
     },
   });
 }

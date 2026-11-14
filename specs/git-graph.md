@@ -71,7 +71,7 @@ Scenario: GRAPH-001.6 Not restored after a restart
 - Commands: none
 - Files:
   - `src/lib/gitGraph.ts` — `layoutGraph` (first parent keeps the lane, lowest free lane reused, carried `GraphState`), `refLabels`
-  - `src/components/GraphView.tsx` — `RowGraph` (SVG lines and dot), `RefBadge`, `MAX_LANES` = 16, `LANE_COLORS` = 8, `ROW` = 26
+  - `src/components/GraphView.tsx` — `RowGraph` (SVG lines and dot), `RefBadge` (its right-click opens the ref-label menu of MERGE-002), `MAX_LANES` = 16, `LANE_COLORS` = 8, `ROW` = 26
   - `src-tauri/src/git.rs` — `graph` (`log --topo-order --decorate=full`), `parse_graph`, command `git_graph`
   - `src/lib/gitApi.ts` — `git.graph`, `GitGraphCommit`
   - `src/styles/app.css` — `.graph-*`, `.gl-*` lane colours
@@ -120,6 +120,7 @@ Scenario: GRAPH-002.6 Labels
   And "feature" shows an outlined label, "origin/main" a remote label and "v1.0" a tag label
   And the labels are ordered: current branch, other local branches, remote branches, tags
   And no label is shown for "origin/HEAD"
+  And a right-click on a branch or tag label opens that label's own menu (MERGE-002), not the commit's
 
 Scenario: GRAPH-002.7 Detached HEAD
   Given HEAD is detached on a commit
@@ -587,8 +588,9 @@ Scenario: GRAPH-011.1 The menu
   When I right-click a commit
   Then the commit is selected
   And a menu opens headed by its short id and message
-  And it offers Copy Commit Id, Copy Message, Create Branch Here…, Create Branch Here (Don't Switch)…, Create Tag Here…, Check Out This Commit…, Cherry-pick, Revert This Commit… and three Reset entries
+  And it offers Copy Commit Id, Copy Message, Create Branch Here…, Create Branch Here (Don't Switch)…, Create Tag Here…, Check Out This Commit…, Cherry-pick, Revert This Commit…, the merge and rebase entries of MERGE-001 and three Reset entries
   And it closes on Escape or a click elsewhere
+  And a right-click on a branch or tag label of the row opens that label's menu instead (MERGE-002)
 
 Scenario: GRAPH-011.2 Copy
   When I choose "Copy Commit Id"

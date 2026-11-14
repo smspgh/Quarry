@@ -4569,6 +4569,9 @@ select optgroup {
   color: var(--warning);
 }
 .scm-busy { font-size: 11.5px; }
+/* Merge or Rebase button beside the branch button, and its two-entry menu (MERGE-003). */
+.scm-branch .scm-merge-btn { flex-shrink: 0; padding: 0 6px; }
+.scm-merge-menu { width: 210px; }
 .scm-sync {
   display: flex;
   flex-direction: column;

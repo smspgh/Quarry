@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, CircleDot, CloudDownload, Copy, Gauge, GitBranch, GitCommitHorizontal, History, Loader2, RefreshCw, RotateCcw, Search, Tag, TriangleAlert, Undo2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, CircleDot, CloudDownload, Copy, Gauge, GitBranch, GitCommitHorizontal, GitMerge, History, Loader2, RefreshCw, RotateCcw, Search, Tag, TriangleAlert, Undo2, X } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
@@ -11,6 +11,10 @@ import { git, type GitCommitAction, type GitCommitDetail, type GitCommitFile, ty
 import { actionConfirm, actionDone, commitMatches, layoutGraph, newGraphState, refLabels, type GraphRow, type RefLabel } from "../lib/gitGraph";
 import { commitFileKind, KIND_LABEL, KIND_LETTER, operationWords } from "../lib/gitStatus";
 import { useStore, type Doc } from "../lib/store";
+// Merge / rebase entries of the commit menu and the ref-label menu (specs/git-merge-rebase.md).
+import { startMerge, startRebase } from "../lib/git";
+import { startEntries, targetOf, type StartEntry, type StartTarget } from "../lib/gitMerge";
+import { refMenu as refMenuOf } from "../lib/gitRefs";
 
 const PAGE = 300;
 /** A page slower than this means git is walking the whole history for it. */
@@ -55,11 +59,11 @@ function RowGraph({ row, head, width }: { row: GraphRow; head: boolean; width: n
   );
 }
 
-function RefBadge({ label }: { label: RefLabel }) {
+function RefBadge({ label, onContextMenu }: { label: RefLabel; onContextMenu?: (e: React.MouseEvent) => void }) {
   const Icon = label.kind === "tag" ? Tag : label.kind === "remote" ? CloudDownload : GitBranch;
   const what = label.kind === "head" ? (label.name === "HEAD" ? "You are here (detached: not on a branch)" : `${label.name}: the branch you are on`) : label.kind === "branch" ? `Local branch ${label.name}` : label.kind === "remote" ? `Remote branch ${label.name}` : `Tag ${label.name}`;
   return (
-    <span className={`graph-ref ${label.kind}`} title={what}>
+    <span className={`graph-ref ${label.kind}`} title={what} onContextMenu={onContextMenu}>
       <Icon size={10} /> {label.name}
     </span>
   );
@@ -69,6 +73,11 @@ interface Menu {
   x: number;
   y: number;
   commit: GitGraphCommit;
+}
+
+/** The right-click menu of a branch / tag label (its entries come from `refMenu` in gitRefs.ts). */
+interface RefMenu extends Menu {
+  label: RefLabel;
 }
 
 /** Asking for a branch / tag name before an action runs. */
@@ -105,6 +114,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   /** The results list shrinks to a few rows once a result is picked, so the graph keeps its room. */
   const [hitsOpen, setHitsOpen] = useState(true);
   const [menu, setMenu] = useState<Menu | null>(null);
+  const [refMenu, setRefMenu] = useState<RefMenu | null>(null);
   const [naming, setNaming] = useState<Naming | null>(null);
   const [newName, setNewName] = useState("");
   const [scrollTop, setScrollTop] = useState(0);
@@ -333,8 +343,11 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
 
   // The menu closes on any click outside it, Escape, or losing the window.
   useEffect(() => {
-    if (!menu) return;
-    const close = () => setMenu(null);
+    if (!menu && !refMenu) return;
+    const close = () => {
+      setMenu(null);
+      setRefMenu(null);
+    };
     const key = (e: KeyboardEvent) => e.key === "Escape" && close();
     window.addEventListener("mousedown", close);
     window.addEventListener("keydown", key);
@@ -344,7 +357,26 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
       window.removeEventListener("keydown", key);
       window.removeEventListener("blur", close);
     };
-  }, [menu]);
+  }, [menu, refMenu]);
+
+  // ----- Merge / rebase (specs/git-merge-rebase.md) -----
+  /** Right-click on a ref label: its own menu; a label without one (detached HEAD) opens the commit's. */
+  const onRefContext = (e: React.MouseEvent, c: GitGraphCommit, label: RefLabel) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelected(c.sha);
+    const at = { x: e.clientX, y: e.clientY, commit: c };
+    const has = !!refMenuOf(label, { repo, busy });
+    setMenu(has ? null : at);
+    setRefMenu(has ? { ...at, label } : null);
+  };
+  const start = (kind: StartEntry["kind"], target: StartTarget) => void (kind === "merge" ? startMerge : startRebase)(root, target);
+  /** A merge / rebase entry: greyed out with the reason as its tooltip when it cannot start. */
+  const startItem = (e: StartEntry, target: StartTarget) => (
+    <button key={e.kind} className="palette-item" role="menuitem" disabled={!!e.disabled} title={e.disabled ?? e.hint} onClick={() => { setMenu(null); setRefMenu(null); start(e.kind, target); }}>
+      <GitMerge size={13} /><span className="title">{e.label}</span>
+    </button>
+  );
 
   const startResize = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -552,7 +584,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
               >
                 <span className="graph-lane-cell" style={{ width: graphW }}>{row && <RowGraph row={row} head={isHead} width={graphW} />}</span>
                 <span className="graph-c-msg">
-                  {labels.map((l) => <RefBadge key={l.full} label={l} />)}
+                  {labels.map((l) => <RefBadge key={l.full} label={l} onContextMenu={(e) => onRefContext(e, c, l)} />)}
                   <span className="truncate" title={c.summary}>{c.summary}</span>
                 </span>
                 <span className="graph-c-author truncate" title={`${c.author} <${c.email}>`}>{c.author}</span>
@@ -594,7 +626,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
                   {sel.parents.length === 0 && "none (the first commit)"}
                   {sel.parents.map((p) => <button key={p} className="link-btn mono" title="Go to this commit" onClick={() => void goTo(p)}>{p.slice(0, 7)}</button>)}
                 </dd>
-                {refLabels(sel.refs).length > 0 && (<><dt>Refs</dt><dd className="graph-refs">{refLabels(sel.refs).map((l) => <RefBadge key={l.full} label={l} />)}</dd></>)}
+                {refLabels(sel.refs).length > 0 && (<><dt>Refs</dt><dd className="graph-refs">{refLabels(sel.refs).map((l) => <RefBadge key={l.full} label={l} onContextMenu={(e) => onRefContext(e, sel, l)} />)}</dd></>)}
               </dl>
             </div>
             <div className="graph-detail-files">
@@ -622,6 +654,8 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
           <div className="menu-sep" />
           {item(`Cherry-pick onto ${branch ?? "Here"}…`, GitCommitHorizontal, () => void act("cherry-pick", menu.commit), "Copy this commit's changes onto the current branch as a new commit")}
           {item("Revert This Commit…", Undo2, () => void act("revert", menu.commit), "Add a commit that undoes this one")}
+          {/* Merge / rebase: a commit with one other branch label stands for that branch. */}
+          {startEntries(targetOf(menu.commit, branch), repo, busy, menu.commit.refs.includes("HEAD") ? "commit" : null).map((e) => startItem(e, targetOf(menu.commit, branch)))}
           <div className="menu-sep" />
           {item(`Reset ${branch ?? "HEAD"} to Here (Soft)…`, RotateCcw, () => void act("reset-soft", menu.commit), "Keep later changes staged")}
           {item(`Reset ${branch ?? "HEAD"} to Here (Mixed)…`, RotateCcw, () => void act("reset-mixed", menu.commit), "Keep later changes in the files, unstaged")}
@@ -629,6 +663,23 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
         </GraphMenu>,
         document.body,
       )}
+      {refMenu && (() => {
+        // The ref-label menu: built by `refMenu()` so later entries (branch and tag housekeeping) land here.
+        const m = refMenuOf(refMenu.label, { repo, busy });
+        if (!m) return null;
+        const target = { ref: m.full, label: m.name, named: true };
+        return createPortal(
+          <GraphMenu menu={refMenu} head={m.heading}>
+            {m.entries.map((e) => (
+              <span key={e.id} style={{ display: "contents" }}>
+                {e.group && <div className="menu-sep" />}
+                {(e.id === "merge" || e.id === "rebase") && startItem({ kind: e.id, label: e.label, disabled: e.disabled, hint: e.title ?? "" }, target)}
+              </span>
+            ))}
+          </GraphMenu>,
+          document.body,
+        );
+      })()}
     </div>
   );
 }
@@ -661,7 +712,7 @@ function DetailFile({ file, commit }: { file: GitCommitFile; commit: GitGraphCom
 }
 
 /** The right-click menu, kept inside the window. */
-function GraphMenu({ menu, children }: { menu: Menu; children: React.ReactNode }) {
+function GraphMenu({ menu, children, head }: { menu: Menu; children: React.ReactNode; head?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ left: menu.x, top: menu.y });
   useLayoutEffect(() => {
@@ -671,7 +722,7 @@ function GraphMenu({ menu, children }: { menu: Menu; children: React.ReactNode }
   }, [menu.x, menu.y]);
   return (
     <div ref={ref} className="palette ctx-menu graph-menu" role="menu" style={{ left: pos.left, top: pos.top }} onMouseDown={(e) => e.stopPropagation()}>
-      <div className="graph-menu-head truncate"><span className="mono">{menu.commit.short}</span> {menu.commit.summary}</div>
+      <div className="graph-menu-head truncate">{head ?? <><span className="mono">{menu.commit.short}</span> {menu.commit.summary}</>}</div>
       {children}
     </div>
   );

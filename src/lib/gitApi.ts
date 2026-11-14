@@ -165,7 +165,49 @@ export type GitCommitAction = "checkout" | "branch" | "branch-switch" | "tag" | 
 
 /** "check": the panel's background fetch of the branch's remote (never prompts). "pull-merge" /
  *  "pull-rebase": a pull that says how to join diverged branches. */
-export type GitRemoteOp = "fetch" | "check" | "pull" | "pull-merge" | "pull-rebase" | "push";
+export type GitRemoteOp = "fetch" | "check" | "pull" | "pull-merge" | "pull-rebase" | "push" | "push-force";
+
+// ----- Start a merge or rebase, force push (specs/git-merge-rebase.md) -----
+
+/** A commit named in a dialog. */
+export interface GitCommitRef {
+  sha: string;
+  short: string;
+  summary: string;
+}
+
+/** What a merge of / rebase onto a branch, tag or commit would do (read before asking). */
+export interface GitMergePreview {
+  /** What git is given: the full ref name (`refs/heads/feature`) or the commit id. */
+  target: string;
+  kind: "branch" | "remote" | "tag" | "commit";
+  /** The commit the target points at. */
+  sha: string;
+  short: string;
+  summary: string;
+  /** Commits the current branch has that the target lacks (a rebase replays these). */
+  ahead: number;
+  /** Commits the target has that the current branch lacks (a merge brings these in). */
+  behind: number;
+  /** How many of `ahead` are merge commits (a rebase does not keep them). */
+  merges: number;
+  /** How many of `ahead` are already on a remote branch (any, as last fetched), which branch, and the commits (newest first, at most 50). */
+  pushed: number;
+  pushedOn: string | null;
+  pushedCommits: GitCommitRef[];
+}
+
+/** "ff-only": move the branch forward or refuse; "no-ff": always a merge commit; "auto": git's default. */
+export type GitMergeMode = "auto" | "ff-only" | "no-ff";
+
+/** What Force Push would replace: the commits only the upstream has (as last fetched; at most 50 listed). */
+export interface GitForcePushPreview {
+  branch: string;
+  upstream: string;
+  lost: number;
+  commits: GitCommitRef[];
+}
+// ----- end -----
 
 export const git = {
   /** `git version ...`, or null when git cannot be run. */
@@ -233,4 +275,11 @@ export const git = {
   abort: (root: string) => invoke<string>("git_abort", { root }),
   /** Ids of the current branch's commits its upstream does not have yet (none without an upstream). */
   unpushed: (root: string) => invoke<string[]>("git_unpushed", { root }),
+  // Start a merge or rebase, force push (specs/git-merge-rebase.md). `target`: a branch, remote branch or tag name, or a commit id.
+  mergePreview: (root: string, target: string) => invoke<GitMergePreview>("git_merge_preview", { root, target }),
+  /** `merge --no-edit`; rejects with git's output when it stops on a conflict (the merge is then in progress). */
+  merge: (root: string, target: string, mode: GitMergeMode) => invoke<string>("git_merge", { root, target, mode }),
+  /** Plain `rebase <target>` of the current branch; rejects with git's output when it stops on a conflict. */
+  rebase: (root: string, target: string) => invoke<string>("git_rebase", { root, target }),
+  forcePushPreview: (root: string) => invoke<GitForcePushPreview>("git_force_push_preview", { root }),
 };
