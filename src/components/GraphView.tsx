@@ -25,6 +25,11 @@ import { pickBranch } from "../lib/git";
 import type { GitCompare } from "../lib/gitApi";
 import { compareClick, WORKTREE, type CompareNames } from "../lib/gitCompare";
 import { GraphCompare } from "./GraphCompare";
+// Branch and tag housekeeping entries of the ref-label menu (specs/git-branches.md).
+import { CloudUpload, Link2, Pencil, Trash2 } from "lucide-react";
+import { runCommand } from "../lib/commands";
+import { loadRefInfo } from "../lib/git";
+import { REF_COMMANDS, type RefMenuEntry } from "../lib/gitRefs";
 
 const PAGE = 300;
 /** A page slower than this means git is walking the whole history for it. */
@@ -69,11 +74,11 @@ function RowGraph({ row, head, width, stash = false }: { row: GraphRow; head: bo
   );
 }
 
-function RefBadge({ label, onContextMenu }: { label: RefLabel; onContextMenu?: (e: React.MouseEvent) => void }) {
+function RefBadge({ label, onContextMenu, open = false }: { label: RefLabel; onContextMenu?: (e: React.MouseEvent) => void; /** Its menu is open. */ open?: boolean }) {
   const Icon = label.kind === "stash" ? Archive : label.kind === "tag" ? Tag : label.kind === "remote" ? CloudDownload : GitBranch;
   const what = label.kind === "stash" ? "A stash: uncommitted work put aside, drawn on the commit it was made on" : label.kind === "head" ? (label.name === "HEAD" ? "You are here (detached: not on a branch)" : `${label.name}: the branch you are on`) : label.kind === "branch" ? `Local branch ${label.name}` : label.kind === "remote" ? `Remote branch ${label.name}` : `Tag ${label.name}`;
   return (
-    <span className={`graph-ref ${label.kind}`} title={what} onContextMenu={onContextMenu}>
+    <span className={`graph-ref ${label.kind} ${open ? "menu-open" : ""}`} title={what} onContextMenu={onContextMenu}>
       <Icon size={10} /> {label.name}
     </span>
   );
@@ -92,8 +97,10 @@ interface RefMenu extends Menu {
 
 /** Asking for a branch / tag name before an action runs. */
 interface Naming {
-  action: "branch" | "branch-switch" | "tag";
+  action: "branch" | "branch-switch" | "tag" | "rename";
   commit: GitGraphCommit;
+  /** "rename": the branch being renamed (BRANCH-004). */
+  branch?: string;
 }
 
 /**
@@ -369,6 +376,14 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   const commitNaming = () => {
     const n = newName.trim();
     const cur = naming;
+    // Rename Branch… (BRANCH-004): an empty or unchanged name does nothing; the rest is the command's.
+    if (cur?.action === "rename") {
+      if (!n || n === cur.branch) return;
+      setNaming(null);
+      setNewName("");
+      void runCommand("git.renameBranch", { name: cur.branch, to: n, root });
+      return;
+    }
     setNaming(null);
     setNewName("");
     if (cur && n) void act(cur.action, cur.commit, n);
@@ -392,6 +407,33 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
     };
   }, [menu, refMenu]);
 
+  // ----- Branch and tag housekeeping (specs/git-branches.md) -----
+  // What the label menu needs besides the status: each branch's upstream, each remote's default branch.
+  const refInfo = useGit((s) => s.refInfo[root.toLowerCase()]);
+  const refsTick = useGit((s) => s.refsTick);
+  const refCtx = { repo, busy, remotes: repo?.remotes.map((r) => r.name) ?? [], upstreams: refInfo?.upstreams, defaults: refInfo?.defaults };
+  useEffect(() => {
+    if (visible) void loadRefInfo(root);
+  }, [visible, root, stamp, refsTick]);
+  // A branch or tag action ran: refs do not change the status the reload effect watches.
+  const seenTick = useRef(refsTick);
+  useEffect(() => {
+    if (seenTick.current === refsTick) return;
+    seenTick.current = refsTick;
+    if (visible) void load(true);
+  }, [refsTick, visible, load]);
+  /** An entry of the label menu that is not merge / rebase. Every action is a command, so its questions cannot be skipped. */
+  const refAct = (e: RefMenuEntry, m: { name: string; kind: "branch" | "remote" | "tag" }, commit: GitGraphCommit) => {
+    setRefMenu(null);
+    if (e.id === "switch") void checkoutRef(root, m.name);
+    else if (e.id === "copy") copy(m.name, m.kind === "tag" ? "the tag name" : "the branch name");
+    else if (e.id === "rename") {
+      setNewName(m.name);
+      setNaming({ action: "rename", commit, branch: m.name });
+    } else if (REF_COMMANDS[e.id]) void runCommand(REF_COMMANDS[e.id], { name: m.name, root });
+  };
+  const refIcon = (id: string) => (id === "switch" ? GitBranch : id === "copy" ? Copy : id === "rename" ? Pencil : id === "upstream" ? Link2 : id === "push" || id === "push-tag" ? CloudUpload : Trash2);
+
   // ----- Merge / rebase (specs/git-merge-rebase.md) -----
   /** Right-click on a ref label: its own menu; a label without one (detached HEAD) opens the commit's. */
   const onRefContext = (e: React.MouseEvent, c: GitGraphCommit, label: RefLabel) => {
@@ -400,7 +442,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
     noteMenuOther(c);
     setSelected(c.sha);
     const at = { x: e.clientX, y: e.clientY, commit: c };
-    const has = !c.stash && !!refMenuOf(label, { repo, busy }); // a stash row only ever gets its own menu
+    const has = !c.stash && !!refMenuOf(label, refCtx); // a stash row only ever gets its own menu
     setMenu(has ? null : at);
     setRefMenu(has ? { ...at, label } : null);
   };
@@ -602,9 +644,10 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
       )}
       {naming && (
         <div className="graph-naming">
-          <span>{naming.action === "tag" ? "New tag" : "New branch"} at <span className="mono">{naming.commit.short}</span>:</span>
+          {naming.action === "rename" ? <span>Rename branch <span className="mono">{naming.branch}</span> to:</span> : <span>{naming.action === "tag" ? "New tag" : "New branch"} at <span className="mono">{naming.commit.short}</span>:</span>}
           <input
             autoFocus
+            onFocus={(e) => e.currentTarget.select()}
             className="input"
             spellCheck={false}
             placeholder={naming.action === "tag" ? "v1.0.0" : "branch-name"}
@@ -617,7 +660,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
               e.stopPropagation();
             }}
           />
-          <button className="btn btn-primary small" disabled={!newName.trim()} onClick={commitNaming}>{naming.action === "branch-switch" ? "Create and Switch" : "Create"}</button>
+          <button className="btn btn-primary small" disabled={!newName.trim() || (naming.action === "rename" && newName.trim() === naming.branch)} onClick={commitNaming}>{naming.action === "rename" ? "Rename" : naming.action === "branch-switch" ? "Create and Switch" : "Create"}</button>
           <button className="icon-btn xs" title="Cancel" onClick={() => setNaming(null)}><X size={14} /></button>
         </div>
       )}
@@ -663,7 +706,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
               >
                 <span className="graph-lane-cell" style={{ width: graphW }}>{row && <RowGraph row={row} head={isHead} width={graphW} stash={c.stash} />}</span>
                 <span className="graph-c-msg">
-                  {labels.map((l) => <RefBadge key={l.full} label={l} onContextMenu={(e) => onRefContext(e, c, l)} />)}
+                  {labels.map((l) => <RefBadge key={l.full} label={l} open={refMenu?.label.full === l.full && refMenu.commit.sha === c.sha} onContextMenu={(e) => onRefContext(e, c, l)} />)}
                   <span className="truncate" title={c.summary}>{c.stash ? stashTitle(c.summary).title : c.summary}</span>
                 </span>
                 <span className="graph-c-author truncate" title={`${c.author} <${c.email}>`}>{c.author}</span>
@@ -792,7 +835,7 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
       )}
       {refMenu && (() => {
         // The ref-label menu: built by `refMenu()` so later entries (branch and tag housekeeping) land here.
-        const m = refMenuOf(refMenu.label, { repo, busy });
+        const m = refMenuOf(refMenu.label, refCtx);
         if (!m) return null;
         const target = { ref: m.full, label: m.name, named: true };
         return createPortal(
@@ -801,6 +844,15 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
               <span key={e.id} style={{ display: "contents" }}>
                 {e.group && <div className="menu-sep" />}
                 {(e.id === "merge" || e.id === "rebase") && startItem({ kind: e.id, label: e.label, disabled: e.disabled, hint: e.title ?? "" }, target)}
+                {/* Housekeeping entries (specs/git-branches.md): Switch, rename, upstream, push, delete, copy. */}
+                {e.id !== "merge" && e.id !== "rebase" && (() => {
+                  const Icon = refIcon(e.id);
+                  return (
+                    <button className={`palette-item ${e.danger ? "danger" : ""}`} role="menuitem" disabled={!!e.disabled} title={e.disabled ?? e.title} onClick={() => refAct(e, m, refMenu.commit)}>
+                      <Icon size={13} /><span className="title">{e.label}</span>
+                    </button>
+                  );
+                })()}
               </span>
             ))}
           </GraphMenu>,

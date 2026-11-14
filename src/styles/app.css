@@ -5020,6 +5020,16 @@ select optgroup {
 .graph-ref.branch { border-color: var(--accent); color: var(--accent); }
 .graph-ref.remote { border-style: dashed; }
 .graph-ref.tag { background: var(--warning-soft); border-color: transparent; color: var(--warning); }
+/* Branch and tag housekeeping (specs/git-branches.md): a label shows it can be right-clicked, and
+   which one a menu belongs to; the branch picker's row button, row menu and note line. */
+.graph-ref.branch:hover, .graph-ref.head:hover, .graph-ref.remote:hover, .graph-ref.tag:hover,
+.graph-ref.menu-open { box-shadow: 0 0 0 2px var(--accent-soft); }
+.graph-ref.menu-open { border-color: var(--accent); border-style: solid; }
+.palette-item .palette-more { flex: none; opacity: 0; }
+.palette-item.active .palette-more, .palette-item:hover .palette-more, .palette-more:focus-visible { opacity: 1; }
+.branch-row-menu { width: 236px; }
+.branch-row-menu .palette-item { width: 100%; text-align: left; }
+.palette-list[data-note]::before { content: attr(data-note); display: block; padding: 6px 10px 4px; font-size: 11.5px; color: var(--text-3); }
 .graph-resizer { flex: none; height: 5px; cursor: ns-resize; border-top: 1px solid var(--divider); }
 .graph-resizer:hover { background: var(--accent-soft); }
 .graph-detail { flex: none; display: flex; min-height: 0; }

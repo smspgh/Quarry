@@ -402,7 +402,7 @@ describe("GraphView compare selection", () => {
     expect(details()).toBeNull();
     // Selecting, replacing and clearing asked nothing and ran nothing but reads.
     expect(useStore.getState().dialog).toBeNull();
-    expect(calls.every((c) => ["git_graph", "git_graph_indexed", "git_commit_detail", "git_diff_files"].includes(c.cmd))).toBe(true);
+    expect(calls.every((c) => ["git_graph", "git_graph_indexed", "git_commit_detail", "git_diff_files", "git_ref_info"].includes(c.cmd))).toBe(true);
   });
 
   it("the commit menu has the compare group after Check Out; Compare with <id> only for another selected commit", async () => {

@@ -873,6 +873,12 @@ pub fn run() {
             git::git_stash_files,
             git::git_stash_op,
             git::git_diff_files,
+            // branch and tag housekeeping
+            git::git_tags,
+            git::git_ref_info,
+            git::git_branch_info,
+            git::git_ref_action,
+            git::git_push_ref,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

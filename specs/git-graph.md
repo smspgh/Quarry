@@ -71,7 +71,7 @@ Scenario: GRAPH-001.6 Not restored after a restart
 - Commands: none
 - Files:
   - `src/lib/gitGraph.ts` — `layoutGraph` (first parent keeps the lane, lowest free lane reused, carried `GraphState`), `refLabels`
-  - `src/components/GraphView.tsx` — `RowGraph` (SVG lines and dot), `RefBadge` (its right-click opens the ref-label menu of MERGE-002), `MAX_LANES` = 16, `LANE_COLORS` = 8, `ROW` = 26
+  - `src/components/GraphView.tsx` — `RowGraph` (SVG lines and dot), `RefBadge` (its right-click opens the ref-label menu of MERGE-002 and BRANCH-001; `open` marks the label whose menu is showing), `MAX_LANES` = 16, `LANE_COLORS` = 8, `ROW` = 26
   - `src-tauri/src/git.rs` — `graph` (`log --topo-order --decorate=full`), `parse_graph`, command `git_graph`
   - `src/lib/gitApi.ts` — `git.graph`, `GitGraphCommit`
   - `src/styles/app.css` — `.graph-*`, `.gl-*` lane colours
@@ -121,7 +121,8 @@ Scenario: GRAPH-002.6 Labels
   And the labels are ordered: current branch, other local branches, remote branches, tags
   And a stash row (All branches) carries a "stash" label and a hollow dot instead (STASH-010)
   And no label is shown for "origin/HEAD"
-  And a right-click on a branch or tag label opens that label's own menu (MERGE-002), not the commit's
+  And a right-click on a branch or tag label opens that label's own menu (MERGE-002, BRANCH-001), not the commit's
+  And a branch or tag label is outlined while I point at it and while its menu is open
 
 Scenario: GRAPH-002.7 Detached HEAD
   Given HEAD is detached on a commit
@@ -579,7 +580,7 @@ Scenario: GRAPH-010.6 Open the file as it is now
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — `GraphMenu` (kept inside the window; closes on outside click, Escape, window blur), naming strip (`Naming`, `commitNaming`), `act`
+  - `src/components/GraphView.tsx` — `GraphMenu` (kept inside the window; closes on outside click, Escape, window blur), naming strip (`Naming`, `commitNaming`; it also renames a branch, BRANCH-004), `act`
   - `src/lib/gitGraph.ts` — `actionDone` (success notifications)
   - `src/lib/git.ts` — `commitAction`, `checkoutRef`
   - `src-tauri/src/git.rs` — `commit_action` / `git_commit_action` (`branch` = `branch`, `branch-switch` = `switch -c`, `tag`), `valid_ref_name`, `checkout`
@@ -599,7 +600,7 @@ Scenario: GRAPH-011.1 The menu
   And it offers Copy Commit Id, Copy Message, Create Branch Here…, Create Branch Here (Don't Switch)…, Create Tag Here…, Check Out This Commit…, the compare entries (Compare with <short id> when another commit was selected, Compare with Working Tree, Compare with Branch…; COMMITCMP-001.8, COMMITCMP-004, COMMITCMP-005), Cherry-pick, Revert This Commit…, the merge and rebase entries of MERGE-001 and three Reset entries
   And a stash row gets none of these: its menu is Apply Stash, Pop Stash, Drop Stash… and Copy Message (STASH-010.7)
   And it closes on Escape or a click elsewhere
-  And a right-click on a branch or tag label of the row opens that label's menu instead (MERGE-002)
+  And a right-click on a branch or tag label of the row opens that label's menu instead (MERGE-002; its rename, upstream, push and delete entries are BRANCH-001)
 
 Scenario: GRAPH-011.2 Copy
   When I choose "Copy Commit Id"
@@ -612,6 +613,7 @@ Scenario: GRAPH-011.3 Switch to a branch on the commit
   When I choose "Switch to origin/review"
   Then a local branch "review" tracking it is checked out
   And open files that changed on disk are re-checked
+  And the label menus of "feature" and "origin/review" have the same "Switch to …" entry, doing the same (BRANCH-001.1, BRANCH-001.3)
 
 Scenario: GRAPH-011.4 No switch entry for the branch I am on
   Given the commit carries only the label of the current branch

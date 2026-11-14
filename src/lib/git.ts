@@ -29,6 +29,9 @@ import { dropConfirm, dropOffer, isStashConflict, STASH_CONFLICT, stashBlocked, 
 import { relativeTime } from "../editor/git";
 // Compare commits (specs/git-compare-commits.md): the actions are at the end of this file.
 import { sideLabel } from "./gitCompare";
+// Branch and tag housekeeping (specs/git-branches.md): the actions are in gitRefActions.ts.
+import type { GitRefInfo, GitTag } from "./gitApi";
+import type { BranchPickFor } from "./gitBranches";
 
 export interface FileHistory {
   path: string;
@@ -88,6 +91,17 @@ interface GitState {
   /** A stash that came back with conflicts (git records nothing for it, so Quarry remembers it here,
    *  in memory only): its row is marked, and for a pop the drop is offered once the files are resolved. */
   stashPending: { root: string; sha: string; title: string; pop: boolean } | null;
+  // ---- branch and tag housekeeping (specs/git-branches.md) ----
+  /** What the picker was opened for beside its purpose: the command a row runs, the branch it is about. */
+  branchPickFor: BranchPickFor | null;
+  /** Bumped each time the picker is opened (it may reopen for a second question without closing). */
+  branchPickSeq: number;
+  /** Tags for the picker's `tag` purpose (loaded when it opens). */
+  tags: GitTag[] | null;
+  /** Per repository (lower-case root): each branch's upstream and each remote's default branch, for the ref menus. */
+  refInfo: Record<string, GitRefInfo>;
+  /** Bumped after every branch / tag action: open graphs reload (refs do not change the status). */
+  refsTick: number;
 }
 
 export const useGit = create<GitState>(() => ({
@@ -114,6 +128,12 @@ export const useGit = create<GitState>(() => ({
   stashForm: false,
   stashReveal: 0,
   stashPending: null,
+  // branch and tag housekeeping
+  branchPickFor: null,
+  branchPickSeq: 0,
+  tags: null,
+  refInfo: {},
+  refsTick: 0,
 }));
 
 const key = (p: string) => p.toLowerCase();
@@ -794,16 +814,22 @@ export async function saveIdentity(root: string, name: string, email: string, gl
  * Open the branch picker (palette mode "branch"). The purpose sets its prompt, which rows it lists
  * and the command a picked row runs (`branchPick` / `pickList` in gitRefs.ts): "switch" (the
  * default), or "merge" / "rebase", which are refused here when they cannot start. "compare"
- * (COMMITCMP-005) only reads; `from` is the graph commit the picked branch is compared with
- * (and its repository), else the current commit.
+ * (COMMITCMP-005) only reads; its `pickFor` is the graph commit the picked branch is compared with
+ * (and its repository), else the current commit. The housekeeping purposes (specs/git-branches.md)
+ * take a `BranchPickFor`: the command a picked row runs and what it is about.
  */
-export async function pickBranch(purpose: BranchPurpose = "switch", from?: { root: string; sha: string }) {
-  const repo = (from && useGit.getState().repos[key(from.root)]) || currentRepo();
+export async function pickBranch(purpose: BranchPurpose = "switch", pickFor: BranchPickFor | CompareFrom | null = null) {
+  // "compare" takes the graph commit to compare with; housekeeping takes its `BranchPickFor`.
+  const from = purpose === "compare" && pickFor && "sha" in pickFor ? pickFor : null;
+  const forRefs = pickFor && "command" in pickFor ? pickFor : null;
+  // Either may act on a graph tab's repository rather than the current one.
+  const root = from?.root ?? forRefs?.root;
+  const repo = (root && useGit.getState().repos[key(root)]) || currentRepo();
   if (!repo) {
     toast("The open folder is not in a git repository.", "info");
     return;
   }
-  compareFrom = purpose === "compare" && from ? from : null;
+  compareFrom = from;
   if (purpose === "merge" || purpose === "rebase") {
     const blocked = startBlocked(repo, purpose, useGit.getState().busy);
     if (blocked) {
@@ -811,13 +837,21 @@ export async function pickBranch(purpose: BranchPurpose = "switch", from?: { roo
       return;
     }
   }
-  useGit.setState({ branches: null, branchPick: purpose });
+  useGit.setState((g) => ({ branches: null, branchPick: purpose, branchPickFor: forRefs, branchPickSeq: g.branchPickSeq + 1, tags: null }));
   useStore.getState().set({ palette: "branch" });
+  if (purpose === "tag") void git.tags(repo.root).then((tags) => useGit.setState({ tags }), (e) => { toast(String(e), "error"); useGit.setState({ tags: [] }); });
+  if (purpose === "switch") void loadRefInfo(repo.root); // the row menu's push targets and default branches
   const list = await git.branches(repo.root).catch((e) => {
     toast(String(e), "error");
     return [] as GitBranch[];
   });
   useGit.setState({ branches: list });
+}
+
+/** Read what the ref menus need besides the status (each branch's upstream, each remote's default branch). */
+export async function loadRefInfo(root: string) {
+  const info = await git.refInfo(root).catch(() => null);
+  if (info) useGit.setState((g) => ({ refInfo: { ...g.refInfo, [key(root)]: info } }));
 }
 
 export async function checkout(name: string, create = false) {
@@ -1404,7 +1438,12 @@ export async function openStashFile(stash: Pick<GitStash, "sha" | "short" | "bas
 
 /** Compare with Branch… asked from a graph commit: the repository and commit the picked branch is
  *  compared with. null: the current commit of the current repository (Git menu, palette). */
-let compareFrom: { root: string; sha: string } | null = null;
+/** The graph commit (and its repository) a Compare with Branch… was asked from (`pickBranch("compare", from)`). */
+export interface CompareFrom {
+  root: string;
+  sha: string;
+}
+let compareFrom: CompareFrom | null = null;
 
 /**
  * Compare a branch (picked by name) with the commit Compare with Branch… was asked from, or with

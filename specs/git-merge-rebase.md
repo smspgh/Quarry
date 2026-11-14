@@ -113,8 +113,8 @@ Scenario: MERGE-001.7 Starting from the graph refreshes the graph
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — `RefBadge` gets its own right-click, in the row list and in the details pane (`onRefContext`: selects the commit, stops the row's menu; a label without a menu opens the commit's); `RefMenu` state beside `Menu`, rendered with `GraphMenu` (`head`) and headed by the kind and name of the ref; entries are dispatched by their `id`. BRANCH-001 adds its entries to this same menu
-  - `src/lib/gitRefs.ts` — pure: `refMenu(label, ctx)` (which labels have a menu, its heading and its entries; here only the merge and rebase entries), `RefMenu`, `RefMenuEntry`
+  - `src/components/GraphView.tsx` — `RefBadge` gets its own right-click, in the row list and in the details pane (`onRefContext`: selects the commit, stops the row's menu; a label without a menu opens the commit's); `RefMenu` state beside `Menu`, rendered with `GraphMenu` (`head`) and headed by the kind and name of the ref; entries are dispatched by their `id`. BRANCH-001 adds its entries to this same menu (`refAct`)
+  - `src/lib/gitRefs.ts` — pure: `refMenu(label, ctx)` (which labels have a menu, its heading and its entries; the merge and rebase entries are this story's, the entries around them come from `withHousekeeping`, BRANCH-001), `RefMenu`, `RefMenuEntry`
   - `src/lib/gitMerge.ts` — `startEntries` / `entryLabels` for a named branch or tag, `startBlocked`
   - `src/lib/gitGraph.ts` — `refLabels` / `RefLabel` (the kinds the menu is built from)
   - `src/lib/git.ts` — `startMerge`, `startRebase`
@@ -130,7 +130,7 @@ Scenario: MERGE-002.1 The label menu of a local branch
   Given I am on "main" and a commit carries the labels "feature" and "origin/feature"
   When I right-click the label "feature"
   Then the commit is selected
-  And a menu headed "Branch feature" opens with "Merge feature into main…" and "Rebase main onto feature…"
+  And a menu headed "Branch feature" opens with "Merge feature into main…" and "Rebase main onto feature…" among its entries (the whole menu is BRANCH-001.1)
   And the commit's own menu does not open
 
 Scenario: MERGE-002.2 A remote branch label
@@ -172,8 +172,9 @@ Scenario: MERGE-002.7 Closing the label menu
 Scenario: MERGE-002.8 Same disabled states as the commit menu
   Given a rebase is stopped on a conflict
   When I right-click the label "feature"
-  Then both entries are greyed out with the tooltip "Finish or abort the rebase first"
+  Then the merge and rebase entries are greyed out with the tooltip "Finish or abort the rebase first"
   And with a detached HEAD the rebase entry is greyed out with the tooltip "Switch to a branch first: a rebase moves a branch"
+  And while another git action runs every entry of the label menu except Copy … Name is greyed out (BRANCH-001.10)
 ```
 
 ## MERGE-003: Merge Branch… and Rebase onto Branch… from the panel, the Git menu and the palette

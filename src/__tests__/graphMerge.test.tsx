@@ -38,6 +38,9 @@ const menus = () => [...document.querySelectorAll<HTMLElement>(".graph-menu[role
 const head = () => menus()[0].querySelector(".graph-menu-head")?.textContent;
 const entries = () => [...menus()[0].querySelectorAll<HTMLButtonElement>("[role=menuitem]")];
 const labels = () => entries().map((b) => b.textContent);
+// The label menu also carries the housekeeping entries (BRANCH-001, graphView.test.tsx): these are its merge / rebase ones.
+const starts = () => entries().filter((b) => /^(Merge|Rebase) /.test(b.textContent ?? ""));
+const startLabels = () => starts().map((b) => b.textContent);
 const entry = (text: string) => {
   const b = entries().find((x) => x.textContent === text);
   if (!b) throw new Error(`no entry "${text}" in ${labels().join(" | ")}`);
@@ -135,7 +138,7 @@ describe("GraphView: merge and rebase", () => {
     expect(selectedRow()?.textContent).toContain("Commit number 2");
     expect(menus()).toHaveLength(1);
     expect(head()).toBe("Branch feature");
-    expect(labels()).toEqual(["Merge feature into main…", "Rebase main onto feature…"]);
+    expect(startLabels()).toEqual(["Merge feature into main…", "Rebase main onto feature…"]);
     // Escape closes it, and so does a click elsewhere; nothing was started.
     await fire.keyDown(window, "Escape");
     expect(menus()).toHaveLength(0);
@@ -150,11 +153,11 @@ describe("GraphView: merge and rebase", () => {
     await show();
     await fire.contextMenu(badge(rows()[3], "origin/topic"));
     expect(head()).toBe("Remote branch origin/topic");
-    expect(labels()).toEqual(["Merge origin/topic into main…", "Rebase main onto origin/topic…"]);
+    expect(startLabels()).toEqual(["Merge origin/topic into main…", "Rebase main onto origin/topic…"]);
     await fire.contextMenu(badge(rows()[3], "v1.2.0"));
     expect(menus()).toHaveLength(1);
     expect(head()).toBe("Tag v1.2.0");
-    expect(labels()).toEqual(["Merge v1.2.0 into main…", "Rebase main onto v1.2.0…"]);
+    expect(startLabels()).toEqual(["Merge v1.2.0 into main…", "Rebase main onto v1.2.0…"]);
     await fire.click(entry("Rebase main onto v1.2.0…"));
     await flush();
     expect(calls.find((c) => c.cmd === "git_merge_preview")?.args).toEqual({ root: ROOT, target: "refs/tags/v1.2.0" });
@@ -164,8 +167,8 @@ describe("GraphView: merge and rebase", () => {
     await show();
     await fire.contextMenu(badge(rows()[0], "main"));
     expect(head()).toBe("Branch main");
-    expect(entries()).toHaveLength(2);
-    for (const b of entries()) {
+    expect(starts()).toHaveLength(2);
+    for (const b of starts()) {
       expect(b.disabled).toBe(true);
       expect(b.title).toBe("This is the branch you are on");
     }
@@ -174,7 +177,8 @@ describe("GraphView: merge and rebase", () => {
   it("the label menu has the commit menu's disabled states", async () => {
     await show(repo({ operation: "rebase", branch: null }));
     await fire.contextMenu(badge(rows()[1], "feature"));
-    for (const b of entries()) {
+    expect(starts()).toHaveLength(2);
+    for (const b of starts()) {
       expect(b.disabled).toBe(true);
       expect(b.title).toBe("Finish or abort the rebase first");
     }
@@ -196,6 +200,6 @@ describe("GraphView: merge and rebase", () => {
     await fire.contextMenu(badge(document.querySelector(".graph-detail")!, "feature"));
     expect(menus()).toHaveLength(1);
     expect(head()).toBe("Branch feature");
-    expect(labels()).toEqual(["Merge feature into main…", "Rebase main onto feature…"]);
+    expect(startLabels()).toEqual(["Merge feature into main…", "Rebase main onto feature…"]);
   });
 });

@@ -330,9 +330,9 @@ Scenario: GIT-006.5 Binary files
 - Status: draft
 - Commands: `git.switchBranch`, `git.checkoutTo`, `git.createBranch`
 - Files:
-  - `src/lib/git.ts` — `pickBranch(purpose)` (opens palette mode `branch` for the purpose `"switch"`, the default; loads `branches`; the other purposes are MERGE-003's), `checkout`
+  - `src/lib/git.ts` — `pickBranch(purpose)` (opens palette mode `branch` for the purpose `"switch"`, the default; loads `branches`; the other purposes are MERGE-003's and BRANCH-002's), `checkout`
   - `src/lib/gitRefs.ts` — `branchPick("switch", …)` (prompt, `git.checkoutTo`, the "Create branch" row), `pickList`
-  - `src/components/CommandPalette.tsx` — `mode === "branch"` item list from the purpose in `useGit().branchPick` ("Create branch …" row, `current` / `remote` labels), placeholder, "Loading branches…"
+  - `src/components/CommandPalette.tsx` — `mode === "branch"` item list from the purpose in `useGit().branchPick` ("Create branch …" row, `current` / `remote` labels), placeholder, "Loading branches…"; each branch row also has the "⋯" row menu of BRANCH-002 (rename, set upstream, push, delete), which never changes what Enter and a click do
   - `src/lib/gitCommands.ts` — `git.switchBranch`, hidden `git.checkoutTo` / `git.createBranch`
   - `src/components/panels/GitPanel.tsx` — branch button (`branchLabel`, disabled while busy); the "Merge or Rebase" button after it is MERGE-003's
   - `src-tauri/src/git.rs` — `git_branches` (`for-each-ref`, local first, newest first, symbolic refs skipped), `git_checkout` (`switch`, `switch -c`, `switch --track`)
@@ -350,6 +350,7 @@ Scenario: GIT-007.1 Open the branch list
   Then a list opens with the prompt "Switch to a branch, or type a name to create one…"
   And local branches come first, then remote ones, each group newest first
   And "main" is labelled "current" and "origin/topic" is labelled "remote"
+  And each branch row has a "⋯" button for its other actions (BRANCH-002); Enter and a click on the row switch
 
 Scenario: GIT-007.2 Switch to a local branch
   Given the branch list is open
@@ -737,6 +738,7 @@ Scenario: GIT-013.8 The remote branch was deleted
   When I look at the status line
   Then it shows a warning "origin/feature no longer exists on the remote." with the button "Push to Recreate It"
   And no ahead / behind numbers are shown
+  And the same line appears after I delete the branch on the remote from Quarry while I am on it (BRANCH-007.6)
 
 Scenario: GIT-013.9 No line without a remote or a branch
   Given a repository with no remote, or a detached HEAD
@@ -818,7 +820,7 @@ Scenario: GIT-014.8 Only the branch's remote is checked
   - `src/components/panels/GitPanel.tsx` — header Fetch / Pull / Push buttons and tooltips, `SyncStatus` action buttons, busy label
   - `src/lib/gitCommands.ts` — `git.fetch`, `git.pull`, `git.push`
   - `src/lib/gitStatus.ts` — `gitErrorText` (hint lines dropped)
-  - `src-tauri/src/git.rs` — `git_remote` / `remote_op` (`fetch --all --prune`, `pull`, `pull --no-rebase`, `pull --rebase`, `push`, `push --set-upstream <origin or first remote> HEAD`; `"push-force"` is Force Push, MERGE-009: none of these ever forces)
+  - `src-tauri/src/git.rs` — `git_remote` / `remote_op` (`fetch --all --prune`, `pull`, `pull --no-rebase`, `pull --rebase`, `push`, `push --set-upstream <origin or first remote> HEAD`; `"push-force"` is Force Push, MERGE-009: none of these ever forces). Pushing one named branch or tag, and deleting a remote branch, are `push_ref` (BRANCH-006, BRANCH-007, BRANCH-009)
   - `src/components/StatusBar.tsx` — busy label after the branch
 - Tests: `src-tauri/src/git.rs`, `src/__tests__/gitRemote.test.ts`
 - Docs: `docs/git.md`
@@ -839,6 +841,7 @@ Scenario: GIT-015.2 Push publishes a branch that has no upstream
   When I push or click "Publish Branch"
   Then "feature" is pushed to "origin" and tracks "origin/feature" from then on
   And with no remote called origin the first remote is used
+  And a branch I am not on is pushed by the same rule, without switching to it, from its label in the graph or its row menu in the branch list (BRANCH-006)
 
 Scenario: GIT-015.3 Pull
   Given 3 commits to pull
@@ -884,6 +887,7 @@ Scenario: GIT-015.8 Unavailable without a repository
   - `src/lib/gitStatus.ts` — `isMissingRepo`
   - `src/components/panels/GitPanel.tsx` — `SyncStatus` missing-repository branch ("Create It on GitHub" only for github.com URLs, "Change URL"), sets `editRemote`
   - `src/lib/git.ts` — `remote()` and `checkRemote()` record the failure in `remoteCheck`; `editRemote` state
+  - `src/lib/gitRefActions.ts` — `pushBranch` records the same failure when a branch pushed by name (BRANCH-006.9) hits a missing repository
   - `src/components/panels/GitRepoSettings.tsx` — `RemoteForm` opens on the requested choice (`startHow`)
 - Tests: `src/__tests__/gitRemote.test.ts`
 - Docs: `docs/git.md`
@@ -895,7 +899,7 @@ Scenario: GIT-015.8 Unavailable without a repository
 ```gherkin
 Scenario: GIT-016.1 The repository is not there
   Given remote "origin" points to a GitHub repository that was deleted
-  When the remote is checked, or a fetch, pull or push fails with "repository not found"
+  When the remote is checked, or a fetch, pull or push (of the current branch, or of a branch pushed by name, BRANCH-006) fails with "repository not found"
   Then the status line shows a warning "The repository origin points to isn't there: it was deleted or renamed, or your account can't see it."
   And the buttons "Create It on GitHub" and "Change URL" are offered instead of Push or Pull
 

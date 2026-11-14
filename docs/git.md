@@ -45,6 +45,26 @@ Open it from the rail (branch icon), **Git › Show Source Control** or **Ctrl+S
 
 **Git › Switch Branch…**, the panel's branch button or the branch in the status bar open a list of branches: local ones first, then remote ones (marked *remote*), the current one marked *current*. Pick one to switch to it; a remote branch is checked out as a new local branch tracking it. Type a name that doesn't exist and pick **Create branch "…" from here** to create it from the current commit and switch to it. Git refuses a switch that would overwrite uncommitted changes; the message says which files.
 
+### Tidying up branches and tags
+
+Delete or rename a branch, choose what it tracks, push a branch you are not on, delete a branch on the remote, delete or push a tag. Every one of these is reachable three ways, and each way asks the same questions:
+
+- **In the commit graph**, right-click a **branch or tag label**. The label's menu (headed **Branch feature**, **Remote branch origin/topic** or **Tag v1.2.0**) has **Switch to …**, the merge and rebase entries, then the actions for that kind of label, then **Copy Branch Name** / **Copy Tag Name**. A right-click beside the labels still opens the commit's menu.
+- **In the branch list** (Switch Branch…), each row has a **⋯** button; a right-click on the row or **Shift+F10** opens the same menu. **Up** / **Down** and **Enter** work in it, **Escape** goes back to the list. Enter and a click on the row still switch branch.
+- **Git › Branches and Tags** (and the command palette): **Rename Branch…**, **Delete Branch…**, **Set Upstream…**, **Push Branch…**, **Delete Remote Branch…**, **Delete Tag…**, **Push Tag…**. Each first opens a list of just the branches or tags it can act on.
+
+| Action | What happens |
+| --- | --- |
+| Delete Branch… | Always asks, and **Cancel** is the default button (Enter does not delete). When every commit of the branch is in its upstream (or, with no upstream, in the branch you are on) the dialog says nothing is lost. Otherwise a second, red dialog says how many commits would be left on no branch and gives the id of the last one, in case you need it back. The branch you are on cannot be deleted. The branch on the remote is never touched. |
+| Rename Branch… | In the graph a strip asks for the new name; in the branch list you type it (spaces become hyphens). The branch keeps its commit and what it tracks; the branch on the remote keeps its old name, and the notification says so. A name that is taken is never overwritten. |
+| Set Upstream… | Lists the remote branches, the one with the same name first; the one it tracks now is marked *tracking*, and **Stop tracking** clears it. Nothing is fetched or pushed. With a remote that has no branches yet, the one row pushes the branch and tracks it. |
+| Push *branch* to *remote* | Pushes that branch without switching to it. It goes to the branch it tracks; a branch that tracks nothing goes to `origin` (or the first remote) and tracks it from then on. The entry always names where it goes. Nothing is ever forced: if the remote has commits the branch lacks, a dialog says so and offers **Switch to *branch*** (or **Pull**, on the branch you are on). |
+| Delete *branch* from *remote*… | Deletes the branch in the remote repository, for everyone. The red dialog names the remote and its address, and says how many commits exist only there (as of the last fetch). Your local branches are kept. A remote's default branch (what `origin/HEAD` points to) cannot be deleted from Quarry. A branch someone already deleted just loses its stale label. |
+| Delete Tag… | Asks once, then removes the tag from this computer only. If it was pushed, the remote keeps its copy. |
+| Push *tag* to *remote* | Pushes that one tag (never all tags) to `origin` or the first remote. A tag the remote already has on another commit is not overwritten. |
+
+With no remote configured, the push and Set Upstream entries lead to the Add Remote form instead. While another git action is running, everything except Copy is greyed out.
+
 ## Merge and rebase
 
 **Merge** brings another branch's commits into the branch you are on; nothing is rewritten. **Rebase** replays your branch's own commits on top of another branch, so they get new ids. Both can be started from four places, and all of them ask first:
@@ -52,7 +72,7 @@ Open it from the rail (branch icon), **Git › Show Source Control** or **Ctrl+S
 - **Git › Merge Branch…** and **Git › Rebase onto Branch…** (also in the command palette) open the branch list without the branch you are on: local branches first, then remote ones. Pick one.
 - The **Merge or Rebase** button right after the branch button in Source Control offers the same two.
 - In the commit graph, right-click a commit: **Merge … into *branch*…** and **Rebase *branch* onto …** sit under Cherry-pick and Revert. A commit that carries exactly one other branch label stands for that branch (the entries then name it); otherwise the commit is used by its id.
-- In the commit graph, right-click a **branch or tag label** (in a row, or under Refs in the details): a menu for that label opens, headed **Branch feature**, **Remote branch origin/topic** or **Tag v1.2.0**, with the same two entries by name. The label of the branch you are on has them greyed out.
+- In the commit graph, right-click a **branch or tag label** (in a row, or under Refs in the details): a menu for that label opens, headed **Branch feature**, **Remote branch origin/topic** or **Tag v1.2.0**, with the same two entries by name (among the label's other actions, see [Tidying up branches and tags](#tidying-up-branches-and-tags)). The label of the branch you are on has them greyed out.
 
 A remote branch is used as it was last fetched: nothing is fetched and no local branch is created.
 

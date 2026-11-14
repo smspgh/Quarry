@@ -1272,19 +1272,26 @@
       "title": "Right-click a branch or tag label in the graph",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 30,
-      "status": "planned",
+      "line": 32,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
         "src/lib/gitRefs.ts",
+        "src/lib/gitBranches.ts",
         "src/lib/gitGraph.ts",
         "src/lib/git.ts",
+        "src/lib/gitRefActions.ts",
+        "src/lib/gitApi.ts",
+        "src-tauri/src/git.rs",
         "src/styles/app.css"
       ],
       "tests": [
         "src/__tests__/gitRefs.test.ts",
-        "src/__tests__/graphView.test.tsx"
+        "src/__tests__/gitBranches.test.ts",
+        "src/__tests__/graphBranches.test.tsx",
+        "src/__tests__/graphMerge.test.tsx",
+        "src-tauri/src/git.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -1333,6 +1340,10 @@
         {
           "id": "BRANCH-001.11",
           "title": "The graph follows the change"
+        },
+        {
+          "id": "BRANCH-001.12",
+          "title": "A label shows that it has a menu"
         }
       ]
     },
@@ -1341,8 +1352,8 @@
       "title": "Manage branches and tags from the branch picker and the Git menu",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 116,
-      "status": "planned",
+      "line": 127,
+      "status": "draft",
       "commands": [
         "git.deleteBranch",
         "git.renameBranch",
@@ -1355,15 +1366,20 @@
       "files": [
         "src/components/CommandPalette.tsx",
         "src/lib/git.ts",
+        "src/lib/gitRefActions.ts",
         "src/lib/gitCommands.ts",
         "src/lib/gitRefs.ts",
+        "src/lib/gitBranches.ts",
         "src/components/MenuBar.tsx",
         "src/lib/gitApi.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git.rs",
+        "src/styles/app.css"
       ],
       "tests": [
         "src/__tests__/gitRefs.test.ts",
-        "src/__tests__/branchPicker.test.tsx",
+        "src/__tests__/gitBranches.test.ts",
+        "src/__tests__/branchPickerRefs.test.tsx",
+        "src/__tests__/gitRefActions.test.ts",
         "src-tauri/src/git.rs"
       ],
       "docs": [
@@ -1425,23 +1441,25 @@
       "title": "Delete a local branch",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 207,
-      "status": "planned",
+      "line": 221,
+      "status": "draft",
       "commands": [
         "git.deleteBranch"
       ],
       "files": [
-        "src/lib/gitRefs.ts",
-        "src/lib/git.ts",
+        "src/lib/gitBranches.ts",
+        "src/lib/gitRefActions.ts",
         "src/lib/gitApi.ts",
         "src-tauri/src/git.rs",
         "src/components/GraphView.tsx",
         "src/components/CommandPalette.tsx"
       ],
       "tests": [
-        "src/__tests__/gitRefs.test.ts",
+        "src/__tests__/gitBranches.test.ts",
+        "src/__tests__/gitRefActions.test.ts",
         "src-tauri/src/git.rs",
-        "src/__tests__/graphView.test.tsx"
+        "src/__tests__/graphBranches.test.tsx",
+        "src/__tests__/branchPickerRefs.test.tsx"
       ],
       "docs": [
         "docs/git.md"
@@ -1494,6 +1512,10 @@
         {
           "id": "BRANCH-003.12",
           "title": "The branch changed between the question and the answer"
+        },
+        {
+          "id": "BRANCH-003.13",
+          "title": "The forced delete is only for the commit that was asked about"
         }
       ]
     },
@@ -1502,24 +1524,25 @@
       "title": "Rename a local branch",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 300,
-      "status": "planned",
+      "line": 321,
+      "status": "draft",
       "commands": [
         "git.renameBranch"
       ],
       "files": [
         "src/components/GraphView.tsx",
         "src/components/CommandPalette.tsx",
-        "src/lib/gitRefs.ts",
-        "src/lib/git.ts",
+        "src/lib/gitBranches.ts",
+        "src/lib/gitRefActions.ts",
         "src-tauri/src/git.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
-        "src/__tests__/gitRefs.test.ts",
+        "src/__tests__/gitBranches.test.ts",
+        "src/__tests__/gitRefActions.test.ts",
         "src-tauri/src/git.rs",
-        "src/__tests__/graphView.test.tsx",
-        "src/__tests__/branchPicker.test.tsx"
+        "src/__tests__/graphBranches.test.tsx",
+        "src/__tests__/branchPickerRefs.test.tsx"
       ],
       "docs": [
         "docs/git.md"
@@ -1576,23 +1599,25 @@
       "title": "Set or clear a branch's upstream",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 387,
-      "status": "planned",
+      "line": 409,
+      "status": "draft",
       "commands": [
         "git.setUpstream"
       ],
       "files": [
         "src/components/CommandPalette.tsx",
-        "src/lib/gitRefs.ts",
-        "src/lib/git.ts",
+        "src/lib/gitBranches.ts",
+        "src/lib/gitRefActions.ts",
         "src-tauri/src/git.rs",
         "src/lib/gitApi.ts",
         "src/components/GraphView.tsx"
       ],
       "tests": [
-        "src/__tests__/gitRefs.test.ts",
+        "src/__tests__/gitBranches.test.ts",
+        "src/__tests__/gitRefActions.test.ts",
         "src-tauri/src/git.rs",
-        "src/__tests__/branchPicker.test.tsx"
+        "src/__tests__/branchPickerRefs.test.tsx",
+        "src/__tests__/graphBranches.test.tsx"
       ],
       "docs": [
         "docs/git.md"
@@ -1641,23 +1666,24 @@
       "title": "Push a branch",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 462,
-      "status": "planned",
+      "line": 484,
+      "status": "draft",
       "commands": [
         "git.pushBranch"
       ],
       "files": [
-        "src/lib/gitRefs.ts",
-        "src/lib/git.ts",
+        "src/lib/gitBranches.ts",
+        "src/lib/gitRefActions.ts",
         "src-tauri/src/git.rs",
         "src/lib/gitApi.ts",
         "src/lib/gitStatus.ts",
         "src/components/GraphView.tsx"
       ],
       "tests": [
+        "src/__tests__/gitBranches.test.ts",
         "src/__tests__/gitRefs.test.ts",
-        "src-tauri/src/git.rs",
-        "src/__tests__/gitRemote.test.ts"
+        "src/__tests__/gitRefActions.test.ts",
+        "src-tauri/src/git.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -1706,6 +1732,10 @@
         {
           "id": "BRANCH-006.11",
           "title": "Only local branches are pushed from here"
+        },
+        {
+          "id": "BRANCH-006.12",
+          "title": "A branch Quarry rewrote is pointed at Force Push"
         }
       ]
     },
@@ -1714,22 +1744,25 @@
       "title": "Delete a branch on the remote",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 550,
-      "status": "planned",
+      "line": 579,
+      "status": "draft",
       "commands": [
         "git.deleteRemoteBranch"
       ],
       "files": [
+        "src/lib/gitBranches.ts",
         "src/lib/gitRefs.ts",
-        "src/lib/git.ts",
+        "src/lib/gitRefActions.ts",
         "src-tauri/src/git.rs",
         "src/lib/gitApi.ts",
         "src/components/GraphView.tsx"
       ],
       "tests": [
+        "src/__tests__/gitBranches.test.ts",
         "src/__tests__/gitRefs.test.ts",
+        "src/__tests__/gitRefActions.test.ts",
         "src-tauri/src/git.rs",
-        "src/__tests__/graphView.test.tsx"
+        "src/__tests__/graphBranches.test.tsx"
       ],
       "docs": [
         "docs/git.md"
@@ -1790,22 +1823,24 @@
       "title": "Delete a tag",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 641,
-      "status": "planned",
+      "line": 672,
+      "status": "draft",
       "commands": [
         "git.deleteTag"
       ],
       "files": [
-        "src/lib/gitRefs.ts",
-        "src/lib/git.ts",
+        "src/lib/gitBranches.ts",
+        "src/lib/gitRefActions.ts",
         "src-tauri/src/git.rs",
         "src/lib/gitApi.ts",
         "src/components/GraphView.tsx"
       ],
       "tests": [
-        "src/__tests__/gitRefs.test.ts",
+        "src/__tests__/gitBranches.test.ts",
+        "src/__tests__/gitRefActions.test.ts",
         "src-tauri/src/git.rs",
-        "src/__tests__/graphView.test.tsx"
+        "src/__tests__/graphBranches.test.tsx",
+        "src/__tests__/branchPickerRefs.test.tsx"
       ],
       "docs": [
         "docs/git.md"
@@ -1846,22 +1881,25 @@
       "title": "Push a tag",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 699,
-      "status": "planned",
+      "line": 730,
+      "status": "draft",
       "commands": [
         "git.pushTag"
       ],
       "files": [
-        "src/lib/gitRefs.ts",
-        "src/lib/git.ts",
+        "src/lib/gitBranches.ts",
+        "src/lib/gitRefActions.ts",
         "src-tauri/src/git.rs",
         "src/lib/gitApi.ts",
         "src/lib/gitStatus.ts",
         "src/components/GraphView.tsx"
       ],
       "tests": [
+        "src/__tests__/gitBranches.test.ts",
         "src/__tests__/gitRefs.test.ts",
-        "src-tauri/src/git.rs"
+        "src/__tests__/gitRefActions.test.ts",
+        "src-tauri/src/git.rs",
+        "src/__tests__/graphBranches.test.tsx"
       ],
       "docs": [
         "docs/git.md"
@@ -8824,7 +8862,7 @@
       "title": "Commit from the Source Control panel",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 390,
+      "line": 391,
       "status": "draft",
       "commands": [
         "git.showPanel"
@@ -8884,7 +8922,7 @@
       "title": "Amend the last commit",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 459,
+      "line": 460,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8923,7 +8961,7 @@
       "title": "See the changed files and open their changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 498,
+      "line": 499,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8981,7 +9019,7 @@
       "title": "Stage and unstage files",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 568,
+      "line": 569,
       "status": "draft",
       "commands": [
         "git.stageFile",
@@ -9035,7 +9073,7 @@
       "title": "Discard changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 625,
+      "line": 626,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9082,7 +9120,7 @@
       "title": "Status line: where the branch stands against its remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 677,
+      "line": 678,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9142,7 +9180,7 @@
       "title": "Background check of the remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 747,
+      "line": 749,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9197,7 +9235,7 @@
       "title": "Fetch, pull, push and publish a branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 812,
+      "line": 814,
       "status": "draft",
       "commands": [
         "git.fetch",
@@ -9259,13 +9297,14 @@
       "title": "Recover when the remote repository is gone",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 879,
+      "line": 882,
       "status": "draft",
       "commands": [],
       "files": [
         "src/lib/gitStatus.ts",
         "src/components/panels/GitPanel.tsx",
         "src/lib/git.ts",
+        "src/lib/gitRefActions.ts",
         "src/components/panels/GitRepoSettings.tsx"
       ],
       "tests": [
@@ -9302,7 +9341,7 @@
       "title": "Commits of the current branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 923,
+      "line": 927,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9367,7 +9406,7 @@
       "title": "File history",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 999,
+      "line": 1003,
       "status": "draft",
       "commands": [
         "git.fileHistory"
@@ -9421,7 +9460,7 @@
       "title": "Commit identity (name and email)",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1054,
+      "line": 1058,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9468,7 +9507,7 @@
       "title": "Add a remote by URL",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1105,
+      "line": 1109,
       "status": "draft",
       "commands": [
         "git.addRemote"
@@ -9517,7 +9556,7 @@
       "title": "See, open and change remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1157,
+      "line": 1161,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9569,7 +9608,7 @@
       "title": "Create a repository on GitHub and push to it",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1216,
+      "line": 1220,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9626,7 +9665,7 @@
       "title": "GitHub accounts",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1283,
+      "line": 1287,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9673,7 +9712,7 @@
       "title": "Private / Public badge on GitHub remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1335,
+      "line": 1339,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9715,7 +9754,7 @@
       "title": "Work with more than one repository",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1379,
+      "line": 1383,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9771,7 +9810,7 @@
       "title": "Branch in the status bar",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1498,
+      "line": 1502,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9817,7 +9856,7 @@
       "title": "Git decorations in the Explorer",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1549,
+      "line": 1553,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9861,7 +9900,7 @@
       "title": "Set a folder as the Source Control context",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1448,
+      "line": 1452,
       "status": "draft",
       "commands": [
         "git.setContext"
@@ -10670,7 +10709,7 @@
       "title": "Long branch lines are cut short",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 138,
+      "line": 139,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10711,7 +10750,7 @@
       "title": "Show the current branch or all branches",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 182,
+      "line": 183,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10744,7 +10783,7 @@
       "title": "Load a long history in pages",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 216,
+      "line": 217,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10803,7 +10842,7 @@
       "title": "Speed up a very large history",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 285,
+      "line": 286,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10849,7 +10888,7 @@
       "title": "Find among the loaded commits",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 336,
+      "line": 337,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10894,7 +10933,7 @@
       "title": "Search the whole history and go to a result",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 387,
+      "line": 388,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10960,7 +10999,7 @@
       "title": "See a commit's details",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 463,
+      "line": 464,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11016,7 +11055,7 @@
       "title": "Open what a commit changed in a file",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 528,
+      "line": 529,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11062,7 +11101,7 @@
       "title": "Copy, switch, branch and tag from a commit's right-click menu",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 577,
+      "line": 578,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11124,7 +11163,7 @@
       "title": "Check out, cherry-pick or revert a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 652,
+      "line": 654,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11179,7 +11218,7 @@
       "title": "Reset the branch to a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 711,
+      "line": 713,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11223,7 +11262,7 @@
       "title": "See uncommitted work and a stopped operation above the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 757,
+      "line": 759,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11270,7 +11309,7 @@
       "title": "Uncommitted changes as the first row of the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 819,
+      "line": 821,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11360,7 +11399,7 @@
       "title": "Drag the height of the Search All History results",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 940,
+      "line": 942,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11423,7 +11462,7 @@
       "title": "Scroll sideways through a graph wider than 16 lanes",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1015,
+      "line": 1017,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11482,7 +11521,7 @@
       "title": "List a small history by date",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1092,
+      "line": 1094,
       "status": "planned",
       "commands": [],
       "files": [
@@ -11555,7 +11594,7 @@
       "title": "Show Commit Graph is in the palette without a repository",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1183,
+      "line": 1185,
       "status": "draft",
       "commands": [
         "git.graph"
@@ -14511,7 +14550,7 @@
       "title": "Merge Branch… and Rebase onto Branch… from the panel, the Git menu and the palette",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 179,
+      "line": 180,
       "status": "draft",
       "commands": [
         "git.mergeBranch",
@@ -14588,7 +14627,7 @@
       "title": "Merge asks first, then merges",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 262,
+      "line": 263,
       "status": "draft",
       "commands": [
         "git.mergeRef"
@@ -14655,7 +14694,7 @@
       "title": "Rebase asks first, then rebases",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 341,
+      "line": 342,
       "status": "draft",
       "commands": [
         "git.rebaseOnto"
@@ -14713,7 +14752,7 @@
       "title": "Rebase warns when commits to replay are already pushed",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 407,
+      "line": 408,
       "status": "draft",
       "commands": [
         "git.rebaseOnto"
@@ -14767,7 +14806,7 @@
       "title": "A merge or rebase that stops on a conflict",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 466,
+      "line": 467,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14829,7 +14868,7 @@
       "title": "Refuse to start when it is not safe",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 538,
+      "line": 539,
       "status": "draft",
       "commands": [
         "git.mergeBranch",
@@ -14904,7 +14943,7 @@
       "title": "Force Push after pushed commits were rewritten",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 619,
+      "line": 620,
       "status": "draft",
       "commands": [
         "git.forcePush"
@@ -22504,6 +22543,7 @@
       "SEARCH-013"
     ],
     "src-tauri/src/git.rs": [
+      "BRANCH-001",
       "BRANCH-002",
       "BRANCH-003",
       "BRANCH-004",
@@ -23890,13 +23930,6 @@
     "src/lib/git.ts": [
       "BRANCH-001",
       "BRANCH-002",
-      "BRANCH-003",
-      "BRANCH-004",
-      "BRANCH-005",
-      "BRANCH-006",
-      "BRANCH-007",
-      "BRANCH-008",
-      "BRANCH-009",
       "COMMITCMP-003",
       "COMMITCMP-004",
       "COMMITCMP-005",
@@ -24005,6 +24038,7 @@
       "GITAI-009"
     ],
     "src/lib/gitApi.ts": [
+      "BRANCH-001",
       "BRANCH-002",
       "BRANCH-003",
       "BRANCH-004",
@@ -24053,6 +24087,17 @@
       "GITAI-007",
       "GITAI-008",
       "GITAI-009"
+    ],
+    "src/lib/gitBranches.ts": [
+      "BRANCH-001",
+      "BRANCH-002",
+      "BRANCH-003",
+      "BRANCH-004",
+      "BRANCH-005",
+      "BRANCH-006",
+      "BRANCH-007",
+      "BRANCH-008",
+      "BRANCH-009"
     ],
     "src/lib/gitCommands.ts": [
       "BRANCH-002",
@@ -24145,7 +24190,7 @@
       "MERGE-009",
       "SAFE-003"
     ],
-    "src/lib/gitRefs.ts": [
+    "src/lib/gitRefActions.ts": [
       "BRANCH-001",
       "BRANCH-002",
       "BRANCH-003",
@@ -24155,6 +24200,12 @@
       "BRANCH-007",
       "BRANCH-008",
       "BRANCH-009",
+      "GIT-016"
+    ],
+    "src/lib/gitRefs.ts": [
+      "BRANCH-001",
+      "BRANCH-002",
+      "BRANCH-007",
       "COMMITCMP-005",
       "GIT-007",
       "MERGE-002",
@@ -24595,6 +24646,7 @@
       "BIG-013",
       "BIG-015",
       "BRANCH-001",
+      "BRANCH-002",
       "CLAUDE-014",
       "CLAUDE-019",
       "COMMITCMP-001",
@@ -24708,6 +24760,7 @@
       "FILE-010"
     ],
     "src-tauri/src/git.rs": [
+      "BRANCH-001",
       "BRANCH-002",
       "BRANCH-003",
       "BRANCH-004",
@@ -24853,12 +24906,16 @@
       "BIG-011"
     ],
     "src/__tests__/branchPicker.test.tsx": [
-      "BRANCH-002",
-      "BRANCH-004",
-      "BRANCH-005",
       "COMMITCMP-005",
       "GIT-007",
       "MERGE-003"
+    ],
+    "src/__tests__/branchPickerRefs.test.tsx": [
+      "BRANCH-002",
+      "BRANCH-003",
+      "BRANCH-004",
+      "BRANCH-005",
+      "BRANCH-008"
     ],
     "src/__tests__/bulkedit.test.ts": [
       "EDIT-003",
@@ -24982,6 +25039,17 @@
       "GITAI-007",
       "GITAI-009"
     ],
+    "src/__tests__/gitBranches.test.ts": [
+      "BRANCH-001",
+      "BRANCH-002",
+      "BRANCH-003",
+      "BRANCH-004",
+      "BRANCH-005",
+      "BRANCH-006",
+      "BRANCH-007",
+      "BRANCH-008",
+      "BRANCH-009"
+    ],
     "src/__tests__/gitCommands.test.ts": [
       "GRAPH-019"
     ],
@@ -25032,6 +25100,16 @@
       "MERGE-003",
       "MERGE-009"
     ],
+    "src/__tests__/gitRefActions.test.ts": [
+      "BRANCH-002",
+      "BRANCH-003",
+      "BRANCH-004",
+      "BRANCH-005",
+      "BRANCH-006",
+      "BRANCH-007",
+      "BRANCH-008",
+      "BRANCH-009"
+    ],
     "src/__tests__/gitRefresh.test.ts": [
       "GIT-001",
       "GIT-025",
@@ -25040,12 +25118,8 @@
     "src/__tests__/gitRefs.test.ts": [
       "BRANCH-001",
       "BRANCH-002",
-      "BRANCH-003",
-      "BRANCH-004",
-      "BRANCH-005",
       "BRANCH-006",
       "BRANCH-007",
-      "BRANCH-008",
       "BRANCH-009",
       "COMMITCMP-005",
       "GIT-007",
@@ -25053,7 +25127,6 @@
       "MERGE-003"
     ],
     "src/__tests__/gitRemote.test.ts": [
-      "BRANCH-006",
       "CONFLICT-007",
       "CONFLICT-010",
       "CONFLICT-013",
@@ -25116,6 +25189,15 @@
     "src/__tests__/goto.test.ts": [
       "EDIT-016"
     ],
+    "src/__tests__/graphBranches.test.tsx": [
+      "BRANCH-001",
+      "BRANCH-003",
+      "BRANCH-004",
+      "BRANCH-005",
+      "BRANCH-007",
+      "BRANCH-008",
+      "BRANCH-009"
+    ],
     "src/__tests__/graphCompare.test.tsx": [
       "COMMITCMP-002",
       "COMMITCMP-003",
@@ -25124,15 +25206,11 @@
       "COMMITCMP-006"
     ],
     "src/__tests__/graphMerge.test.tsx": [
+      "BRANCH-001",
       "MERGE-001",
       "MERGE-002"
     ],
     "src/__tests__/graphView.test.tsx": [
-      "BRANCH-001",
-      "BRANCH-003",
-      "BRANCH-004",
-      "BRANCH-007",
-      "BRANCH-008",
       "COMMITCMP-001",
       "COMMITCMP-005",
       "GITAI-009",

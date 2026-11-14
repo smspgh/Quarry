@@ -251,6 +251,63 @@ export interface GitCompare {
   /** Working tree: untracked files, which are not compared. */
   untracked: number;
 }
+
+// ----- Branch and tag housekeeping (specs/git-branches.md) -----
+
+/** A tag, for the Delete Tag… / Push Tag… lists (newest first). */
+export interface GitTag {
+  name: string;
+  /** Short id of the commit it points at. */
+  sha: string;
+  time: number;
+  summary: string;
+}
+
+/** What the ref menus need besides the status. */
+export interface GitRefInfo {
+  /** Local branch → its upstream as configured (`origin/main`). */
+  upstreams: Record<string, string>;
+  /** Remote → its default branch (what `origin/HEAD` points to here). */
+  defaults: Record<string, string>;
+}
+
+/** A ref about to be deleted, read right before the question is asked. */
+export interface GitBranchInfo {
+  name: string;
+  /** Short and full id of the commit it points at. */
+  sha: string;
+  fullSha: string;
+  /** A local branch: it is the one checked out. */
+  current: boolean;
+  /** A local branch: its upstream, when that remote branch still exists. */
+  upstream: string | null;
+  /** A local branch: what "merged" is measured against (the upstream, else the current branch;
+   *  null on a detached HEAD, then `baseSha` is that commit). */
+  base: string | null;
+  baseSha: string | null;
+  /** A local branch: commits not in `base`. A remote branch: commits in no local branch. */
+  unmerged: number;
+  /** A remote branch: it is its remote's default branch. */
+  defaultBranch: boolean;
+}
+
+/** Local ref changes; the deletes resolve with the short id the ref was on, a rename with the
+ *  upstream the branch still tracks ("" for none). */
+export type GitRefAction = "branch-delete" | "branch-delete-force" | "branch-rename" | "upstream-set" | "upstream-unset" | "tag-delete";
+
+/** What a push of one branch or tag, or the delete of a remote branch, did. */
+export interface GitPushRef {
+  remote: string;
+  /** The branch on the remote (it can differ from the local name), or the tag. */
+  branch: string;
+  upToDate: boolean;
+  /** The branch had no upstream and now tracks this. */
+  tracking: string | null;
+  /** A deleted remote branch: the short id it was on. */
+  was: string | null;
+  /** A delete: it was already gone on the remote. */
+  gone: boolean;
+}
 // ----- end -----
 
 export const git = {
@@ -348,4 +405,16 @@ export const git = {
    *  and the working tree when `right` is left out. A side is a commit id, "HEAD" or a branch name.
    *  Read-only: nothing is checked out, staged or written inside `.git`. */
   diffFiles: (root: string, left: string, right?: string) => invoke<GitCompare>("git_diff_files", { root, left, right: right ?? null }),
+  // ---- branch and tag housekeeping (specs/git-branches.md) ----
+  /** Tags, newest first. */
+  tags: (root: string) => invoke<GitTag[]>("git_tags", { root }),
+  refInfo: (root: string) => invoke<GitRefInfo>("git_ref_info", { root }),
+  /** `kind`: "branch" (local), "remote" (`origin/topic`) or "tag". Rejects when the ref is not there. */
+  branchInfo: (root: string, kind: "branch" | "remote" | "tag", name: string) => invoke<GitBranchInfo>("git_branch_info", { root, kind, name }),
+  /** "branch-delete" rejects with `NOT_MERGED` (gitBranches.ts) when git's safe delete refuses;
+   *  "branch-delete-force" takes the full commit id the question was about as `arg`. */
+  refAction: (root: string, action: GitRefAction, name: string, arg: string | null = null) => invoke<string>("git_ref_action", { root, action, name, arg }),
+  /** Push one branch ("branch") or one tag ("tag"), or delete a remote branch ("delete", `name` =
+   *  `origin/topic`). Never forces. */
+  pushRef: (root: string, kind: "branch" | "tag" | "delete", name: string) => invoke<GitPushRef>("git_push_ref", { root, kind, name }),
 };

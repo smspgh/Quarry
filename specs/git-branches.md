@@ -5,7 +5,9 @@ prefix: BRANCH
 
 # Branch and Tag Housekeeping
 
-Tidying up refs without a terminal: delete and rename local branches, set or clear a branch's upstream, push any branch, delete a branch on the remote, delete a tag and push a tag. Every action is reachable from two places: a right-click on a ref label in the commit graph, and the branch picker (plus the Git menu and the command palette, which open the same picker). Nothing here is built yet (roadmap item 4 in `GIT-ROADMAP.md`); switching and creating branches are GIT-007 and GRAPH-011, Fetch / Pull / Push of the current branch are GIT-015. User documentation will be the Branches section of `docs/git.md`.
+Tidying up refs without a terminal: delete and rename local branches, set or clear a branch's upstream, push any branch, delete a branch on the remote, delete a tag and push a tag. Every action is reachable from two places: a right-click on a ref label in the commit graph, and the branch picker (plus the Git menu and the command palette, which open the same picker). This is roadmap item 4 in `GIT-ROADMAP.md`; switching and creating branches are GIT-007 and GRAPH-011, Fetch / Pull / Push of the current branch are GIT-015. User documentation: "Tidying up branches and tags" in `docs/git.md`.
+
+Where the code lives: the pure wording, checks and picker rows are in `src/lib/gitBranches.ts`; the menu entries in `src/lib/gitRefs.ts` (`refMenu`, `rowMenu`); the actions in `src/lib/gitRefActions.ts` (`refCommand` → `refAction`); the git work in `ref_action` / `push_ref` / `branch_info` of `src-tauri/src/git.rs`.
 
 Decisions (choices made where the roadmap left the design open):
 
@@ -29,15 +31,19 @@ Decisions (choices made where the roadmap left the design open):
 
 ## BRANCH-001: Right-click a branch or tag label in the graph
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — the ref-label menu of MERGE-002 (`RefBadge` right-click in the row list and the details pane, `RefMenu` state, rendered with `GraphMenu`) gets this area's entries; reload after a ref action
-  - `src/lib/gitRefs.ts` — `refMenu(label, ctx)` (created by MERGE-002 with the merge and rebase entries) extended: Switch to, the housekeeping entries per kind of ref, Copy; labels naming the remote, disabled reasons; new `splitRemoteRef`, `pushTarget`
+  - `src/components/GraphView.tsx` — the ref-label menu of MERGE-002 (`RefBadge` right-click in the row list and the details pane, `RefMenu` state, rendered with `GraphMenu`) gets this area's entries (`refAct`: Switch, Copy and the rename strip are the view's, everything else is `runCommand` with `{ name, root }`); `refCtx`; reload when `useGit().refsTick` changes
+  - `src/lib/gitRefs.ts` — `refMenu(label, ctx)` (created by MERGE-002 with the merge and rebase entries) extended by `withHousekeeping` once `ctx.remotes` is given: Switch to, the housekeeping entries per kind of ref, Copy; labels naming the remote, disabled reasons; `REF_COMMANDS` (entry id → command)
+  - `src/lib/gitBranches.ts` — pure: `splitRemoteRef`, `pushTarget`, `defaultRemote`, `pushLabel`, `ON_THIS_BRANCH`
   - `src/lib/gitGraph.ts` — `refLabels` / `RefLabel` (kinds the menu is built from)
-  - `src/lib/git.ts` — `refInfo` state the menu needs (upstream of each branch, remotes, default branch per remote)
-  - `src/styles/app.css` — `.graph-ref` hover / context-open state
-- Tests: `src/__tests__/gitRefs.test.ts`, `src/__tests__/graphView.test.tsx`
+  - `src/lib/git.ts` — `refInfo` state the menu needs (upstream of each branch, default branch per remote) and `loadRefInfo`; `refsTick`
+  - `src/lib/gitRefActions.ts` — `copyRefName`; `busyRun` bumps `refsTick` after every action
+  - `src/lib/gitApi.ts` — `git.refInfo`, `GitRefInfo`
+  - `src-tauri/src/git.rs` — `git_ref_info` / `ref_info` (`for-each-ref` upstreams, `default_branch` from `refs/remotes/<remote>/HEAD`)
+  - `src/styles/app.css` — `.graph-ref` hover / `.menu-open` state
+- Tests: `src/__tests__/gitRefs.test.ts`, `src/__tests__/gitBranches.test.ts`, `src/__tests__/graphBranches.test.tsx`, `src/__tests__/graphMerge.test.tsx`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 
 **As a** developer looking at the commit graph
@@ -110,22 +116,30 @@ Scenario: BRANCH-001.11 The graph follows the change
   Given the label menu of "feature"
   When an action from it succeeds, for example Rename Branch… to "feature-2"
   Then the graph reloads and the commit shows "feature-2" and no "feature"
-  And the selected commit and the scroll position are kept
+  And the selected commit is kept, and so is the scroll position within the first page of commits (a reload starts again from the first page, as after a commit or a fetch)
+
+Scenario: BRANCH-001.12 A label shows that it has a menu
+  When I point at a branch or tag label
+  Then it is outlined
+  And while its menu is open the label stays outlined, so I can see which label the menu belongs to
 ```
 
 ## BRANCH-002: Manage branches and tags from the branch picker and the Git menu
 
-- Status: planned
+- Status: draft
 - Commands: `git.deleteBranch`, `git.renameBranch`, `git.setUpstream`, `git.pushBranch`, `git.deleteRemoteBranch`, `git.deleteTag`, `git.pushTag`
 - Files:
-  - `src/components/CommandPalette.tsx` — `mode === "branch"`: row "⋯" button, right-click and Shift+F10 open the row menu (purpose `switch` only); the purposes `delete-branch`, `local-branch`, `remote-branch`, `tag`, `upstream`, `new-name` with their prompts and empty texts
-  - `src/lib/git.ts` — `pickBranch(purpose)` (the purpose argument and `branchPick` come from MERGE-003) gains this area's purposes and loads `tags` beside `branches` for `tag`; `refAction` (the one function every entry point calls)
-  - `src/lib/gitCommands.ts` — the seven commands, each taking an optional `{ name }`, `enabled: hasRepo`; without a name a command opens the picker with its purpose, and the picked row runs the same command with the name
-  - `src/lib/gitRefs.ts` — `refMenu` (the picker's row menu has the housekeeping and Copy entries of the graph label menu; the Switch, merge and rebase entries are left out of it), `pickList` (which refs a purpose lists)
-  - `src/components/MenuBar.tsx` — Git › Branches and Tags submenu referencing the command ids, after Rebase onto Branch… and before Edit History (planned layout in `specs/git-merge-rebase.md`, Decisions)
+  - `src/components/CommandPalette.tsx` — `mode === "branch"`: row "⋯" button (`.palette-more`), right-click and Shift+F10 open the row menu (`rowMenu` state, `openRowMenu`, `runRowEntry`; rows of the purpose `switch` only, keyboard handled in `onKey`, Escape through `cancel`); the purposes `delete-branch`, `local-branch`, `remote-branch`, `tag`, `upstream`, `new-name` with their prompts, rows (`housekeepingRows`) and empty texts (`branchEmpty`)
+  - `src/lib/git.ts` — `pickBranch(purpose, pickFor)` (the purpose argument and `branchPick` come from MERGE-003) gains this area's purposes: `branchPickFor` (command, target branch, repository), `branchPickSeq`, loads `tags` beside `branches` for `tag`
+  - `src/lib/gitRefActions.ts` — `refCommand` (what the seven commands run: with a name the action, without one the picker), `refArgs`, `refRepo`, `refAction` (the one function every entry point reaches)
+  - `src/lib/gitCommands.ts` — the seven commands, each taking an optional `{ name }` (and `{ root }` from a graph tab), enabled while there is a repository; without a name a command opens the picker with its purpose, and the picked row runs the same command with the name
+  - `src/lib/gitRefs.ts` — `rowMenu` (the picker's row menu has the housekeeping and Copy entries of the graph label menu; the Switch, merge and rebase entries are left out of it), `branchPick`, `pickList` (which refs a purpose lists), `REF_COMMANDS`
+  - `src/lib/gitBranches.ts` — pure: `housekeepingRows` (the rows of each purpose), `housekeepingPrompt`, `isHousekeeping`, `BranchPickFor`
+  - `src/components/MenuBar.tsx` — Git › Branches and Tags submenu referencing the command ids, after Rebase onto Branch… (planned layout in `specs/git-merge-rebase.md`, Decisions)
   - `src/lib/gitApi.ts` — `git.tags`, `GitTag`
-  - `src-tauri/src/git.rs` — `git_tags` (`for-each-ref refs/tags`, newest first)
-- Tests: `src/__tests__/gitRefs.test.ts`, `src/__tests__/branchPicker.test.tsx`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git.rs` — `git_tags` (`for-each-ref --sort=-creatordate refs/tags`, newest first)
+  - `src/styles/app.css` — `.palette-more`, `.branch-row-menu`, the list's note line
+- Tests: `src/__tests__/gitRefs.test.ts`, `src/__tests__/gitBranches.test.ts`, `src/__tests__/branchPickerRefs.test.tsx`, `src/__tests__/gitRefActions.test.ts`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 
 **As a** developer who works from the keyboard or keeps the graph closed
@@ -206,16 +220,16 @@ Scenario: BRANCH-002.12 The picker shows a change made elsewhere
 
 ## BRANCH-003: Delete a local branch
 
-- Status: planned
+- Status: draft
 - Commands: `git.deleteBranch`
 - Files:
-  - `src/lib/gitRefs.ts` — `deleteQuestion` (first dialog), `unmergedQuestion` (second, danger), `refDone`
-  - `src/lib/git.ts` — `refAction("branch-delete")`: asks, runs, toast, refresh
+  - `src/lib/gitBranches.ts` — `deleteQuestion` (first dialog), `unmergedQuestion` (second, danger), `refDone`, `NOT_MERGED` / `isNotMerged`
+  - `src/lib/gitRefActions.ts` — `refAction("branch-delete")` → `deleteBranch`: reads the branch, asks, runs the safe delete (or, after the second question, the forced one for the commit asked about), toast, refresh
   - `src/lib/gitApi.ts` — `git.refAction`, `git.branchInfo`, `GitBranchInfo`
-  - `src-tauri/src/git.rs` — `git_branch_info` (upstream, merge base branch, count of commits not in it via `rev-list --count`), `ref_action` / `git_ref_action` (`branch-delete` = `branch -d`, `branch-delete-force` = `branch -D`; refuses the checked-out branch itself)
+  - `src-tauri/src/git.rs` — `git_branch_info` / `branch_info` (upstream, the branch "merged" is measured against, count of commits not in it via `rev-list --count`), `ref_action` / `git_ref_action` (`branch-delete` = `branch -d`, failing with `NOT_MERGED` when git refuses; `branch-delete-force` = `branch -D`, only while the branch still points at the commit the question named; both refuse the checked-out branch), `known_ref`
   - `src/components/GraphView.tsx` — label menu entry, reload
   - `src/components/CommandPalette.tsx` — "Delete which branch?" list
-- Tests: `src/__tests__/gitRefs.test.ts`, `src-tauri/src/git.rs`, `src/__tests__/graphView.test.tsx`
+- Tests: `src/__tests__/gitBranches.test.ts`, `src/__tests__/gitRefActions.test.ts`, `src-tauri/src/git.rs`, `src/__tests__/graphBranches.test.tsx`, `src/__tests__/branchPickerRefs.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer whose branch list has filled up with finished work
@@ -239,7 +253,9 @@ Scenario: BRANCH-003.2 Enter does not delete
 
 Scenario: BRANCH-003.3 An unmerged branch needs a second confirmation
   Given I am on "main" and branch "experiment" has no upstream and 2 commits that are not in "main"
-  When I choose "Delete Branch…" for "experiment" and click "Delete Branch" in the first dialog
+  When I choose "Delete Branch…" for "experiment"
+  Then the first dialog says "2 commits on "experiment" are not in "main": you are asked once more before they are lost."
+  When I click "Delete Branch" in it
   Then the branch is not deleted yet
   And a second dialog asks "Delete "experiment" and lose 2 commits?" and says "2 commits on "experiment" are not in "main". Deleting the branch leaves them on no branch. Its last commit is 9f8e7d6, should you need it back."
   And its buttons are a red "Delete Anyway" and "Cancel", with Cancel the default
@@ -295,20 +311,25 @@ Scenario: BRANCH-003.12 The branch changed between the question and the answer
   Given the first dialog said "feature" was merged, and a commit was added to "feature" from a terminal while it was open
   When I click "Delete Branch"
   Then the branch is not deleted and the second, "lose 1 commit" question is asked
+
+Scenario: BRANCH-003.13 The forced delete is only for the commit that was asked about
+  Given the dialog "Delete "experiment" and lose 2 commits?" is open, and a third commit was added to "experiment" from a terminal
+  When I click "Delete Anyway"
+  Then the branch is kept and an error says ""experiment" changed while the question was open. Nothing was deleted."
 ```
 
 ## BRANCH-004: Rename a local branch
 
-- Status: planned
+- Status: draft
 - Commands: `git.renameBranch`
 - Files:
-  - `src/components/GraphView.tsx` — naming strip (`Naming`) gains a rename action, prefilled with the current name
-  - `src/components/CommandPalette.tsx` — branch mode, purpose `new-name`: prompt, prefilled query, single `Rename "a" to "b"` row
-  - `src/lib/gitRefs.ts` — `renameCheck(old, typed, existing)` (same name, taken name, picker's space-to-hyphen), `refDone`
-  - `src/lib/git.ts` — `refAction("branch-rename")`; status refresh so the panel and status bar show the new name
-  - `src-tauri/src/git.rs` — `ref_action` `branch-rename` = `branch -m <old> <new>` (never `-M`), `valid_ref_name`, `ref_exists`
+  - `src/components/GraphView.tsx` — naming strip (`Naming`) gains a rename action, prefilled with the current name (`commitNaming` runs `git.renameBranch` with `{ name, to, root }`)
+  - `src/components/CommandPalette.tsx` — branch mode, purpose `new-name`: prompt, prefilled query (the effect on `branchPickSeq`), single `Rename "a" to "b"` row
+  - `src/lib/gitBranches.ts` — `renameCheck(old, typed, existing, hyphens)` (same name, taken name, picker's space-to-hyphen), `housekeepingRows("new-name")`, `refDone`
+  - `src/lib/gitRefActions.ts` — `refAction("branch-rename")` → `renameBranch`; status refresh so the panel and status bar show the new name
+  - `src-tauri/src/git.rs` — `ref_action` `branch-rename` = `branch -m <old> <new>` (never `-M`; a change of letter case only goes through a free temporary name, because git refuses it where file names ignore case), `valid_ref_name`, `ref_exists`
   - `src/lib/gitApi.ts` — `git.refAction`
-- Tests: `src/__tests__/gitRefs.test.ts`, `src-tauri/src/git.rs`, `src/__tests__/graphView.test.tsx`, `src/__tests__/branchPicker.test.tsx`
+- Tests: `src/__tests__/gitBranches.test.ts`, `src/__tests__/gitRefActions.test.ts`, `src-tauri/src/git.rs`, `src/__tests__/graphBranches.test.tsx`, `src/__tests__/branchPickerRefs.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer who named a branch badly
@@ -349,6 +370,7 @@ Scenario: BRANCH-004.5 The name is taken
   When I rename "fix" to "main"
   Then nothing is renamed and an error says "A branch named "main" already exists."
   And "main" still points at its own commit
+  And in the "New name for "fix"…" picker the list says the same and offers no row to pick
 
 Scenario: BRANCH-004.6 Invalid names
   Given the rename strip for "fix" in the graph
@@ -386,16 +408,16 @@ Scenario: BRANCH-004.11 Git refuses
 
 ## BRANCH-005: Set or clear a branch's upstream
 
-- Status: planned
+- Status: draft
 - Commands: `git.setUpstream`
 - Files:
-  - `src/components/CommandPalette.tsx` — branch mode, purpose `upstream`: prompt, "tracking" label, "Stop tracking" row, empty state with "Push … to origin" row
-  - `src/lib/gitRefs.ts` — `upstreamRows(branch, branches, remotes)`, `refDone`
-  - `src/lib/git.ts` — `refAction("upstream-set" | "upstream-unset")`, no-remote redirect (`showAddRemote`), status refresh
-  - `src-tauri/src/git.rs` — `ref_action` `upstream-set` = `branch --set-upstream-to=<remote/branch> <branch>`, `upstream-unset` = `branch --unset-upstream <branch>`; `branches` (already returns `upstream`)
+  - `src/components/CommandPalette.tsx` — branch mode, purpose `upstream`: prompt, "tracking" label, "Stop tracking" row, the "No remote branches yet" note with the "Push … to origin and track it" row
+  - `src/lib/gitBranches.ts` — `housekeepingRows("upstream")` (same-name branch first, Stop tracking row, push-and-track row), `refDone`, `NO_REMOTE`
+  - `src/lib/gitRefActions.ts` — `refAction("upstream-set" | "upstream-unset")` → `setUpstream` (nothing is run for the upstream it already has), `refCommand` no-remote redirect (`showAddRemote`), status refresh
+  - `src-tauri/src/git.rs` — `ref_action` `upstream-set` = `branch --set-upstream-to=refs/remotes/<remote/branch> <branch>`, `upstream-unset` = `branch --unset-upstream <branch>`; `branches` (already returns `upstream`)
   - `src/lib/gitApi.ts` — `git.refAction`
   - `src/components/GraphView.tsx` — label menu entry
-- Tests: `src/__tests__/gitRefs.test.ts`, `src-tauri/src/git.rs`, `src/__tests__/branchPicker.test.tsx`
+- Tests: `src/__tests__/gitBranches.test.ts`, `src/__tests__/gitRefActions.test.ts`, `src-tauri/src/git.rs`, `src/__tests__/branchPickerRefs.test.tsx`, `src/__tests__/graphBranches.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer whose branch tracks nothing, or the wrong remote branch
@@ -461,16 +483,16 @@ Scenario: BRANCH-005.9 The remote branch disappeared
 
 ## BRANCH-006: Push a branch
 
-- Status: planned
+- Status: draft
 - Commands: `git.pushBranch`
 - Files:
-  - `src/lib/gitRefs.ts` — `pushTarget(branch, upstream, remotes)` (upstream, else origin, else first remote; entry label), `pushRejected` (recognises a non-fast-forward rejection)
-  - `src/lib/git.ts` — `refAction("branch-push")`: no-remote redirect, busy label, result toast, rejection dialog via `choose`, `isMissingRepo` handling as `remote()`
-  - `src-tauri/src/git.rs` — `push_ref` / `git_push_ref` (`push <remote> refs/heads/<b>:refs/heads/<upstream name>`, with `--set-upstream` when the branch has none; never `--force`); `remotes`
-  - `src/lib/gitApi.ts` — `git.pushRef`
-  - `src/lib/gitStatus.ts` — `gitErrorText`
+  - `src/lib/gitBranches.ts` — `pushTarget(branch, upstream, remotes)` (upstream, else origin, else first remote), `pushLabel`, `pushRejected` (recognises a non-fast-forward rejection), `rejectedDialog`, `refDone`
+  - `src/lib/gitRefActions.ts` — `refAction("branch-push")` → `pushBranch`: no-remote redirect, busy label, result toast, rejection dialog via `choose` (Switch to …, or Pull on the current branch), `isMissingRepo` recorded in `remoteCheck` as `remote()` does
+  - `src-tauri/src/git.rs` — `push_ref` / `git_push_ref` (`push <remote> refs/heads/<b>:refs/heads/<upstream name>`, with `--set-upstream` when the branch has none; never `--force`); `default_remote`
+  - `src/lib/gitApi.ts` — `git.pushRef`, `GitPushRef`
+  - `src/lib/gitStatus.ts` — `gitErrorText`, `isMissingRepo`
   - `src/components/GraphView.tsx` — label menu entry; `src/components/CommandPalette.tsx` — row menu entry and "Push which branch?" list
-- Tests: `src/__tests__/gitRefs.test.ts`, `src-tauri/src/git.rs`, `src/__tests__/gitRemote.test.ts`
+- Tests: `src/__tests__/gitBranches.test.ts`, `src/__tests__/gitRefs.test.ts`, `src/__tests__/gitRefActions.test.ts`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 
 **As a** developer with work on a branch I am not on
@@ -529,6 +551,7 @@ Scenario: BRANCH-006.8 The remote has commits the branch does not have
   And its buttons are "Switch to feature" and "Close", with Close the default
   When I click "Switch to feature"
   Then the repository is on "feature" and Source Control shows what there is to pull
+  And when the rejected branch is the one I am on, the dialog says "Pull, then push again." and its buttons are "Pull" and "Close"
 
 Scenario: BRANCH-006.9 Other failures
   Given the remote cannot be reached
@@ -545,19 +568,26 @@ Scenario: BRANCH-006.11 Only local branches are pushed from here
   Given the label "origin/topic" in the graph
   When I open its menu
   Then it has no Push entry
+
+Scenario: BRANCH-006.12 A branch Quarry rewrote is pointed at Force Push
+  Given I am on "main", whose pushed commits were rewritten by a rebase in Quarry (MERGE-009)
+  When I choose "Push main to origin/main" and the remote refuses it
+  Then no dialog offers to pull
+  And an error shows git's message and says "main was rewritten after it was pushed: use Git › Force Push (Replace Remote Branch)… instead of pulling."
 ```
 
 ## BRANCH-007: Delete a branch on the remote
 
-- Status: planned
+- Status: draft
 - Commands: `git.deleteRemoteBranch`
 - Files:
-  - `src/lib/gitRefs.ts` — `splitRemoteRef(name, remotes)` (longest matching remote name, so "origin/feature/login" is "feature/login" on "origin"), `remoteDeleteQuestion`, `isDefaultBranch`
-  - `src/lib/git.ts` — `refAction("remote-branch-delete")`: asks, busy label, toast, refresh; `remoteInfo` / remote URLs for the dialog
-  - `src-tauri/src/git.rs` — `push_ref` `delete` = `push <remote> --delete refs/heads/<branch>`; an already-missing ref is answered with `fetch --prune <remote>` and reported as gone; `git_branch_info` (commits only on that remote branch; the remote's default branch from `refs/remotes/<remote>/HEAD`)
-  - `src/lib/gitApi.ts` — `git.pushRef`
+  - `src/lib/gitBranches.ts` — `splitRemoteRef(name, remotes)` (longest matching remote name, so "origin/feature/login" is "feature/login" on "origin"), `remoteDeleteQuestion`, `remotePlace`, `refDone`
+  - `src/lib/gitRefs.ts` — the entry's label and its default-branch reason (`withHousekeeping`, from `ctx.defaults`)
+  - `src/lib/gitRefActions.ts` — `refAction("remote-branch-delete")` → `deleteRemoteBranch`: reads the branch, refuses a default branch, asks (the remote's URL from the status), busy label, toast, refresh
+  - `src-tauri/src/git.rs` — `push_ref` `delete` = `push <remote> --delete refs/heads/<branch>`, only for a remote branch this repository knows, never a default branch; an already-missing ref is answered with `fetch --prune <remote>` and reported as gone; `git_branch_info` (commits only on that remote branch; the remote's default branch from `refs/remotes/<remote>/HEAD`), `split_remote`
+  - `src/lib/gitApi.ts` — `git.pushRef`, `git.branchInfo`
   - `src/components/GraphView.tsx` — remote label menu entry; `src/components/CommandPalette.tsx` — row menu entry and "Delete which branch on the remote?" list
-- Tests: `src/__tests__/gitRefs.test.ts`, `src-tauri/src/git.rs`, `src/__tests__/graphView.test.tsx`
+- Tests: `src/__tests__/gitBranches.test.ts`, `src/__tests__/gitRefs.test.ts`, `src/__tests__/gitRefActions.test.ts`, `src-tauri/src/git.rs`, `src/__tests__/graphBranches.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer whose branch was merged and is still sitting on the remote
@@ -600,13 +630,14 @@ Scenario: BRANCH-007.6 Deleting the upstream of the branch I am on
   Given I am on "topic", which tracks "origin/topic"
   When I delete "topic" from origin
   Then I am still on "topic" and my files are untouched
-  And the Source Control status line says the branch's remote branch is gone and offers to publish it again
+  And the Source Control status line reads "origin/topic no longer exists on the remote." with the button "Push to Recreate It" (GIT-013.8)
 
 Scenario: BRANCH-007.7 A remote's default branch is protected
   Given origin's default branch is "main"
   When I open the menu of the label "origin/main"
   Then "Delete main from origin…" is greyed out with the tooltip "main is origin's default branch."
   And running the delete command for "origin/main" from a macro deletes nothing and shows the same sentence
+  And a repository that has no "origin/HEAD" (it was not cloned, and `git remote set-head` was never run) knows no default branch: the entry is then available, and the remote itself decides
 
 Scenario: BRANCH-007.8 The right remote and the whole branch name
   Given remotes "origin" and "backup" and the label "backup/feature/login"
@@ -640,15 +671,15 @@ Scenario: BRANCH-007.12 One action at a time
 
 ## BRANCH-008: Delete a tag
 
-- Status: planned
+- Status: draft
 - Commands: `git.deleteTag`
 - Files:
-  - `src/lib/gitRefs.ts` — `tagDeleteQuestion`, `refDone`
-  - `src/lib/git.ts` — `refAction("tag-delete")`: asks, toast, graph reload signal
-  - `src-tauri/src/git.rs` — `ref_action` `tag-delete` = `tag -d <name>` (name checked with `ref_exists("refs/tags/…")`, never passed as an option), `git_tags`
+  - `src/lib/gitBranches.ts` — `tagDeleteQuestion`, `refDone`
+  - `src/lib/gitRefActions.ts` — `refAction("tag-delete")` → `deleteTag`: reads the tag's commit, asks, toast, graph reload signal (`refsTick`)
+  - `src-tauri/src/git.rs` — `ref_action` `tag-delete` = `tag -d <name>` (name checked with `known_ref` / `ref_exists("refs/tags/…")`, never passed as an option), `git_tags`, `git_branch_info` (kind `tag`: the commit it points at)
   - `src/lib/gitApi.ts` — `git.refAction`, `git.tags`
   - `src/components/GraphView.tsx` — tag label menu entry; `src/components/CommandPalette.tsx` — "Delete which tag?" list
-- Tests: `src/__tests__/gitRefs.test.ts`, `src-tauri/src/git.rs`, `src/__tests__/graphView.test.tsx`
+- Tests: `src/__tests__/gitBranches.test.ts`, `src/__tests__/gitRefActions.test.ts`, `src-tauri/src/git.rs`, `src/__tests__/graphBranches.test.tsx`, `src/__tests__/branchPickerRefs.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer who tagged the wrong commit or mistyped a version
@@ -698,16 +729,16 @@ Scenario: BRANCH-008.7 Annotated tags
 
 ## BRANCH-009: Push a tag
 
-- Status: planned
+- Status: draft
 - Commands: `git.pushTag`
 - Files:
-  - `src/lib/gitRefs.ts` — `pushTarget` (origin, else first remote; entry label), `refDone`
-  - `src/lib/git.ts` — `refAction("tag-push")`: no-remote redirect, busy label, toasts, error
+  - `src/lib/gitBranches.ts` — `defaultRemote` (origin, else first remote), `pushLabel`, `tagRejected`, `tagRejectedText`, `refDone`
+  - `src/lib/gitRefActions.ts` — `refAction("tag-push")` → `pushTag`: no-remote redirect, busy label, toasts, error
   - `src-tauri/src/git.rs` — `push_ref` `tag` = `push <remote> refs/tags/<name>` (never `--force`, never `--tags`); "Everything up-to-date" recognised
   - `src/lib/gitApi.ts` — `git.pushRef`
   - `src/lib/gitStatus.ts` — `gitErrorText`
   - `src/components/GraphView.tsx` — tag label menu entry; `src/components/CommandPalette.tsx` — "Push which tag?" list
-- Tests: `src/__tests__/gitRefs.test.ts`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitBranches.test.ts`, `src/__tests__/gitRefs.test.ts`, `src/__tests__/gitRefActions.test.ts`, `src-tauri/src/git.rs`, `src/__tests__/graphBranches.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer who tagged a release

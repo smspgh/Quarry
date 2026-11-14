@@ -12,6 +12,7 @@ import { forcePushBlocked, startBlocked, type StartKind } from "./gitMerge";
 import { showStashes, showStashForm, stashLatest } from "./git";
 import { applyChange, applySelection, canApply, type ApplyAction, type ApplyScope } from "./gitStaging";
 import { compareWithBranch } from "./git";
+import { refCommand, refRepo, type RefCommandId } from "./gitRefActions";
 import { showPanel } from "./panels";
 import { activeDoc, useStore } from "./store";
 
@@ -236,4 +237,18 @@ export function registerGitCommands() {
   register({ id: "git.compareWithBranch", title: "Compare with Branch…", category: "Git", enabled: hasRepo, run: () => void pickBranch("compare") });
   // What a picked row of the branch list runs: the branch name.
   register({ id: "git.compareBranchPick", title: "Compare with Branch", category: "Git", hidden: true, run: (name) => { if (typeof name !== "string" || !name.trim()) return false; void compareWithBranch(name.trim()); } });
+
+  // ----- Branch and tag housekeeping (specs/git-branches.md) -----
+  // Each takes an optional `{ name }` (plus `{ root }` from a graph tab, `{ to }` for a rename,
+  // `{ upstream }` for Set Upstream): with a name it starts the action, with every question it has;
+  // without one the branch picker asks which, and the picked row runs the same command.
+  const hasRefRepo = (args?: unknown) => !!refRepo(args);
+  const refRun = (id: RefCommandId) => (args?: unknown) => refCommand(id, args);
+  register({ id: "git.renameBranch", title: "Rename Branch…", category: "Git", enabled: hasRefRepo, run: refRun("git.renameBranch") });
+  register({ id: "git.deleteBranch", title: "Delete Branch…", category: "Git", enabled: hasRefRepo, run: refRun("git.deleteBranch") });
+  register({ id: "git.setUpstream", title: "Set Upstream…", category: "Git", enabled: hasRefRepo, run: refRun("git.setUpstream") });
+  register({ id: "git.pushBranch", title: "Push Branch…", category: "Git", enabled: hasRefRepo, run: refRun("git.pushBranch") });
+  register({ id: "git.deleteRemoteBranch", title: "Delete Remote Branch…", category: "Git", enabled: hasRefRepo, run: refRun("git.deleteRemoteBranch") });
+  register({ id: "git.deleteTag", title: "Delete Tag…", category: "Git", enabled: hasRefRepo, run: refRun("git.deleteTag") });
+  register({ id: "git.pushTag", title: "Push Tag…", category: "Git", enabled: hasRefRepo, run: refRun("git.pushTag") });
 }

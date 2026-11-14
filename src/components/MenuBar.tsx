@@ -272,6 +272,7 @@ const MENUS: Menu[] = [
       { cmd: "git.switchBranch" },
       { cmd: "git.mergeBranch" },
       { cmd: "git.rebaseBranch" },
+      { label: "Branches and Tags", submenu: () => [{ cmd: "git.renameBranch" }, { cmd: "git.deleteBranch" }, { cmd: "git.setUpstream" }, { cmd: "git.pushBranch" }, { cmd: "git.deleteRemoteBranch" }, { sep: true }, { cmd: "git.deleteTag" }, { cmd: "git.pushTag" }] },
       { sep: true },
       { cmd: "git.fetch" },
       { cmd: "git.pull" },
