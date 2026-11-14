@@ -85,6 +85,15 @@ describe("Source Control panel: Merge or Rebase", () => {
     expect(row.indexOf(mergeButton())).toBeLessThan(row.indexOf(document.querySelector(".scm-op")!));
   });
 
+  // Seen live: `.btn:disabled { pointer-events: none }` made WebView2 show no tooltip on the disabled
+  // button, so the reason was never seen. The branch row keeps pointer events for disabled buttons.
+  it("the disabled button's tooltip is reachable: the branch row keeps pointer events on", async () => {
+    const { readFileSync } = await import("node:fs");
+    const css = readFileSync("src/styles/app.css", "utf8");
+    expect(css).toMatch(/\.btn:disabled\s*\{[^}]*pointer-events:\s*none/);
+    expect(css).toMatch(/\.scm-branch \.btn:disabled\s*\{[^}]*pointer-events:\s*auto/);
+  });
+
   it("is disabled while another git action is running", async () => {
     await show(repo(), { busy: "Pulling…" });
     expect(mergeButton().disabled).toBe(true);

@@ -4612,6 +4612,11 @@ select optgroup {
 .scm-top { gap: 6px; }
 .scm-branch { min-width: 0; }
 .scm-branch .btn { max-width: 70%; min-width: 0; }
+/* A disabled button in this row says why in its tooltip (MERGE-003.9, CONFLICT-012.2). `.btn:disabled`
+   switches pointer events off, and WebView2 then shows no tooltip, so they stay on here. */
+.scm-branch .btn:disabled { pointer-events: auto; cursor: default; }
+.scm-branch .btn:disabled:hover,
+.scm-branch .btn:disabled:active { background: var(--control); color: var(--text); }
 .scm-op {
   font-size: 11px;
   padding: 1px 6px;
