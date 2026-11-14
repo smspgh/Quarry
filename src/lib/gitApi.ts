@@ -246,6 +246,12 @@ export const git = {
   unstage: (root: string, paths: string[]) => invoke<void>("git_unstage", { root, paths }),
   /** Tracked files go back to their staged version; untracked files go to the Recycle Bin. */
   discard: (root: string, paths: string[]) => invoke<void>("git_discard", { root, paths }),
+  /** Partial staging (specs/git-staging.md): stage / unstage / discard line ranges of one file.
+   *  `expect` = hashes (`textHash`) of the two texts the comparison shows and the encoding its
+   *  right side was read with; when git or the disk no longer match, nothing is changed and the
+   *  error starts with `STALE`. `orig`: the path in HEAD of a staged rename. */
+  applyLines: (root: string, path: string, mode: "stage" | "unstage" | "discard", picks: { oldStart: number; oldCount: number; newStart: number; newCount: number }[], expect: { left: string; right: string; encoding: string | null }, orig?: string) =>
+    invoke<void>("git_apply_lines", { root, path, mode, picks, expect, orig: orig ?? null }),
   commit: (root: string, message: string, amend = false) => invoke<GitCommitResult>("git_commit", { root, message, amend }),
   /** Local branches first, then remote ones; each newest first. */
   branches: (root: string) => invoke<GitBranch[]>("git_branches", { root }),

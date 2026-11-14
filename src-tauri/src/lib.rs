@@ -838,6 +838,7 @@ pub fn run() {
             git::git_stage,
             git::git_unstage,
             git::git_discard,
+            git::staging::git_apply_lines, // partial staging (specs/git-staging.md)
             git::git_commit,
             git::git_branches,
             git::git_checkout,

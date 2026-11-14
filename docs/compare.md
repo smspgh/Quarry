@@ -5,6 +5,7 @@ A **Compare** tab shows two versions of a text side by side, or in one editor wi
 - [Opening a compare](#opening-a-compare)
 - [Reading the differences](#reading-the-differences)
 - [Editing and saving](#editing-and-saving)
+- [Comparisons from Source Control](#comparisons-from-source-control)
 - [Limits](#limits)
 
 ## Opening a compare
@@ -24,7 +25,7 @@ The first file is the left (original) side and the second the right (changed) si
 - **Moving between changes.** **F7** / **Shift+F7** (or the arrows in the toolbar) go to the next / previous change. The toolbar shows where you are, for example **Change 2 of 5**.
 - **Layout.** **Side by side** / **Inline** switches the layout. In inline mode the removed lines appear above the lines that replaced them.
 - **Unchanged lines.** The fold button hides long unchanged stretches. Click a folded stretch to show it.
-- **Swap** (⇄) puts each side on the other side. **Reload** reads the files from disk again and takes a tab's current text; clipboard and git versions keep the text they had (it is off while a side has unsaved edits).
+- **Swap** (⇄) puts each side on the other side. **Reload** reads the files from disk again and takes a tab's current text; clipboard and git versions keep the text they had, except in a comparison opened from Source Control, which reads its git side again too (it is off while a side has unsaved edits).
 
 ## Editing and saving
 
@@ -33,6 +34,18 @@ The first file is the left (original) side and the second the right (changed) si
 - **Saving.** An edited side is tagged **edited**. Save with **Ctrl+S** or the **Save** button. Each file keeps its encoding, byte order mark and line-ending style.
 - **Closing.** Closing a compare with unsaved edits asks first.
 - **Other tabs.** If the file is also open in a normal tab, that tab notices the change like any other change made outside it.
+
+## Comparisons from Source Control
+
+A Compare tab opened by clicking a file under **Changes** or **Staged Changes** in the Source Control panel can also stage, unstage or discard part of the file:
+
+- A bar above each change has **Stage Change** and **Discard Change** (from Changes) or **Unstage Change** (from Staged Changes). In side-by-side layout the bar is in the right side; the Inline layout has it too.
+- The toolbar has **Stage Selected Lines** / **Discard Selected Lines** (or **Unstage Selected Lines**), which act on the lines selected in the right side; a bare cursor counts as its line. They are off when the selection touches no change.
+- The arrows between the sides are unchanged: they edit the right side (an edit you can undo and must save), they don't stage or discard anything.
+- The tab follows the index: after a staging action or a commit it is refreshed in place, its left side relabelled **(staged)** or **(HEAD)**, without moving away from where you were. A tab with unsaved edits is not refreshed.
+- While the sides are swapped the staging controls are hidden; swap back to get them.
+
+What each action does, when it asks and what it saves first is in [Git: Source Control panel](git.md#source-control-panel).
 
 ## Limits
 

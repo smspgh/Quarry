@@ -1,5 +1,5 @@
-import { EditorState, Prec, type Extension } from "@codemirror/state";
-import { EditorView } from "@codemirror/view";
+import { EditorState, Prec, RangeSetBuilder, StateField, type Extension } from "@codemirror/state";
+import { Decoration, EditorView, WidgetType, type DecorationSet } from "@codemirror/view";
 import { getChunks, goToNextChunk, goToPreviousChunk, MergeView, unifiedMergeView } from "@codemirror/merge";
 import { ArrowDown, ArrowLeftRight, ArrowUp, ChevronsDownUp, Columns2, RefreshCw, Rows2, Save } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -7,6 +7,8 @@ import { baseExtensions, detectLanguage, settingsReconfigure } from "../editor/c
 import { captureSideTexts, diffViews, markSideEdited, patchDiff, reloadDiff, saveDiff, swapDiff, useDiff, type Side } from "../lib/diff";
 import { useStore, type Doc } from "../lib/store";
 import { editor } from "../editor/manager";
+import { useGit } from "../lib/git";
+import { applyChange, applySelection, changeAtCursor as stagingChangeAt, selectedLines as stagingSelection, type ApplyAction } from "../lib/gitStaging";
 
 /** The editor that holds the changes (the right side, or the single inline editor), per tab, for
  *  the Next / Previous Change commands. */
@@ -30,11 +32,126 @@ function position(view: EditorView): { index: number; total: number } {
   return { index: i + 1, total: got.chunks.length };
 }
 
+// ---------- partial staging (specs/git-staging.md): a bar above each change ----------
+
+/** Index of the change at the cursor of a tab's right side (-1: none): what the `git.*Change`
+ *  commands act on. */
+export const changeAtCursor = (docId: string) => stagingChangeAt(docId);
+/** What the selection of a tab's right side takes from its changes: what the `git.*Lines`
+ *  commands act on. */
+export const selectedLines = (docId: string) => stagingSelection(docId);
+
+const BAR_BUTTONS: Record<"changes" | "staged", { action: ApplyAction; label: string; title: string }[]> = {
+  changes: [
+    { action: "stage", label: "Stage Change", title: "Stage this change (Ctrl+K S at the cursor)" },
+    { action: "discard", label: "Discard Change", title: "Discard this change… (asks first)" },
+  ],
+  staged: [{ action: "unstage", label: "Unstage Change", title: "Unstage this change (Ctrl+K U at the cursor)" }],
+};
+
+/** The bar above a change: Stage Change / Discard Change, or Unstage Change. */
+class HunkBar extends WidgetType {
+  constructor(readonly docId: string, readonly index: number, readonly kind: "changes" | "staged") {
+    super();
+  }
+  eq(o: HunkBar) {
+    return o.docId === this.docId && o.index === this.index && o.kind === this.kind;
+  }
+  toDOM() {
+    const bar = document.createElement("div");
+    bar.className = "diff-hunk-bar";
+    for (const b of BAR_BUTTONS[this.kind]) {
+      const btn = bar.appendChild(document.createElement("button"));
+      btn.type = "button";
+      btn.className = `diff-hunk-btn${b.action === "discard" ? " danger" : ""}`;
+      btn.textContent = b.label;
+      btn.title = b.title;
+      btn.dataset.action = b.action;
+      btn.disabled = !!useGit.getState().busy;
+      // Keep the keyboard focus in the editor (F7 goes on to the next change).
+      btn.onmousedown = (e) => e.preventDefault();
+      btn.onclick = (e) => {
+        e.preventDefault();
+        void applyChange(this.docId, b.action, this.index);
+      };
+    }
+    return bar;
+  }
+  ignoreEvent() {
+    return true;
+  }
+}
+
+/** The same height on the left side, so the two sides stay level. */
+class HunkGap extends WidgetType {
+  eq() {
+    return true;
+  }
+  toDOM() {
+    const gap = document.createElement("div");
+    gap.className = "diff-hunk-gap";
+    return gap;
+  }
+}
+
+/** Bars above the changes of the right / inline editor (`kind`), or matching gaps in the left one. */
+function hunkBars(docId: string, kind: "changes" | "staged" | "gap"): Extension {
+  const build = (state: EditorState): DecorationSet => {
+    const got = getChunks(state);
+    const b = new RangeSetBuilder<Decoration>();
+    if (got) {
+      got.chunks.forEach((c, i) => {
+        const at = state.doc.lineAt(Math.min(kind === "gap" ? c.fromA : c.fromB, state.doc.length)).from;
+        // side -2: above the removed lines the inline layout draws there (side -1).
+        b.add(at, at, Decoration.widget({ widget: kind === "gap" ? new HunkGap() : new HunkBar(docId, i, kind), block: true, side: -2 }));
+      });
+    }
+    return b.finish();
+  };
+  return StateField.define<DecorationSet>({
+    create: build,
+    update: (v, tr) => (tr.docChanged || getChunks(tr.startState)?.chunks !== getChunks(tr.state)?.chunks ? build(tr.state) : v),
+    provide: (f) => EditorView.decorations.from(f),
+  });
+}
+
+/** Where the reader was, kept across a rebuild of the editors (a refresh after staging). */
+interface Place {
+  line: number;
+  col: number;
+  top: number;
+  focused: boolean;
+}
+
+function placeOf(view: EditorView, host: HTMLElement): Place {
+  const head = view.state.selection.main.head;
+  const line = view.state.doc.lineAt(head);
+  let top = 1;
+  try {
+    top = view.state.doc.lineAt(view.lineBlockAtHeight(host.getBoundingClientRect().top - view.documentTop).from).number;
+  } catch {
+    // not laid out
+  }
+  return { line: line.number, col: head - line.from, top, focused: view.hasFocus };
+}
+
+function restorePlace(view: EditorView, p: Place) {
+  const doc = view.state.doc;
+  const line = doc.line(Math.min(p.line, doc.lines));
+  const top = doc.line(Math.min(p.top, doc.lines)).from;
+  view.dispatch({ selection: { anchor: Math.min(line.from + p.col, line.to) }, effects: p.top > 1 ? EditorView.scrollIntoView(top, { y: "start" }) : [] });
+  if (p.focused) view.focus();
+}
+
 export function DiffView({ doc, visible }: { doc: Doc; visible: boolean }) {
   const s = useDiff((st) => st.sessions[doc.id]);
   const settings = useStore((st) => st.settings);
   const host = useRef<HTMLDivElement>(null);
   const [nav, setNav] = useState({ index: 0, total: 0 });
+  // Partial staging: is a git action running, does the selection touch a change, where the reader was.
+  const busy = useGit((g) => !!g.busy);
+  const [lines, setLines] = useState(false);
+  const place = useRef<Place | null>(null);
 
   const version = s?.version;
   const inline = s?.inline;
@@ -51,7 +168,13 @@ export function DiffView({ doc, visible }: { doc: Doc; visible: boolean }) {
     const firstLine = (cur.right.text || cur.left.text).slice(0, 200);
     void detectLanguage(path, firstLine).load().then((support) => {
       if (disposed) return;
-      const report = (view: EditorView) => setNav(position(view));
+      // Source Control comparison, sides not swapped: change bars and the selected-lines buttons.
+      const staging = cur.git && !cur.swapped ? (cur.git.staged ? "staged" : "changes") : null;
+      const report = (view: EditorView) => {
+        setNav(position(view));
+        // Only the right side's cursor / selection counts (the left side's is ignored).
+        if (staging && view === changeViews.get(doc.id)) setLines(stagingSelection(doc.id).length > 0);
+      };
       const side = (which: "left" | "right", s: Side): Extension[] =>
         baseExtensions(settings, [
           support ?? [],
@@ -68,17 +191,18 @@ export function DiffView({ doc, visible }: { doc: Doc; visible: boolean }) {
           parent: el,
           state: EditorState.create({
             doc: cur.right.text,
-            extensions: [side("right", cur.right), unifiedMergeView({ original: cur.left.text, mergeControls: false, gutter: true, highlightChanges: true, syntaxHighlightDeletions: true, collapseUnchanged: fold, diffConfig: { timeout: 3000 } })],
+            extensions: [side("right", cur.right), staging ? hunkBars(doc.id, staging) : [], unifiedMergeView({ original: cur.left.text, mergeControls: false, gutter: true, highlightChanges: true, syntaxHighlightDeletions: true, collapseUnchanged: fold, diffConfig: { timeout: 3000 } })],
           }),
         });
         changeViews.set(doc.id, single);
         diffViews.set(doc.id, { right: single });
+        if (place.current) restorePlace(single, place.current);
         report(single);
       } else {
         merge = new MergeView({
           parent: el,
-          a: { doc: cur.left.text, extensions: side("left", cur.left) },
-          b: { doc: cur.right.text, extensions: side("right", cur.right) },
+          a: { doc: cur.left.text, extensions: [side("left", cur.left), staging ? hunkBars(doc.id, "gap") : []] },
+          b: { doc: cur.right.text, extensions: [side("right", cur.right), staging ? hunkBars(doc.id, staging) : []] },
           revertControls: cur.right.editable ? "a-to-b" : cur.left.editable ? "b-to-a" : undefined,
           highlightChanges: true,
           gutter: true,
@@ -87,6 +211,7 @@ export function DiffView({ doc, visible }: { doc: Doc; visible: boolean }) {
         });
         changeViews.set(doc.id, merge.b);
         diffViews.set(doc.id, { left: merge.a, right: merge.b });
+        if (place.current) restorePlace(merge.b, place.current);
         report(merge.b);
       }
     });
@@ -94,6 +219,9 @@ export function DiffView({ doc, visible }: { doc: Doc; visible: boolean }) {
       disposed = true;
       // Edits live in the editors: keep them for the rebuilt ones (inline / side by side, fold).
       captureSideTexts(doc.id);
+      // A refresh after staging must not jump away from where the reader was.
+      const shown = changeViews.get(doc.id);
+      if (shown) place.current = placeOf(shown, el);
       merge?.destroy();
       single?.destroy();
       changeViews.delete(doc.id);
@@ -110,6 +238,10 @@ export function DiffView({ doc, visible }: { doc: Doc; visible: boolean }) {
   }, [settings, doc.id]);
 
   useEffect(() => editor.registerFocus(doc.id, () => changeViews.get(doc.id)?.focus()), [doc.id]);
+  // While git is busy the bars' buttons are disabled (new bars read the state when they are drawn).
+  useEffect(() => {
+    host.current?.querySelectorAll<HTMLButtonElement>(".diff-hunk-btn").forEach((b) => (b.disabled = busy));
+  }, [busy, version, inline, collapse]);
   useEffect(() => {
     if (!visible) return;
     requestAnimationFrame(() => {
@@ -151,6 +283,22 @@ export function DiffView({ doc, visible }: { doc: Doc; visible: boolean }) {
         <button className={`icon-btn ${s.collapse ? "on" : ""}`} title={s.collapse ? "Show unchanged lines" : "Fold unchanged lines"} aria-pressed={s.collapse} onClick={() => patchDiff(doc.id, (cur) => ({ collapse: !cur.collapse }))}><ChevronsDownUp size={15} /></button>
         <button className="icon-btn" title="Swap sides" aria-label="Swap sides" disabled={dirty} onClick={() => swapDiff(doc.id)}><ArrowLeftRight size={15} /></button>
         <button className="icon-btn" title="Reload the files from disk" aria-label="Reload" disabled={dirty} onClick={() => void reloadDiff(doc.id)}><RefreshCw size={15} /></button>
+        {s.git && !s.swapped && (
+          <>
+            <span className="diff-sep" />
+            {(s.git.staged
+              ? [{ action: "unstage" as const, label: "Unstage Selected Lines", title: "Unstage the selected lines of the right side (Ctrl+K N)" }]
+              : [
+                  { action: "stage" as const, label: "Stage Selected Lines", title: "Stage the selected lines of the right side (Ctrl+K L)" },
+                  { action: "discard" as const, label: "Discard Selected Lines", title: "Discard the selected lines of the right side… (asks first)" },
+                ]
+            ).map((b) => (
+              <button key={b.action} className={`btn small diff-lines-btn${b.action === "discard" ? " btn-danger" : ""}`} title={b.title} disabled={busy || !lines} onMouseDown={(e) => e.preventDefault()} onClick={() => void applySelection(doc.id, b.action)}>
+                {b.label}
+              </button>
+            ))}
+          </>
+        )}
         {dirty && (
           <button className="btn small btn-primary" title="Save the edited side (Ctrl+S)" onClick={() => void saveDiff(doc.id)}><Save size={13} /> Save</button>
         )}

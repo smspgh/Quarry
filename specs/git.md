@@ -502,7 +502,8 @@ Scenario: GIT-009.4 Nothing to amend before the first commit
 - Files:
   - `src/components/panels/GitPanel.tsx` — `Section`, `FileRow` (click / Enter = `openChange`, double-click = open file, letter, folder, tooltip), "No uncommitted changes." note
   - `src/lib/gitStatus.ts` — `groupFiles`, `rowKind`, `kindOf`, `KIND_LETTER`, `KIND_LABEL`
-  - `src/lib/git.ts` — `openChange` (staged: HEAD vs index; changes: index or HEAD vs tab / file; new files just open)
+  - `src/lib/git.ts` — `openChange` (untracked files just open; the rest is a Source Control comparison)
+  - `src/lib/gitStaging.ts` — `openChangeCompare` / `changeSources` (staged: HEAD vs index; changes: index vs tab / file, labelled "(staged)" or "(HEAD)"; an open comparison is reused)
   - `src-tauri/src/git.rs` — `parse_status` (porcelain v2, renames with original path), `git_show` (`rev` "" / ":" = index)
   - `src/styles/app.css` — `.scm-*` rows, `.git-*` colours
 - Tests: `src/__tests__/splitGit.test.ts`, `src-tauri/src/git.rs`
@@ -535,17 +536,21 @@ Scenario: GIT-010.4 Click a staged file
   Given "a.ts" is under Staged Changes
   When I click its row
   Then a Compare tab opens with "a.ts (HEAD)" on the left and "a.ts (staged)" on the right
+  And each change in it can be unstaged by itself (STAGE-002)
 
 Scenario: GIT-010.5 Click a file under Changes
   Given "b.ts" is under Changes and is not staged
   When I click its row
   Then a Compare tab opens with "b.ts (HEAD)" on the left and the working copy on the right, using the open tab when there is one
   And for a file that is also staged the left side is "(staged)" instead
+  And each change in it can be staged or discarded by itself (STAGE-001, STAGE-003)
+  And clicking the row again shows that same tab instead of opening another
 
 Scenario: GIT-010.6 New files just open
   Given an untracked file under Changes
   When I click its row
   Then the file itself opens in a tab, since there is nothing to compare it with
+  And a new file that was staged and then edited again opens a Compare tab instead: "(staged)" on the left, the working copy on the right
 
 Scenario: GIT-010.7 Double-click opens the file
   Given any row of a file that still exists
@@ -566,7 +571,7 @@ Scenario: GIT-010.8 Sections collapse and empty ones are hidden
 - Commands: `git.stageFile`, `git.unstageFile`
 - Files:
   - `src/components/panels/GitPanel.tsx` — row "Stage" (+) / "Unstage" (−) buttons, heading "Stage all" / "Unstage all"
-  - `src/lib/git.ts` — `stage`, `unstage`
+  - `src/lib/git.ts` — `stage`, `unstage` (open Source Control comparisons of the file are refreshed afterwards, STAGE-009; staging part of a file is STAGE-001 to STAGE-004)
   - `src/lib/gitCommands.ts` — `git.stageFile` (a conflicted file goes through `resolveConflicts`), `git.unstageFile`, their `enabled` rules
   - `src-tauri/src/git.rs` — `git_stage` (`add -A`, paths on stdin as a NUL list), `git_unstage` (`restore --staged`, or `rm --cached` before the first commit)
 - Tests: `src-tauri/src/git.rs`
@@ -608,6 +613,7 @@ Scenario: GIT-011.6 Stage or unstage the current file from the menu
   When I run Git › Stage Current File
   Then that file is staged
   And Git › Unstage Current File takes it back out
+  And an open comparison of that file from Changes or Staged Changes shows the new state without reloading
 
 Scenario: GIT-011.7 Menu commands are greyed out when they do not apply
   Given the active file has no changes
@@ -622,7 +628,7 @@ Scenario: GIT-011.7 Menu commands are greyed out when they do not apply
 - Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — row "Discard changes" / "Delete (to the Recycle Bin)" button, heading "Discard all changes" (Changes section only)
-  - `src/lib/git.ts` — `discard` (confirmation wording, `checkExternalChanges` afterwards)
+  - `src/lib/git.ts` — `discard` (confirmation wording, `checkExternalChanges` afterwards); discarding one change or some lines of a file is STAGE-003 / STAGE-004
   - `src/lib/dialogs.ts` — `choose`
   - `src-tauri/src/git.rs` — `git_discard` (`restore --worktree` for tracked files, `trash::delete_all` for untracked ones)
 - Tests: `src-tauri/src/git.rs`

@@ -5,20 +5,22 @@ prefix: STAGE
 
 # Hunk and Line Staging
 
-Staging, unstaging and discarding part of a file: one change (a "hunk") or a selected range of lines, from the Compare tab that Source Control opens for a changed file. Whole-file staging and discarding are in `git.md` (GIT-011, GIT-012), the Compare tab itself in `compare.md`. Nothing here is built yet (roadmap item 1 in `GIT-ROADMAP.md`); user documentation will go in `docs/git.md` and `docs/compare.md`.
+Staging, unstaging and discarding part of a file: one change (a "hunk") or a selected range of lines, from the Compare tab that Source Control opens for a changed file. Whole-file staging and discarding are in `git.md` (GIT-011, GIT-012), the Compare tab itself in `compare.md`. Roadmap item 1 in `GIT-ROADMAP.md`; user documentation is in `docs/git.md` (Stage part of a file) and `docs/compare.md`.
 
 Decisions:
 
 - **Owner decisions (2026-11-13).** The shared unsaved-tabs dialog (Save All / Continue Without Saving / Cancel, SAFE-001 to SAFE-003) is for operations that can rewrite any file of the repository. Partial staging is not one of them and keeps its own rule, below: the one file is saved first, without that dialog (SAFE says the same; the only thing it adds is that a failed save cancels the action, which STAGE-005.2 already requires).
-- **A "change" is what the Compare tab already counts** ("Change 2 of 5"): one block of differing lines as @codemirror/merge shows it, not git's own hunk with 3 context lines. The user-facing word is "change"; "hunk" is only used in this file's title and in code.
+- **A "change" is what the Compare tab already counts** ("Change 2 of 5"): one block of differing lines as @codemirror/merge shows it, not git's own hunk with 3 context lines. The user-facing word is "change"; "hunk" is only used in this file's title and in code. The editor compares characters, so its block sometimes takes in a neighbouring line that is the same on both sides (four lines removed above a line that starts alike); such a line is not counted as part of the change, so "4 removed lines" stay 4 removed lines when lines are picked from it.
 - **Only Source Control comparisons get the controls**: the tabs opened by clicking a row under Changes (staged or HEAD ↔ working copy: Stage, Discard) or under Staged Changes (HEAD ↔ staged: Unstage). Compare with Last Commit, commit-file and file-to-file comparisons do not, because their left side is not the index.
 - **Controls**: a small bar above each change in the right side (also in the Inline layout) with "Stage Change" / "Discard Change", or "Unstage Change" in the staged comparison; toolbar buttons "Stage Selected Lines" / "Discard Selected Lines" (or "Unstage Selected Lines") for a selection. The copy arrows of DIFF-011 stay as they are (an undoable edit of the side, not a git action).
-- **Six commands**, so the palette, menu, shortcuts and macros say exactly what they will do: `git.stageChange`, `git.unstageChange`, `git.discardChange` (the change at the cursor), `git.stageLines`, `git.unstageLines`, `git.discardLines` (the selection). They are in the palette and in a Git › Stage Part of a File submenu, which sits directly after Stage Current File / Unstage Current File (the planned layout of the whole Git menu is in `specs/git-merge-rebase.md`, Decisions). Shortcuts: `Ctrl+K S` (stage change), `Ctrl+K U` (unstage change), `Ctrl+K L` (stage lines), `Ctrl+K N` (unstage lines); Discard has no shortcut on purpose. Two-key chords are already supported and these four are free: the only chord today is `Ctrl+K M` (`code.setLanguage`), no command in `commands.ts` or `gitCommands.ts` uses `Ctrl+K` on its own, no other planned git spec takes a `Ctrl+K` chord, and a chord's second key never reaches the editor as typing.
+- **Six commands**, so the palette, menu, shortcuts and macros say exactly what they will do: `git.stageChange`, `git.unstageChange`, `git.discardChange` (the change at the cursor), `git.stageLines`, `git.unstageLines`, `git.discardLines` (the selection). They are in the palette (which, as for every command, leaves out the ones that do not apply at the moment) and in a Git › Stage Part of a File submenu, which sits directly after Stage Current File / Unstage Current File (the planned layout of the whole Git menu is in `specs/git-merge-rebase.md`, Decisions). Shortcuts: `Ctrl+K S` (stage change), `Ctrl+K U` (unstage change), `Ctrl+K L` (stage lines), `Ctrl+K N` (unstage lines); Discard has no shortcut on purpose. Two-key chords are already supported and these four are free: the only chord today is `Ctrl+K M` (`code.setLanguage`), no command in `commands.ts` or `gitCommands.ts` uses `Ctrl+K` on its own, no other planned git spec takes a `Ctrl+K` chord, and a chord's second key never reaches the editor as typing.
 - **Lines are selected in the right side** (the working copy, or the staged text in the staged comparison). A bare cursor counts as its one line. In a change that replaces N lines with N lines the lines are paired one to one; when the counts differ, the selected new lines replace the whole old block; added lines are taken one by one; removed lines can only be taken whole, by a selection that spans the place they were removed from. Staging part of a set of removed lines is not offered in this version.
 - **Discard always asks**, names the file and the lines, and "Cancel" is the default button. Stage and Unstage do not ask: they lose nothing. There is no Discard in the staged comparison (as GIT-012.6).
 - **Unsaved edits are saved first** for Stage and Discard, like marking a conflict resolved; the Discard dialog says so before it happens. Unstage never saves anything: it does not read the working file.
 - **Nothing is applied on stale data.** If the file or the index is not what the comparison shows, nothing is staged, unstaged or discarded (and nothing is saved): the comparison reloads and says so.
-- **The patch is built byte for byte in Rust** from the index blob and the file on disk (line endings, encoding, BOM, missing final newline untouched) and applied with `git apply --cached`, `git apply --cached -R` or `git apply -R`; the pure TS side only turns changes and the selection into line ranges.
+- **The patch is built byte for byte in Rust** from the index blob and the file on disk (line endings, encoding, BOM, missing final newline untouched) and applied with `git apply --cached`, `git apply --cached -R` or `git apply -R`; the pure TS side only turns changes and the selection into line ranges. "The file on disk" is read the way git compares it with the index (`git diff-files` with the whole file as context), so a file that has CRLF on disk and LF in the repository gives a patch in the repository's line endings, and nothing is written into `.git` to find that out. Files git treats as binary, which includes UTF-16 text, and files whose line breaks the editor and git count differently (lone CR) are refused with a message: only the whole file can be staged.
+- **The code is in its own files**: the actions in `src/lib/gitStaging.ts` (not `git.ts`), the Rust side in `src-tauri/src/git/staging.rs` (a submodule of `git.rs`).
+- **Clicking a row whose comparison is already open** shows that tab, brought up to date, instead of opening a second one.
 - **Source Control comparisons follow the index**: they refresh in place after any staging action in Quarry, and Reload re-reads their git side (today a git side keeps its text, DIFF-013.5).
 - **Whole-file cases fall back to the file actions**: untracked and conflicted files have no partial staging (they open as files); for a deleted file, and for the single change of a newly added staged file, the change buttons do what the row's Stage / Unstage / Discard do.
 - **A staged new file that was edited again** opens a comparison under Changes ("(staged)" ↔ working copy) instead of just opening the file, so the later edits can be staged in parts.
@@ -27,19 +29,21 @@ Decisions:
 
 ## STAGE-001: Stage one change of a file
 
-- Status: planned
+- Status: draft
 - Commands: `git.stageChange`
 - Files:
-  - `src/lib/gitHunks.ts` — new, pure: `hunksOf` (line ranges of each change from the two texts' chunks), `hunkAt` (change at a line), `Pick` type (`oldStart`, `oldCount`, `newStart`, `newCount`)
-  - `src/lib/git.ts` — `openChange` (marks the session as a Source Control comparison: root, path, staged), new `stageHunk` action (busy label, refresh of the comparison)
-  - `src/lib/diff.ts` — `DiffSession.git` (root, path, `staged`), `openCompare` option carrying it
-  - `src/components/DiffView.tsx` — change bar ("Stage Change") above each change in the right / inline editor
+  - `src/lib/gitHunks.ts` — pure: `hunksOf` (line ranges of each change from the two texts' chunks; lines that are the same on both sides are dropped from a chunk's ends), `hunkAt` (change at a line), `Pick` type (`oldStart`, `oldCount`, `newStart`, `newCount`), `textHash`
+  - `src/lib/gitStaging.ts` — `openChangeCompare` / `changeSources` (the comparison's two sides and its `git` mark; an open comparison of the same file and section is shown again), `stageHunk` / `applyChange` (busy label, refresh of the comparison), `reloadChange`
+  - `src/lib/git.ts` — `openChange` (untracked and conflicted files open as files; everything else goes to `openChangeCompare`)
+  - `src/lib/diff.ts` — `DiffSession.git` (`DiffGit`: root, path, `staged`, `base`, `origPath`, `whole`), `openCompare` option carrying it, `loadSide`
+  - `src/components/DiffView.tsx` — `hunkBars` / `HunkBar` (the bar "Stage Change" above each change in the right / inline editor), `HunkGap` (same height in the left editor), `placeOf` / `restorePlace` (cursor, scroll line and focus kept across the rebuild)
   - `src/lib/gitApi.ts` — `applyLines` wrapper
-  - `src-tauri/src/git.rs` — new `git_apply_lines` (mode `stage`): `build_patch` from the index blob and the file on disk, `git apply --cached`
-  - `src-tauri/src/lib.rs` — register `git_apply_lines`
-  - `src/components/panels/GitPanel.tsx` — no new logic expected; the file must appear in both sections and the Commit button must count it
-  - `src/styles/app.css` — `.diff-hunk-bar`
-- Tests: `src/__tests__/gitHunks.test.ts`, `src/__tests__/diffView.test.tsx`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/staging.rs` — `git_apply_lines` / `apply_lines` (mode `stage`): `splice` + `build_patch` from the index blob and the working file as git sees it (`worktree_as_git`), `git apply --cached`
+  - `src-tauri/src/git.rs` — `pub mod staging`
+  - `src-tauri/src/lib.rs` — registers `git::staging::git_apply_lines`
+  - `src/components/panels/GitPanel.tsx` — no new logic; the file appears in both sections and the Commit button counts it
+  - `src/styles/app.css` — `.diff-hunk-bar`, `.diff-hunk-gap`, `.diff-hunk-btn`
+- Tests: `src/__tests__/gitHunks.test.ts`, `src/__tests__/gitStaging.test.tsx`, `src-tauri/src/git/staging.rs`
 - Docs: `docs/git.md`, `docs/compare.md`
 
 **As a** developer whose file holds two unrelated edits
@@ -104,14 +108,14 @@ Scenario: STAGE-001.9 No question is asked
 
 ## STAGE-002: Unstage one change
 
-- Status: planned
+- Status: draft
 - Commands: `git.unstageChange`
 - Files:
-  - `src/lib/git.ts` — new `unstageHunk` action; `openChange` staged branch (HEAD ↔ staged session marked `staged: true`)
+  - `src/lib/gitStaging.ts` — `unstageHunk` / `applyChange`; `changeSources` staged branch (HEAD ↔ staged session marked `staged: true`, `origPath` of a rename, `whole` for a staged deletion)
   - `src/lib/gitHunks.ts` — `hunksOf`, `hunkAt` (same ranges, applied in reverse)
   - `src/components/DiffView.tsx` — change bar with "Unstage Change" only, in a staged comparison
-  - `src-tauri/src/git.rs` — `git_apply_lines` (mode `unstage`): patch from the HEAD blob and the index blob, `git apply --cached -R`; whole added file → same as `git_unstage`
-- Tests: `src/__tests__/gitHunks.test.ts`, `src/__tests__/diffView.test.tsx`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/staging.rs` — `apply_lines` (mode `unstage`): patch from the HEAD blob and the index blob, `git apply --cached -R`; a newly added file with nothing left staged → `unstage`
+- Tests: `src/__tests__/gitHunks.test.ts`, `src/__tests__/gitStaging.test.tsx`, `src-tauri/src/git/staging.rs`
 - Docs: `docs/git.md`, `docs/compare.md`
 
 **As a** developer who staged more than the commit should hold
@@ -159,15 +163,15 @@ Scenario: STAGE-002.6 A staged rename with edits
 
 ## STAGE-003: Discard one change, after asking
 
-- Status: planned
+- Status: draft
 - Commands: `git.discardChange`
 - Files:
-  - `src/lib/git.ts` — new `discardHunk` action (confirmation wording, save first, `checkExternalChanges` afterwards)
-  - `src/lib/gitHunks.ts` — `describeLines` (pure: "Lines 20–22", "Line 20", "The 4 lines removed after line 19")
+  - `src/lib/gitStaging.ts` — `discardHunk` / `applyGuarded` (confirmation wording, save first, the file's tab reloaded with `revertDocument` afterwards)
+  - `src/lib/gitHunks.ts` — `describeLines` ("Lines 20–22", "Line 20", "The 4 lines removed after line 19"), `discardText` (the question's sentences)
   - `src/lib/dialogs.ts` — `choose` (unchanged: danger button, `default: true` on Cancel)
   - `src/components/DiffView.tsx` — "Discard Change" on the change bar (comparisons from Changes only)
-  - `src-tauri/src/git.rs` — `git_apply_lines` (mode `discard`): patch from the index blob and the file on disk, `git apply -R` on the working file only
-- Tests: `src/__tests__/gitHunks.test.ts`, `src/__tests__/diffView.test.tsx`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/staging.rs` — `apply_lines` (mode `discard`): patch from the index blob and the working file, `git apply -R` on the working file only
+- Tests: `src/__tests__/gitHunks.test.ts`, `src/__tests__/gitStaging.test.tsx`, `src-tauri/src/git/staging.rs`
 - Docs: `docs/git.md`, `docs/compare.md`
 
 **As a** developer who tried something in one place that did not work out
@@ -223,14 +227,14 @@ Scenario: STAGE-003.8 No Discard in the staged comparison
 
 ## STAGE-004: Stage, unstage or discard selected lines
 
-- Status: planned
+- Status: draft
 - Commands: `git.stageLines`, `git.unstageLines`, `git.discardLines`
 - Files:
   - `src/lib/gitHunks.ts` — `picksForSelection` (pure: selection line range × changes → `Pick[]`; equal counts pair line by line, unequal counts take the whole old block, added lines one by one, a removal only when the selection spans it), `selectionApplies`
-  - `src/lib/git.ts` — `stageLines`, `unstageLines`, `discardLines` (the same guards and dialogs as the change actions)
+  - `src/lib/gitStaging.ts` — `stageLines`, `unstageLines`, `discardLines` / `applySelection`, `selectedLines` (the same guards and dialogs as the change actions)
   - `src/components/DiffView.tsx` — toolbar buttons "Stage Selected Lines" / "Discard Selected Lines" / "Unstage Selected Lines", enabled from the right editor's selection
-  - `src-tauri/src/git.rs` — `git_apply_lines` with several picks; `build_patch` context and line counts for partial changes (unselected added lines left out, unselected removed lines kept as context)
-- Tests: `src/__tests__/gitHunks.test.ts`, `src/__tests__/diffView.test.tsx`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/staging.rs` — `apply_lines` with several picks; `splice` / `build_patch` context and line counts for partial changes
+- Tests: `src/__tests__/gitHunks.test.ts`, `src/__tests__/gitStaging.test.tsx`, `src-tauri/src/git/staging.rs`
 - Docs: `docs/git.md`, `docs/compare.md`
 
 **As a** developer whose single change mixes a fix with debug output
@@ -299,17 +303,23 @@ Scenario: STAGE-004.10 The change bar always takes the whole change
   Given I selected 2 lines inside a 6-line change
   When I click "Stage Change" on that change's bar
   Then all 6 lines are staged
+
+Scenario: STAGE-004.11 A neighbouring line that did not change is left alone
+  Given 4 lines were added above a line that begins like them, so the editor marks that line as part of the change too
+  When I select the first added line and click "Stage Selected Lines"
+  Then only that line is added to the staged version
+  And the unchanged neighbouring line is still in the staged version
 ```
 
 ## STAGE-005: Unsaved edits are saved first
 
-- Status: planned
+- Status: draft
 - Commands: `git.stageChange`, `git.stageLines`, `git.discardChange`, `git.discardLines`
 - Files:
-  - `src/lib/git.ts` — `saveBeforeApply` (shared by `stageHunk` / `stageLines` / `discardHunk` / `discardLines`: the open text tab via `saveDocument`, an edited Compare side via `saveDiff`; a failed or cancelled save stops the action), as `resolveConflicts` does
+  - `src/lib/gitStaging.ts` — `applyGuarded` (shared by every Stage / Discard action: the open text tab via `saveDocument`, an edited Compare side via `saveDiff`; a failed or cancelled save stops the action; the tab's text must be what the comparison shows, before and after the save)
   - `src/lib/diff.ts` — `saveDiff`, `sideText` (the text the comparison shows)
-  - `src/lib/actions.ts` — `saveDocument`, `revertDocument` / `checkExternalChanges` after a discard
-- Tests: `src/__tests__/diffSession.test.ts`, `src/__tests__/diffView.test.tsx`
+  - `src/lib/actions.ts` — `saveDocument`, `revertDocument` after a discard
+- Tests: `src/__tests__/gitStaging.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer who stages while still typing
@@ -358,12 +368,12 @@ Scenario: STAGE-005.6 Unsaved edits in other files are left alone
 
 ## STAGE-006: Line endings, encoding and the end of the file are preserved
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src-tauri/src/git.rs` — `build_patch` (pure: works on bytes, lines split on `\n` keeping any `\r`, `\ No newline at end of file` markers, hunk header counts), `git_apply_lines` (`git apply` run with whitespace checks off so CRLF lines are not rejected or rewritten)
+  - `src-tauri/src/git/staging.rs` — `build_patch` (pure: works on bytes, lines split on `\n` keeping any `\r`, `\ No newline at end of file` markers, hunk header counts), `worktree_as_git` (the working file after git's own line-ending conversion, read from `git diff-files` with the whole file as context, so nothing is written to the repository), `apply` (`git apply --whitespace=nowarn`), the binary / UTF-16 and mixed-line-ending refusals
   - `src/lib/gitHunks.ts` — line ranges only; never sends text to be written
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git/staging.rs`
 - Docs: none
 
 **As a** developer on Windows whose files use CRLF or a legacy encoding
@@ -411,19 +421,25 @@ Scenario: STAGE-006.7 Change on the first or the last line
   Given changes on line 1 and on the last line of a 200-line file
   When I stage one and discard the other
   Then both actions succeed, with no "patch does not apply" error
+
+Scenario: STAGE-006.8 A file git treats as binary
+  Given "wide.txt" is saved as UTF-16, which git treats as a binary file
+  When I click "Stage Change" or "Unstage Change" in its comparison
+  Then nothing is staged or unstaged and a message says only the whole file can be staged, unstaged or discarded
 ```
 
 ## STAGE-007: Where partial staging is offered
 
-- Status: planned
+- Status: draft
 - Commands: `git.stageChange`, `git.unstageChange`, `git.discardChange`, `git.stageLines`, `git.unstageLines`, `git.discardLines`
 - Files:
-  - `src/lib/git.ts` — `openChange` (index `A` + worktree `M` now opens "(staged)" ↔ working copy; deleted file; conflict and untracked still open the file), `canApply` (pure-ish rule shared by the bars, toolbar and commands)
+  - `src/lib/git.ts` — `openChange` (conflict and untracked open the file; index `A` + worktree `M` now compares)
+  - `src/lib/gitStaging.ts` — `changeSources` ("(staged)" ↔ working copy, deleted file → `whole`), `canApply` / `fits` (the rule shared by the bars, toolbar and commands), `wholeFile` (a deleted file's change buttons = the row's actions), `applying` (one action at a time)
   - `src/lib/gitStatus.ts` — `kindOf` (which rows compare, which just open)
-  - `src/lib/diff.ts` — `DiffSession.git`, `swapDiff` (marks the session swapped)
+  - `src/lib/diff.ts` — `DiffSession.git`, `DiffSession.swapped` (set by `swapDiff`)
   - `src/components/DiffView.tsx` — bars and toolbar buttons shown only for a Source Control comparison that is not swapped; disabled while `useGit().busy`
   - `src/lib/gitCommands.ts` — `enabled` rules of the six commands
-- Tests: `src/__tests__/gitHunks.test.ts`, `src/__tests__/diffView.test.tsx`, `src/__tests__/splitGit.test.ts`
+- Tests: `src/__tests__/gitStaging.test.tsx`
 - Docs: `docs/git.md`, `docs/compare.md`
 
 **As a** developer
@@ -435,7 +451,7 @@ Scenario: STAGE-007.1 Other comparisons have no staging controls
   Given a Compare tab opened with Compare with Last Commit (HEAD), from a commit's file list, from file history, from a stash, from a comparison of two commits, or of two files
   When I look at its changes and toolbar
   Then there are no Stage, Unstage or Discard controls
-  And the six partial-staging commands are greyed out in the menu and the palette
+  And the six partial-staging commands are greyed out in the menu and left out of the palette
 
 Scenario: STAGE-007.2 Conflicted files
   Given "app.ts" is under Merge Changes with conflicts
@@ -491,14 +507,14 @@ Scenario: STAGE-007.10 During a merge or rebase, for files without conflicts
 
 ## STAGE-008: Partial staging from the menu, the palette and the keyboard
 
-- Status: planned
+- Status: draft
 - Commands: `git.stageChange`, `git.unstageChange`, `git.discardChange`, `git.stageLines`, `git.unstageLines`, `git.discardLines`
 - Files:
-  - `src/lib/gitCommands.ts` — register the six commands (titles, `Ctrl+K S` / `Ctrl+K U` / `Ctrl+K L` / `Ctrl+K N`, `enabled` from the active Compare tab); each calls the same `git.ts` action as its button
-  - `src/components/MenuBar.tsx` — Git › Stage Part of a File submenu, directly after Stage Current File / Unstage Current File and before the Stash submenu (group 5 of the planned Git menu, `specs/git-merge-rebase.md` Decisions)
-  - `src/components/DiffView.tsx` — `changeAtCursor`, `selectedLines` for the active tab (what the commands act on); button tooltips show the shortcuts
-  - `src/lib/git.ts` — `stageHunk`, `unstageHunk`, `discardHunk`, `stageLines`, `unstageLines`, `discardLines` (the only entry points; all guards live here)
-- Tests: `src/__tests__/diffView.test.tsx`, `src/__tests__/ui.test.ts`
+  - `src/lib/gitCommands.ts` — registers the six commands (titles, `Ctrl+K S` / `Ctrl+K U` / `Ctrl+K L` / `Ctrl+K N`, `enabled` from the active Compare tab); each calls the same `gitStaging.ts` action as its button
+  - `src/components/MenuBar.tsx` — Git › Stage Part of a File submenu, directly after Stage Current File / Unstage Current File (group 5 of the planned Git menu, `specs/git-merge-rebase.md` Decisions)
+  - `src/components/DiffView.tsx` — `changeAtCursor`, `selectedLines` for a tab (what the commands act on); button tooltips show the shortcuts
+  - `src/lib/gitStaging.ts` — `stageHunk`, `unstageHunk`, `discardHunk`, `stageLines`, `unstageLines`, `discardLines` (the only entry points; all guards live here), `changeAtCursor`
+- Tests: `src/__tests__/gitStaging.test.tsx`
 - Docs: `docs/git.md`, `docs/keyboard-shortcuts.md`
 
 **As a** developer who works from the keyboard
@@ -507,8 +523,9 @@ Scenario: STAGE-007.10 During a merge or rebase, for files without conflicts
 
 ```gherkin
 Scenario: STAGE-008.1 The commands are in the Git menu and the palette
-  When I open Git › Stage Part of a File, or type "stage" in the command palette
+  When I open Git › Stage Part of a File
   Then I find "Stage Change at Cursor", "Unstage Change at Cursor", "Discard Change at Cursor…", "Stage Selected Lines", "Unstage Selected Lines" and "Discard Selected Lines…"
+  And the command palette lists the ones that apply to the active comparison at the moment
 
 Scenario: STAGE-008.2 Review and stage with the keyboard
   Given a comparison from Changes with 3 changes
@@ -541,13 +558,14 @@ Scenario: STAGE-008.6 Commands that do not fit the comparison are greyed out
 Scenario: STAGE-008.7 The cursor is not in a change
   Given the cursor is on an unchanged line with nothing selected
   When I press Ctrl+K S
-  Then nothing is staged
+  Then nothing is staged and a notification says "Stage Change at Cursor is not available here"
   And "Stage Change at Cursor" and "Stage Selected Lines" are greyed out in the menu
 
 Scenario: STAGE-008.8 Not on a Compare tab
   Given the active tab is a text tab, a terminal or the commit graph
   When I press Ctrl+K S or Ctrl+K U
-  Then nothing happens and the six commands are greyed out in the menu and the palette
+  Then nothing is staged or unstaged (a notification says the command is not available here)
+  And the six commands are greyed out in the menu and left out of the palette
 
 Scenario: STAGE-008.9 Commands save first too
   Given the file's tab has unsaved edits
@@ -562,15 +580,16 @@ Scenario: STAGE-008.10 Shortcuts do not collide
 
 ## STAGE-009: The comparison stays true to the index
 
-- Status: planned
+- Status: draft
 - Commands: none
 - Files:
-  - `src/lib/git.ts` — `refreshChangeTabs` (after `stage` / `unstage` / `discard` / the partial actions / `commit`: re-reads the sides of every clean Source Control comparison of the touched files), stale check before applying (the texts the comparison shows vs the index blob and the file on disk)
-  - `src/lib/diff.ts` — `reloadDiff` (a session with `git` re-reads its index / HEAD side from git; labels "(HEAD)" / "(staged)" recomputed), `patchDiff`
-  - `src/components/DiffView.tsx` — keeps the scroll position and cursor line across a refresh
-  - `src-tauri/src/git.rs` — `git_apply_lines` takes the expected text hashes and refuses with a `stale` error before touching anything; `git apply --check` first so a patch is applied whole or not at all
+  - `src/lib/gitStaging.ts` — `refreshChangeTabs` (after every git action: re-reads the sides of every clean Source Control comparison), `reloadChange` (sides and labels from git and the disk; the view is rebuilt only when something changed), the stale route (`STALE`, `staleMessage`)
+  - `src/lib/git.ts` — `onGitAction` (called at the end of `run`, so `stage` / `unstage` / `discard` / `commit` and the rest refresh the comparisons)
+  - `src/lib/diff.ts` — `reloadDiff` (a session with `git` goes to `reloadChange`), `patchDiff`
+  - `src/components/DiffView.tsx` — keeps the cursor line, the first visible line and the focus across a refresh
+  - `src-tauri/src/git/staging.rs` — `apply_lines` takes the hashes of the two texts shown (`Expected`, `text_hash`) and refuses with a `quarry-stale` error before touching anything; `git apply --check` first so a patch is applied whole or not at all
   - `src/lib/gitStatus.ts` — `gitErrorText` for any other failure
-- Tests: `src/__tests__/diffSession.test.ts`, `src/__tests__/diffView.test.tsx`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitStaging.test.tsx`, `src-tauri/src/git/staging.rs`
 - Docs: `docs/compare.md`
 
 **As a** developer who also uses the panel, the terminal and other tools on the same repository
@@ -624,4 +643,10 @@ Scenario: STAGE-009.9 The file was closed, renamed or deleted meanwhile
   Given a comparison from Changes whose file was deleted from disk after it was opened
   When I click "Stage Change"
   Then nothing is staged and the message says the file changed since the comparison was loaded
+  And the reloaded comparison shows "app.ts (deleted)" on the right
+
+Scenario: STAGE-009.10 Clicking the row again shows the open comparison
+  Given the comparison of "app.ts" from Changes is open in a tab
+  When I click "app.ts" under Changes again
+  Then that tab is shown, brought up to date, and no second comparison opens
 ```

@@ -4414,6 +4414,57 @@ select optgroup {
   opacity: 0.4;
   pointer-events: none;
 }
+/* Partial staging (specs/git-staging.md): the bar above each change of a Source Control
+   comparison, the same height as a gap on the left side so the two sides stay level. */
+.diff-hunk-bar,
+.diff-hunk-gap {
+  height: 22px;
+  box-sizing: border-box;
+}
+.diff-hunk-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  background: var(--subtle-pressed);
+  border-top: 1px solid var(--divider);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  line-height: 1;
+  cursor: default;
+}
+.diff-hunk-gap {
+  background: var(--subtle-pressed);
+  border-top: 1px solid var(--divider);
+}
+.diff-hunk-btn {
+  height: 18px;
+  padding: 0 7px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--accent-text);
+  font: inherit;
+  cursor: pointer;
+}
+.diff-hunk-btn:hover:not(:disabled) {
+  background: var(--subtle-hover);
+  border-color: var(--stroke-2);
+}
+.diff-hunk-btn.danger {
+  color: var(--danger);
+}
+.diff-hunk-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.diff-toolbar .diff-lines-btn {
+  white-space: nowrap;
+}
+.diff-toolbar .diff-lines-btn:disabled {
+  opacity: 0.45;
+}
+
 .diff-host {
   flex: 1;
   min-height: 0;

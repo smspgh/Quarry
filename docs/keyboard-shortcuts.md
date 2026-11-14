@@ -2,7 +2,7 @@
 
 Every command is also in the command palette (**Ctrl+Shift+P** or **F1**), which shows its shortcut, and nearly all are in the menus.
 
-Letter and digit shortcuts follow the physical key position, so they work on any keyboard layout. **Ctrl+K M** is a chord: press Ctrl+K, release, then press M.
+Letter and digit shortcuts follow the physical key position, so they work on any keyboard layout. **Ctrl+K M** is a chord: press Ctrl+K, release, then press M. So are **Ctrl+K S**, **Ctrl+K U**, **Ctrl+K L** and **Ctrl+K N**.
 
 The **Id** column is the command id used in [macro files](macros.md#file-format).
 
@@ -188,6 +188,9 @@ These need the file's [language server](code-intelligence.md).
 | – | Accept All Current / Incoming in This File | `git.acceptAllCurrent` / `git.acceptAllIncoming` |
 | – | Show / Hide Line Blame | `git.toggleBlame` |
 | – | Stage / Unstage Current File | `git.stageFile` / `git.unstageFile` |
+| Ctrl+K S / Ctrl+K U | Stage / Unstage Change at Cursor (in a comparison opened from Source Control) | `git.stageChange` / `git.unstageChange` |
+| Ctrl+K L / Ctrl+K N | Stage / Unstage Selected Lines | `git.stageLines` / `git.unstageLines` |
+| – | Discard Change at Cursor… / Discard Selected Lines… (no shortcut on purpose) | `git.discardChange` / `git.discardLines` |
 | – | Switch Branch… | `git.switchBranch` |
 | – | Fetch / Pull / Push | `git.fetch` / `git.pull` / `git.push` |
 | – | Add Remote… | `git.addRemote` |

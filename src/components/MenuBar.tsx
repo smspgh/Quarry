@@ -265,6 +265,8 @@ const MENUS: Menu[] = [
       { cmd: "git.stageFile" },
       { cmd: "git.unstageFile" },
       { label: "Stash", submenu: () => [{ cmd: "git.stash" }, { cmd: "git.stashApply" }, { cmd: "git.stashPop" }, { cmd: "git.stashDrop" }, { sep: true }, { cmd: "git.showStashes" }] },
+      // Partial staging (specs/git-staging.md): the active Source Control comparison.
+      { label: "Stage Part of a File", submenu: () => [{ cmd: "git.stageChange" }, { cmd: "git.unstageChange" }, { cmd: "git.discardChange" }, { sep: true }, { cmd: "git.stageLines" }, { cmd: "git.unstageLines" }, { cmd: "git.discardLines" }] },
       { sep: true },
       { cmd: "git.switchBranch" },
       { cmd: "git.mergeBranch" },

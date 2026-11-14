@@ -173,6 +173,12 @@ Scenario: UI-003.7 Help menu
   When I choose "Script API Reference"
   Then an untitled tab "Script API Reference.js" opens with no unsaved-changes mark
   And choosing it again shows that same tab instead of opening a second one
+
+Scenario: UI-003.8 Git menu: Stage Part of a File
+  When I open the Git menu
+  Then "Stage Part of a File" comes directly after "Stage Current File" and "Unstage Current File"
+  And its submenu lists the six partial-staging commands (STAGE-008.1), with "Ctrl+K S", "Ctrl+K U", "Ctrl+K L" and "Ctrl+K N" beside the four that have a shortcut
+  And the submenu is greyed out unless the active tab is a comparison opened from Source Control in which one of them applies
 ```
 
 ## UI-004: Menu bar keyboard access

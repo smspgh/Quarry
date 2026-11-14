@@ -10,6 +10,7 @@ import { nextChangeIndex } from "./gitStatus";
 import { forcePush, startMerge, startRebase } from "./git";
 import { forcePushBlocked, startBlocked, type StartKind } from "./gitMerge";
 import { showStashes, showStashForm, stashLatest } from "./git";
+import { applyChange, applySelection, canApply, type ApplyAction, type ApplyScope } from "./gitStaging";
 import { showPanel } from "./panels";
 import { activeDoc, useStore } from "./store";
 
@@ -133,6 +134,28 @@ export function registerGitCommands() {
       if (f) void unstage(f.root, [f.path]);
     },
   });
+  // ---- Partial staging (specs/git-staging.md) ----
+  // Six commands on the active Source Control comparison (a Compare tab opened from Changes or
+  // Staged Changes): the change at the cursor, or the selected lines, of its right side. Each runs
+  // the same lib/gitStaging.ts action as its button, so the guards and the Discard question are
+  // the same on every route. Discard has no shortcut on purpose.
+  const part = (action: ApplyAction, scope: ApplyScope) => ({
+    category: "Git",
+    enabled: () => canApply(activeDoc(s())?.id, action, scope),
+    run: () => {
+      const docId = activeDoc(s())?.id;
+      if (!docId || !canApply(docId, action, scope)) return false;
+      void (scope === "change" ? applyChange(docId, action) : applySelection(docId, action));
+      return true;
+    },
+  });
+  register({ id: "git.stageChange", title: "Stage Change at Cursor", keys: "Ctrl+K S", ...part("stage", "change") });
+  register({ id: "git.unstageChange", title: "Unstage Change at Cursor", keys: "Ctrl+K U", ...part("unstage", "change") });
+  register({ id: "git.discardChange", title: "Discard Change at Cursor…", ...part("discard", "change") });
+  register({ id: "git.stageLines", title: "Stage Selected Lines", keys: "Ctrl+K L", ...part("stage", "lines") });
+  register({ id: "git.unstageLines", title: "Unstage Selected Lines", keys: "Ctrl+K N", ...part("unstage", "lines") });
+  register({ id: "git.discardLines", title: "Discard Selected Lines…", ...part("discard", "lines") });
+  // ---- end of partial staging ----
   // These two take { docId } (a tab's right-click menu); git.fileHistory also takes a path.
   register({ id: "git.compareWithHead", title: "Compare with Last Commit (HEAD)", category: "Git", enabled: tracked, run: (a) => { const f = repoFile(a); if (!f) return false; void compareWithHead(f.path); } });
   register({

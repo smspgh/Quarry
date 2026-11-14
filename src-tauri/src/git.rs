@@ -12,6 +12,9 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
+// Staging / unstaging / discarding part of a file (git/staging.rs, specs/git-staging.md).
+pub mod staging;
+
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct GitStatus {
@@ -2154,7 +2157,7 @@ mod tests {
     use super::*;
 
     /// A fresh repository with a local identity, or None when git cannot run here (test skipped).
-    fn repo() -> Option<(tempfile::TempDir, PathBuf)> {
+    pub(super) fn repo() -> Option<(tempfile::TempDir, PathBuf)> {
         let ok = Command::new("git").arg("--version").output().is_ok_and(|o| o.status.success());
         if !ok {
             eprintln!("git is not runnable: skipping");
@@ -2168,13 +2171,13 @@ mod tests {
         Some((dir, root))
     }
 
-    fn write(root: &Path, rel: &str, text: &str) -> String {
+    pub(super) fn write(root: &Path, rel: &str, text: &str) -> String {
         let p = root.join(rel);
         std::fs::write(&p, text).unwrap();
         p.to_string_lossy().into_owned()
     }
 
-    fn git_ok(root: &Path, args: &[&str]) {
+    pub(super) fn git_ok(root: &Path, args: &[&str]) {
         run(root, false, args, None).unwrap();
     }
 

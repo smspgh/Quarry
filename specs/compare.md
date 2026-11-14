@@ -371,7 +371,7 @@ Scenario: DIFF-008.5 Only on a Compare tab
 - Commands: `compare.toggleInline`, `compare.swap`
 - Files:
   - `src/components/DiffView.tsx` — layout switch (`unifiedMergeView` for inline), fold button (`collapseUnchanged: { margin: 3, minSize: 6 }`), rebuild effect on `version` / `inline` / `collapse`, `settingsReconfigure` on settings changes
-  - `src/lib/diff.ts` — `DiffSession.inline` / `collapse` / `version`, `swapDiff`, `captureSideTexts`, `patchDiff`
+  - `src/lib/diff.ts` — `DiffSession.inline` / `collapse` / `version` / `swapped`, `swapDiff`, `captureSideTexts`, `patchDiff`
   - `src/lib/commands.ts` — `compare.toggleInline`, `compare.swap` (disabled while the tab has unsaved edits)
 - Tests: `src/__tests__/diffSession.test.ts`, `src/__tests__/diffView.test.tsx`
 - Docs: `docs/compare.md`
@@ -403,6 +403,7 @@ Scenario: DIFF-009.4 Swap sides
   When I click "Swap sides"
   Then b.ts is on the left and a.ts on the right
   And the tab is renamed "b.ts ↔ a.ts"
+  And in a comparison opened from Source Control the Stage / Unstage / Discard controls are hidden until the sides are swapped back (STAGE-007.6)
 
 Scenario: DIFF-009.5 No swap with unsaved edits
   Given I edited a side and have not saved
@@ -470,6 +471,7 @@ Scenario: DIFF-010.5 Inline layout edits the right side
 - Files:
   - `src/components/DiffView.tsx` — `revertControls`: `"a-to-b"` when the right side is editable, else `"b-to-a"` when the left is, else none; `mergeControls: false` inline
   - `src/styles/app.css` — `.cm-merge-revert`
+  - Not a git action: in a comparison opened from Source Control the arrows still only edit the side; staging and discarding are the bar above each change (STAGE-001, STAGE-003, STAGE-007.9)
   - Library behaviour, not set in this repo: @codemirror/merge (6.12.3) listens for `mousedown` on its `.cm-merge-revert` gutter (`MergeView.setupRevertControls` → `revertClicked`), so an arrow acts when the button goes down (DIFF-011.2)
 - Tests: `src/__tests__/diffView.test.tsx`
 - Docs: `docs/compare.md`
@@ -584,9 +586,10 @@ Scenario: DIFF-012.8 Nothing to save
 - Status: draft
 - Commands: none
 - Files:
-  - `src/lib/diff.ts` — `reloadDiff` (files from disk, tab snapshots from the tab, a closed tab keeps its snapshot, `text` sources keep their text, folder labels kept)
+  - `src/lib/diff.ts` — `reloadDiff` (files from disk, tab snapshots from the tab, a closed tab keeps its snapshot, `text` sources keep their text, folder labels kept; a Source Control comparison goes to `reloadChange`)
+  - `src/lib/gitStaging.ts` — `reloadChange` (both sides of a Source Control comparison from git and the disk again)
   - `src/components/DiffView.tsx` — "Reload the files from disk" button, disabled while edited
-- Tests: `src/__tests__/diffSession.test.ts`
+- Tests: `src/__tests__/diffSession.test.ts`, `src/__tests__/gitStaging.test.tsx`
 - Docs: `docs/compare.md`
 
 **As a** developer whose compared files changed outside the comparison
@@ -599,6 +602,7 @@ Scenario: DIFF-013.1 Reload files
   When I click "Reload the files from disk"
   Then both files are read again and the differences are recalculated
   And a notification says "Reloaded"
+  And a comparison opened from Source Control reads its git side again too (STAGE-009.6)
 
 Scenario: DIFF-013.2 Now identical
   Given the files have the same text after the reload
@@ -616,7 +620,7 @@ Scenario: DIFF-013.4 The tab was closed
   Then that side keeps its last snapshot
 
 Scenario: DIFF-013.5 Clipboard and git sides keep their text
-  Given a side is the clipboard or a version from git
+  Given a side is the clipboard, or a version from git in a comparison that was not opened from Changes or Staged Changes
   When I reload
   Then that side shows the same text as before
 

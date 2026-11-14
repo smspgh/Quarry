@@ -4366,7 +4366,7 @@
       "title": "Edit file sides; snapshots are read-only",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 422,
+      "line": 423,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4408,7 +4408,7 @@
       "title": "Copy a change across with the arrows",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 466,
+      "line": 467,
       "status": "draft",
       "commands": [],
       "files": [
@@ -4453,7 +4453,7 @@
       "title": "Save an edited side",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 514,
+      "line": 516,
       "status": "draft",
       "commands": [
         "file.save"
@@ -4512,15 +4512,17 @@
       "title": "Reload the compared texts",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 582,
+      "line": 584,
       "status": "draft",
       "commands": [],
       "files": [
         "src/lib/diff.ts",
+        "src/lib/gitStaging.ts",
         "src/components/DiffView.tsx"
       ],
       "tests": [
-        "src/__tests__/diffSession.test.ts"
+        "src/__tests__/diffSession.test.ts",
+        "src/__tests__/gitStaging.test.tsx"
       ],
       "docs": [
         "docs/compare.md"
@@ -4561,7 +4563,7 @@
       "title": "Preview comparisons replace each other",
       "area": "DIFF",
       "spec": "specs/compare.md",
-      "line": 634,
+      "line": 638,
       "status": "draft",
       "commands": [],
       "files": [
@@ -8912,6 +8914,7 @@
         "src/components/panels/GitPanel.tsx",
         "src/lib/gitStatus.ts",
         "src/lib/git.ts",
+        "src/lib/gitStaging.ts",
         "src-tauri/src/git.rs",
         "src/styles/app.css"
       ],
@@ -8962,7 +8965,7 @@
       "title": "Stage and unstage files",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 563,
+      "line": 568,
       "status": "draft",
       "commands": [
         "git.stageFile",
@@ -9016,7 +9019,7 @@
       "title": "Discard changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 619,
+      "line": 625,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9063,7 +9066,7 @@
       "title": "Status line: where the branch stands against its remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 671,
+      "line": 677,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9123,7 +9126,7 @@
       "title": "Background check of the remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 741,
+      "line": 747,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9178,7 +9181,7 @@
       "title": "Fetch, pull, push and publish a branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 806,
+      "line": 812,
       "status": "draft",
       "commands": [
         "git.fetch",
@@ -9240,7 +9243,7 @@
       "title": "Recover when the remote repository is gone",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 873,
+      "line": 879,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9283,7 +9286,7 @@
       "title": "Commits of the current branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 917,
+      "line": 923,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9348,7 +9351,7 @@
       "title": "File history",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 993,
+      "line": 999,
       "status": "draft",
       "commands": [
         "git.fileHistory"
@@ -9402,7 +9405,7 @@
       "title": "Commit identity (name and email)",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1048,
+      "line": 1054,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9449,7 +9452,7 @@
       "title": "Add a remote by URL",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1099,
+      "line": 1105,
       "status": "draft",
       "commands": [
         "git.addRemote"
@@ -9498,7 +9501,7 @@
       "title": "See, open and change remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1151,
+      "line": 1157,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9550,7 +9553,7 @@
       "title": "Create a repository on GitHub and push to it",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1210,
+      "line": 1216,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9607,7 +9610,7 @@
       "title": "GitHub accounts",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1277,
+      "line": 1283,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9654,7 +9657,7 @@
       "title": "Private / Public badge on GitHub remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1329,
+      "line": 1335,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9696,7 +9699,7 @@
       "title": "Work with more than one repository",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1373,
+      "line": 1379,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9752,7 +9755,7 @@
       "title": "Branch in the status bar",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1492,
+      "line": 1498,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9798,7 +9801,7 @@
       "title": "Git decorations in the Explorer",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1543,
+      "line": 1549,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9842,7 +9845,7 @@
       "title": "Set a folder as the Source Control context",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1442,
+      "line": 1448,
       "status": "draft",
       "commands": [
         "git.setContext"
@@ -18249,17 +18252,19 @@
       "title": "Stage one change of a file",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 28,
-      "status": "planned",
+      "line": 30,
+      "status": "draft",
       "commands": [
         "git.stageChange"
       ],
       "files": [
         "src/lib/gitHunks.ts",
+        "src/lib/gitStaging.ts",
         "src/lib/git.ts",
         "src/lib/diff.ts",
         "src/components/DiffView.tsx",
         "src/lib/gitApi.ts",
+        "src-tauri/src/git/staging.rs",
         "src-tauri/src/git.rs",
         "src-tauri/src/lib.rs",
         "src/components/panels/GitPanel.tsx",
@@ -18267,8 +18272,8 @@
       ],
       "tests": [
         "src/__tests__/gitHunks.test.ts",
-        "src/__tests__/diffView.test.tsx",
-        "src-tauri/src/git.rs"
+        "src/__tests__/gitStaging.test.tsx",
+        "src-tauri/src/git/staging.rs"
       ],
       "docs": [
         "docs/git.md",
@@ -18318,21 +18323,21 @@
       "title": "Unstage one change",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 105,
-      "status": "planned",
+      "line": 109,
+      "status": "draft",
       "commands": [
         "git.unstageChange"
       ],
       "files": [
-        "src/lib/git.ts",
+        "src/lib/gitStaging.ts",
         "src/lib/gitHunks.ts",
         "src/components/DiffView.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/staging.rs"
       ],
       "tests": [
         "src/__tests__/gitHunks.test.ts",
-        "src/__tests__/diffView.test.tsx",
-        "src-tauri/src/git.rs"
+        "src/__tests__/gitStaging.test.tsx",
+        "src-tauri/src/git/staging.rs"
       ],
       "docs": [
         "docs/git.md",
@@ -18370,22 +18375,22 @@
       "title": "Discard one change, after asking",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 160,
-      "status": "planned",
+      "line": 164,
+      "status": "draft",
       "commands": [
         "git.discardChange"
       ],
       "files": [
-        "src/lib/git.ts",
+        "src/lib/gitStaging.ts",
         "src/lib/gitHunks.ts",
         "src/lib/dialogs.ts",
         "src/components/DiffView.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/staging.rs"
       ],
       "tests": [
         "src/__tests__/gitHunks.test.ts",
-        "src/__tests__/diffView.test.tsx",
-        "src-tauri/src/git.rs"
+        "src/__tests__/gitStaging.test.tsx",
+        "src-tauri/src/git/staging.rs"
       ],
       "docs": [
         "docs/git.md",
@@ -18431,8 +18436,8 @@
       "title": "Stage, unstage or discard selected lines",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 224,
-      "status": "planned",
+      "line": 228,
+      "status": "draft",
       "commands": [
         "git.stageLines",
         "git.unstageLines",
@@ -18440,14 +18445,14 @@
       ],
       "files": [
         "src/lib/gitHunks.ts",
-        "src/lib/git.ts",
+        "src/lib/gitStaging.ts",
         "src/components/DiffView.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/staging.rs"
       ],
       "tests": [
         "src/__tests__/gitHunks.test.ts",
-        "src/__tests__/diffView.test.tsx",
-        "src-tauri/src/git.rs"
+        "src/__tests__/gitStaging.test.tsx",
+        "src-tauri/src/git/staging.rs"
       ],
       "docs": [
         "docs/git.md",
@@ -18493,6 +18498,10 @@
         {
           "id": "STAGE-004.10",
           "title": "The change bar always takes the whole change"
+        },
+        {
+          "id": "STAGE-004.11",
+          "title": "A neighbouring line that did not change is left alone"
         }
       ]
     },
@@ -18501,8 +18510,8 @@
       "title": "Unsaved edits are saved first",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 304,
-      "status": "planned",
+      "line": 314,
+      "status": "draft",
       "commands": [
         "git.stageChange",
         "git.stageLines",
@@ -18510,13 +18519,12 @@
         "git.discardLines"
       ],
       "files": [
-        "src/lib/git.ts",
+        "src/lib/gitStaging.ts",
         "src/lib/diff.ts",
         "src/lib/actions.ts"
       ],
       "tests": [
-        "src/__tests__/diffSession.test.ts",
-        "src/__tests__/diffView.test.tsx"
+        "src/__tests__/gitStaging.test.tsx"
       ],
       "docs": [
         "docs/git.md"
@@ -18553,15 +18561,15 @@
       "title": "Line endings, encoding and the end of the file are preserved",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 359,
-      "status": "planned",
+      "line": 369,
+      "status": "draft",
       "commands": [],
       "files": [
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/staging.rs",
         "src/lib/gitHunks.ts"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/staging.rs"
       ],
       "docs": [],
       "scenarios": [
@@ -18592,6 +18600,10 @@
         {
           "id": "STAGE-006.7",
           "title": "Change on the first or the last line"
+        },
+        {
+          "id": "STAGE-006.8",
+          "title": "A file git treats as binary"
         }
       ]
     },
@@ -18600,8 +18612,8 @@
       "title": "Where partial staging is offered",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 416,
-      "status": "planned",
+      "line": 431,
+      "status": "draft",
       "commands": [
         "git.stageChange",
         "git.unstageChange",
@@ -18612,15 +18624,14 @@
       ],
       "files": [
         "src/lib/git.ts",
+        "src/lib/gitStaging.ts",
         "src/lib/gitStatus.ts",
         "src/lib/diff.ts",
         "src/components/DiffView.tsx",
         "src/lib/gitCommands.ts"
       ],
       "tests": [
-        "src/__tests__/gitHunks.test.ts",
-        "src/__tests__/diffView.test.tsx",
-        "src/__tests__/splitGit.test.ts"
+        "src/__tests__/gitStaging.test.tsx"
       ],
       "docs": [
         "docs/git.md",
@@ -18674,8 +18685,8 @@
       "title": "Partial staging from the menu, the palette and the keyboard",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 492,
-      "status": "planned",
+      "line": 508,
+      "status": "draft",
       "commands": [
         "git.stageChange",
         "git.unstageChange",
@@ -18688,11 +18699,10 @@
         "src/lib/gitCommands.ts",
         "src/components/MenuBar.tsx",
         "src/components/DiffView.tsx",
-        "src/lib/git.ts"
+        "src/lib/gitStaging.ts"
       ],
       "tests": [
-        "src/__tests__/diffView.test.tsx",
-        "src/__tests__/ui.test.ts"
+        "src/__tests__/gitStaging.test.tsx"
       ],
       "docs": [
         "docs/git.md",
@@ -18746,20 +18756,20 @@
       "title": "The comparison stays true to the index",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 563,
-      "status": "planned",
+      "line": 581,
+      "status": "draft",
       "commands": [],
       "files": [
+        "src/lib/gitStaging.ts",
         "src/lib/git.ts",
         "src/lib/diff.ts",
         "src/components/DiffView.tsx",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/staging.rs",
         "src/lib/gitStatus.ts"
       ],
       "tests": [
-        "src/__tests__/diffSession.test.ts",
-        "src/__tests__/diffView.test.tsx",
-        "src-tauri/src/git.rs"
+        "src/__tests__/gitStaging.test.tsx",
+        "src-tauri/src/git/staging.rs"
       ],
       "docs": [
         "docs/compare.md"
@@ -18800,6 +18810,10 @@
         {
           "id": "STAGE-009.9",
           "title": "The file was closed, renamed or deleted meanwhile"
+        },
+        {
+          "id": "STAGE-009.10",
+          "title": "Clicking the row again shows the open comparison"
         }
       ]
     },
@@ -20931,6 +20945,10 @@
         {
           "id": "UI-003.7",
           "title": "Help menu"
+        },
+        {
+          "id": "UI-003.8",
+          "title": "Git menu: Stage Part of a File"
         }
       ]
     },
@@ -20939,7 +20957,7 @@
       "title": "Menu bar keyboard access",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 178,
+      "line": 184,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21014,7 +21032,7 @@
       "title": "Command palette",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 300,
+      "line": 306,
       "status": "draft",
       "commands": [
         "view.commandPalette",
@@ -21070,7 +21088,7 @@
       "title": "Quick Open a file by name",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 366,
+      "line": 372,
       "status": "draft",
       "commands": [
         "file.quickOpen"
@@ -21116,7 +21134,7 @@
       "title": "Go to Line from the palette",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 416,
+      "line": 422,
       "status": "draft",
       "commands": [
         "goto.line"
@@ -21169,7 +21187,7 @@
       "title": "One command registry behind menus, shortcuts and the palette",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 480,
+      "line": 486,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21206,7 +21224,7 @@
       "title": "Global keyboard shortcuts",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 525,
+      "line": 531,
       "status": "draft",
       "commands": [
         "ui.escape"
@@ -21266,7 +21284,7 @@
       "title": "Modal dialogs",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 605,
+      "line": 611,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21312,7 +21330,7 @@
       "title": "Notifications",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 667,
+      "line": 673,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21347,7 +21365,7 @@
       "title": "Panel rail",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 707,
+      "line": 713,
       "status": "draft",
       "commands": [
         "view.explorer",
@@ -21404,7 +21422,7 @@
       "title": "Floating and pinned side panels",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 766,
+      "line": 772,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21468,7 +21486,7 @@
       "title": "Collapse and restore the side panels",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 848,
+      "line": 854,
       "status": "draft",
       "commands": [
         "view.toggleSidebar"
@@ -21515,7 +21533,7 @@
       "title": "Side panel widths",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 898,
+      "line": 904,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21554,7 +21572,7 @@
       "title": "Bottom panel",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 943,
+      "line": 949,
       "status": "draft",
       "commands": [
         "view.togglePanel",
@@ -21618,7 +21636,7 @@
       "title": "Status bar position and document facts",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1015,
+      "line": 1021,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21660,7 +21678,7 @@
       "title": "Status bar pickers for indentation, encoding, line endings and language",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1062,
+      "line": 1068,
       "status": "draft",
       "commands": [
         "view.setTabSize",
@@ -21727,7 +21745,7 @@
       "title": "Light and dark themes",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1144,
+      "line": 1150,
       "status": "draft",
       "commands": [
         "view.toggleTheme"
@@ -21777,7 +21795,7 @@
       "title": "Zoom and editor view toggles",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1199,
+      "line": 1205,
       "status": "draft",
       "commands": [
         "view.zoomIn",
@@ -21835,7 +21853,7 @@
       "title": "Keyboard focus returns to the active tab",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1263,
+      "line": 1269,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21881,7 +21899,7 @@
       "title": "Tab key can leave the editor",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1314,
+      "line": 1320,
       "status": "draft",
       "commands": [
         "view.toggleTabFocus"
@@ -21921,7 +21939,7 @@
       "title": "Single instance and files handed over by Windows",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1359,
+      "line": 1365,
       "status": "draft",
       "commands": [],
       "files": [
@@ -21973,7 +21991,7 @@
       "title": "Window size and position are remembered",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1418,
+      "line": 1424,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22011,7 +22029,7 @@
       "title": "Notice after an unexpected exit",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1460,
+      "line": 1466,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22542,11 +22560,6 @@
       "MERGE-008",
       "MERGE-009",
       "STAGE-001",
-      "STAGE-002",
-      "STAGE-003",
-      "STAGE-004",
-      "STAGE-006",
-      "STAGE-009",
       "STASH-001",
       "STASH-002",
       "STASH-003",
@@ -22557,6 +22570,14 @@
       "STASH-008",
       "STASH-009",
       "STASH-010"
+    ],
+    "src-tauri/src/git/staging.rs": [
+      "STAGE-001",
+      "STAGE-002",
+      "STAGE-003",
+      "STAGE-004",
+      "STAGE-006",
+      "STAGE-009"
     ],
     "src-tauri/src/json_tools.rs": [
       "BIG-017",
@@ -23940,12 +23961,7 @@
       "SAFE-006",
       "SAFE-007",
       "STAGE-001",
-      "STAGE-002",
-      "STAGE-003",
-      "STAGE-004",
-      "STAGE-005",
       "STAGE-007",
-      "STAGE-008",
       "STAGE-009",
       "STASH-001",
       "STASH-002",
@@ -24134,6 +24150,18 @@
       "SAFE-004",
       "SAFE-006",
       "SAFE-007"
+    ],
+    "src/lib/gitStaging.ts": [
+      "DIFF-013",
+      "GIT-010",
+      "STAGE-001",
+      "STAGE-002",
+      "STAGE-003",
+      "STAGE-004",
+      "STAGE-005",
+      "STAGE-007",
+      "STAGE-008",
+      "STAGE-009"
     ],
     "src/lib/gitStash.ts": [
       "CONFLICT-008",
@@ -24730,12 +24758,6 @@
       "MERGE-007",
       "MERGE-008",
       "MERGE-009",
-      "STAGE-001",
-      "STAGE-002",
-      "STAGE-003",
-      "STAGE-004",
-      "STAGE-006",
-      "STAGE-009",
       "STASH-001",
       "STASH-002",
       "STASH-003",
@@ -24746,6 +24768,14 @@
       "STASH-008",
       "STASH-009",
       "STASH-010"
+    ],
+    "src-tauri/src/git/staging.rs": [
+      "STAGE-001",
+      "STAGE-002",
+      "STAGE-003",
+      "STAGE-004",
+      "STAGE-006",
+      "STAGE-009"
     ],
     "src-tauri/src/json_tools.rs": [
       "BIG-017",
@@ -24888,23 +24918,13 @@
       "DIFF-010",
       "DIFF-012",
       "DIFF-013",
-      "DIFF-014",
-      "STAGE-005",
-      "STAGE-009"
+      "DIFF-014"
     ],
     "src/__tests__/diffView.test.tsx": [
       "DIFF-008",
       "DIFF-009",
       "DIFF-010",
-      "DIFF-011",
-      "STAGE-001",
-      "STAGE-002",
-      "STAGE-003",
-      "STAGE-004",
-      "STAGE-005",
-      "STAGE-007",
-      "STAGE-008",
-      "STAGE-009"
+      "DIFF-011"
     ],
     "src/__tests__/findReplace.test.ts": [
       "FIND-003",
@@ -24973,8 +24993,7 @@
       "STAGE-001",
       "STAGE-002",
       "STAGE-003",
-      "STAGE-004",
-      "STAGE-007"
+      "STAGE-004"
     ],
     "src/__tests__/gitMerge.test.ts": [
       "MERGE-001",
@@ -25050,6 +25069,17 @@
     ],
     "src/__tests__/gitSafetyRoutes.test.tsx": [
       "SAFE-005"
+    ],
+    "src/__tests__/gitStaging.test.tsx": [
+      "DIFF-013",
+      "STAGE-001",
+      "STAGE-002",
+      "STAGE-003",
+      "STAGE-004",
+      "STAGE-005",
+      "STAGE-007",
+      "STAGE-008",
+      "STAGE-009"
     ],
     "src/__tests__/gitStash.test.ts": [
       "STASH-001",
@@ -25248,8 +25278,7 @@
       "SPLIT-001",
       "SPLIT-002",
       "SPLIT-004",
-      "SPLIT-007",
-      "STAGE-007"
+      "SPLIT-007"
     ],
     "src/__tests__/splitHistory.test.ts": [
       "SPLIT-005"
@@ -25302,7 +25331,6 @@
       "SET-004",
       "SET-007",
       "SET-017",
-      "STAGE-008",
       "STASH-011",
       "TAB-003",
       "UI-004"

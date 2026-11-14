@@ -411,7 +411,15 @@ async function run<T>(label: string, fn: () => Promise<T>): Promise<T | undefine
   } finally {
     useGit.setState({ busy: null });
     refreshGit(0);
+    afterAction?.(); // partial staging: open Source Control comparisons follow the index
   }
+}
+
+// Partial staging (lib/gitStaging.ts, specs/git-staging.md) registers here to refresh its
+// comparisons after every git action, without git.ts importing it.
+let afterAction: (() => void) | null = null;
+export function onGitAction(fn: () => void) {
+  afterAction = fn;
 }
 
 export const stage = (root: string, paths: string[]) => run("Staging…", () => git.stage(root, paths));
@@ -845,29 +853,20 @@ export async function compareWithHead(path: string) {
 
 /** The Source Control panel's diff of a changed file: staged = HEAD vs index, else index (or HEAD) vs working copy. */
 export async function openChange(f: GitFile, staged: boolean) {
-  const { openCompare } = await import("./diff");
   const { openPath } = await import("./actions");
   const kind = kindOf(f);
   // A conflicted file has no single "before" to compare with: open the file itself, where git's
-  // conflict markers show both sides to choose from.
-  if (kind === "untracked" || (kind === "added" && !staged) || kind === "conflict") {
+  // conflict markers show both sides to choose from. An untracked file has nothing to compare with.
+  // (A staged new file that was edited again compares its staged text with the working copy.)
+  if (kind === "untracked" || kind === "conflict") {
     if (kind !== "conflict" || (await fs.exists(f.path))) void openPath(f.path);
     else toast(`${nameOf(f.path)} was deleted on one side and is not in the folder. Mark it resolved with + to keep it deleted${repoOf(f.path)?.operation ? ", or abort" : ""}.`, "info", 7000);
     return;
   }
-  const show = (rev: string, path = f.path) => git.show(path, rev).catch(() => null);
-  const name = nameOf(f.path);
-  if (staged) {
-    const [a, b] = await Promise.all([f.origPath ? show("HEAD", f.origPath) : show("HEAD"), show(":")]);
-    await openCompare({ kind: "text", label: `${name} (HEAD)`, text: a?.text ?? "" }, { kind: "text", label: `${name} (staged)`, text: b?.text ?? "" });
-    return;
-  }
-  const base = f.index !== "." ? await show(":") : await show("HEAD");
-  const left = { kind: "text" as const, label: `${name} (${f.index !== "." ? "staged" : "HEAD"})`, text: base?.text ?? "" };
-  const doc = useStore.getState().docs.find((d) => d.kind === "text" && d.path && key(d.path) === key(f.path));
-  if (kind === "deleted" && !(await fs.exists(f.path))) await openCompare(left, { kind: "text", label: `${name} (deleted)`, text: "" });
-  else if (doc) await openCompare(left, { kind: "tab", docId: doc.id });
-  else await openCompare(left, { kind: "file", path: f.path });
+  // The comparison carries what it compares, so single changes and lines can be staged,
+  // unstaged or discarded in it (lib/gitStaging.ts).
+  const { openChangeCompare } = await import("./gitStaging");
+  await openChangeCompare(f, staged);
 }
 
 // ---------- history ----------

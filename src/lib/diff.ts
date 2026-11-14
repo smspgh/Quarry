@@ -36,6 +36,25 @@ export interface DiffSession {
   collapse: boolean;
   /** Bumped when the texts are replaced (reload, swap), so the view rebuilds. */
   version: number;
+  /** A Source Control comparison (opened from Changes / Staged Changes): its left side is the
+   *  index or HEAD, so single changes and lines can be staged, unstaged or discarded. */
+  git?: DiffGit;
+  /** The sides were swapped: the partial-staging controls are hidden until swapped back. */
+  swapped?: boolean;
+}
+
+/** What a Source Control comparison compares (specs/git-staging.md; actions in lib/gitStaging.ts). */
+export interface DiffGit {
+  root: string;
+  path: string;
+  /** Opened from Staged Changes: HEAD ↔ staged (Unstage). Else staged / HEAD ↔ working copy (Stage, Discard). */
+  staged: boolean;
+  /** What the left side is when not `staged`: the staged text, or HEAD when nothing is staged. */
+  base?: "staged" | "HEAD";
+  /** The file's path in HEAD when it is a staged rename. */
+  origPath?: string;
+  /** Only the whole file can be acted on (it was deleted): the change buttons do what the row's do. */
+  whole?: boolean;
 }
 
 export const useDiff = create<{ sessions: Record<string, DiffSession> }>(() => ({ sessions: {} }));
@@ -116,8 +135,11 @@ async function load(src: Source): Promise<Side> {
   return { label: baseName(src.path), path: src.path, text, editable: !st.readonly, encoding: f.encoding, bom: f.hasBom, eol: f.eol, dirty: false, source: src, modifiedMs: f.modifiedMs };
 }
 
+/** Read one side (for lib/gitStaging.ts, which re-reads the sides of a Source Control comparison). */
+export const loadSide = (src: Source): Promise<Side> => load(src);
+
 /** Open a Compare tab for two sources (left = older / original, right = newer). */
-export async function openCompare(a: Source, b: Source, opts: { preview?: boolean } = {}): Promise<Doc | null> {
+export async function openCompare(a: Source, b: Source, opts: { preview?: boolean; git?: DiffGit } = {}): Promise<Doc | null> {
   const store = useStore.getState();
   let left: Side;
   let right: Side;
@@ -145,7 +167,7 @@ export async function openCompare(a: Source, b: Source, opts: { preview?: boolea
   // A preview Compare tab is replaced by the next one (clicking through a commit's files), unless
   // it was kept with a double-click on its tab or edited.
   const oldPreview = opts.preview ? store.docs.find((d) => d.kind === "diff" && d.preview && !d.dirty) : undefined;
-  useDiff.setState((st) => ({ sessions: { ...st.sessions, [doc.id]: { left, right, inline: false, collapse: true, version: 0 } } }));
+  useDiff.setState((st) => ({ sessions: { ...st.sessions, [doc.id]: { left, right, inline: false, collapse: true, version: 0, git: opts.git } } }));
   store.addDoc(doc, true);
   if (oldPreview) {
     disposeDiff(oldPreview.id);
@@ -224,6 +246,8 @@ export async function saveDiff(docId: string): Promise<boolean> {
 export async function reloadDiff(docId: string) {
   const s = diffOf(docId);
   if (!s) return;
+  // A Source Control comparison reads its git side again too (the index may have changed).
+  if (s.git) return void (await (await import("./gitStaging")).reloadChange(docId, { announce: true }));
   const again = async (side: Side): Promise<Side> => {
     if (side.source.kind === "tab" && !useStore.getState().docs.some((d) => d.id === (side.source as { docId: string }).docId)) return side;
     const next = await load(side.source);
@@ -241,7 +265,7 @@ export async function reloadDiff(docId: string) {
 }
 
 export function swapDiff(docId: string) {
-  patchDiff(docId, (s) => ({ left: s.right, right: s.left, version: s.version + 1 }));
+  patchDiff(docId, (s) => ({ left: s.right, right: s.left, version: s.version + 1, swapped: !s.swapped }));
   const s = diffOf(docId);
   if (s) useStore.getState().updateDoc(docId, { name: compareTitle(s.left, s.right) });
 }
