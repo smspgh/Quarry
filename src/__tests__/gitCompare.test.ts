@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GitCommitFile, GitCompare, GitGraphCommit } from "../lib/gitApi";
-import { arrange, compareClick, compareFileKind, compareHeading, compareSummary, countsLine, noDifferences, orderSides, sideLabel, swapCompare, swapFile, untrackedNote, WORKTREE } from "../lib/gitCompare";
+import { arrange, compareClick, compareFileKind, compareHeading, compareSummary, countsLine, fileRowClick, fileRowDoubleClick, noDifferences, orderSides, ROW_CLICK_DELAY, setRowClickDelay, sideLabel, swapCompare, swapFile, untrackedNote, WORKTREE } from "../lib/gitCompare";
 
 // Compare commits, pure parts (specs/git-compare-commits.md).
 const ROOT = "C:\\work\\proj";
@@ -119,5 +119,49 @@ describe("wording", () => {
     expect(sideLabel("src/lib/helpers.ts", "18bc71d")).toBe("helpers.ts @ 18bc71d");
     expect(sideLabel("store.ts", "a1b2c3d")).toBe("store.ts @ a1b2c3d");
     expect(["A", "M", "D", "R", "U"].map(compareFileKind)).toEqual(["added", "modified", "deleted", "renamed", "conflict"]);
+  });
+});
+
+describe("file rows: click compares, double-click opens the file (GRAPH-015.6, COMMITCMP-003.9)", () => {
+  afterEach(() => void vi.useRealTimers());
+  it("a single click compares after ROW_CLICK_DELAY", async () => {
+    vi.useFakeTimers();
+    const seen: string[] = [];
+    fileRowClick({ detail: 1 }, () => seen.push("compare"));
+    await vi.advanceTimersByTimeAsync(ROW_CLICK_DELAY - 10);
+    expect(seen).toEqual([]);
+    await vi.advanceTimersByTimeAsync(20);
+    expect(seen).toEqual(["compare"]);
+  });
+  it("a double-click opens only the file: no Compare tab covers the graph first", async () => {
+    vi.useFakeTimers();
+    const seen: string[] = [];
+    fileRowClick({ detail: 1 }, () => seen.push("compare"));
+    await vi.advanceTimersByTimeAsync(120);
+    fileRowClick({ detail: 2 }, () => seen.push("second compare"));
+    await fileRowDoubleClick(() => seen.push("file"));
+    await vi.advanceTimersByTimeAsync(ROW_CLICK_DELAY * 2);
+    expect(seen).toEqual(["file"]);
+  });
+  it("a comparison already on its way is waited for, so the file ends up in front", async () => {
+    vi.useFakeTimers();
+    const order: string[] = [];
+    let finish = () => {};
+    fileRowClick({ detail: 1 }, () => new Promise<void>((r) => (finish = () => { order.push("compare"); r(); })));
+    await vi.advanceTimersByTimeAsync(ROW_CLICK_DELAY + 10);
+    const opened = fileRowDoubleClick(() => order.push("file"));
+    await Promise.resolve();
+    expect(order).toEqual([]);
+    finish();
+    await opened;
+    expect(order).toEqual(["compare", "file"]);
+  });
+  it("still opens the file when the comparison failed", async () => {
+    setRowClickDelay(0);
+    const seen: string[] = [];
+    fileRowClick({ detail: 1 }, () => Promise.reject(new Error("binary")));
+    await fileRowDoubleClick(() => seen.push("file"));
+    expect(seen).toEqual(["file"]);
+    setRowClickDelay(ROW_CLICK_DELAY);
   });
 });

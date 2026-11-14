@@ -32,6 +32,7 @@ const { GraphView } = await import("../components/GraphView");
 const { useGit } = await import("../lib/git");
 const { useStore } = await import("../lib/store");
 const { isPanelShown } = await import("../lib/panels");
+(await import("../lib/gitCompare")).setRowClickDelay(0); // file rows compare at once here
 const { DATE_ORDER_OFF, DATE_ORDER_WHY } = await import("../lib/gitGraph");
 
 const ROOT = "C:\\work\\proj";

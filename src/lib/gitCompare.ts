@@ -9,6 +9,49 @@ import { commitFileKind, type GitKind } from "./gitStatus";
 /** The second side of a comparison when it is the working tree instead of a commit. */
 export const WORKTREE = "worktree";
 
+// ---- file rows of the graph's lists: click compares, double-click opens the file ----
+// A Compare tab opened by the first click would cover the graph before the second click, so the
+// double-click would never reach the row. The click's comparison therefore waits `ROW_CLICK_DELAY`
+// ms; a double-click in that time cancels it and opens only the file. A comparison already on its
+// way is waited for, so the file still ends up in front (GRAPH-015.6, COMMITCMP-003.9).
+
+/** How long a file row's click waits for a second click before it opens the comparison. */
+export const ROW_CLICK_DELAY = 300;
+let rowClickDelay = ROW_CLICK_DELAY;
+/** Component tests set 0: the click then compares at once. */
+export const setRowClickDelay = (ms: number) => void (rowClickDelay = ms);
+
+let rowTimer: ReturnType<typeof setTimeout> | null = null;
+let pendingRowOpen: Promise<unknown> = Promise.resolve();
+
+/** A file row's click: runs `open` (the comparison) after `ROW_CLICK_DELAY`, unless a double-click comes first. */
+export function fileRowClick(e: { detail: number }, open: () => unknown) {
+  if (e.detail > 1) return;
+  if (rowTimer) clearTimeout(rowTimer);
+  rowTimer = null;
+  if (rowClickDelay <= 0) {
+    pendingRowOpen = Promise.resolve().then(open).catch(() => {});
+    return;
+  }
+  let start = () => {};
+  const started = new Promise<void>((r) => (start = r));
+  pendingRowOpen = started.then(open).catch(() => {});
+  rowTimer = setTimeout(() => {
+    rowTimer = null;
+    start();
+  }, rowClickDelay);
+}
+
+/** A file row's double-click: cancels the first click's comparison if it has not started, else waits for it; then opens the file. */
+export function fileRowDoubleClick(openFile: () => unknown): Promise<void> {
+  if (rowTimer) {
+    clearTimeout(rowTimer);
+    rowTimer = null;
+    pendingRowOpen = Promise.resolve();
+  }
+  return pendingRowOpen.then(() => void openFile());
+}
+
 /** What is selected in the graph: one commit, or two being compared (`second` may be WORKTREE). */
 export interface CompareSel {
   first: string | null;

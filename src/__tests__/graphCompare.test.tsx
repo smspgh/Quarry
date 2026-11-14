@@ -32,7 +32,8 @@ vi.mock("../lib/actions", async (orig) => ({ ...(await orig<typeof import("../li
 
 const { render, cleanup, flush, fire, byText, act } = await import("./helpers/render");
 const { GraphCompare } = await import("../components/GraphCompare");
-const { WORKTREE } = await import("../lib/gitCompare");
+const { WORKTREE, setRowClickDelay } = await import("../lib/gitCompare");
+setRowClickDelay(0); // a file row's click compares at once here (the 300 ms wait is tested in gitCompare.test.ts)
 const { compareWithBranch, pickBranch, useGit } = await import("../lib/git");
 const { diffOf } = await import("../lib/diff");
 const { useStore } = await import("../lib/store");

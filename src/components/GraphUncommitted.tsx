@@ -1,6 +1,7 @@
 import { CircleDot, X } from "lucide-react";
 import { openPath } from "../lib/actions";
 import { openChange } from "../lib/git";
+import { fileRowClick, fileRowDoubleClick } from "../lib/gitCompare";
 import type { GitFile, GitStatus } from "../lib/gitApi";
 import { groupFiles, KIND_LABEL, KIND_LETTER, rowKind, type Group } from "../lib/gitStatus";
 
@@ -72,8 +73,8 @@ function ChangedFile({ f, group, root }: { f: GitFile; group: Group; root: strin
       role="listitem"
       tabIndex={0}
       title={`${f.path}\n${KIND_LABEL[kind]}${f.origPath ? ` (from ${nameOf(f.origPath)})` : ""}${staged ? ", staged" : ""}\n${group === "conflict" ? "Click to open the file and resolve the conflict" : "Click to see the change, double-click to open the file"}`}
-      onClick={() => void openChange(f, staged)}
-      onDoubleClick={() => void openPath(f.path)}
+      onClick={(e) => fileRowClick(e, () => openChange(f, staged))}
+      onDoubleClick={() => void fileRowDoubleClick(() => openPath(f.path))}
       onKeyDown={(e) => e.key === "Enter" && void openChange(f, staged)}
     >
       <span className={`scm-name git-${kind}`}>{nameOf(f.path)}</span>

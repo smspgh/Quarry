@@ -23,7 +23,7 @@ import { fs } from "../lib/ipc";
 import { ArrowLeftRight } from "lucide-react";
 import { pickBranch } from "../lib/git";
 import type { GitCompare } from "../lib/gitApi";
-import { compareClick, WORKTREE, type CompareNames } from "../lib/gitCompare";
+import { compareClick, fileRowClick, fileRowDoubleClick, WORKTREE, type CompareNames } from "../lib/gitCompare";
 import { GraphCompare } from "./GraphCompare";
 // Branch and tag housekeeping entries of the ref-label menu (specs/git-branches.md).
 import { CloudUpload, Link2, Pencil, Trash2 } from "lucide-react";
@@ -1086,15 +1086,16 @@ function stoppedNoun(operation: string): string {
 function DetailFile({ file, commit }: { file: GitCommitFile; commit: GitGraphCommit }) {
   const kind = commitFileKind(file.status);
   const slash = file.rel.lastIndexOf("/");
-  const open = () => commit.stash ? void openStashFile({ sha: commit.sha, short: commit.short, base: commit.parents[0] ?? "" }, file) : void openCommitFile({ sha: commit.sha, short: commit.short, author: commit.author, email: commit.email, time: commit.time, summary: commit.summary, rel: file.rel, root: "" }, file);
+  const open = () => commit.stash ? openStashFile({ sha: commit.sha, short: commit.short, base: commit.parents[0] ?? "" }, file) : openCommitFile({ sha: commit.sha, short: commit.short, author: commit.author, email: commit.email, time: commit.time, summary: commit.summary, rel: file.rel, root: "" }, file);
+  const openFile = () => (commit.stash ? fs.exists(file.path).then((there) => void (there && openPath(file.path)), () => {}) : openPath(file.path));
   return (
     <div
       className="scm-row graph-file"
       tabIndex={0}
       title={`${file.rel}\n${KIND_LABEL[kind]}${file.origRel ? ` (from ${file.origRel})` : ""}\nClick to see what this commit changed, double-click to open the file as it is now`}
-      onClick={open}
-      onDoubleClick={() => file.status !== "D" && (commit.stash ? void fs.exists(file.path).then((there) => void (there && openPath(file.path)), () => {}) : void openPath(file.path))}
-      onKeyDown={(e) => e.key === "Enter" && open()}
+      onClick={(e) => fileRowClick(e, open)}
+      onDoubleClick={() => file.status !== "D" && void fileRowDoubleClick(openFile)}
+      onKeyDown={(e) => e.key === "Enter" && void open()}
     >
       <span className={`scm-name git-${kind}`}>{file.rel.slice(slash + 1)}</span>
       {slash > 0 && <span className="scm-dir">{file.rel.slice(0, slash).replace(/\//g, "\\")}</span>}

@@ -268,7 +268,8 @@ Scenario: COMMITCMP-003.8 Keyboard
 
 Scenario: COMMITCMP-003.9 Open the file as it is now
   When I double-click a file in the comparison pane
-  Then the file itself opens from the working folder
+  Then the file itself opens from the working folder, in front of the Compare tab the first click opened, however long that comparison took to read
+  And the double-click's second click does not open a second Compare tab
   But a file with the letter D is not opened
 
 Scenario: COMMITCMP-003.10 Opening files changes nothing on disk

@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { openPath } from "../lib/actions";
 import { openCompareFile } from "../lib/git";
 import { git, type GitCommitFile, type GitCompare, type GitGraphCommit } from "../lib/gitApi";
-import { arrange, compareFileKind, compareHeading, compareSummary, countsLine, noDifferences, untrackedNote, WORKTREE, type CompareNames } from "../lib/gitCompare";
+import { arrange, compareFileKind, fileRowClick, fileRowDoubleClick, compareHeading, compareSummary, countsLine, noDifferences, untrackedNote, WORKTREE, type CompareNames } from "../lib/gitCompare";
 import { refLabels } from "../lib/gitGraph";
 import { gitErrorText, KIND_LABEL, KIND_LETTER } from "../lib/gitStatus";
 
@@ -157,7 +157,7 @@ export function GraphCompare({ root, first, second, names, picked = false, initi
 function CompareFile({ file, top, left, right }: { file: GitCommitFile; top: number; left: GitGraphCommit; right: GitGraphCommit | null }) {
   const kind = compareFileKind(file.status);
   const slash = file.rel.lastIndexOf("/");
-  const open = () => void openCompareFile(left, right, file);
+  const open = () => openCompareFile(left, right, file);
   const move = (e: React.KeyboardEvent, to: Element | null) => {
     e.preventDefault();
     (to as HTMLElement | null)?.focus();
@@ -169,10 +169,10 @@ function CompareFile({ file, top, left, right }: { file: GitCommitFile; top: num
       style={{ top }}
       tabIndex={0}
       title={`${file.rel}\n${KIND_LABEL[kind]}${file.origRel ? ` (from ${file.origRel})` : ""}\nClick to compare the two versions, double-click to open the file as it is now`}
-      onClick={open}
-      onDoubleClick={() => file.status !== "D" && void openPath(file.path)}
+      onClick={(e) => fileRowClick(e, open)}
+      onDoubleClick={() => file.status !== "D" && void fileRowDoubleClick(() => openPath(file.path))}
       onKeyDown={(e) => {
-        if (e.key === "Enter") open();
+        if (e.key === "Enter") void open();
         else if (e.key === "ArrowDown") move(e, e.currentTarget.nextElementSibling);
         else if (e.key === "ArrowUp") move(e, e.currentTarget.previousElementSibling);
       }}

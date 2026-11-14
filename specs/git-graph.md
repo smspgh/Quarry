@@ -908,7 +908,7 @@ Scenario: GRAPH-015.6 Open a changed file
   When I click "app.css" in the details pane
   Then the Compare tab that Source Control opens for that file opens, with "app.css (HEAD)" on the left and the working file on the right
   And clicking the new file "notes.txt" opens the file itself
-  And double-clicking a file opens it from the working folder
+  And double-clicking a file opens it from the working folder, in front of the Compare tab its first click opened, and the second click opens no second Compare tab (`fileRowClick` / `fileRowDoubleClick` in `src/lib/gitCompare.ts`; the same in an ordinary commit's file list)
 
 Scenario: GRAPH-015.7 The row follows my work
   Given the graph shows "Uncommitted changes (3)" and I have scrolled 200 rows down with a commit selected
