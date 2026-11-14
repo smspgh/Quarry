@@ -15,7 +15,7 @@ Owner decisions, 2026-11-13: build items 0-9, item 10 gets a spec only; one loca
 | 2 | Stash | `git-stash.md` (STASH-001..011) | indexed; 2 owner questions (no Abort for a conflicted pop, untracked files included by default) | yes (b8660bf; on main: 610 Vitest + 132 Rust tests pass; stories `draft`) | no: 13 live checks listed by the build agent |
 | 3 | Start a merge or a rebase | `git-merge-rebase.md` (MERGE-001..009; 009 = Force Push, shared with item 6) | indexed; open default: merge is blocked on a dirty tree | yes (8184e5c; on main: 542 Vitest + 124 Rust tests pass; stories `draft`) | no: 11 live checks listed by the build agent |
 | 4 | Branch and tag housekeeping | `git-branches.md` (BRANCH-001..009) | indexed; 3 optional owner questions (remote tag delete, which remote when several, ask before deleting a merged branch) | no | no |
-| 5 | Compare commits | `git-compare-commits.md` (COMMITCMP-001..006) | indexed; 2 owner questions (two-dot vs three-dot for branches, untracked files vs working tree) | no | no |
+| 5 | Compare commits | `git-compare-commits.md` (COMMITCMP-001..006) | indexed; 2 owner questions (two-dot vs three-dot for branches, untracked files vs working tree) | yes ("Graph: compare two commits, a commit with the working tree, or with a branch"; on main: 730 Vitest + 152 Rust tests pass; stories `draft`) | no: 11 live checks listed by the build agent |
 | 6 | Edit history | `git-history-edit.md` (HISTORY-001..011) | indexed; owner decided: warn, then Force Push (built with item 3) | no | no |
 | 7 | Graph polish | `git-graph.md` (GRAPH-015..018) | indexed; no blocking questions | no | no |
 | 8 | Buffer-aware safety | `git-safety.md` (SAFE-001..007) | written and indexed | no | no |
