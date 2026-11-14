@@ -11908,7 +11908,7 @@
       "title": "Drop a commit",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 256,
+      "line": 257,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11957,7 +11957,7 @@
       "title": "Squash a commit into its parent",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 309,
+      "line": 310,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12010,7 +12010,7 @@
       "title": "Guards on every history edit",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 365,
+      "line": 366,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12076,7 +12076,7 @@
       "title": "Open the Edit History list",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 446,
+      "line": 447,
       "status": "draft",
       "commands": [
         "git.editHistory"
@@ -12149,7 +12149,7 @@
       "title": "Plan the changes in the list",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 525,
+      "line": 526,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12241,7 +12241,7 @@
       "title": "Run or cancel the Edit History list",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 644,
+      "line": 645,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12315,7 +12315,7 @@
       "title": "A history edit that stops on a conflict",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 730,
+      "line": 732,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12385,7 +12385,7 @@
       "title": "Force Push is offered after a history edit of pushed commits",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 810,
+      "line": 812,
       "status": "draft",
       "commands": [
         "git.forcePush"

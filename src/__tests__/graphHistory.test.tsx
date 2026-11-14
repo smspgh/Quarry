@@ -297,6 +297,27 @@ describe("GraphView: edit history", () => {
     expect(document.querySelector(".history-edit")).toBeNull();
   });
 
+  it("the keyboard goes back to the strip or the list when a dialog or menu closes", async () => {
+    // Overlays return the focus with editor.focus(); the commit rows are hidden under the list, so
+    // focusing them would leave Escape, Ctrl+Enter and the letter keys dead after a cancelled dialog.
+    const { editor } = await import("../editor/manager");
+    await show();
+    useStore.setState({ activeId: doc.id });
+    await choose(2, "Reword Message…");
+    box().blur();
+    editor.focus();
+    expect(document.activeElement).toBe(box());
+    await fire.keyDown(box(), "Escape");
+    editor.focus();
+    expect(document.activeElement).toBe(document.querySelector(".graph-list"));
+    await choose(3, "Edit History from Here…");
+    useStore.setState({ activeId: doc.id });
+    (document.activeElement as HTMLElement | null)?.blur();
+    editor.focus();
+    expect(document.activeElement).toBe(document.querySelector(".he-list"));
+    useStore.setState({ activeId: null });
+  });
+
   it("closing the graph tab drops the list; nothing was changed", async () => {
     const m = await show();
     await choose(3, "Edit History from Here…");

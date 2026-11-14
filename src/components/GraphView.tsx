@@ -216,7 +216,9 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   };
   // ----- end -----
 
-  useEffect(() => editor.registerFocus(doc.id, () => listRef.current?.focus()), [doc.id]);
+  // While the Edit History list or the Reword / Squash strip is open the keyboard goes back there
+  // (the commit rows are hidden under the list), so a cancelled confirmation leaves their keys working.
+  useEffect(() => editor.registerFocus(doc.id, () => (listRef.current?.closest(".graph-view")?.querySelector<HTMLElement>(".he-list, .graph-message-strip textarea") ?? listRef.current)?.focus()), [doc.id]);
   useEffect(() => {
     git.graphIndexed(root).then(setIndexed, () => setIndexed(null));
   }, [root]);

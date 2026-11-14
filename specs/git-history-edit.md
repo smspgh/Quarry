@@ -251,6 +251,7 @@ Scenario: HISTORY-003.8 No editor ever opens
 Scenario: HISTORY-003.9 Cancel
   When I cancel the "Reword this commit?" dialog
   Then git is not run and the strip stays open with my text
+  And the keyboard focus is back in the strip's box, so Ctrl+Enter and Escape still work
 ```
 
 ## HISTORY-004: Drop a commit
@@ -692,6 +693,7 @@ Scenario: HISTORY-009.5 Pushed commits in the plan
 Scenario: HISTORY-009.6 Cancelling the dialog keeps the plan
   When I cancel the confirmation dialog
   Then git is not run and the list is still open with my choices
+  And the keyboard focus is back in the list, so its keys still work
 
 Scenario: HISTORY-009.7 Cancel an untouched list
   Given I changed nothing in the list
