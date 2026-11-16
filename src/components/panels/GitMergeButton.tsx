@@ -1,5 +1,5 @@
 import { GitMerge, GitPullRequestArrow } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { runCommand } from "../../lib/commands";
 import { useGit } from "../../lib/git";
@@ -15,6 +15,7 @@ export function MergeRebaseButton({ repo }: { repo: GitStatus }) {
   const busy = useGit((s) => s.busy);
   const [at, setAt] = useState<{ left: number; top: number } | null>(null);
   const button = useRef<HTMLButtonElement>(null);
+  const menu = useRef<HTMLDivElement>(null);
   const blocked = { merge: startBlocked(repo, "merge", busy), rebase: startBlocked(repo, "rebase", busy) };
   // Nothing in the menu could run: the button itself is disabled and says why.
   const off = blocked.merge && blocked.rebase ? blocked.merge : null;
@@ -32,6 +33,14 @@ export function MergeRebaseButton({ repo }: { repo: GitStatus }) {
       window.removeEventListener("keydown", key);
       window.removeEventListener("blur", close);
     };
+  }, [at]);
+
+  // The menu is as wide as its entries (long branch names): keep it inside the window once measured.
+  useLayoutEffect(() => {
+    const w = menu.current?.getBoundingClientRect().width;
+    if (!at || !w) return;
+    const left = Math.max(4, Math.min(at.left, window.innerWidth - w - 4));
+    if (left !== at.left) setAt({ ...at, left });
   }, [at]);
 
   const open = () => {
@@ -72,7 +81,7 @@ export function MergeRebaseButton({ repo }: { repo: GitStatus }) {
       </button>
       {at &&
         createPortal(
-          <div className="palette ctx-menu scm-merge-menu" role="menu" aria-label="Merge or Rebase" style={{ left: at.left, top: at.top }} onMouseDown={(e) => e.stopPropagation()}>
+          <div ref={menu} className="palette ctx-menu scm-merge-menu" role="menu" aria-label="Merge or Rebase" style={{ left: at.left, top: at.top }} onMouseDown={(e) => e.stopPropagation()}>
             {entry("git.mergeBranch", "Merge Branch…", blocked.merge, `Pick a branch to merge into ${into}`, GitMerge)}
             {entry("git.rebaseBranch", "Rebase onto Branch…", blocked.rebase, `Pick a branch to rebase ${repo.branch ?? "your branch"} onto`, GitPullRequestArrow)}
           </div>,

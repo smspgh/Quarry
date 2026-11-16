@@ -196,7 +196,8 @@ describe("GraphView stash rows", () => {
     expect(row.querySelector("circle.gn.stash")).not.toBeNull();
     expect(rows()[0].querySelector("circle.gn.stash")).toBeNull();
     expect(row.querySelector(".graph-c-author")?.textContent).toBe("Ada");
-    expect(document.querySelector(".graph-toolbar")?.textContent).toContain("6 commits");
+    expect(document.querySelector(".graph-toolbar")?.textContent).toContain("5 commits"); // the stash row is not a commit
+    expect(document.querySelector(".graph-toolbar")?.textContent).not.toContain("6 commits");
   });
 
   it("its right-click menu has the stash actions and none of the commit actions", async () => {
@@ -271,7 +272,7 @@ describe("GraphView stash rows", () => {
     await render(<GraphView doc={doc} visible />);
     await flush();
     expect(calls.find((c) => c.cmd === "git_graph")?.args.limit).toBe(301);
-    expect(document.querySelector(".graph-toolbar")?.textContent).toContain("301+ commits");
+    expect(document.querySelector(".graph-toolbar")?.textContent).toContain("300+ commits");
     answers.page = [];
     await act(async () => {
       list().scrollTop = 300 * 26;

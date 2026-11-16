@@ -7,6 +7,7 @@ import { branchPick, pickList } from "../lib/gitRefs";
 import { openPath } from "../lib/actions";
 import { bus } from "../lib/bus";
 import { allCommands, prettyKeys, runCommand, type Command } from "../lib/commands";
+import { dropPickerStep } from "../lib/macros";
 import { bareTitle, fuzzy, fuzzyCommand, fuzzyPath, shiftIndices } from "../lib/fuzzy";
 import { fs } from "../lib/ipc";
 import { activeDoc, useStore } from "../lib/store";
@@ -305,7 +306,10 @@ export function CommandPalette() {
     set({ palette: null });
     editor.focus();
     if (e.id === "copy") copyRefName(name);
-    else if (REF_COMMANDS[e.id]) void runCommand(REF_COMMANDS[e.id], { name });
+    else if (REF_COMMANDS[e.id]) {
+      dropPickerStep();
+      void runCommand(REF_COMMANDS[e.id], { name });
+    }
   };
   const housekeeping = mode === "branch" && isHousekeeping(branchPurpose) ? housekeepingRows(branchPurpose, pickFor, { branches: branches ?? [], tags: tags ?? [], remotes: pickRepo()?.remotes.map((r) => r.name) ?? [], query }) : null;
   const refsLoading = !branches || (branchPurpose === "tag" && !tags);
@@ -350,6 +354,8 @@ export function CommandPalette() {
     close();
     if (it.cmd) {
       if (mode === "commands") pushRecentCommand(it.cmd.id);
+      // A picked branch: the macro keeps this command only, not the one that opened the picker.
+      if (mode === "branch") dropPickerStep();
       void runCommand(it.cmd.id, it.arg);
     } else if (it.file) {
       const path = it.abs ? it.file : `${folder}\\${it.file.replace(/\//g, "\\")}`;

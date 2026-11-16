@@ -57,6 +57,18 @@ describe("compare sessions", () => {
     expect(useStore.getState().activeId).toBe(doc!.id);
   });
 
+  it("a side showing a tab drops \"(unsaved)\" as soon as the tab is saved, and the title follows", async () => {
+    const tab = { id: "t-app", kind: "text", name: "app.ts", path: "C:\\p\\app.ts", dirty: true, encoding: "UTF-8", bom: false, eol: "LF" } as never;
+    useStore.setState({ docs: [tab] });
+    const doc = await openCompare({ kind: "text", label: "app.ts (HEAD)", text: "old\n" }, { kind: "tab", docId: "t-app" });
+    expect(diffOf(doc!.id).right.label).toBe("app.ts (unsaved)");
+    useStore.getState().updateDoc("t-app", { dirty: false });
+    expect(diffOf(doc!.id).right.label).toBe("app.ts");
+    expect(useStore.getState().docs.find((d) => d.id === doc!.id)!.name).toBe("app.ts (HEAD) ↔ app.ts");
+    useStore.getState().updateDoc("t-app", { dirty: true });
+    expect(diffOf(doc!.id).right.label).toBe("app.ts (unsaved)");
+  });
+
   it("snapshots are read-only and identical texts are reported", async () => {
     put("C:\\p\\a.ts", "same");
     const doc = await openCompare({ kind: "text", label: "Clipboard", text: "same" }, { kind: "file", path: "C:\\p\\a.ts" });

@@ -251,7 +251,11 @@ export function RepoSettings({ repo }: { repo: GitStatus }) {
   }, [repo.root]);
   const id = identity?.root === repo.root ? identity : null;
   const missing = !!id && (!id.name || !id.email);
-  const showForm = repo.remotes.length === 0 || adding;
+  // No remote opens the add form by itself, except while a stopped operation or conflicts need the
+  // panel: then the form waits (Fetch / Pull / Push still lead to it), so it never takes the focus
+  // and the view away from the files to resolve.
+  const resolving = !!repo.operation || repo.files.some((f) => f.conflicted);
+  const showForm = (repo.remotes.length === 0 && !resolving) || adding;
   // The GitHub account matters when a repository may be created there or a remote is on GitHub.
   const onGithub = showForm || repo.remotes.some((r) => /github\.com[:/]/i.test(r.url));
   const where = (scope: string | null) => (scope === "local" ? "this repository" : scope === "global" ? "all your repositories" : (scope ?? "git"));
@@ -327,6 +331,14 @@ export function RepoSettings({ repo }: { repo: GitStatus }) {
           </div>
         );
       })}
+      {!showForm && repo.remotes.length === 0 && (
+        <div className="scm-kv">
+          <span className="muted grow">None yet.</span>
+          <button className="btn small" onClick={() => useGit.setState({ addingRemote: true })}>
+            Add Remote…
+          </button>
+        </div>
+      )}
       {showForm && <RemoteForm key={`add:${repo.root}`} repo={repo} onCancel={repo.remotes.length ? () => useGit.setState({ addingRemote: false }) : undefined} />}
       </div>
     </div>

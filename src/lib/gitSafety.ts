@@ -311,6 +311,15 @@ export function keptNotice(names: string[]): string {
   return `${nameList(names)} changed on disk; their tabs keep your unsaved text. Saving one overwrites its file.`;
 }
 
+/**
+ * Whether the tabs an operation reloaded get the "changed on disk" notice. Not after the actions
+ * whose whole point is to change those files and that say so themselves (Stash, stash Apply / Pop,
+ * discard, taking one side): the notice would only repeat them.
+ */
+export function noticeReloads(kind: SafetyKind): boolean {
+  return !["stash", "stash-apply", "discard", "take-side"].includes(kind);
+}
+
 /** Tabs reloaded from disk: one file keeps the familiar wording, several are counted. */
 export function reloadedNotice(names: string[]): string {
   return names.length === 1 ? `${names[0]} changed on disk and was reloaded.` : `${names.length} open files changed on disk and were reloaded.`;

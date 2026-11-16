@@ -63,7 +63,8 @@ export function refMenu(label: RefLabel, ctx: RefMenuCtx): RefMenu | null {
   const current = label.kind === "head";
   const heading = `${kind === "branch" ? "Branch" : kind === "remote" ? "Remote branch" : "Tag"} ${label.name}`;
   const target = { ref: label.full, label: label.name, named: true };
-  const entries: RefMenuEntry[] = startEntries(target, ctx.repo, ctx.busy, current ? "branch" : null).map((e) => ({ id: e.kind, label: e.label, disabled: e.disabled, title: e.hint }));
+  // The branch you are on has no merge / rebase entries ("Merge main into main…" means nothing).
+  const entries: RefMenuEntry[] = current ? [] : startEntries(target, ctx.repo, ctx.busy).map((e) => ({ id: e.kind, label: e.label, disabled: e.disabled, title: e.hint }));
   if (ctx.remotes) return { heading, kind, name: label.name, full: label.full, current, entries: withHousekeeping(kind, label.name, current, entries, ctx) };
   return { heading, kind, name: label.name, full: label.full, current, entries };
 }
@@ -88,7 +89,7 @@ export const REF_COMMANDS: Record<string, string> = {
  */
 function withHousekeeping(kind: RefMenu["kind"], name: string, current: boolean, start: RefMenuEntry[], ctx: RefMenuCtx): RefMenuEntry[] {
   const remotes = ctx.remotes ?? [];
-  const blocked = !ctx.repo ? "The open folder is not in a git repository" : ctx.busy ? "Another git action is running" : null;
+  const blocked = !ctx.repo ? "Reading this repository's status…" : ctx.busy ? "Another git action is running" : null;
   const entry = (id: string, label: string, title: string, disabled: string | null = null, danger = false): RefMenuEntry => ({ id, label, title, disabled: blocked ?? disabled, ...(danger ? { danger } : {}) });
   const out: RefMenuEntry[] = [];
   if (!current && kind !== "tag") out.push(entry("switch", `Switch to ${name}`, kind === "remote" ? "Check out a local branch that tracks it" : "Check out this branch"));

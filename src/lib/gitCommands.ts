@@ -239,7 +239,17 @@ export function registerGitCommands() {
   register({ id: "git.showStashes", title: "Show Stashes", category: "Git", enabled: hasRepo, run: showStashes });
 
   // ---- compare commits (specs/git-compare-commits.md): read-only, so never blocked by an operation ----
-  register({ id: "git.compareWithBranch", title: "Compare with Branch…", category: "Git", enabled: hasRepo, run: () => void pickBranch("compare") });
+  // With a graph tab in front, its repository (and its current commit), not Source Control's.
+  register({
+    id: "git.compareWithBranch",
+    title: "Compare with Branch…",
+    category: "Git",
+    enabled: hasRepo,
+    run: () => {
+      const d = activeDoc(useStore.getState());
+      void pickBranch("compare", d?.kind === "graph" && d.graph ? { root: d.graph.root, sha: "HEAD" } : null);
+    },
+  });
   // What a picked row of the branch list runs: the branch name.
   register({ id: "git.compareBranchPick", title: "Compare with Branch", category: "Git", hidden: true, run: (name) => { if (typeof name !== "string" || !name.trim()) return false; void compareWithBranch(name.trim()); } });
 

@@ -165,6 +165,7 @@ Scenario: STAGE-002.6 A staged rename with edits
   When I unstage one of the 2 changes in the staged comparison
   Then the rename stays staged with the other change
   And the unstaged change shows under Changes for "new.ts"
+  And the staged comparison's left side is labelled "old.ts (HEAD)", the file's name before the rename
 ```
 
 ## STAGE-003: Discard one change, after asking
@@ -340,6 +341,7 @@ Scenario: STAGE-005.1 Stage with an unsaved tab saves it first
   Then the tab of "app.ts" is saved without a question
   And the first change, as shown in the comparison, is staged
   And the tab no longer shows the unsaved-changes dot
+  And the comparison's right side reads "app.ts" again at once (it follows every save of the tab, without a click)
 
 Scenario: STAGE-005.2 The save fails or is cancelled
   Given "app.ts" has unsaved edits and was also changed on disk by another program
@@ -432,6 +434,7 @@ Scenario: STAGE-006.8 A file git treats as binary
   Given "wide.txt" is saved as UTF-16, which git treats as a binary file
   When I click "Stage Change" or "Unstage Change" in its comparison
   Then nothing is staged or unstaged and a message says only the whole file can be staged, unstaged or discarded
+  And its comparison shows no change bars and no selected-lines buttons in the first place (they could only refuse); the whole file is staged from the Source Control list
 ```
 
 ## STAGE-007: Where partial staging is offered

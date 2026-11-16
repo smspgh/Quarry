@@ -151,7 +151,7 @@ Scenario: MERGE-002.4 The label of the branch I am on
   Given I am on "main"
   When I right-click the label "main"
   Then a menu headed "Branch main" opens
-  And its merge and rebase entries are greyed out with the tooltip "This is the branch you are on"
+  And it has no merge or rebase entries (no "Merge main into main…")
 
 Scenario: MERGE-002.5 Labels without a label menu
   Given HEAD is detached on a commit that shows the label "HEAD"

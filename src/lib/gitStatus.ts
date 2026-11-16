@@ -180,6 +180,16 @@ export function operationDone(operation: string, how: "continue" | "skip" | "abo
   return `${how === "skip" ? `Skipped that ${w.item}` : "Continued"}: ${w.noun} is on its next ${w.item}.`;
 }
 
+/** Ends the operation name Rust's Continue / Skip returns when it stopped again on a conflict (git.rs `STOPPED_AGAIN`). */
+export const STOPPED_AGAIN = ":conflicts";
+
+/** The notification after a Continue / Skip that went on and stopped on a conflict in the next step (CONFLICT-012.3). */
+export function operationStoppedAgain(operation: string, how: "continue" | "skip"): string {
+  const w = operationWords(operation);
+  const next = w.continueLabel ? `, then ${w.continueLabel}` : "";
+  return `${how === "skip" ? `Skipped that ${w.item}` : "Continued"}: the next ${w.item} has conflicts too. Resolve them${next}.`;
+}
+
 /** Kind (colour / letter) of a file in a commit, from git's status letter there. */
 export function commitFileKind(status: string): GitKind {
   if (status === "?") return "untracked"; // an untracked file held by a stash

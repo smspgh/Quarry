@@ -17,7 +17,7 @@ import { makeRoom, markUsed } from "./tabLimit";
 import { popClosed, pushClosed, type ClosedTab } from "./closedTabs";
 import { appData, big, fs, sys } from "./ipc";
 import { activeDoc, newDocId, PANELS, useStore, type Doc, type SidebarPanel } from "./store";
-import type { BigDocInfo, FileStat, Settings } from "./types";
+import type { BigDocInfo, FileStat, Settings, TextFile } from "./types";
 import { DEFAULT_SETTINGS } from "./types";
 import { choose } from "./dialogs";
 
@@ -637,14 +637,42 @@ export async function revertDocument(docId?: string, opts: { confirm?: boolean; 
   }
   try {
     const file = await fs.readText(doc.path, opts.encoding);
-    editor.replaceAll(doc.id, file.content);
-    store.updateDoc(doc.id, { dirty: false, modifiedMs: file.modifiedMs, encoding: file.encoding, bom: file.hasBom, eol: file.eol, size: file.size, decodeErrors: file.hadDecodeErrors || undefined });
-    takeSnapshot(doc.id);
+    applyDiskFile(doc.id, file);
     if (opts.encoding) store.toast(file.hadDecodeErrors ? `${doc.name} has bytes that are not valid ${file.encoding} (shown as \uFFFD).` : `Reopened ${doc.name} as ${file.encoding}`, file.hadDecodeErrors ? "warning" : "info", 4000);
     else if (!opts.silent) store.toast(`Reverted ${doc.name} to the version on disk`, "info", 2500);
     return true;
   } catch (e) {
     store.toast(`Could not revert ${doc.name}:
+${String(e)}`, "error");
+    return false;
+  }
+}
+
+/** A text tab takes the file just read from disk: its text, encoding and line ends; it is clean after. */
+function applyDiskFile(docId: string, file: TextFile) {
+  editor.replaceAll(docId, file.content);
+  useStore.getState().updateDoc(docId, { dirty: false, modifiedMs: file.modifiedMs, encoding: file.encoding, bom: file.hasBom, eol: file.eol, size: file.size, decodeErrors: file.hadDecodeErrors || undefined });
+  takeSnapshot(docId);
+}
+
+/**
+ * Reload a text tab whose file changed on disk. A file whose text, encoding and line ends are
+ * what the tab already shows (rewritten by git with the same bytes, saved by Quarry itself) is not
+ * reloaded and not reported: only its time is taken over. True: reloaded; "same": nothing to do.
+ */
+async function reloadText(docId: string, path: string): Promise<boolean | "same"> {
+  try {
+    const file = await fs.readText(path);
+    const doc = useStore.getState().docs.find((d) => d.id === docId);
+    if (!doc) return false;
+    if (file.content === editor.textOf(docId) && file.encoding === doc.encoding && file.eol === doc.eol && file.hasBom === doc.bom) {
+      useStore.getState().updateDoc(docId, { dirty: false, modifiedMs: file.modifiedMs, size: file.size });
+      return "same";
+    }
+    applyDiskFile(docId, file);
+    return true;
+  } catch (e) {
+    useStore.getState().toast(`Could not reload ${path.split(/[\\/]/).pop()}:
 ${String(e)}`, "error");
     return false;
   }
@@ -787,8 +815,8 @@ async function doCheck(opts: CheckOptions): Promise<CheckResult> {
     const cur = useStore.getState().docs.find((d) => d.id === doc.id);
     if (!cur || saving.has(doc.id)) continue;
     const reloadFromDisk = async () => {
-      const ok = await (doc.kind === "big" ? reloadBig(doc.id) : revertDocument(doc.id, { confirm: false, silent: true }));
-      if (ok) reloadedDocs.add(doc.id);
+      const ok = await (doc.kind === "big" ? reloadBig(doc.id) : reloadText(doc.id, doc.path!));
+      if (ok === true) reloadedDocs.add(doc.id);
       return ok;
     };
     // The file is back (a branch switch, a tool rewriting it). Going missing marked the tab
@@ -797,7 +825,8 @@ async function doCheck(opts: CheckOptions): Promise<CheckResult> {
     missingWarned.delete(doc.id);
     if (backUnedited) {
       if (cur.modifiedMs && stat.modifiedMs > cur.modifiedMs) {
-        await reloadFromDisk();
+        const ok = await reloadFromDisk();
+        if (ok !== true) continue; // the same text came back (it is clean again), or the reload failed
         if (opts.quiet) note("reloaded", doc.path!, doc.name);
         else store.toast(`${doc.name} is back on disk and was reloaded.`, "info", 4000);
       } else store.updateDoc(doc.id, { dirty: false });
@@ -806,7 +835,7 @@ async function doCheck(opts: CheckOptions): Promise<CheckResult> {
     if (!cur.modifiedMs || stat.modifiedMs <= cur.modifiedMs) continue;
     const ahead = answered.get(normalizePath(doc.path!));
     if (!cur.dirty || ahead === "lose") {
-      if (await reloadFromDisk()) note("reloaded", doc.path!, doc.name);
+      if ((await reloadFromDisk()) === true) note("reloaded", doc.path!, doc.name);
     } else if (ahead === "keep") {
       store.updateDoc(doc.id, { modifiedMs: stat.modifiedMs }); // keep mine, answered before the operation ran
       note("kept", doc.path!, doc.name);
@@ -819,7 +848,7 @@ async function doCheck(opts: CheckOptions): Promise<CheckResult> {
         "Keep my version",
       );
       if (reload) {
-        if (await reloadFromDisk()) store.toast(`Reverted ${doc.name} to the version on disk`, "info", 2500);
+        if ((await reloadFromDisk()) !== false) store.toast(`Reverted ${doc.name} to the version on disk`, "info", 2500);
       } else store.updateDoc(doc.id, { modifiedMs: stat.modifiedMs }); // keep mine: stop re-asking
     }
   }
@@ -842,7 +871,6 @@ async function checkCompareTabs(only: string | undefined, reloadedDocs: Set<stri
     if (only && id !== only) continue;
     let reload = false;
     let blocked = false;
-    const changed: { path: string; name: string }[] = [];
     for (const which of ["left", "right"] as const) {
       const side = s[which];
       if (side.source.kind === "tab") {
@@ -859,14 +887,12 @@ async function checkCompareTabs(only: string | undefined, reloadedDocs: Set<stri
       if (!side.dirty) {
         if (newer) {
           reload = true;
-          changed.push({ path: side.path, name });
         }
         continue;
       }
       const ahead = answered.get(normalizePath(side.path));
       if (ahead === "lose" && newer) {
         reload = true;
-        changed.push({ path: side.path, name });
       } else {
         blocked = true;
         if (ahead === "keep" && newer && stat) {
@@ -877,8 +903,8 @@ async function checkCompareTabs(only: string | undefined, reloadedDocs: Set<stri
       }
     }
     if (!reload || blocked) continue;
-    const ok = s.git ? await (await import("./gitStaging")).reloadChange(id) : await refreshDiff(id);
-    if (ok) for (const c of changed) note("reloaded", c.path, c.name);
+    // A comparison just follows its file: no notice (its text tab, if open, has its own).
+    await (s.git ? (await import("./gitStaging")).reloadChange(id) : refreshDiff(id));
   }
 }
 

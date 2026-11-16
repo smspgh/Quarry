@@ -163,15 +163,11 @@ describe("GraphView: merge and rebase", () => {
     expect(calls.find((c) => c.cmd === "git_merge_preview")?.args).toEqual({ root: ROOT, target: "refs/tags/v1.2.0" });
   });
 
-  it("the label of the branch you are on has a menu with both entries greyed out", async () => {
+  it("the label of the branch you are on has a menu without merge or rebase entries", async () => {
     await show();
     await fire.contextMenu(badge(rows()[0], "main"));
     expect(head()).toBe("Branch main");
-    expect(starts()).toHaveLength(2);
-    for (const b of starts()) {
-      expect(b.disabled).toBe(true);
-      expect(b.title).toBe("This is the branch you are on");
-    }
+    expect(starts()).toHaveLength(0);
   });
 
   it("the label menu has the commit menu's disabled states", async () => {

@@ -73,6 +73,7 @@ Scenario: MACRO-001.6 No recording during playback
   - `src/editor/manager.ts` — `hooks.onKeydown` (highest-precedence keydown handler), `hooks.onInput` (input handler)
   - `src/lib/commands.ts` — `runCommand` and `handleKeyEvent` call `recordCommand`
   - `src/lib/types.ts` — `MacroStep`
+  - `src/lib/git.ts` — `pickBranch` calls `markPickerStep`; `src/components/CommandPalette.tsx` calls `dropPickerStep` before a picked row's command
 - Tests: `src/__tests__/scripts.test.ts`
 - Docs: `docs/macros.md`
 
@@ -117,6 +118,13 @@ Scenario: MACRO-002.7 Script runs are refused and never recorded
   When I press Ctrl+Shift+Enter
   Then the script does not run and a warning says scripts can't run while a macro is recording
   And no step is recorded
+
+Scenario: MACRO-002.8 A picker records only what was picked
+  Given recording is on
+  When I run Merge Branch… and pick "feature" in the branch picker
+  Then the macro holds one step, the merge of "feature", not the command that opened the picker
+  And when the picker was opened by a button (no command), the steps before it are kept
+  And "Recorded 1 step" is said for a single step, not "1 steps"
 ```
 
 ## MACRO-003: Record more steps into an existing macro

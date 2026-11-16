@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canGroupUndo, isUnrecordable, scriptBlockedByMacro, shouldStopToEnd } from "../lib/macros";
+import { canGroupUndo, dropPickerStep, isUnrecordable, markPickerStep, recordCommand, scriptBlockedByMacro, shouldStopToEnd, startRecording, stopRecording } from "../lib/macros";
 import { describeWhen, formatScriptError, isScriptPath, newScriptFileName, scriptApplies, scriptNameOf } from "../lib/scripting";
 
 describe("macro play-to-end", () => {
@@ -15,6 +15,26 @@ describe("macro play-to-end", () => {
     expect(canGroupUndo([cmd("edit.upper"), cmd("edit.indent")])).toBe(true);
     expect(canGroupUndo([cmd("edit.upper"), cmd("edit.undo")])).toBe(false);
     expect(canGroupUndo([])).toBe(true);
+  });
+});
+
+describe("macro steps around a picker", () => {
+  it("keeps only the picked command, not the command that opened the picker", () => {
+    startRecording();
+    recordCommand("git.mergeBranch");
+    markPickerStep(); // pickBranch, while git.mergeBranch runs
+    dropPickerStep(); // a row is picked
+    recordCommand("git.mergeRef", "feature");
+    expect(stopRecording()).toEqual([{ type: "command", id: "git.mergeRef", args: "feature" }]);
+  });
+  it("never drops an earlier step when a button (no command) opened the picker", async () => {
+    startRecording();
+    recordCommand("edit.upper");
+    await Promise.resolve();
+    markPickerStep();
+    dropPickerStep();
+    recordCommand("git.checkoutTo", "main");
+    expect(stopRecording().map((s) => (s as { id: string }).id)).toEqual(["edit.upper", "git.checkoutTo"]);
   });
 });
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { commitLabel, displayUrl, gitErrorText, hasConflictMarkers, isMissingRepo, operationDone, operationWords, remoteWebUrl, repoNameFor, syncLine } from "../lib/gitStatus";
+import { commitLabel, displayUrl, gitErrorText, hasConflictMarkers, isMissingRepo, operationDone, operationStoppedAgain, operationWords, remoteWebUrl, repoNameFor, syncLine } from "../lib/gitStatus";
 
 describe("remote URLs", () => {
   it("finds the web page of https and ssh remotes", () => {
@@ -122,6 +122,11 @@ describe("operation wording", () => {
     expect(operationDone("rebase", "skip", true)).toBe("Skipped that commit: the rebase is on its next commit.");
     expect(operationDone("rebase", "continue")).toBe("The rebase is finished.");
     expect(operationDone("cherry-pick", "abort")).toBe("Aborted the cherry-pick.");
+  });
+
+  it("says when Skip or Continue stopped again on the next conflict", () => {
+    expect(operationStoppedAgain("rebase", "skip")).toBe("Skipped that commit: the next commit has conflicts too. Resolve them, then Continue Rebase.");
+    expect(operationStoppedAgain("am", "continue")).toBe("Continued: the next patch has conflicts too. Resolve them, then Continue Applying Patches.");
   });
 
   it("keeps the other operations' labels", () => {

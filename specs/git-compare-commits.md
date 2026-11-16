@@ -408,6 +408,7 @@ Scenario: COMMITCMP-005.1 Compare with Branch… from the Git menu
   And the comparison pane is headed "a1b2c3d main ↔ 18bc71d feature"
   And the counts line says "18bc71d is 4 commits ahead of a1b2c3d"
   And the files that differ are listed and open as in any comparison of two commits
+  And with a graph tab of another repository in front, the picker lists that repository's branches and the comparison is made there (not in Source Control's repository)
 
 Scenario: COMMITCMP-005.2 My uncommitted changes are not part of it
   Given I have 2 uncommitted changes on "feature"

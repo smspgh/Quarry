@@ -963,7 +963,8 @@ fn remote_op(root: &Path, op: &str) -> Result<String, String> {
         "check" => {
             quiet = true;
             let mut v = quiet_options(root);
-            v.extend(["fetch".into(), "--prune".into(), "--quiet".into()]);
+            // --no-tags: a tag deleted here must not come back on its own (a Fetch the user asks for may bring it).
+            v.extend(["fetch".into(), "--prune".into(), "--no-tags".into(), "--quiet".into()]);
             v
         }
         "pull" => vec!["pull".into()],
@@ -1478,12 +1479,18 @@ fn continue_operation(root: &Path, how: &str) -> Result<String, String> {
         "skip" => return Err("A merge has nothing to skip. Abort it instead.".into()),
         _ => return Err(format!("unknown step {how}")),
     };
+    // With files still in conflict, git refuses a Continue: that stays an error.
+    let unmerged_before = has_unmerged(root);
     let mut cmd = git(root, false);
     // Each commit keeps its own message: never wait on an editor.
     cmd.env("GIT_EDITOR", "true").args([op.as_str(), flag]);
     let out = exec(cmd, None)?;
     if out.ok {
         return Ok(op);
+    }
+    // It went on and stopped on a conflict in the next commit: not a failure (CONFLICT-012.3).
+    if (how == "skip" || !unmerged_before) && operation(root).is_some() && has_unmerged(root) {
+        return Ok(format!("{op}{STOPPED_AGAIN}"));
     }
     let text = combined(&out);
     // A history edit's new message could not be set (signing failed, …): say so plainly. The step
@@ -1498,6 +1505,9 @@ fn continue_operation(root: &Path, how: &str) -> Result<String, String> {
     }
     Err(text)
 }
+
+/// Ends the operation name `continue_operation` returns when it stopped again on a conflict.
+pub(crate) const STOPPED_AGAIN: &str = ":conflicts";
 
 /// Abandon the merge / rebase / cherry-pick / revert in progress: back to how things were before it.
 fn abort_operation(root: &Path) -> Result<String, String> {
@@ -3478,6 +3488,13 @@ mod tests {
         remote_op(&root, "check").unwrap();
         let st = status(&root).unwrap().unwrap();
         assert_eq!((st.ahead, st.behind, st.upstream_gone), (0, 1, false));
+        // A tag deleted here does not come back with the background check.
+        git_ok(other.path(), &["tag", "v9"]);
+        git_ok(other.path(), &["push", "-q", "origin", "v9"]);
+        git_ok(&root, &["fetch", "-q", "--tags"]);
+        git_ok(&root, &["tag", "-d", "v9"]);
+        remote_op(&root, "check").unwrap();
+        assert_eq!(run_text(&root, true, &["tag", "-l", "v9"]).unwrap().trim(), "");
 
         // A local commit too: diverged; pull with rebase joins them.
         write(&root, "b.txt", "mine\n");

@@ -113,14 +113,29 @@ export function HistoryEditList({ root, range, visible }: { root: string; range:
       // Dropping below itself: the row leaves its place first.
       return Math.max(0, Math.min(els.length - 1, i > from ? i - 1 : i));
     };
-    const onMove = (ev: PointerEvent) => {
+    // Near an edge the list keeps scrolling while the pointer rests there (every 40 ms), not only
+    // while it moves; the landing line follows.
+    let lastY = e.clientY;
+    const edgeStep = () => {
       const r = list.getBoundingClientRect();
-      if (ev.clientY < r.top + 24) list.scrollTop -= 12;
-      else if (ev.clientY > r.bottom - 24) list.scrollTop += 12;
+      return lastY < r.top + 24 ? -12 : lastY > r.bottom - 24 ? 12 : 0;
+    };
+    const tick = window.setInterval(() => {
+      const step = edgeStep();
+      if (!step) return;
+      const before = list.scrollTop;
+      list.scrollTop += step;
+      if (list.scrollTop === before) return;
+      to = at(lastY);
+      setDrag({ from, to });
+    }, 40);
+    const onMove = (ev: PointerEvent) => {
+      lastY = ev.clientY;
       to = at(ev.clientY);
       setDrag({ from, to });
     };
     const onUp = () => {
+      window.clearInterval(tick);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       setDrag(null);
@@ -191,6 +206,11 @@ export function HistoryEditList({ root, range, visible }: { root: string; range:
                   rows={Math.min(8, Math.max(2, boxMessage(rows, i).split("\n").length))}
                   value={boxMessage(rows, i)}
                   autoFocus={!group}
+                  // The caret goes after the message (a click still puts it where it lands).
+                  onFocus={(e) => {
+                    const n = e.currentTarget.value.length;
+                    e.currentTarget.setSelectionRange(n, n);
+                  }}
                   onChange={(e) => setRows(setMessage(rowsRef.current, i, e.target.value))}
                   onBlur={() => !group && setEditing((cur) => (cur === c.sha ? null : cur))}
                   onKeyDown={(e) => {

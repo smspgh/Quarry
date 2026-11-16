@@ -25,7 +25,7 @@ Decisions (made where the roadmap left the choice open):
 - **The list lives in the graph tab** (it replaces every row of the graph, the uncommitted-changes row of GRAPH-015 and stash rows included, until Run or Cancel); it is not a dialog and not a new tab kind, and it is not kept in the session. At most 100 commits.
 - **The list's keys are its own.** P, R, S, F, D, Up, Down, Alt+Up, Alt+Down, Ctrl+Enter and Escape act on the list only while the list itself has the keyboard focus; they are not commands and not global shortcuts. With the focus in a message box of the list they are text or do what that box says; with the focus anywhere else (another tab, a panel, the palette) they keep their usual meaning, so Alt+Up / Alt+Down still move a line in an editor (`edit.moveLineUp` / `edit.moveLineDown`).
 - **Only what changed is rewritten.** Rows below the lowest changed row keep their ids; the confirmation says so.
-- **How it runs (decided while building).** A plan is `git rebase -i` with a todo Quarry wrote: `GIT_SEQUENCE_EDITOR` is `cp '<temporary file>'` (git runs it through its own sh; checked on Windows with spaces, parentheses, an apostrophe and backslashes in the path), `GIT_EDITOR=true`, and the user's `rebase.autoStash` / `rebaseMerges` / `updateRefs` / `autoSquash` / `missingCommitsCheck` are switched off for the run. A dropped commit is simply left out of the todo. A new message is an `exec` line after the commit (and after everything folded into it) that pipes the text into `git commit --amend -F -`; it is part of the rebase's own state, so it survives a conflict stop, Continue, and a restart of Quarry, and nothing of Quarry's is left behind. Squash is therefore `fixup` plus that line. The badge "Rebasing 2 of 4" counts commits, not these lines. Commit hooks (`pre-commit`, `commit-msg`) are not run for a reworded message (`--no-verify`): the changes were committed before, and a failing hook would stop the rebase half-way with no button for it. A commit that becomes empty is kept (`--empty=keep`). Dropping the tip commit alone replays nothing: the branch is moved back to its parent. At most 1000 commits are replayed by one edit.
+- **How it runs (decided while building).** A plan is `git rebase -i` with a todo Quarry wrote: `GIT_SEQUENCE_EDITOR` is `cp '<temporary file>'` (git runs it through its own sh; checked on Windows with spaces, parentheses, an apostrophe and backslashes in the path), `GIT_EDITOR=true`, and the user's `rebase.autoStash` / `rebaseMerges` / `updateRefs` / `autoSquash` / `missingCommitsCheck` are switched off for the run. A dropped commit is simply left out of the todo. A new message is an `exec` line after the commit (and after everything folded into it) that pipes the text into `git commit --amend -F -`; it is part of the rebase's own state, so it survives a conflict stop, Continue, and a restart of Quarry, and nothing of Quarry's is left behind. Squash is therefore `fixup` plus that line. The badge "Rebasing 2 of 4" counts commits, not these lines. A new message goes through the repository's `commit-msg` hook, as in git's own reword (owner's goal: work with the user's setup, e.g. a Gerrit Change-Id or a commitlint hook): the message is written to `.git/quarry-message`, `git hook run --ignore-missing commit-msg` sees and may change it, then `git commit --amend --no-verify -F` uses it; `pre-commit` is not run (the files do not change, and git's reword skips it too). A hook that refuses stops the step like any other failure (the edit is undone, the hook's words are shown). Git older than 2.36 has no `git hook run`: messages are then amended without hooks. A commit that becomes empty is kept (`--empty=keep`). Dropping the tip commit alone replays nothing: the branch is moved back to its parent. At most 1000 commits are replayed by one edit.
 - **Conflicts** use the existing stopped-rebase flow unchanged (badge "Rebasing 2 of 4", Continue Rebase, Skip, Abort; CONFLICT-011 to CONFLICT-013). Source Control is shown when the edit stops, as for a merge or rebase started in Quarry (MERGE-007).
 
 ## HISTORY-001: Edit-history entries in a commit's right-click menu
@@ -149,6 +149,7 @@ Scenario: HISTORY-002.3 The message comes back
   When I undo the commit "Add tab limit tests"
   Then the message box contains "Add tab limit tests"
   But a message I had already typed in the box is left as it is
+  And the message belongs to this repository: after another folder (another repository) is opened its box is empty, and coming back finds the message again
 
 Scenario: HISTORY-002.4 Uncommitted changes are kept
   Given I have 1 staged file and 2 unstaged changes
@@ -246,7 +247,7 @@ Scenario: HISTORY-003.8 No editor ever opens
   Given git's configured editor is a program that would wait for input
   When I reword any commit
   Then it finishes without that program being started
-  And the repository's pre-commit and commit-msg hooks are not run for the new message
+  And the repository's commit-msg hook sees the new message (and may add to it, or refuse it), while its pre-commit hook is not run
 
 Scenario: HISTORY-003.9 Cancel
   When I cancel the "Reword this commit?" dialog
@@ -294,7 +295,7 @@ Scenario: HISTORY-004.2 Drop a commit in the middle
 Scenario: HISTORY-004.3 Drop the last commit
   When I drop the tip commit e5f6a7b and confirm
   Then "main" points at d4e5f6a and the files match it
-  And the dialog had said that no other commit changes
+  And the dialog had said that no other commit changes, and said nothing about conflicts (nothing is replayed)
 
 Scenario: HISTORY-004.4 Later commits depend on it
   Given e5f6a7b changes the same lines as d4e5f6a

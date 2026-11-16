@@ -117,13 +117,41 @@ export function distinctLabels(a: Side, b: Side): [Side, Side] {
   return [{ ...a, label: `${pa}\\${a.label}` }, { ...b, label: `${pb}\\${b.label}` }];
 }
 
+/** The label of a side that shows an open tab: its name, with "(unsaved)" while it has unsaved changes. Pure. */
+export function tabLabel(name: string, dirty: boolean): string {
+  return dirty ? `${name} (unsaved)` : name;
+}
+
+/** A tab was saved or edited: the Compare tabs showing it relabel that side, and their title follows. */
+export function relabelTabSides(docId: string, name: string, dirty: boolean) {
+  const want = tabLabel(name, dirty);
+  for (const [id, s] of Object.entries(useDiff.getState().sessions)) {
+    const fix = (side: Side): Side => (side.source.kind === "tab" && side.source.docId === docId && side.label !== want ? { ...side, label: want } : side);
+    const left = fix(s.left);
+    const right = fix(s.right);
+    if (left === s.left && right === s.right) continue;
+    patchDiff(id, () => ({ left, right }));
+    useStore.getState().updateDoc(id, { name: compareTitle(left, right) });
+  }
+}
+
+// Follow the unsaved state of the tabs Compare tabs show (a save drops "(unsaved)" at once).
+useStore.subscribe((st, prev) => {
+  if (st.docs === prev.docs || !Object.keys(useDiff.getState().sessions).length) return;
+  const before = new Map(prev.docs.map((d) => [d.id, d]));
+  for (const d of st.docs) {
+    const was = before.get(d.id);
+    if (d.kind === "text" && was && (was.dirty !== d.dirty || was.name !== d.name)) relabelTabSides(d.id, d.name, d.dirty);
+  }
+});
+
 async function load(src: Source): Promise<Side> {
   if (src.kind === "text") return { label: src.label, path: null, text: src.text.replace(/\r\n?/g, "\n"), editable: false, encoding: "UTF-8", bom: false, eol: "LF", dirty: false, source: src };
   if (src.kind === "tab") {
     const { editor } = await import("../editor/manager");
     const doc = useStore.getState().docs.find((d) => d.id === src.docId);
     if (!doc || doc.kind !== "text") throw new Error("only text tabs can be compared");
-    return { label: doc.dirty ? `${doc.name} (unsaved)` : doc.name, path: doc.path, text: editor.textOf(doc.id), editable: false, encoding: doc.encoding, bom: doc.bom, eol: doc.eol, dirty: false, source: src };
+    return { label: tabLabel(doc.name, doc.dirty), path: doc.path, text: editor.textOf(doc.id), editable: false, encoding: doc.encoding, bom: doc.bom, eol: doc.eol, dirty: false, source: src };
   }
   const st = await fs.stat(src.path);
   if (st.isDir) throw new Error(`${src.path} is a folder`);

@@ -58,6 +58,9 @@ Scenario: GRAPH-001.5 The graph follows the repository
   Then the graph is loaded again from the first page
   And clicking "Reload the graph" does the same on demand
   And "Fetch from all remotes" fetches and then reloads
+  But switching to another tab and back, with nothing changed in the repository, keeps the pages loaded and the place in the list
+  And the heading counts commits only: stash rows are not counted
+  And a graph tab keeps its repository known (also after another folder is opened), so its label menus work
 
 Scenario: GRAPH-001.6 Not restored after a restart
   Given a graph tab is open

@@ -550,7 +550,7 @@ function toggleRecording() {
     const macro: Macro = { id: `m-${Date.now().toString(36)}`, name: `Macro ${s.macros.length + 1}`, steps, createdAt: Date.now(), unsaved: true };
     setLastMacro(macro);
     stageMacros([macro, ...s.macros]);
-    s.toast(`Recorded ${steps.length} steps as "${macro.name}". Save it in the Macros panel to keep it.`, "success", 4000);
+    s.toast(`Recorded ${steps.length} ${steps.length === 1 ? "step" : "steps"} as "${macro.name}". Save it in the Macros panel to keep it.`, "success", 4000);
     s.set({ sidebarVisible: true, sidebarPanel: "macros", activeMacroId: macro.id });
   } else {
     if (!activeDoc(s) || activeDoc(s)!.kind !== "text") {

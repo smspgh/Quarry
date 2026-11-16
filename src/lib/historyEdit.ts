@@ -448,7 +448,8 @@ export function historyConfirm(kind: HistoryKind, info: HistoryInfo): HistoryDia
     ok = `Rewrite ${lines.length} Commit${lines.length === 1 ? "" : "s"}`;
   }
   const tail = [kind === "undo" ? "" : back, kind === "undo" || kind === "drop" && !renewed.length ? "" : untouched].filter(Boolean).join("\n");
-  const stop = kind === "undo" || (kind === "reword" && lines.length <= 1) ? "" : "\n\nIf a commit conflicts while it is replayed, the rewrite stops and Source Control shows the files to resolve; Abort there brings everything back.";
+  // Dropping the tip replays nothing, so nothing can conflict.
+  const stop = kind === "undo" || (kind === "reword" && lines.length <= 1) || (kind === "drop" && !renewed.length) ? "" : "\n\nIf a commit conflicts while it is replayed, the rewrite stops and Source Control shows the files to resolve; Abort there brings everything back.";
   if (pushed.length) {
     const where = info.pushedOn ?? "a remote branch";
     const total = kind === "undo" ? 1 : lines.length;

@@ -1881,7 +1881,7 @@
       "title": "Push a tag",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 730,
+      "line": 731,
       "status": "draft",
       "commands": [
         "git.pushTag"
@@ -3333,7 +3333,7 @@
       "title": "Comparing never changes the repository",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 476,
+      "line": 477,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3933,7 +3933,7 @@
       "title": "Carry on with a rebase",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 603,
+      "line": 604,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3982,7 +3982,7 @@
       "title": "Carry on with a patch series (git am)",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 662,
+      "line": 663,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9275,7 +9275,7 @@
       "title": "Fetch, pull, push and publish a branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 826,
+      "line": 827,
       "status": "draft",
       "commands": [
         "git.fetch",
@@ -9337,7 +9337,7 @@
       "title": "Recover when the remote repository is gone",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 895,
+      "line": 897,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9381,7 +9381,7 @@
       "title": "Commits of the current branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 940,
+      "line": 942,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9446,7 +9446,7 @@
       "title": "File history",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1016,
+      "line": 1018,
       "status": "draft",
       "commands": [
         "git.fileHistory"
@@ -9500,7 +9500,7 @@
       "title": "Commit identity (name and email)",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1071,
+      "line": 1073,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9547,7 +9547,7 @@
       "title": "Add a remote by URL",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1122,
+      "line": 1124,
       "status": "draft",
       "commands": [
         "git.addRemote"
@@ -9596,7 +9596,7 @@
       "title": "See, open and change remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1174,
+      "line": 1176,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9648,7 +9648,7 @@
       "title": "Create a repository on GitHub and push to it",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1233,
+      "line": 1235,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9705,7 +9705,7 @@
       "title": "GitHub accounts",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1300,
+      "line": 1302,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9752,7 +9752,7 @@
       "title": "Private / Public badge on GitHub remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1352,
+      "line": 1354,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9794,7 +9794,7 @@
       "title": "Work with more than one repository",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1396,
+      "line": 1398,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9850,7 +9850,7 @@
       "title": "Branch in the status bar",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1515,
+      "line": 1517,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9896,7 +9896,7 @@
       "title": "Git decorations in the Explorer",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1566,
+      "line": 1568,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9940,7 +9940,7 @@
       "title": "Set a folder as the Source Control context",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1465,
+      "line": 1467,
       "status": "draft",
       "commands": [
         "git.setContext"
@@ -10712,7 +10712,7 @@
       "title": "Read branches and merges as lanes with labels",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 68,
+      "line": 71,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10769,7 +10769,7 @@
       "title": "Long branch lines are cut short",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 141,
+      "line": 144,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10810,7 +10810,7 @@
       "title": "Show the current branch or all branches",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 186,
+      "line": 189,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10843,7 +10843,7 @@
       "title": "Load a long history in pages",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 220,
+      "line": 223,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10902,7 +10902,7 @@
       "title": "Speed up a very large history",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 294,
+      "line": 297,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10948,7 +10948,7 @@
       "title": "Find among the loaded commits",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 345,
+      "line": 348,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10993,7 +10993,7 @@
       "title": "Search the whole history and go to a result",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 398,
+      "line": 401,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11059,7 +11059,7 @@
       "title": "See a commit's details",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 476,
+      "line": 479,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11115,7 +11115,7 @@
       "title": "Open what a commit changed in a file",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 541,
+      "line": 544,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11161,7 +11161,7 @@
       "title": "Copy, switch, branch and tag from a commit's right-click menu",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 590,
+      "line": 593,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11224,7 +11224,7 @@
       "title": "Check out, cherry-pick or revert a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 668,
+      "line": 671,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11279,7 +11279,7 @@
       "title": "Reset the branch to a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 731,
+      "line": 734,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11323,7 +11323,7 @@
       "title": "See a stopped operation above the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 778,
+      "line": 781,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11374,7 +11374,7 @@
       "title": "Uncommitted changes as the first row of the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 850,
+      "line": 853,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11468,7 +11468,7 @@
       "title": "Drag the height of the Search All History results",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 973,
+      "line": 976,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11531,7 +11531,7 @@
       "title": "Scroll sideways through a graph wider than 16 lanes",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1048,
+      "line": 1051,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11591,7 +11591,7 @@
       "title": "List a small history by date",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1126,
+      "line": 1129,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11665,7 +11665,7 @@
       "title": "Show Commit Graph is in the palette without a repository",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1219,
+      "line": 1222,
       "status": "draft",
       "commands": [
         "git.graph"
@@ -11849,7 +11849,7 @@
       "title": "Reword a commit's message",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 178,
+      "line": 179,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11918,7 +11918,7 @@
       "title": "Drop a commit",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 262,
+      "line": 263,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11967,7 +11967,7 @@
       "title": "Squash a commit into its parent",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 315,
+      "line": 316,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12020,7 +12020,7 @@
       "title": "Guards on every history edit",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 371,
+      "line": 372,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12086,7 +12086,7 @@
       "title": "Open the Edit History list",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 452,
+      "line": 453,
       "status": "draft",
       "commands": [
         "git.editHistory"
@@ -12159,7 +12159,7 @@
       "title": "Plan the changes in the list",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 531,
+      "line": 532,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12251,7 +12251,7 @@
       "title": "Run or cancel the Edit History list",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 650,
+      "line": 651,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12325,7 +12325,7 @@
       "title": "A history edit that stops on a conflict",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 737,
+      "line": 738,
       "status": "draft",
       "commands": [],
       "files": [
@@ -12404,7 +12404,7 @@
       "title": "Force Push is offered after a history edit of pushed commits",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 831,
+      "line": 832,
       "status": "draft",
       "commands": [
         "git.forcePush"
@@ -13966,7 +13966,8 @@
         "src/lib/macros.ts",
         "src/editor/manager.ts",
         "src/lib/commands.ts",
-        "src/lib/types.ts"
+        "src/lib/types.ts",
+        "src/lib/git.ts"
       ],
       "tests": [
         "src/__tests__/scripts.test.ts"
@@ -14002,6 +14003,10 @@
         {
           "id": "MACRO-002.7",
           "title": "Script runs are refused and never recorded"
+        },
+        {
+          "id": "MACRO-002.8",
+          "title": "A picker records only what was picked"
         }
       ]
     },
@@ -14010,7 +14015,7 @@
       "title": "Record more steps into an existing macro",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 122,
+      "line": 130,
       "status": "draft",
       "commands": [
         "macro.recordInto"
@@ -14044,7 +14049,7 @@
       "title": "Play a macro once",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 158,
+      "line": 166,
       "status": "draft",
       "commands": [
         "macro.playLast",
@@ -14104,7 +14109,7 @@
       "title": "Play a macro N times",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 232,
+      "line": 240,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14139,7 +14144,7 @@
       "title": "Play a macro until the end of the file",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 266,
+      "line": 274,
       "status": "draft",
       "commands": [
         "macro.playToEnd",
@@ -14184,7 +14189,7 @@
       "title": "Pause and stop playback",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 310,
+      "line": 318,
       "status": "draft",
       "commands": [
         "macro.stop",
@@ -14228,7 +14233,7 @@
       "title": "A whole playback is one undo step",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 360,
+      "line": 368,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14268,7 +14273,7 @@
       "title": "Confirm before a macro plays",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 402,
+      "line": 410,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14314,7 +14319,7 @@
       "title": "Manage macros in the Macros panel and menu",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 453,
+      "line": 461,
       "status": "draft",
       "commands": [
         "macro.panel",
@@ -14378,7 +14383,7 @@
       "title": "Edit a macro's steps",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 527,
+      "line": 535,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14432,7 +14437,7 @@
       "title": "Save a macro to a file",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 591,
+      "line": 599,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14483,7 +14488,7 @@
       "title": "Macros folder: loading, reloading and changing it",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 653,
+      "line": 661,
       "status": "draft",
       "commands": [],
       "files": [
@@ -15620,6 +15625,10 @@
         {
           "id": "SAFE-006.12",
           "title": "Change markers and blame follow"
+        },
+        {
+          "id": "SAFE-006.13",
+          "title": "No notice that repeats what I just did, or that nothing changed"
         }
       ]
     },
@@ -15628,7 +15637,7 @@
       "title": "Tabs whose file is not there after the operation",
       "area": "SAFE",
       "spec": "specs/git-safety.md",
-      "line": 600,
+      "line": 607,
       "status": "draft",
       "commands": [],
       "files": [
@@ -18565,7 +18574,7 @@
       "title": "Discard one change, after asking",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 170,
+      "line": 171,
       "status": "draft",
       "commands": [
         "git.discardChange"
@@ -18626,7 +18635,7 @@
       "title": "Stage, unstage or discard selected lines",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 234,
+      "line": 235,
       "status": "draft",
       "commands": [
         "git.stageLines",
@@ -18700,7 +18709,7 @@
       "title": "Unsaved edits are saved first",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 320,
+      "line": 321,
       "status": "draft",
       "commands": [
         "git.stageChange",
@@ -18751,7 +18760,7 @@
       "title": "Line endings, encoding and the end of the file are preserved",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 375,
+      "line": 377,
       "status": "draft",
       "commands": [],
       "files": [
@@ -18802,7 +18811,7 @@
       "title": "Where partial staging is offered",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 437,
+      "line": 440,
       "status": "draft",
       "commands": [
         "git.stageChange",
@@ -18875,7 +18884,7 @@
       "title": "Partial staging from the menu, the palette and the keyboard",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 514,
+      "line": 517,
       "status": "draft",
       "commands": [
         "git.stageChange",
@@ -18946,7 +18955,7 @@
       "title": "The comparison stays true to the index",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 587,
+      "line": 590,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22485,7 +22494,7 @@
         },
         {
           "id": "UPD-005.2",
-          "title": "The private source repository is never contacted"
+          "title": "No account or token is ever used"
         },
         {
           "id": "UPD-005.3",
@@ -22502,7 +22511,7 @@
       "title": "Build, sign and publish a release",
       "area": "UPD",
       "spec": "specs/updates.md",
-      "line": 251,
+      "line": 252,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22551,6 +22560,14 @@
         {
           "id": "UPD-006.9",
           "title": "A version older than the latest release is refused"
+        },
+        {
+          "id": "UPD-006.10",
+          "title": "Copies of 0.1.10 and earlier still find the release"
+        },
+        {
+          "id": "UPD-006.11",
+          "title": "A private release repository is refused"
         }
       ]
     },
@@ -22559,7 +22576,7 @@
       "title": "Set the version number everywhere",
       "area": "UPD",
       "spec": "specs/updates.md",
-      "line": 318,
+      "line": 330,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22604,7 +22621,7 @@
       "title": "Release in one step",
       "area": "UPD",
       "spec": "specs/updates.md",
-      "line": 368,
+      "line": 380,
       "status": "draft",
       "commands": [],
       "files": [
@@ -24194,6 +24211,7 @@
       "HISTORY-009",
       "HISTORY-010",
       "HISTORY-011",
+      "MACRO-002",
       "MERGE-001",
       "MERGE-002",
       "MERGE-003",

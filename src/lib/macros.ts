@@ -71,6 +71,33 @@ export function recordCommand(id: string, args?: unknown) {
   if (isUnrecordable(id)) return;
   const kept = recordableArgs(args);
   push(kept === undefined ? { type: "command", id } : { type: "command", id, args: kept });
+  // The command runs synchronously up to its first await: a picker it opens then marks this step.
+  freshStep = steps.length - 1;
+  queueMicrotask(() => (freshStep = null));
+}
+
+/** The step of a command that only opened a picker (`markPickerStep`), while that picker is open. */
+let pickerStep: number | null = null;
+/** The step recorded by the command that is running now (until its first await). */
+let freshStep: number | null = null;
+
+/**
+ * Called by a command that opens a picker (the branch picker): its step is the one just recorded.
+ * When a row is picked, `dropPickerStep` removes it, so the macro holds only the command the row
+ * ran, with the picked name: replaying it does not open the picker again.
+ */
+export function markPickerStep() {
+  // Only the step of the command opening the picker: a picker opened by a button records nothing.
+  pickerStep = isRecording() && freshStep !== null && freshStep === steps.length - 1 ? freshStep : null;
+}
+
+/** A picker row is about to run its command: forget the step that opened the picker. */
+export function dropPickerStep() {
+  if (pickerStep !== null && pickerStep === steps.length - 1) {
+    steps.pop();
+    useStore.getState().set({ recordingSteps: steps.length });
+  }
+  pickerStep = null;
 }
 
 /** Why a script can't run right now because of a macro, or null. */
@@ -82,6 +109,7 @@ export function scriptBlockedByMacro(st: { recording: boolean; macroPlaying: boo
 
 export function startRecording(targetId: string | null = null) {
   steps = [];
+  pickerStep = null;
   useStore.getState().set({ recording: true, recordingSteps: 0, recordTargetId: targetId });
 }
 

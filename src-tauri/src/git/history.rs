@@ -199,15 +199,32 @@ fn shell_path(path: &Path) -> String {
     format!("'{}'", path.to_string_lossy().replace('\'', "'\\''"))
 }
 
+/// The amend every message step Quarry writes ends with (`message_step_failed` looks for it).
+const AMEND: &str = "git commit --amend --no-verify --cleanup=whitespace -q -F";
+/// Where a new message waits for the commit-msg hook (in the git folder).
+const MESSAGE_FILE: &str = "quarry-message";
+
+/// Whether this git has `git hook run` (2.36+): then a new message goes through the repository's
+/// commit-msg hook, as in git's own reword (which skips pre-commit too: the files do not change).
+pub(super) fn hooks_runnable(root: &Path) -> bool {
+    run(root, true, &["hook", "run", "--ignore-missing", "quarry-no-such-hook"], None).is_ok()
+}
+
 /// The todo for `steps` (oldest first): `pick` / `fixup` lines, a dropped commit is left out, and
-/// after each group that gets a new message an `exec` that amends it.
-pub(super) fn todo_text(steps: &[HistoryStep]) -> Result<String, String> {
+/// after each group that gets a new message an `exec` that amends it. `hooks`: the message goes
+/// through the commit-msg hook first (`hooks_runnable`); a hook that refuses stops the step.
+pub(super) fn todo_text(steps: &[HistoryStep], hooks: bool) -> Result<String, String> {
     let mut lines: Vec<String> = Vec::new();
     let mut pending: Option<String> = None;
     let mut open = false; // a pick has been written that a fixup can fold into
     let flush = |lines: &mut Vec<String>, pending: &mut Option<String>| {
         if let Some(m) = pending.take() {
-            lines.push(format!("exec printf '%s\\n' {} | git commit --amend --no-verify --cleanup=whitespace -q -F -", shell_words(&m)));
+            let words = shell_words(&m);
+            lines.push(if hooks {
+                format!("exec f=\"$(git rev-parse --git-path {MESSAGE_FILE})\" && printf '%s\\n' {words} >\"$f\" && git hook run --ignore-missing commit-msg -- \"$f\" && {AMEND} \"$f\"")
+            } else {
+                format!("exec printf '%s\\n' {words} | {AMEND} -")
+            });
         }
     };
     for s in steps {
@@ -284,10 +301,34 @@ pub(super) fn history_rewrite(root: &Path, action: &str, expected_tip: &str, bas
             if tip_parents.len() > 1 {
                 return Err("A merge commit can't be edited here.".into());
             }
+            // The commit-msg hook sees (and may change) the message first, as in a plain commit.
+            let file = if hooks_runnable(root) {
+                let path = root.join(run_text(root, true, &["rev-parse", "--git-path", MESSAGE_FILE])?.trim());
+                std::fs::write(&path, format!("{}\n", text.trim_end())).map_err(|e| e.to_string())?;
+                let p = path.to_string_lossy().to_string();
+                if let Err(e) = run(root, false, &["hook", "run", "--ignore-missing", "commit-msg", "--", &p], None) {
+                    let _ = std::fs::remove_file(&path);
+                    return Err(format!("The commit-msg hook refused the message:\n{e}"));
+                }
+                Some(path)
+            } else {
+                None
+            };
             let mut cmd = git(root, false);
             // `--only` with no paths: the commit keeps its own changes, whatever is staged now.
-            cmd.env("GIT_EDITOR", "true").args(["commit", "--amend", "--only", "--no-verify", "--cleanup=whitespace", "-q", "-F", "-"]);
-            let out = exec(cmd, Some(text.into_bytes()))?;
+            cmd.env("GIT_EDITOR", "true").args(["commit", "--amend", "--only", "--no-verify", "--cleanup=whitespace", "-q", "-F"]);
+            let out = match &file {
+                Some(path) => {
+                    cmd.arg(path);
+                    let out = exec(cmd, None);
+                    let _ = std::fs::remove_file(path);
+                    out?
+                }
+                None => {
+                    cmd.arg("-");
+                    exec(cmd, Some(text.into_bytes()))?
+                }
+            };
             if out.ok { Ok(combined(&out)) } else { Err(combined(&out)) }
         }
         "plan" => run_plan(root, base, steps),
@@ -330,7 +371,7 @@ fn run_plan(root: &Path, base: Option<&str>, steps: &[HistoryStep]) -> Result<St
             return run(root, false, &["reset", "--hard", b], None).map(|_| String::new());
         }
     }
-    let todo = todo_text(steps)?;
+    let todo = todo_text(steps, hooks_runnable(root))?;
     // The todo goes to a file of its own in a temporary folder (closed before git reads it).
     let dir = tempfile::tempdir().map_err(|e| format!("could not write the plan: {e}"))?;
     let file = dir.path().join("quarry-rebase-todo");
@@ -369,9 +410,12 @@ fn run_plan(root: &Path, base: Option<&str>, steps: &[HistoryStep]) -> Result<St
 /// The lines of git's output that say why it stopped (its `error:` / `fatal:` lines, else the last
 /// line), without the todo line it was running.
 pub(super) fn failure_reason(text: &str) -> String {
-    let lines: Vec<&str> = text.lines().map(str::trim).filter(|l| !l.is_empty()).collect();
+    // git's own wrapping around a failed step says nothing about why (and names command lines).
+    let boiler = |l: &str| l.starts_with("hint:") || l.starts_with("Executing:") || l.starts_with("warning: execution failed") || l.starts_with("You can fix the problem") || l.starts_with("git rebase --");
+    let lines: Vec<&str> = text.lines().map(str::trim).filter(|l| !l.is_empty() && !boiler(l)).collect();
     let said: Vec<&str> = lines.iter().copied().filter(|l| l.starts_with("error:") || l.starts_with("fatal:")).collect();
-    let pick = if said.is_empty() { lines.last().copied().into_iter().collect() } else { said };
+    // Without error: / fatal: lines (a hook's own words): what is left, at most three lines.
+    let pick = if said.is_empty() { lines.iter().copied().take(3).collect() } else { said };
     pick.join("\n")
 }
 
@@ -380,7 +424,7 @@ pub(super) fn failure_reason(text: &str) -> String {
 pub(super) fn message_step_failed(dir: &Path) -> bool {
     let next = std::fs::read_to_string(dir.join("git-rebase-todo")).unwrap_or_default();
     let first = next.lines().map(str::trim).find(|l| !l.is_empty() && !l.starts_with('#')).unwrap_or("");
-    first.starts_with("exec printf ") && first.contains("git commit --amend --no-verify --cleanup=whitespace -q -F -")
+    first.starts_with("exec ") && first.contains(AMEND)
 }
 
 #[tauri::command]
@@ -436,6 +480,10 @@ mod tests {
         Some((d, root, ids))
     }
 
+    fn todo_text_plain(steps: &[HistoryStep]) -> Result<String, String> {
+        todo_text(steps, false)
+    }
+
     fn step(sha: &str, action: &str, message: Option<&str>) -> HistoryStep {
         HistoryStep { sha: sha.to_string(), action: action.to_string(), message: message.map(str::to_string) }
     }
@@ -449,17 +497,17 @@ mod tests {
         let a = "a".repeat(40);
         let b = "b".repeat(40);
         let c = "c".repeat(40);
-        let t = todo_text(&[step(&a, "pick", Some("It's new\r\n\r\nBody $HOME \"q\"\n")), step(&b, "fixup", None), step(&c, "drop", None)]).unwrap();
+        let t = todo_text_plain(&[step(&a, "pick", Some("It's new\r\n\r\nBody $HOME \"q\"\n")), step(&b, "fixup", None), step(&c, "drop", None)]).unwrap();
         assert_eq!(t, format!("pick {a}\nfixup {b}\nexec printf '%s\\n' 'It'\\''s new' '' 'Body $HOME \"q\"' | git commit --amend --no-verify --cleanup=whitespace -q -F -\n"));
         // The exec comes after everything folded into the commit, before the next pick.
-        let t = todo_text(&[step(&a, "pick", Some("one")), step(&b, "pick", None)]).unwrap();
+        let t = todo_text_plain(&[step(&a, "pick", Some("one")), step(&b, "pick", None)]).unwrap();
         assert_eq!(t.lines().collect::<Vec<_>>(), vec![format!("pick {a}"), "exec printf '%s\\n' 'one' | git commit --amend --no-verify --cleanup=whitespace -q -F -".to_string(), format!("pick {b}")]);
-        assert!(todo_text(&[step(&a, "fixup", None)]).is_err(), "nothing to fold into");
-        assert!(todo_text(&[step(&a, "drop", None), step(&b, "fixup", None)]).is_err());
-        assert!(todo_text(&[step(&a, "drop", None)]).is_err(), "dropping everything is a reset");
-        assert!(todo_text(&[step(&a, "pick", Some("  \n"))]).is_err(), "an empty message");
-        assert!(todo_text(&[step("HEAD", "pick", None)]).is_err());
-        assert!(todo_text(&[step(&a, "edit", None)]).is_err());
+        assert!(todo_text_plain(&[step(&a, "fixup", None)]).is_err(), "nothing to fold into");
+        assert!(todo_text_plain(&[step(&a, "drop", None), step(&b, "fixup", None)]).is_err());
+        assert!(todo_text_plain(&[step(&a, "drop", None)]).is_err(), "dropping everything is a reset");
+        assert!(todo_text_plain(&[step(&a, "pick", Some("  \n"))]).is_err(), "an empty message");
+        assert!(todo_text_plain(&[step("HEAD", "pick", None)]).is_err());
+        assert!(todo_text_plain(&[step(&a, "edit", None)]).is_err());
     }
 
     #[test]
@@ -805,12 +853,75 @@ mod tests {
         assert_eq!((rev(&root, "HEAD"), message(&root, "HEAD")), (tip, "c5".to_string()));
     }
 
+    /// A commit-msg hook (run by git's sh on Windows too).
+    fn hook(root: &Path, body: &str) {
+        let path = root.join(".git").join("hooks").join("commit-msg");
+        std::fs::write(&path, format!("#!/bin/sh\n{body}\n")).unwrap();
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755)).unwrap();
+        }
+    }
+
+    #[test]
+    fn new_messages_go_through_the_commit_msg_hook() {
+        let Some((_d, root, ids)) = five() else { return };
+        if !hooks_runnable(&root) {
+            return; // git before 2.36: messages are amended without hooks
+        }
+        // The hook adds a trailer (as Gerrit's Change-Id hook does): reworded messages get it.
+        hook(&root, "printf '\\nReviewed: yes\\n' >> \"$1\"");
+        let t = todo_text(&[step(&ids[4], "pick", Some("words"))], true).unwrap();
+        assert!(t.contains("git hook run --ignore-missing commit-msg") && t.contains(AMEND), "{t}");
+        plan(&root, Some(&ids[2]), &[step(&ids[3], "pick", Some("c4 new")), step(&ids[4], "pick", None)]).unwrap();
+        assert_eq!(message(&root, "HEAD~1"), "c4 new\n\nReviewed: yes");
+        history_rewrite(&root, "reword", &rev(&root, "HEAD"), None, &[], Some("c5 new")).unwrap();
+        assert_eq!(message(&root, "HEAD"), "c5 new\n\nReviewed: yes");
+        // A hook that refuses: nothing is rewritten, and the reason is said.
+        hook(&root, "echo 'needs a ticket number' >&2; exit 1");
+        let tip = rev(&root, "HEAD");
+        let err = plan(&root, Some(&ids[2]), &[step(&rev(&root, "HEAD~1"), "pick", Some("again")), step(&tip, "pick", None)]).unwrap_err();
+        assert!(err.starts_with(HALTED) && err.contains("needs a ticket number"), "{err}");
+        assert!(operation(&root).is_none());
+        assert_eq!(rev(&root, "HEAD"), tip);
+        let err = history_rewrite(&root, "reword", &tip, None, &[], Some("tip again")).unwrap_err();
+        assert!(err.contains("needs a ticket number"), "{err}");
+        assert_eq!(rev(&root, "HEAD"), tip);
+    }
+
+    #[test]
+    fn a_skip_that_stops_on_the_next_conflict_is_not_an_error() {
+        let Some((_d, root)) = repo() else { return };
+        git_ok(&root, &["config", "core.editor", "this-editor-must-never-start --wait"]);
+        commit_file(&root, "a.txt", "0
+", "base");
+        git_ok(&root, &["switch", "-qc", "topic"]);
+        commit_file(&root, "a.txt", "t1
+", "t1");
+        commit_file(&root, "a.txt", "t2
+", "t2");
+        git_ok(&root, &["switch", "-q", "main"]);
+        commit_file(&root, "a.txt", "m
+", "m");
+        git_ok(&root, &["switch", "-q", "topic"]);
+        assert!(run_text(&root, false, &["rebase", "main"]).is_err());
+        // Continue with the file still in conflict: git refuses, and that stays an error.
+        assert!(continue_operation(&root, "continue").is_err());
+        // Skip t1: t2 conflicts too, so the rebase stops again; that is reported, not failed.
+        assert_eq!(continue_operation(&root, "skip").unwrap(), format!("rebase{}", super::super::STOPPED_AGAIN));
+        assert_eq!(operation(&root).as_deref(), Some("rebase"));
+        abort_operation(&root).unwrap();
+    }
+
     #[test]
     fn the_reason_and_the_failed_message_step_are_recognised() {
         assert_eq!(failure_reason("Executing: x\nerror: gpg failed to sign the data\nfatal: failed to write commit object\nhint: …"), "error: gpg failed to sign the data\nfatal: failed to write commit object");
-        assert_eq!(failure_reason("one\n\nlast words\n"), "last words");
+        assert_eq!(failure_reason("one\n\nlast words\n"), "one\nlast words");
+        // A hook that refused: its own words, without git's wrapping around the failed step.
+        assert_eq!(failure_reason("Executing: f=x && git hook run\nneeds a ticket number\nwarning: execution failed: f=x\nYou can fix the problem, and then run\n\n  git rebase --continue\n\nhint: Disable this message"), "needs a ticket number");
         let d = tempfile::tempdir().unwrap();
-        let todo = todo_text(&[step(&"a".repeat(40), "pick", Some("m"))]).unwrap();
+        let todo = todo_text_plain(&[step(&"a".repeat(40), "pick", Some("m"))]).unwrap();
         let exec_line = todo.lines().nth(1).unwrap().to_string();
         std::fs::write(d.path().join("git-rebase-todo"), format!("# rescheduled\n{exec_line}\npick {}\n", "b".repeat(40))).unwrap();
         assert!(message_step_failed(d.path()));

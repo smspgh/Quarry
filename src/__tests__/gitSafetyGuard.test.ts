@@ -687,6 +687,15 @@ describe("open tabs show what is on disk afterwards (SAFE-006, SAFE-007)", () =>
     expect(h.calls.filter((c) => c.cmd === "fs_read_text").map((c) => c.args.path)).toEqual([P("src\\store.ts"), P("README.md")]);
   });
 
+  it("a file rewritten with the text the tab already shows is not reloaded or reported", async () => {
+    const store = await open(P("src\\store.ts"), { content: "same\n" });
+    h.onGit = () => void put("src\\store.ts", "same\n");
+    await drive(() => gitLib.checkoutRef(ROOT, "feature"), "Cancel");
+    expect(h.text.get(store.id)).toBe("same\n");
+    expect(toasts().some((t) => t.includes("was reloaded"))).toBe(false);
+    expect(useStore.getState().docs.find((d) => d.id === store.id)!.dirty).toBe(false);
+  });
+
   it("one file keeps the familiar notice", async () => {
     await open(P("src\\store.ts"));
     h.onGit = () => void put("src\\store.ts", "feature store\n");
@@ -718,7 +727,9 @@ describe("open tabs show what is on disk afterwards (SAFE-006, SAFE-007)", () =>
       await drive(run, "Cancel");
       expect(ran(REWRITES)).toEqual([cmd]);
       expect(h.text.get(store.id)).toContain("<<<<<<< HEAD");
-      expect(toasts()).toContain("store.ts changed on disk and was reloaded.");
+      // A stash action says what it did itself: no "changed on disk" notice repeats it.
+      if (cmd.startsWith("git_stash")) expect(toasts().some((t) => t.includes("was reloaded"))).toBe(false);
+      else expect(toasts()).toContain("store.ts changed on disk and was reloaded.");
     });
   }
 
@@ -792,7 +803,8 @@ describe("open tabs show what is on disk afterwards (SAFE-006, SAFE-007)", () =>
     expect(diffOf(tabCmp.id).left.text).toBe("old store\n");
     expect(diffOf(edited.id).right.text).toBe("kept\n"); // kept unsaved
     expect(diffOf(edited.id).right.dirty).toBe(true);
-    expect(toasts()).toEqual(["Switched to feature", "2 open files changed on disk and were reloaded.", "kept.ts changed on disk; its tab keeps your unsaved text. Saving it overwrites the file."]);
+    // Only the text tab is counted: a comparison follows its file without a notice of its own.
+    expect(toasts()).toEqual(["Switched to feature", "store.ts changed on disk and was reloaded.", "kept.ts changed on disk; its tab keeps your unsaved text. Saving it overwrites the file."]);
   });
 
   it("tabs whose file is gone stay open, marked unsaved, with one warning worded for the operation", async () => {

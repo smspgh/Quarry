@@ -283,6 +283,8 @@ export function dateOrderAllowed(count: number, more: boolean): boolean {
 /** Height the commit list always keeps beside the search results: 6 rows. */
 export const LIST_MIN = 156;
 export const HITS_MIN = 80;
+/** The commit details pane never gets shorter than this (app.css `.graph-detail` min-height). */
+export const DETAIL_MIN = 180;
 
 /**
  * The height of the Search All History results for a dragged `wanted`: at least 80 px, the commit

@@ -254,7 +254,7 @@ Every one of them asks first. The dialog lists each commit that gets a new id (t
 
 Anything that replays commits needs a clean working folder: with uncommitted changes to tracked files you get **Commit or discard your changes first** and nothing runs (untracked files do not count). Undo Last Commit and rewording the newest commit work with uncommitted changes.
 
-No editor ever opens, whatever git's `core.editor` is, and the repository's commit hooks are not run for a reworded message.
+No editor ever opens, whatever git's `core.editor` is. A new message goes through the repository's commit-msg hook (as with git's own reword; the pre-commit hook is not run, since the files do not change): a hook that adds a line (a Change-Id, a sign-off) adds it, and a hook that refuses the message leaves everything as it was and shows what it said.
 
 If git stops part-way for any reason other than a conflict (most often commit signing is on, `commit.gpgsign`, and signing fails), the edit is undone at once: the branch stays where it was, no rebase is left in progress, and an error says why. Your typed message stays in its box (the Edit History list keeps your choices), so you can fix the cause and try again. If a conflict stopped the edit first and a new message then fails on **Continue Rebase**, the rebase stays stopped with that message step next: fix the cause and continue again, or **Abort**.
 

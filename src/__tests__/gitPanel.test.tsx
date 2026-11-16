@@ -195,6 +195,29 @@ describe("Source Control panel: the message git prepared for a stopped merge", (
     expect(box().value).toBe("Merge branch 'clash' (kept both lines)");
   });
 
+  it("each repository keeps its own message: typed text never shows in another repository's box", async () => {
+    const OTHER = "C:\\work\\other";
+    const other = { ...repo(), root: OTHER };
+    await show(repo());
+    await type("for proj only");
+    // Another folder is opened (a refresh then shows its repository).
+    answers.status = other;
+    await act(async () => {
+      useStore.setState({ folder: OTHER });
+      useGit.setState({ repos: { [KEY]: repo(), [OTHER.toLowerCase()]: other }, current: OTHER.toLowerCase() });
+    });
+    await flush();
+    expect(useGit.getState().current).toBe(OTHER.toLowerCase());
+    expect(box().value).toBe("");
+    answers.status = repo();
+    await act(async () => {
+      useStore.setState({ folder: ROOT });
+      useGit.setState({ repos: { [KEY]: repo(), [OTHER.toLowerCase()]: other }, current: KEY });
+    });
+    await flush();
+    expect(box().value).toBe("for proj only");
+  });
+
   it("a message typed before the merge is never replaced or cleared", async () => {
     await show(repo());
     await type("my own message");

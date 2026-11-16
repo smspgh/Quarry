@@ -39,7 +39,7 @@ function macrosMenu(): Item[] {
   for (const m of st.macros) {
     items.push({
       label: m.name,
-      sub: `${m.steps.length} steps`,
+      sub: `${m.steps.length} ${m.steps.length === 1 ? "step" : "steps"}`,
       submenu: () => [
         { label: "Play", sub: why, disabled: !canPlay, run: () => void runCommand("macro.play", { id: m.id }) },
         { label: "Play Until End of File", disabled: !canPlay, run: () => void runCommand("macro.play", { id: m.id, toEnd: true }) },
@@ -265,9 +265,9 @@ const MENUS: Menu[] = [
       { sep: true },
       { cmd: "git.stageFile" },
       { cmd: "git.unstageFile" },
-      { label: "Stash", submenu: () => [{ cmd: "git.stash" }, { cmd: "git.stashApply" }, { cmd: "git.stashPop" }, { cmd: "git.stashDrop" }, { sep: true }, { cmd: "git.showStashes" }] },
-      // Partial staging (specs/git-staging.md): the active Source Control comparison.
+      // Partial staging (specs/git-staging.md): the active Source Control comparison. Before Stash (planned order).
       { label: "Stage Part of a File", submenu: () => [{ cmd: "git.stageChange" }, { cmd: "git.unstageChange" }, { cmd: "git.discardChange" }, { sep: true }, { cmd: "git.stageLines" }, { cmd: "git.unstageLines" }, { cmd: "git.discardLines" }] },
+      { label: "Stash", submenu: () => [{ cmd: "git.stash" }, { cmd: "git.stashApply" }, { cmd: "git.stashPop" }, { cmd: "git.stashDrop" }, { sep: true }, { cmd: "git.showStashes" }] },
       { sep: true },
       { cmd: "git.switchBranch" },
       { cmd: "git.mergeBranch" },

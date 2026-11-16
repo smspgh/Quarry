@@ -592,6 +592,7 @@ Scenario: CONFLICT-012.3 Skip asks first
   Then that commit is left out and the rebase carries on
   And when tabs of the repository have unsaved changes the unsaved-changes dialog follows my confirmation, before git runs (SAFE-003.9)
   And a notification says "Skipped that commit: the rebase is on its next commit." or "The rebase is finished."
+  And when the next commit stops on a conflict too, a notification (not an error) says "Skipped that commit: the next commit has conflicts too. Resolve them, then Continue Rebase." and Source Control shows
 
 Scenario: CONFLICT-012.4 Nothing left to commit
   Given a cherry-pick is stopped and resolving left no changes at all

@@ -7,7 +7,7 @@
  */
 import { choose } from "./dialogs";
 import { saveDiff, useDiff } from "./diff";
-import { asksAboutTabs, keptNotice, missingNotice, notSavedNotice, reloadedNotice, tabsAtRisk, tabsOfPaths, unsavedPrompt, type OpenTab, type RiskTab, type SafetyOp } from "./gitSafety";
+import { asksAboutTabs, keptNotice, missingNotice, noticeReloads, notSavedNotice, reloadedNotice, tabsAtRisk, tabsOfPaths, unsavedPrompt, type OpenTab, type RiskTab, type SafetyOp } from "./gitSafety";
 import { fs } from "./ipc";
 import { useStore } from "./store";
 
@@ -121,7 +121,7 @@ async function after(g: Guarded) {
   }
   const r = await checkExternalChanges({ quiet: true });
   if (!r) return;
-  if (r.reloaded.length) toast(reloadedNotice(r.reloaded), "info", 4000);
+  if (r.reloaded.length && noticeReloads(g.op.kind)) toast(reloadedNotice(r.reloaded), "info", 4000);
   if (r.missing.length) toast(missingNotice(g.op, r.missing), "warning", 8000);
   if (r.kept.length) toast(keptNotice(r.kept), "warning", 8000);
 }

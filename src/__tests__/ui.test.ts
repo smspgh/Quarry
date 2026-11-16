@@ -99,9 +99,9 @@ describe("menu mnemonics", () => {
     const taken = new Set([...registered, "l", "u", "c", "w", "r", "p"]);
     for (const l of labels) expect(taken.has(MENU_MNEMONICS[l])).toBe(false);
   });
-  it("Git › Stash lists the five stash commands, after Unstage Current File, with no Drop All and no shortcuts", () => {
+  it("Git › Stash lists the five stash commands, after Stage Part of a File, with no Drop All and no shortcuts", () => {
     const menu = readFileSync("src/components/MenuBar.tsx", "utf8");
-    const sub = /\{ cmd: "git\.unstageFile" \},\s*(?:\{[^\n]*\},\s*)?\{ label: "Stash", submenu: \(\) => \[([^\]]*)\] \}/.exec(menu);
+    const sub = /\{ cmd: "git\.unstageFile" \},\s*(?:\/\/[^\n]*\s*)?\{ label: "Stage Part of a File"[^\n]*\},\s*\{ label: "Stash", submenu: \(\) => \[([^\]]*)\] \}/.exec(menu);
     expect(sub).not.toBeNull();
     expect([...sub![1].matchAll(/cmd: "([^"]+)"/g)].map((m) => m[1])).toEqual(["git.stash", "git.stashApply", "git.stashPop", "git.stashDrop", "git.showStashes"]);
     const cmds = readFileSync("src/lib/gitCommands.ts", "utf8");

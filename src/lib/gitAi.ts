@@ -115,6 +115,11 @@ export function budgetNote(b: Budget, lead = "Large change: "): string {
   return start ? `${lead}Claude saw ${start}.` : "";
 }
 
+/** The same note asked before sending: "Claude will see …", not "Claude saw …". Pure. */
+export function aheadNote(note: string): string {
+  return note.replace(/Claude saw/g, "Claude will see").replace(/the ones it saw/g, "the ones it sees");
+}
+
 // ---------- what the user is told before anything is sent ----------
 
 export type DraftScope = "staged" | "all" | "amend";
@@ -160,7 +165,7 @@ export function sendNotice(what: SendWhat): SendNotice {
   if (what.kind === "summary") {
     return {
       title: "Send these commits to Claude?",
-      message: `Quarry sends the messages, authors and dates of the ${plural(what.commits, "commit")} and the diff of the ${plural(what.files, "file")} they changed ${LEAVES} ${NOTHING_ELSE}${what.note ? `\n\n${what.note}` : ""}`,
+      message: `Quarry sends the messages, authors and dates of the ${plural(what.commits, "commit")} and the diff of the ${plural(what.files, "file")} they changed ${LEAVES} ${NOTHING_ELSE}${what.note ? `\n\n${aheadNote(what.note)}` : ""}`,
     };
   }
   const subjects = "the first lines of the last 10 commit messages";
@@ -172,7 +177,7 @@ export function sendNotice(what: SendWhat): SendNotice {
   } else {
     sent = `Quarry sends the diff of ${draftSubject(what)} and ${subjects}`;
   }
-  return { title: "Send these changes to Claude?", message: `${sent} ${LEAVES} ${NOTHING_ELSE}${what.note ? `\n\n${what.note}` : ""}` };
+  return { title: "Send these changes to Claude?", message: `${sent} ${LEAVES} ${NOTHING_ELSE}${what.note ? `\n\n${aheadNote(what.note)}` : ""}` };
 }
 
 /** Settings › Claude Code: what each helper sends (the "i" beside "Ask before sending git content to Claude"). */

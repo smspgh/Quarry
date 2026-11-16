@@ -595,6 +595,13 @@ Scenario: SAFE-006.12 Change markers and blame follow
   Given "src\store.ts" was reloaded after a switch to "feature"
   When I look at its gutter
   Then it has no change markers, because the tab equals the file committed on "feature"
+
+Scenario: SAFE-006.13 No notice that repeats what I just did, or that nothing changed
+  Given "src\store.ts" is open without unsaved changes
+  When git rewrites it with exactly the text the tab shows (same encoding and line ends)
+  Then the tab is not reloaded and no "changed on disk" notice appears
+  And after Stash Changes, stash Apply / Pop, a discard or taking one side, the tabs reload without that notice (the action's own notification says what happened)
+  And a Compare tab that follows its file adds no notice of its own
 ```
 
 ## SAFE-007: Tabs whose file is not there after the operation

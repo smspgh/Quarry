@@ -2,7 +2,19 @@
 
 Plan of attack for making Quarry's git experience the best one inside an editor. Written on 2026-11-12 at release 0.1.7; **items 0-9 were built on 2026-11-13/14 (item 10 has a spec only)**. This file is the handover for a session that starts with no context: read "Start here", then the Git notes in `CLAUDE.md` (the "Git roadmap work" bullets name the new code) and `docs/git.md`, before touching anything.
 
-## Start here (state on 2026-11-14)
+## Start here (state on 2026-11-16)
+
+**Third session, 2026-11-16.** The owner asked to settle issue 8 by his goals and to fix all remaining open issues. Every one of the 24 is now fixed (local, not pushed; the owner pushes and releases):
+
+- **8**: "Commit Merge" wording kept. Reworded / squashed messages now go through the repository's **commit-msg** hook (as in git's own reword; pre-commit still skipped, since the files do not change): `git hook run --ignore-missing commit-msg` on `.git/quarry-message`, then `commit --amend --no-verify -F`. A refusing hook undoes the edit and shows the hook's words. Git before 2.36: no hooks, as before.
+- **4** menus / dialogs opaque (`--flyout` solid); **5** graph menu as wide as its entries; **6** a picker step is replaced by the picked command in macros (`markPickerStep` / `dropPickerStep`); **7** no merge / rebase entries on the own branch's label, Stage Part of a File before Stash, Skip that stops on the next conflict is a notification (Rust `STOPPED_AGAIN`), no reload notice when the disk text equals the tab, merge menu widens.
+- **11** "(unsaved)" follows the tab live; **12** staging near the end shows the file's end; **13** UTF-16 comparisons get no bars, staged rename's left label is the old name, heading counts commits only, no reload notice after stash / discard / take-side or for Compare tabs.
+- **15** graph tabs keep their repository known; **16** details pane min 180 px; **17** returning to a graph tab keeps pages and scroll; **18** Compare with Branch… uses the graph tab's repository; **19** background check fetches with `--no-tags`; **20** lane scrollbar thumb 8 px.
+- **22** commit message per repository; **23** drag auto-scroll keeps going while the pointer rests at an edge; **24** tip drop says nothing about conflicts, reword caret at the end, "Claude will see" before sending, Add Remote form waits during a conflict stop ("None yet." + button), "1 step".
+- Seen live (dev build, throwaway repo, settings restored by hash): graph menu 257 px with nothing cut, opaque; Source Control at 280 px with nothing clipped. Checks: tsc clean, 1331 Vitest, 196 Rust (1 ignored), specs 0 problems.
+- **Releases moved to smspgh/Quarry** (owner's request; he chose to make the repo public). Updater endpoint, `release.ps1` (refuses a non-public repo; posts a bridge `latest.json` release to smspgh/quarry-releases for copies of 0.1.10 and earlier, `-LegacyRepo ""` to stop), `quick-release.ps1`, `docs/releasing.md`, UPD-005 / UPD-006 updated. The owner must make smspgh/Quarry public before the next `-Publish`.
+
+**Still for the owner:** the unconfirmed spec defaults (point 2 below).
 
 **Second session, 2026-11-14 (later the same day).** The owner said "continue and use your best judgement", so the most important open issues were fixed rather than asked about; each choice is recorded below and is easy to reverse. Six local commits after ced3a68, nothing pushed:
 
@@ -74,30 +86,30 @@ Found in the dev build on throwaway repos; not fixed because each needs the owne
 1. *(fixed 2026-11-14, menus scroll)* **Git menu taller than the window** (883 px in an 816 px window, does not scroll): Push, Force Push…, Add Remote… and the Claude submenu cannot be reached with the mouse. Scrolling the top level would clip its submenus: needs a design decision (regroup into submenus, or scroll).
 2. *(fixed 2026-11-14, globally)* **Disabled buttons show no tooltip** (`.btn:disabled` turns pointer events off): fixed for Merge or Rebase and Skip (ace9f47); every other disabled `.btn` / `.icon-btn` (Commit, header icons, stash, Draft) still has none. A global fix changes hover and click-through everywhere.
 3. *(fixed 2026-11-14)* **First click on a conflict-bar button is lost while Source Control floats (unpinned)**: the click closes the panel, the editor shifts, and Accept Current / Incoming is not pressed. A conflict stop opens that panel by itself, so this is the usual state.
-4. Menus and dialogs are see-through (text behind them is readable).
-5. The graph's commit menu is too narrow (220 px): "Create Branch Here (Don't Switch)…" and both Summarise entries are cut.
-6. The macro recorder records the picker step (`git.mergeBranch`) as well as `git.mergeRef`.
-7. Small: "Merge main into main…" shows (greyed) on the own-branch label; Stash comes before Stage Part of a File in the Git menu (planned order is the reverse); after Skip a further conflict shows the error toast rather than the notification CONFLICT-012.3 names; an extra "changed on disk and was reloaded" toast when the text is unchanged; at 280 px the Merge or Rebase button label is clipped.
-8. For the owner to confirm: the wording of fix a06eb63 ("Commit Merge" + its note) for a merge whose resolution changes no file; reworded / squashed messages skip commit hooks (`--no-verify`, item 6).
+4. *(fixed 2026-11-16)* Menus and dialogs are see-through (text behind them is readable).
+5. *(fixed 2026-11-16)* The graph's commit menu is too narrow (220 px): "Create Branch Here (Don't Switch)…" and both Summarise entries are cut.
+6. *(fixed 2026-11-16)* The macro recorder records the picker step (`git.mergeBranch`) as well as `git.mergeRef`.
+7. *(fixed 2026-11-16)* Small: "Merge main into main…" shows (greyed) on the own-branch label; Stash comes before Stage Part of a File in the Git menu (planned order is the reverse); after Skip a further conflict shows the error toast rather than the notification CONFLICT-012.3 names; an extra "changed on disk and was reloaded" toast when the text is unchanged; at 280 px the Merge or Rebase button label is clipped.
+8. *(fixed 2026-11-16)* For the owner to confirm: the wording of fix a06eb63 ("Commit Merge" + its note) for a merge whose resolution changes no file; reworded / squashed messages skip commit hooks (`--no-verify`, item 6).
 
 9. *(fixed 2026-11-14)* **Compare toolbar below about 1000 px of editor width** (item 1): file labels shrink to nothing, the Side by side / Inline switch is squashed, the swap icon overlaps the count. Needs a layout decision (wrap, icons, overflow menu).
 10. *(fixed 2026-11-14)* **Drop-stash offer wording after resolving with "Current"** (item 2): it still says the stash's changes "are now in your files"; for that file they are not, and Drop Stash would lose them (Keep Stash is the default).
-11. A Source Control comparison keeps "(unsaved)" in its label after the file's tab is saved, until the row is clicked again.
-12. Staging the last change near the end of a file still moves the view when the file becomes shorter than the scroll position.
-13. Small: a UTF-16 file still gets bars that can only refuse; a staged rename's left label reads "new-name (HEAD)"; the graph heading counts stash rows as commits ("343 commits" for 340); every stash, pop or staging save adds a "changed on disk and was reloaded" toast.
+11. *(fixed 2026-11-16)* A Source Control comparison keeps "(unsaved)" in its label after the file's tab is saved, until the row is clicked again.
+12. *(fixed 2026-11-16)* Staging the last change near the end of a file still moves the view when the file becomes shorter than the scroll position.
+13. *(fixed 2026-11-16)* Small: a UTF-16 file still gets bars that can only refuse; a staged rename's left label reads "new-name (HEAD)"; the graph heading counts stash rows as commits ("343 commits" for 340); every stash, pop or staging save adds a "changed on disk and was reloaded" toast.
 
 14. *(fixed 2026-11-14, click waits 300 ms)* **Double-click on a file in the graph's file lists does not open the file** (GRAPH-015.6, COMMITCMP-003.9, also an ordinary commit's file list): the first click's Compare tab takes the front; a very fast double-click opens the file plus two identical Compare tabs. Decision: delay the single click, or drop the double-click promise.
-15. A graph tab whose repository Quarry no longer knows greys every label-menu entry with "The open folder is not in a git repository" (untrue), while the commit menu of the same tab still offers Switch, Cherry-pick and Reset.
-16. The graph's details pane has no minimum height (112 px with its content cut when the search results are dragged tall).
-17. Returning to a graph tab reloads from page 1, so the place in a long list is lost (follows the stories, but noticeable).
-18. Git › Compare with Branch… uses the Source Control repository even when another repository's graph tab is in front.
-19. A locally deleted tag that exists on the remote comes back at the next automatic remote check.
-20. The lane scroll-bar thumb is only 4-5 px thick.
+15. *(fixed 2026-11-16)* A graph tab whose repository Quarry no longer knows greys every label-menu entry with "The open folder is not in a git repository" (untrue), while the commit menu of the same tab still offers Switch, Cherry-pick and Reset.
+16. *(fixed 2026-11-16)* The graph's details pane has no minimum height (112 px with its content cut when the search results are dragged tall).
+17. *(fixed 2026-11-16)* Returning to a graph tab reloads from page 1, so the place in a long list is lost (follows the stories, but noticeable).
+18. *(fixed 2026-11-16)* Git › Compare with Branch… uses the Source Control repository even when another repository's graph tab is in front.
+19. *(fixed 2026-11-16)* A locally deleted tag that exists on the remote comes back at the next automatic remote check.
+20. *(fixed 2026-11-16)* The lane scroll-bar thumb is only 4-5 px thick.
 
 21. *(fixed 2026-11-14, aborted automatically with a dedicated message)* **A history edit in a repository with `commit.gpgsign` on and signing failing** (item 6, the most serious open issue): Reword of an older commit leaves the rebase stopped with raw git output, and Continue Rebase then says "The rebase is finished." although the message is unchanged (HISTORY-009.12 expects no rebase left in progress); Squash stops the same way (Abort restores everything); Reword of the tip fails cleanly but the typed message is lost. Decision: abort automatically when the message step fails, or show a dedicated message.
-22. The commit box text carries across repositories (an undone commit's message, or typed text, is still in the box after another folder is opened).
-23. Drag reorder in the Edit History list auto-scrolls only while the pointer moves.
-24. Small: the tip-drop dialog mentions replay conflicts although nothing is replayed; the list's reword box opens with the caret before the first letter; "Large change: Claude saw…" is in the past tense before sending; a conflict stop in a repo with no remote opens the Add Remote form and pushes the commit box out of view; "Recorded 1 steps". The Git menu is now 952 px tall (issue 1).
+22. *(fixed 2026-11-16)* The commit box text carries across repositories (an undone commit's message, or typed text, is still in the box after another folder is opened).
+23. *(fixed 2026-11-16)* Drag reorder in the Edit History list auto-scrolls only while the pointer moves.
+24. *(fixed 2026-11-16)* Small: the tip-drop dialog mentions replay conflicts although nothing is replayed; the list's reword box opens with the caret before the first letter; "Large change: Claude saw…" is in the past tense before sending; a conflict stop in a repo with no remote opens the Add Remote form and pushes the commit box out of view; "Recorded 1 steps". The Git menu is now 952 px tall (issue 1).
 
 ## The goal, stated honestly
 

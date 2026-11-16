@@ -105,7 +105,7 @@ describe("GraphView: branch and tag housekeeping from a ref label", () => {
     await show();
     await fire.contextMenu(badge(rows()[0], "main"));
     expect(head()).toBe("Branch main");
-    expect(labels()).toEqual(["Merge main into main…", "Rebase main onto main…", "Rename Branch…", "Set Upstream…", "Push main to origin/main", "Delete Branch…", "Copy Branch Name"]);
+    expect(labels()).toEqual(["Rename Branch…", "Set Upstream…", "Push main to origin/main", "Delete Branch…", "Copy Branch Name"]);
     expect(entry("Delete Branch…").disabled).toBe(true);
     expect(entry("Delete Branch…").title).toBe("You are on this branch. Switch to another branch first.");
     for (const text of ["Rename Branch…", "Set Upstream…", "Push main to origin/main"]) expect(entry(text).disabled).toBe(false);

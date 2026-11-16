@@ -1,5 +1,5 @@
 import { ArrowDown, ArrowUp, Check, ChevronRight, CircleDot, CloudDownload, CloudOff, FileDiff, FileText, Folder, GitBranch, GitGraph, History, Minus, Plus, RefreshCw, TriangleAlert, Undo2, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { openPath } from "../../lib/actions";
 import { abortOperation, continueOperation, resolveConflicts, takeSide, checkRemote, isMissingRepo, commit, compareCommitWithCurrent, currentRepo, discard, moreHistory, openChange, openCommitChange, openCommitFile, openGraph, pickBranch, remote, rescanGit, stage, unstage, useGit } from "../../lib/git";
 import { commitFileKind, commitLabel, gitErrorText, groupFiles, KIND_LABEL, KIND_LETTER, operationWords, rowKind, syncLine, type Group } from "../../lib/gitStatus";
@@ -432,8 +432,17 @@ export function GitPanel() {
   const g = useGit();
   const folder = useStore((s) => s.folder);
   const repo = currentRepo(g);
-  const [message, setMessage] = useState("");
+  // One commit message per repository: text typed for one (or an undone commit's message) never
+  // shows up in another's box when another folder is opened; coming back finds it again.
+  const [messages, setMessages] = useState<Record<string, string>>({});
+  const rk = repo?.root.toLowerCase() ?? "";
+  const message = messages[rk] ?? "";
+  const setMessage = useCallback(
+    (v: React.SetStateAction<string>) => setMessages((m) => ({ ...m, [rk]: typeof v === "function" ? v(m[rk] ?? "") : v })),
+    [rk],
+  );
   const [amend, setAmend] = useState(false);
+  useEffect(() => setAmend(false), [rk]);
   const busy = g.busy;
 
   // A stopped pick / merge / revert comes with the message git prepared: offer it once, in an empty box.

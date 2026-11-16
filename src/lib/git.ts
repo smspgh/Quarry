@@ -14,8 +14,9 @@ import type { ConflictBlock } from "./conflicts";
 import type { EditorView } from "@codemirror/view";
 import { git, type GitBranch, type GitCommitAction, type GitCommitFile, type GitFile, type GitLogEntry, type GitIdentity, type GitRemoteOp, type GitStatus, type GithubRepo } from "./gitApi";
 import { newDocId, useStore, type Doc } from "./store";
+import { markPickerStep } from "./macros";
 import { fs } from "./ipc";
-import { displayUrl, gitErrorText, hasConflictMarkers, isMissingRepo, KIND_RANK, kindOf, operationDone, operationWords, type GitKind } from "./gitStatus";
+import { displayUrl, gitErrorText, hasConflictMarkers, isMissingRepo, KIND_RANK, kindOf, operationDone, operationStoppedAgain, operationWords, STOPPED_AGAIN, type GitKind } from "./gitStatus";
 
 export { isMissingRepo, KIND_LABEL, KIND_LETTER, kindOf, type GitKind } from "./gitStatus";
 import { choose } from "./dialogs";
@@ -200,6 +201,8 @@ function interesting(): string[] {
   if (s.folder) out.push(s.folder);
   if (contextPlace) out.push(contextPlace);
   for (const d of s.docs) if (d.path && (d.kind === "text" || d.kind === "big")) out.push(parentOf(d.path));
+  // An open graph tab keeps its repository known (its menus need the status), whatever folder is open.
+  for (const d of s.docs) if (d.kind === "graph" && d.graph?.root) out.push(d.graph.root);
   return out;
 }
 
@@ -597,6 +600,12 @@ export async function continueOperation(root: string, operation: string, how: "c
   if (!g) return;
   const out = await rewrite(g, how === "skip" ? "Skipping…" : "Continuing…", () => git.continueOp(root, how));
   if (out === undefined) return;
+  if (out.endsWith(STOPPED_AGAIN)) {
+    // It went on and stopped on a conflict in the next step: say so, and show where to resolve it.
+    toast(operationStoppedAgain(out.slice(0, -STOPPED_AGAIN.length) || operation, how), "info", 5000);
+    showPanel("git");
+    return;
+  }
   // Status is refreshed by run(); a rebase that is still going shows its next step there.
   const still = await git.status(root).catch(() => null);
   toast(operationDone(out || operation, how, !!still?.operation), "success", 3500);
@@ -897,6 +906,7 @@ export async function pickBranch(purpose: BranchPurpose = "switch", pickFor: Bra
       return;
     }
   }
+  markPickerStep();
   useGit.setState((g) => ({ branches: null, branchPick: purpose, branchPickFor: forRefs, branchPickSeq: g.branchPickSeq + 1, tags: null }));
   useStore.getState().set({ palette: "branch" });
   if (purpose === "tag") void git.tags(repo.root).then((tags) => useGit.setState({ tags }), (e) => { toast(String(e), "error"); useGit.setState({ tags: [] }); });
@@ -1559,7 +1569,7 @@ export async function compareWithBranch(name: string): Promise<boolean> {
   });
   if (!result?.right) return false;
   openGraph(repo.root);
-  useStore.getState().set({ graphCompare: { root: repo.root, first: result.left.sha, second: result.right.sha, names: { first: from ? undefined : (repo.branch ?? "HEAD"), second: name }, result } });
+  useStore.getState().set({ graphCompare: { root: repo.root, first: result.left.sha, second: result.right.sha, names: { first: from && from.sha !== "HEAD" ? undefined : (repo.branch ?? "HEAD"), second: name }, result } });
   return true;
 }
 

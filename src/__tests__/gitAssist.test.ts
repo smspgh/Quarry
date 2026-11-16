@@ -3,6 +3,7 @@ import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import type { GitFile, GitStatus } from "../lib/gitApi";
 import type { DiffFile, OneshotResult } from "../lib/gitAi";
+import { aheadNote } from "../lib/gitAi";
 
 // The Claude git helpers end to end with a fake Claude Code (specs/git-claude.md): the question
 // before sending, one request at a time, Stop and late answers, the time limit, errors with their
@@ -250,7 +251,9 @@ describe("draft a commit message (GITAI-003, GITAI-004)", () => {
     void assist.draftCommitMessage(ROOT, { amend: false, message: "" });
     await tick();
     const note = "Large change: Claude saw only the start of 1 file (data\\fixtures.json).";
-    expect(dialog()?.message).toContain(note);
+    // Asked before sending: what Claude will see; under the box afterwards: what it saw.
+    expect(dialog()?.message).toContain(aheadNote(note));
+    expect(aheadNote(note)).toBe("Large change: Claude will see only the start of 1 file (data\\fixtures.json).");
     await press("Send");
     const prompt = claude.runs[0].prompt;
     expect(prompt).toContain("[The rest of this file's diff was left out: 280,000 more characters.]");

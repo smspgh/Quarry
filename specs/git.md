@@ -797,6 +797,7 @@ Scenario: GIT-014.4 The check only updates what git knows about the remote
   When the background check runs
   Then my files, my branches and my index are unchanged
   And only the remote-tracking branches (origin/…) are updated, with deleted remote branches pruned
+  And no tags are fetched: a tag I deleted here does not come back by itself (a Fetch I ask for may bring it back)
 
 Scenario: GIT-014.5 The background check never asks for a sign-in
   Given the remote needs a sign-in that is not stored, or an SSH key with a passphrase
@@ -874,6 +875,7 @@ Scenario: GIT-015.5 No remote yet: pointed to the form instead of failing
   When I run Fetch, Pull or Push
   Then git is not run
   And Source Control opens on its Add Remote form with the message "This repository has no remote yet. Add one in Source Control."
+  But while an operation is stopped or files are in conflict, the form does not open by itself (it would take the view from the files to resolve): the Repository section says "None yet." with an "Add Remote…" button
 
 Scenario: GIT-015.6 Failures show git's message without command-line hints
   Given the remote rejects my push because it has commits I do not have

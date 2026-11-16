@@ -5,7 +5,7 @@ import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { editor } from "../editor/manager";
 import { relativeTime } from "../editor/git";
 import { askDialog, openPath } from "../lib/actions";
-import { abortOperation, checkoutRef, commitAction, openCommitFile, remote, unsavedTabs, useGit } from "../lib/git";
+import { abortOperation, checkoutRef, commitAction, openCommitFile, refreshGit, remote, unsavedTabs, useGit } from "../lib/git";
 import { isPanelShown, showPanel } from "../lib/panels";
 import { git, type GitCommitAction, type GitCommitDetail, type GitCommitFile, type GitGraphCommit } from "../lib/gitApi";
 import { actionConfirm, actionDone, commitMatches, layoutGraph, newGraphState, refLabels, type GraphRow, type RefLabel } from "../lib/gitGraph";
@@ -33,7 +33,7 @@ import { REF_COMMANDS, type RefMenuEntry } from "../lib/gitRefs";
 // Claude git helpers: the Summarise entries of the commit menu (specs/git-claude.md).
 import { SummariseItems } from "./GraphSummarise";
 // Graph polish (GRAPH-015..018): the uncommitted-changes row, results divider, lane scrolling, date order.
-import { clampHitsHeight, clampLaneScroll, DATE_ORDER_OFF, DATE_ORDER_WHY, dateOrderAllowed, isUncommitted, LIST_MIN, revealLane, rowOffset, takePage, UNCOMMITTED, uncommittedLineEnd, withoutUncommitted, withUncommitted } from "../lib/gitGraph";
+import { clampHitsHeight, clampLaneScroll, DATE_ORDER_OFF, DETAIL_MIN, DATE_ORDER_WHY, dateOrderAllowed, isUncommitted, LIST_MIN, revealLane, rowOffset, takePage, UNCOMMITTED, uncommittedLineEnd, withoutUncommitted, withUncommitted } from "../lib/gitGraph";
 import { GraphLaneScroll } from "./GraphLaneScroll";
 import { GraphUncommitted } from "./GraphUncommitted";
 // Edit History (specs/git-history-edit.md): the commit menu's group, the message strip, the list.
@@ -127,6 +127,10 @@ const uncommittedRow = (head: string | null): GitGraphCommit => ({ sha: UNCOMMIT
 export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   const root = doc.graph!.root;
   const repo = useGit((s) => s.repos[root.toLowerCase()]);
+  // A repository Quarry does not know (yet): read it, so the label menus are not all greyed out.
+  useEffect(() => {
+    if (!repo) refreshGit(0);
+  }, [repo, root]);
   const busy = useGit((s) => s.busy);
   const gitShown = useStore((s) => isPanelShown(s, "git"));
   const toast = useStore((s) => s.toast);
@@ -305,8 +309,13 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
 
   // (Re)load when the tab is shown and whenever the repository moves: commit, pull, push, checkout, fetch.
   const stamp = repo ? `${repo.head}|${repo.branch}|${repo.ahead}|${repo.behind}|${repo.upstream}|${repo.operation}|${repo.stash ?? ""}|${repo.stashCount ?? 0}` : "";
+  // Coming back to the tab with nothing changed keeps the loaded pages and the place in the list.
+  const loadedFor = useRef<string | null>(null);
   useEffect(() => {
     if (!visible) return;
+    const want = `${all}|${byDate}|${stamp}`;
+    if (loadedFor.current === want && loaded.current.commits.length > 0) return;
+    loadedFor.current = want;
     inFlight.current = false;
     void load(true);
   }, [visible, all, stamp, load, byDate]);
@@ -352,7 +361,9 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   const total = commits.length - extra;
   /** Where the uncommitted row's dashed line ends (see `uncommittedLineEnd`). */
   const lineEnd = useMemo(() => uncommittedLineEnd(commits), [commits]);
-  const orderOk = countedFor === all && dateOrderAllowed(total - stashRows.current, more);
+  /** The commits loaded, stash rows left out (the heading counts commits). */
+  const counted = total - stashRows.current;
+  const orderOk = countedFor === all && dateOrderAllowed(counted, more);
   // ----- end -----
 
   const lanesWide = Math.min(MAX_LANES, data.wide);
@@ -367,12 +378,16 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   useLayoutEffect(() => {
     const el = listRef.current;
     if (!el || !visible) return;
+    // Shown again: the hidden list may have lost its scroll position.
+    if (el.scrollTop !== scrollTopRef.current) el.scrollTop = scrollTopRef.current;
     const measure = () => setViewH(el.clientHeight);
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
   }, [visible]);
+  const scrollTopRef = useRef(scrollTop);
+  scrollTopRef.current = scrollTop;
   const first = Math.max(0, Math.floor(scrollTop / ROW) - 8);
   const last = Math.min(commits.length, Math.ceil((scrollTop + viewH) / ROW) + 8);
   useEffect(() => {
@@ -660,7 +675,9 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
     const startY = e.clientY;
     const startH = el.offsetHeight;
     const content = el.scrollHeight;
-    const available = startH + listEl.clientHeight - LIST_MIN;
+    // The list keeps LIST_MIN; the details pane may give way down to its own minimum (DETAIL_MIN).
+    const detailEl = el.parentElement?.querySelector<HTMLElement>(".graph-detail");
+    const available = startH + Math.max(0, listEl.clientHeight - LIST_MIN) + Math.max(0, (detailEl?.offsetHeight ?? DETAIL_MIN) - DETAIL_MIN);
     let moved = false;
     const move = (ev: MouseEvent) => {
       const h = clampHitsHeight(startH + ev.clientY - startY, content, available);
@@ -747,18 +764,18 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
               e.stopPropagation();
             }}
           />
-          {matches && <span className="muted graph-count" title="Matches among the commits loaded so far">{matchCount} in {total} loaded</span>}
+          {matches && <span className="muted graph-count" title="Matches among the commits loaded so far">{matchCount} in {counted} loaded</span>}
           {matches && <button className="icon-btn xs" title="Previous match (Shift+Enter)" disabled={!matchCount} onClick={() => nextMatch(-1)}><ArrowUp size={13} /></button>}
           {matches && <button className="icon-btn xs" title="Next match (Enter)" disabled={!matchCount} onClick={() => nextMatch(1)}><ArrowDown size={13} /></button>}
           {matches && more && (
-            <button className="btn small" disabled={searching} title={`Only ${total} commits are loaded so far. Search every commit ${all ? "of every branch" : "of this branch"} with git (Ctrl+Enter; Enter when nothing loaded matches)`} onClick={() => void searchAll()}>
+            <button className="btn small" disabled={searching} title={`Only ${counted} commits are loaded so far. Search every commit ${all ? "of every branch" : "of this branch"} with git (Ctrl+Enter; Enter when nothing loaded matches)`} onClick={() => void searchAll()}>
               {searching ? "Searching…" : "Search All History"}
             </button>
           )}
         </span>
         <span className="grow" />
         {(busy || loading || seeking) && <span className="muted row graph-busy"><Loader2 size={13} className="spin" /> {busy ?? (seeking ? "Loading back to that commit…" : "Loading…")}</span>}
-        <span className="muted graph-count">{total}{more ? "+" : ""} {total === 1 && !more ? "commit" : "commits"}</span>
+        <span className="muted graph-count">{counted}{more ? "+" : ""} {counted === 1 && !more ? "commit" : "commits"}</span>
         <button className="icon-btn" title="Fetch from all remotes" disabled={!!busy} onClick={() => void remote(root, "fetch").then(() => load(true))}><CloudDownload size={15} /></button>
         <button className="icon-btn" title="Reload the graph" onClick={() => void load(true)}><RefreshCw size={15} /></button>
       </div>

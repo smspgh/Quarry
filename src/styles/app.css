@@ -4676,7 +4676,7 @@ select optgroup {
 .scm-busy { font-size: 11.5px; }
 /* Merge or Rebase button beside the branch button, and its two-entry menu (MERGE-003). */
 .scm-branch .scm-merge-btn { flex-shrink: 0; padding: 0 6px; }
-.scm-merge-menu { width: 210px; }
+.scm-merge-menu { width: max-content; min-width: 210px; max-width: min(440px, calc(100vw - 8px)); }
 .scm-sync {
   display: flex;
   flex-direction: column;
@@ -5119,6 +5119,8 @@ select optgroup {
    it squashed its rows and clipped its heading. It may use the window's height (GraphMenu keeps it
    inside the window), and scrolls with full-height rows when even that is not enough. */
 .graph-menu { max-height: calc(100vh - 8px); overflow-y: auto; }
+/* As wide as its longest entry ("Create Branch Here (Don't Switch)…", the Summarise entries), never cut. */
+.graph-menu { width: max-content; min-width: 220px; max-width: min(440px, calc(100vw - 8px)); }
 .graph-menu > * { flex-shrink: 0; }
 .ctx-menu .palette-item.danger, .ctx-menu .palette-item.danger .title { color: var(--danger); }
 .scm-actions.always { display: inline-flex; }
@@ -5140,7 +5142,8 @@ select optgroup {
 .graph-hits.compact { max-height: 100px; }
 /* The graph itself never shrinks below a handful of rows; the details pane gives way first. */
 .graph-list { min-height: 156px; }
-.graph-detail { flex-shrink: 1; min-height: 110px; }
+/* It gives way down to a heading, a few lines of the message and the first files, never less. */
+.graph-detail { flex-shrink: 1; min-height: 180px; }
 /* The selected commit is never dimmed by the find box. */
 .graph-row.dim.selected > :not(.graph-lane-cell) { opacity: 1; }
 .graph-hits-head { display: flex; align-items: center; gap: 8px; padding: 5px 14px; font-size: 11.5px; color: var(--text-3); position: sticky; top: 0; background: var(--card); }
@@ -5163,7 +5166,11 @@ select optgroup {
 .graph-list.lanes-right .graph-lane-cell { -webkit-mask-image: linear-gradient(to left, transparent, #000 18px); mask-image: linear-gradient(to left, transparent, #000 18px); }
 .graph-list.lanes-left.lanes-right .graph-lane-cell { -webkit-mask-image: linear-gradient(to right, transparent, #000 18px, #000 calc(100% - 18px), transparent); mask-image: linear-gradient(to right, transparent, #000 18px, #000 calc(100% - 18px), transparent); }
 .graph-head { position: relative; }
-.graph-lane-scroll { position: absolute; left: 8px; bottom: 0; height: 12px; overflow-x: auto; overflow-y: hidden; }
+.graph-lane-scroll { position: absolute; left: 8px; bottom: 0; height: 14px; overflow-x: auto; overflow-y: hidden; }
+/* Its only job is to be grabbed: a thicker thumb than the global 4 px (8 px, 10 px on hover). */
+.graph-lane-scroll::-webkit-scrollbar { height: 14px; }
+.graph-lane-scroll::-webkit-scrollbar-thumb { border-width: 3px; }
+.graph-lane-scroll::-webkit-scrollbar-thumb:hover { border-width: 2px; }
 /* Date order toggle: off for histories that do not fit one page. */
 .graph-order button:disabled, .graph-order button:disabled:hover { opacity: 0.5; background: none; cursor: default; }
 

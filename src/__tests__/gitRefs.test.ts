@@ -21,10 +21,12 @@ describe("the menu of a ref label", () => {
     expect([tag.heading, tag.kind, tag.full]).toEqual(["Tag v1.2.0", "tag", "refs/tags/v1.2.0"]);
     expect(tag.entries.map((e) => e.label)).toEqual(["Merge v1.2.0 into main…", "Rebase main onto v1.2.0…"]);
   });
-  it("the branch you are on: both entries greyed out", () => {
+  it("the branch you are on: no merge or rebase entries", () => {
     const m = refMenu(label(["HEAD", "refs/heads/main"], "main"), { repo: repo(), busy: null })!;
     expect([m.heading, m.current]).toEqual(["Branch main", true]);
-    expect(m.entries.map((e) => e.disabled)).toEqual(["This is the branch you are on", "This is the branch you are on"]);
+    expect(m.entries).toEqual([]);
+    const full = refMenu(label(["HEAD", "refs/heads/main"], "main"), { repo: repo(), busy: null, remotes: ["origin"] })!;
+    expect(full.entries.some((e) => e.id === "merge" || e.id === "rebase")).toBe(false);
   });
   it("the detached HEAD label has no menu", () => {
     expect(refMenu(label(["HEAD"], "HEAD"), { repo: repo({ branch: null }), busy: null })).toBeNull();
@@ -76,7 +78,7 @@ describe("the housekeeping entries of a ref label's menu", () => {
   });
   it("the branch you are on: no Switch, Delete greyed out with the reason, push names its upstream", () => {
     const m = refMenu(label(["HEAD", "refs/heads/main"], "main"), ctx({ upstreams: { main: "origin/main" } }))!;
-    expect(m.entries.map((e) => `${e.group ? "| " : ""}${e.id}${e.disabled ? " (off)" : ""}`)).toEqual(["merge (off)", "rebase (off)", "| rename", "upstream", "push", "delete (off)", "| copy"]);
+    expect(m.entries.map((e) => `${e.group ? "| " : ""}${e.id}${e.disabled ? " (off)" : ""}`)).toEqual(["| rename", "upstream", "push", "delete (off)", "| copy"]);
     expect(m.entries.find((e) => e.id === "push")!.label).toBe("Push main to origin/main");
     expect(m.entries.find((e) => e.id === "delete")!.disabled).toBe("You are on this branch. Switch to another branch first.");
   });

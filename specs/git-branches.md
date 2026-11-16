@@ -695,6 +695,7 @@ Scenario: BRANCH-008.1 Delete a tag from the graph
   When I click "Delete Tag"
   Then the label "v1.2.0" is gone from the graph and the commit is still there
   And a notification says "Deleted tag v1.2.0 (was 18bc71d)"
+  And the background remote check does not bring it back (GIT-014.4)
 
 Scenario: BRANCH-008.2 Delete a tag from the Git menu
   Given tags "v1.1" and "v1.2.0"

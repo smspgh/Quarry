@@ -9,7 +9,7 @@ import { useStore, type Doc } from "../lib/store";
 import { editor } from "../editor/manager";
 import { useGit } from "../lib/git";
 import { barPlace } from "../lib/gitHunks";
-import { applyChange, applySelection, changeAtCursor as stagingChangeAt, selectedLines as stagingSelection, type ApplyAction } from "../lib/gitStaging";
+import { applyChange, applySelection, changeAtCursor as stagingChangeAt, linesPickable, selectedLines as stagingSelection, type ApplyAction } from "../lib/gitStaging";
 
 /** The editor that holds the changes (the right side, or the single inline editor), per tab, for
  *  the Next / Previous Change commands. */
@@ -154,7 +154,10 @@ function restorePlace(view: EditorView, p: Place) {
   const line = doc.line(Math.min(p.line, doc.lines));
   const top = doc.line(Math.min(p.top, doc.lines)).from;
   const scrolled = p.top > 1 || p.off > 0;
-  const scroll = () => EditorView.scrollIntoView(top, { y: "start", yMargin: -p.off });
+  // The text got shorter than where the reader was (the last change near the end was staged): show
+  // the end of the file at the bottom rather than putting its last line at the top of an empty view.
+  const past = p.top > doc.lines;
+  const scroll = () => (past ? EditorView.scrollIntoView(doc.length, { y: "end" }) : EditorView.scrollIntoView(top, { y: "start", yMargin: -p.off }));
   view.dispatch({ selection: { anchor: Math.min(line.from + p.col, line.to) }, effects: scrolled ? scroll() : [] });
   if (p.focused) view.focus();
   // Side by side, the spacers that level the two sides are only added once the new editors are
@@ -196,7 +199,7 @@ export function DiffView({ doc, visible }: { doc: Doc; visible: boolean }) {
     void detectLanguage(path, firstLine).load().then((support) => {
       if (disposed) return;
       // Source Control comparison, sides not swapped: change bars and the selected-lines buttons.
-      const staging = cur.git && !cur.swapped ? (cur.git.staged ? "staged" : "changes") : null;
+      const staging = cur.git && !cur.swapped && linesPickable(cur) ? (cur.git.staged ? "staged" : "changes") : null;
       const report = (view: EditorView) => {
         setNav(position(view));
         // Only the right side's cursor / selection counts (the left side's is ignored).
@@ -310,7 +313,7 @@ export function DiffView({ doc, visible }: { doc: Doc; visible: boolean }) {
         <button className={`icon-btn ${s.collapse ? "on" : ""}`} title={s.collapse ? "Show unchanged lines" : "Fold unchanged lines"} aria-pressed={s.collapse} onClick={() => patchDiff(doc.id, (cur) => ({ collapse: !cur.collapse }))}><ChevronsDownUp size={15} /></button>
         <button className="icon-btn" title="Swap sides" aria-label="Swap sides" disabled={dirty} onClick={() => swapDiff(doc.id)}><ArrowLeftRight size={15} /></button>
         <button className="icon-btn" title="Reload the files from disk" aria-label="Reload" disabled={dirty} onClick={() => void reloadDiff(doc.id)}><RefreshCw size={15} /></button>
-        {s.git && !s.swapped && (
+        {s.git && !s.swapped && linesPickable(s) && (
           <>
             <span className="diff-sep" />
             {(s.git.staged

@@ -40,12 +40,13 @@ export const staleMessage = (name: string) => `${name} changed since this compar
 export async function changeSources(g: DiffGit, f: GitFile | undefined): Promise<{ left: Source; right: Source; git: DiffGit }> {
   const show = (rev: string, path = g.path) => git.show(path, rev).catch(() => null);
   const name = nameOf(g.path);
-  const text = (label: string, t: string | undefined): Source => ({ kind: "text", label: `${name} (${label})`, text: t ?? "" });
+  const text = (label: string, t: string | undefined, as = name): Source => ({ kind: "text", label: `${as} (${label})`, text: t ?? "" });
   if (g.staged) {
-    const origPath = f?.origPath ?? undefined;
+    const origPath = f?.origPath ?? g.origPath ?? undefined;
     const [a, b] = await Promise.all([show("HEAD", origPath ?? g.path), show(":")]);
-    // A staged deletion has no staged text: only the whole file can be unstaged.
-    return { left: text("HEAD", a?.text), right: text("staged", b?.text), git: { root: g.root, path: g.path, staged: true, origPath, whole: b === null && a !== null } };
+    // A staged deletion has no staged text: only the whole file can be unstaged. A staged rename's
+    // HEAD side is the file under its old name.
+    return { left: text("HEAD", a?.text, nameOf(origPath ?? g.path)), right: text("staged", b?.text), git: { root: g.root, path: g.path, staged: true, origPath, whole: b === null && a !== null } };
   }
   const somethingStaged = !!f && !f.untracked && f.index !== ".";
   const base = await show(":");
@@ -129,12 +130,21 @@ interface Live {
 
 /** The comparison's changes as they are in its editors now (null: not a Source Control
  *  comparison, sides swapped, or the editors are not built yet). */
+/**
+ * Whether a comparison's lines can be staged one change at a time. Git treats UTF-16 text as
+ * binary (Rust refuses it), so such a file gets no change bars or line buttons: only the whole
+ * file, from the Source Control list. Pure.
+ */
+export function linesPickable(s: { left: { encoding: string }; right: { encoding: string }; git?: DiffSession["git"] }): boolean {
+  return !!s.git?.whole || ![s.left, s.right].some((x) => /^UTF-16/i.test(x.encoding));
+}
+
 function live(docId: string | null | undefined): Live | null {
   if (!docId) return null;
   const s = diffOf(docId);
   const views = diffViews.get(docId);
   const view = views?.right;
-  if (!s?.git || s.swapped || !view) return null;
+  if (!s?.git || s.swapped || !view || !linesPickable(s)) return null;
   const got = getChunks(view.state);
   if (!got) return null;
   // Side by side: the left editor's text; inline: the original kept by the single editor.
