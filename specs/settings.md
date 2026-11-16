@@ -32,7 +32,7 @@ Scenario: SET-001.1 Open with the shortcut
   When I press Ctrl+,
   Then the Settings panel opens scrolled to the top
   And keyboard focus is in the "Filter settings" box
-  And the sections are Appearance, Editor, Tabs and panels, Files, Folders, Search, Code intelligence, Claude Code, JSON and Data, in that order
+  And the sections are Appearance, Editor, Tabs and panels, Files, Folders, Search, Git, Code intelligence, Claude Code, JSON and Data, in that order
 
 Scenario: SET-001.2 Settings always opens at 35% of the window width
   Given the window is 2000 px wide and I dragged the Settings panel to 300 px before closing it
@@ -957,4 +957,42 @@ Scenario: SET-018.5 The text stays inside the window
   Given an "i" icon near the bottom-right corner of the window
   When its help text opens
   Then the text is shown above the icon and entirely inside the window
+```
+
+## SET-019: Git settings
+
+- Status: draft
+- Commands: none
+- Files:
+  - `src/components/panels/SettingsPanel.tsx` — section "Git": "Allow merging with uncommitted changes" (switch) and "Compare with Branch shows" (The two tips / Changes since split), each hint following the current value
+  - `src/lib/types.ts` — `gitMergeWithChanges` (default off), `gitCompareBranch` (default `"tips"`)
+  - `src/lib/actions.ts` — `sanitizeSettings` (`gitMergeWithChanges` in `BOOLEAN_SETTINGS`; `gitCompareBranch` anything but `"split"` → `"tips"`)
+- Tests: `src/__tests__/gitMerge.test.ts`, `src/__tests__/graphCompare.test.tsx`
+- Docs: `docs/settings.md`, `docs/git.md`
+
+**As a** developer
+**I want** to choose how strict a merge is about my uncommitted work, and what Compare with Branch compares
+**So that** git in Quarry works the way I am used to
+
+```gherkin
+Scenario: SET-019.1 The defaults are the careful ones
+  Given a fresh settings file
+  When I open Settings › Git
+  Then "Allow merging with uncommitted changes" is off
+  And "Compare with Branch shows" is "The two tips"
+
+Scenario: SET-019.2 The hint says what the current choice does
+  When I turn "Allow merging with uncommitted changes" on
+  Then its hint says git refuses a merge that would change those files, and that Abort may not bring them back exactly after a conflict
+  When I choose "Changes since split"
+  Then its hint says only what the picked branch changed since it split off is shown, as a pull request shows it
+
+Scenario: SET-019.3 What they change
+  When I change either setting
+  Then the next merge or Compare with Branch… follows it, as MERGE-008.12 and COMMITCMP-005.14 describe, with no restart
+
+Scenario: SET-019.4 A bad value in the file
+  Given settings.json has "gitCompareBranch": "sideways"
+  When Quarry starts
+  Then "Compare with Branch shows" is "The two tips"
 ```

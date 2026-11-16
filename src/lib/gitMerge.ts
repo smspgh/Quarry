@@ -114,12 +114,12 @@ function targetNote(p: GitMergePreview, label: string, kind: StartKind): string 
  * The question before a merge. `label`: how the target is shown; `branch`: the current branch (null
  * on a detached HEAD). Cancel is always the default button. The value chosen is the merge mode.
  */
-export function mergeConfirm(p: GitMergePreview, label: string, branch: string | null): Plan<GitMergeMode> {
+export function mergeConfirm(p: GitMergePreview, label: string, branch: string | null, dirty = 0): Plan<GitMergeMode> {
   const on = branch ?? "the current commit";
   if (p.behind === 0) return { nothing: `${branch ?? "The current commit"} already contains ${label}: nothing to merge.` };
   const title = `Merge ${label} into ${on}?`;
   const detached = branch ? "" : " You are not on a branch, so the result belongs to no branch until you create one.";
-  const note = targetNote(p, label, "merge") + detached;
+  const note = targetNote(p, label, "merge") + detached + dirtyNote(dirty);
   if (p.ahead === 0) {
     return {
       title,
@@ -133,6 +133,16 @@ export function mergeConfirm(p: GitMergePreview, label: string, branch: string |
     text: `${subject} brought into ${on} and joined with a merge commit. Nothing is rewritten: both histories stay as they are.${note}\n\nIf the changes conflict, the merge stops and Source Control shows the files to resolve.`,
     choices: [{ label: "Merge", kind: "primary", value: "no-ff" }, CANCEL],
   };
+}
+
+/**
+ * With "Allow merging with uncommitted changes" on and changes present: what that means. git
+ * refuses a merge that would change those files, and `merge --abort` may not restore them.
+ */
+export function dirtyNote(changes: number): string {
+  if (!changes) return "";
+  const them = changes === 1 ? "it" : "them";
+  return `\n\n${changes === 1 ? "Your uncommitted change stays" : `Your ${changes} uncommitted changes stay`} as ${changes === 1 ? "it is" : "they are"}: git refuses the merge if it would change ${changes === 1 ? "that file" : "those files"}. If the merge stops on a conflict, Abort may not be able to bring ${them} back exactly; commit or stash ${them} first to be safe.`;
 }
 
 /** The notification after a merge that finished. */

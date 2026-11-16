@@ -10,6 +10,7 @@ prefix: THREEWAY
 Decisions:
 
 - **The inline bars stay the default.** Clicking a file under Merge Changes still opens the file itself (CONFLICT-009). The merge view opens only when asked for, and there is no setting that makes it the default.
+- **Owner answers (2026-11-16), for when this is built.** Each conflicted file's row under Merge Changes gets its own "Open in Merge View" button (THREEWAY-001.2), and Ctrl+S in the merge tab means Complete Merge (THREEWAY-004.6): both confirmed. Still open: the Base pane when the markers carry no base (THREEWAY-001.6).
 - **One source of truth: the file's marker blocks.** The view is built from the text of the conflicted file (the open tab's text when there is one, else the file on disk) with the existing `parseConflicts`; it does not read the index stages. So it works on a half-resolved file, and the base is shown only when the markers carry it (diff3 / zdiff3 style). Quarry never changes `merge.conflictStyle` itself.
 - **The Result is a private copy until Complete.** An unresolved conflict stays in the Result as its marker block. Nothing reaches the file or its text tab before Complete, so Cancel is always free.
 - **Complete goes through `resolveConflicts`.** It puts the Result into the file's tab, then runs today's path: save, leftover-marker check on disk, Mark Resolved (CONFLICT-007). There is no second staging route.

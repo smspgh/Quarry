@@ -203,6 +203,10 @@ export interface Settings {
   claudeGitModel: string;
   /** Ask before a Claude git helper sends repository content (the dialog's "Send and Don't Ask Again" turns it off). */
   claudeGitConfirm: boolean;
+  /** Merge may start with uncommitted changes to tracked files (git refuses one that would touch them). Off: a clean state is required (specs/git-merge-rebase.md). */
+  gitMergeWithChanges: boolean;
+  /** Compare with Branch…: "tips" = the two branch tips as they are; "split" = what the branch changed since it split off (from the common ancestor). */
+  gitCompareBranch: "tips" | "split";
   /** Code intelligence: completion, hover, go to definition, problems... from language servers. */
   lspEnabled: boolean;
   /** Language servers switched off (ids from lspServers.ts SERVERS). */
@@ -242,6 +246,8 @@ export const DEFAULT_SETTINGS: Settings = {
   claudePermissionMode: "acceptEdits",
   claudeGitModel: "haiku",
   claudeGitConfirm: true,
+  gitMergeWithChanges: false,
+  gitCompareBranch: "tips",
   lspEnabled: true,
   lspDisabled: [],
   lspCommands: {},

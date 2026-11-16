@@ -11,11 +11,14 @@ const world = vi.hoisted(() => ({
   blobs: {} as Record<string, string>,
   /** path → text of the file in the working folder. */
   disk: {} as Record<string, string>,
+  /** What `git_merge_base` answers (Compare with Branch… set to "Changes since split"). */
+  mergeBase: null as string | null,
 }));
 const spy = vi.hoisted(() => ({ openPath: vi.fn(async () => null) }));
 vi.mock("@tauri-apps/api/core", () => ({
   invoke: async (cmd: string, args: Record<string, unknown> = {}) => {
     calls.push({ cmd, args });
+    if (cmd === "git_merge_base") return world.mergeBase;
     if (cmd === "git_diff_files") return typeof world.compare === "function" ? (world.compare as (a: unknown) => unknown)(args) : world.compare;
     if (cmd === "git_show") {
       const text = world.blobs[`${args.rev}:${args.rel}`];
@@ -415,6 +418,27 @@ describe("Compare with Branch… (COMMITCMP-005)", () => {
     // Only reads, no dialog: nothing was checked out or fetched.
     expect(new Set(calls.map((c) => c.cmd))).toEqual(new Set(["git_diff_files"]));
     expect(useStore.getState().dialog).toBeNull();
+  });
+
+  it("set to \"Changes since split\", the left side is where the branch split off (COMMITCMP-005.14)", async () => {
+    const base = "5".repeat(40);
+    world.mergeBase = base;
+    useStore.getState().updateSettings({ gitCompareBranch: "split" });
+    try {
+      expect(await compareWithBranch("main")).toBe(true);
+      expect(calls.find((c) => c.cmd === "git_merge_base")?.args).toEqual({ root: ROOT, left: "HEAD", right: "main" });
+      expect(calls.find((c) => c.cmd === "git_diff_files")?.args).toEqual({ root: ROOT, left: base, right: "main" });
+      expect(useStore.getState().graphCompare?.names).toEqual({ first: "where main split off", second: "main" });
+      // Unrelated histories: the two tips, saying so.
+      calls.length = 0;
+      world.mergeBase = null;
+      expect(await compareWithBranch("main")).toBe(true);
+      expect(calls.find((c) => c.cmd === "git_diff_files")?.args).toEqual({ root: ROOT, left: "HEAD", right: "main" });
+      expect(useStore.getState().graphCompare?.names).toEqual({ first: "feature", second: "main" });
+      expect(lastToast()).toBe("main and feature share no history: comparing the two tips.");
+    } finally {
+      useStore.getState().updateSettings({ gitCompareBranch: "tips" });
+    }
   });
 
   it("from a graph commit, that commit is compared instead of the current one (.5)", async () => {

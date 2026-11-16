@@ -874,6 +874,7 @@ pub fn run() {
             git::git_stash_files,
             git::git_stash_op,
             git::git_diff_files,
+            git::git_merge_base,
             // branch and tag housekeeping
             git::git_tags,
             git::git_ref_info,

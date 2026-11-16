@@ -12,6 +12,7 @@ This area is built in the first wave, so it also owns the things the later git s
 Decisions (taken where the roadmap left the choice open):
 
 - **Owner decisions (2026-11-13).** (1) Pushed commits: warn, then offer Force Push. A rebase that would replay pushed commits warns in a danger dialog that names them, with Cancel as the default (MERGE-006); afterwards the status line offers "Force Push…" (`git push --force-with-lease`), which asks again (MERGE-009). (2) The unsaved-tabs question (Save All / Continue Without Saving / Cancel) is specified once, in SAFE-001 to SAFE-003, and is built: `startMerge` and `startRebase` ask it through the shared guard after their clean-state check and before their own confirmation; a Save All there leads to the clean-state refusal (SAFE-003.4, SAFE-003.12). This area defines no unsaved-tabs dialog of its own.
+- **Owner decisions (2026-11-16).** (1) Uncommitted changes to tracked files still block a merge by default, but the setting Settings › Git › "Allow merging with uncommitted changes" (`gitMergeWithChanges`, off by default) lets a merge start anyway; git then refuses one that would change those files, and the merge dialog warns that Abort may not restore them after a conflict (MERGE-008.12). A rebase always needs a clean state. (2) "Force Push…" on the status line is kept in memory only, lost on restart (MERGE-009.10): confirmed as built.
 - **Cancel is the default button of every merge, rebase and force-push dialog.** Enter and Escape both cancel; the action needs a click (or Tab + Enter). This follows the roadmap ground rule "the safe button as the default" and is stricter than today's cherry-pick dialog, whose confirm button is the default. `choose()` in `src/lib/dialogs.ts` already takes a per-choice `default`, so the dialogs themselves need no change.
 - **What is merged / rebased onto.** Right-clicking a commit that carries exactly one branch label other than the current branch acts on that branch by name (so the merge message reads "Merge branch 'feature' into main"). A commit with no such label, or with several, is used by its id; right-clicking one of its labels picks that branch or tag by name. A remote branch is used as it was last fetched: nothing is fetched and no local branch is created.
 - **Ref-label menu (one menu, shared with BRANCH-001).** A right-click on a ref label in the graph (in a row, or in the details pane's Refs line) selects the commit and opens a menu for that ref instead of the commit's menu. The labels that open it are: a local branch label (the current branch's included), a remote branch label and a tag label. It is headed "Branch feature", "Remote branch origin/topic" or "Tag v1.2.0". The detached "HEAD" label and a "stash" label (STASH-010) have no label menu: a right-click on them opens their row's menu. This area gives the menu its first two entries, "Merge <ref> into <current>…" and "Rebase <current> onto <ref>…" (greyed out on the current branch's own label); BRANCH-001 later adds the housekeeping entries to the same menu around them. The entries are built by the pure `refMenu(label, ctx)` in `src/lib/gitRefs.ts`, created here and extended there.
@@ -546,7 +547,10 @@ Scenario: MERGE-007.9 No second operation on top
   - `src/lib/git.ts` — `startCheck`: `startMerge` / `startRebase` call `startBlocked` and `trackedChanges` on a fresh status before the preview (covers every entry point, including the hidden commands and recorded macros); errors through `gitErrorText`
   - `src/lib/gitCommands.ts` — `enabled()` of `git.mergeBranch` / `git.rebaseBranch`; the hidden two always run and are refused by `startCheck`
   - `src/lib/dialogs.ts` — `choose()` for the "uncommitted changes" refusal with its Show Source Control button
-  - `src-tauri/src/git.rs` — `start_guard`: `start_merge` / `start_rebase` refuse again on their side (operation in progress, changed tracked files; detached HEAD for rebase)
+  - `src-tauri/src/git.rs` — `start_guard`: `start_merge` / `start_rebase` refuse again on their side (operation in progress, changed tracked files unless `allow_dirty`, merge only; detached HEAD for rebase)
+  - `src/lib/types.ts` / `src/lib/actions.ts` — setting `gitMergeWithChanges` (off by default; `BOOLEAN_SETTINGS`)
+  - `src/components/panels/SettingsPanel.tsx` — Settings › Git "Allow merging with uncommitted changes"
+  - `src/lib/gitApi.ts` — `git.merge(…, allowDirty)`
 - Tests: `src/__tests__/gitMerge.test.ts`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 
@@ -615,6 +619,17 @@ Scenario: MERGE-008.11 One action at a time
   Given a pull is running
   When I look at the graph menus, the panel and the Git menu
   Then every merge and rebase entry is greyed out until it ends
+
+Scenario: MERGE-008.12 Merging with uncommitted changes, when allowed in Settings
+  Given Settings › Git › "Allow merging with uncommitted changes" is on (it is off by default)
+  And I am on "main" with 2 uncommitted changes to tracked files
+  When I start a merge of "feature"
+  Then the merge dialog opens instead of the refusal
+  And it adds "Your 2 uncommitted changes stay as they are: git refuses the merge if it would change those files. If the merge stops on a conflict, Abort may not be able to bring them back exactly; commit or stash them first to be safe."
+  When I click "Merge" and "feature" does not change those files
+  Then the merge is done and my changes are still there
+  But when "feature" changes one of those files, git refuses, names it, and nothing is in progress
+  And a rebase still refuses with "Commit or discard your changes first", whatever the setting
 ```
 
 ## MERGE-009: Force Push after pushed commits were rewritten

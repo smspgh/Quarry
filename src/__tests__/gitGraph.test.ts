@@ -160,7 +160,7 @@ describe("stash rows in the layout", () => {
 });
 
 // ----- Graph polish (GRAPH-015..018) -----
-import { clampHitsHeight, clampLaneScroll, dateOrderAllowed, isUncommitted, revealLane, rowOffset, takePage, UNCOMMITTED, uncommittedLineEnd, withoutUncommitted, withUncommitted } from "../lib/gitGraph";
+import { clampHitsHeight, clampLaneScroll, isUncommitted, revealLane, rowOffset, takePage, UNCOMMITTED, uncommittedLineEnd, withoutUncommitted, withUncommitted } from "../lib/gitGraph";
 
 describe("the uncommitted-changes row in the layout (GRAPH-015)", () => {
   const un = (head?: string) => ({ sha: UNCOMMITTED, parents: head ? [head] : [] });
@@ -274,14 +274,6 @@ describe("the first-page probe and date order (GRAPH-018)", () => {
     expect(takePage(page, 4)).toEqual({ rows: page, more: false });
     // The stash row above the commit that is left out stays on the page; the next page brings its commit.
     expect(takePage(page, 3)).toEqual({ rows: page.slice(0, 5), more: true });
-  });
-
-  it("date order is allowed for 300 commits or fewer, all loaded", () => {
-    expect(dateOrderAllowed(40, false)).toBe(true);
-    expect(dateOrderAllowed(300, false)).toBe(true);
-    expect(dateOrderAllowed(300, true)).toBe(false); // "300+": 301 or more
-    expect(dateOrderAllowed(301, false)).toBe(false);
-    expect(dateOrderAllowed(0, false)).toBe(true);
   });
 
   it("the layout takes commits in date order: branches interleave, main keeps lane 0", () => {

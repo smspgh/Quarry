@@ -33,7 +33,6 @@ const { useGit } = await import("../lib/git");
 const { useStore } = await import("../lib/store");
 const { isPanelShown } = await import("../lib/panels");
 (await import("../lib/gitCompare")).setRowClickDelay(0); // file rows compare at once here
-const { DATE_ORDER_OFF, DATE_ORDER_WHY } = await import("../lib/gitGraph");
 
 const ROOT = "C:\\work\\proj";
 const sha = (n: number) => `${n}`.repeat(40);
@@ -564,71 +563,42 @@ describe("GraphView date order (GRAPH-018)", () => {
     expect(toasts()).toEqual([]);
   });
 
-  it("is disabled, with the reason, for more than 300 commits; exactly 300 is allowed", async () => {
+  it("works for any size of history: a large one pages in date order", async () => {
     answers.page = chain(301);
-    const view = await render(<GraphView doc={doc} visible />);
-    await flush();
-    expect(toolbar().textContent).toContain("300+ commits");
-    expect(button().disabled).toBe(true);
-    expect(button().title).toBe(DATE_ORDER_WHY);
-    expect(DATE_ORDER_WHY).toBe("Only for histories of 300 commits or fewer: in larger ones date order spreads the branches over many more lanes.");
-    await view.unmount();
-    calls.length = 0;
-    answers.page = chain(300);
     await render(<GraphView doc={doc} visible />);
     await flush();
-    expect(toolbar().textContent).toContain("300 commits");
-    expect(toolbar().textContent).not.toContain("300+");
+    expect(toolbar().textContent).toContain("300+ commits");
     expect(button().disabled).toBe(false);
-    // Everything is loaded: scrolling to the end asks for nothing more.
+    await fire.click(button());
+    await flush();
+    expect(button().getAttribute("aria-pressed")).toBe("true");
+    expect(graphCalls().map((a) => a.order)).toEqual([null, "date"]);
+    // Scrolling to the end asks for the next page, still in date order.
     await act(async () => {
       list().scrollTop = 300 * 26;
       list().dispatchEvent(new Event("scroll", { bubbles: true }));
     });
     await flush();
-    expect(graphCalls()).toHaveLength(1);
+    expect(graphCalls().slice(2).map((a) => [a.skip, a.order])).toEqual([[300, "date"]]);
+    expect(toasts()).toEqual([]);
   });
 
-  it("goes back to branch order, saying so once, when the history shown has more than 300 commits", async () => {
+  it("stays on when switching to a larger scope or when the history grows", async () => {
     await render(<GraphView doc={doc} visible />);
     await flush();
     await fire.click(button());
     await flush();
-    expect(button().getAttribute("aria-pressed")).toBe("true");
-    // All branches has 2,000 commits.
     answers.page = (args: { all: boolean }) => (args.all ? chain(301) : PAGE);
     await fire.click(byText(toolbar(), "button", "All branches")[0]);
     await flush(6);
-    expect(graphCalls().slice(2).map((a) => [a.all, a.order])).toEqual([[true, "date"], [true, null]]);
-    expect(toolbar().textContent).toContain("300+ commits");
-    expect(button().disabled).toBe(true);
-    expect(button().getAttribute("aria-pressed")).toBe("false");
-    expect(toasts()).toEqual([DATE_ORDER_OFF]);
-    expect(DATE_ORDER_OFF).toBe("Date order is off: this history has more than 300 commits.");
-    // Back on the small history it can be turned on again, but stays off until asked.
-    await fire.click(byText(toolbar(), "button", "Current branch")[0]);
-    await flush(6);
-    expect(graphCalls().slice(-1)[0]).toMatchObject({ all: false, order: null });
-    expect(button().disabled).toBe(false);
-    expect(button().getAttribute("aria-pressed")).toBe("false");
-    expect(toasts()).toEqual([DATE_ORDER_OFF]);
-  });
-
-  it("a history that grows past 300 commits while date order is on reloads in branch order", async () => {
-    answers.page = chain(298);
-    await render(<GraphView doc={doc} visible />);
-    await flush();
-    await fire.click(button());
-    await flush();
+    expect(graphCalls().slice(2).map((a) => [a.all, a.order])).toEqual([[true, "date"]]);
     expect(button().getAttribute("aria-pressed")).toBe("true");
-    // A fetch brings 5 more commits.
     answers.page = chain(303);
     await setRepo({ behind: 5 });
     await flush(6);
-    expect(graphCalls().slice(2).map((a) => a.order)).toEqual(["date", null]);
-    expect(button().disabled).toBe(true);
-    expect(toasts()).toEqual([DATE_ORDER_OFF]);
-    expect(toolbar().textContent).toContain("300+ commits");
+    expect(graphCalls().slice(-1)[0]).toMatchObject({ order: "date" });
+    expect(button().getAttribute("aria-pressed")).toBe("true");
+    expect(toasts()).toEqual([]);
   });
 
   it("is disabled until the first page has arrived", async () => {
@@ -643,7 +613,7 @@ describe("GraphView date order (GRAPH-018)", () => {
     expect(button().disabled).toBe(false);
   });
 
-  it("works with the uncommitted-changes row: it stays first, and is not counted against the limit", async () => {
+  it("works with the uncommitted-changes row: it stays first and is not counted", async () => {
     answers.page = chain(300);
     await setRepo({ files: [file("a.ts")] });
     await render(<GraphView doc={doc} visible />);

@@ -137,7 +137,7 @@
       "prefix": "SET",
       "title": "Settings",
       "spec": "specs/settings.md",
-      "stories": 18
+      "stories": 19
     },
     {
       "prefix": "SPLIT",
@@ -1272,7 +1272,7 @@
       "title": "Right-click a branch or tag label in the graph",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 32,
+      "line": 33,
       "status": "draft",
       "commands": [],
       "files": [
@@ -1352,7 +1352,7 @@
       "title": "Manage branches and tags from the branch picker and the Git menu",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 127,
+      "line": 128,
       "status": "draft",
       "commands": [
         "git.deleteBranch",
@@ -1441,7 +1441,7 @@
       "title": "Delete a local branch",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 221,
+      "line": 222,
       "status": "draft",
       "commands": [
         "git.deleteBranch"
@@ -1524,7 +1524,7 @@
       "title": "Rename a local branch",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 321,
+      "line": 322,
       "status": "draft",
       "commands": [
         "git.renameBranch"
@@ -1599,7 +1599,7 @@
       "title": "Set or clear a branch's upstream",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 409,
+      "line": 410,
       "status": "draft",
       "commands": [
         "git.setUpstream"
@@ -1666,7 +1666,7 @@
       "title": "Push a branch",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 484,
+      "line": 485,
       "status": "draft",
       "commands": [
         "git.pushBranch"
@@ -1744,7 +1744,7 @@
       "title": "Delete a branch on the remote",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 579,
+      "line": 580,
       "status": "draft",
       "commands": [
         "git.deleteRemoteBranch"
@@ -1823,7 +1823,7 @@
       "title": "Delete a tag",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 672,
+      "line": 673,
       "status": "draft",
       "commands": [
         "git.deleteTag"
@@ -1881,7 +1881,7 @@
       "title": "Push a tag",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 731,
+      "line": 732,
       "status": "draft",
       "commands": [
         "git.pushTag"
@@ -2946,7 +2946,7 @@
       "title": "Pick a second commit with Ctrl+click",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 27,
+      "line": 28,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3017,7 +3017,7 @@
       "title": "See which files differ between two commits",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 113,
+      "line": 114,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3094,7 +3094,7 @@
       "title": "Open a differing file in a Compare tab",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 208,
+      "line": 209,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3160,7 +3160,7 @@
       "title": "Compare a commit with the working tree",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 281,
+      "line": 282,
       "status": "draft",
       "commands": [],
       "files": [
@@ -3244,7 +3244,7 @@
       "title": "Compare with a branch",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 379,
+      "line": 380,
       "status": "draft",
       "commands": [
         "git.compareWithBranch",
@@ -3260,7 +3260,8 @@
         "src/lib/gitCompare.ts",
         "src/components/MenuBar.tsx",
         "src/lib/store.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git.rs",
+        "src/lib/gitApi.ts"
       ],
       "tests": [
         "src/__tests__/gitCompare.test.ts",
@@ -3325,6 +3326,10 @@
         {
           "id": "COMMITCMP-005.13",
           "title": "The branch points at the commit I right-clicked"
+        },
+        {
+          "id": "COMMITCMP-005.14",
+          "title": "Only what the branch changed since it split off, when chosen in Settings"
         }
       ]
     },
@@ -3333,7 +3338,7 @@
       "title": "Comparing never changes the repository",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 477,
+      "line": 489,
       "status": "draft",
       "commands": [],
       "files": [
@@ -9990,7 +9995,7 @@
       "title": "Claude-assisted git exists only while Claude Code is switched on",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 33,
+      "line": 34,
       "status": "draft",
       "commands": [
         "git.draftMessage",
@@ -10048,7 +10053,7 @@
       "title": "Know what is sent to Claude before it goes",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 93,
+      "line": 94,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10119,7 +10124,7 @@
       "title": "Draft a commit message from the changes about to be committed",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 174,
+      "line": 175,
       "status": "draft",
       "commands": [
         "git.draftMessage"
@@ -10221,7 +10226,7 @@
       "title": "Draft a message for a very large change",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 297,
+      "line": 298,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10279,7 +10284,7 @@
       "title": "See that Claude is working, and stop it",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 360,
+      "line": 361,
       "status": "draft",
       "commands": [
         "git.stopClaude"
@@ -10347,7 +10352,7 @@
       "title": "Be told why Claude could not answer",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 434,
+      "line": 435,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10409,7 +10414,7 @@
       "title": "Have a conflict explained and a resolution proposed",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 499,
+      "line": 500,
       "status": "draft",
       "commands": [
         "git.explainConflict"
@@ -10507,7 +10512,7 @@
       "title": "Keep Current and Incoming straight in Claude's explanation",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 618,
+      "line": 619,
       "status": "draft",
       "commands": [],
       "files": [
@@ -10562,7 +10567,7 @@
       "title": "Summarise a branch or a range of commits",
       "area": "GITAI",
       "spec": "specs/git-claude.md",
-      "line": 679,
+      "line": 680,
       "status": "draft",
       "commands": [
         "git.summariseBranch"
@@ -11374,7 +11379,7 @@
       "title": "Uncommitted changes as the first row of the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 853,
+      "line": 854,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11468,7 +11473,7 @@
       "title": "Drag the height of the Search All History results",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 976,
+      "line": 977,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11531,7 +11536,7 @@
       "title": "Scroll sideways through a graph wider than 16 lanes",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1051,
+      "line": 1052,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11588,10 +11593,10 @@
     },
     "GRAPH-018": {
       "id": "GRAPH-018",
-      "title": "List a small history by date",
+      "title": "List the history by date",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1129,
+      "line": 1130,
       "status": "draft",
       "commands": [],
       "files": [
@@ -11628,19 +11633,19 @@
         },
         {
           "id": "GRAPH-018.5",
-          "title": "Only for small histories"
+          "title": "Any size of history"
         },
         {
           "id": "GRAPH-018.6",
-          "title": "Exactly at the limit"
+          "title": "Exactly 300 commits"
         },
         {
           "id": "GRAPH-018.7",
-          "title": "The limit applies to what is shown"
+          "title": "It stays on when the scope changes"
         },
         {
           "id": "GRAPH-018.8",
-          "title": "The history grows past the limit"
+          "title": "It stays on when the history grows"
         },
         {
           "id": "GRAPH-018.9",
@@ -11665,7 +11670,7 @@
       "title": "Show Commit Graph is in the palette without a repository",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1222,
+      "line": 1220,
       "status": "draft",
       "commands": [
         "git.graph"
@@ -14547,7 +14552,7 @@
       "title": "Merge and rebase from a commit's right-click menu in the graph",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 54,
+      "line": 55,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14599,7 +14604,7 @@
       "title": "Merge and rebase from a branch or tag label in the graph",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 111,
+      "line": 112,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14657,7 +14662,7 @@
       "title": "Merge Branch… and Rebase onto Branch… from the panel, the Git menu and the palette",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 180,
+      "line": 181,
       "status": "draft",
       "commands": [
         "git.mergeBranch",
@@ -14734,7 +14739,7 @@
       "title": "Merge asks first, then merges",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 263,
+      "line": 264,
       "status": "draft",
       "commands": [
         "git.mergeRef"
@@ -14801,7 +14806,7 @@
       "title": "Rebase asks first, then rebases",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 342,
+      "line": 343,
       "status": "draft",
       "commands": [
         "git.rebaseOnto"
@@ -14859,7 +14864,7 @@
       "title": "Rebase warns when commits to replay are already pushed",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 408,
+      "line": 409,
       "status": "draft",
       "commands": [
         "git.rebaseOnto"
@@ -14913,7 +14918,7 @@
       "title": "A merge or rebase that stops on a conflict",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 467,
+      "line": 468,
       "status": "draft",
       "commands": [],
       "files": [
@@ -14975,7 +14980,7 @@
       "title": "Refuse to start when it is not safe",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 539,
+      "line": 540,
       "status": "draft",
       "commands": [
         "git.mergeBranch",
@@ -15042,6 +15047,10 @@
         {
           "id": "MERGE-008.11",
           "title": "One action at a time"
+        },
+        {
+          "id": "MERGE-008.12",
+          "title": "Merging with uncommitted changes, when allowed in Settings"
         }
       ]
     },
@@ -15050,7 +15059,7 @@
       "title": "Force Push after pushed commits were rewritten",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 620,
+      "line": 635,
       "status": "draft",
       "commands": [
         "git.forcePush"
@@ -18134,6 +18143,46 @@
         }
       ]
     },
+    "SET-019": {
+      "id": "SET-019",
+      "title": "Git settings",
+      "area": "SET",
+      "spec": "specs/settings.md",
+      "line": 962,
+      "status": "draft",
+      "commands": [],
+      "files": [
+        "src/components/panels/SettingsPanel.tsx",
+        "src/lib/types.ts",
+        "src/lib/actions.ts"
+      ],
+      "tests": [
+        "src/__tests__/gitMerge.test.ts",
+        "src/__tests__/graphCompare.test.tsx"
+      ],
+      "docs": [
+        "docs/settings.md",
+        "docs/git.md"
+      ],
+      "scenarios": [
+        {
+          "id": "SET-019.1",
+          "title": "The defaults are the careful ones"
+        },
+        {
+          "id": "SET-019.2",
+          "title": "The hint says what the current choice does"
+        },
+        {
+          "id": "SET-019.3",
+          "title": "What they change"
+        },
+        {
+          "id": "SET-019.4",
+          "title": "A bad value in the file"
+        }
+      ]
+    },
     "SPLIT-001": {
       "id": "SPLIT-001",
       "title": "Split the editor and close the split",
@@ -18447,7 +18496,7 @@
       "title": "Stage one change of a file",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 30,
+      "line": 31,
       "status": "draft",
       "commands": [
         "git.stageChange"
@@ -18522,7 +18571,7 @@
       "title": "Unstage one change",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 115,
+      "line": 116,
       "status": "draft",
       "commands": [
         "git.unstageChange"
@@ -18574,7 +18623,7 @@
       "title": "Discard one change, after asking",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 171,
+      "line": 172,
       "status": "draft",
       "commands": [
         "git.discardChange"
@@ -18635,7 +18684,7 @@
       "title": "Stage, unstage or discard selected lines",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 235,
+      "line": 236,
       "status": "draft",
       "commands": [
         "git.stageLines",
@@ -18709,7 +18758,7 @@
       "title": "Unsaved edits are saved first",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 321,
+      "line": 322,
       "status": "draft",
       "commands": [
         "git.stageChange",
@@ -18760,7 +18809,7 @@
       "title": "Line endings, encoding and the end of the file are preserved",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 377,
+      "line": 378,
       "status": "draft",
       "commands": [],
       "files": [
@@ -18811,7 +18860,7 @@
       "title": "Where partial staging is offered",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 440,
+      "line": 441,
       "status": "draft",
       "commands": [
         "git.stageChange",
@@ -18884,7 +18933,7 @@
       "title": "Partial staging from the menu, the palette and the keyboard",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 517,
+      "line": 518,
       "status": "draft",
       "commands": [
         "git.stageChange",
@@ -18955,7 +19004,7 @@
       "title": "The comparison stays true to the index",
       "area": "STAGE",
       "spec": "specs/git-staging.md",
-      "line": 590,
+      "line": 591,
       "status": "draft",
       "commands": [],
       "files": [
@@ -19021,7 +19070,7 @@
       "title": "Stash uncommitted changes",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 25,
+      "line": 26,
       "status": "draft",
       "commands": [
         "git.stash"
@@ -19084,7 +19133,7 @@
       "title": "Choose whether untracked files go into the stash",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 97,
+      "line": 98,
       "status": "draft",
       "commands": [
         "git.stash"
@@ -19139,7 +19188,7 @@
       "title": "Guards before stashing",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 154,
+      "line": 155,
       "status": "draft",
       "commands": [
         "git.stash"
@@ -19188,7 +19237,7 @@
       "title": "See the stashes of the repository",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 200,
+      "line": 201,
       "status": "draft",
       "commands": [
         "git.showStashes"
@@ -19255,7 +19304,7 @@
       "title": "See what a stash holds",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 269,
+      "line": 270,
       "status": "draft",
       "commands": [],
       "files": [
@@ -19315,7 +19364,7 @@
       "title": "Apply a stash and keep it",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 332,
+      "line": 333,
       "status": "draft",
       "commands": [
         "git.stashApply"
@@ -19388,7 +19437,7 @@
       "title": "Pop a stash",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 414,
+      "line": 415,
       "status": "draft",
       "commands": [
         "git.stashPop"
@@ -19436,7 +19485,7 @@
       "title": "Drop a stash",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 461,
+      "line": 462,
       "status": "draft",
       "commands": [
         "git.stashDrop"
@@ -19497,7 +19546,7 @@
       "title": "A stash that conflicts when it comes back",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 523,
+      "line": 524,
       "status": "draft",
       "commands": [
         "git.stashApply",
@@ -19594,7 +19643,7 @@
       "title": "Stashes in the commit graph",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 643,
+      "line": 644,
       "status": "draft",
       "commands": [
         "git.graph"
@@ -19682,7 +19731,7 @@
       "title": "Stash from the menu and the command palette",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 737,
+      "line": 738,
       "status": "draft",
       "commands": [
         "git.stash",
@@ -20706,7 +20755,7 @@
       "title": "Open a conflicted file in the merge view",
       "area": "THREEWAY",
       "spec": "specs/git-merge-editor.md",
-      "line": 22,
+      "line": 23,
       "status": "planned",
       "commands": [
         "git.openMergeView"
@@ -20781,7 +20830,7 @@
       "title": "Accept a side or both for each conflict",
       "area": "THREEWAY",
       "spec": "specs/git-merge-editor.md",
-      "line": 109,
+      "line": 110,
       "status": "planned",
       "commands": [
         "git.acceptCurrent",
@@ -20844,7 +20893,7 @@
       "title": "Edit the result by hand",
       "area": "THREEWAY",
       "spec": "specs/git-merge-editor.md",
-      "line": 173,
+      "line": 174,
       "status": "planned",
       "commands": [],
       "files": [
@@ -20888,7 +20937,7 @@
       "title": "Complete the merge of a file, or cancel",
       "area": "THREEWAY",
       "spec": "specs/git-merge-editor.md",
-      "line": 221,
+      "line": 222,
       "status": "planned",
       "commands": [
         "git.completeMergeView",
@@ -20969,7 +21018,7 @@
       "title": "Know which side is which during a rebase",
       "area": "THREEWAY",
       "spec": "specs/git-merge-editor.md",
-      "line": 319,
+      "line": 320,
       "status": "planned",
       "commands": [],
       "files": [
@@ -23603,6 +23652,7 @@
       "SET-014",
       "SET-015",
       "SET-016",
+      "SET-019",
       "TAB-009",
       "TERM-007",
       "UPD-002"
@@ -23826,6 +23876,7 @@
       "SET-011",
       "SET-014",
       "SET-015",
+      "SET-019",
       "SPLIT-007",
       "STAGE-005",
       "TAB-002",
@@ -24270,6 +24321,7 @@
       "BRANCH-009",
       "COMMITCMP-002",
       "COMMITCMP-004",
+      "COMMITCMP-005",
       "CONFLICT-008",
       "CONFLICT-011",
       "CONFLICT-012",
@@ -24862,6 +24914,7 @@
       "SET-013",
       "SET-015",
       "SET-016",
+      "SET-019",
       "TAB-009",
       "THREEWAY-001",
       "UI-002",
@@ -25356,7 +25409,8 @@
       "MERGE-006",
       "MERGE-007",
       "MERGE-008",
-      "MERGE-009"
+      "MERGE-009",
+      "SET-019"
     ],
     "src/__tests__/gitNav.test.ts": [
       "GIT-004",
@@ -25475,7 +25529,8 @@
       "COMMITCMP-003",
       "COMMITCMP-004",
       "COMMITCMP-005",
-      "COMMITCMP-006"
+      "COMMITCMP-006",
+      "SET-019"
     ],
     "src/__tests__/graphHistory.test.tsx": [
       "HISTORY-001",

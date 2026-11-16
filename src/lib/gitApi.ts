@@ -435,7 +435,8 @@ export const git = {
   // Start a merge or rebase, force push (specs/git-merge-rebase.md). `target`: a branch, remote branch or tag name, or a commit id.
   mergePreview: (root: string, target: string) => invoke<GitMergePreview>("git_merge_preview", { root, target }),
   /** `merge --no-edit`; rejects with git's output when it stops on a conflict (the merge is then in progress). */
-  merge: (root: string, target: string, mode: GitMergeMode) => invoke<string>("git_merge", { root, target, mode }),
+  /** `allowDirty`: Settings › Git "Allow merging with uncommitted changes" (git still refuses a merge that would touch them). */
+  merge: (root: string, target: string, mode: GitMergeMode, allowDirty = false) => invoke<string>("git_merge", { root, target, mode, allowDirty }),
   /** Plain `rebase <target>` of the current branch; rejects with git's output when it stops on a conflict. */
   rebase: (root: string, target: string) => invoke<string>("git_rebase", { root, target }),
   forcePushPreview: (root: string) => invoke<GitForcePushPreview>("git_force_push_preview", { root }),
@@ -455,6 +456,8 @@ export const git = {
    *  and the working tree when `right` is left out. A side is a commit id, "HEAD" or a branch name.
    *  Read-only: nothing is checked out, staged or written inside `.git`. */
   diffFiles: (root: string, left: string, right?: string) => invoke<GitCompare>("git_diff_files", { root, left, right: right ?? null }),
+  /** The common ancestor of two commits / branches (Compare with Branch… "since it split off"); null when they share none. */
+  mergeBase: (root: string, left: string, right: string) => invoke<string | null>("git_merge_base", { root, left, right }),
   // ---- branch and tag housekeeping (specs/git-branches.md) ----
   /** Tags, newest first. */
   tags: (root: string) => invoke<GitTag[]>("git_tags", { root }),

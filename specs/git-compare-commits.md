@@ -14,6 +14,7 @@ Decisions (the roadmap left these open):
 - **Graph menu.** The three entries (Compare with <short id>, Compare with Working Tree, Compare with Branch…) form one group in the commit's right-click menu, after Check Out This Commit… and before Cherry-pick (the planned order of the whole menu is in `specs/git-merge-rebase.md`, Decisions). They are not on a stash row or the uncommitted-changes row, and not in the ref-label menu of MERGE-002. A right-click still selects the commit it is on (GRAPH-011.1), which ends a comparison that was showing; "Compare with <short id>" names the commit that was selected before the right-click.
 - **Which side is which.** Left = the older state, right = the newer one. When one commit is an ancestor of the other, the ancestor is on the left whatever the click order. When neither is (two branches), the first selected commit is on the left and the Ctrl+clicked one on the right. A Swap Sides button flips them. The working tree is always on the right. Until git has answered, the heading shows the two ids in the order they were picked.
 - **What "differs" means.** The direct difference between the two snapshots (`git diff A B`), not "changes since the common ancestor" (`A...B`). The pane's header says how many commits each side has that the other lacks, so a diverged pair is not misread.
+- **Owner decision (2026-11-16): Compare with Branch… is a setting.** Settings › Git › "Compare with Branch shows" (`gitCompareBranch`): "The two tips" (default, the direct difference above) or "Changes since split", which compares the commit where the branch split off (`git merge-base`) with the branch, as a pull request does; with no shared history it falls back to the two tips and says so (COMMITCMP-005.14). Ctrl+click comparisons of two commits are always direct.
 - **Letters** (A, M, D, R) read left to right: A = only in the right side. Renames are detected (`-M`) and shown as one R row with the old path.
 - **Compare tabs** follow the existing commit-file tabs (GRAPH-010, DIFF-014): labels `name @ shortid`, both sides read-only, opened as preview tabs that replace each other. A working-tree side behaves as in Compare with Last Commit (DIFF-006): the open tab's text (read-only snapshot) or the file on disk (editable).
 - **Binary files** are listed like any other file; clicking one opens no tab and says "This file is binary.", as today.
@@ -390,7 +391,10 @@ Scenario: COMMITCMP-004.14 How the folder relates to the commit
   - `src/lib/gitCompare.ts` — `orderSides(…, picked)` (picked branch left unless it is ahead of the other commit), `noDifferences` for the same commit on both sides
   - `src/components/MenuBar.tsx` — Git menu item directly after Compare with Last Commit (HEAD)
   - `src/lib/store.ts` — `graphCompare`: the pending comparison for a graph tab (no new palette mode)
-  - `src-tauri/src/git.rs` — `compare_side` resolves "HEAD" or a branch name to its commit (name checked with `valid_ref_name`, then `refs/heads/<name>` or `refs/remotes/<name>` through `rev-parse --verify`)
+  - `src-tauri/src/git.rs` — `compare_side` resolves "HEAD" or a branch name to its commit (name checked with `valid_ref_name`, then `refs/heads/<name>` or `refs/remotes/<name>` through `rev-parse --verify`); `merge_base` / command `git_merge_base` (read-only) for "Changes since split"
+  - `src/lib/gitApi.ts` — `git.mergeBase`
+  - `src/lib/types.ts` / `src/lib/actions.ts` — setting `gitCompareBranch` ("tips" by default, or "split")
+  - `src/components/panels/SettingsPanel.tsx` — Settings › Git "Compare with Branch shows": The two tips / Changes since split
 - Tests: `src/__tests__/gitCompare.test.ts`, `src/__tests__/graphCompare.test.tsx`, `src/__tests__/graphView.test.tsx`, `src/__tests__/branchPicker.test.tsx`, `src/__tests__/gitRefs.test.ts`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 
@@ -472,6 +476,14 @@ Scenario: COMMITCMP-005.13 The branch points at the commit I right-clicked
   Given "main" points at commit "77e0f12" and I am on another commit
   When I right-click "77e0f12", choose "Compare with Branch…" and pick "main"
   Then the pane says "No differences: both sides are the commit 77e0f12."
+
+Scenario: COMMITCMP-005.14 Only what the branch changed since it split off, when chosen in Settings
+  Given Settings › Git › "Compare with Branch shows" is "Changes since split" (the default is "The two tips")
+  And I am on "main", and "feature" split off at commit "5e5e5e5"
+  When I run Compare with Branch… and pick "feature"
+  Then "5e5e5e5" is compared with "feature", the left side labelled "where feature split off"
+  And commits made on "main" since then do not show in the list, as in a pull request
+  But when "main" and "feature" share no history, the two tips are compared and a notification says "feature and main share no history: comparing the two tips."
 ```
 
 ## COMMITCMP-006: Comparing never changes the repository

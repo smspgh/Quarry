@@ -68,6 +68,13 @@ A folder that doesn't exist yet is created. If a folder you choose can't be used
 
 **Clear find & replace history** asks first, then removes every remembered entry.
 
+## Git
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| Allow merging with uncommitted changes | Off | Off: a [merge](git.md#merge-and-rebase) only starts when every tracked file is committed, so **Abort** can always bring everything back. On: a merge may start with uncommitted changes; git refuses one that would change those files, and if the merge stops on a conflict, Abort may not be able to bring your changes back exactly. A rebase always needs a clean state. |
+| Compare with Branch shows | The two tips | **The two tips**: how the two branches differ right now. **Changes since split**: only what the picked branch changed since it split off from yours, as a pull request shows it. See [Comparing commits](git.md#comparing-commits). |
+
 ## JSON
 
 | Setting | Default | Description |

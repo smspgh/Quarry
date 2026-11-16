@@ -628,6 +628,16 @@ export function SettingsPanel() {
           )}
         </Section>
 
+        {/* Git (specs/git-merge-rebase.md MERGE-008, specs/git-compare-commits.md COMMITCMP-004). */}
+        <Section title="Git">
+          <Row label="Allow merging with uncommitted changes" hint={settings.gitMergeWithChanges ? "A merge may start while tracked files have changes; git refuses one that would change those files, and if it stops on a conflict Abort may not bring them back exactly" : "A merge only starts when every tracked file is committed, so Abort can always bring everything back as it was"} k="gitMergeWithChanges">
+            <Switch on={settings.gitMergeWithChanges} onChange={(v) => change("gitMergeWithChanges", v)} />
+          </Row>
+          <Row label="Compare with Branch shows" hint={settings.gitCompareBranch === "tips" ? "How the two branches differ right now, tip against tip" : "Only what the picked branch changed since it split off, as a pull request shows it"} k="gitCompareBranch">
+            <Segmented items={[["tips", "The two tips"], ["split", "Changes since split"]] as const} value={settings.gitCompareBranch} onChange={(v) => change("gitCompareBranch", v)} />
+          </Row>
+        </Section>
+
         <CodeIntelSection change={change} />
 
         <ClaudeSection change={change} />

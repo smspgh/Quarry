@@ -1279,9 +1279,8 @@ fn graph(root: &Path, all: bool, skip: u32, limit: u32) -> Result<Vec<GitGraphCo
 }
 
 /// Graph polish (GRAPH-018): `by_date` lists the commits in git's author-date order (newest
-/// first, but never a commit above one of its children) instead of branch by branch. The UI only
-/// asks for it when the whole history fits one page, which it finds out by asking the first page
-/// for one commit more than it shows (`limit` = 301).
+/// first, but never a commit above one of its children) instead of branch by branch, for any size
+/// of history (each page re-sorts the history, so pages cost a little more than in branch order).
 fn graph_ordered(root: &Path, all: bool, skip: u32, limit: u32, by_date: bool) -> Result<Vec<GitGraphCommit>, String> {
     if !has_head(root) {
         return Ok(Vec::new());
@@ -1691,9 +1690,14 @@ fn merge_preview(root: &Path, target: &str) -> Result<GitMergePreview, String> {
 /// Why a merge or rebase may not start now: something is in progress, or tracked files have
 /// uncommitted changes (Abort could then not bring everything back). The UI checks first; this is
 /// the second look, right before git runs.
-fn start_guard(root: &Path, what: &str) -> Result<(), String> {
+/// `allow_dirty`: the setting "Allow merging with uncommitted changes" (merge only): git itself
+/// then refuses a merge that would touch a changed file.
+fn start_guard(root: &Path, what: &str, allow_dirty: bool) -> Result<(), String> {
     if let Some(op) = operation(root) {
         return Err(format!("A {op} is in progress. Finish or abort it first."));
+    }
+    if allow_dirty {
+        return Ok(());
     }
     let changed = run_text(root, true, &["status", "--porcelain", "--untracked-files=no"])?;
     if !changed.trim().is_empty() {
@@ -1705,8 +1709,8 @@ fn start_guard(root: &Path, what: &str) -> Result<(), String> {
 /// Merge `target` into the current branch (or detached HEAD) without asking for a message.
 /// `mode`: "ff-only" (refuses when a fast-forward is not possible), "no-ff" (always a merge
 /// commit) or "auto". A conflict stops the merge: the error is git's output (CONFLICT lines).
-fn start_merge(root: &Path, target: &str, mode: &str) -> Result<String, String> {
-    start_guard(root, "merge")?;
+fn start_merge(root: &Path, target: &str, mode: &str, allow_dirty: bool) -> Result<String, String> {
+    start_guard(root, "merge", allow_dirty)?;
     let (full, kind, sha) = resolve_target(root, target)?;
     // By its short name when that means the same commit, so the message reads "Merge branch
     // 'feature'" (git does not shorten a full ref name there); the full name when a tag and a
@@ -1732,7 +1736,7 @@ fn start_merge(root: &Path, target: &str, mode: &str) -> Result<String, String> 
 /// automatic stash, no editor). Refused on a detached HEAD. A conflict stops the rebase: the error
 /// is git's output.
 fn start_rebase(root: &Path, target: &str) -> Result<String, String> {
-    start_guard(root, "rebase")?;
+    start_guard(root, "rebase", false)?;
     if run(root, true, &["symbolic-ref", "-q", "HEAD"], None).is_err() {
         return Err("Switch to a branch first: a rebase moves a branch.".into());
     }
@@ -2133,6 +2137,20 @@ fn diff_files(root: &Path, left: &str, right: Option<&str>) -> Result<GitCompare
         behind,
         untracked,
     })
+}
+
+/// Compare with Branch… set to "what the branch changed since it split off": the common ancestor
+/// of the two sides (each a commit id, HEAD or a branch name, as in `compare_side`), or None when
+/// the histories share no commit. Read-only.
+fn merge_base(root: &Path, left: &str, right: &str) -> Result<Option<String>, String> {
+    let (l, r) = (compare_side(root, left)?, compare_side(root, right)?);
+    match compare_git(root, &["merge-base", &l, &r], None) {
+        Ok(out) => {
+            let sha = String::from_utf8_lossy(&out).trim().to_string();
+            Ok(is_sha(&sha).then_some(sha))
+        }
+        Err(_) => Ok(None),
+    }
 }
 
 // ---------- branch and tag housekeeping (specs/git-branches.md) ----------
@@ -2652,8 +2670,13 @@ pub async fn git_merge_preview(root: String, target: String) -> Result<GitMergeP
 }
 
 #[tauri::command]
-pub async fn git_merge(root: String, target: String, mode: String) -> Result<String, String> {
-    blocking(move || start_merge(Path::new(&root), &target, &mode)).await
+pub async fn git_merge_base(root: String, left: String, right: String) -> Result<Option<String>, String> {
+    blocking(move || merge_base(Path::new(&root), &left, &right)).await
+}
+
+#[tauri::command]
+pub async fn git_merge(root: String, target: String, mode: String, allow_dirty: Option<bool>) -> Result<String, String> {
+    blocking(move || start_merge(Path::new(&root), &target, &mode, allow_dirty.unwrap_or(false))).await
 }
 
 #[tauri::command]
@@ -3578,12 +3601,12 @@ mod tests {
         let init = rev(&root, "HEAD");
         let feature = rev(&root, "feature");
         // Fast-forward: main is at feature, no merge commit.
-        start_merge(&root, "feature", "ff-only").unwrap();
+        start_merge(&root, "feature", "ff-only", false).unwrap();
         assert_eq!(rev(&root, "HEAD"), feature);
         assert_eq!(subjects(&root, "HEAD"), ["f2", "f1", "init"]);
         // Always a merge commit, with feature as the second parent and no message asked for.
         git_ok(&root, &["reset", "-q", "--hard", &init]);
-        start_merge(&root, "feature", "no-ff").unwrap();
+        start_merge(&root, "feature", "no-ff", false).unwrap();
         assert!(subjects(&root, "HEAD")[0].starts_with("Merge branch 'feature'"), "{:?}", subjects(&root, "HEAD"));
         assert_eq!(rev(&root, "HEAD^2"), feature);
         assert_eq!(rev(&root, "HEAD^1"), init);
@@ -3592,18 +3615,18 @@ mod tests {
         commit_file(&root, "m1.txt", "m\n", "m1");
         let before = rev(&root, "HEAD");
         // A fast-forward is no longer possible: refused, and no merge commit is made instead.
-        assert!(start_merge(&root, "feature", "ff-only").is_err());
+        assert!(start_merge(&root, "feature", "ff-only", false).is_err());
         assert_eq!(rev(&root, "HEAD"), before);
         assert!(operation(&root).is_none());
-        start_merge(&root, "feature", "auto").unwrap();
+        start_merge(&root, "feature", "auto", false).unwrap();
         assert_eq!((rev(&root, "HEAD^1"), rev(&root, "HEAD^2"), rev(&root, "feature")), (before, feature.clone(), feature));
         assert!(status(&root).unwrap().unwrap().files.is_empty());
-        assert!(start_merge(&root, "feature", "sideways").is_err());
+        assert!(start_merge(&root, "feature", "sideways", false).is_err());
         // A remote-style or unknown name never becomes an option.
-        assert!(start_merge(&root, "--abort", "auto").unwrap_err().contains("is not a branch or commit"));
+        assert!(start_merge(&root, "--abort", "auto", false).unwrap_err().contains("is not a branch or commit"));
         // A detached HEAD can merge too.
         git_ok(&root, &["checkout", "-q", "--detach", &init]);
-        start_merge(&root, "feature", "ff-only").unwrap();
+        start_merge(&root, "feature", "ff-only", false).unwrap();
         assert_eq!(rev(&root, "HEAD"), rev(&root, "feature"));
     }
 
@@ -3616,14 +3639,14 @@ mod tests {
         git_ok(&root, &["switch", "-q", "main"]);
         commit_file(&root, "notes.txt", "1\n2\n3\nmain\n", "ours");
         let before = rev(&root, "HEAD");
-        let err = start_merge(&root, "feature", "auto").unwrap_err();
+        let err = start_merge(&root, "feature", "auto", false).unwrap_err();
         assert!(err.contains("CONFLICT") && err.contains("notes.txt"), "{err}");
         let st = status(&root).unwrap().unwrap();
         assert_eq!(st.operation.as_deref(), Some("merge"));
         assert!(st.operation_message.as_ref().unwrap().starts_with("Merge branch 'feature'"));
         assert!(file(&st, &root, "notes.txt").conflicted);
         // Nothing else starts on top of it.
-        assert!(start_merge(&root, "feature", "auto").unwrap_err().contains("in progress"));
+        assert!(start_merge(&root, "feature", "auto", false).unwrap_err().contains("in progress"));
         assert!(start_rebase(&root, "feature").unwrap_err().contains("in progress"));
         assert!(force_push(&root).unwrap_err().contains("in progress"));
         assert_eq!(abort_operation(&root).unwrap(), "merge");
@@ -3634,12 +3657,49 @@ mod tests {
     }
 
     #[test]
+    fn allow_dirty_merges_around_changes_git_does_not_touch_and_refuses_ones_it_would() {
+        let Some((_d, root)) = repo_with_feature() else { return };
+        // Branch "more" changes a.txt.
+        git_ok(&root, &["switch", "-qc", "more"]);
+        commit_file(&root, "a.txt", "two\n", "more");
+        git_ok(&root, &["switch", "-q", "main"]);
+        // a.txt is not changed by "feature": the merge goes ahead and the edit stays.
+        write(&root, "a.txt", "edited\n");
+        start_merge(&root, "feature", "auto", true).unwrap();
+        assert_eq!(rev(&root, "HEAD"), rev(&root, "feature"));
+        assert_eq!(std::fs::read_to_string(root.join("a.txt")).unwrap(), "edited\n");
+        // A change to a file the merge would change: git refuses and nothing is in progress.
+        let before = rev(&root, "HEAD");
+        let err = start_merge(&root, "more", "auto", true).unwrap_err();
+        assert!(err.contains("a.txt"), "{err}");
+        assert!(operation(&root).is_none());
+        assert_eq!(rev(&root, "HEAD"), before);
+        assert_eq!(std::fs::read_to_string(root.join("a.txt")).unwrap(), "edited\n");
+        // The rebase never allows it.
+        assert!(start_rebase(&root, "more").unwrap_err().contains("uncommitted changes"));
+    }
+
+    #[test]
+    fn merge_base_is_where_the_branch_split_off() {
+        let Some((_d, root)) = repo_with_feature() else { return };
+        let init = rev(&root, "main");
+        commit_file(&root, "m.txt", "m\n", "on main");
+        assert_eq!(merge_base(&root, "HEAD", "feature").unwrap().as_deref(), Some(init.as_str()));
+        assert_eq!(merge_base(&root, "main", "feature").unwrap().as_deref(), Some(init.as_str()));
+        // Unrelated histories share nothing.
+        git_ok(&root, &["switch", "-q", "--orphan", "alone"]);
+        commit_file(&root, "z.txt", "z\n", "alone");
+        assert_eq!(merge_base(&root, "HEAD", "feature").unwrap(), None);
+        assert!(merge_base(&root, "HEAD", "no-such").is_err());
+    }
+
+    #[test]
     fn merge_and_rebase_refuse_uncommitted_tracked_changes_but_not_untracked_files() {
         let Some((_d, root)) = repo_with_feature() else { return };
         let before = rev(&root, "HEAD");
         // An unstaged change to a tracked file.
         write(&root, "a.txt", "edited\n");
-        assert!(start_merge(&root, "feature", "auto").unwrap_err().contains("uncommitted changes"));
+        assert!(start_merge(&root, "feature", "auto", false).unwrap_err().contains("uncommitted changes"));
         // A staged one: still staged after the refusal.
         git_ok(&root, &["add", "a.txt"]);
         assert!(start_rebase(&root, "feature").unwrap_err().contains("uncommitted changes"));
@@ -3649,7 +3709,7 @@ mod tests {
         git_ok(&root, &["reset", "-q", "--hard"]);
         // An untracked file the other side adds too: git refuses, names it, nothing is in progress.
         write(&root, "f1.txt", "mine\n");
-        let err = start_merge(&root, "feature", "auto").unwrap_err();
+        let err = start_merge(&root, "feature", "auto", false).unwrap_err();
         assert!(err.contains("f1.txt"), "{err}");
         assert!(operation(&root).is_none());
         assert_eq!(rev(&root, "HEAD"), before);
@@ -3657,7 +3717,7 @@ mod tests {
         std::fs::remove_file(root.join("f1.txt")).unwrap();
         // An untracked file that is not in the way does not block, and is still there after.
         write(&root, "scratch.txt", "x\n");
-        start_merge(&root, "feature", "ff-only").unwrap();
+        start_merge(&root, "feature", "ff-only", false).unwrap();
         let st = status(&root).unwrap().unwrap();
         assert!(file(&st, &root, "scratch.txt").untracked);
         assert_eq!(rev(&root, "HEAD"), rev(&root, "feature"));
@@ -3673,7 +3733,7 @@ mod tests {
         git_ok(&root, &["switch", "-q", "main"]);
         let before = rev(&root, "HEAD");
         assert_eq!({ let p = merge_preview(&root, "imported").unwrap(); (p.ahead, p.behind) }, (1, 1));
-        let err = start_merge(&root, "imported", "auto").unwrap_err();
+        let err = start_merge(&root, "imported", "auto", false).unwrap_err();
         assert!(err.contains("unrelated histories"), "{err}");
         assert!(operation(&root).is_none());
         assert_eq!(rev(&root, "HEAD"), before);
@@ -3715,7 +3775,7 @@ mod tests {
         assert_eq!(st.operation.as_deref(), Some("rebase"));
         assert_eq!(st.operation_step, Some((1, 2)));
         assert!(file(&st, &root, "notes.txt").conflicted);
-        assert!(start_merge(&root, "feature", "auto").unwrap_err().contains("in progress"));
+        assert!(start_merge(&root, "feature", "auto", false).unwrap_err().contains("in progress"));
         assert_eq!(abort_operation(&root).unwrap(), "rebase");
         let st = status(&root).unwrap().unwrap();
         assert_eq!(st.branch.as_deref(), Some("main"));
@@ -4278,7 +4338,7 @@ mod tests {
         commit_file(&root, "notes.txt", "1\n2\n3\nfeature\n", "theirs");
         git_ok(&root, &["switch", "-q", "main"]);
         commit_file(&root, "notes.txt", "1\n2\n3\nmain\n", "ours");
-        assert!(start_merge(&root, "feature", "auto").is_err());
+        assert!(start_merge(&root, "feature", "auto", false).is_err());
         let c = diff_files(&root, &init, None).unwrap();
         assert_eq!(compared(&c), [row("U", "notes.txt", None)]);
         // The merge is still stopped, with the same conflicted file.

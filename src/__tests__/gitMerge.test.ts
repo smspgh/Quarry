@@ -279,7 +279,7 @@ describe("starting a merge or rebase", () => {
     press("Merge");
     expect(await done).toBe(true);
     expect(api.mergePreview).toHaveBeenCalledWith(ROOT, sha(1));
-    expect(api.merge).toHaveBeenCalledWith(ROOT, "refs/heads/feature", "no-ff");
+    expect(api.merge).toHaveBeenCalledWith(ROOT, "refs/heads/feature", "no-ff", false);
     expect(toasts()).toEqual(["Merged 18bc71d into main"]);
   });
 
@@ -291,7 +291,7 @@ describe("starting a merge or rebase", () => {
     expect(defaultButton()).toBe("Cancel");
     press("Fast-forward");
     expect(await done).toBe(true);
-    expect(api.merge).toHaveBeenCalledWith(ROOT, "refs/heads/feature", "ff-only");
+    expect(api.merge).toHaveBeenCalledWith(ROOT, "refs/heads/feature", "ff-only", false);
     expect(toasts()).toEqual(["main moved forward to feature (3 commits)"]);
   });
 
@@ -321,6 +321,26 @@ describe("starting a merge or rebase", () => {
     press("Close");
     expect(await again).toBe(false);
     expect(api.rebase).not.toHaveBeenCalled();
+  });
+
+  it("with \"Allow merging with uncommitted changes\" on, a merge starts and says what that means; a rebase still refuses", async () => {
+    useStore.getState().updateSettings({ gitMergeWithChanges: true });
+    try {
+      now = { ...now, files: [file("a.txt"), file("b.txt")] };
+      const done = startMerge(ROOT, "feature");
+      const d = await openDialog();
+      expect(d.title).toBe("Merge feature into main?");
+      expect(d.message).toContain("Your 2 uncommitted changes stay as they are: git refuses the merge if it would change those files. If the merge stops on a conflict, Abort may not be able to bring them back exactly; commit or stash them first to be safe.");
+      press("Merge");
+      expect(await done).toBe(true);
+      expect(api.merge).toHaveBeenCalledWith(ROOT, "refs/heads/feature", "no-ff", true);
+      const again = startRebase(ROOT, "feature");
+      expect((await openDialog()).title).toBe("Commit or discard your changes first");
+      press("Close");
+      expect(await again).toBe(false);
+    } finally {
+      useStore.getState().updateSettings({ gitMergeWithChanges: false });
+    }
   });
 
   it("untracked files do not block", async () => {

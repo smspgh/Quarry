@@ -484,7 +484,7 @@ export const unsavedTabs = (root: string): Promise<RiskTab[]> => riskTabs(root, 
  */
 async function cleanGuard(root: string, op: SafetyOp, refusal: Parameters<typeof dirtyRefusal>[0]): Promise<Guarded | null> {
   const g = await guard(root, op);
-  if (!g || !g.saved) return g;
+  if (!g || !g.saved || mergeWithChanges(refusal)) return g;
   const st = await git.status(root).catch(() => null);
   const dirty = st ? trackedChanges(st) : 0;
   if (!dirty) return g;
@@ -1185,13 +1185,16 @@ async function startCheck(root: string, kind: StartKind): Promise<GitStatus | nu
     return null;
   }
   const dirty = trackedChanges(st);
-  if (dirty) {
+  if (dirty && !mergeWithChanges(kind)) {
     const d = dirtyRefusal(kind, dirty);
     if (await choose(d.title, d.text, d.choices, false)) showPanel("git");
     return null;
   }
   return st;
 }
+
+/** Settings › Git "Allow merging with uncommitted changes" (merge only; a rebase always needs a clean state). */
+const mergeWithChanges = (kind: StartKind | "history") => kind === "merge" && useStore.getState().settings.gitMergeWithChanges;
 
 async function startPreview(root: string, ref: string): Promise<GitMergePreview | null> {
   try {
@@ -1224,7 +1227,8 @@ export async function startMerge(root: string, target: StartTarget | string): Pr
   const st = await startCheck(root, "merge");
   const p = st && (await startPreview(root, t.ref));
   if (!st || !p) return false;
-  const plan = mergeConfirm(p, t.label, st.branch);
+  const allowDirty = mergeWithChanges("merge");
+  const plan = mergeConfirm(p, t.label, st.branch, allowDirty ? trackedChanges(st) : 0);
   if (plan.nothing !== undefined) {
     toast(plan.nothing, "info", 4000);
     return false;
@@ -1234,7 +1238,7 @@ export async function startMerge(root: string, target: StartTarget | string): Pr
   if (!g) return false;
   const mode = await choose(plan.title, plan.text, plan.choices, null);
   if (!mode) return false;
-  if ((await runStart(root, g, "Merging…", () => git.merge(root, p.target, mode))) !== "done") return false;
+  if ((await runStart(root, g, "Merging…", () => git.merge(root, p.target, mode, allowDirty))) !== "done") return false;
   toast(mergeDone(mode, p, t.label, st.branch), "success", 4000);
   return true;
 }
@@ -1555,6 +1559,9 @@ let compareFrom: CompareFrom | null = null;
  * the current commit (HEAD; uncommitted changes are not part of it). Opens the repository's graph
  * tab, or brings it to the front, and hands it the two commits.
  */
+/** The left side's name when Compare with Branch… starts where the branch split off. */
+export const splitName = (branch: string) => `where ${branch} split off`;
+
 export async function compareWithBranch(name: string): Promise<boolean> {
   const from = compareFrom;
   compareFrom = null;
@@ -1563,13 +1570,25 @@ export async function compareWithBranch(name: string): Promise<boolean> {
     toast("Open a folder in a git repository", "info");
     return false;
   }
-  const result = await git.diffFiles(repo.root, from?.sha ?? "HEAD", name).catch((e) => {
+  const start = from?.sha ?? "HEAD";
+  const startName = from && from.sha !== "HEAD" ? undefined : (repo.branch ?? "HEAD");
+  // Settings › Git: the two tips as they are, or what the branch changed since it split off.
+  let left = start;
+  let leftName = startName;
+  if (useStore.getState().settings.gitCompareBranch === "split") {
+    const base = await git.mergeBase(repo.root, start, name).catch(() => null);
+    if (base) {
+      left = base;
+      leftName = splitName(name);
+    } else toast(`${name} and ${startName ?? "this commit"} share no history: comparing the two tips.`, "info", 5000);
+  }
+  const result = await git.diffFiles(repo.root, left, name).catch((e) => {
     toast(gitErrorText(String(e)), "error");
     return null;
   });
   if (!result?.right) return false;
   openGraph(repo.root);
-  useStore.getState().set({ graphCompare: { root: repo.root, first: result.left.sha, second: result.right.sha, names: { first: from && from.sha !== "HEAD" ? undefined : (repo.branch ?? "HEAD"), second: name }, result } });
+  useStore.getState().set({ graphCompare: { root: repo.root, first: result.left.sha, second: result.right.sha, names: { first: leftName, second: name }, result } });
   return true;
 }
 

@@ -270,16 +270,6 @@ export function takePage<T extends { stash?: boolean }>(page: T[], size: number)
   return { rows: page, more: false };
 }
 
-/** Date order is only offered for a history that fits one page (GRAPH-018). */
-export const DATE_ORDER_MAX = 300;
-export const DATE_ORDER_WHY = `Only for histories of ${DATE_ORDER_MAX} commits or fewer: in larger ones date order spreads the branches over many more lanes.`;
-export const DATE_ORDER_OFF = `Date order is off: this history has more than ${DATE_ORDER_MAX} commits.`;
-
-/** `count`: the commits loaded (no stash or uncommitted rows); `more`: commits remain unloaded. */
-export function dateOrderAllowed(count: number, more: boolean): boolean {
-  return !more && count <= DATE_ORDER_MAX;
-}
-
 /** Height the commit list always keeps beside the search results: 6 rows. */
 export const LIST_MIN = 156;
 export const HITS_MIN = 80;

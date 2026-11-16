@@ -116,7 +116,7 @@ Scenario: GRAPH-002.5 Commits are listed branch by branch
   Given a merged branch whose commits are older than later commits on "main"
   When I open the graph
   Then the branch's commits are listed together under the merge, not interleaved by date
-  But with "Date order" on (small histories only, GRAPH-018) they are listed by author date across branches
+  But with "Date order" on (GRAPH-018) they are listed by author date across branches
 
 Scenario: GRAPH-002.6 Labels
   Given I am on "main", which is on the same commit as "origin/main", and tag "v1.0" and branch "feature" exist
@@ -846,7 +846,8 @@ Built as decided, with these additions: the uncommitted row's parent is the curr
 - **Uncommitted row (GRAPH-015).** The row is laid out as one extra commit whose only parent is the current commit, placed first in the list. It therefore takes the first lane, and so does the current commit's line below it; the first lane is never cut (GRAPH-003.4), so the row's line always reaches the current commit, however far down that is. The row replaces the uncommitted-changes strip of GRAPH-014.1; the stopped-operation strip with Abort stays, and the row shows during a stopped operation too. The row has no right-click menu. The count is the number of changed files, as in the strip today. Next to the other planned git specs: the warning strip a stash leaves when it came back with conflicts (STASH-009.12) stays a strip, like the stopped-operation strip; the row is not a commit, so none of the entries other specs add to the commit menu (merge, rebase, compare, edit history, Summarise with Claude) applies to it, and it cannot be picked with Ctrl+click for Compare Commits (COMMITCMP-001: Compare with Working Tree on a commit is the way to compare with uncommitted work); while the Edit History list is open (HISTORY-007) it replaces every row, this one included; a file clicked in the row's details pane opens the Source Control comparison, so it has the partial-staging controls of STAGE-001.
 - **Results divider (GRAPH-016).** Same kind of divider as the details pane. Limits: at least 80 px, never taller than its content, and the commit list always keeps 156 px (6 rows). A dragged height is the user's choice: it is kept for the tab, and clicking a result no longer shrinks the list. Not saved across restarts (graph tabs are not in the session).
 - **Lanes beyond 16 (GRAPH-017): horizontal scroll of the lane column**, not a wider cap and not smarter cutting. A wider cap takes the room from the Commit column on every row (44 lanes = 534 px) for the sake of a few rows; smarter cutting means changing `layoutGraph`, whose results must stay identical page by page (GRAPH-003.5) and keep lane 0 uncut. Scrolling is drawing only: every lane gets its own position (none share a column), the column still shows at most 16 lanes (198 px), and the layout is untouched. To make hidden lanes hard to miss: faded edges, a scroll bar under the column heading, and selecting a commit scrolls its dot into view.
-- **Date order (GRAPH-018).** "Small" = the whole history in the scope shown (Current branch or All branches) is 300 commits or fewer, i.e. it fits the first page. Above that the button is disabled and says why. The order is git's author-date order (newest first, but a commit is never listed above one of its children), so the rows follow the Date column, which shows author dates. Per graph tab, off by default, not saved. Long lines are still cut after 40 rows.
+- **Owner confirmations (2026-11-16).** Lanes beyond 16 scroll sideways: confirmed. Date order has no size limit any more (GRAPH-018, below).
+- **Date order (GRAPH-018).** For a history of any size (owner, 2026-11-16; it was first limited to 300 commits, because date order spreads a large history over more lanes, but the lane column scrolls sideways (GRAPH-017) and long lines are cut after 40 rows, so the width stays usable). The order is git's author-date order (newest first, but a commit is never listed above one of its children), so the rows follow the Date column, which shows author dates. Per graph tab, off by default, not saved. Long lines are still cut after 40 rows.
 - **Palette entry without a repository (GRAPH-019).** `git.graph` loses its `enabled` condition, so it is available everywhere (palette, Git menu, a recorded macro), and running it with no repository shows one notification, "Open a folder in a git repository", whether or not a folder is open. The other repository commands (Fetch, Pull, Push, Switch Branch…, Add Remote…) keep their condition.
 - **Shared with the other planned git specs.** The planned order of the commit's right-click menu and of the Git menu, the ref-label menu (a right-click on a branch or tag label, MERGE-002 / BRANCH-001) and the branch picker's purposes are written down once, in the Decisions of `specs/git-merge-rebase.md`. None of the four owner decisions of 2026-11-13 (Force Push after rewriting pushed commits, the one unsaved-tabs dialog, the git helpers' own Claude model, drafting from all changes) changes GRAPH-015 to GRAPH-019.
 
@@ -1126,22 +1127,22 @@ Scenario: GRAPH-017.9 Reload and switching scope
   Then the column starts again at lane 1
 ```
 
-## GRAPH-018: List a small history by date
+## GRAPH-018: List the history by date
 
 - Status: draft
 - Commands: none
 - Files:
-  - `src/components/GraphView.tsx` — "Date order" toggle in the toolbar (`byDate` state, off by default; `orderOk`), enabled only once the first page of the scope shown has arrived (`countedFor`) and the whole history is loaded in one page of at most 300 commits (`load()` asks the first page for one commit more, `takePage`), falls back to branch order with one notification when the history is larger (`load()` turns `byDate` off and the reload effect runs again), `orderKeep` (the selected commit is brought back into view after the switch)
+  - `src/components/GraphView.tsx` — "Date order" toggle in the toolbar (`byDate` state, off by default; `orderOk`), enabled once the first page of the scope shown has arrived (`countedFor`), for a history of any size; pages in date order like branch order; `orderKeep` (the selected commit is brought back into view after the switch)
   - `src-tauri/src/git.rs` — `graph_ordered` / `git_graph` take the order (`--topo-order`, or `--author-date-order` for `order: "date"`)
   - `src/lib/gitApi.ts` — `git.graph` order argument
-  - `src/lib/gitGraph.ts` — pure `dateOrderAllowed(count, more)`, `takePage`, `DATE_ORDER_MAX` = 300, the tooltip and notification texts `DATE_ORDER_WHY` / `DATE_ORDER_OFF`; `layoutGraph` unchanged (works on any children-before-parents order)
-  - `src/styles/app.css` — `.graph-order` (the disabled toggle)
+  - `src/lib/gitGraph.ts` — `takePage` (the "300+ commits" count); `layoutGraph` unchanged (works on any children-before-parents order)
+  - `src/styles/app.css` — `.graph-order` (the toggle, disabled while loading)
 - Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphPolish.test.tsx`, `src-tauri/src/git.rs`
 - Docs: `docs/git.md`
 
-**As a** developer in a small repository
+**As a** developer
 **I want** to list the commits newest first across branches
-**So that** I can read what happened in the order it happened, where that does not spread the graph over many lanes
+**So that** I can read what happened in the order it happened
 
 ```gherkin
 Scenario: GRAPH-018.1 Branch order is the default
@@ -1168,32 +1169,29 @@ Scenario: GRAPH-018.4 The order follows the Date column
   When "Date order" is on and nothing else forces its place
   Then it is listed by 1 March, the date its Date column shows
 
-Scenario: GRAPH-018.5 Only for small histories
+Scenario: GRAPH-018.5 Any size of history
   Given the history shown has more than 300 commits (the toolbar says "300+ commits")
-  When I look at the toolbar
-  Then "Date order" is disabled
-  And its tooltip says "Only for histories of 300 commits or fewer: in larger ones date order spreads the branches over many more lanes."
-  And the graph is in branch order
+  When I click "Date order"
+  Then the first 300 commits are listed in date order
+  And scrolling to the end loads the next 300, still in date order, with the lanes continuing unbroken
+  And when the branches spread over more than 16 lanes the lane column scrolls sideways (GRAPH-017)
 
-Scenario: GRAPH-018.6 Exactly at the limit
+Scenario: GRAPH-018.6 Exactly 300 commits
   Given the history shown has exactly 300 commits
   When I look at the toolbar
-  Then the toolbar says "300 commits" and "Date order" can be turned on
-  And with 301 commits it is disabled
+  Then it says "300 commits", with no plus sign: the first page asks git for one commit more than it shows
+  And with 301 commits it says "300+ commits"
 
-Scenario: GRAPH-018.7 The limit applies to what is shown
+Scenario: GRAPH-018.7 It stays on when the scope changes
   Given "Current branch" shows 120 commits and "Date order" is on
   When I click "All branches", which has 2,000 commits
-  Then the graph is in branch order and "Date order" is disabled and not pressed
-  And a notification says "Date order is off: this history has more than 300 commits."
-  When I go back to "Current branch"
-  Then "Date order" is enabled but stays off until I click it
+  Then the graph is listed in date order
+  And no notification is shown
 
-Scenario: GRAPH-018.8 The history grows past the limit
+Scenario: GRAPH-018.8 It stays on when the history grows
   Given "Date order" is on with 298 commits shown
   When a fetch brings 5 more commits into the graph
-  Then the graph reloads in branch order with "Date order" disabled
-  And the same notification is shown once
+  Then the graph reloads, still in date order
 
 Scenario: GRAPH-018.9 Switching keeps my place
   Given a commit is selected and its details pane is open

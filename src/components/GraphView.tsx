@@ -33,7 +33,7 @@ import { REF_COMMANDS, type RefMenuEntry } from "../lib/gitRefs";
 // Claude git helpers: the Summarise entries of the commit menu (specs/git-claude.md).
 import { SummariseItems } from "./GraphSummarise";
 // Graph polish (GRAPH-015..018): the uncommitted-changes row, results divider, lane scrolling, date order.
-import { clampHitsHeight, clampLaneScroll, DATE_ORDER_OFF, DETAIL_MIN, DATE_ORDER_WHY, dateOrderAllowed, isUncommitted, LIST_MIN, revealLane, rowOffset, takePage, UNCOMMITTED, uncommittedLineEnd, withoutUncommitted, withUncommitted } from "../lib/gitGraph";
+import { clampHitsHeight, clampLaneScroll, DETAIL_MIN, isUncommitted, LIST_MIN, revealLane, rowOffset, takePage, UNCOMMITTED, uncommittedLineEnd, withoutUncommitted, withUncommitted } from "../lib/gitGraph";
 import { GraphLaneScroll } from "./GraphLaneScroll";
 import { GraphUncommitted } from "./GraphUncommitted";
 // Edit History (specs/git-history-edit.md): the commit menu's group, the message strip, the list.
@@ -247,14 +247,6 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
       if (gen !== generation.current) return true;
       const probe = reset ? takePage(got, size) : null;
       const page = probe ? probe.rows : got;
-      // Date order is only for a history that fits one page: a larger one goes back to branch
-      // order (turning the toggle off makes the reload effect run again).
-      if (probe?.more && date) {
-        byDateRef.current = false;
-        setByDate(false);
-        toast(DATE_ORDER_OFF, "info", 5000);
-        return true;
-      }
       // The uncommitted row's parent is the current commit, which need not be on this page.
       const head = reset && dirtyRef.current ? await headOf(page) : null;
       if (gen !== generation.current) return true;
@@ -363,7 +355,8 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
   const lineEnd = useMemo(() => uncommittedLineEnd(commits), [commits]);
   /** The commits loaded, stash rows left out (the heading counts commits). */
   const counted = total - stashRows.current;
-  const orderOk = countedFor === all && dateOrderAllowed(counted, more);
+  /** Date order can be switched once the first page of the scope shown has arrived. */
+  const orderOk = countedFor === all;
   // ----- end -----
 
   const lanesWide = Math.min(MAX_LANES, data.wide);
@@ -727,13 +720,13 @@ export function GraphView({ doc, visible }: { doc: Doc; visible: boolean }) {
           <button className={all ? "" : "on"} aria-pressed={!all} title={`${branch ?? "The current commit"} and the branch it tracks on the remote: your commits to push and the ones to pull`} onClick={() => setAll(false)}>Current branch</button>
           <button className={all ? "on" : ""} aria-pressed={all} title="Every branch and tag, local and remote" onClick={() => setAll(true)}>All branches</button>
         </div>
-        {/* Graph polish (GRAPH-018): date order, for a history that fits one page. */}
-        <div className="segmented graph-order" title={orderOk ? undefined : countedFor === all ? DATE_ORDER_WHY : "Available once the commits are counted"}>
+        {/* Graph polish (GRAPH-018): date order, for any history. */}
+        <div className="segmented graph-order" title={orderOk ? undefined : "Available once the commits are counted"}>
           <button
             className={byDate && orderOk ? "on" : ""}
             aria-pressed={byDate && orderOk}
             disabled={!orderOk}
-            title={orderOk ? "List the commits newest first across branches (by the date in the Date column) instead of branch by branch" : countedFor === all ? DATE_ORDER_WHY : "Available once the commits are counted"}
+            title={orderOk ? "List the commits newest first across branches (by the date in the Date column) instead of branch by branch" : "Available once the commits are counted"}
             onClick={() => {
               orderKeep.current = selected;
               setByDate(!byDate);
