@@ -3,17 +3,22 @@
 
     .\scripts\release.ps1                          build + sign + write release-out\ (nothing is uploaded)
     .\scripts\release.ps1 -Notes "What changed"    same, with release notes shown in the update dialog
-    .\scripts\release.ps1 -Publish                 also create the GitHub release in smspgh/quarry-releases
+    .\scripts\release.ps1 -Publish                 also create the GitHub release in smspgh/Quarry
 
   Bump the version first (package.json, src-tauri/Cargo.toml, src-tauri/tauri.conf.json: all three must match).
   The signing key is read from ~/.tauri/quarry.key (override with $env:QUARRY_SIGNING_KEY); back it up, because
-  installed copies only accept updates signed with it. Source stays private; only the installer, its signature
-  and latest.json go to the public releases repo.
+  installed copies only accept updates signed with it.
+
+  Releases go to the source repo smspgh/Quarry, which must be public: the in-app updater downloads latest.json
+  and the installer without signing in. Copies of 0.1.10 and earlier look for updates in the old releases repo,
+  so latest.json (pointing at the installer in smspgh/Quarry) is also published there as a release of the same
+  version. Pass -LegacyRepo "" once no such copies are left.
 #>
 param(
   [string]$Notes = "",
   [switch]$Publish,
-  [string]$Repo = "smspgh/quarry-releases"
+  [string]$Repo = "smspgh/Quarry",
+  [string]$LegacyRepo = "smspgh/quarry-releases"
 )
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
@@ -32,6 +37,14 @@ $env:TAURI_SIGNING_PRIVATE_KEY = (Resolve-Path $key).Path
 if ($null -eq $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD) { $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = "" }
 
 if ($Publish) {
+  # The updater cannot sign in: a private repo's release files would be a 404 for every installed copy.
+  $visibility = gh repo view $Repo --json visibility -q .visibility 2>$null
+  if ($LASTEXITCODE -ne 0) { throw "Cannot read $Repo with gh (is gh signed in?)." }
+  if ($visibility -ne "PUBLIC") { throw "$Repo is $visibility. Installed copies download updates without signing in, so releases must go to a public repository. Make $Repo public first (gh repo edit $Repo --visibility public --accept-visibility-change-consequences)." }
+  if ($LegacyRepo) {
+    gh release view "v$version" --repo $LegacyRepo 2>$null | Out-Null
+    if ($LASTEXITCODE -eq 0) { throw "Release v$version already exists in $LegacyRepo. Bump the version." }
+  }
   gh release view "v$version" --repo $Repo 2>$null | Out-Null
   if ($LASTEXITCODE -eq 0) { throw "Release v$version already exists in $Repo. Bump the version." }
   # Installed copies ignore a release that is not newer than the one they have.
@@ -74,3 +87,11 @@ $body = if ($Notes) { $Notes } else { $title }
 gh release create "v$version" --repo $Repo --title $title --notes $body (Join-Path $out "Quarry_${version}_x64-setup.exe") (Join-Path $out "Quarry_${version}_x64-setup.exe.sig") (Join-Path $out "latest.json")
 if ($LASTEXITCODE -ne 0) { throw "gh release create failed" }
 Write-Host "Published v$version to https://github.com/$Repo/releases"
+
+# Older installed copies read latest.json from the old releases repo: give them the same file (its url points at
+# the installer in $Repo), so they update to this version, which then looks in $Repo itself.
+if ($LegacyRepo) {
+  gh release create "v$version" --repo $LegacyRepo --title $title --notes "$body`n`nQuarry's releases have moved to https://github.com/$Repo/releases" (Join-Path $out "latest.json")
+  if ($LASTEXITCODE -ne 0) { throw "Published to $Repo, but the bridge release in $LegacyRepo failed: older copies will not see v$version. Run: gh release create v$version --repo $LegacyRepo --title `"$title`" --notes `"moved`" release-out\latest.json" }
+  Write-Host "Bridge: latest.json for v$version also in https://github.com/$LegacyRepo/releases"
+}

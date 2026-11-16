@@ -213,7 +213,7 @@ Scenario: UPD-004.4 Close
 - Status: draft
 - Commands: none
 - Files:
-  - `src-tauri/tauri.conf.json` — `plugins.updater.endpoints` (`https://github.com/smspgh/quarry-releases/releases/latest/download/latest.json`), `plugins.updater.pubkey` (minisign), `bundle.createUpdaterArtifacts`, `plugins.updater.windows.installMode`
+  - `src-tauri/tauri.conf.json` — `plugins.updater.endpoints` (`https://github.com/smspgh/Quarry/releases/latest/download/latest.json`; up to 0.1.10 it was smspgh/quarry-releases), `plugins.updater.pubkey` (minisign), `bundle.createUpdaterArtifacts`, `plugins.updater.windows.installMode`
   - `src-tauri/Cargo.toml` — `tauri-plugin-updater`
   - `src-tauri/src/lib.rs` — plugin registration
   - `src-tauri/capabilities/default.json` — `updater:default`
@@ -229,12 +229,13 @@ Scenario: UPD-004.4 Close
 Scenario: UPD-005.1 Updates are found without signing in
   Given an installed Quarry on a computer with no GitHub account configured
   When it checks for updates
-  Then it reads latest.json from the public repository smspgh/quarry-releases and finds the newest release
+  Then it reads latest.json from the public repository smspgh/Quarry and finds the newest release
+  And a copy of 0.1.10 or earlier, which reads it from smspgh/quarry-releases, finds the same newest release there (UPD-006.10)
 
-Scenario: UPD-005.2 The private source repository is never contacted
-  Given the source repository smspgh/Quarry is private
+Scenario: UPD-005.2 No account or token is ever used
+  Given the release repository smspgh/Quarry is public
   When Quarry checks for or downloads an update
-  Then no request goes to smspgh/Quarry and no access token is sent or stored in the application
+  Then no access token is sent or stored in the application, and nothing needs signing in
 
 Scenario: UPD-005.3 An installer signed with another key is rejected
   Given latest.json points at an installer whose signature was not made with the maintainer's key
@@ -253,7 +254,7 @@ Scenario: UPD-005.4 An equal or older version is not offered
 - Status: draft
 - Commands: none
 - Files:
-  - `scripts/release.ps1` — version check across the three files, signing key (`~/.tauri/quarry.key` or `$env:QUARRY_SIGNING_KEY`), `pnpm tauri build`, `release-out/` (installer, `.sig`, `latest.json`), `-Notes`, `-Publish` (`gh release create` in `smspgh/quarry-releases`, refuses an existing tag or a version not higher than the latest release), `-Repo`
+  - `scripts/release.ps1` — version check across the three files, signing key (`~/.tauri/quarry.key` or `$env:QUARRY_SIGNING_KEY`), `pnpm tauri build`, `release-out/` (installer, `.sig`, `latest.json`), `-Notes`, `-Publish` (refuses a `-Repo` that is not public; `gh release create` in `smspgh/Quarry`, then the bridge release with `latest.json` only in `-LegacyRepo` = `smspgh/quarry-releases`; refuses an existing tag in either or a version not higher than the latest release), `-Repo`, `-LegacyRepo`
   - `src-tauri/tauri.conf.json` — `version`, `bundle.createUpdaterArtifacts`
   - `package.json` — `version`
   - `src-tauri/Cargo.toml` — `version`
@@ -275,7 +276,7 @@ Scenario: UPD-006.1 Build and sign without publishing
 Scenario: UPD-006.2 latest.json describes the release
   When the script has built version 0.1.8 with -Notes "Faster search"
   Then latest.json has version "0.1.8", notes "Faster search" and a UTC pub_date
-  And its windows-x86_64 entry holds the content of the .sig file and the url https://github.com/smspgh/quarry-releases/releases/download/v0.1.8/Quarry_0.1.8_x64-setup.exe
+  And its windows-x86_64 entry holds the content of the .sig file and the url https://github.com/smspgh/Quarry/releases/download/v0.1.8/Quarry_0.1.8_x64-setup.exe
 
 Scenario: UPD-006.3 Mismatched versions stop the script
   Given package.json says 0.1.8 and src-tauri/Cargo.toml says 0.1.7
@@ -294,13 +295,12 @@ Scenario: UPD-006.5 A missing signature stops the script
   Then it stops and release-out is not written
 
 Scenario: UPD-006.6 Publish
-  Given no release v0.1.8 exists in smspgh/quarry-releases
+  Given no release v0.1.8 exists in smspgh/Quarry or smspgh/quarry-releases
   When I run .\scripts\release.ps1 -Notes "Faster search" -Publish
-  Then the release v0.1.8 titled "Quarry 0.1.8" is created in smspgh/quarry-releases with the installer, its .sig and latest.json
-  And no source code is uploaded
+  Then the release v0.1.8 titled "Quarry 0.1.8" is created in smspgh/Quarry with the installer, its .sig and latest.json
 
 Scenario: UPD-006.7 A version that is already published is refused
-  Given the release v0.1.8 already exists in smspgh/quarry-releases
+  Given the release v0.1.8 already exists in smspgh/Quarry (or in smspgh/quarry-releases)
   When I run .\scripts\release.ps1 -Publish
   Then it stops with "Release v0.1.8 already exists" before building
 
@@ -310,9 +310,21 @@ Scenario: UPD-006.8 Uncommitted changes only warn
   Then it warns that the release will include them and continues
 
 Scenario: UPD-006.9 A version older than the latest release is refused
-  Given the latest release in smspgh/quarry-releases is v0.1.8 and the version files say 0.1.6
+  Given the latest release in smspgh/Quarry is v0.1.8 and the version files say 0.1.6
   When I run .\scripts\release.ps1 -Publish
   Then it stops with "Version 0.1.6 is not higher than the latest release v0.1.8" before building
+
+Scenario: UPD-006.10 Copies of 0.1.10 and earlier still find the release
+  Given those copies read latest.json from smspgh/quarry-releases
+  When I publish v0.1.11
+  Then a release v0.1.11 in smspgh/quarry-releases holds the same latest.json, whose url points at the installer in smspgh/Quarry
+  And its notes say the releases have moved to https://github.com/smspgh/Quarry/releases
+  And with -LegacyRepo "" nothing is published there
+
+Scenario: UPD-006.11 A private release repository is refused
+  Given smspgh/Quarry is private
+  When I run .\scripts\release.ps1 -Publish
+  Then it stops before building, saying installed copies download updates without signing in and the repository must be made public first
 ```
 
 ## UPD-007: Set the version number everywhere
@@ -384,7 +396,7 @@ Scenario: UPD-008.1 Release the next patch version
   Given the working tree is clean and the version is 0.1.9
   When I run .\scripts\quick-release.ps1
   Then the version files say 0.1.10 and are committed as "Quarry 0.1.10"
-  And release v0.1.10 is published to smspgh/quarry-releases with the notes "Release Bump"
+  And release v0.1.10 is published to smspgh/Quarry (and its latest.json to smspgh/quarry-releases) with the notes "Release Bump"
   And the commit is pushed
   And it prints "Quarry 0.1.10 is published and pushed."
 

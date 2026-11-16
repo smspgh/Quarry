@@ -1,6 +1,7 @@
 <#
   One-step release: bump to the next patch version, commit it, build + sign + publish the installer
-  to smspgh/quarry-releases, then push the source.
+  as a release of smspgh/Quarry (latest.json also to the old smspgh/quarry-releases for copies of 0.1.10
+  and earlier), then push the source.
 
     .\scripts\quick-release.ps1                          notes "Release Bump"
     .\scripts\quick-release.ps1 -Notes "What changed"    your own notes for the update dialog
