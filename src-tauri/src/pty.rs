@@ -1,5 +1,5 @@
-//! Terminal tabs: the real `claude` command line in a ConPTY (portable-pty), drawn by xterm.js in
-//! the UI. Output goes to the UI as `pty:data` events (UTF-8, never split inside a character), then
+//! Terminal tabs: a shell (PowerShell, Command Prompt, Git Bash, ...) or the real `claude` command
+//! line in a ConPTY (portable-pty), drawn by xterm.js in the UI. Output goes to the UI as `pty:data` events (UTF-8, never split inside a character), then
 //! one `pty:exit`.
 
 use parking_lot::Mutex;
@@ -7,7 +7,7 @@ use portable_pty::{native_pty_system, Child, CommandBuilder, MasterPty, PtySize}
 use serde::Serialize;
 use std::collections::HashMap;
 use std::io::Read;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::Arc;
 use tauri::{AppHandle, Emitter, State};
@@ -64,18 +64,88 @@ fn size(cols: u16, rows: u16) -> PtySize {
     PtySize { rows: rows.clamp(2, 1000), cols: cols.clamp(10, 2000), pixel_width: 0, pixel_height: 0 }
 }
 
-/// Start `claude` in a terminal in `cwd` (`resume`: continue that conversation), or, with
-/// `command`, that command line through cmd.exe (installing a language server). Returns its id.
+/// A shell a terminal tab can run, as `pty_shells` found it on this computer.
+#[derive(Clone, Debug, Serialize, PartialEq)]
+pub struct Shell {
+    /// "pwsh" | "powershell" | "cmd" | "gitbash".
+    pub id: String,
+    pub name: String,
+    pub program: String,
+    pub args: Vec<String>,
+}
+
+fn on_path(name: &str) -> Option<PathBuf> {
+    let path = std::env::var_os("PATH")?;
+    std::env::split_paths(&path).map(|d| d.join(name)).find(|p| p.is_file())
+}
+
+fn env_dir(var: &str) -> Option<PathBuf> {
+    std::env::var_os(var).map(PathBuf::from)
+}
+
+/// Git Bash beside the `git.exe` on PATH (`<Git>\cmd\git.exe` -> `<Git>\bin\bash.exe`), then the usual
+/// install folders. Never a `bash.exe` from PATH: in System32 that is WSL's launcher.
+fn git_bash() -> Option<PathBuf> {
+    let beside_git = on_path("git.exe").and_then(|g| Some(g.parent()?.parent()?.join("bin").join("bash.exe")));
+    let installed = ["ProgramFiles", "ProgramFiles(x86)"].into_iter().filter_map(env_dir).map(|d| d.join("Git").join("bin").join("bash.exe"));
+    let per_user = env_dir("LOCALAPPDATA").map(|d| d.join("Programs").join("Git").join("bin").join("bash.exe"));
+    beside_git.into_iter().chain(installed).chain(per_user).find(|p| p.is_file())
+}
+
+/// The shells installed here, best first: the first one is what "Automatic" starts.
+pub fn shells() -> Vec<Shell> {
+    let system = env_dir("SystemRoot").unwrap_or_else(|| PathBuf::from(r"C:\Windows")).join("System32");
+    let pwsh = on_path("pwsh.exe").or_else(|| env_dir("ProgramFiles").map(|d| d.join("PowerShell").join("7").join("pwsh.exe")).filter(|p| p.is_file()));
+    let powershell = Some(system.join("WindowsPowerShell").join("v1.0").join("powershell.exe")).filter(|p| p.is_file());
+    let cmd = Some(system.join("cmd.exe")).filter(|p| p.is_file());
+    let found = [
+        ("pwsh", "PowerShell 7", pwsh, vec!["-NoLogo"]),
+        ("powershell", "Windows PowerShell", powershell, vec!["-NoLogo"]),
+        ("cmd", "Command Prompt", cmd, vec![]),
+        ("gitbash", "Git Bash", git_bash(), vec!["--login", "-i"]),
+    ];
+    found
+        .into_iter()
+        .filter_map(|(id, name, program, args)| Some(Shell { id: id.into(), name: name.into(), program: program?.to_string_lossy().into_owned(), args: args.into_iter().map(String::from).collect() }))
+        .collect()
+}
+
+#[tauri::command]
+pub fn pty_shells() -> Vec<Shell> {
+    shells()
+}
+
+/// The command for a shell tab: `argv` is the program and its arguments (one of `pty_shells`, or the
+/// user's own command line from Settings).
+fn shell_command(argv: &[String]) -> Result<CommandBuilder, String> {
+    let program = argv.first().map(|p| p.trim()).filter(|p| !p.is_empty()).ok_or("No shell is set. Choose one in Settings > Terminal.")?;
+    let mut c = CommandBuilder::new(program);
+    c.args(&argv[1..]);
+    // A login bash (Git Bash, MSYS2) changes to the home folder unless told to stay.
+    if Path::new(program).file_stem().and_then(|s| s.to_str()).is_some_and(|s| s.eq_ignore_ascii_case("bash")) {
+        c.env("CHERE_INVOKING", "1");
+    }
+    Ok(c)
+}
+
+/// Start a program in a terminal in `cwd` and return its id: with `command`, that command line
+/// through cmd.exe (installing a language server); with `shell`, that shell (program + arguments);
+/// otherwise `claude` (`resume`: continue that conversation).
 #[tauri::command]
 #[allow(clippy::too_many_arguments)]
-pub fn pty_start(app: AppHandle, state: State<'_, crate::AppState>, exe: String, cwd: String, cols: u16, rows: u16, resume: Option<String>, command: Option<String>) -> Result<u32, String> {
+pub fn pty_start(app: AppHandle, state: State<'_, crate::AppState>, exe: String, cwd: String, cols: u16, rows: u16, resume: Option<String>, command: Option<String>, shell: Option<Vec<String>>) -> Result<u32, String> {
     if !Path::new(&cwd).is_dir() {
         return Err(format!("{cwd} is not a folder"));
     }
+    let mut what = "Claude Code";
     let mut cmd = if let Some(line) = command.filter(|c| !c.trim().is_empty()) {
+        what = "the command";
         let mut c = CommandBuilder::new("cmd.exe");
         c.args(["/d", "/s", "/c", &line]);
         c
+    } else if let Some(argv) = shell {
+        what = "the shell";
+        shell_command(&argv)?
     } else {
         claude_command(&exe, resume)?
     };
@@ -85,7 +155,7 @@ pub fn pty_start(app: AppHandle, state: State<'_, crate::AppState>, exe: String,
     }
     cmd.env("TERM", "xterm-256color");
     cmd.env("COLORTERM", "truecolor");
-    spawn(app, state, cmd, cols, rows)
+    spawn(app, state, cmd, cols, rows, what)
 }
 
 fn claude_command(exe: &str, resume: Option<String>) -> Result<CommandBuilder, String> {
@@ -110,9 +180,9 @@ fn resume_id(resume: Option<String>) -> Option<String> {
     resume.filter(|s| crate::claude::is_session_id(s))
 }
 
-fn spawn(app: AppHandle, state: State<'_, crate::AppState>, cmd: CommandBuilder, cols: u16, rows: u16) -> Result<u32, String> {
+fn spawn(app: AppHandle, state: State<'_, crate::AppState>, cmd: CommandBuilder, cols: u16, rows: u16, what: &str) -> Result<u32, String> {
     let pair = native_pty_system().openpty(size(cols, rows)).map_err(|e| e.to_string())?;
-    let child = pair.slave.spawn_command(cmd).map_err(|e| format!("could not start Claude Code: {e}"))?;
+    let child = pair.slave.spawn_command(cmd).map_err(|e| format!("could not start {what}: {e}"))?;
     drop(pair.slave);
     let mut reader = pair.master.try_clone_reader().map_err(|e| e.to_string())?;
     let writer = pair.master.take_writer().map_err(|e| e.to_string())?;
@@ -221,6 +291,32 @@ mod tests {
         let mut bad = vec![b'x', 0xff, b'y'];
         assert_eq!(take_utf8(&mut bad), "x\u{fffd}y");
         assert!(bad.is_empty());
+    }
+
+    #[test]
+    fn the_shells_of_this_computer_exist_and_command_prompt_is_one() {
+        let all = shells();
+        assert!(all.iter().any(|s| s.id == "cmd"), "{all:?}");
+        for s in &all {
+            assert!(Path::new(&s.program).is_file(), "{s:?}");
+        }
+        // Never WSL's launcher for Git Bash.
+        assert!(all.iter().all(|s| s.id != "gitbash" || !s.program.to_lowercase().contains("system32")));
+        let ids: Vec<&str> = all.iter().map(|s| s.id.as_str()).collect();
+        let mut sorted = ids.clone();
+        sorted.sort_by_key(|id| ["pwsh", "powershell", "cmd", "gitbash"].iter().position(|x| x == id));
+        assert_eq!(ids, sorted);
+    }
+
+    #[test]
+    fn a_shell_needs_a_program_and_bash_keeps_its_folder() {
+        assert!(shell_command(&[]).is_err());
+        assert!(shell_command(&["  ".into()]).is_err());
+        let bash = shell_command(&[r"C:\Program Files\Git\bin\bash.exe".into(), "--login".into(), "-i".into()]).unwrap();
+        assert_eq!(bash.get_env("CHERE_INVOKING").and_then(|v| v.to_str()), Some("1"));
+        assert_eq!(bash.get_argv().len(), 3);
+        let cmd = shell_command(&["cmd.exe".into()]).unwrap();
+        assert!(cmd.get_env("CHERE_INVOKING").is_none());
     }
 
     #[test]

@@ -18,6 +18,8 @@ import { SERVERS, splitCommand } from "../../lib/lspServers";
 import { installServer, resolveInstall } from "../../lib/lspInstall";
 import { InfoTip } from "../InfoTip";
 import { SENDS_TIP } from "../../lib/gitAi";
+import { ShortcutsSection } from "./ShortcutsSection";
+import { CUSTOM_SHELL, knownShells, loadShells, pickShell, shellOptions, type Shell } from "../../lib/shells";
 
 /** Pure helper (testable): does a row with this label/hint match the filter text? */
 export function rowMatches(query: string, label: string, hint?: string, section?: string): boolean {
@@ -365,6 +367,30 @@ function ClaudeSection({ change }: { change: <K extends keyof Settings>(key: K, 
 }
 
 /** Code intelligence: the on / off switch and each language server (found or not, install, own command). */
+/** Settings › Terminal (specs/terminal.md TERM-010): the shell of new terminal tabs. */
+function TerminalSection({ change }: { change: <K extends keyof Settings>(key: K, value: Settings[K]) => void }) {
+  const shell = useStore((s) => s.settings.terminalShell);
+  const custom = useStore((s) => s.settings.terminalCustom);
+  const [shells, setShells] = React.useState<Shell[]>(knownShells());
+  React.useEffect(() => { void loadShells().then(setShells); }, []);
+  const picked = pickShell(shells, shell, custom);
+  const missing = shell !== "" && shell !== CUSTOM_SHELL && shells.length > 0 && !shells.some((x) => x.id === shell);
+  const options = shellOptions(shells);
+  if (missing) options.push({ value: shell, label: `${shell} (not found)` });
+  return (
+    <Section title="Terminal">
+      <Row label="Shell" hint={missing ? `That shell is no longer installed; new terminals use ${shells[0].name}` : shell === CUSTOM_SHELL ? "New terminal tabs run the command line below" : "error" in picked ? picked.error : `New terminal tabs (Ctrl+\`) run ${picked.argv[0]}`} k="terminalShell">
+        <Select value={shell} options={options} title="Terminal shell" onChange={(v) => change("terminalShell", v)} />
+      </Row>
+      {shell === CUSTOM_SHELL && (
+        <Row label="Custom shell command" hint='The program and its arguments; put a path with spaces in "quotes"' k="terminalCustom" stack>
+          <TextField value={custom} placeholder={'"C:\\msys64\\usr\\bin\\bash.exe" --login -i'} onCommit={(v) => change("terminalCustom", v)} />
+        </Row>
+      )}
+    </Section>
+  );
+}
+
 function CodeIntelSection({ change }: { change: <K extends keyof Settings>(key: K, value: Settings[K]) => void }) {
   const s = useStore((st) => st.settings);
   const isOpen = useStore((st) => isPanelShown(st, "settings"));
@@ -609,6 +635,8 @@ export function SettingsPanel() {
           </Row>
         </Section>
 
+        <TerminalSection change={change} />
+
         <Section title="Folders">
           <FolderRow label="Scripts folder" hint="Root of your scripts: .js files here and in its subfolders" k="scriptsDir" sub="scripts" value={settings.scriptsDir} onChange={(v) => void changeFolder("scriptsDir", v)} />
           <FolderRow label="Macros folder" hint="Each macro is a .macro.json file here" k="macrosDir" sub="macros" value={settings.macrosDir} onChange={(v) => void changeFolder("macrosDir", v)} />
@@ -647,6 +675,8 @@ export function SettingsPanel() {
             <NumberField value={settings.jsonIndent} min={1} max={8} onCommit={(v) => change("jsonIndent", v)} />
           </Row>
         </Section>
+
+        <ShortcutsSection query={query} />
 
         <Section title="Data">
           {rowMatches(query, "Open settings folder", "app data", "Data") && (

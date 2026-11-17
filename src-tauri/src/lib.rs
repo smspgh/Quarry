@@ -820,6 +820,7 @@ pub fn run() {
             claude::claude_conversations,
             claude::claude_history,
             pty::pty_start,
+            pty::pty_shells,
             pty::pty_write,
             pty::pty_resize,
             pty::pty_kill,

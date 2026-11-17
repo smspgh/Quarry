@@ -213,6 +213,12 @@ export interface Settings {
   lspDisabled: string[];
   /** Command lines replacing a server's default (`id` → `"C:\tools\clangd.exe" --background-index`). */
   lspCommands: Record<string, string>;
+  /** Shell of new terminal tabs: "" = the first one found (PowerShell 7, Windows PowerShell, …), a shell id from `pty_shells`, or "custom". */
+  terminalShell: string;
+  /** Command line used when `terminalShell` is "custom" (`"C:\\msys64\\usr\\bin\\bash.exe" --login -i`). */
+  terminalCustom: string;
+  /** The user's own shortcuts: command id → keys ("Ctrl+Shift+K", "Ctrl+K M"); "" = no shortcut. Commands not named keep their built-in keys. */
+  keybindings: Record<string, string>;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -251,6 +257,9 @@ export const DEFAULT_SETTINGS: Settings = {
   lspEnabled: true,
   lspDisabled: [],
   lspCommands: {},
+  keybindings: {},
+  terminalShell: "",
+  terminalCustom: "",
 };
 
 export type MacroStep =

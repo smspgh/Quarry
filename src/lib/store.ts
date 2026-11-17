@@ -35,7 +35,8 @@ export interface Doc {
   /** Claude Code tab: the folder it works in and its session (resumed after a restart). */
   claude?: { cwd: string; sessionId?: string };
   /** Terminal tab running the `claude` command line in this folder (not kept in the session). */
-  terminal?: { cwd: string; resume?: string; command?: string };
+  /** `shell`: a shell tab (name for messages, program + arguments); `command`: a one-off command; neither: the `claude` command line. */
+  terminal?: { cwd: string; resume?: string; command?: string; shell?: { name: string; argv: string[] } };
   /** Commit graph tab of this repository (not kept in the session). */
   graph?: { root: string };
 }

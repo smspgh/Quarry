@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp, ChevronUp, Files, FilePlus, FolderOpen, FolderPlus, Pencil, RefreshCw, Search, SquareTerminal, X } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp, ChevronUp, Files, FilePlus, FolderOpen, FolderPlus, Pencil, RefreshCw, Search, SquareTerminal, Terminal, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { dirName, openFiles, openFolderDialog, openPath } from "../../lib/actions";
 import { filesToClipboard, pasteInto, trashPaths } from "../../lib/fileOps";
@@ -810,10 +810,11 @@ export function FileTree({ variant }: { variant?: TreeVariant }) {
             onPasted={(p) => afterPaste(p, dest)}
             onDeleted={afterDelete}
             lead={!e ? (
-              claudeOn && folder && !isVariant ? (
+              folder && !isVariant ? (
                 <>
-                  <button className="palette-item" onClick={() => { setMenu(null); void runCommand("claude.openHere", folder); }}><ClaudeMark size={13} className="accent" /><span className="title">Work with Claude Code Here</span></button>
-                  <button className="palette-item" onClick={() => { setMenu(null); void runCommand("claude.openTerminal", folder); }}><SquareTerminal size={13} /><span className="title">Claude Code Terminal Here</span></button>
+                  <button className="palette-item" onClick={() => { setMenu(null); void runCommand("terminal.new", folder); }}><Terminal size={13} /><span className="title">Open in Terminal</span></button>
+                  {claudeOn && <button className="palette-item" onClick={() => { setMenu(null); void runCommand("claude.openHere", folder); }}><ClaudeMark size={13} className="accent" /><span className="title">Work with Claude Code Here</span></button>}
+                  {claudeOn && <button className="palette-item" onClick={() => { setMenu(null); void runCommand("claude.openTerminal", folder); }}><SquareTerminal size={13} /><span className="title">Claude Code Terminal Here</span></button>}
                   <div className="menu-sep" />
                 </>
               ) : undefined
@@ -835,6 +836,9 @@ export function FileTree({ variant }: { variant?: TreeVariant }) {
                 })()}
                 {!inSel && variant?.menuLead?.(e, () => setMenu(null))}
                 {!readOnly && (inSel || e.isDir) && <button className="palette-item" onClick={() => void openAll(paths)} title={inSel ? "Open each selected file in its own tab (and the files in selected folders)" : "Open each file in this folder in its own tab"}><Files size={13} /><span className="title">Open All Files</span></button>}
+                {e.isDir && !inSel && !isVariant && (
+                  <button className="palette-item" onClick={() => { setMenu(null); void runCommand("terminal.new", e.path); }}><Terminal size={13} /><span className="title">Open in Terminal</span></button>
+                )}
                 {e.isDir && !inSel && claudeOn && !isVariant && (
                   <button className="palette-item" onClick={() => { setMenu(null); void runCommand("claude.openHere", e.path); }}><ClaudeMark size={13} className="accent" /><span className="title">Work with Claude Code Here</span></button>
                 )}

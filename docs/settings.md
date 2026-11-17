@@ -51,6 +51,13 @@ Settings are stored in `%APPDATA%\com.quarry.app\settings.json`. If that file ca
 | Colours in large-file mode | On | Syntax colours for JSON, logs, CSV / TSV, XML and SQL files open in [large-file mode](large-files.md#colours). Only the lines on screen are coloured. |
 | Restore session on start | On | Reopen the folder and tabs, including untitled tabs, from last time. See [Sessions and hot exit](editing.md#sessions-and-hot-exit). |
 
+## Terminal
+
+| Setting | Default | Notes |
+| --- | --- | --- |
+| Shell | Automatic | The shell of new [terminal tabs](terminal.md): Automatic (the first one found: PowerShell 7, Windows PowerShell, Command Prompt), any installed shell including Git Bash, or Custom…. |
+| Custom shell command | (empty) | Shown for Custom…: the program and its arguments, for example `"C:\msys64\usr\bin\bash.exe" --login -i` or `wsl.exe`. |
+
 ## Folders
 
 | Setting | Default | Description |
@@ -100,6 +107,10 @@ A folder that doesn't exist yet is created. If a folder you choose can't be used
 | Model for git helpers | Haiku | The model of the [Claude git helpers](git.md#claude-assisted-git) (draft a commit message, explain a conflict, summarise): Default, Opus, Sonnet or Haiku. Separate from Model above; each helper is one short request on your Claude Code plan. |
 | Ask before sending git content to Claude | On | Before a git helper sends anything, a dialog says exactly what leaves your computer. "Send and Don't Ask Again" in that dialog turns this off. The "i" lists what each helper sends. |
 | Permissions | Auto-accept edits | **Auto-accept edits**: file edits go ahead without asking, and commands and web access ask first. **Ask first**: Claude asks before every edit too. Open Claude tabs switch too: an idle tab continues its conversation with the new setting from its next message; a tab where Claude is working finishes the task first. |
+
+## Keyboard shortcuts
+
+Lists the shortcuts you have changed; **Show all** lists every command, and the filter at the top of Settings also finds commands by name or keys. Each command has **Change**, **Remove** and **Restore default** buttons, and **Restore all** puts every shortcut back after asking. How recording works and which keys are refused is in [Keyboard shortcuts › Changing shortcuts](keyboard-shortcuts.md#changing-shortcuts).
 
 ## Data
 

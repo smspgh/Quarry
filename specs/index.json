@@ -137,7 +137,7 @@
       "prefix": "SET",
       "title": "Settings",
       "spec": "specs/settings.md",
-      "stories": 19
+      "stories": 20
     },
     {
       "prefix": "SPLIT",
@@ -165,9 +165,9 @@
     },
     {
       "prefix": "TERM",
-      "title": "Claude CLI Terminal Tabs",
+      "title": "Terminal Tabs",
       "spec": "specs/terminal.md",
-      "stories": 9
+      "stories": 10
     },
     {
       "prefix": "THREEWAY",
@@ -18188,6 +18188,85 @@
         }
       ]
     },
+    "SET-020": {
+      "id": "SET-020",
+      "title": "Change keyboard shortcuts",
+      "area": "SET",
+      "spec": "specs/settings.md",
+      "line": 1000,
+      "status": "draft",
+      "commands": [
+        "view.shortcuts"
+      ],
+      "files": [
+        "src/components/panels/ShortcutsSection.tsx",
+        "src/lib/keybindings.ts",
+        "src/lib/commands.ts",
+        "src/App.tsx",
+        "src/components/panels/SettingsPanel.tsx",
+        "src/components/MenuBar.tsx",
+        "src/lib/types.ts",
+        "src/lib/actions.ts"
+      ],
+      "tests": [
+        "src/__tests__/keybindings.test.ts",
+        "src/__tests__/shortcutsSection.test.tsx"
+      ],
+      "docs": [
+        "docs/keyboard-shortcuts.md",
+        "docs/settings.md"
+      ],
+      "scenarios": [
+        {
+          "id": "SET-020.1",
+          "title": "The section lists what I changed"
+        },
+        {
+          "id": "SET-020.2",
+          "title": "Find a command with the Settings filter"
+        },
+        {
+          "id": "SET-020.3",
+          "title": "Record new keys"
+        },
+        {
+          "id": "SET-020.4",
+          "title": "A two-key shortcut"
+        },
+        {
+          "id": "SET-020.5",
+          "title": "Cancel and start over"
+        },
+        {
+          "id": "SET-020.6",
+          "title": "Keys another command has"
+        },
+        {
+          "id": "SET-020.7",
+          "title": "Keys that are refused"
+        },
+        {
+          "id": "SET-020.8",
+          "title": "Remove a shortcut"
+        },
+        {
+          "id": "SET-020.9",
+          "title": "Restore one and restore all"
+        },
+        {
+          "id": "SET-020.10",
+          "title": "Saved and applied at start"
+        },
+        {
+          "id": "SET-020.11",
+          "title": "A bad value in the file"
+        },
+        {
+          "id": "SET-020.12",
+          "title": "Open the list from a menu"
+        }
+      ]
+    },
     "SPLIT-001": {
       "id": "SPLIT-001",
       "title": "Split the editor and close the split",
@@ -20488,7 +20567,7 @@
         },
         {
           "id": "TERM-003.2",
-          "title": "The four keys Quarry keeps"
+          "title": "The keys Quarry keeps"
         },
         {
           "id": "TERM-003.3",
@@ -20505,7 +20584,7 @@
       "title": "Copy and paste in the terminal",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 166,
+      "line": 168,
       "status": "draft",
       "commands": [],
       "files": [
@@ -20541,7 +20620,7 @@
       "title": "The terminal fits the tab and follows the theme",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 202,
+      "line": 204,
       "status": "draft",
       "commands": [],
       "files": [
@@ -20588,7 +20667,7 @@
       "title": "When the program ends",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 247,
+      "line": 249,
       "status": "draft",
       "commands": [],
       "files": [
@@ -20631,7 +20710,7 @@
       "title": "Closing terminal tabs",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 289,
+      "line": 291,
       "status": "draft",
       "commands": [],
       "files": [
@@ -20672,7 +20751,7 @@
       "title": "A clean environment for the program",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 333,
+      "line": 335,
       "status": "draft",
       "commands": [],
       "files": [
@@ -20707,7 +20786,7 @@
       "title": "One-off command terminals",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 366,
+      "line": 368,
       "status": "draft",
       "commands": [],
       "files": [
@@ -20752,6 +20831,81 @@
         {
           "id": "TERM-009.7",
           "title": "Available without Claude Code"
+        }
+      ]
+    },
+    "TERM-010": {
+      "id": "TERM-010",
+      "title": "Shell terminal tabs",
+      "area": "TERM",
+      "spec": "specs/terminal.md",
+      "line": 418,
+      "status": "draft",
+      "commands": [
+        "terminal.new"
+      ],
+      "files": [
+        "src/lib/shells.ts",
+        "src/lib/terminal.ts",
+        "src/lib/commands.ts",
+        "src/components/TerminalView.tsx",
+        "src/components/panels/SettingsPanel.tsx",
+        "src/components/MenuBar.tsx",
+        "src/components/panels/ExplorerPanel.tsx",
+        "src/App.tsx",
+        "src/lib/types.ts",
+        "src/lib/actions.ts",
+        "src-tauri/src/pty.rs"
+      ],
+      "tests": [
+        "src/__tests__/shells.test.ts",
+        "src/__tests__/terminalView.test.tsx",
+        "src-tauri/src/pty.rs"
+      ],
+      "docs": [
+        "docs/terminal.md",
+        "docs/settings.md"
+      ],
+      "scenarios": [
+        {
+          "id": "TERM-010.1",
+          "title": "A terminal in the open folder"
+        },
+        {
+          "id": "TERM-010.2",
+          "title": "Which folder"
+        },
+        {
+          "id": "TERM-010.3",
+          "title": "From the Explorer"
+        },
+        {
+          "id": "TERM-010.4",
+          "title": "The shell is a setting"
+        },
+        {
+          "id": "TERM-010.5",
+          "title": "A custom shell"
+        },
+        {
+          "id": "TERM-010.6",
+          "title": "Another shell just this once"
+        },
+        {
+          "id": "TERM-010.7",
+          "title": "The shell ends"
+        },
+        {
+          "id": "TERM-010.8",
+          "title": "The shell cannot start"
+        },
+        {
+          "id": "TERM-010.9",
+          "title": "Like every terminal tab"
+        },
+        {
+          "id": "TERM-010.10",
+          "title": "A shell that was uninstalled"
         }
       ]
     },
@@ -22964,7 +23118,8 @@
       "TERM-006",
       "TERM-007",
       "TERM-008",
-      "TERM-009"
+      "TERM-009",
+      "TERM-010"
     ],
     "src-tauri/src/search.rs": [
       "BIG-007",
@@ -23034,6 +23189,7 @@
       "SET-003",
       "SET-006",
       "SET-013",
+      "SET-020",
       "SPLIT-001",
       "SPLIT-002",
       "SPLIT-004",
@@ -23044,6 +23200,7 @@
       "TAB-005",
       "TERM-001",
       "TERM-003",
+      "TERM-010",
       "THREEWAY-001",
       "UI-002",
       "UI-008",
@@ -23338,12 +23495,14 @@
       "SCRIPT-014",
       "SET-001",
       "SET-006",
+      "SET-020",
       "SPLIT-001",
       "STAGE-008",
       "STASH-011",
       "TAB-006",
       "TAB-010",
       "TERM-001",
+      "TERM-010",
       "THREEWAY-001",
       "UI-002",
       "UI-003",
@@ -23424,6 +23583,7 @@
       "TERM-005",
       "TERM-006",
       "TERM-009",
+      "TERM-010",
       "UI-021"
     ],
     "src/components/TitleBar.tsx": [
@@ -23498,7 +23658,8 @@
       "SEARCH-003",
       "SEARCH-011",
       "TAB-008",
-      "TERM-001"
+      "TERM-001",
+      "TERM-010"
     ],
     "src/components/panels/GitDraft.tsx": [
       "GIT-008",
@@ -23659,9 +23820,14 @@
       "SET-015",
       "SET-016",
       "SET-019",
+      "SET-020",
       "TAB-009",
       "TERM-007",
+      "TERM-010",
       "UPD-002"
+    ],
+    "src/components/panels/ShortcutsSection.tsx": [
+      "SET-020"
     ],
     "src/components/panels/StashSection.tsx": [
       "SAFE-005",
@@ -23883,6 +24049,7 @@
       "SET-014",
       "SET-015",
       "SET-019",
+      "SET-020",
       "SPLIT-007",
       "STAGE-005",
       "TAB-002",
@@ -23894,6 +24061,7 @@
       "TAB-009",
       "TAB-010",
       "TERM-007",
+      "TERM-010",
       "THREEWAY-001",
       "THREEWAY-004",
       "UI-002",
@@ -24079,6 +24247,7 @@
       "SET-007",
       "SET-008",
       "SET-013",
+      "SET-020",
       "SPLIT-001",
       "SPLIT-002",
       "SPLIT-003",
@@ -24091,6 +24260,7 @@
       "TAB-010",
       "TERM-001",
       "TERM-002",
+      "TERM-010",
       "THREEWAY-004",
       "UI-001",
       "UI-003",
@@ -24669,6 +24839,9 @@
       "JSON-006",
       "JSON-007"
     ],
+    "src/lib/keybindings.ts": [
+      "SET-020"
+    ],
     "src/lib/lineTransforms.ts": [
       "EDIT-009",
       "EDIT-010",
@@ -24807,6 +24980,9 @@
       "FIND-007",
       "SET-012"
     ],
+    "src/lib/shells.ts": [
+      "TERM-010"
+    ],
     "src/lib/split.ts": [
       "SPLIT-001",
       "SPLIT-002",
@@ -24890,7 +25066,8 @@
       "TERM-002",
       "TERM-006",
       "TERM-007",
-      "TERM-009"
+      "TERM-009",
+      "TERM-010"
     ],
     "src/lib/types.ts": [
       "BIG-001",
@@ -24921,7 +25098,9 @@
       "SET-015",
       "SET-016",
       "SET-019",
+      "SET-020",
       "TAB-009",
+      "TERM-010",
       "THREEWAY-001",
       "UI-002",
       "UI-018",
@@ -25183,7 +25362,8 @@
     ],
     "src-tauri/src/pty.rs": [
       "TERM-002",
-      "TERM-005"
+      "TERM-005",
+      "TERM-010"
     ],
     "src-tauri/src/search.rs": [
       "SEARCH-003",
@@ -25604,6 +25784,9 @@
       "JSON-005",
       "JSON-007"
     ],
+    "src/__tests__/keybindings.test.ts": [
+      "SET-020"
+    ],
     "src/__tests__/lineMenu.test.ts": [
       "EDIT-002",
       "EDIT-014"
@@ -25712,6 +25895,12 @@
       "UI-010",
       "UI-018"
     ],
+    "src/__tests__/shells.test.ts": [
+      "TERM-010"
+    ],
+    "src/__tests__/shortcutsSection.test.tsx": [
+      "SET-020"
+    ],
     "src/__tests__/splitGit.test.ts": [
       "CONFLICT-009",
       "EXPL-016",
@@ -25753,7 +25942,8 @@
       "TERM-003",
       "TERM-004",
       "TERM-006",
-      "TERM-009"
+      "TERM-009",
+      "TERM-010"
     ],
     "src/__tests__/text.test.ts": [
       "EDIT-017",
@@ -26583,6 +26773,9 @@
     "selection.toggleColumnMode": [
       "EDIT-006"
     ],
+    "terminal.new": [
+      "TERM-010"
+    ],
     "ui.escape": [
       "FIND-001",
       "UI-009"
@@ -26628,6 +26821,9 @@
     "view.settings": [
       "SET-001",
       "UI-012"
+    ],
+    "view.shortcuts": [
+      "SET-020"
     ],
     "view.splitEditor": [
       "SPLIT-001"

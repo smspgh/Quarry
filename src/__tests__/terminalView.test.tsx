@@ -196,3 +196,60 @@ describe("TerminalView", () => {
     expect(starts()).toHaveLength(1);
   });
 });
+
+// Shell tabs (specs/terminal.md TERM-010).
+describe("TerminalView with a shell", () => {
+  const SHELL = { name: "Git Bash", argv: ["C:\\Program Files\\Git\\bin\\bash.exe", "--login", "-i"] };
+  const shellDoc = () => ({ id: "term-sh", kind: "terminal", name: "Git Bash · proj", terminal: { cwd: "C:\\work\\proj", shell: SHELL } }) as unknown as Doc;
+  const open = async () => {
+    const { useStore } = await import("../lib/store");
+    useStore.setState({ docs: [shellDoc()], activeId: "term-sh" });
+    await render(<TerminalView doc={shellDoc()} visible />);
+    await flush();
+    return useStore;
+  };
+  beforeEach(() => {
+    h.calls.length = 0;
+    h.listeners.clear();
+    h.terms.length = 0;
+  });
+  afterEach(cleanup);
+
+  it("starts the shell with its arguments in the tab's folder", async () => {
+    await open();
+    expect(starts()).toHaveLength(1);
+    expect(starts()[0].args).toMatchObject({ cwd: "C:\\work\\proj", shell: SHELL.argv, command: undefined, resume: undefined });
+  });
+
+  it("closes the tab when the shell exits normally", async () => {
+    const useStore = await open();
+    await emit("pty:exit", { id: 7, code: 0 });
+    await flush();
+    expect(useStore.getState().docs).toEqual([]);
+  });
+
+  it("keeps the tab and offers a restart when the shell fails", async () => {
+    const useStore = await open();
+    await emit("pty:exit", { id: 7, code: 3 });
+    await flush();
+    expect(useStore.getState().docs).toHaveLength(1);
+    expect(screen()).toContain("[Git Bash ended (exit code 3). Press Enter to start it again.]");
+    await act(async () => term().data!("\r"));
+    await flush();
+    expect(starts()).toHaveLength(2);
+    expect(starts()[1].args).toMatchObject({ shell: SHELL.argv });
+  });
+});
+
+describe("a Claude CLI tab still names Claude Code when it ends", () => {
+  afterEach(cleanup);
+  it("says Claude Code ended", async () => {
+    h.calls.length = 0;
+    h.listeners.clear();
+    h.terms.length = 0;
+    await mount();
+    expect(starts()[0].args.shell).toBeUndefined();
+    await emit("pty:exit", { id: 7, code: 0 });
+    expect(screen()).toContain("[Claude Code ended. Press Enter to start it again.]");
+  });
+});

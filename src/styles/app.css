@@ -5304,3 +5304,39 @@ textarea.input.he-box { display: block; width: calc(100% - 160px); max-width: 76
 .he-below { color: var(--text-3); min-width: 0; }
 .he-note { color: var(--warning); }
 .select-option.disabled { opacity: 0.45; cursor: default; }
+
+/* Settings › Keyboard shortcuts (ShortcutsSection.tsx). */
+.shortcut-row .field-label > span {
+  overflow-wrap: anywhere;
+}
+.shortcut-row.changed .kbd {
+  color: var(--accent-text);
+  border-color: var(--accent-ring);
+}
+.shortcut-none {
+  font-size: 11px;
+  color: var(--text-3);
+}
+.shortcut-capture {
+  min-width: 110px;
+  height: 26px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--accent);
+  background: var(--control);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.shortcut-error {
+  color: var(--danger);
+}
+.shortcuts-section {
+  gap: 3px;
+  scroll-margin-top: 40px;
+}
+.field-row.shortcut-row {
+  padding: 4px 8px 4px 12px;
+  row-gap: 4px;
+}

@@ -56,12 +56,12 @@ It prints each story's id, title and `spec file:line` (and, for a story id, its 
 | `SAFE` | Unsaved Tabs and Git Operations | [git-safety.md](git-safety.md) | 7 |
 | `SCRIPT` | Scripts | [scripting.md](scripting.md) | 15 |
 | `SEARCH` | Find in Files | [search.md](search.md) | 16 |
-| `SET` | Settings | [settings.md](settings.md) | 19 |
+| `SET` | Settings | [settings.md](settings.md) | 20 |
 | `SPLIT` | Split Editor | [split.md](split.md) | 7 |
 | `STAGE` | Hunk and Line Staging | [git-staging.md](git-staging.md) | 9 |
 | `STASH` | Stash | [git-stash.md](git-stash.md) | 11 |
 | `TAB` | Tabs | [tabs.md](tabs.md) | 10 |
-| `TERM` | Claude CLI Terminal Tabs | [terminal.md](terminal.md) | 9 |
+| `TERM` | Terminal Tabs | [terminal.md](terminal.md) | 10 |
 | `THREEWAY` | Three-Way Merge View (deferred) | [git-merge-editor.md](git-merge-editor.md) | 5 |
 | `UI` | Application Shell | [app-shell.md](app-shell.md) | 25 |
 | `UPD` | Updates and About | [updates.md](updates.md) | 8 |

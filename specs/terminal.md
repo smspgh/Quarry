@@ -1,11 +1,11 @@
 ---
-area: Claude CLI Terminal Tabs
+area: Terminal Tabs
 prefix: TERM
 ---
 
-# Claude CLI Terminal Tabs
+# Terminal Tabs
 
-A Claude CLI tab (`kind: "terminal"`) runs the real `claude` command line in a Windows pseudo console (ConPTY), drawn by xterm.js. The same tab kind runs one-off install commands for language servers. Quarry's own chat interface is in `claude-code.md`. User documentation: `docs/claude-code.md` (section "Claude CLI tabs").
+A terminal tab (`kind: "terminal"`) runs a program in a Windows pseudo console (ConPTY), drawn by xterm.js: a shell (PowerShell, Command Prompt, Git Bash or your own; TERM-010), the real `claude` command line (a Claude CLI tab), or a one-off install command for a language server. Quarry's own chat interface is in `claude-code.md`. User documentation: `docs/terminal.md`, and `docs/claude-code.md` (section "Claude CLI tabs").
 
 ## TERM-001: Open a Claude CLI tab in a folder
 
@@ -127,7 +127,7 @@ Scenario: TERM-002.6 Not for the conversation open in the tab
 - Status: draft
 - Commands: none
 - Files:
-  - `src/App.tsx` — global `keydown` handler: inside `.terminal-view` everything returns early except Ctrl+Tab, Ctrl+Shift+Tab, Ctrl+Shift+P and Ctrl+F4
+  - `src/App.tsx` — global `keydown` handler: inside `.terminal-view` everything returns early except Ctrl+Tab, Ctrl+Shift+Tab, Ctrl+Shift+P, Ctrl+F4 and the keys of New Terminal (`terminalPassesToQuarry`)
   - `src/components/TerminalView.tsx` — `t.onData` → `pty_write`, `editor.registerFocus`
   - `src-tauri/src/pty.rs` — `pty_write`
   - `src-tauri/src/writer.rs` — `ChannelWriter` (input written off the UI thread)
@@ -145,7 +145,7 @@ Scenario: TERM-003.1 Editor shortcuts do not fire
   Then the key goes to the claude program
   And the tab is not closed, nothing is saved and no find bar, panel or palette opens
 
-Scenario: TERM-003.2 The four keys Quarry keeps
+Scenario: TERM-003.2 The keys Quarry keeps
   Given a Claude CLI tab has the focus
   When I press Ctrl+Tab or Ctrl+Shift+Tab
   Then Quarry switches to the next or previous tab
@@ -153,6 +153,8 @@ Scenario: TERM-003.2 The four keys Quarry keeps
   Then the command palette opens
   When I press Ctrl+F4
   Then Quarry closes the tab (after asking while the program runs)
+  When I press Ctrl+` (or the keys I gave New Terminal)
+  Then a new terminal tab opens in the same folder
 
 Scenario: TERM-003.3 Focus comes back to the terminal
   When I opened the command palette from a terminal tab and closed it with Esc
@@ -411,4 +413,94 @@ Scenario: TERM-009.6 Closing while it runs asks
 Scenario: TERM-009.7 Available without Claude Code
   When Settings › Claude Code › "Claude Code" is off
   Then install commands still open and run in terminal tabs
+```
+
+## TERM-010: Shell terminal tabs
+
+- Status: draft
+- Commands: `terminal.new`
+- Files:
+  - `src/lib/shells.ts` — `loadShells` / `knownShells` (the list from Rust, asked once), pure `pickShell` (Automatic, a shell id, Custom), `shellOptions`, `terminalTitle`
+  - `src/lib/terminal.ts` — `openShellTerminal`
+  - `src/lib/commands.ts` — `terminal.new` (folder order, `{ folder, shell }` argument, tab limit)
+  - `src/components/TerminalView.tsx` — `shell` passed to `pty_start`; a shell that exits with code 0 closes its tab, any other code keeps it with "Press Enter to start it again"
+  - `src/components/panels/SettingsPanel.tsx` — `TerminalSection`: Shell list, Custom shell command
+  - `src/components/MenuBar.tsx` — Tools › New Terminal, Tools › New Terminal With (one entry per installed shell)
+  - `src/components/panels/ExplorerPanel.tsx` — "Open in Terminal" on a folder and on blank space
+  - `src/App.tsx` — `terminalPassesToQuarry` (New Terminal's keys work inside a terminal)
+  - `src/lib/types.ts` — `terminalShell` (default ""), `terminalCustom`
+  - `src/lib/actions.ts` — `sanitizeSettings` for both
+  - `src-tauri/src/pty.rs` — `shells` / `pty_shells` (PowerShell 7, Windows PowerShell, Command Prompt, Git Bash, as installed; never WSL's `bash.exe`), `shell_command` (`CHERE_INVOKING` for bash), `pty_start` `shell` argument
+- Tests: `src/__tests__/shells.test.ts`, `src/__tests__/terminalView.test.tsx`, `src-tauri/src/pty.rs`
+- Docs: `docs/terminal.md`, `docs/settings.md`
+
+**As a** developer
+**I want** a shell in a tab, in the folder I am working in
+**So that** I can run builds, tests and git commands without leaving the editor
+
+```gherkin
+Scenario: TERM-010.1 A terminal in the open folder
+  Given the folder C:\work\proj is open and PowerShell 7 is installed
+  When I press Ctrl+` or choose Tools › New Terminal
+  Then a tab "PowerShell 7 · proj" opens with a PowerShell prompt in C:\work\proj
+  And it has the keyboard focus
+
+Scenario: TERM-010.2 Which folder
+  Given a terminal or Claude tab is active
+  When I run New Terminal
+  Then the new terminal starts in that tab's folder
+  Given no such tab is active
+  When I run New Terminal
+  Then it starts in the open folder, else the active file's folder, else my home folder
+
+Scenario: TERM-010.3 From the Explorer
+  When I right-click a folder in the Explorer and choose "Open in Terminal"
+  Then a terminal opens in that folder
+  When I right-click blank space in the Explorer and choose "Open in Terminal"
+  Then a terminal opens in the open folder
+  And both entries are there with the Claude Code integration switched off
+
+Scenario: TERM-010.4 The shell is a setting
+  Given Settings › Terminal › Shell is "Automatic"
+  When I look at the list
+  Then it offers Automatic (naming the first shell found), every installed shell of PowerShell 7, Windows PowerShell, Command Prompt and Git Bash, and "Custom…"
+  When I choose Git Bash and open a new terminal
+  Then the tab is "Git Bash · proj" and bash starts in the tab's folder, not in my home folder
+  And terminals already open keep their shell
+
+Scenario: TERM-010.5 A custom shell
+  When I choose "Custom…" and type "C:\msys64\usr\bin\bash.exe" --login -i
+  Then new terminals run that program with those arguments, in a tab named after the program ("bash · proj")
+  When the custom command is empty and I run New Terminal
+  Then no tab opens and a notification says to type the shell's command line in Settings › Terminal first
+
+Scenario: TERM-010.6 Another shell just this once
+  Given more than one shell is installed
+  When I choose Tools › New Terminal With › Command Prompt
+  Then a "Command Prompt · proj" tab opens and the setting is unchanged
+
+Scenario: TERM-010.7 The shell ends
+  Given a shell tab is open
+  When I type exit and the shell ends with code 0
+  Then the tab closes without a question
+  When a shell ends with another exit code
+  Then the tab stays and says "[PowerShell 7 ended (exit code 1). Press Enter to start it again.]"
+  When I press Enter
+  Then the shell starts again in the same folder
+
+Scenario: TERM-010.8 The shell cannot start
+  Given the custom shell command names a program that does not exist
+  When I run New Terminal
+  Then the tab shows the error in red and "Press Enter to try again."
+
+Scenario: TERM-010.9 Like every terminal tab
+  When I use a shell tab
+  Then keys, copy and paste, size, theme, the question before closing a running tab and the clean environment are those of TERM-003 to TERM-008
+  And the tab is not reopened after a restart
+
+Scenario: TERM-010.10 A shell that was uninstalled
+  Given the setting names Git Bash and Git Bash is no longer installed
+  When I run New Terminal
+  Then the first shell found starts instead
+  And Settings › Terminal says that shell is no longer installed
 ```

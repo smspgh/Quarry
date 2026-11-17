@@ -612,8 +612,8 @@ Scenario: UI-009.6 A terminal tab keeps its keys
   Given keyboard focus is in a Claude CLI terminal tab
   When I press Ctrl+R, Ctrl+L, Ctrl+W, Ctrl+J or Escape
   Then the key goes to the program in the terminal and no Quarry command runs
-  When I press Ctrl+Tab, Ctrl+Shift+Tab, Ctrl+Shift+P or Ctrl+F4
-  Then Quarry switches tab, opens the palette or closes the tab
+  When I press Ctrl+Tab, Ctrl+Shift+Tab, Ctrl+Shift+P, Ctrl+F4 or Ctrl+`
+  Then Quarry switches tab, opens the palette, closes the tab or opens a new terminal
 
 Scenario: UI-009.7 Escape closes the topmost overlay only
   Given the find bar is open and the command palette is open over it

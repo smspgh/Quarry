@@ -2,6 +2,7 @@ import { ChevronRight } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { dirName } from "../lib/actions";
 import { getCommand, isEnabled, prettyKeys, runCommand } from "../lib/commands";
+import { knownShells } from "../lib/shells";
 import { activeDoc } from "../lib/store";
 import { useStore } from "../lib/store";
 import { allLanguageNames } from "../editor/cmSetup";
@@ -316,13 +317,21 @@ const MENUS: Menu[] = [
       ...(useStore.getState().settings.claudeEnabled
         ? ([{ cmd: "claude.openHere" }, { cmd: "claude.openFolder" }, { cmd: "claude.openTerminal" }, { cmd: "claude.addSelection" }, { cmd: "claude.addFile" }, { sep: true }] as Item[])
         : []),
+      { cmd: "terminal.new" },
+      // One entry per installed shell; the plain command above starts the one chosen in Settings.
+      ...(knownShells().length > 1
+        ? ([{ label: "New Terminal With", submenu: () => knownShells().map((sh) => ({ label: sh.name, run: () => void runCommand("terminal.new", { shell: sh.id }) })) }] as Item[])
+        : []),
+      { sep: true },
       { cmd: "view.settings", label: "Settings" },
+      { cmd: "view.shortcuts" },
     ],
   },
   {
     label: "Help",
     items: () => [
       { cmd: "view.commandPalette", label: "All Commands and Shortcuts" },
+      { cmd: "view.shortcuts", label: "Change Keyboard Shortcuts…" },
       { cmd: "help.scriptApi" },
       { sep: true },
       { cmd: "help.checkUpdates", label: "Check for Updates…" },

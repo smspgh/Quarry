@@ -19,6 +19,7 @@ import { appData, big, fs, sys } from "./ipc";
 import { activeDoc, newDocId, PANELS, useStore, type Doc, type SidebarPanel } from "./store";
 import type { BigDocInfo, FileStat, Settings, TextFile } from "./types";
 import { DEFAULT_SETTINGS } from "./types";
+import { sanitizeKeybindings } from "./keybindings";
 import { choose } from "./dialogs";
 
 const SETTINGS_FILE = "settings.json";
@@ -995,6 +996,9 @@ export function sanitizeSettings(s: Settings): Settings {
     theme: (["system", "light", "dark"] as const).includes(s.theme) ? s.theme : DEFAULT_SETTINGS.theme,
     menuPosition: (["top", "titlebar", "hidden"] as const).includes(s.menuPosition) ? s.menuPosition : DEFAULT_SETTINGS.menuPosition,
     defaultEol: s.defaultEol === "LF" || s.defaultEol === "CRLF" ? s.defaultEol : DEFAULT_SETTINGS.defaultEol,
+    keybindings: sanitizeKeybindings(s.keybindings),
+    terminalShell: typeof s.terminalShell === "string" ? s.terminalShell.trim() : DEFAULT_SETTINGS.terminalShell,
+    terminalCustom: typeof s.terminalCustom === "string" ? s.terminalCustom.replace(/[\r\n]/g, " ").trim() : DEFAULT_SETTINGS.terminalCustom,
     scriptsDir: typeof s.scriptsDir === "string" ? s.scriptsDir.replace(/[\r\n]/g, "").trim() : "",
     macrosDir: typeof s.macrosDir === "string" ? s.macrosDir.replace(/[\r\n]/g, "").trim() : "",
   };

@@ -18,7 +18,7 @@ import { Dialog, Toasts } from "./components/Toasts";
 import { Welcome } from "./components/Welcome";
 import { editor } from "./editor/manager";
 import { flushSession, installCloseGuard, loadSettings, openPath, restoreSession, saveSession, installExternalChangeWatch } from "./lib/actions";
-import { eventToKeys, getCommandsForKeys, handleKeyEvent, registerAllCommands } from "./lib/commands";
+import { eventToKeys, getCommand, getCommandsForKeys, getKeyCapture, handleKeyEvent, isVacatedKey, registerAllCommands } from "./lib/commands";
 import { appIpc, big } from "./lib/ipc";
 import { installClaudeEvents } from "./lib/claude";
 import { installLsp } from "./lib/lsp";
@@ -93,6 +93,12 @@ export default function App() {
     let tabEscapeUntil = 0;
     // Global shortcuts (capture phase so they win over focused inputs for Ctrl/Alt combos).
     const onKey = (e: KeyboardEvent) => {
+      // Settings is recording a shortcut: the key press is the answer, not a command.
+      const capture = getKeyCapture();
+      if (capture) {
+        capture(e);
+        return;
+      }
       const target = e.target as HTMLElement | null;
       const inField = !!target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) && !target.closest(".cm-content");
       // Escape inside the editor with no overlay to close belongs to CodeMirror: it collapses extra
@@ -117,10 +123,10 @@ export default function App() {
         }
       }
       // A terminal gets every key (Ctrl+R, Ctrl+L, Ctrl+W, Escape, ... belong to the program) except tab
-      // switching, the palette and Ctrl+F4 (close the tab).
+      // switching, the palette, Ctrl+F4 (close the tab) and the New Terminal shortcut.
       if (target?.closest?.(".terminal-view")) {
         const k = eventToKeys(e);
-        if (k !== "Ctrl+Tab" && k !== "Ctrl+Shift+Tab" && k !== "Ctrl+Shift+P" && k !== "Ctrl+F4") return;
+        if (!k || !terminalPassesToQuarry(k, getCommand("terminal.new")?.keys)) return;
       }
       // A focused tab handles its own keys (Delete / Ctrl+W close that tab, not the active one).
       if (target?.closest?.(".tabs [role=tab]") && (e.key === "Delete" || (e.ctrlKey && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "w"))) return;
@@ -136,6 +142,15 @@ export default function App() {
       // Let plain typing and simple editing keys through to inputs.
       if (inField && !e.ctrlKey && !e.altKey && !/^F\d+$/.test(e.key) && e.key !== "Escape") return;
       if (inField && e.ctrlKey && !e.shiftKey && !e.altKey && ["a", "c", "v", "x", "z", "y"].includes(e.key.toLowerCase())) return;
+      // A built-in key the user moved or removed must not fall through to the editor's own binding for it.
+      if (inEditor) {
+        const k = eventToKeys(e);
+        if (k && isVacatedKey(k)) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+      }
       handleKeyEvent(e).then((handled) => void handled);
       // Decide synchronously whether to swallow: re-run matcher cheaply.
       if (matchesRegistered(e)) {
@@ -255,6 +270,11 @@ export default function App() {
       <Toasts />
     </div>
   );
+}
+
+/** Pure: the few shortcuts Quarry keeps while a terminal has the keyboard (`newTerminalKeys`: the keys of New Terminal now). */
+export function terminalPassesToQuarry(stroke: string, newTerminalKeys?: string): boolean {
+  return stroke === "Ctrl+Tab" || stroke === "Ctrl+Shift+Tab" || stroke === "Ctrl+Shift+P" || stroke === "Ctrl+F4" || (!!newTerminalKeys && !newTerminalKeys.includes(" ") && stroke === newTerminalKeys);
 }
 
 /** True when the key event is a registered shortcut that should be kept from the page. */

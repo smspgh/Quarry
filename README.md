@@ -56,6 +56,7 @@ See [Find and replace](docs/find-and-replace.md).
 - **Line tools.** Sort (natural order), dedupe, trim, join, number lines, change case.
 - **Languages and formatting.** Syntax highlighting for about 140 languages, with automatic language detection for pasted text. **Format Document** works out of the box for JSON, web languages, Go, Python, C/C++, C#, Java, Shell and SQL, using built-in formatters (Prettier, plus gofmt, Ruff, clang-format, shfmt and others compiled to WebAssembly). If you have the real tool installed, Quarry uses that instead, so the result matches your project's setup.
 - **Encodings.** Encoding detection (BOM and chardetng), conversion on save, and CRLF/LF/CR line endings.
+- **Your own shortcuts.** Change, remove or add the keys of any command in Settings; a conflict is named before you assign.
 - **Navigation.** Command palette, Quick Open, Go to Line, and an Explorer that watches the folder.
 - **Sessions.** Hot exit restores your tabs and unsaved scratch buffers. Saves are atomic, and Quarry notices files that change on disk.
 
@@ -66,10 +67,33 @@ See [Editing](docs/editing.md) and [Formatting](docs/formatting.md).
 - **Language servers.** TypeScript / JavaScript, Python, Rust, Go, C / C++, C#, CSS and HTML files get suggestions while typing, hover documentation, Go to Definition (F12), Find All References (Shift+F12), Rename (F2) and live problems, from the same language servers VS Code uses. A **Problems** panel lists them for every open file, and a missing server installs with one click.
 - **Compare.** Two files (or a file against its unsaved edits or the clipboard) side by side or inline, with changed words highlighted, F7 to step through the changes, and arrows to copy a change across, then save.
 
-- **Git.** Change markers in the gutter with peek and revert, line blame, a Source Control panel to stage, commit, discard and amend, branch switching and creation, fetch / pull / push, file history, and change colours in the Explorer. It runs your own `git`.
 - **Split editor.** Ctrl+\\ shows two panes side by side, the same file in both or two different ones.
 
-See [Code intelligence](docs/code-intelligence.md), [Compare](docs/compare.md) and [Git](docs/git.md).
+See [Code intelligence](docs/code-intelligence.md) and [Compare](docs/compare.md).
+
+### Git
+
+Quarry runs your own `git`, so your configuration, hooks and credentials apply.
+
+- **In the editor.** Change markers in the gutter with peek and revert, line blame, and change colours in the Explorer.
+- **Source Control panel.** Stage, commit, amend and discard; fetch, pull and push with a status line that says what is ahead, behind or diverged; create the repository on GitHub from the panel.
+- **Staging by line.** Stage, unstage or discard a single change or just the selected lines from the comparison of a file.
+- **Commit graph.** Every branch in one scrolling graph, also for very large histories, with search across the whole history, a details pane, and checkout, branch, tag, cherry-pick, revert and reset from a commit's menu. Select two commits (or a commit and your working files) to compare them.
+- **Merge and rebase.** Start either from the graph, a branch label or the panel, with a preview of what will happen first. Conflicts get Accept Current / Incoming / Both bars in the editor, and a stopped operation has Continue, Skip and Abort.
+- **Edit history.** Undo the last commit, reword, squash, drop or reorder commits from a list, without typing a rebase plan. Force Push is offered only when needed and never overwrites work you haven't fetched.
+- **Stash.** Stash with or without untracked files, look inside a stash, then apply, pop or drop it.
+- **Branches and tags.** Rename, delete, set upstream, and push or delete on the remote.
+- **Unsaved tabs are safe.** Any git action that rewrites files checks your open tabs first and asks before anything unsaved could be lost.
+- **Claude helpers (optional).** Draft a commit message, explain a conflict, or summarise a branch or a run of commits. Nothing is applied without a click.
+
+See [Git](docs/git.md).
+
+### Terminal
+
+- **Shell tabs.** **Ctrl+`** opens PowerShell, Command Prompt, Git Bash or your own shell in a tab, in the folder you are working in; right-click a folder in the Explorer for **Open in Terminal**.
+- **A real console.** Full-screen programs, colours and prompts work as in Windows Terminal, in Quarry's theme and font.
+
+See [Terminal](docs/terminal.md).
 
 ### Macros and scripts
 
@@ -83,7 +107,7 @@ See [Macros](docs/macros.md) and [Scripts](docs/scripting.md).
 - **Claude tabs.** Right-click a folder in the Explorer and choose **Work with Claude Code Here** to work with [Claude Code](https://claude.com/claude-code) in that folder, in Quarry's own interface: streamed replies, a card for every step, diffs of each edit, and permission requests answered with a click. File edits are applied automatically and commands ask first, or set it to ask before everything.
 - **Screenshots and context.** Paste screenshots into the message box, drop files on it, or send the editor selection with **Ctrl+Alt+L**.
 - **History.** Restored tabs show their earlier messages, and any past conversation in the folder can be continued.
-- **Terminal.** **Claude Code Terminal Here** runs the `claude` command line itself in a terminal tab.
+- **Claude CLI.** **Claude Code Terminal Here** runs the `claude` command line itself in a terminal tab.
 - **Optional.** It uses your own Claude Code installation and login. One switch in Settings turns the whole integration off.
 
 See [Claude Code](docs/claude-code.md).
@@ -97,7 +121,11 @@ See [Claude Code](docs/claude-code.md).
 
 ## Install
 
-Quarry is at version 0.1.0. There are no prebuilt releases yet, so build it from source (below). The installers aren't code-signed, so Windows SmartScreen will warn the first time you run one.
+Download the latest `Quarry_<version>_x64-setup.exe` from the [Releases page](https://github.com/smspgh/Quarry/releases/latest) and run it. It installs for your user only (no administrator rights needed) and needs Windows 11.
+
+The installer isn't code-signed yet, so Windows SmartScreen warns the first time you run it: choose **More info**, then **Run anyway**.
+
+Quarry checks for a new version when it starts and offers to install it; updates are verified against Quarry's signing key before they are installed. You can turn the check off in Settings, or run it yourself with **Help › Check for Updates**.
 
 ## Build from source
 
@@ -121,7 +149,8 @@ The installers end up in `src-tauri/target/release/bundle/`. Tests, project layo
 | [Large files](docs/large-files.md) | How large-file mode works: colours, CSV grid, JSON tree and validation, filter view, follow mode, find, replace, editing, limits |
 | [Code intelligence](docs/code-intelligence.md) | Language servers: suggestions, hover, definitions, references, rename, problems, installing servers |
 | [Compare](docs/compare.md) | Comparing files, a file with its unsaved edits or the clipboard; editing and saving |
-| [Git](docs/git.md) | Change markers, blame, Source Control panel, branches, pull / push, file history |
+| [Git](docs/git.md) | Change markers, blame, Source Control panel, staging by line, commit graph, merge and rebase, conflicts, edit history, stash, branches and tags, Claude helpers |
+| [Terminal](docs/terminal.md) | Shell tabs, choosing the shell, keys, closing |
 | [Find and replace](docs/find-and-replace.md) | Find bar, Find / Replace in Files, undo, regex flavours |
 | [JSON tools](docs/json.md) | Tree view, paths, validate, format, JSON ↔ CSV |
 | [Formatting](docs/formatting.md) | Built-in and installed formatters for each language |
@@ -153,6 +182,7 @@ The installers end up in `src-tauri/target/release/bundle/`. Tests, project layo
 | `Ctrl+Alt+L` | Add the selection to Claude Code |
 | `Ctrl+Shift+G` / `Alt+F5` | Source Control / next change since the last commit |
 | `Ctrl+\` / `Ctrl+1` / `Ctrl+2` | Split editor / focus left / right pane |
+| ``Ctrl+` `` | New terminal |
 | `Ctrl+B` / `Ctrl+J` / `Alt+Z` | Collapse or restore side panels / bottom panel / word wrap |
 
 The full list is in [Keyboard shortcuts](docs/keyboard-shortcuts.md).

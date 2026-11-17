@@ -77,7 +77,7 @@ Very long conversations show only their most recent messages.
 
 A Claude CLI tab runs `claude` in a Windows pseudo console, so slash commands, `/resume`, `/model` and everything else in the command line work as usual.
 
-- Every key goes to Claude Code except **Ctrl+Tab** / **Ctrl+Shift+Tab** (switch tabs), **Ctrl+Shift+P** (command palette) and **Ctrl+F4** (close the tab). So Esc, Ctrl+R, Ctrl+L, Ctrl+W and the rest behave exactly as in a terminal.
+- Every key goes to Claude Code except **Ctrl+Tab** / **Ctrl+Shift+Tab** (switch tabs), **Ctrl+Shift+P** (command palette), **Ctrl+F4** (close the tab) and **Ctrl+`** (a [shell terminal](terminal.md) in the same folder). So Esc, Ctrl+R, Ctrl+L, Ctrl+W and the rest behave exactly as in a terminal.
 - **Ctrl+C** copies when text is selected, and otherwise goes to Claude Code. **Ctrl+V** and **Ctrl+Shift+V** paste text, and **Ctrl+Shift+C** copies.
 - The terminal follows Quarry's theme and editor font.
 - When Claude Code exits, press **Enter** to start it again. Closing the tab ends it and anything it started.

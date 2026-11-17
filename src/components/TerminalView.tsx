@@ -8,6 +8,7 @@ import { useEffect, useRef } from "react";
 import { useStore, type Doc } from "../lib/store";
 import { commandFinished, setTerminalPty } from "../lib/terminal";
 import { editor } from "../editor/manager";
+import { closeDocument } from "../lib/actions";
 
 /** xterm colours from the theme tokens (--term-*), so the terminal follows light / dark. */
 function themeFromCss(): ITheme {
@@ -22,7 +23,7 @@ function themeFromCss(): ITheme {
   };
 }
 
-/** A terminal tab: the `claude` command line in the tab's folder. Stays mounted while hidden, like
+/** A terminal tab: a shell, the `claude` command line or a one-off command in the tab's folder. Stays mounted while hidden, like
  *  Claude tabs, so switching tabs keeps the screen and the running program. */
 export function TerminalView({ doc, visible }: { doc: Doc; visible: boolean }) {
   const host = useRef<HTMLDivElement>(null);
@@ -35,7 +36,8 @@ export function TerminalView({ doc, visible }: { doc: Doc; visible: boolean }) {
   useEffect(() => {
     const el = host.current;
     if (!el || !doc.terminal) return;
-    const { cwd, resume, command } = doc.terminal;
+    const { cwd, resume, command, shell } = doc.terminal;
+    const program = shell?.name ?? "Claude Code";
     const settings = useStore.getState().settings;
     const t = new Terminal({ fontFamily: settings.fontFamily, fontSize: settings.fontSize, cursorBlink: true, scrollback: 10_000, theme: themeFromCss() });
     const f = new FitAddon();
@@ -55,7 +57,7 @@ export function TerminalView({ doc, visible }: { doc: Doc; visible: boolean }) {
     const start = async () => {
       try {
         if (command && first) t.write(`\x1b[2m> ${command}\x1b[0m\r\n`);
-        const id = await invoke<number>("pty_start", { exe: useStore.getState().settings.claudePath, cwd, cols: t.cols, rows: t.rows, resume: first ? resume : undefined, command });
+        const id = await invoke<number>("pty_start", { exe: useStore.getState().settings.claudePath, cwd, cols: t.cols, rows: t.rows, resume: first ? resume : undefined, command, shell: shell?.argv });
         first = false;
         if (disposed) {
           void invoke("pty_kill", { id });
@@ -86,7 +88,12 @@ export function TerminalView({ doc, visible }: { doc: Doc; visible: boolean }) {
         commandFinished(doc.id, e.payload.code);
         return;
       }
-      t.write(`\r\n\x1b[2m[Claude Code ended${code}. Press Enter to start it again.]\x1b[0m\r\n`);
+      // A shell that ended normally (`exit`) closes its tab, as in any terminal; a failure stays readable.
+      if (shell && !e.payload.code) {
+        void closeDocument(doc.id, true);
+        return;
+      }
+      t.write(`\r\n\x1b[2m[${program} ended${code}. Press Enter to start it again.]\x1b[0m\r\n`);
     });
     t.onData((d) => {
       if (pty !== null) void invoke("pty_write", { id: pty, data: d }).catch(() => {});

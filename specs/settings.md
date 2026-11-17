@@ -996,3 +996,108 @@ Scenario: SET-019.4 A bad value in the file
   When Quarry starts
   Then "Compare with Branch shows" is "The two tips"
 ```
+
+## SET-020: Change keyboard shortcuts
+
+- Status: draft
+- Commands: `view.shortcuts`
+- Files:
+  - `src/components/panels/ShortcutsSection.tsx` — the section: `listedRows` (changed only / Show all / the Settings filter), Change / Remove / Restore default buttons, the recording box, Restore all
+  - `src/lib/keybindings.ts` — pure rules: `strokeProblem`, `checkKeys`, `withKeys`, `restoreDefault`, `captureStep`, `keyRowMatches`, `sanitizeKeybindings`, `vacatedKeys`
+  - `src/lib/commands.ts` — `setKeyOverrides` (rebuilds the key index, sets each command's `keys`), `keyRows`, `isVacatedKey`, `setKeyCapture` / `getKeyCapture`, the store subscription at the end of `registerAllCommands`, `view.shortcuts`
+  - `src/App.tsx` — `onKey`: key presses go to the recording handler first; a vacated built-in key is swallowed inside an editor
+  - `src/components/panels/SettingsPanel.tsx` — mounts the section above "Data"
+  - `src/components/MenuBar.tsx` — Tools › Keyboard Shortcuts…, Help › Change Keyboard Shortcuts…; `MENU_MNEMONICS` (letters a shortcut may not take)
+  - `src/lib/types.ts` — `Settings.keybindings` (command id → keys, "" = none; default `{}`)
+  - `src/lib/actions.ts` — `sanitizeSettings` (`sanitizeKeybindings`)
+- Tests: `src/__tests__/keybindings.test.ts`, `src/__tests__/shortcutsSection.test.tsx`
+- Docs: `docs/keyboard-shortcuts.md`, `docs/settings.md`
+
+**As a** developer coming from another editor
+**I want** to give any command the keys I am used to
+**So that** I do not have to relearn my shortcuts
+
+```gherkin
+Scenario: SET-020.1 The section lists what I changed
+  Given I have changed no shortcut
+  When I open Settings and look at "Keyboard shortcuts"
+  Then it says "No shortcuts changed" and lists no command
+  And "Restore all" is disabled
+  When I click "Show all"
+  Then every command of the palette is listed as "Category: Title" with its keys, or "None"
+
+Scenario: SET-020.2 Find a command with the Settings filter
+  When I type "duplicate" in the filter at the top of Settings
+  Then "Edit: Duplicate Line Down" is listed under Keyboard shortcuts with Ctrl+Shift+D
+  When I type "ctrl+shift+d" instead
+  Then the same command is listed
+
+Scenario: SET-020.3 Record new keys
+  Given "Edit: Duplicate Line Down" has Ctrl+Shift+D
+  When I click its Change button and press Ctrl+Alt+J
+  Then the box shows "Ctrl+Alt+J" and no command runs
+  When I press Enter
+  Then the command's keys are Ctrl+Alt+J in the list, the Edit menu and the palette
+  And pressing Ctrl+Alt+J in a document duplicates the line
+  And pressing Ctrl+Shift+D in a document does nothing
+
+Scenario: SET-020.4 A two-key shortcut
+  When I click Change, press Ctrl+K, then J, then Enter
+  Then the command's keys are "Ctrl+K J"
+
+Scenario: SET-020.5 Cancel and start over
+  Given I clicked Change and pressed Ctrl+Alt+J
+  When I press Backspace
+  Then the box is empty again and waits for keys
+  When I press Escape, or click outside the row
+  Then recording ends and the shortcut is unchanged
+
+Scenario: SET-020.6 Keys another command has
+  Given Ctrl+S is the shortcut of Save
+  When I click Change on another command and press Ctrl+S
+  Then the row says Ctrl+S is the shortcut of Save and that assigning it takes it away from that command
+  When I click "Assign"
+  Then the other command has Ctrl+S and Save has no shortcut
+
+Scenario: SET-020.7 Keys that are refused
+  When I record K, Shift+K or Enter on its own
+  Then the row says "A shortcut needs Ctrl or Alt, or a function key." and "Assign" is disabled
+  When I record Ctrl+C, Ctrl+X, Ctrl+V or F10
+  Then the row says what the key is kept for and "Assign" is disabled
+  When I record Alt+F
+  Then the row says "Alt+F opens the File menu."
+  When I record Ctrl+K on its own while Ctrl+K M exists
+  Then the row says Ctrl+K starts two-key shortcuts
+  When I record Ctrl+S followed by X while Ctrl+S is the shortcut of Save
+  Then the row says a two-key shortcut cannot start with it
+
+Scenario: SET-020.8 Remove a shortcut
+  When I click Remove on "Edit: Toggle Line Comment"
+  Then it shows "None"
+  And pressing Ctrl+/ in a document does nothing
+  And Edit › Toggle Line Comment still works
+
+Scenario: SET-020.9 Restore one and restore all
+  Given I gave Save's Ctrl+S to another command
+  When I click Restore default on Save
+  Then Save has Ctrl+S again and the other command loses it
+  When I click "Restore all"
+  Then a dialog asks "Restore all keyboard shortcuts?"
+  When I confirm
+  Then every command has its built-in keys
+
+Scenario: SET-020.10 Saved and applied at start
+  Given I changed a shortcut
+  When I restart Quarry
+  Then the changed shortcut works and is shown in the menus
+  And settings.json has it under "keybindings"
+
+Scenario: SET-020.11 A bad value in the file
+  Given settings.json has "keybindings": "x", or an entry whose value is a number
+  When Quarry starts
+  Then the bad value is ignored and the built-in keys apply
+
+Scenario: SET-020.12 Open the list from a menu
+  When I choose Tools › Keyboard Shortcuts…
+  Then Settings opens with every command listed under Keyboard shortcuts, scrolled into view
+```

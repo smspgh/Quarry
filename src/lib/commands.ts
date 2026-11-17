@@ -56,7 +56,8 @@ import { stepChange } from "../components/DiffView";
 import { hasLsp, lspCommands, restartServers, useLsp } from "./lsp";
 import { nextDiagnostic, previousDiagnostic } from "@codemirror/lint";
 import { startCompletion } from "@codemirror/autocomplete";
-import { openClaudeTerminal } from "./terminal";
+import { openClaudeTerminal, openShellTerminal } from "./terminal";
+import { loadShells, pickShell, terminalTitle } from "./shells";
 import { appendToDraft, claudeBusy, claudeEnabled, claudeTabFor, contextFor, interruptClaude, newClaudeSession, openClaudeTab } from "./claude";
 import { makeRoom } from "./tabLimit";
 import { big, json as jsonIpc } from "./ipc";
@@ -74,6 +75,7 @@ import { registerGitCommands } from "./gitCommands";
 import { showAbout } from "./about";
 import { showPanel as showPanelOnly, toggleAllPanels, togglePanel } from "./panels";
 import { choose, inform } from "./dialogs";
+import { vacatedKeys, type KeyOverrides, type KeyRow } from "./keybindings";
 
 export interface Command {
   id: string;
@@ -124,15 +126,65 @@ const byKey = new Map<string, Command[]>();
 /** First strokes of two-key chords such as "Ctrl+K M" (normalized). */
 const chordPrefixes = new Set<string>();
 
+/** Built-in keys per command id (normalized, "" for none): what Restore default goes back to. */
+const defaultKeys = new Map<string, string>();
+/** The user's own keys (`settings.keybindings`), normalized. */
+let keyOverrides: KeyOverrides = {};
+let vacated = new Set<string>();
+
+function indexKeys(cmd: Command) {
+  if (!cmd.keys) return;
+  const k = normalizeKeys(cmd.keys);
+  if (!byKey.has(k)) byKey.set(k, []);
+  byKey.get(k)!.push(cmd);
+  const [first, second] = k.split(" ");
+  if (second) chordPrefixes.add(first);
+}
+
 export function register(cmd: Command) {
   registry.set(cmd.id, cmd);
-  if (cmd.keys) {
-    const k = normalizeKeys(cmd.keys);
-    if (!byKey.has(k)) byKey.set(k, []);
-    byKey.get(k)!.push(cmd);
-    const [first, second] = k.split(" ");
-    if (second) chordPrefixes.add(first);
+  defaultKeys.set(cmd.id, cmd.keys ? normalizeKeys(cmd.keys) : "");
+  const own = keyOverrides[cmd.id];
+  if (own !== undefined) cmd.keys = own || undefined;
+  indexKeys(cmd);
+}
+
+/**
+ * Apply the user's shortcuts (specs/settings.md SET-020): every command's `keys` becomes its own
+ * keys or its built-in ones, so menus, the palette and the key handler all follow.
+ */
+export function setKeyOverrides(overrides: KeyOverrides) {
+  keyOverrides = {};
+  for (const [id, keys] of Object.entries(overrides)) keyOverrides[id] = keys.trim() ? normalizeKeys(keys) : "";
+  byKey.clear();
+  chordPrefixes.clear();
+  clearPendingChord();
+  for (const cmd of registry.values()) {
+    const own = keyOverrides[cmd.id];
+    cmd.keys = (own !== undefined ? own : defaultKeys.get(cmd.id)) || undefined;
+    indexKeys(cmd);
   }
+  vacated = vacatedKeys(keyRows());
+}
+
+/** Every command with its keys in effect and its built-in keys, in registration order. */
+export function keyRows(): KeyRow[] {
+  return [...registry.values()].map((c) => ({ id: c.id, title: c.title, category: c.category, keys: c.keys ? normalizeKeys(c.keys) : "", defaultKeys: defaultKeys.get(c.id) ?? "", hidden: c.hidden }));
+}
+
+/** A built-in key the user moved or removed and nothing uses now: App.tsx keeps it from the editor's own bindings. */
+export function isVacatedKey(stroke: string): boolean {
+  return vacated.has(stroke);
+}
+
+/** While Settings records a shortcut, every key press goes to this handler and no command runs. */
+let keyCapture: ((e: KeyboardEvent) => void) | null = null;
+export function setKeyCapture(fn: ((e: KeyboardEvent) => void) | null) {
+  keyCapture = fn;
+  clearPendingChord();
+}
+export function getKeyCapture() {
+  return keyCapture;
 }
 
 const matchesWhen = (c: Command) => (c.when ? c.when() !== false : true);
@@ -211,7 +263,7 @@ let chordTimer = 0;
 
 function clearPendingChord() {
   pendingChord = null;
-  window.clearTimeout(chordTimer);
+  if (typeof window !== "undefined") window.clearTimeout(chordTimer);
 }
 
 /** Exposed for tests / status UI. */
@@ -235,6 +287,7 @@ export function resolveStroke(stroke: string, pending: string | null): { kind: "
 }
 
 export async function handleKeyEvent(e: KeyboardEvent): Promise<boolean> {
+  if (keyCapture) return true;
   const k = eventToKeys(e);
   if (!k) return false;
   const store = useStore.getState();
@@ -969,6 +1022,7 @@ export function registerAllCommands() {
   register({ id: "view.macros", title: "Show Macros", category: "View", run: () => showPanel("macros") });
   register({ id: "view.scripts", title: "Show Scripts", category: "View", run: () => showPanel("scripts") });
   register({ id: "view.settings", title: "Settings", category: "View", keys: "Ctrl+,", run: () => showPanel("settings") });
+  register({ id: "view.shortcuts", title: "Keyboard Shortcuts…", category: "View", run: () => { showPanelOnly("settings"); window.setTimeout(() => bus.emit("settings.shortcuts"), 0); } });
   register({ id: "view.toggleWrap", title: "Toggle Word Wrap", category: "View", keys: "Alt+Z", run: () => { s().updateSettings({ wordWrap: !s().settings.wordWrap }); editor.applySettings(s().settings); persistSettings(); } });
   register({ id: "view.zoomIn", title: "Zoom In", category: "View", keys: "Ctrl+=", run: () => { s().updateSettings({ fontSize: Math.min(40, s().settings.fontSize + 1) }); editor.applySettings(s().settings); persistSettings(); } });
   register({ id: "view.zoomInPlus", title: "Zoom In", category: "View", keys: "Ctrl+Plus", hidden: true, run: () => runCommand("view.zoomIn") });
@@ -1283,6 +1337,33 @@ export function registerAllCommands() {
       openClaudeTerminal(folder, a.resume);
     },
   });
+  // Terminal tabs with a shell (specs/terminal.md TERM-010). Not part of the Claude Code integration.
+  register({
+    id: "terminal.new",
+    title: "New Terminal",
+    category: "View",
+    keys: "Ctrl+`",
+    // args: the folder, or { folder, shell } (shell: an id from pty_shells or "custom"; default: the setting).
+    // Without a folder: the terminal or Claude tab's folder, the open folder, the active file's folder, or the home folder.
+    run: async (args) => {
+      const a = (typeof args === "string" ? { folder: args } : (args ?? {})) as { folder?: string; shell?: string };
+      const d = activeDoc(s());
+      let folder = a.folder ?? (d?.kind === "terminal" ? d.terminal?.cwd : d?.kind === "claude" ? d.claude?.cwd : undefined) ?? s().folder ?? (d?.path ? dirName(d.path) : null);
+      if (!folder) {
+        const { homeDir } = await import("@tauri-apps/api/path");
+        folder = await homeDir();
+      }
+      const { terminalShell, terminalCustom } = s().settings;
+      const shell = pickShell(await loadShells(), typeof a.shell === "string" ? a.shell : terminalShell, terminalCustom);
+      if ("error" in shell) {
+        s().toast(shell.error, "warning", 6000);
+        return false;
+      }
+      if ((await makeRoom([terminalTitle(shell.name, folder)], (id) => closeDocument(id))) === 0) return false;
+      openShellTerminal(folder, shell);
+    },
+  });
+  void loadShells();
   register({
     id: "claude.openFolder",
     title: "Work with Claude Code in Folder…",
@@ -1456,4 +1537,13 @@ export function registerAllCommands() {
   bindCommandRunner((id, args) => void runCommand(id, args));
   bindAppKeyFallback((e) => handleKeyEvent(e));
   applyDefaultEnabled();
+  // The user's own shortcuts (Settings › Keyboard shortcuts), now and whenever they change.
+  setKeyOverrides(useStore.getState().settings.keybindings ?? {});
+  if (!keysWatched) {
+    keysWatched = true;
+    useStore.subscribe((st, prev) => {
+      if (st.settings.keybindings !== prev.settings.keybindings) setKeyOverrides(st.settings.keybindings ?? {});
+    });
+  }
 }
+let keysWatched = false;
