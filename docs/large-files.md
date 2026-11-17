@@ -121,7 +121,7 @@ Editing works line by line and is available once indexing has finished.
 
 ## Saving
 
-**Ctrl+S** and **Save As** stream the original file plus your edits to a temporary file in the same folder, then replace the target in one step. If anything fails, the original stays intact and the document stays open.
+**Ctrl+S** and **Save As** stream the original file plus your edits to a temporary file in the same folder, flush it to disk, then replace the target in one step. The saved file keeps the original's attributes (such as hidden), permissions and creation time, and saving through a symbolic link writes the file it points to and keeps the link. If anything fails, the original stays intact and the document stays open.
 
 You can't save over a file that is open in large-file mode in another tab.
 

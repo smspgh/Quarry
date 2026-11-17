@@ -1038,7 +1038,9 @@ impl BigDoc {
     where
         F: Fn(IndexProgress) + Send + 'static,
     {
-        let target = target.map(Path::to_path_buf).unwrap_or_else(|| self.path.clone());
+        let shown = target.map(Path::to_path_buf).unwrap_or_else(|| self.path.clone());
+        // Through a symbolic link, write the file it points to and keep the link (as text saves do).
+        let target = crate::files::link_target(&shown);
         let dir = target.parent().filter(|d| !d.as_os_str().is_empty()).unwrap_or(Path::new("."));
         let tmp = tempfile::Builder::new()
             .prefix(".quarry-")
@@ -1051,6 +1053,8 @@ impl BigDoc {
                 w.write_all(self.piece_slice(p)).map_err(|e| e.to_string())?;
             }
             w.flush().map_err(|e| e.to_string())?;
+            // On disk before it replaces the original, so a crash or power cut cannot leave a short file.
+            w.get_ref().sync_all().map_err(|e| e.to_string())?;
         }
         // Windows cannot replace a file that is mapped: release our mapping only when the target
         // is the file we map. If the replace then fails, map the (unchanged) original again so the
@@ -1061,10 +1065,10 @@ impl BigDoc {
             self.stop_indexing();
             self.mmap = None;
         }
-        let temp_path = tmp.into_temp_path();
-        if let Err(e) = temp_path.persist(&target) {
+        // ReplaceFileW keeps the original's attributes, ACL, creation time and alternate data streams.
+        if let Err(e) = crate::files::replace_with(tmp.into_temp_path(), &target) {
             if release {
-                let file = File::open(&self.backing).map_err(|e2| format!("cannot save {}: {}; reopening the original failed: {e2}", target.display(), e.error))?;
+                let file = File::open(&self.backing).map_err(|e2| format!("cannot save {}: {e}; reopening the original failed: {e2}", target.display()))?;
                 let mmap = unsafe { Mmap::map(&file).map_err(|e2| e2.to_string())? };
                 self.mmap = Some(Arc::new(mmap));
                 if !index_complete {
@@ -1072,9 +1076,9 @@ impl BigDoc {
                     self.start_indexing(on_progress);
                 }
             }
-            return Err(format!("cannot save {}: {}", target.display(), e.error));
+            return Err(format!("cannot save {}: {e}", target.display()));
         }
-        self.path = target.clone();
+        self.path = shown;
         self.rebind(&target, on_progress)?;
         self.clean_depth = Some(0);
         Ok(())
@@ -1555,6 +1559,40 @@ y
         assert!(!d.is_dirty());
         assert_eq!(std::fs::read_to_string(&f).unwrap(), "ONE\ntwo\nthree\n");
         assert_eq!(all_lines(&d), vec!["ONE", "two", "three", ""]);
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn save_keeps_file_attributes_and_symlinks() {
+        use std::os::windows::fs::MetadataExt;
+        let dir = tempfile::tempdir().unwrap();
+        let f = dir.path().join("hidden.log");
+        std::fs::write(&f, "one\ntwo\n").unwrap();
+        assert!(std::process::Command::new("attrib").arg("+h").arg(&f).status().unwrap().success());
+        let mut d = BigDoc::open(1, &f, |_| {}).unwrap();
+        d.wait_indexed();
+        d.replace_line(0, "ONE").unwrap();
+        d.save(None, |_| {}).unwrap();
+        d.wait_indexed();
+        assert_eq!(std::fs::read_to_string(&f).unwrap(), "ONE\ntwo\n");
+        const HIDDEN: u32 = 0x2;
+        assert_ne!(std::fs::metadata(&f).unwrap().file_attributes() & HIDDEN, 0, "the hidden attribute survives a save");
+        drop(d);
+        // Through a symbolic link (creating one needs Developer Mode or admin; skip otherwise).
+        let real = dir.path().join("real.log");
+        std::fs::write(&real, "a\nb\n").unwrap();
+        let link = dir.path().join("link.log");
+        if std::os::windows::fs::symlink_file(&real, &link).is_ok() {
+            let mut d = BigDoc::open(2, &link, |_| {}).unwrap();
+            d.wait_indexed();
+            d.replace_line(1, "B").unwrap();
+            d.save(None, |_| {}).unwrap();
+            d.wait_indexed();
+            assert!(std::fs::symlink_metadata(&link).unwrap().file_type().is_symlink(), "still a link");
+            assert_eq!(std::fs::read_to_string(&real).unwrap(), "a\nB\n");
+            assert_eq!(d.info().path, link.to_string_lossy());
+        }
+        assert!(std::fs::read_dir(dir.path()).unwrap().flatten().all(|e| !e.file_name().to_string_lossy().starts_with(".quarry-")));
     }
 
     #[test]

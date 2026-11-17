@@ -574,7 +574,8 @@ Scenario: BIG-009.5 A new edit clears redo
 - Commands: `file.save`, `file.saveAs`
 - Files:
   - `src/lib/actions.ts` — `saveDocument` (big branch, read-only guard, `mappedElsewhere` guard)
-  - `src-tauri/src/bigfile.rs` — `save` (temp file `.quarry-*.tmp` in the target folder, then replace; remaps the original if the replace fails), `rebind`, `same_file`
+  - `src-tauri/src/bigfile.rs` — `save` (temp file `.quarry-*.tmp` in the target folder, flushed with `sync_all`, then `files::replace_with` (ReplaceFileW); a symbolic link is followed with `files::link_target`; remaps the original if the replace fails), `rebind`, `same_file`
+  - `src-tauri/src/files.rs` — `replace_with`, `link_target` (shared with text saves)
   - `src-tauri/src/lib.rs` — `big_save`
   - `src/lib/ipc.ts` — `big.save`
 - Tests: `src-tauri/src/bigfile.rs`
@@ -621,6 +622,13 @@ Scenario: BIG-010.6 Read-only documents save only as a copy
   Given a UTF-16 large file, which is read-only
   When I press Ctrl+S
   Then a toast says the file is read-only and to use Save As
+
+Scenario: BIG-010.7 Saving keeps the file's attributes and links
+  Given a hidden large file, or a symbolic link to a large file, with edited lines
+  When I save
+  Then the file is still hidden, with its permissions and creation time kept
+  And a symbolic link is still a link and the file it points to holds my edits
+  And the saved bytes reached the disk before the original was replaced
 ```
 
 ## BIG-011: Encodings and line endings

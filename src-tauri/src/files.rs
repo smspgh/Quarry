@@ -260,11 +260,7 @@ pub fn write_text(path: &Path, content: &str, opts: &WriteOptions) -> Result<Fil
         .unwrap_or(UTF_8);
     let out = encode_text(content, encoding, opts.bom.unwrap_or(false))?;
 
-    // Saving through a symbolic link writes the file it points to (and keeps the link).
-    let target = match fs::symlink_metadata(path) {
-        Ok(m) if m.file_type().is_symlink() => fs::canonicalize(path).map(|c| PathBuf::from(strip_verbatim(&c.to_string_lossy()))).unwrap_or_else(|_| path.to_path_buf()),
-        _ => path.to_path_buf(),
-    };
+    let target = link_target(path);
     // Atomic save: write to a sibling temp file, then put it in place of the target.
     let dir = target.parent().unwrap_or_else(|| Path::new("."));
     if !dir.as_os_str().is_empty() && !dir.exists() {
@@ -286,11 +282,19 @@ pub fn write_text(path: &Path, content: &str, opts: &WriteOptions) -> Result<Fil
     stat(path)
 }
 
+/// The file a save of `path` writes: through a symbolic link, the file it points to (so the link is kept).
+pub(crate) fn link_target(path: &Path) -> PathBuf {
+    match fs::symlink_metadata(path) {
+        Ok(m) if m.file_type().is_symlink() => fs::canonicalize(path).map(|c| PathBuf::from(strip_verbatim(&c.to_string_lossy()))).unwrap_or_else(|_| path.to_path_buf()),
+        _ => path.to_path_buf(),
+    }
+}
+
 /// Put the saved temp file in place of `target`. An existing file is replaced with ReplaceFileW,
 /// which keeps the file's own attributes, permissions (ACL), creation time and alternate data
 /// streams; a plain rename would give it the temp file's. A new file is renamed into place.
 #[cfg(windows)]
-fn replace_with(tmp: tempfile::TempPath, target: &Path) -> Result<(), String> {
+pub(crate) fn replace_with(tmp: tempfile::TempPath, target: &Path) -> Result<(), String> {
     use std::os::windows::ffi::OsStrExt;
     use windows_sys::Win32::Storage::FileSystem::{ReplaceFileW, REPLACEFILE_IGNORE_MERGE_ERRORS};
     if target.is_file() {
@@ -307,7 +311,7 @@ fn replace_with(tmp: tempfile::TempPath, target: &Path) -> Result<(), String> {
 }
 
 #[cfg(not(windows))]
-fn replace_with(tmp: tempfile::TempPath, target: &Path) -> Result<(), String> {
+pub(crate) fn replace_with(tmp: tempfile::TempPath, target: &Path) -> Result<(), String> {
     tmp.persist(target).map_err(|e| e.error.to_string())
 }
 
