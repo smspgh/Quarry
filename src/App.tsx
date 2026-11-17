@@ -83,7 +83,7 @@ export default function App() {
         await Promise.all([loadMacros(), migrateLegacyScripts()]);
         await restoreSession();
         installCloseGuard();
-        if (useStore.getState().settings.autoUpdateCheck) setTimeout(() => void import("./lib/updater").then((m) => m.checkForUpdates(true)), 6000);
+        if (useStore.getState().settings.autoUpdateCheck) setTimeout(() => void import("./lib/updater").then((m) => m.checkForUpdates(true)), 3000);
         const crash = await appIpc.takeCrashReport().catch(() => null);
         if (crash) useStore.getState().toast(`Quarry closed unexpectedly last time. Details were saved to ${crash}`, "warning", 15000);
       })();
