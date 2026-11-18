@@ -9,7 +9,7 @@ Git in the editor (change markers, peek / revert, line blame), the Source Contro
 
 ## GIT-001: Detect repositories and keep their status fresh
 
-- Status: draft
+- Status: verified
 - Commands: `git.refresh`
 - Files:
   - `src/lib/git.ts` — `installGit`, `refreshGit` (debounce), `doRefresh` (a git failure goes to `statusErrors`, never `notRepo`; a known repository keeps its last status), `rescanGit` (clears `notRepo`, re-checks a missing git), `interesting`, `notRepo`, `repoOf`, `currentRepo`, `fileStatus`
@@ -84,7 +84,7 @@ Scenario: GIT-001.10 A failed read keeps the last status
 
 ## GIT-002: Change markers in the gutter
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/editor/git.ts` — `gitDiff` field (`Chunk.build` / `Chunk.updateB`), `lineChange`, `changeRows`, `gitMarkers`, `ChangeMarker`, the `cm-git-gutter` gutter in `gitExtensions`
@@ -131,7 +131,7 @@ Scenario: GIT-002.5 Markers reset after a commit
 
 ## GIT-003: Peek at a change and revert it
 
-- Status: draft
+- Status: verified
 - Commands: `git.peekChange`, `git.revertChange`
 - Files:
   - `src/editor/git.ts` — `peekField`, `setPeek`, `peekDOM`, `revertSpec`, `revertChange`, gutter `mousedown`, Escape handler, `changeAtLine`
@@ -187,7 +187,7 @@ Scenario: GIT-003.7 Revert at cursor on an unchanged line
 
 ## GIT-004: Jump to the next or previous change
 
-- Status: draft
+- Status: verified
 - Commands: `git.nextChange`, `git.prevChange`
 - Files:
   - `src/lib/gitCommands.ts` — `jumpChange` (opens the peek)
@@ -230,7 +230,7 @@ Scenario: GIT-004.5 Only for text tabs
 
 ## GIT-005: Line blame
 
-- Status: draft
+- Status: verified
 - Commands: `git.toggleBlame`
 - Files:
   - `src/lib/git.ts` — `toggleBlame`, `blameSoon` (0 ms on toggle / tab switch / save, 1500 ms after typing), `blameNow` (stale answers dropped), `blameOn`
@@ -283,7 +283,7 @@ Scenario: GIT-005.6 Hide blame
 
 ## GIT-006: Compare a file with the last commit
 
-- Status: draft
+- Status: verified
 - Commands: `git.compareWithHead`
 - Files:
   - `src/lib/git.ts` — `compareWithHead` (HEAD text vs tab / file on disk / empty "(deleted)")
@@ -327,7 +327,7 @@ Scenario: GIT-006.5 Binary files
 
 ## GIT-007: Switch and create branches
 
-- Status: draft
+- Status: verified
 - Commands: `git.switchBranch`, `git.checkoutTo`, `git.createBranch`
 - Files:
   - `src/lib/git.ts` — `pickBranch(purpose)` (opens palette mode `branch` for the purpose `"switch"`, the default; loads `branches`; the other purposes are MERGE-003's and BRANCH-002's), `checkout`
@@ -391,11 +391,10 @@ Scenario: GIT-007.7 Unavailable without a repository or while git is busy
 
 ## GIT-008: Commit from the Source Control panel
 
-- Status: draft
+- Status: verified
 - Commands: `git.showPanel`
 - Files:
   - `src/components/panels/GitPanel.tsx` — `GitPanel`: message box (Ctrl+Enter; when empty it takes the message of a commit taken back with Undo Last Commit, HISTORY-002.3), Commit button and its disabled rule, `doCommit`, "as name <email>" hint
-  - `src/components/panels/GitDraft.tsx` — `useDraft`: the Draft button, the box while Claude drafts (GITAI-003)
   - `src/lib/git.ts` — `commit()` (message check, Stage All and Commit dialog, unsaved-tabs warning, success toast), `run` (busy label)
   - `src/lib/gitStatus.ts` — `commitLabel`, `groupFiles`
   - `src/lib/gitCommands.ts` — `git.showPanel` (Ctrl+Shift+G)
@@ -457,17 +456,11 @@ Scenario: GIT-008.8 Ctrl+Enter while the button is disabled says why
   Then no commit is made
   And a message says why: "Write a commit message first." with an empty box, "There is nothing to commit." with no changes, or the conflicts warning (CONFLICT-010.2)
   And while a git action is running nothing happens
-
-Scenario: GIT-008.9 The Draft button and a draft in progress
-  Given Claude Code is switched on
-  When I look at the row under the message box
-  Then a "Draft" button sits between the Commit button and "Amend" (GITAI-003); with Claude Code switched off it is not there
-  And while Claude is drafting, the message box is read-only, reads "Claude is drafting a message…", and the Commit button and Ctrl+Enter do nothing
 ```
 
 ## GIT-009: Amend the last commit
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — Amend checkbox (disabled without HEAD, cleared after a commit), button disabled rule
@@ -506,7 +499,7 @@ Scenario: GIT-009.4 Nothing to amend before the first commit
 
 ## GIT-010: See the changed files and open their changes
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — `Section`, `FileRow` (click / Enter = `openChange`, double-click = open file, letter, folder, tooltip), "No uncommitted changes." note
@@ -576,7 +569,7 @@ Scenario: GIT-010.8 Sections collapse and empty ones are hidden
 
 ## GIT-011: Stage and unstage files
 
-- Status: draft
+- Status: verified
 - Commands: `git.stageFile`, `git.unstageFile`
 - Files:
   - `src/components/panels/GitPanel.tsx` — row "Stage" (+) / "Unstage" (−) buttons, heading "Stage all" / "Unstage all"
@@ -633,7 +626,7 @@ Scenario: GIT-011.7 Menu commands are greyed out when they do not apply
 
 ## GIT-012: Discard changes
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — row "Discard changes" / "Delete (to the Recycle Bin)" button, heading "Discard all changes" (Changes section only)
@@ -689,7 +682,7 @@ Scenario: GIT-012.6 No discard for staged rows
 
 ## GIT-013: Status line: where the branch stands against its remote
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/gitStatus.ts` — `syncLine` (its `rewritten` case is MERGE-009's), `SyncKind`
@@ -760,7 +753,7 @@ Scenario: GIT-013.9 No line without a remote or a branch
 
 ## GIT-014: Background check of the remote
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/git.ts` — `checkRemote` (`CHECK_EVERY` = 60 s counted from the last check, failed or not; skipped while busy / already checking / no remote), `markChecked`, `remoteCheck` state
@@ -826,7 +819,7 @@ Scenario: GIT-014.8 Only the branch's remote is checked
 
 ## GIT-015: Fetch, pull, push and publish a branch
 
-- Status: draft
+- Status: verified
 - Commands: `git.fetch`, `git.pull`, `git.push`
 - Files:
   - `src/lib/git.ts` — `remote()` (no-remote redirect, busy labels, result toasts, for the pulls the unsaved-tabs `guard` before and the tab check after through `rewrite`, missing-repository detection), `run`
@@ -896,7 +889,7 @@ Scenario: GIT-015.8 Unavailable without a repository
 
 ## GIT-016: Recover when the remote repository is gone
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/gitStatus.ts` — `isMissingRepo`
@@ -941,7 +934,7 @@ Scenario: GIT-016.5 The warning clears when the remote is changed
 
 ## GIT-017: Commits of the current branch
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — `CommitsSection` (`COMMITS_PAGE` = 30, "N to push" (the status's ahead count) / "N to pull" counts, expand to files, "Show more", graph button)
@@ -1017,7 +1010,7 @@ Scenario: GIT-017.10 A long run of unpushed commits is counted in full
 
 ## GIT-018: File history
 
-- Status: draft
+- Status: verified
 - Commands: `git.fileHistory`
 - Files:
   - `src/lib/git.ts` — `showHistory`, `moreHistory` (`PAGE` = 100), `openCommitChange`, `compareCommitWithCurrent`, `history` state
@@ -1072,7 +1065,7 @@ Scenario: GIT-018.7 Not offered for untracked files
 
 ## GIT-019: Commit identity (name and email)
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitRepoSettings.tsx` — `RepoSettings` (Repository section, opens itself when something is missing, summary line), `IdentityForm` ("Only this repository", Enter saves, Escape cancels)
@@ -1123,7 +1116,7 @@ Scenario: GIT-019.6 Change an existing identity
 
 ## GIT-020: Add a remote by URL
 
-- Status: draft
+- Status: verified
 - Commands: `git.addRemote`
 - Files:
   - `src/components/panels/GitRepoSettings.tsx` — `RemoteForm` (URL choice, `RemoteNameInput`, "Add and Push" / "Add", Enter = and push, `canPush` needs a commit), `showForm` rule
@@ -1175,7 +1168,7 @@ Scenario: GIT-020.6 A name and a URL are required
 
 ## GIT-021: See, open and change remotes
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitRepoSettings.tsx` — remote rows (name, short URL, Open, Change), `RemoteForm` with `change` ("Save and Push" / "Save"; URL prefilled through `displayUrl`), `shortUrl`
@@ -1234,7 +1227,7 @@ Scenario: GIT-021.7 A token in the URL stays hidden when changing it
 
 ## GIT-022: Create a repository on GitHub and push to it
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitRepoSettings.tsx` — `RemoteForm` GitHub choice (repository name, Private, `GithubTarget`, "Create and Push" / "Create")
@@ -1301,7 +1294,7 @@ Scenario: GIT-022.8 Carry a project on in a new GitHub repository
 
 ## GIT-023: GitHub accounts
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitRepoSettings.tsx` — `GithubRow` (account text / `Select` for several / "Sign in" / add-account button), `GithubTarget`, `onGithub` rule
@@ -1353,7 +1346,7 @@ Scenario: GIT-023.6 Only shown when GitHub is involved
 
 ## GIT-024: Private / Public badge on GitHub remotes
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitRepoSettings.tsx` — `Visibility` badge, summary "(private)" / "(public)", section kept mounted while closed
@@ -1397,7 +1390,7 @@ Scenario: GIT-024.5 A repository created from Quarry is badged at once
 
 ## GIT-025: Work with more than one repository
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — repository `Select` (shown when more than one repository is known; "Show a repository…" when the open folder is not in one), `context` line under the header
@@ -1466,7 +1459,7 @@ Scenario: GIT-025.8 The panel names its folder under the buttons
 
 ## GIT-028: Set a folder as the Source Control context
 
-- Status: draft
+- Status: verified
 - Commands: `git.setContext`
 - Files:
   - `src/lib/git.ts` — `setSourceControlContext` (asks git for the folder's repository, makes it `current`, keeps the folder in view as `contextPlace` until another folder opens, opens the panel), `interesting`, `followOpenFolder` (drops it)
@@ -1516,7 +1509,7 @@ Scenario: GIT-028.6 Git missing or failing
 
 ## GIT-026: Branch in the status bar
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/StatusBar.tsx` — `GitStatusItem` (click = `pickBranch`)
@@ -1567,7 +1560,7 @@ Scenario: GIT-026.6 Hidden without a repository
 
 ## GIT-027: Git decorations in the Explorer
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/ExplorerPanel.tsx` — `gitFiles` / `gitDirs` lookups, `tree-label git-<kind>`, `tree-git` letter, `tree-git-dot`

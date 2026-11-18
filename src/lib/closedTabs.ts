@@ -1,6 +1,6 @@
 /**
  * Recently closed file tabs, for Reopen Closed Tab (Ctrl+Shift+T). Pure: actions.ts keeps the stack
- * and opens the entry; untitled, Claude, terminal, Compare and commit-graph tabs never get here.
+ * and opens the entry; untitled, terminal, Compare and commit-graph tabs never get here.
  */
 
 export interface ClosedTab {

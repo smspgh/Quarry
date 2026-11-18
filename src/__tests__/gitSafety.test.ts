@@ -52,8 +52,8 @@ describe("which tabs count (SAFE-001)", () => {
     expect(tabsAtRisk([text("1", `${ROOT}\\old.ts`, true, { missingOnly: true })], ROOT, [ROOT])).toEqual([]);
     expect(rels(tabsAtRisk([text("1", `${ROOT}\\old.ts`, true, { missingOnly: false })], ROOT, [ROOT]))).toEqual(["old.ts"]);
   });
-  it("never counts Claude, terminal or graph tabs", () => {
-    const tabs: OpenTab[] = ["claude", "terminal", "graph"].map((kind) => ({ id: kind, kind, path: null, dirty: true }));
+  it("never counts terminal or graph tabs", () => {
+    const tabs: OpenTab[] = ["terminal", "graph"].map((kind) => ({ id: kind, kind, path: null, dirty: true }));
     expect(tabsAtRisk(tabs, ROOT, [ROOT])).toEqual([]);
   });
   it("tabsOfPaths keeps to the files named", () => {

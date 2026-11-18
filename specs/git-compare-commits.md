@@ -27,7 +27,7 @@ Decisions (the roadmap left these open):
 
 ## COMMITCMP-001: Pick a second commit with Ctrl+click
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — row `onClick` (Ctrl key → `ctrlClick`), `compare` state beside `selected` (`setSelected` = a plain selection, which ends the comparison; `comparePair` sets both), row classes / `aria-selected` for both commits, `onKeyDown` (Escape; arrows go through `select`), `noteMenuOther` + the commit menu's entry "Compare with <short id>", `rowOf` (a stash row is never a side)
@@ -113,7 +113,7 @@ Scenario: COMMITCMP-001.12 Rows that are not commits cannot be picked
 
 ## COMMITCMP-002: See which files differ between two commits
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphCompare.tsx` — comparison pane (heading, both commits with labels and first message line, counts line, Swap Sides, close), windowed file rows (`CompareFile`, 24 px, `OVERSCAN`), empty / loading / error states; a late answer for a changed pair is dropped
@@ -208,7 +208,7 @@ Scenario: COMMITCMP-002.12 Resize
 
 ## COMMITCMP-003: Open a differing file in a Compare tab
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphCompare.tsx` — `CompareFile`: click / Enter opens the comparison, double-click opens the file itself, Up / Down move between rows
@@ -281,7 +281,7 @@ Scenario: COMMITCMP-003.10 Opening files changes nothing on disk
 
 ## COMMITCMP-004: Compare a commit with the working tree
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — commit menu entry "Compare with Working Tree" (`comparePair(sha, WORKTREE)`), passes the repository's status object as `tick`
@@ -379,7 +379,7 @@ Scenario: COMMITCMP-004.14 How the folder relates to the commit
 
 ## COMMITCMP-005: Compare with a branch
 
-- Status: draft
+- Status: verified
 - Commands: `git.compareWithBranch`, `git.compareBranchPick`
 - Files:
   - `src/lib/gitCommands.ts` — registers `git.compareWithBranch` ("Compare with Branch…", enabled only with a repository) and hidden `git.compareBranchPick` (run with the picked branch name, like `git.checkoutTo`)
@@ -488,7 +488,7 @@ Scenario: COMMITCMP-005.14 Only what the branch changed since it split off, when
 
 ## COMMITCMP-006: Comparing never changes the repository
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src-tauri/src/git.rs` — `diff_files`: read-only git commands only (`diff`, `rev-list`, `rev-parse`, `log`, `ls-files`) through `compare_git` (`GIT_OPTIONAL_LOCKS=0`); a working-tree comparison reads a scratch copy of the index (`scratch_index`, `GIT_INDEX_FILE`) because `git diff` would otherwise rewrite the index; `compare_side`: ids through `is_sha`, names through `valid_ref_name`, and git is only ever given the id, "HEAD" or the full `refs/…` name, so a name can't be read as an option

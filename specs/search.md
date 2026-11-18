@@ -9,7 +9,7 @@ The Search panel: searching the current file, the open tabs or folders on disk, 
 
 ## SEARCH-001: Open the Search panel
 
-- Status: draft
+- Status: verified
 - Commands: `find.inFiles`, `find.replaceInFiles`
 - Files:
   - `src/lib/commands.ts` — `find.inFiles`, `find.replaceInFiles` (`showPanelOnly("search")`, `search.focus`)
@@ -69,7 +69,7 @@ Scenario: SEARCH-001.7 A long search text stays visible
 
 ## SEARCH-002: Search the current file or all open files
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SearchPanel.tsx` — `effectiveScope`, `searchOpenDocs`, `searchTexts` ("Max" across all documents, `truncated`), `buildJsRegex`, `run()` (in-memory branch, large-file branch), scope buttons
@@ -139,7 +139,7 @@ Scenario: SEARCH-002.9 Nothing found counts only the documents searched
 
 ## SEARCH-003: Search a folder, the Explorer selection or chosen folders
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SearchPanel.tsx` — `explorerRoots`, `targetSummary`, `folderLabel`, Folder / Selection button, "Whole folder" link, "Choose…" (folder picker, `customRoots`), `run()` roots
@@ -212,7 +212,7 @@ Scenario: SEARCH-003.9 No folder to search
 
 ## SEARCH-004: Search options and regular-expression checking
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SearchPanel.tsx` — Match Case / Whole Word / Regex toggles, Ctrl+Enter, "Dot matches newline", `regexEngine` (JavaScript-only check for Current File on a text tab and Open Files), debounced `validateRegex` (150 ms, Rust scopes only), `jsRegexError`, `invalidRegex`, `regexMessage`, `multiline` flag sent with the query
@@ -296,7 +296,7 @@ Scenario: SEARCH-004.10 A multi-line plain-text search finds Windows line ends
 
 ## SEARCH-005: Filter which files are searched
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SearchPanel.tsx` — Filters button and badge (`activeFilterCount`), include / exclude boxes, "Use .gitignore", "Max" field, `showFilters`
@@ -363,7 +363,7 @@ Scenario: SEARCH-005.8 File filters do not apply to Current File and Open Files
 
 ## SEARCH-006: Streamed results, cancelling and limits
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SearchPanel.tsx` — `run()`, `cancel()`, `onResults` / `onDone` / `onError` listeners (stale `searchId` ignored), `status`, "Max" field (1 to 1,000,000)
@@ -443,7 +443,7 @@ Scenario: SEARCH-006.11 At most 1,000 results of one line
 
 ## SEARCH-007: Browse the results list
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SearchPanel.tsx` — results tree, `previewBefore`, `relativeDir`, `budgetRows` (`ROW_BUDGET` 1500, `MAX_SHOWN` 500 per file), `visibleKeys`, `onListKeyDown`, `focusItem`, `toggleCollapse`
@@ -511,7 +511,7 @@ Scenario: SEARCH-007.8 An empty match
 
 ## SEARCH-008: Open a result in the editor
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SearchPanel.tsx` — `openMatch`, `locateMatch`, `stale` set, `ranQuery`, `resultSel`, `keyOf`
@@ -576,7 +576,7 @@ Scenario: SEARCH-008.8 Space previews without leaving the list
 
 ## SEARCH-009: Step through results with F4
 
-- Status: draft
+- Status: verified
 - Commands: `find.nextResult`, `find.prevResult`
 - Files:
   - `src/lib/commands.ts` — `stepResult` (`find.nextResult` / `find.prevResult`, enabled only with results, shows the Search panel first)
@@ -631,7 +631,7 @@ Scenario: SEARCH-009.7 Results beyond the first 500 of a file are skipped
 
 ## SEARCH-010: Leave results out
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SearchPanel.tsx` — `leaveOut`, `leaveOutPatch`, × buttons (`results-dismiss`), Delete key, status "left out"
@@ -686,7 +686,7 @@ Scenario: SEARCH-010.7 The × explains what it does
 
 ## SEARCH-011: File actions on result file rows
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SearchPanel.tsx` — `selFiles`, `fileAnchor`, `fileMenu`, `onDeleted` + `deletedPatch` (deleted files leave the results, with their left-out results and the current result)
@@ -744,7 +744,7 @@ Scenario: SEARCH-011.7 Results left out of a deleted file are forgotten
 
 ## SEARCH-012: Replace in Files on disk
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SearchPanel.tsx` — `replaceAllInResults` (targets, dirty-tab skip, confirmation, `searchedAt`, `replaceNote`, `fileErrors`), `unlistedNote` (matches replaced but not listed: past 500 of a file, past Max, past the per-line cap), `previewReplacement`, Replace All button
@@ -844,7 +844,7 @@ Scenario: SEARCH-012.13 The confirmation says when more may be replaced
 
 ## SEARCH-013: Replace in Files keeps each file's encoding
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src-tauri/src/search.rs` — `replace_in_files` (decode with `detect_encoding`, strict decode, `encode_text`, `encode_error`), `file_encoding` / `utf16_len` (previews and columns of non-UTF-8 files)
@@ -890,7 +890,7 @@ Scenario: SEARCH-013.5 Files are written atomically
 
 ## SEARCH-014: Replacement text: groups and Preserve Case
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src-tauri/src/search.rs` — `parse_replacement`, `expand_replacement`, `preserve_case`, `replace_text` (literal when Regex is off)
@@ -941,7 +941,7 @@ Scenario: SEARCH-014.6 Preserve Case can be changed after the search
 
 ## SEARCH-015: Replace in the open documents
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SearchPanel.tsx` — `replaceAllInResults` (`st.inMemory` branch, `editedSince`, count of what was replaced, exact count beyond Max for `unlistedNote`), `searchedText` (each document's text as the search read it, from `searchOpenDocs`), `buildJsRegex`
@@ -1012,7 +1012,7 @@ Scenario: SEARCH-015.8 The confirmation counts the matches beyond Max
 
 ## SEARCH-016: Undo Replace in Files
 
-- Status: draft
+- Status: verified
 - Commands: `find.undoReplaceInFiles`
 - Files:
   - `src/lib/replaceUndo.ts` — `undoReplaceInFiles` (confirmation, restore, reload, toast), `undoEntriesOf`, `reloadOpenDocs`

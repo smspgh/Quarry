@@ -480,23 +480,4 @@ export const git = {
    *  A plan that stops on a conflict rejects with git's output and leaves the rebase in progress. */
   historyRewrite: (root: string, action: "undo" | "reword" | "plan", expectedTip: string, base: string | null = null, steps: GitHistoryStep[] = [], message: string | null = null) =>
     invoke<string>("git_history_rewrite", { root, action, expectedTip, base, steps, message }),
-  // ---- Claude git helpers (specs/git-claude.md): what a request is built from; nothing is changed ----
-  /** What a commit made now would hold, per file, with the first lines of the last 10 commit
-   *  messages. "staged": the index; "all": every change plus untracked files that are not ignored
-   *  (nothing staged); "amend": the last commit together with the index. */
-  commitDiff: (root: string, scope: "staged" | "all" | "amend") => invoke<{ files: import("./gitAi").DiffFile[]; subjects: string[] }>("git_commit_diff", { root, scope }),
-  /** The commits `to` has that `from` does not, oldest first, with the true count (the list is
-   *  empty when that is over `limit`). `from` "" = everything up to `to`. */
-  rangeLog: (root: string, from: string, to: string, limit: number) => invoke<{ count: number; commits: import("./gitAi").RangeCommit[] }>("git_range_log", { root, from, to, limit }),
-  /** What that range changed, per file (`git diff from...to`). */
-  rangeDiff: (root: string, from: string, to: string) => invoke<import("./gitAi").DiffFile[]>("git_range_diff", { root, from, to }),
-  /** The remote's default branch as last fetched (`origin/main`), or null. */
-  defaultBranch: (root: string) => invoke<string | null>("git_default_branch", { root }),
-};
-
-/** One-off Claude Code requests of the git helpers (src-tauri/src/claude.rs `claude_oneshot`). */
-export const claude = {
-  /** One prompt (on stdin), one answer: no tools, no conversation, outside the repository. `id` names the request for `cancel`. */
-  oneshot: (args: { id: number; exe: string; model: string; prompt: string; timeoutSecs: number }) => invoke<import("./gitAi").OneshotResult>("claude_oneshot", { args }),
-  cancel: (id: number) => invoke<void>("claude_oneshot_cancel", { id }),
 };

@@ -91,7 +91,7 @@ describe("Source Control panel: Merge or Rebase", () => {
   it("the disabled button's tooltip is reachable: no disabled button switches pointer events off", async () => {
     const { readFileSync } = await import("node:fs");
     const css = readFileSync("src/styles/app.css", "utf8");
-    for (const sel of ["\\.btn", "\\.icon-btn", "\\.diff-toolbar \\.icon-btn", "\\.claude-input-foot \\.icon-btn"]) {
+    for (const sel of ["\\.btn", "\\.icon-btn", "\\.diff-toolbar \\.icon-btn"]) {
       const rule = new RegExp(`(^|\\n)${sel}:disabled\\s*\\{([^}]*)\\}`).exec(css);
       expect(rule, sel).not.toBeNull();
       expect(rule![2]).not.toMatch(/pointer-events:\s*none/);

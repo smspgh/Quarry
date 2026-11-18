@@ -9,7 +9,7 @@ The Settings panel, every setting it holds and what changing it does, the per-ro
 
 ## SET-001: Open the Settings panel and filter it
 
-- Status: draft
+- Status: verified
 - Commands: `view.settings`
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — `SettingsPanel` (focus and scroll-to-top on open, filter box, Escape clears the filter), `rowMatches`, `Section`, `Row`
@@ -32,7 +32,7 @@ Scenario: SET-001.1 Open with the shortcut
   When I press Ctrl+,
   Then the Settings panel opens scrolled to the top
   And keyboard focus is in the "Filter settings" box
-  And the sections are Appearance, Editor, Tabs and panels, Files, Folders, Search, Git, Code intelligence, Claude Code, JSON and Data, in that order
+  And the sections are Appearance, Editor, Tabs and panels, Files, Terminal, Folders, Search, Git, Code intelligence, JSON, Keyboard shortcuts and Data, in that order
 
 Scenario: SET-001.2 Settings always opens at 35% of the window width
   Given the window is 2000 px wide and I dragged the Settings panel to 300 px before closing it
@@ -66,7 +66,7 @@ Scenario: SET-001.6 Other ways in
 
 ## SET-002: Changes apply at once and are saved automatically
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — `change` (store update, `editor.applySettings`, `persistSettings`, `applyHistoryLimit` for the history limit)
@@ -109,7 +109,7 @@ Scenario: SET-002.4 A split editor follows too
 
 ## SET-003: Settings are loaded, completed and repaired at start
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/actions.ts` — `loadSettings` (merge over `DEFAULT_SETTINGS`, `.bak` copy and warning toast when unreadable), `sanitizeSettings` (numbers clamped, enums and `BOOLEAN_SETTINGS` checked, empty `fontFamily` replaced), `clampInt`
@@ -175,7 +175,7 @@ Scenario: SET-003.7 Switches that are not true or false, and an empty font, fall
 
 ## SET-004: Use previous setting and Restore default on each row
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — `Row` (`hasPrev`, `dirty`, the two buttons, `apply` for rows with side effects), `describeValue`
@@ -239,7 +239,7 @@ Scenario: SET-004.8 Rows with side effects run them
 
 ## SET-005: Reset everything and open the settings folder
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — `resetAll` (confirmation, `DEFAULT_SETTINGS`, `loadMacros("switch")`, `restartServers` when a code-intelligence setting changes, toast), "Open settings folder" button (`appData.path`, `revealItemInDir`, falls back to a toast with the path)
@@ -286,7 +286,7 @@ Scenario: SET-005.5 Reset all reconnects the language servers
 
 ## SET-006: Theme, window material and menu bar position
 
-- Status: draft
+- Status: verified
 - Commands: `view.toggleTheme`
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — Appearance rows "Theme", "Menu bar", "Mica material"
@@ -337,7 +337,7 @@ Scenario Outline: SET-006.5 Menu bar position
 
 ## SET-007: Editor font size and font family
 
-- Status: draft
+- Status: verified
 - Commands: `view.zoomIn`, `view.zoomInPlus`, `view.zoomOut`, `view.zoomReset`
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — "Font size" row, `FontFamilyField` (`FONT_CHOICES`, only installed fonts listed, "Custom…"), `fontListFor`, `firstFontFamily`, `fontMissing`, `fontInstalled` (width measurement, since WebView2 reports every font as available)
@@ -400,7 +400,7 @@ Scenario: SET-007.7 A hand-written value opens in Custom
 
 ## SET-008: Editor behaviour settings
 
-- Status: draft
+- Status: verified
 - Commands: `view.toggleWrap`, `view.toggleWhitespace`, `view.setTabSize`
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — Editor section rows (`tabSize`, `insertSpaces`, `wordWrap`, `lineNumbers`, `highlightActiveLine`, `bracketMatching`, `autoCloseBrackets`, `renderWhitespace`, `defaultEol`)
@@ -462,7 +462,7 @@ Scenario: SET-008.7 The tab-size command without a size opens the picker
 
 ## SET-009: Number fields, switches and segmented choices
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — `NumberField` (commit on blur / Enter, clamp, `invalid` state), `Switch` (`role="switch"`), `Segmented` (`role="radiogroup"`, arrow keys, roving tab stop), `TextField` (commit on blur / Enter, re-syncs from the store), `LabelCtx` (`aria-labelledby`)
@@ -524,7 +524,7 @@ Scenario: SET-009.7 Switches are announced by their row label
 
 ## SET-010: Tab limit, large-file and session settings
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — "Tabs and panels" and "Files" sections (`maxOpenTabs`, `largeFileThresholdMb`, `bigHighlight`, `restoreSession`)
@@ -566,7 +566,7 @@ Scenario: SET-010.4 Restore session on start
 
 ## SET-011: Scripts and macros folders
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — `FolderRow` (shows the folder in use, default path typed back in stores empty, "Browse…", hint suffix "· default folder"), `changeFolder`
@@ -619,7 +619,7 @@ Scenario: SET-011.6 Cancelling a macros folder change keeps the previous folder
 
 ## SET-012: Find and replace history size
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — "Find & replace history" row (Unlimited / Limit, number field, default limit 500), `clearSearchHistory`
@@ -660,7 +660,7 @@ Scenario: SET-012.4 Clear the history
 
 ## SET-013: Confirmation and update-check switches
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — rows "Confirm script & macro runs" (`confirmRuns`) and "Check for updates on start" (`autoUpdateCheck`)
@@ -692,7 +692,7 @@ Scenario: SET-013.2 Check for updates on start
 
 ## SET-014: Code intelligence settings
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection` (master switch, one row per server from `SERVERS`, installed / not installed line, own command box, "Install…", per-server switch, "Restart language servers", re-detect on window focus)
@@ -741,83 +741,9 @@ Scenario: SET-014.6 The filter covers servers
   Then that server's row is shown
 ```
 
-## SET-015: Claude Code settings
-
-- Status: draft
-- Commands: none
-- Files:
-  - `src/components/panels/SettingsPanel.tsx` — `ClaudeSection` (`setEnabled` closes Claude tabs after asking, location row with detection hint and "Browse…", `CLAUDE_MODELS`, permissions segmented control)
-  - `src/lib/claude.ts` — `detectClaude`
-  - `src/lib/actions.ts` — `closeDocument`, `askDialog`, `sanitizeSettings` (`claudeEnabled`, `claudePath`, `claudeModel`, `claudePermissionMode`, `claudeGitModel`, `claudeGitConfirm`)
-  - `src/lib/types.ts` — `claudeGitModel` (default `"haiku"`), `claudeGitConfirm` (default on)
-  - `src/lib/gitAi.ts` — `SENDS_TIP` (the "i" beside the confirm row)
-  - `src/components/Select.tsx` — the model list
-- Tests: none
-- Docs: `docs/settings.md`, `docs/claude-code.md`
-
-**As a** developer who does, or does not, use Claude Code
-**I want** to switch the integration on or off and set its executable, model and permission mode
-**So that** Quarry shows only what I use and Claude works the way I expect
-
-```gherkin
-Scenario: SET-015.1 Turning Claude Code off hides its settings
-  Given no Claude Code tabs are open
-  When I turn the "Claude Code" switch off
-  Then the rows "Claude Code location", "Model", "Model for git helpers", "Ask before sending git content to Claude" and "Permissions" disappear
-  And the Explorer's right-click menu no longer offers "Work with Claude Code Here"
-
-Scenario: SET-015.2 Turning it off with Claude tabs open asks first
-  Given 2 Claude Code tabs are open
-  When I turn the "Claude Code" switch off
-  Then a dialog asks "Turn off Claude Code?" and says the 2 Claude Code tabs close
-  When I click "Turn off"
-  Then both tabs are closed and the switch is off
-
-Scenario: SET-015.3 Cancelling keeps it on
-  Given 1 Claude Code tab is open
-  When I turn the switch off and cancel the dialog
-  Then the tab stays open and the switch stays on
-
-Scenario: SET-015.4 The location row reports what was found
-  Given Claude Code is installed and "Claude Code location" is empty
-  When I open Settings
-  Then the row's hint first reads "Looking for Claude Code…" and then shows the version and the path found
-
-Scenario: SET-015.5 Claude Code is not found
-  Given "Claude Code location" points at a file that does not exist
-  When I open Settings
-  Then the row's hint ends with "Install it from claude.com/claude-code, or browse to claude.exe"
-
-Scenario: SET-015.6 A pasted path loses its quotes
-  When I paste "C:\Tools\claude.exe" including the quotes into "Claude Code location" and press Enter
-  Then the stored value is C:\Tools\claude.exe without quotes
-
-Scenario: SET-015.7 Model
-  When I open the "Model" list
-  Then it offers Default, Opus, Sonnet and Haiku
-  And a model name already stored that is not one of those is offered as a fifth entry
-
-Scenario: SET-015.8 Permissions
-  Given "Permissions" is "Auto-accept edits"
-  When I choose "Ask first"
-  Then the hint reads "Claude asks before every edit and command"
-
-Scenario: SET-015.9 Model for git helpers
-  Given a fresh installation
-  When I look at the row "Model for git helpers", directly under "Model"
-  Then it shows "Haiku" and offers Default, Opus, Sonnet and Haiku
-  And choosing another entry does not change "Model", and Restore default sets it back to "Haiku" (GITAI-003.16)
-
-Scenario: SET-015.10 Ask before sending git content to Claude
-  Given the switch "Ask before sending git content to Claude" is on, as it is by default
-  When I hover or click the "i" beside it
-  Then it lists what Draft, Explain and Summarise each send, and that it goes through my Claude Code account only when I click
-  And switching it off, here or with "Send and Don't Ask Again" in the dialog, makes the git helpers send without asking (GITAI-002.4)
-```
-
 ## SET-016: JSON pretty-print indent
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — JSON section, "Pretty-print indent" (`jsonIndent`, 1–8)
@@ -844,7 +770,7 @@ Scenario: SET-016.2 The default is 2
 
 ## SET-017: Themed dropdown lists
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/Select.tsx` — `Select` (combobox button, portalled listbox, `onKey` (Escape on an open list calls `preventDefault`), type-ahead with a 700 ms window, closes on outside mouse-down / resize / outside scroll / blur), `placeFlyout` (flips up, clamps to the window, max height 320), `typeAheadIndex`, option groups and hints
@@ -918,7 +844,7 @@ Scenario: SET-017.9 An option that cannot be chosen
 
 ## SET-018: Help "i" icons
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/InfoTip.tsx` — `InfoTip` (hover shows, click pins, Escape / outside click / second click dismisses, positioned below or above the icon and kept 8 px inside the window)
@@ -961,7 +887,7 @@ Scenario: SET-018.5 The text stays inside the window
 
 ## SET-019: Git settings
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — section "Git": "Allow merging with uncommitted changes" (switch) and "Compare with Branch shows" (The two tips / Changes since split), each hint following the current value
@@ -999,7 +925,7 @@ Scenario: SET-019.4 A bad value in the file
 
 ## SET-020: Change keyboard shortcuts
 
-- Status: draft
+- Status: verified
 - Commands: `view.shortcuts`
 - Files:
   - `src/components/panels/ShortcutsSection.tsx` — the section: `listedRows` (changed only / Show all / the Settings filter), Change / Remove / Restore default buttons, the recording box, Restore all

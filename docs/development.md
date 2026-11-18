@@ -51,8 +51,7 @@ src-tauri/src/
   search.rs      Find / Replace in Files (grep-searcher, grep-regex, ignore) with undo backups
   json_tools.rs  strict JSON validate / format / minify that preserves the source text
   watch.rs       folder watcher for the Explorer (notify, debounced)
-  claude.rs      Claude tabs: one headless `claude` process per tab (stream-json), history, images
-  pty.rs         Claude CLI tabs: `claude` in a ConPTY pseudo console (portable-pty); also install commands
+  pty.rs         terminal tabs: a shell or a one-off command (install commands) in a ConPTY pseudo console (portable-pty)
   lsp.rs         language servers: stdio processes, Content-Length framing, project roots, TypeScript setup
 src/
   App.tsx        layout, global key handling, startup and session restore
@@ -82,13 +81,7 @@ src/
 - **Menus.** The menu bar model is in `src/components/MenuBar.tsx`. Its items refer to command ids and never duplicate logic.
 - **Large-file tabs** are `kind: "big"` documents rendered by `BigFileView.tsx`. The UI never holds their text. Commands reach them through events on `src/lib/bus.ts` (`big.find`, `big.goto`, …).
 - **JSON tree.** The tree uses the tolerant parser in `src/lib/jsonPath.ts`, so it keeps working on half-typed JSON. Validate and Format use the strict Rust code.
-- **Claude Code.** Claude tabs are `kind: "claude"` documents:
-  - `claude.rs` runs `claude -p --input-format stream-json --output-format stream-json --verbose --include-partial-messages --permission-prompt-tool stdio` (plus `--permission-mode`, `--model` and `--resume` when set; `--verbose` is required for stream-json output with `-p`) in the tab's folder and forwards each stdout line as a `claude:out` event.
-  - `src/lib/claudeProtocol.ts` is pure and unit-tested. It folds those events into a transcript, and builds what goes to stdin: user messages with images, `interrupt`, and answers to `can_use_tool` permission requests. AskUserQuestion is answered by allowing it with `answers`; **Allow for this conversation** sends back the suggested rules with `destination: "session"`.
-  - `src/lib/claude.ts` keeps each tab's session, `ClaudeView.tsx` draws it, and `Markdown.tsx` renders replies through the parser in `src/lib/markdown.ts` as React elements, never as HTML.
-  - Past conversations are read from Claude Code's JSONL transcripts (`claude_conversations`, `claude_history`) and replayed through the same reducer.
-  - Claude CLI tabs (`kind: "terminal"`, `TerminalView.tsx`) are xterm.js over `pty.rs`.
-  - Both kinds of tab stay mounted while hidden, and everything is behind `settings.claudeEnabled`.
+- **Terminal tabs** (`kind: "terminal"`, `TerminalView.tsx`) are xterm.js over `pty.rs`. They stay mounted while hidden.
 - **Code intelligence.** `src/lib/lsp.ts` drives `@codemirror/lsp-client`:
   - One client per (server, project root). The server table, URI and position helpers and the hover HTML sanitiser are in `src/lib/lspServers.ts` (pure, tested).
   - Because text tabs share one `EditorView` whose state is swapped, `QuarryWorkspace` keeps a file open on the server for as long as its tab is open (not just while it's on screen), syncs from `editor.stateOf()`, and applies server edits and diagnostics to background states (`editor.dispatchTo`, `editor.setLspDiagnostics`).

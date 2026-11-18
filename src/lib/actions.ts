@@ -7,8 +7,7 @@ import type { Text } from "@codemirror/state";
 import { editor } from "../editor/manager";
 import { detectLanguage } from "../editor/cmSetup";
 import { bus } from "./bus";
-import { claudeBusy, disposeClaude, openClaudeTab, stopAllClaude } from "./claude";
-import { disposeTerminal, terminalPty } from "./terminal";
+import { disposeTerminal, killAllTerminals, terminalPty } from "./terminal";
 import { stopAllServers } from "./lsp";
 import { disposeDiff, patchDiff, refreshDiff, saveDiff, useDiff } from "./diff";
 import { keptNotice, missingNotice, reloadedNotice } from "./gitSafety";
@@ -518,12 +517,8 @@ export async function closeDocument(docId?: string, force = false, remember = tr
       if (!ok) return false;
     }
   }
-  if (doc.kind === "claude") {
-    if (!force && claudeBusy(doc.id) && !(await askDialog(`Stop Claude Code in ${doc.name.replace(/^Claude · /, "")}?`, "Claude is still working in this tab. Closing it stops the current task; the conversation can be continued later from Claude Code.", "Close tab"))) return false;
-    disposeClaude(doc.id);
-  }
   if (doc.kind === "terminal") {
-    // A one-off command (installing a language server) or an interactive CLI: closing kills it.
+    // A shell or a one-off command (installing a language server): closing kills it.
     if (!force && terminalPty(doc.id) !== null && !(await askDialog(`Stop ${doc.name}?`, "A program is still running in this tab. Closing the tab ends it and everything it started.", "Close tab"))) return false;
     disposeTerminal(doc.id);
   }
@@ -542,7 +537,7 @@ export async function closeDocument(docId?: string, force = false, remember = tr
 
 let closedTabs: ClosedTab[] = [];
 
-/** File-backed text and large-file tabs only: untitled, Claude, terminal, Compare and graph tabs are not reopened. */
+/** File-backed text and large-file tabs only: untitled, terminal, Compare and graph tabs are not reopened. */
 function rememberClosed(doc: Doc) {
   if (!doc.path || (doc.kind !== "text" && doc.kind !== "big")) return;
   const entry: ClosedTab = { path: doc.path };
@@ -610,9 +605,9 @@ async function closeMany(ids: string[]): Promise<boolean> {
       for (const d of dirty) if (!(await saveDocument(d.id))) return false;
     }
   }
-  const running = docs.filter((d) => (d.kind === "claude" && claudeBusy(d.id)) || (d.kind === "terminal" && terminalPty(d.id) !== null));
+  const running = docs.filter((d) => d.kind === "terminal" && terminalPty(d.id) !== null);
   if (running.length > 0) {
-    const title = running.length === 1 ? `Stop ${running[0].name.replace(/^Claude · /, "")}?` : `Stop ${running.length} running tabs?`;
+    const title = running.length === 1 ? `Stop ${running[0].name}?` : `Stop ${running.length} running tabs?`;
     const message = running.length === 1 ? "Something is still running in this tab. Closing it stops it." : `${running.map((d) => d.name).join(", ")} still have something running. Closing them stops it.`;
     if (!(await askDialog(title, message, running.length === 1 ? "Close tab" : "Close tabs"))) return false;
   }
@@ -972,12 +967,16 @@ const clampInt = (v: unknown, min: number, max: number, dflt: number) =>
   typeof v === "number" && Number.isFinite(v) ? Math.round(Math.max(min, Math.min(max, v))) : dflt;
 
 /** Clamp numeric settings read from disk to the same bounds the Settings panel enforces. */
-const BOOLEAN_SETTINGS = ["insertSpaces", "wordWrap", "lineNumbers", "highlightActiveLine", "bracketMatching", "autoCloseBrackets", "renderWhitespace", "restoreSession", "mica", "confirmRuns", "autoUpdateCheck", "bigHighlight", "claudeEnabled", "lspEnabled", "claudeGitConfirm", "gitMergeWithChanges"] as const;
+const BOOLEAN_SETTINGS = ["insertSpaces", "wordWrap", "lineNumbers", "highlightActiveLine", "bracketMatching", "autoCloseBrackets", "renderWhitespace", "restoreSession", "mica", "confirmRuns", "autoUpdateCheck", "bigHighlight", "lspEnabled", "gitMergeWithChanges"] as const;
+
+/** Settings of the removed Claude Code integration: dropped from older settings files. */
+const REMOVED_SETTINGS = new Set(["claudeEnabled", "claudePath", "claudeModel", "claudePermissionMode", "claudeGitModel", "claudeGitConfirm"]);
 
 export function sanitizeSettings(s: Settings): Settings {
   const switches = Object.fromEntries(BOOLEAN_SETTINGS.map((k) => [k, typeof s[k] === "boolean" ? s[k] : DEFAULT_SETTINGS[k]]));
+  const kept = Object.fromEntries(Object.entries(s).filter(([k]) => !REMOVED_SETTINGS.has(k))) as unknown as Settings;
   return {
-    ...s,
+    ...kept,
     ...switches,
     fontFamily: typeof s.fontFamily === "string" && s.fontFamily.trim() ? s.fontFamily : DEFAULT_SETTINGS.fontFamily,
     fontSize: clampInt(s.fontSize, 8, 40, DEFAULT_SETTINGS.fontSize),
@@ -986,11 +985,7 @@ export function sanitizeSettings(s: Settings): Settings {
     largeFileThresholdMb: clampInt(s.largeFileThresholdMb, 1, 4096, DEFAULT_SETTINGS.largeFileThresholdMb),
     searchHistoryLimit: clampInt(s.searchHistoryLimit, 0, 1_000_000, DEFAULT_SETTINGS.searchHistoryLimit),
     maxOpenTabs: clampInt(s.maxOpenTabs, 1, 1000, DEFAULT_SETTINGS.maxOpenTabs),
-    claudePath: typeof s.claudePath === "string" ? s.claudePath : DEFAULT_SETTINGS.claudePath,
-    claudeModel: typeof s.claudeModel === "string" ? s.claudeModel : DEFAULT_SETTINGS.claudeModel,
-    claudePermissionMode: s.claudePermissionMode === "default" ? "default" : DEFAULT_SETTINGS.claudePermissionMode,
     gitCompareBranch: s.gitCompareBranch === "split" ? "split" : DEFAULT_SETTINGS.gitCompareBranch,
-    claudeGitModel: typeof s.claudeGitModel === "string" ? s.claudeGitModel.trim() : DEFAULT_SETTINGS.claudeGitModel,
     lspDisabled: Array.isArray(s.lspDisabled) ? s.lspDisabled.filter((x): x is string => typeof x === "string") : [],
     lspCommands: s.lspCommands && typeof s.lspCommands === "object" && !Array.isArray(s.lspCommands) ? Object.fromEntries(Object.entries(s.lspCommands).filter(([, v]) => typeof v === "string")) : {},
     theme: (["system", "light", "dark"] as const).includes(s.theme) ? s.theme : DEFAULT_SETTINGS.theme,
@@ -1030,8 +1025,6 @@ interface SessionDoc {
   path: string | null;
   name?: string;
   text?: string;
-  /** Claude Code tab: its folder and session (resumed on the next message). */
-  claude?: { cwd: string; sessionId?: string };
   cursor?: number;
   scrollTop?: number;
 }
@@ -1087,9 +1080,6 @@ function sessionDocs(s: ReturnType<typeof useStore.getState>): { docs: SessionDo
         entry.name = d.name;
         entry.text = text;
       }
-    } else if (d.kind === "claude") {
-      if (!d.claude) continue;
-      entry.claude = { ...d.claude };
     } else if (!d.path) {
       continue;
     }
@@ -1192,15 +1182,12 @@ async function restoreSessionTabs() {
     const all: SessionDoc[] = session.docs ?? (session.openFiles ?? []).map((p) => ({ path: p }));
     // Opened with files (e.g. a double-click in File Explorer): those replace the session's tabs,
     // but unsaved Untitled text exists only in the session, so it always comes back.
-    const entries = startup.length === 0 ? all : all.filter((e) => !e.path && !e.claude && typeof e.text === "string");
+    const entries = startup.length === 0 ? all : all.filter((e) => !e.path && typeof e.text === "string");
     const restored: (Doc | null)[] = [];
     for (const entry of entries) {
       let doc: Doc | null = null;
       if (entry.path) {
         if (await fs.exists(entry.path)) doc = await openPath(entry.path, { activate: false, noLimit: true });
-      } else if (entry.claude) {
-        // Claude tabs come back idle; the process starts (resuming the session) on the next message.
-        if (store.settings.claudeEnabled && (await fs.exists(entry.claude.cwd))) doc = await openClaudeTab(entry.claude.cwd, { sessionId: entry.claude.sessionId, activate: false, start: false, reuse: false });
       } else if (typeof entry.text === "string") {
         doc = await newDocument(entry.text, entry.name);
       }
@@ -1252,13 +1239,13 @@ export function installCloseGuard() {
     if (dirty.length === 0) {
       // Untitled buffers skipped the prompt because the session keeps them; if it can't be written, ask.
       if (await flushSession()) {
-        await Promise.all([stopAllClaude(), stopAllServers()]);
+        await Promise.all([killAllTerminals(), stopAllServers()]);
         await win.destroy();
         return;
       }
       dirty.push(...s.docs.filter((d) => needsSavePromptOnExit(d, 0, false)));
       if (dirty.length === 0) {
-        await Promise.all([stopAllClaude(), stopAllServers()]);
+        await Promise.all([killAllTerminals(), stopAllServers()]);
         await win.destroy();
         return;
       }
@@ -1274,7 +1261,7 @@ export function installCloseGuard() {
     }
     await flushSession();
     for (const d of useStore.getState().docs) if (d.kind === "big" && d.bigId !== undefined) big.close(d.bigId).catch(() => {});
-    await Promise.all([stopAllClaude(), stopAllServers()]);
+    await Promise.all([killAllTerminals(), stopAllServers()]);
     await win.destroy();
   });
 }

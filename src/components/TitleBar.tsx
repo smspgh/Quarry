@@ -5,15 +5,12 @@ import { anyPanelShown, toggleAllPanels } from "../lib/panels";
 import { BrandIcon } from "./BrandIcon";
 import { useStore, type Doc } from "../lib/store";
 import { MenuBar } from "./MenuBar";
-import { ClaudeMark } from "./ClaudeView";
-import { useClaudeBadge } from "../lib/claude";
 import { compareCandidate } from "../lib/diff";
 import { runCommand } from "../lib/commands";
 import { fileStatus, repoOf } from "../lib/git";
 
 function DocIcon({ doc }: { doc: Doc }) {
   if (doc.kind === "big") return <HardDrive className="tab-icon" />;
-  if (doc.kind === "claude") return <ClaudeMark className="tab-icon accent" />;
   if (doc.kind === "terminal") return <SquareTerminal className="tab-icon" />;
   if (doc.kind === "diff") return <FileDiff className="tab-icon" />;
   if (doc.kind === "graph") return <GitGraph className="tab-icon" />;
@@ -104,7 +101,6 @@ function Tab({ doc, active, index, count }: { doc: Doc; active: boolean; index: 
         <DocIcon doc={doc} />
         <span className="tab-title">{doc.name}</span>
         {doc.dirty && <span className="tab-dirty" />}
-        {doc.kind === "claude" && !active && <ClaudeBadge docId={doc.id} />}
         <button
           className="tab-close"
           title="Close (Ctrl+W)"
@@ -254,17 +250,4 @@ export function TitleBar() {
       <WindowControls />
     </div>
   );
-}
-
-const BADGE = {
-  ask: "Claude is waiting for your answer",
-  busy: "Claude is working",
-  done: "Claude finished",
-} as const;
-
-/** Background Claude tab: waiting for an answer, working, or finished since you last looked. */
-function ClaudeBadge({ docId }: { docId: string }) {
-  const badge = useClaudeBadge(docId);
-  if (!badge) return null;
-  return <span className={`tab-badge ${badge}`} title={BADGE[badge]} role="img" aria-label={BADGE[badge]} />;
 }

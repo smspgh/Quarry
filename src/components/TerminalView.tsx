@@ -23,8 +23,8 @@ function themeFromCss(): ITheme {
   };
 }
 
-/** A terminal tab: a shell, the `claude` command line or a one-off command in the tab's folder. Stays mounted while hidden, like
- *  Claude tabs, so switching tabs keeps the screen and the running program. */
+/** A terminal tab: a shell or a one-off command in the tab's folder. Stays mounted while hidden, so
+ *  switching tabs keeps the screen and the running program. */
 export function TerminalView({ doc, visible }: { doc: Doc; visible: boolean }) {
   const host = useRef<HTMLDivElement>(null);
   const term = useRef<Terminal | null>(null);
@@ -36,8 +36,8 @@ export function TerminalView({ doc, visible }: { doc: Doc; visible: boolean }) {
   useEffect(() => {
     const el = host.current;
     if (!el || !doc.terminal) return;
-    const { cwd, resume, command, shell } = doc.terminal;
-    const program = shell?.name ?? "Claude Code";
+    const { cwd, command, shell } = doc.terminal;
+    const program = shell?.name ?? "The program";
     const settings = useStore.getState().settings;
     const t = new Terminal({ fontFamily: settings.fontFamily, fontSize: settings.fontSize, cursorBlink: true, scrollback: 10_000, theme: themeFromCss() });
     const f = new FitAddon();
@@ -57,7 +57,7 @@ export function TerminalView({ doc, visible }: { doc: Doc; visible: boolean }) {
     const start = async () => {
       try {
         if (command && first) t.write(`\x1b[2m> ${command}\x1b[0m\r\n`);
-        const id = await invoke<number>("pty_start", { exe: useStore.getState().settings.claudePath, cwd, cols: t.cols, rows: t.rows, resume: first ? resume : undefined, command, shell: shell?.argv });
+        const id = await invoke<number>("pty_start", { cwd, cols: t.cols, rows: t.rows, command, shell: shell?.argv });
         first = false;
         if (disposed) {
           void invoke("pty_kill", { id });

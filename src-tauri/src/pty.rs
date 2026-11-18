@@ -1,4 +1,4 @@
-//! Terminal tabs: a shell (PowerShell, Command Prompt, Git Bash, ...) or the real `claude` command
+//! Terminal tabs: a shell (PowerShell, Command Prompt, Git Bash, ...) or a one-off command
 //! line in a ConPTY (portable-pty), drawn by xterm.js in the UI. Output goes to the UI as `pty:data` events (UTF-8, never split inside a character), then
 //! one `pty:exit`.
 
@@ -129,55 +129,23 @@ fn shell_command(argv: &[String]) -> Result<CommandBuilder, String> {
 }
 
 /// Start a program in a terminal in `cwd` and return its id: with `command`, that command line
-/// through cmd.exe (installing a language server); with `shell`, that shell (program + arguments);
-/// otherwise `claude` (`resume`: continue that conversation).
+/// through cmd.exe (installing a language server); otherwise `shell` (program + arguments).
 #[tauri::command]
-#[allow(clippy::too_many_arguments)]
-pub fn pty_start(app: AppHandle, state: State<'_, crate::AppState>, exe: String, cwd: String, cols: u16, rows: u16, resume: Option<String>, command: Option<String>, shell: Option<Vec<String>>) -> Result<u32, String> {
+pub fn pty_start(app: AppHandle, state: State<'_, crate::AppState>, cwd: String, cols: u16, rows: u16, command: Option<String>, shell: Option<Vec<String>>) -> Result<u32, String> {
     if !Path::new(&cwd).is_dir() {
         return Err(format!("{cwd} is not a folder"));
     }
-    let mut what = "Claude Code";
-    let mut cmd = if let Some(line) = command.filter(|c| !c.trim().is_empty()) {
-        what = "the command";
+    let (mut cmd, what) = if let Some(line) = command.filter(|c| !c.trim().is_empty()) {
         let mut c = CommandBuilder::new("cmd.exe");
         c.args(["/d", "/s", "/c", &line]);
-        c
-    } else if let Some(argv) = shell {
-        what = "the shell";
-        shell_command(&argv)?
+        (c, "the command")
     } else {
-        claude_command(&exe, resume)?
+        (shell_command(&shell.unwrap_or_default())?, "the shell")
     };
     cmd.cwd(&cwd);
-    for v in crate::claude::SESSION_ENV {
-        cmd.env_remove(v);
-    }
     cmd.env("TERM", "xterm-256color");
     cmd.env("COLORTERM", "truecolor");
     spawn(app, state, cmd, cols, rows, what)
-}
-
-fn claude_command(exe: &str, resume: Option<String>) -> Result<CommandBuilder, String> {
-    let exe = crate::claude::find_exe(exe).ok_or("Claude Code was not found. Install it, or set its location in Settings › Claude Code.")?;
-    let is_cmd = exe.extension().and_then(|e| e.to_str()).is_some_and(|e| e.eq_ignore_ascii_case("cmd"));
-    let mut cmd = if is_cmd {
-        let mut c = CommandBuilder::new("cmd.exe");
-        c.args(["/d", "/c"]);
-        c.arg(&exe);
-        c
-    } else {
-        CommandBuilder::new(&exe)
-    };
-    if let Some(id) = resume_id(resume) {
-        cmd.args(["--resume", &id]);
-    }
-    Ok(cmd)
-}
-
-/// The conversation to resume, when it is a session id (the same check as Claude tabs).
-fn resume_id(resume: Option<String>) -> Option<String> {
-    resume.filter(|s| crate::claude::is_session_id(s))
 }
 
 fn spawn(app: AppHandle, state: State<'_, crate::AppState>, cmd: CommandBuilder, cols: u16, rows: u16, what: &str) -> Result<u32, String> {
@@ -317,15 +285,5 @@ mod tests {
         assert_eq!(bash.get_argv().len(), 3);
         let cmd = shell_command(&["cmd.exe".into()]).unwrap();
         assert!(cmd.get_env("CHERE_INVOKING").is_none());
-    }
-
-    #[test]
-    fn only_session_ids_are_resumed() {
-        let id = "8a472df2-81a0-47b8-8720-b17e2df22a0d";
-        assert_eq!(resume_id(Some(id.into())).as_deref(), Some(id));
-        assert_eq!(resume_id(Some("--dangerously-skip-permissions".into())), None);
-        assert_eq!(resume_id(Some(String::new())), None);
-        assert_eq!(resume_id(Some("a".repeat(65))), None);
-        assert_eq!(resume_id(None), None);
     }
 }

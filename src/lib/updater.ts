@@ -1,8 +1,8 @@
 import { check, type Update } from "@tauri-apps/plugin-updater";
 import { choose, inform } from "./dialogs";
 import { flushSession, needsSavePromptOnExit } from "./actions";
-import { stopAllClaude } from "./claude";
 import { stopAllServers } from "./lsp";
+import { killAllTerminals } from "./terminal";
 import { editor } from "../editor/manager";
 import { useStore } from "./store";
 
@@ -61,7 +61,7 @@ async function install(update: Update) {
   try {
     s.toast(`Downloading Quarry ${update.version}…`, "info", 8000);
     await update.download();
-    await Promise.all([stopAllClaude(), stopAllServers()]);
+    await Promise.all([killAllTerminals(), stopAllServers()]);
     // On Windows the installer takes over and Quarry exits; the new version starts when it finishes.
     await update.install();
   } catch (e) {

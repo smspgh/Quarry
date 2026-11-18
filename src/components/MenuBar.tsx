@@ -282,10 +282,6 @@ const MENUS: Menu[] = [
       { cmd: "git.push" },
       { cmd: "git.forcePush" },
       { cmd: "git.addRemote" },
-      // Claude git helpers: the last group; left out (not greyed) while Claude Code is switched off.
-      ...(useStore.getState().settings.claudeEnabled
-        ? ([{ sep: true }, { label: "Claude", submenu: () => [{ cmd: "git.draftMessage" }, { cmd: "git.explainConflict" }, { cmd: "git.summariseBranch" }, { sep: true }, { cmd: "git.stopClaude" }] }] as Item[])
-        : []),
     ],
   },
   {
@@ -313,10 +309,6 @@ const MENUS: Menu[] = [
   {
     label: "Tools",
     items: () => [
-      // Hidden, not greyed, while the Claude Code integration is off.
-      ...(useStore.getState().settings.claudeEnabled
-        ? ([{ cmd: "claude.openHere" }, { cmd: "claude.openFolder" }, { cmd: "claude.openTerminal" }, { cmd: "claude.addSelection" }, { cmd: "claude.addFile" }, { sep: true }] as Item[])
-        : []),
       { cmd: "terminal.new" },
       // One entry per installed shell; the plain command above starts the one chosen in Settings.
       ...(knownShells().length > 1

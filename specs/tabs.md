@@ -9,10 +9,10 @@ The tab strip: what a tab shows, switching and closing tabs, the right-click men
 
 ## TAB-001: See the open documents in the tab strip
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
-  - `src/components/TitleBar.tsx` — `TitleBar` (tab row above the title bar with `menuPosition: "titlebar"`, tabs inside the title bar otherwise; window title), `Tab`, `DocIcon`, `ClaudeBadge`
+  - `src/components/TitleBar.tsx` — `TitleBar` (tab row above the title bar with `menuPosition: "titlebar"`, tabs inside the title bar otherwise; window title), `Tab`, `DocIcon`
   - `src/lib/store.ts` — `docs`, `activeId`, `Doc.kind`, `addDoc` (new tabs go at the end)
   - `src/styles/app.css` — `.tabbar` / `.titlebar` (`min-height` only, so they grow a row at a time), `.tabs` (`flex-wrap: wrap`), `.tab` (120–240 px wide), `.tab.active`; the brand mark and window buttons stay on the first row
 - Tests: none
@@ -28,7 +28,7 @@ Scenario: TAB-001.1 A tab per document, in opening order
   When I open "a.txt", then "b.json", then a new untitled file
   Then the tab strip shows "a.txt", "b.json", "Untitled-1" from left to right
   And "Untitled-1" is the active tab
-  And each tab has an icon for its kind (JSON, plain text, code, large file, Claude, terminal, Compare, commit graph)
+  And each tab has an icon for its kind (JSON, plain text, code, large file, terminal, Compare, commit graph)
 
 Scenario: TAB-001.2 Where the tab strip sits
   Given Settings › Menu bar is "Title bar" (the default)
@@ -56,7 +56,7 @@ Scenario: TAB-001.5 No tabs
 
 ## TAB-002: Switch between tabs
 
-- Status: draft
+- Status: verified
 - Commands: `file.nextTab`, `file.prevTab`, `file.nextTabPg`, `file.prevTabPg`
 - Files:
   - `src/lib/actions.ts` — `nextTab` (tab-strip order, wraps, nothing with fewer than 2 tabs)
@@ -94,7 +94,7 @@ Scenario: TAB-002.3 Wrap around
   Then "a.txt" is active
 
 Scenario: TAB-002.4 From a terminal tab
-  Given a Claude CLI terminal tab is active and has the keyboard
+  Given a terminal tab is active and has the keyboard
   When I press Ctrl+Tab
   Then the next tab becomes active instead of the key going to the terminal program
 
@@ -106,7 +106,7 @@ Scenario: TAB-002.5 Not while a dialog is open
 
 ## TAB-003: Use the tab strip from the keyboard
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/TitleBar.tsx` — `tabStripKey`, `focusTabAt`, `Tab` `onKeyDown`, roles `tablist` / `tab`, `aria-selected`, roving `tabIndex`
@@ -149,7 +149,7 @@ Scenario: TAB-003.5 Only the active tab is a Tab stop
 
 ## TAB-004: See which tabs have unsaved changes
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/TitleBar.tsx` — `.tab.dirty` class, `tab-dirty` dot, `aria-label` with ", unsaved changes", "● " prefix in the window title
@@ -188,15 +188,14 @@ Scenario: TAB-004.4 Background tabs keep their dot
 
 ## TAB-005: Close a tab
 
-- Status: draft
+- Status: verified
 - Commands: `file.close`, `file.closeF4`
 - Files:
-  - `src/lib/actions.ts` — `closeDocument` (Save / Don't Save / Cancel via `askSaveChanges`, busy Claude and running-terminal confirmations, disposal per kind, `saveSession`)
+  - `src/lib/actions.ts` — `closeDocument` (Save / Don't Save / Cancel via `askSaveChanges`, running-terminal confirmation, disposal per kind, `saveSession`)
   - `src/lib/store.ts` — `removeDoc` (which tab becomes active next)
   - `src/lib/commands.ts` — `file.close` (Ctrl+W), `file.closeF4` (Ctrl+F4, hidden); default `enabled` (`docOnly`)
   - `src/components/TitleBar.tsx` — close button, middle-click, Delete / Ctrl+W on a focused tab
   - `src/editor/manager.ts` — `dispose`
-  - `src/lib/claude.ts` — `claudeBusy`, `disposeClaude`
   - `src/lib/terminal.ts` — `terminalPty`, `disposeTerminal`
   - `src/lib/diff.ts` — `disposeDiff`
   - `src/lib/ipc.ts` — `big.close`
@@ -239,10 +238,10 @@ Scenario: TAB-005.5 Close a background tab with the mouse
   Then "b.txt" closes and "a.txt" stays active
 
 Scenario: TAB-005.6 A tab with something running asks first
-  Given a Claude Code tab is still working on a task
+  Given a terminal tab with a program still running
   When I close its tab
-  Then Quarry asks whether to stop Claude Code, with "Close tab" and Cancel
-  And a terminal tab with a program still running asks "Stop <tab name>?" in the same way
+  Then Quarry asks "Stop <tab name>?" with "Close tab" and Cancel
+  And Cancel leaves the tab and its program running
 
 Scenario: TAB-005.7 Ctrl+F4 also closes
   Given "a.txt" is the active tab
@@ -253,10 +252,10 @@ Scenario: TAB-005.7 Ctrl+F4 also closes
 
 ## TAB-006: Close other tabs or all tabs
 
-- Status: draft
+- Status: verified
 - Commands: `file.closeOthers`, `file.closeAll`
 - Files:
-  - `src/lib/actions.ts` — `closeOthers`, `closeAll` → `closeMany` (one `askSaveChanges` for every dirty tab and one `askDialog` for running Claude / terminal tabs, both before anything closes; then `closeDocument(id, true)`), `closeManyQuestion` (pure: title, up to 8 names, Save / Save All)
+  - `src/lib/actions.ts` — `closeOthers`, `closeAll` → `closeMany` (one `askSaveChanges` for every dirty tab and one `askDialog` for running terminal tabs, both before anything closes; then `closeDocument(id, true)`), `closeManyQuestion` (pure: title, up to 8 names, Save / Save All)
   - `src/lib/commands.ts` — `file.closeOthers`, `file.closeAll`; default `enabled` (`docOnly`)
   - `src/components/TitleBar.tsx` — "Close Others" in the tab menu
   - `src/components/MenuBar.tsx` — File › Close Other Tabs / Close All Tabs
@@ -308,7 +307,7 @@ Scenario: TAB-006.7 Close Others asks the same way
   Then all three tabs stay open
 
 Scenario: TAB-006.8 Running tabs are confirmed once, before anything closes
-  Given a Claude Code tab is still working and a terminal tab has a program running
+  Given two terminal tabs each have a program running
   When I choose File › Close All Tabs
   Then Quarry asks once "Stop 2 running tabs?" with "Close tabs" and Cancel
   And Cancel leaves every tab open
@@ -316,7 +315,7 @@ Scenario: TAB-006.8 Running tabs are confirmed once, before anything closes
 
 ## TAB-007: Act on a tab from its right-click menu
 
-- Status: draft
+- Status: verified
 - Commands: `file.close`, `file.closeOthers`, `file.closeAll`, `file.openToSide`, `file.copyPath`, `file.showInQuarryExplorer`, `file.showInWindowsExplorer`, `compare.withSaved`, `compare.withSelected`, `compare.selectForCompare`, `compare.withClipboard`, `git.compareWithHead`, `git.fileHistory`
 - Files:
   - `src/components/TitleBar.tsx` — the `ctx-menu` in `Tab`: which items show for which document, closes on any mouse press or key outside; every item (and the tab's ×, middle-click and Delete) is `runCommand(id, { docId })` via `onTab`, except Close All, which is `runCommand("file.closeAll")`
@@ -405,7 +404,7 @@ Scenario: TAB-007.12 Close All from a tab's menu
 
 ## TAB-008: Preview tabs while browsing the Explorer
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/actions.ts` — `openPath` with `preview` (closes the previous clean preview, also when the clicked file is already open), `openFiles` keeps requested previews
@@ -465,10 +464,10 @@ Scenario: TAB-008.7 The tooltip explains the preview
 
 ## TAB-009: Limit how many tabs are open
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
-  - `src/lib/tabLimit.ts` — `planRoom` (pure), `makeRoom` (the two dialogs, list of up to 8 names), `markUsed` / `lastUsed` (least recently shown), `inUse` (running terminal, busy Claude)
+  - `src/lib/tabLimit.ts` — `planRoom` (pure), `makeRoom` (the two dialogs, list of up to 8 names), `markUsed` / `lastUsed` (least recently shown), `inUse` (running terminal)
   - `src/lib/actions.ts` — `openPath` (`noLimit`), `openFiles` (one question for a batch, `keep`), `sanitizeSettings` (1–1000)
   - `src/lib/commands.ts` — `file.new` calls `makeRoom`
   - `src/lib/types.ts` — `Settings.maxOpenTabs` (default 50)
@@ -540,7 +539,7 @@ Scenario: TAB-009.10 The setting's bounds
 
 ## TAB-010: Reopen a tab I closed
 
-- Status: draft
+- Status: verified
 - Commands: `file.reopenClosedTab`
 - Files:
   - `src/lib/closedTabs.ts` — `pushClosed` (newest last, one entry per path, at most 20), `popClosed` (skips and drops entries that are open again or gone)
@@ -566,7 +565,7 @@ Scenario: TAB-010.2 Most recent first
   Then "c.txt", "b.txt" and "a.txt" reopen in that order
 
 Scenario: TAB-010.3 Only file tabs are remembered
-  Given I closed "Untitled-1", a Claude Code tab, a Claude CLI terminal tab, a Compare tab and a commit graph tab after closing "a.txt"
+  Given I closed "Untitled-1", a terminal tab, a Compare tab and a commit graph tab after closing "a.txt"
   When I press Ctrl+Shift+T
   Then "a.txt" reopens
   And a large-file tab that was closed reopens as a large-file tab

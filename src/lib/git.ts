@@ -883,8 +883,7 @@ export async function saveIdentity(root: string, name: string, email: string, gl
  * default), or "merge" / "rebase", which are refused here when they cannot start. "compare"
  * (COMMITCMP-005) only reads; its `pickFor` is the graph commit the picked branch is compared with
  * (and its repository), else the current commit. The housekeeping purposes (specs/git-branches.md)
- * take a `BranchPickFor`: the command a picked row runs and what it is about. "summarise" /
- * "summarise-base" (specs/git-claude.md) only read; their context is `setSummarisePick` in gitRefs.ts.
+ * take a `BranchPickFor`: the command a picked row runs and what it is about.
  * Only a merge or rebase start is checked here (`startBlocked`): no other purpose starts an operation.
  */
 export async function pickBranch(purpose: BranchPurpose = "switch", pickFor: BranchPickFor | CompareFrom | null = null) {

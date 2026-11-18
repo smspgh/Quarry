@@ -9,7 +9,7 @@ The window and its chrome (title bar, menu bar, panel rail and side panels, bott
 
 ## UI-001: Custom title bar and window buttons
 
-- Status: draft
+- Status: verified
 - Commands: `app.exit`
 - Files:
   - `src/components/TitleBar.tsx` — `TitleBar` (window title, drag regions, `onDouble`), `WindowControls` (Minimize / Maximize / Restore / Close)
@@ -60,7 +60,7 @@ Scenario: UI-001.5 Close and Exit
 
 ## UI-002: Menu bar position
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/TitleBar.tsx` — `TitleBar`: `inlineMenu` layout (`.tabbar` row + `.titlebar` with `MenuBar inline`) versus tabs in the title bar
@@ -111,7 +111,7 @@ Scenario: UI-002.5 A corrupt setting falls back to the default
 
 ## UI-003: Menus list commands and reflect their state
 
-- Status: draft
+- Status: verified
 - Commands: `help.scriptApi`
 - Files:
   - `src/components/MenuBar.tsx` — `MENUS` model (items reference command ids), `resolve` (label, shortcut, disabled state, dynamic title), `TEXT_CATEGORY`, `MenuList` (a top-level menu's max-height is the room below it, so it scrolls; a submenu is `position: fixed` beside its entry, moved up / to the left to stay inside the window: pure `submenuPlace` over `submenuShift`; scrolling closes the open submenu), `languageMenu`, `recentFilesMenu`, `recentFoldersMenu`
@@ -189,7 +189,7 @@ Scenario: UI-003.9 A submenu stays inside the window
 Scenario: UI-003.10 A menu taller than the window scrolls
   Given the window is too short for the whole Git menu
   When I open the Git menu
-  Then it ends 8 px above the window's bottom edge and scrolls with the mouse wheel, so Push, Force Push…, Add Remote… and Claude can be reached
+  Then it ends 8 px above the window's bottom edge and scrolls with the mouse wheel, so Push, Force Push… and Add Remote… can be reached
   And a submenu opened after scrolling opens beside its entry and is not cut off by the menu's edge
   And scrolling the menu closes a submenu that was open
   And a submenu with no room on the right opens on the left of its entry
@@ -203,7 +203,7 @@ Scenario: UI-003.11 A disabled button still shows its tooltip
 
 ## UI-004: Menu bar keyboard access
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/MenuBar.tsx` — `MenuBar` (lone Alt / F10 / Alt+letter listener, ignored while `store.dialog` is set, Left / Right between menus, Escape, `openWithKeyboard`, `altHeld` → `show-mnemonics`), `MENU_MNEMONICS`, `menuForMnemonic`, `mnemonicKey` (letter from `KeyboardEvent.code`), `splitMnemonic` / `MenuLabel`, `MenuList.onKeyDown` (Up / Down / Home / End, Right / Enter / Space into a submenu, Left out of it, Tab kept inside), `nextMenuIndex`, `ITEM_SELECTOR` (disabled items are skipped)
@@ -313,7 +313,7 @@ Scenario: UI-004.12 Mnemonics leave other Alt shortcuts alone
   Given the find bar has focus
   When I press Alt+C
   Then Match Case is toggled and no menu opens
-  Given a Claude CLI terminal tab has focus
+  Given a terminal tab has focus
   When I press Alt+F
   Then the key goes to the terminal and no menu opens
 
@@ -325,7 +325,7 @@ Scenario: UI-004.13 Hidden menu bar
 
 ## UI-005: Command palette
 
-- Status: draft
+- Status: verified
 - Commands: `view.commandPalette`, `view.commandPaletteF1`
 - Files:
   - `src/components/CommandPalette.tsx` — `CommandPalette` (mode `commands`), `loadRecentCommands` / `pushRecentCommand` (localStorage `quarry.recentCommands`, 20 entries), `Highlight`, `paletteTop`, `onKey`; the `language`, `encoding` and `branch` modes reuse the same list
@@ -398,7 +398,7 @@ Scenario: UI-005.8 The pointer highlights a row only when it moves
 
 ## UI-006: Quick Open a file by name
 
-- Status: draft
+- Status: verified
 - Commands: `file.quickOpen`
 - Files:
   - `src/components/CommandPalette.tsx` — mode `files`: pool of open and recent files, folder file list (`fs.walk`, `fileListCache`), 50 / 100 result caps, `pick` builds the absolute path
@@ -448,7 +448,7 @@ Scenario: UI-006.5 The file list belongs to the folder it was built for
 
 ## UI-007: Go to Line from the palette
 
-- Status: draft
+- Status: verified
 - Commands: `goto.line`
 - Files:
   - `src/components/CommandPalette.tsx` — mode `goto`: `parseGoto`, live preview effect, `gotoOrigin` restore in `cancel`, `gotoHint`, out-of-range toast in `pick`
@@ -512,7 +512,7 @@ Scenario: UI-007.7 No file tab
 
 ## UI-008: One command registry behind menus, shortcuts and the palette
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/commands.ts` — `Command`, `register`, `runCommand`, `allCommands`, `getCommand`, `isEnabled`, `applyDefaultEnabled` (`hasDoc` / `hasFileDoc` / `hasText` / `hasJson`), `registerAllCommands`, `toastOnce`
@@ -557,7 +557,7 @@ Scenario: UI-008.4 Commands that are always available
 
 ## UI-009: Global keyboard shortcuts
 
-- Status: draft
+- Status: verified
 - Commands: `ui.escape`
 - Files:
   - `src/App.tsx` — capture-phase `onKey` handler (field, terminal, tab strip, Explorer tree and history-menu exceptions), `matchesRegistered` (which keys are swallowed)
@@ -609,7 +609,7 @@ Scenario: UI-009.5 A chord that does not exist
   Then "m" is typed as ordinary text
 
 Scenario: UI-009.6 A terminal tab keeps its keys
-  Given keyboard focus is in a Claude CLI terminal tab
+  Given keyboard focus is in a terminal tab
   When I press Ctrl+R, Ctrl+L, Ctrl+W, Ctrl+J or Escape
   Then the key goes to the program in the terminal and no Quarry command runs
   When I press Ctrl+Tab, Ctrl+Shift+Tab, Ctrl+Shift+P, Ctrl+F4 or Ctrl+`
@@ -637,7 +637,7 @@ Scenario: UI-009.9 Browser context menu is suppressed
 
 ## UI-010: Modal dialogs
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/dialogs.ts` — `choose`, `inform`, `dismissDialog`, the `queue` / `current` pair (one dialog at a time, later ones wait), `Choice.default` / `cancel`
@@ -699,7 +699,7 @@ Scenario: UI-010.6 No shortcut runs behind a dialog
 
 ## UI-011: Notifications
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/Toasts.tsx` — `Toasts` (icon per kind, dismiss button, Escape on a focused notification)
@@ -739,7 +739,7 @@ Scenario: UI-011.4 At most 5 at a time
 
 ## UI-012: Panel rail
 
-- Status: draft
+- Status: verified
 - Commands: `view.explorer`, `view.json`, `view.macros`, `view.scripts`, `view.settings`
 - Files:
   - `src/components/SidebarRail.tsx` — `SidebarRail`, `PANEL_TITLES`, `ICONS`, order `TOP` + Settings at the bottom, pin dot
@@ -798,7 +798,7 @@ Scenario: UI-012.6 A panel keeps its contents while closed
 
 ## UI-013: Floating and pinned side panels
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/panels.ts` — `isPinned`, `isAutoDocked`, `isDocked`, `floatingPanel`, `isPanelShown`, `setPinned`, `closePanel`, `floatCloseOn`
@@ -887,7 +887,7 @@ Scenario: UI-013.11 A button in the editor still gets the click
 
 ## UI-014: Collapse and restore the side panels
 
-- Status: draft
+- Status: verified
 - Commands: `view.toggleSidebar`
 - Files:
   - `src/lib/panels.ts` — `toggleAllPanels`, `collapsePanels`, `anyPanelShown`
@@ -937,7 +937,7 @@ Scenario: UI-014.5 Collapsing is not kept across a restart
 
 ## UI-015: Side panel widths
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/Sidebar.tsx` — `PanelFrame.startResize` (drag handle, clamp to minimum and 60% of the window), Settings width reset in `useLayoutEffect`
@@ -982,7 +982,7 @@ Scenario: UI-015.4 Settings always opens at 35% of the window
 
 ## UI-016: Bottom panel
 
-- Status: draft
+- Status: verified
 - Commands: `view.togglePanel`, `view.problems`
 - Files:
   - `src/components/BottomPanel.tsx` — `BottomPanel` (Console and Problems tabs, problem count, Clear console, close button, `startResize`, scroll to newest line)
@@ -1054,11 +1054,10 @@ Scenario: UI-016.8 A saved height that no longer fits
 
 ## UI-017: Status bar position and document facts
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/StatusBar.tsx` — `StatusBar`: "Ln, Col" item with selection / cursor counts, large-file size and indexing item, "Read-only", static encoding and line-ending items for large files
-  - `src/components/GitAssistStatus.tsx` — `GitAssistStatusItem` (the running Claude git request and its stop button)
   - `src/lib/store.ts` — `cursor: CursorInfo` (`line`, `col`, `selections`, `selectedChars`)
   - `src/editor/manager.ts` — `publishCursor` feeds `cursor` from the focused pane
   - `src/lib/actions.ts` — `formatBytes`
@@ -1098,17 +1097,11 @@ Scenario: UI-017.4 Read-only file
 Scenario: UI-017.5 No document
   When no document is open
   Then the status bar shows no cursor, encoding, line-ending or language items
-
-Scenario: UI-017.6 A running Claude git request
-  Given a Claude git helper is running (GITAI-005)
-  When I look at the left part of the status bar, whatever tab is active
-  Then an item reads "Claude: drafting a commit message… 12s", counting up, with a stop button
-  And it is gone when the request ends or is stopped
 ```
 
 ## UI-018: Status bar pickers for indentation, encoding, line endings and language
 
-- Status: draft
+- Status: verified
 - Commands: `view.setTabSize`, `file.setEncoding`, `file.setEol`
 - Files:
   - `src/components/StatusBar.tsx` — `Picker` (popup above the item, keyboard handling, current value ticked, `openOn` bus events), `placePopup`, the four pickers (line endings offer CR only while the document uses it) and the Column button in `StatusBar`
@@ -1190,7 +1183,7 @@ Scenario: UI-018.9 A CR-only file keeps CR in the line-ending picker
 
 ## UI-019: Light and dark themes
 
-- Status: draft
+- Status: verified
 - Commands: `view.toggleTheme`
 - Files:
   - `src/App.tsx` — `useTheme` (sets `data-theme` and `data-mica` on the root element, follows the Windows colour scheme in System mode, sets the native window theme)
@@ -1245,7 +1238,7 @@ Scenario: UI-019.6 Windows accessibility settings
 
 ## UI-020: Zoom and editor view toggles
 
-- Status: draft
+- Status: verified
 - Commands: `view.zoomIn`, `view.zoomInPlus`, `view.zoomOut`, `view.zoomReset`, `view.toggleWrap`, `view.toggleWhitespace`
 - Files:
   - `src/lib/commands.ts` — `view.zoomIn` (Ctrl+=), `view.zoomInPlus` (Ctrl+Plus, hidden duplicate), `view.zoomOut` (Ctrl+-), `view.zoomReset` (Ctrl+0, back to `DEFAULT_SETTINGS.fontSize`), `view.toggleWrap` (Alt+Z), `view.toggleWhitespace`; each updates the setting, applies it and saves it
@@ -1309,7 +1302,7 @@ Scenario: UI-020.7 Wrap and whitespace need a text document
 
 ## UI-021: Keyboard focus returns to the active tab
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/editor/manager.ts` — `editor.focus()` (active tab's registered target, else the text editor; does nothing for a non-text tab without a target), `registerFocus(docId, fn)`
@@ -1319,7 +1312,6 @@ Scenario: UI-020.7 Wrap and whitespace need a text document
   - `src/components/StatusBar.tsx` — `Picker.pick` calls `editor.focus()`
   - `src/components/Sidebar.tsx` — Escape in a floating panel calls `editor.focus()`
   - `src/components/BigFileView.tsx` — registers the large-file view as focus target
-  - `src/components/ClaudeView.tsx` — registers the message box
   - `src/components/TerminalView.tsx` — registers the terminal
   - `src/components/DiffView.tsx` — registers the changed side of the comparison
   - `src/components/GraphView.tsx` — registers the commit list
@@ -1337,10 +1329,10 @@ Scenario: UI-021.1 Back to the text editor
   Then the caret is blinking in the editor and typing inserts text
 
 Scenario: UI-021.2 Back to a non-text tab
-  Given a Claude Code tab is active and I open the View menu
+  Given a terminal tab is active and I open the View menu
   When I press Escape
-  Then keyboard focus is in the Claude message box
-  And the same rule returns focus to the terminal of a Claude CLI tab, the line view of a large-file tab, the changed side of a Compare tab and the commit list of a commit graph tab
+  Then keyboard focus is in the terminal
+  And the same rule returns focus to the line view of a large-file tab, the changed side of a Compare tab and the commit list of a commit graph tab
 
 Scenario: UI-021.3 After a dialog
   Given a large-file tab is active and a dialog is shown
@@ -1360,7 +1352,7 @@ Scenario: UI-021.5 Focus is not sent to a hidden text editor
 
 ## UI-022: Tab key can leave the editor
 
-- Status: draft
+- Status: verified
 - Commands: `view.toggleTabFocus`
 - Files:
   - `src/App.tsx` — `onKey`: `tabEscapeUntil` (Escape then Tab within 2 s), `tabMovesFocus` check, Escape in the editor clears Find in Files highlighting
@@ -1405,7 +1397,7 @@ Scenario: UI-022.4 The mode is not remembered
 
 ## UI-023: Single instance and files handed over by Windows
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src-tauri/src/lib.rs` — `run` (single-instance plugin registered first: forwards arguments as the `open-paths` event, un-minimises, shows and focuses the main window), `cli_paths` (ignores options and missing paths, resolves relative paths against the launching folder, repairs `C:"`), `startup_paths`
@@ -1458,13 +1450,13 @@ Scenario: UI-023.6 Explorer integration installed without changing defaults
   Then these entries are removed
 
 Scenario: UI-023.7 Drop files on the window
-  When I drop 2 files from File Explorer on the Quarry window, outside a Claude Code tab
+  When I drop 2 files from File Explorer on the Quarry window
   Then both files open in tabs
 ```
 
 ## UI-024: Window size and position are remembered
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src-tauri/src/lib.rs` — `run` registers `tauri_plugin_window_state` with its default settings (plugin 2.5: every `StateFlags` flag, saved on close and on exit to `.window-state.json` in the app config folder; a saved position is applied only if it overlaps a connected monitor)
@@ -1506,7 +1498,7 @@ Scenario: UI-024.5 A monitor that is gone
 
 ## UI-025: Notice after an unexpected exit
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src-tauri/src/lib.rs` — `install_crash_log` (panic hook appends to `crash.log` in the app log folder), `take_crash_report` (moves the report aside so it is shown once)

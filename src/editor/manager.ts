@@ -512,7 +512,7 @@ class EditorManager {
     for (const id of ids) if (id && this.stateOf(id)?.field(findScopeField, false)) this.effectsTo(id, [setFindScope.of(null)]);
   }
 
-  /** How to focus tabs that are not text documents (Claude, terminal, large file, Compare). */
+  /** How to focus tabs that are not text documents (terminal, large file, Compare, graph). */
   private focusers = new Map<string, () => void>();
   /** A non-text view registers its focus target while it is mounted; returns the unregister function. */
   registerFocus(docId: string, focus: () => void): () => void {

@@ -2,8 +2,6 @@
 
 A terminal tab runs a shell inside Quarry, in the folder you are working in: PowerShell, Command Prompt, Git Bash, or any shell you name. It is a real Windows console (ConPTY), so full-screen programs, colours and prompts work as in Windows Terminal.
 
-Claude Code has its own terminal tabs; see [Claude Code › Claude CLI tabs](claude-code.md).
-
 ## Opening a terminal
 
 | From | How |
@@ -12,7 +10,7 @@ Claude Code has its own terminal tabs; see [Claude Code › Claude CLI tabs](cla
 | Explorer | Right-click a folder, or blank space for the open folder, and choose **Open in Terminal** |
 | Another shell, once | **Tools › New Terminal With**, then the shell |
 
-The terminal starts in the folder of the active terminal or Claude tab if there is one; otherwise in the open folder, then the active file's folder, then your home folder. The tab is named after the shell and the folder ("PowerShell 7 · proj"). You can open as many as the [tab limit](settings.md#tabs-and-panels) allows.
+The terminal starts in the folder of the active terminal tab if there is one; otherwise in the open folder, then the active file's folder, then your home folder. The tab is named after the shell and the folder ("PowerShell 7 · proj"). You can open as many as the [tab limit](settings.md#tabs-and-panels) allows.
 
 ## Choosing the shell
 

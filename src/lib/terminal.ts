@@ -1,8 +1,7 @@
 /**
- * Terminal tabs (`kind: "terminal"`): a shell, the real `claude` command line or a one-off command
- * in a pseudo console (src-tauri/src/pty.rs), drawn by xterm.js in components/TerminalView.tsx.
- * They are not kept in the session: a shell starts fresh, and a Claude conversation is in Claude
- * Code's history and can be resumed.
+ * Terminal tabs (`kind: "terminal"`): a shell or a one-off command in a pseudo console
+ * (src-tauri/src/pty.rs), drawn by xterm.js in components/TerminalView.tsx. They are not kept in
+ * the session: a shell starts fresh.
  */
 import { invoke } from "@tauri-apps/api/core";
 import { terminalTitle, type ShellChoice } from "./shells";
@@ -17,27 +16,6 @@ export function setTerminalPty(docId: string, ptyId: number | null) {
 }
 
 export const terminalPty = (docId: string) => running.get(docId) ?? null;
-
-/** Open a terminal tab running `claude` in `folder` (`resume`: continue that conversation). */
-export function openClaudeTerminal(folder: string, resume?: string): Doc {
-  const name = folder.replace(/[\\/]+$/, "").split(/[\\/]/).pop() || folder;
-  const doc: Doc = {
-    id: newDocId(),
-    kind: "terminal",
-    path: null,
-    name: `Claude CLI · ${name}`,
-    dirty: false,
-    encoding: "",
-    bom: false,
-    eol: "CRLF",
-    language: "Terminal",
-    readonly: false,
-    modifiedMs: 0,
-    terminal: { cwd: folder, resume },
-  };
-  useStore.getState().addDoc(doc, true);
-  return doc;
-}
 
 /** Open a terminal tab running `shell` in `folder` (specs/terminal.md TERM-010). */
 export function openShellTerminal(folder: string, shell: ShellChoice): Doc {

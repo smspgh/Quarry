@@ -9,7 +9,7 @@ The commit graph tab (`kind: "graph"`): a repository's history as a lane graph w
 
 ## GRAPH-001: Open the commit graph in a tab
 
-- Status: draft
+- Status: verified
 - Commands: `git.graph`
 - Files:
   - `src/lib/gitCommands.ts` — registers `git.graph` (always enabled, GRAPH-019)
@@ -20,7 +20,7 @@ The commit graph tab (`kind: "graph"`): a repository's history as a lane graph w
   - `src/components/TitleBar.tsx` — `DocIcon` for graph tabs
   - `src/App.tsx` — renders one `GraphView` per graph doc
   - `src/lib/store.ts` — `Doc.graph`
-  - `src/lib/actions.ts` — `sessionDocs()` keeps only text and Claude tabs, so graph tabs are not saved
+  - `src/lib/actions.ts` — `sessionDocs()` keeps only text and large-file tabs, so graph tabs are not saved
 - Tests: `src/__tests__/graphView.test.tsx`
 - Docs: `docs/git.md`
 
@@ -70,7 +70,7 @@ Scenario: GRAPH-001.6 Not restored after a restart
 
 ## GRAPH-002: Read branches and merges as lanes with labels
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/gitGraph.ts` — `layoutGraph` (first parent keeps the lane, lowest free lane reused, carried `GraphState`), `refLabels`
@@ -143,7 +143,7 @@ Scenario: GRAPH-002.8 Very wide histories
 
 ## GRAPH-003: Long branch lines are cut short
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/gitGraph.ts` — `MAX_SPAN` = 40, `GraphRow.cut` / `GraphRow.from`, `GraphState.cut`; lane 0 is never cut
@@ -188,7 +188,7 @@ Scenario: GRAPH-003.5 Paging does not change the picture
 
 ## GRAPH-004: Show the current branch or all branches
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — "Current branch" / "All branches" segmented control (`all` state, starts on Current branch)
@@ -222,7 +222,7 @@ Scenario: GRAPH-004.3 A branch with no remote branch
 
 ## GRAPH-005: Load a long history in pages
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — `load()`, `PAGE` = 300, `SLOW_PAGE_MS` = 400, `MAX_PAGE` = 4800, `generation` guard, reload on the `stamp` (head, branch, ahead / behind, upstream, operation) keeping `selected` and the scroll offset, windowed rows (`first` / `last`, 8 rows of overscan), next page when within 40 rows of the end; the first page asks git for one commit more than it shows (`takePage`), the next pages for exactly the page size
@@ -296,7 +296,7 @@ Scenario: GRAPH-005.9 What a reload keeps
 
 ## GRAPH-006: Speed up a very large history
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — Speed Up strip (`slowMs`, `indexed`, `indexing`, `hideSpeedUp`)
@@ -347,7 +347,7 @@ Scenario: GRAPH-006.6 Indexing fails
 
 ## GRAPH-007: Find among the loaded commits
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — search box, `matches` / `matchCount`, `nextMatch`, dimmed rows, Ctrl+F in `onKeyDown`
@@ -400,7 +400,7 @@ Scenario: GRAPH-007.6 Nothing matches
 
 ## GRAPH-008: Search the whole history and go to a result
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — `searchAll`, results list (`hits`, `hitsOpen`, `pickHit`), `goTo` (loads pages of 4,800 until the commit is in the graph, then centres it), "Show in Graph"
@@ -478,7 +478,7 @@ Scenario: GRAPH-008.11 Search by branch or tag name
 
 ## GRAPH-009: See a commit's details
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — selection (`select`, `onKeyDown`: arrows, PageUp / PageDown, Home / End), details pane, `startResize` (120 px to 70% of the window), `copy`
@@ -543,7 +543,7 @@ Scenario: GRAPH-009.8 Resize and close
 
 ## GRAPH-010: Open what a commit changed in a file
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — `DetailFile` (click / Enter, double-click)
@@ -592,7 +592,7 @@ Scenario: GRAPH-010.6 Open the file as it is now
 
 ## GRAPH-011: Copy, switch, branch and tag from a commit's right-click menu
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — `GraphMenu` (kept inside the window, as tall as the window allows and scrolling beyond that: `.graph-menu` in app.css; closes on outside click, Escape, window blur), naming strip (`Naming`, `commitNaming`; it also renames a branch, BRANCH-004), `act`
@@ -613,7 +613,6 @@ Scenario: GRAPH-011.1 The menu
   Then the commit is selected (alone: a comparison of two commits that was showing ends)
   And a menu opens headed by its short id and message
   And it offers Copy Commit Id, Copy Message, Create Branch Here…, Create Branch Here (Don't Switch)…, Create Tag Here…, Check Out This Commit…, the compare entries (Compare with <short id> when another commit was selected, Compare with Working Tree, Compare with Branch…; COMMITCMP-001.8, COMMITCMP-004, COMMITCMP-005), Cherry-pick, Revert This Commit…, the merge and rebase entries of MERGE-001, three Reset entries, and the edit-history group (Undo Last Commit… on the tip commit only, Reword Message…, Squash into Parent…, Drop Commit…, Edit History from Here…; HISTORY-001)
-  And while Claude Code is switched on, its last group holds the "Summarise … with Claude" entries that apply to the commit (GITAI-009.4 to GITAI-009.6)
   And a stash row gets none of these: its menu is Apply Stash, Pop Stash, Drop Stash… and Copy Message (STASH-010.7)
   And it closes on Escape or a click elsewhere
   And a right-click on a branch or tag label of the row opens that label's menu instead (MERGE-002; its rename, upstream, push and delete entries are BRANCH-001)
@@ -670,7 +669,7 @@ Scenario: GRAPH-011.9 Create a branch without switching
 
 ## GRAPH-012: Check out, cherry-pick or revert a commit
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — `act()`
@@ -733,7 +732,7 @@ Scenario: GRAPH-012.7 Detached HEAD wording
 
 ## GRAPH-013: Reset the branch to a commit
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — Reset menu entries (hard one styled as dangerous), `act()`
@@ -780,7 +779,7 @@ Scenario: GRAPH-013.5 Cancel
 
 ## GRAPH-014: See a stopped operation above the graph
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — `.graph-strip` rows (stopped operation, stash conflicts; uncommitted changes are a row of the list, GRAPH-015), `openSourceControl()` (focuses the first Merge Changes row, else the first change), Abort button
@@ -843,17 +842,17 @@ GRAPH-015 to GRAPH-019 come from `GIT-ROADMAP.md` ("7. Graph polish" and the `gi
 
 Built as decided, with these additions: the uncommitted row's parent is the current commit's full id, taken from the loaded page or asked from git (`git_head_sha`) when that commit is further down; the row's count follows the status on its own, and only its coming and going lays the loaded rows out again (no history is read for it); the first page of every load asks for one commit more than it shows, which is how "exactly 300 commits" is known; a results list that already shows everything is not given a remembered height by a drag that changes nothing.
 
-- **Uncommitted row (GRAPH-015).** The row is laid out as one extra commit whose only parent is the current commit, placed first in the list. It therefore takes the first lane, and so does the current commit's line below it; the first lane is never cut (GRAPH-003.4), so the row's line always reaches the current commit, however far down that is. The row replaces the uncommitted-changes strip of GRAPH-014.1; the stopped-operation strip with Abort stays, and the row shows during a stopped operation too. The row has no right-click menu. The count is the number of changed files, as in the strip today. Next to the other planned git specs: the warning strip a stash leaves when it came back with conflicts (STASH-009.12) stays a strip, like the stopped-operation strip; the row is not a commit, so none of the entries other specs add to the commit menu (merge, rebase, compare, edit history, Summarise with Claude) applies to it, and it cannot be picked with Ctrl+click for Compare Commits (COMMITCMP-001: Compare with Working Tree on a commit is the way to compare with uncommitted work); while the Edit History list is open (HISTORY-007) it replaces every row, this one included; a file clicked in the row's details pane opens the Source Control comparison, so it has the partial-staging controls of STAGE-001.
+- **Uncommitted row (GRAPH-015).** The row is laid out as one extra commit whose only parent is the current commit, placed first in the list. It therefore takes the first lane, and so does the current commit's line below it; the first lane is never cut (GRAPH-003.4), so the row's line always reaches the current commit, however far down that is. The row replaces the uncommitted-changes strip of GRAPH-014.1; the stopped-operation strip with Abort stays, and the row shows during a stopped operation too. The row has no right-click menu. The count is the number of changed files, as in the strip today. Next to the other planned git specs: the warning strip a stash leaves when it came back with conflicts (STASH-009.12) stays a strip, like the stopped-operation strip; the row is not a commit, so none of the entries other specs add to the commit menu (merge, rebase, compare, edit history) applies to it, and it cannot be picked with Ctrl+click for Compare Commits (COMMITCMP-001: Compare with Working Tree on a commit is the way to compare with uncommitted work); while the Edit History list is open (HISTORY-007) it replaces every row, this one included; a file clicked in the row's details pane opens the Source Control comparison, so it has the partial-staging controls of STAGE-001.
 - **Results divider (GRAPH-016).** Same kind of divider as the details pane. Limits: at least 80 px, never taller than its content, and the commit list always keeps 156 px (6 rows). A dragged height is the user's choice: it is kept for the tab, and clicking a result no longer shrinks the list. Not saved across restarts (graph tabs are not in the session).
 - **Lanes beyond 16 (GRAPH-017): horizontal scroll of the lane column**, not a wider cap and not smarter cutting. A wider cap takes the room from the Commit column on every row (44 lanes = 534 px) for the sake of a few rows; smarter cutting means changing `layoutGraph`, whose results must stay identical page by page (GRAPH-003.5) and keep lane 0 uncut. Scrolling is drawing only: every lane gets its own position (none share a column), the column still shows at most 16 lanes (198 px), and the layout is untouched. To make hidden lanes hard to miss: faded edges, a scroll bar under the column heading, and selecting a commit scrolls its dot into view.
 - **Owner confirmations (2026-11-16).** Lanes beyond 16 scroll sideways: confirmed. Date order has no size limit any more (GRAPH-018, below).
 - **Date order (GRAPH-018).** For a history of any size (owner, 2026-11-16; it was first limited to 300 commits, because date order spreads a large history over more lanes, but the lane column scrolls sideways (GRAPH-017) and long lines are cut after 40 rows, so the width stays usable). The order is git's author-date order (newest first, but a commit is never listed above one of its children), so the rows follow the Date column, which shows author dates. Per graph tab, off by default, not saved. Long lines are still cut after 40 rows.
 - **Palette entry without a repository (GRAPH-019).** `git.graph` loses its `enabled` condition, so it is available everywhere (palette, Git menu, a recorded macro), and running it with no repository shows one notification, "Open a folder in a git repository", whether or not a folder is open. The other repository commands (Fetch, Pull, Push, Switch Branch…, Add Remote…) keep their condition.
-- **Shared with the other planned git specs.** The planned order of the commit's right-click menu and of the Git menu, the ref-label menu (a right-click on a branch or tag label, MERGE-002 / BRANCH-001) and the branch picker's purposes are written down once, in the Decisions of `specs/git-merge-rebase.md`. None of the four owner decisions of 2026-11-13 (Force Push after rewriting pushed commits, the one unsaved-tabs dialog, the git helpers' own Claude model, drafting from all changes) changes GRAPH-015 to GRAPH-019.
+- **Shared with the other planned git specs.** The planned order of the commit's right-click menu and of the Git menu, the ref-label menu (a right-click on a branch or tag label, MERGE-002 / BRANCH-001) and the branch picker's purposes are written down once, in the Decisions of `specs/git-merge-rebase.md`. None of the owner decisions of 2026-11-13 (Force Push after rewriting pushed commits, the one unsaved-tabs dialog) changes GRAPH-015 to GRAPH-019.
 
 ## GRAPH-015: Uncommitted changes as the first row of the graph
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — the uncommitted row (`uncommittedRow`, first row of `commits` with the id `UNCOMMITTED`; `RowGraph` `uncommitted`: hollow dot, dashed line in lane 0 down to `lineEnd`), added by `load()` on the first page and by the `dirty` effect (`place()` lays the loaded rows out again when the row comes or goes; `headOf` finds the current commit's full id), `extra` / `total` (counts and paging without the row), selection / keyboard / find / right-click / Ctrl+click over a row that is not a commit; there is no uncommitted-changes `.graph-strip` any more
@@ -976,7 +975,7 @@ Scenario: GRAPH-015.16 The row cannot be picked for a comparison
 
 ## GRAPH-016: Drag the height of the Search All History results
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — results list height (`hitsH`, an inline `max-height` while the list is open; `startHitsResize` beside `startResize`, measuring the limits when the drag starts), divider `.graph-hits-resizer` under `.graph-hits` (double-click clears `hitsH`), how `hitsOpen` / Show Fewer / Show More and `pickHit` behave once a height was dragged
@@ -1051,7 +1050,7 @@ Scenario: GRAPH-016.10 No divider without results
 
 ## GRAPH-017: Scroll sideways through a graph wider than 16 lanes
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — `x()` gives every lane its own place; `RowGraph` drawn at the full width (`fullW`) inside the `graphW` column and shifted by the shared `laneScroll` (in lanes; `lanePx` goes to the rows as the CSS variable `--lane-scroll`); `MAX_LANES` = 16 stays the visible width; Shift+wheel on the lane column (a non-passive `wheel` listener on the list), reveal of the selected dot, `lanes-left` / `lanes-right` (faded edges), reset on a scope switch
@@ -1129,7 +1128,7 @@ Scenario: GRAPH-017.9 Reload and switching scope
 
 ## GRAPH-018: List the history by date
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — "Date order" toggle in the toolbar (`byDate` state, off by default; `orderOk`), enabled once the first page of the scope shown has arrived (`countedFor`), for a history of any size; pages in date order like branch order; `orderKeep` (the selected commit is brought back into view after the switch)
@@ -1219,7 +1218,7 @@ Scenario: GRAPH-018.12 While loading
 
 ## GRAPH-019: Show Commit Graph is in the palette without a repository
 
-- Status: draft
+- Status: verified
 - Commands: `git.graph`
 - Files:
   - `src/lib/gitCommands.ts` — `git.graph` registered without `enabled: hasRepo`

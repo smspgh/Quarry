@@ -9,7 +9,7 @@ Keyboard macros: recording typing, editing keys and commands in a text tab, play
 
 ## MACRO-001: Record a macro
 
-- Status: draft
+- Status: verified
 - Commands: `macro.toggleRecord`
 - Files:
   - `src/lib/commands.ts` — `toggleRecording` (new unsaved `Macro N`, opens the Macros panel), `macro.toggleRecord` (`enabled`, `dynamicTitle`), `setLastMacro` / `getLastMacro`
@@ -66,7 +66,7 @@ Scenario: MACRO-001.6 No recording during playback
 
 ## MACRO-002: What a recording captures
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/macros.ts` — `installRecorderHooks` (`onKeydown`, `onInput`, `IGNORED_KEYS`), `recordCommand` (skips `isUnrecordable`: `macro.*`, `script.runActive`, `script.run`; `recordableArgs` drops a tab's `docId`, see TAB-007.10), `push`
@@ -129,7 +129,7 @@ Scenario: MACRO-002.8 A picker records only what was picked
 
 ## MACRO-003: Record more steps into an existing macro
 
-- Status: draft
+- Status: verified
 - Commands: `macro.recordInto`
 - Files:
   - `src/lib/commands.ts` — `macro.recordInto` (hidden; takes the macro id), append branch of `toggleRecording`
@@ -165,7 +165,7 @@ Scenario: MACRO-003.3 Unavailable without a text tab
 
 ## MACRO-004: Play a macro once
 
-- Status: draft
+- Status: verified
 - Commands: `macro.playLast`, `macro.play`
 - Files:
   - `src/lib/commands.ts` — `macro.playLast` (`getLastMacro() ?? macros[0]`: looked up by id, then path, in the current list; `macroReady`, `dynamicTitle`), `macro.play` (hidden; id or `{ id, toEnd }`), `bindCommandRunner`, `bindAppKeyFallback`
@@ -239,7 +239,7 @@ Scenario: MACRO-004.9 A deleted macro is not played
 
 ## MACRO-005: Play a macro N times
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/MacrosPanel.tsx` — times input (clamped to 1–100,000), "Play ×N" button, `play(id, n)`
@@ -273,7 +273,7 @@ Scenario: MACRO-005.4 Highest value is 100,000
 
 ## MACRO-006: Play a macro until the end of the file
 
-- Status: draft
+- Status: verified
 - Commands: `macro.playToEnd`, `macro.play`
 - Files:
   - `src/lib/macros.ts` — `playToEnd`, `shouldStopToEnd`, `PLAY_TO_END_MAX` (10,000)
@@ -317,7 +317,7 @@ Scenario: MACRO-006.5 From the menu
 
 ## MACRO-007: Pause and stop playback
 
-- Status: draft
+- Status: verified
 - Commands: `macro.stop`, `macro.pause`
 - Files:
   - `src/lib/macros.ts` — `stopPlayback`, `pausePlayback`, `checkpoint` (every 20 steps, and every 5 passes of To end), `PlaybackCancelled`, `guarded`
@@ -367,7 +367,7 @@ Scenario: MACRO-007.5 Only available while playing
 
 ## MACRO-008: A whole playback is one undo step
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/macros.ts` — `beginSession` / `endSession` (snapshot, history suppression, net change re-applied with `userEvent: "input.macro"`), `macroHistoryExtension`, `ensureHistoryExtension`, `canGroupUndo`, `isUndoRedoStep`, `depth`
@@ -409,7 +409,7 @@ Scenario: MACRO-008.5 A stopped playback is still one step
 
 ## MACRO-009: Confirm before a macro plays
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/commands.ts` — `confirmRun("macro", …)` (shared with scripts)
@@ -460,7 +460,7 @@ Scenario: MACRO-009.6 Same wording wherever playback starts
 
 ## MACRO-010: Manage macros in the Macros panel and menu
 
-- Status: draft
+- Status: verified
 - Commands: `macro.panel`, `macro.edit`, `view.macros`
 - Files:
   - `src/components/panels/MacrosPanel.tsx` — list, `rename`, `duplicate`, `remove`, selection (`activeMacroId`)
@@ -534,7 +534,7 @@ Scenario: MACRO-010.9 Menu play items explain why they are disabled
 
 ## MACRO-011: Edit a macro's steps
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/MacroSteps.tsx` — `MacroSteps` (`startEdit`, `commitText`, `captureKey`, `move`, `remove`, `insert`, `label`)
@@ -598,7 +598,7 @@ Scenario: MACRO-011.8 A macro with no steps
 
 ## MACRO-012: Save a macro to a file
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/macros.ts` — `saveMacro` (target `<folder>\<safe name>.macro.json`, overwrite question, removes the old file after a rename), `safeFileName`, `macroFileName`, `displayPath`
@@ -660,7 +660,7 @@ Scenario: MACRO-012.7 Save fails
 
 ## MACRO-013: Macros folder: loading, reloading and changing it
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/macros.ts` — `loadMacros` (unsaved guard, `LoadReason`, skips unreadable files, sorted by name), `macrosDir`, `resolveFolder`, `cleanDirSetting`, `migrateLegacy`

@@ -9,7 +9,7 @@ The JSON panel (tree view of the current document), the path bar above the edito
 
 ## JSON-001: See the document as a tree in the JSON panel
 
-- Status: draft
+- Status: verified
 - Commands: `view.json`
 - Files:
   - `src/components/panels/JsonPanel.tsx` — `JsonPanel` (windowed rows of 24 px, `rows` pre-order walk, `expandAll`, `nodeLabel`, 250 ms re-parse timer)
@@ -56,7 +56,7 @@ Scenario: JSON-001.5 No text document
 
 ## JSON-002: Move between the tree and the editor
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/JsonPanel.tsx` — `reveal`, `updateCursor` (Follow cursor), `onRowKeyDown`, `focusRow`, roving `tabKey`
@@ -110,7 +110,7 @@ Scenario: JSON-002.6 Double-click toggles a container
 
 ## JSON-003: Parse status while editing, and the tree's limits
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/JsonPanel.tsx` — status chip (Parsed / Lenient / Invalid / Too large / Empty document / Not JSON), `lastGood` stale tree, error button → `editor.goTo`
@@ -172,7 +172,7 @@ Scenario: JSON-003.7 Deep nesting does not crash the panel
 
 ## JSON-004: Copy a value or its path from the tree
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/JsonPanel.tsx` — `copyPath`, `copyValue`, path format `Select`, row action buttons, Ctrl+C / Ctrl+Shift+C in `onRowKeyDown`
@@ -235,7 +235,7 @@ Scenario: JSON-004.7 Row tooltip
 
 ## JSON-005: Copy the path of the value under the cursor
 
-- Status: draft
+- Status: verified
 - Commands: `json.copyPath`, `json.copyJsonPath`, `json.copyPointer`, `json.copyBracket`
 - Files:
   - `src/lib/jsonModel.ts` — `copyJsonPath`, `jsonPathAtCursor`
@@ -278,7 +278,7 @@ Scenario: JSON-005.4 Nothing under the cursor
 
 ## JSON-006: Copy the value under the cursor
 
-- Status: draft
+- Status: verified
 - Commands: `json.copyValue`
 - Files:
   - `src/lib/jsonModel.ts` — `copyJsonValue`, `previewValue`
@@ -317,7 +317,7 @@ Scenario: JSON-006.4 Nothing under the cursor
 
 ## JSON-007: Path bar above the editor
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/CodeEditor.tsx` — `Breadcrumb` (60 ms after a cursor move, 300 ms after an edit, stale state)
@@ -368,7 +368,7 @@ Scenario: JSON-007.5 Very deep paths are shortened
 
 ## JSON-008: Validate a JSON document
 
-- Status: draft
+- Status: verified
 - Commands: `json.validate`
 - Files:
   - `src/lib/commands.ts` — `jsonValidate`, `jsoncDialect`, `jsonErrorText`, `toastOnce`, `clearValidationOnEdit`; `bigJsonValidate` hands a large-file tab to the Large Files area
@@ -439,7 +439,7 @@ Scenario: JSON-008.8 Specific messages
 
 ## JSON-009: Pretty-print JSON without changing its values
 
-- Status: draft
+- Status: verified
 - Commands: `json.format`
 - Files:
   - `src/lib/commands.ts` — `jsonTransform("format")`, `jsonErrorText`
@@ -506,7 +506,7 @@ Scenario: JSON-009.7 Deep nesting
 
 ## JSON-010: Minify JSON
 
-- Status: draft
+- Status: verified
 - Commands: `json.minify`
 - Files:
   - `src/lib/commands.ts` — `jsonTransform("minify")`
@@ -549,7 +549,7 @@ Scenario: JSON-010.4 Invalid JSON is not changed
 
 ## JSON-011: Convert JSON to CSV
 
-- Status: draft
+- Status: verified
 - Commands: `json.toCsv`
 - Files:
   - `src/lib/convert.ts` — `jsonToCsv`, `csvCell`
@@ -606,7 +606,7 @@ Scenario: JSON-011.6 File name is kept
 
 ## JSON-012: Convert CSV or TSV to JSON
 
-- Status: draft
+- Status: verified
 - Commands: `json.fromCsv`
 - Files:
   - `src/lib/convert.ts` — `csvToJson`, `csvRecords` (RFC 4180 records), `sniffDelimiter`, `csvSplit`
@@ -679,7 +679,7 @@ Scenario: JSON-012.8 Nothing to convert
 
 ## JSON-013: Copy the top-level keys
 
-- Status: draft
+- Status: verified
 - Commands: `json.copyKeys`
 - Files:
   - `src/lib/convert.ts` — `topLevelKeys`
@@ -717,7 +717,7 @@ Scenario: JSON-013.4 Invalid JSON
 
 ## JSON-014: JSON commands are offered only where they apply
 
-- Status: draft
+- Status: verified
 - Commands: `json.format`, `json.minify`, `json.validate`, `json.copyPath`, `json.copyJsonPath`, `json.copyPointer`, `json.copyBracket`, `json.copyValue`, `json.toCsv`, `json.copyKeys`, `json.fromCsv`
 - Files:
   - `src/lib/commands.ts` — `applyDefaultEnabled` (`json.*` → `hasJson`), `isBigJson`, `isCsvDoc`, `textDocOnly`, `runCommand` / `handleKeyEvent` (disabled commands are no-ops)

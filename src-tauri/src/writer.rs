@@ -1,4 +1,4 @@
-//! Writing to a child process (Claude Code, a language server, a terminal) without blocking the
+//! Writing to a child process (a language server, a terminal) without blocking the
 //! caller. Synchronous Tauri commands run on the main thread, and a blocking `write_all` to a child
 //! that has stopped reading (or a large message to one that reads slowly) froze the whole window.
 //! Each child gets a writer thread fed by a channel; sends are queued in order, so messages still

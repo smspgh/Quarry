@@ -9,7 +9,7 @@ The find bar over a text document: finding, stepping through matches, the match 
 
 ## FIND-001: Open and close the find bar
 
-- Status: draft
+- Status: verified
 - Commands: `find.open`, `find.replace`, `ui.escape`
 - Files:
   - `src/components/FindBar.tsx` — `FindBar`: seeds the query from the selection, opens CodeMirror's (hidden) search panel for highlighting, `close()`
@@ -67,7 +67,7 @@ Scenario: FIND-001.7 Opening the bar replaces Find in Files highlighting
 
 ## FIND-002: Step through matches and see the match count
 
-- Status: draft
+- Status: verified
 - Commands: `find.next`, `find.prev`
 - Files:
   - `src/components/FindBar.tsx` — count effects (first match at or after the cursor, `{ current, total }`, 100 000 cap), `run()`, Next / Previous buttons
@@ -140,7 +140,7 @@ Scenario: FIND-002.9 F3 in the search box
 
 ## FIND-003: Match Case, Whole Word, Regex and multi-line searches
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/FindBar.tsx` — `buildQuery`, `escapeRegex`, `onBarKey` (Alt+C / Alt+W / Alt+R), `onFindKey` (Ctrl+Enter), `invalid`
@@ -203,7 +203,7 @@ Scenario: FIND-003.8 A multi-line search without Regex is literal
 
 ## FIND-004: Replace the current match
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/FindBar.tsx` — `doReplaceNext`, `onReplaceKey` (Enter), Replace button
@@ -254,7 +254,7 @@ Scenario: FIND-004.6 A read-only document is not changed
 
 ## FIND-005: Replace all matches in the document
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/FindBar.tsx` — `doReplaceAll` (counts up to 100 000 for the message, CodeMirror `replaceAll`), `onReplaceKey` (Ctrl+Alt+Enter)
@@ -298,7 +298,7 @@ Scenario: FIND-005.5 More than 100,000 matches
 
 ## FIND-006: Preserve Case when replacing
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/FindBar.tsx` — Preserve Case toggle (`findBar.preserveCase`, Alt+P), routes Replace / Replace All to `findReplace.ts` when on
@@ -350,7 +350,7 @@ Scenario: FIND-006.6 The toggle shows its state
 
 ## FIND-007: Find and replace history, and clearing a box
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/searchHistory.ts` — `recordHistory`, `addEntry`, `sanitizeEntries`, `ensureHistoryLoaded` (lazy load of `search-history.json`), `removeHistoryEntry`, `clearHistory`, `applyHistoryLimit`, `MAX_ENTRY_CHARS`
@@ -447,7 +447,7 @@ Scenario: FIND-007.13 F3 steps without adding to the history
 
 ## FIND-008: Turn every find match into a cursor
 
-- Status: draft
+- Status: verified
 - Commands: `edit.selectAllMatches`
 - Files:
   - `src/editor/bulkEdit.ts` — `selectAllFindMatches`, `findMatchSelection`, `MAX_OCCURRENCES` (200 000), `bulkEditing` (fast typing with many cursors)
@@ -488,7 +488,7 @@ Scenario: FIND-008.4 No match
 
 ## FIND-009: Select occurrences of the selected text
 
-- Status: draft
+- Status: verified
 - Commands: `edit.selectNextOccurrence`, `edit.selectAllOccurrences`
 - Files:
   - `src/lib/commands.ts` — `edit.selectNextOccurrence` (CodeMirror `selectNextOccurrence`), `edit.selectAllOccurrences`
@@ -536,7 +536,7 @@ Scenario: FIND-009.6 Nothing to select
 
 ## FIND-010: Find in Selection
 
-- Status: draft
+- Status: verified
 - Commands: `find.toggleInSelection`
 - Files:
   - `src/editor/findScope.ts` — `findScopeField` (the ranges, mapped through edits, drawn as `.cm-findScope`), `setFindScope`, `scopeFromSelection` (selection ranges, or the cursors' lines), `inScope`, `scopeSpans`

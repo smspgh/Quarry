@@ -200,20 +200,6 @@ These need the file's [language server](code-intelligence.md).
 | – | Add Remote… | `git.addRemote` |
 | – | Refresh Git Status | `git.refresh` |
 
-## Claude Code
-
-| Keys | Command | Id |
-| --- | --- | --- |
-| – | Work with Claude Code Here | `claude.openHere` |
-| – | Work with Claude Code in Folder… | `claude.openFolder` |
-| – | Open Claude Code Terminal Here | `claude.openTerminal` |
-| Ctrl+Alt+L | Add Selection to Claude Code | `claude.addSelection` |
-| – | Mention This File to Claude Code | `claude.addFile` |
-| – | New Conversation | `claude.newSession` |
-| – | Stop | `claude.stop` |
-
-In a Claude tab's message box: **Enter** sends, **Shift+Enter** adds a line, **Esc** stops Claude, and **Ctrl+V** pastes text or a screenshot. In a Claude CLI tab every key goes to Claude Code except **Ctrl+Tab**, **Ctrl+Shift+Tab**, **Ctrl+Shift+P** and **Ctrl+F4** (close the tab). **Ctrl+C** there copies only when text is selected. See [Claude Code](claude-code.md).
-
 ## Large-file tabs
 
 | Keys | Action |

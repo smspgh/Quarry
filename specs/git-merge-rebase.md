@@ -32,7 +32,6 @@ Decisions (taken where the roadmap left the choice open):
   | `switch` | GIT-007 | every local and remote branch, the current one labelled "current"; a "Create branch" row for a new name | `git.checkoutTo` / `git.createBranch` |
   | `merge`, `rebase` | MERGE-003 | local and remote branches without the current branch | `git.mergeRef` / `git.rebaseOnto` |
   | `compare` | COMMITCMP-005 | local and remote branches, the current one included | `git.compareBranchPick` |
-  | `summarise`, `summarise-base` | GITAI-009 | `summarise`: local branches (asked only on a detached HEAD); `summarise-base`: local and remote branches without the summarised one, the suggested base first | `git.summariseBranch` with the picked names |
   | `delete-branch` | BRANCH-003 | local branches without the current branch | `git.deleteBranch` |
   | `local-branch` | BRANCH-004, BRANCH-005, BRANCH-006 | every local branch, the current one first | `git.renameBranch` / `git.setUpstream` / `git.pushBranch` |
   | `remote-branch` | BRANCH-007 | remote branches only | `git.deleteRemoteBranch` |
@@ -48,13 +47,12 @@ Decisions (taken where the roadmap left the choice open):
   5. Stage Current File, Unstage Current File, Stage Part of a File ▸ (STAGE-008), Stash ▸ (STASH-011)
   6. Switch Branch…, Merge Branch…, Rebase onto Branch… (MERGE-003), Branches and Tags ▸ (BRANCH-002), Edit History ▸ (HISTORY-002, HISTORY-007)
   7. Fetch, Pull, Push, Force Push (Replace Remote Branch)… (MERGE-009), Add Remote…
-  8. Claude ▸ (GITAI-001; the whole submenu is left out while Claude Code is switched off)
-- **Graph commit menu (planned layout).** The right-click menu of a commit row gets entries from several specs, in this order, each line a group: (1) Copy Commit Id, Copy Message; (2) Switch to …, Create Branch Here…, Create Branch Here (Don't Switch)…, Create Tag Here…, Check Out This Commit…; (3) the compare entries of COMMITCMP-001, COMMITCMP-004 and COMMITCMP-005; (4) Cherry-pick…, Revert This Commit… and, from this area, the merge and rebase entries; (5) the three Reset entries; (6) the edit-history entries of HISTORY-001; (7) the Summarise … with Claude entries of GITAI-009. A stash row (STASH-010) and the uncommitted-changes row (GRAPH-015) never get any of these.
+- **Graph commit menu (planned layout).** The right-click menu of a commit row gets entries from several specs, in this order, each line a group: (1) Copy Commit Id, Copy Message; (2) Switch to …, Create Branch Here…, Create Branch Here (Don't Switch)…, Create Tag Here…, Check Out This Commit…; (3) the compare entries of COMMITCMP-001, COMMITCMP-004 and COMMITCMP-005; (4) Cherry-pick…, Revert This Commit… and, from this area, the merge and rebase entries; (5) the three Reset entries; (6) the edit-history entries of HISTORY-001. A stash row (STASH-010) and the uncommitted-changes row (GRAPH-015) never get any of these.
 - **One sentence for "something is in progress".** "Finish or abort the rebase first" (or merge, cherry-pick, revert, patch series) comes from the pure `finishFirst(operation)` in `src/lib/gitStatus.ts`, built on `operationWords`; Stash (STASH-003) and Edit History (HISTORY-001) use the same helper. As a tooltip it has no full stop; as a notification it ends with one.
 
 ## MERGE-001: Merge and rebase from a commit's right-click menu in the graph
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — two entries in the commit menu, directly after Cherry-pick / Revert and before the Reset entries (the planned order of the whole menu is in this file's Decisions): `startItem` (disabled state, tooltip), calls `startMerge` / `startRebase`
@@ -111,7 +109,7 @@ Scenario: MERGE-001.7 Starting from the graph refreshes the graph
 
 ## MERGE-002: Merge and rebase from a branch or tag label in the graph
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — `RefBadge` gets its own right-click, in the row list and in the details pane (`onRefContext`: selects the commit, stops the row's menu; a label without a menu opens the commit's); `RefMenu` state beside `Menu`, rendered with `GraphMenu` (`head`) and headed by the kind and name of the ref; entries are dispatched by their `id`. BRANCH-001 adds its entries to this same menu (`refAct`)
@@ -180,7 +178,7 @@ Scenario: MERGE-002.8 Same disabled states as the commit menu
 
 ## MERGE-003: Merge Branch… and Rebase onto Branch… from the panel, the Git menu and the palette
 
-- Status: draft
+- Status: verified
 - Commands: `git.mergeBranch`, `git.rebaseBranch`, `git.mergeRef`, `git.rebaseOnto`
 - Files:
   - `src/lib/gitCommands.ts` — `git.mergeBranch` ("Merge Branch…"), `git.rebaseBranch` ("Rebase onto Branch…") with `enabled()`; hidden `git.mergeRef` / `git.rebaseOnto` taking the picked name (like `git.checkoutTo`), which run the same guards
@@ -263,7 +261,7 @@ Scenario: MERGE-003.10 Rebase needs a branch
 
 ## MERGE-004: Merge asks first, then merges
 
-- Status: draft
+- Status: verified
 - Commands: `git.mergeRef`
 - Files:
   - `src/lib/gitMerge.ts` — `mergeConfirm(preview, label, branch)` (title, text, buttons; Cancel default; "nothing to merge"), `mergeDone` (notifications)
@@ -342,7 +340,7 @@ Scenario: MERGE-004.10 What a merge never does
 
 ## MERGE-005: Rebase asks first, then rebases
 
-- Status: draft
+- Status: verified
 - Commands: `git.rebaseOnto`
 - Files:
   - `src/lib/gitMerge.ts` — `rebaseConfirm(preview, label, branch)` (title, text, buttons; Cancel default; merge-commit note; "nothing to rebase"; the fast-forward variant), `rebaseDone`
@@ -408,7 +406,7 @@ Scenario: MERGE-005.8 What a rebase never does
 
 ## MERGE-006: Rebase warns when commits to replay are already pushed
 
-- Status: draft
+- Status: verified
 - Commands: `git.rebaseOnto`
 - Files:
   - `src/lib/gitMerge.ts` — `rebaseConfirm` (danger variant: counts, the remote branch named, the commits listed by `commitLines`, "Rebase Anyway")
@@ -467,7 +465,7 @@ Scenario: MERGE-006.7 A fast-forward rewrites nothing
 
 ## MERGE-007: A merge or rebase that stops on a conflict
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/git.ts` — `runStart`: the failure path of `startMerge` / `startRebase` (error via `gitErrorText`, fresh status, `showPanel("git")` when an operation is now in progress; open tabs are reloaded through `rewrite` whether it finished, stopped or failed), `abortOperation`, `continueOperation`
@@ -539,7 +537,7 @@ Scenario: MERGE-007.9 No second operation on top
 
 ## MERGE-008: Refuse to start when it is not safe
 
-- Status: draft
+- Status: verified
 - Commands: `git.mergeBranch`, `git.rebaseBranch`, `git.mergeRef`, `git.rebaseOnto`
 - Files:
   - `src/lib/gitMerge.ts` — `startBlocked(repo, kind, busy)` (no repository, git busy, operation in progress, no commits yet, detached HEAD for rebase) and its wording; `trackedChanges(repo)` (uncommitted changes do not grey anything out: the start refuses); `dirtyRefusal(what, count)` (the "Commit or discard your changes first" dialog, shared with HISTORY-006.6)
@@ -634,7 +632,7 @@ Scenario: MERGE-008.12 Merging with uncommitted changes, when allowed in Setting
 
 ## MERGE-009: Force Push after pushed commits were rewritten
 
-- Status: draft
+- Status: verified
 - Commands: `git.forcePush`
 - Files:
   - `src/lib/gitCommands.ts` — `git.forcePush` ("Force Push (Replace Remote Branch)…", enabled on a branch that has an upstream, with no operation stopped and git not busy)

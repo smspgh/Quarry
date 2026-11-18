@@ -32,7 +32,7 @@ Decisions (choices made where the roadmap left the design open):
 
 ## BRANCH-001: Right-click a branch or tag label in the graph
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — the ref-label menu of MERGE-002 (`RefBadge` right-click in the row list and the details pane, `RefMenu` state, rendered with `GraphMenu`) gets this area's entries (`refAct`: Switch, Copy and the rename strip are the view's, everything else is `runCommand` with `{ name, root }`); `refCtx`; reload when `useGit().refsTick` changes
@@ -127,7 +127,7 @@ Scenario: BRANCH-001.12 A label shows that it has a menu
 
 ## BRANCH-002: Manage branches and tags from the branch picker and the Git menu
 
-- Status: draft
+- Status: verified
 - Commands: `git.deleteBranch`, `git.renameBranch`, `git.setUpstream`, `git.pushBranch`, `git.deleteRemoteBranch`, `git.deleteTag`, `git.pushTag`
 - Files:
   - `src/components/CommandPalette.tsx` — `mode === "branch"`: row "⋯" button (`.palette-more`), right-click and Shift+F10 open the row menu (`rowMenu` state, `openRowMenu`, `runRowEntry`; rows of the purpose `switch` only, keyboard handled in `onKey`, Escape through `cancel`); the purposes `delete-branch`, `local-branch`, `remote-branch`, `tag`, `upstream`, `new-name` with their prompts, rows (`housekeepingRows`) and empty texts (`branchEmpty`)
@@ -221,7 +221,7 @@ Scenario: BRANCH-002.12 The picker shows a change made elsewhere
 
 ## BRANCH-003: Delete a local branch
 
-- Status: draft
+- Status: verified
 - Commands: `git.deleteBranch`
 - Files:
   - `src/lib/gitBranches.ts` — `deleteQuestion` (first dialog), `unmergedQuestion` (second, danger), `refDone`, `NOT_MERGED` / `isNotMerged`
@@ -321,7 +321,7 @@ Scenario: BRANCH-003.13 The forced delete is only for the commit that was asked 
 
 ## BRANCH-004: Rename a local branch
 
-- Status: draft
+- Status: verified
 - Commands: `git.renameBranch`
 - Files:
   - `src/components/GraphView.tsx` — naming strip (`Naming`) gains a rename action, prefilled with the current name (`commitNaming` runs `git.renameBranch` with `{ name, to, root }`)
@@ -409,7 +409,7 @@ Scenario: BRANCH-004.11 Git refuses
 
 ## BRANCH-005: Set or clear a branch's upstream
 
-- Status: draft
+- Status: verified
 - Commands: `git.setUpstream`
 - Files:
   - `src/components/CommandPalette.tsx` — branch mode, purpose `upstream`: prompt, "tracking" label, "Stop tracking" row, the "No remote branches yet" note with the "Push … to origin and track it" row
@@ -484,7 +484,7 @@ Scenario: BRANCH-005.9 The remote branch disappeared
 
 ## BRANCH-006: Push a branch
 
-- Status: draft
+- Status: verified
 - Commands: `git.pushBranch`
 - Files:
   - `src/lib/gitBranches.ts` — `pushTarget(branch, upstream, remotes)` (upstream, else origin, else first remote), `pushLabel`, `pushRejected` (recognises a non-fast-forward rejection), `rejectedDialog`, `refDone`
@@ -579,7 +579,7 @@ Scenario: BRANCH-006.12 A branch Quarry rewrote is pointed at Force Push
 
 ## BRANCH-007: Delete a branch on the remote
 
-- Status: draft
+- Status: verified
 - Commands: `git.deleteRemoteBranch`
 - Files:
   - `src/lib/gitBranches.ts` — `splitRemoteRef(name, remotes)` (longest matching remote name, so "origin/feature/login" is "feature/login" on "origin"), `remoteDeleteQuestion`, `remotePlace`, `refDone`
@@ -672,7 +672,7 @@ Scenario: BRANCH-007.12 One action at a time
 
 ## BRANCH-008: Delete a tag
 
-- Status: draft
+- Status: verified
 - Commands: `git.deleteTag`
 - Files:
   - `src/lib/gitBranches.ts` — `tagDeleteQuestion`, `refDone`
@@ -731,7 +731,7 @@ Scenario: BRANCH-008.7 Annotated tags
 
 ## BRANCH-009: Push a tag
 
-- Status: draft
+- Status: verified
 - Commands: `git.pushTag`
 - Files:
   - `src/lib/gitBranches.ts` — `defaultRemote` (origin, else first remote), `pushLabel`, `tagRejected`, `tagRejectedText`, `refDone`

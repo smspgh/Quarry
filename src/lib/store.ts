@@ -9,7 +9,7 @@ export type PaletteMode = "commands" | "files" | "goto" | "language" | "encoding
 
 export interface Doc {
   id: string;
-  kind: "text" | "big" | "claude" | "terminal" | "diff" | "graph";
+  kind: "text" | "big" | "terminal" | "diff" | "graph";
   path: string | null;
   name: string;
   dirty: boolean;
@@ -32,11 +32,8 @@ export interface Doc {
   decodeErrors?: boolean;
   /** Large file in follow mode (picking up appended lines itself; the external-change check skips it). */
   following?: boolean;
-  /** Claude Code tab: the folder it works in and its session (resumed after a restart). */
-  claude?: { cwd: string; sessionId?: string };
-  /** Terminal tab running the `claude` command line in this folder (not kept in the session). */
-  /** `shell`: a shell tab (name for messages, program + arguments); `command`: a one-off command; neither: the `claude` command line. */
-  terminal?: { cwd: string; resume?: string; command?: string; shell?: { name: string; argv: string[] } };
+  /** Terminal tab in this folder (not kept in the session): `shell` = a shell tab (name for messages, program + arguments); `command` = a one-off command. */
+  terminal?: { cwd: string; command?: string; shell?: { name: string; argv: string[] } };
   /** Commit graph tab of this repository (not kept in the session). */
   graph?: { root: string };
 }

@@ -7,7 +7,7 @@ prefix: SAFE
 
 What Quarry does about open tabs when a git operation rewrites the files under them: before the operation it says which tabs have unsaved changes and offers to save them, and afterwards every open tab shows what is now on disk. Roadmap item 8, "Buffer-aware safety" (`GIT-ROADMAP.md`); user documentation is the section "Unsaved tabs and git" of `docs/git.md`. The stories cover every git action of Quarry: the Source Control panel and the graph, Stash (`git-stash.md`), starting a merge or rebase and Force Push (`git-merge-rebase.md`), partial staging (`git-staging.md`), Edit History (`git-history-edit.md`) and branch housekeeping (`git-branches.md`). None of those areas asks about unsaved tabs on its own: this area adds the one shared question to their action functions. Their command ids are defined in their own specs and listed in the Commands of the stories here that cover them.
 
-Operations run outside Quarry's own git actions (a terminal tab, a Claude tab, another program) are not covered: for those the existing check on window focus and tab activation (FILE-015) stays the only safety net.
+Operations run outside Quarry's own git actions (a terminal tab, another program) are not covered: for those the existing check on window focus and tab activation (FILE-015) stays the only safety net.
 
 **Decisions**
 
@@ -16,7 +16,7 @@ Operations run outside Quarry's own git actions (a terminal tab, a Claude tab, a
 - **A tab counts when** it is a text tab, a large-file tab or a Compare tab with an editable file side, it has edits the user made that are not saved, and its file is inside the repository the operation runs in (the deepest known repository containing the file, so a file in a nested repository belongs to the nested one). Untitled tabs never count. Tabs of other repositories or of files outside any repository never count. A tab that is marked unsaved only because its file went missing (FILE-015.4) and was not edited since does not count, otherwise switching back to the branch that has the file would ask about it.
 - **Whole-repository family** (three-button dialog): switch branch, check out a commit, create a branch at a commit and switch to it, pull (all three kinds), merge and rebase (MERGE-004, MERGE-005, fast-forward included), an Edit History run (HISTORY-009), Reword Message of a commit that is not the last, Drop Commit and Squash into Parent (HISTORY-003 to HISTORY-005), cherry-pick, revert, Stash Changes (STASH-001), Apply and Pop of a stash (STASH-006, STASH-007), Continue and Skip of a stopped operation.
 - **Discarding family** (no Save All, because saving and then discarding is pointless): discard file(s), hard reset, abort, take a side of a whole file (also the "Current" / "Incoming" buttons after a stash came back with conflicts, STASH-009). Their existing confirmation gains a sentence naming the tabs whose unsaved edits go too; "Cancel" stays the default. Confirming is the answer: the affected tabs then reload without a second question.
-- **Never asks:** fetch, push, Force Push (MERGE-009), commit and amend (the GIT-008.6 warning stays), stage, unstage, mark resolved (it saves the tab itself, CONFLICT-007), soft and mixed reset, "Undo Last Commit" (a soft reset) and Reword Message of the last commit (neither touches the files, HISTORY-002, HISTORY-003.6), creating a branch from the current commit (the files do not change), creating or deleting a branch or tag without switching, renaming a branch, setting an upstream, pushing a branch or a tag, deleting a branch on the remote (BRANCH-003 to BRANCH-009), dropping a stash (STASH-008), comparing commits (COMMITCMP) and the Claude git helpers (GITAI).
+- **Never asks:** fetch, push, Force Push (MERGE-009), commit and amend (the GIT-008.6 warning stays), stage, unstage, mark resolved (it saves the tab itself, CONFLICT-007), soft and mixed reset, "Undo Last Commit" (a soft reset) and Reword Message of the last commit (neither touches the files, HISTORY-002, HISTORY-003.6), creating a branch from the current commit (the files do not change), creating or deleting a branch or tag without switching, renaming a branch, setting an upstream, pushing a branch or a tag, deleting a branch on the remote (BRANCH-003 to BRANCH-009), dropping a stash (STASH-008) and comparing commits (COMMITCMP).
 - **Hunk and line staging / discard** (STAGE) keep the rule of their own spec (save the one file's tab first, STAGE-005); the only contract added here is that a failed save cancels the action, as in SAFE-002.4.
 - **Order of dialogs:** an operation's own confirmation comes first, the unsaved-tabs dialog second, immediately before git runs. Cancel in either one means git is not run.
 - **Operations that only start from a clean state are the exception to that order.** A merge, a rebase and every history edit that replays commits refuse to start while tracked files have uncommitted changes (MERGE-008, HISTORY-006.6), and "Save All" turns unsaved edits into exactly such changes. For these the order is: their own clean-state check; then the unsaved-tabs dialog; then, when Save All wrote anything, the clean-state check again, which now refuses with "Commit or discard your changes first"; only then the operation's confirmation and git. So the confirmation never describes a merge or rewrite that the save has just made impossible, and "Continue Without Saving" is the way to run it with the unsaved text kept in the tabs.
@@ -59,13 +59,13 @@ Redone against the code on 2026-11-14, after every other git area was built. "gu
 | `applyGuarded` in `src/lib/gitStaging.ts` (one change / selected lines) | change bars, Compare toolbar, `git.stageChange` … `git.discardLines` | its own rule (STAGE-005): the file's tab or edited side is saved first, a failed save cancels | Discard: the file's tab is reloaded; comparisons follow the index |
 | `refAction` in `src/lib/gitRefActions.ts` (delete, rename, set upstream, push, delete remote branch, tags) | graph label menu, branch-list row menu, Git › Branches and Tags | none: no file is rewritten | nothing to reload |
 
-No route was left outside the guard. Not covered, by decision: git run in a terminal tab, a Claude tab or another program (FILE-015 notices those when the window gets focus).
+No route was left outside the guard. Not covered, by decision: git run in a terminal tab or another program (FILE-015 notices those when the window gets focus).
 
 Findings of the first audit (0.1.9) and what became of them: a cherry-pick, revert or pull that stopped on a conflict returned before the check (now `rewrite` checks in a `finally`); `checkExternalChanges` dropped a call made while another check was running (now queued); Compare tabs with a file side were never refreshed (`checkCompareTabs`); `takeSide` updated text tabs only (now every kind, through the same check); discard asked a second "changed on disk" question (answered ahead); one notice per reloaded file (folded).
 
 ## SAFE-001: Be told which tabs have unsaved changes before git rewrites files
 
-- Status: draft
+- Status: verified
 - Commands: `git.switchBranch`, `git.checkoutTo`, `git.pull`
 - Files:
   - `src/lib/gitSafety.ts` — pure: `tabsAtRisk(tabs, root, repoRoots)` and `ownerRoot` (which tabs count), `unsavedPrompt(op, tabs)` (title, text, buttons), `listPaths` (10, then "and N more")
@@ -157,14 +157,14 @@ Scenario: SAFE-001.12 A tab whose file is merely missing does not count
   And had I typed in the "old.ts" tab since, the dialog would list "old.ts"
 
 Scenario: SAFE-001.13 Other kinds of tabs never count
-  Given a Claude tab with a running conversation, a terminal tab and a commit graph tab are open
+  Given a terminal tab with a running shell and a commit graph tab are open
   When I pick "feature" in the branch list
   Then no unsaved-changes dialog appears
 ```
 
 ## SAFE-002: Save All, Continue Without Saving or Cancel
 
-- Status: draft
+- Status: verified
 - Commands: `git.switchBranch`, `git.checkoutTo`, `git.pull`
 - Files:
   - `src/lib/gitTabs.ts` — `guardUnsaved` (acts on the answer: saves the listed files, or returns the files kept unsaved; null when the operation may not run), `withTabs` (answers "keep my version" ahead for the kept tabs and words the warning afterwards)
@@ -245,7 +245,7 @@ Scenario: SAFE-002.10 Edits made while the dialog chain was open
 
 ## SAFE-003: Every operation that can rewrite files asks
 
-- Status: draft
+- Status: verified
 - Commands: `git.switchBranch`, `git.checkoutTo`, `git.createBranch`, `git.pull`, `git.fetch`, `git.push`, `git.mergeBranch`, `git.rebaseBranch`, `git.mergeRef`, `git.rebaseOnto`, `git.stash`, `git.stashApply`, `git.stashPop`, `git.stashDrop`, `git.editHistory`, `git.undoLastCommit`, `git.forcePush`, `git.deleteBranch`, `git.renameBranch`, `git.setUpstream`, `git.pushBranch`, `git.deleteRemoteBranch`, `git.deleteTag`, `git.pushTag`
 - Files:
   - `src/lib/git.ts` — `guard` in `checkout` (not when creating a branch), `checkoutRef`, `commitAction` (`actionOp`: checkout, branch-switch, cherry-pick, revert; not branch, tag, reset-soft, reset-mixed), `remote` (the three pulls only; not fetch, push), `continueOperation`, `stashChanges`, `stashAction` for apply and pop but not drop; `cleanGuard` (the clean-state order) in `startMerge`, `startRebase` and `planRun` (`dropCommit`, `squashCommit`, `rewordCommit` for a commit that is not the last, `runHistoryEdit`); not `undoLastCommit`, `forcePush`
@@ -346,7 +346,7 @@ Scenario: SAFE-003.13 Uncommitted changes already on disk: one refusal, no quest
 
 ## SAFE-004: Operations that throw work away say which unsaved tabs go too
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/git.ts` — `discard`, `takeSide`, `abortOperation`, `commitAction` (reset-hard): the extra sentence, and `noTabs(root, op, lose)` so the named tabs reload without a second question; `unsavedTabs(root)` for the graph
@@ -429,7 +429,7 @@ Scenario: SAFE-004.10 No unsaved tabs, unchanged wording
 
 ## SAFE-005: No route around the question
 
-- Status: draft
+- Status: verified
 - Commands: `git.switchBranch`, `git.checkoutTo`, `git.createBranch`, `git.pull`, `git.mergeBranch`, `git.rebaseBranch`, `git.mergeRef`, `git.rebaseOnto`, `git.stash`, `git.stashApply`, `git.stashPop`, `git.editHistory`
 - Files:
   - `src/lib/git.ts` — the guard sits inside each exported action, so callers cannot skip it; no other file calls the file-rewriting `git.*` functions of gitApi.ts
@@ -512,7 +512,7 @@ Scenario: SAFE-005.10 While the dialog is open nothing else can start
 
 ## SAFE-006: Open tabs show what is on disk after every operation
 
-- Status: draft
+- Status: verified
 - Commands: `git.discardChange`, `git.discardLines`, `git.mergeRef`, `git.rebaseOnto`, `git.stash`, `git.stashApply`, `git.stashPop`, `git.editHistory`
 - Files:
   - `src/lib/git.ts` — `rewrite(g, label, fn)`: the one after-operation step of every action that can rewrite files, run on success **and** on failure or a stop; `runStart`, `historyRun` and `stashAction` go through it; `stashRun` also refreshes the Source Control comparisons
@@ -606,7 +606,7 @@ Scenario: SAFE-006.13 No notice that repeats what I just did, or that nothing ch
 
 ## SAFE-007: Tabs whose file is not there after the operation
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/actions.ts` — `checkExternalChanges` (`missingWarned`, the came-back path; the result lists the missing files), `missingOnly`, `closeDocument`

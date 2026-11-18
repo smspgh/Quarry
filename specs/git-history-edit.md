@@ -30,7 +30,7 @@ Decisions (made where the roadmap left the choice open):
 
 ## HISTORY-001: Edit-history entries in a commit's right-click menu
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — hosts the group after the Reset entries (`historyEdit.menu(commit)`)
@@ -111,7 +111,7 @@ Scenario: HISTORY-001.10 Git is busy
 
 ## HISTORY-002: Undo Last Commit
 
-- Status: draft
+- Status: verified
 - Commands: `git.undoLastCommit`
 - Files:
   - `src/components/GraphHistory.tsx` — "Undo Last Commit…" entry on the tip commit
@@ -178,7 +178,7 @@ Scenario: HISTORY-002.8 Cancel
 
 ## HISTORY-003: Reword a commit's message
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphHistory.tsx` — "Reword Message…" entry, `MessageStrip` (multi-line; Ctrl+Enter submits, Escape closes), submits to `rewordCommit`
@@ -262,7 +262,7 @@ Scenario: HISTORY-003.10 Git fails
 
 ## HISTORY-004: Drop a commit
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphHistory.tsx` — "Drop Commit…" entry (dangerous style)
@@ -315,7 +315,7 @@ Scenario: HISTORY-004.6 Untracked files are left alone
 
 ## HISTORY-005: Squash a commit into its parent
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/GraphHistory.tsx` — "Squash into Parent…" entry, message strip prefilled with the joined message
@@ -371,7 +371,7 @@ Scenario: HISTORY-005.7 No stop for a message
 
 ## HISTORY-006: Guards on every history edit
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/historyEdit.ts` — `planTodo` (the lowest changed commit and everything after it), `historyConfirm` (list of up to 12 lines + "and N more", current tip, pushed variant with `kind: "danger"`), `rewriteList`, `movedText`
@@ -452,7 +452,7 @@ Scenario: HISTORY-006.10 What is never done
 
 ## HISTORY-007: Open the Edit History list
 
-- Status: draft
+- Status: verified
 - Commands: `git.editHistory`
 - Files:
   - `src/components/HistoryEditList.tsx` — new; the list shown in the graph tab in place of the commit rows (header, rows, Reset List / Cancel / Run)
@@ -531,7 +531,7 @@ Scenario: HISTORY-007.10 The rest of the application stays usable
 
 ## HISTORY-008: Plan the changes in the list
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/HistoryEditList.tsx` — rows (drag handle with pointer drag, action `Select`, message boxes), problem markers, "Reset List"; key handling in the list's own `onKeyDown`, only while the list element itself (not a message box or the action picker inside it) has the focus: the keys are not registered as commands
@@ -650,7 +650,7 @@ Scenario: HISTORY-008.17 The keys only act while the list has focus
 
 ## HISTORY-009: Run or cancel the Edit History list
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/HistoryEditList.tsx` — "Run" / "Cancel", closes on success or a stop, stays open on a refusal, reloads when the branch moved
@@ -737,7 +737,7 @@ Scenario: HISTORY-009.12 A failure that is not a conflict
 
 ## HISTORY-010: A history edit that stops on a conflict
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/git.ts` — `historyRun` → `runStart` (reports a stop through `gitErrorText` and shows Source Control with `showPanel("git")`, as `startMerge` / `startRebase` do in MERGE-007); `continueOperation`, `abortOperation` (existing)
@@ -831,7 +831,7 @@ Scenario: HISTORY-010.12 A new message fails after a conflict stop
 
 ## HISTORY-011: Force Push is offered after a history edit of pushed commits
 
-- Status: draft
+- Status: verified
 - Commands: `git.forcePush`
 - Files:
   - `src/lib/git.ts` — `historyFinish`: after a confirmed edit that rewrote pushed commits, `markRewritten` (the `rewrotePushed` marker of MERGE-009) when it finished, `pendingRewrite` when it stopped (the marker is then set by Continue Rebase, forgotten by Abort); nothing else is added here: `forcePush`, its dialog, the status-line wording and the `"push-force"` remote operation are MERGE-009's

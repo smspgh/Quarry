@@ -30,7 +30,7 @@ Decisions:
 
 ## STAGE-001: Stage one change of a file
 
-- Status: draft
+- Status: verified
 - Commands: `git.stageChange`
 - Files:
   - `src/lib/gitHunks.ts` — pure: `hunksOf` (line ranges of each change from the two texts' chunks; lines that are the same on both sides are dropped from a chunk's ends), `hunkAt` (change at a line), `Pick` type (`oldStart`, `oldCount`, `newStart`, `newCount`), `textHash`, `barPlace` (where a change's bar and the left side's gap go so the two sides stay level; a change with no lines on a side hangs its widget below the line before it)
@@ -115,7 +115,7 @@ Scenario: STAGE-001.10 The two sides stay level
 
 ## STAGE-002: Unstage one change
 
-- Status: draft
+- Status: verified
 - Commands: `git.unstageChange`
 - Files:
   - `src/lib/gitStaging.ts` — `unstageHunk` / `applyChange`; `changeSources` staged branch (HEAD ↔ staged session marked `staged: true`, `origPath` of a rename, `whole` for a staged deletion)
@@ -171,7 +171,7 @@ Scenario: STAGE-002.6 A staged rename with edits
 
 ## STAGE-003: Discard one change, after asking
 
-- Status: draft
+- Status: verified
 - Commands: `git.discardChange`
 - Files:
   - `src/lib/gitStaging.ts` — `discardHunk` / `applyGuarded` (confirmation wording, save first, the file's tab reloaded with `revertDocument` afterwards)
@@ -235,7 +235,7 @@ Scenario: STAGE-003.8 No Discard in the staged comparison
 
 ## STAGE-004: Stage, unstage or discard selected lines
 
-- Status: draft
+- Status: verified
 - Commands: `git.stageLines`, `git.unstageLines`, `git.discardLines`
 - Files:
   - `src/lib/gitHunks.ts` — `picksForSelection` (pure: selection line range × changes → `Pick[]`; equal counts pair line by line, unequal counts take the whole old block, added lines one by one, a removal only when the selection spans it), `selectionApplies`
@@ -321,7 +321,7 @@ Scenario: STAGE-004.11 A neighbouring line that did not change is left alone
 
 ## STAGE-005: Unsaved edits are saved first
 
-- Status: draft
+- Status: verified
 - Commands: `git.stageChange`, `git.stageLines`, `git.discardChange`, `git.discardLines`
 - Files:
   - `src/lib/gitStaging.ts` — `applyGuarded` (shared by every Stage / Discard action: the open text tab via `saveDocument`, an edited Compare side via `saveDiff`; a failed or cancelled save stops the action; the tab's text must be what the comparison shows, before and after the save)
@@ -377,7 +377,7 @@ Scenario: STAGE-005.6 Unsaved edits in other files are left alone
 
 ## STAGE-006: Line endings, encoding and the end of the file are preserved
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src-tauri/src/git/staging.rs` — `build_patch` (pure: works on bytes, lines split on `\n` keeping any `\r`, `\ No newline at end of file` markers, hunk header counts), `worktree_as_git` (the working file after git's own line-ending conversion, read from `git diff-files` with the whole file as context, so nothing is written to the repository), `apply` (`git apply --whitespace=nowarn`), the binary / UTF-16 and mixed-line-ending refusals
@@ -440,7 +440,7 @@ Scenario: STAGE-006.8 A file git treats as binary
 
 ## STAGE-007: Where partial staging is offered
 
-- Status: draft
+- Status: verified
 - Commands: `git.stageChange`, `git.unstageChange`, `git.discardChange`, `git.stageLines`, `git.unstageLines`, `git.discardLines`
 - Files:
   - `src/lib/git.ts` — `openChange` (conflict and untracked open the file; index `A` + worktree `M` now compares)
@@ -517,7 +517,7 @@ Scenario: STAGE-007.10 During a merge or rebase, for files without conflicts
 
 ## STAGE-008: Partial staging from the menu, the palette and the keyboard
 
-- Status: draft
+- Status: verified
 - Commands: `git.stageChange`, `git.unstageChange`, `git.discardChange`, `git.stageLines`, `git.unstageLines`, `git.discardLines`
 - Files:
   - `src/lib/gitCommands.ts` — registers the six commands (titles, `Ctrl+K S` / `Ctrl+K U` / `Ctrl+K L` / `Ctrl+K N`, `enabled` from the active Compare tab); each calls the same `gitStaging.ts` action as its button
@@ -590,7 +590,7 @@ Scenario: STAGE-008.10 Shortcuts do not collide
 
 ## STAGE-009: The comparison stays true to the index
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/gitStaging.ts` — `refreshChangeTabs` (after every git action: re-reads the sides of every clean Source Control comparison), `reloadChange` (sides and labels from git and the disk; the view is rebuilt only when something changed), the stale route (`STALE`, `staleMessage`)

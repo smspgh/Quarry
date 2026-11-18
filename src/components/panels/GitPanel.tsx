@@ -13,7 +13,6 @@ import { forcePush } from "../../lib/git";
 import { isRewritten } from "../../lib/gitMerge";
 import { StashesSection } from "./StashSection";
 import { isStashConflict, STASH_CONFLICT, stashSideTitle } from "../../lib/gitStash";
-import { DRAFTING_PLACEHOLDER, useDraft } from "./GitDraft";
 
 const nameOf = (p: string) => p.slice(p.lastIndexOf("\\") + 1);
 
@@ -483,10 +482,8 @@ export function GitPanel() {
   const opWords = repo?.operation ? operationWords(repo.operation) : null;
   // A rebase or am is continued by the main button instead of committed.
   const rebasing = !!opWords?.continueLabel;
-  // Claude git helpers: the Draft button and the box's state while a draft runs (GitDraft.tsx).
-  const draft = useDraft(repo, message, setMessage, amend);
   const doCommit = async () => {
-    if (!repo || busy || draft.drafting) return;
+    if (!repo || busy) return;
     if (rebasing) {
       await continueOperation(repo.root, repo.operation!, "continue");
       return;
@@ -494,7 +491,6 @@ export function GitPanel() {
     if (await commit(repo.root, message, amend)) {
       setMessage("");
       setAmend(false);
-      draft.committed();
     }
   };
 
@@ -603,24 +599,13 @@ export function GitPanel() {
           </div>
           <textarea
             className="input scm-message"
-            placeholder={draft.drafting ? DRAFTING_PLACEHOLDER : rebasing ? opWords!.placeholder! : `Message (Ctrl+Enter to commit${target})`}
+            placeholder={rebasing ? opWords!.placeholder! : `Message (Ctrl+Enter to commit${target})`}
             disabled={rebasing}
             aria-label="Commit message"
-            ref={draft.box}
-            readOnly={draft.drafting}
-            value={draft.drafting ? "" : message}
+            value={message}
             rows={3}
-            onChange={(e) => {
-              if (draft.drafting) return;
-              setMessage(e.target.value);
-              draft.edited(e.target.value);
-            }}
+            onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Escape" && draft.escape()) {
-                e.preventDefault();
-                e.stopPropagation();
-                return;
-              }
               if (e.key === "Enter" && e.ctrlKey) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -631,7 +616,7 @@ export function GitPanel() {
           <div className="row">
             <button
               className="btn btn-primary small grow"
-              disabled={!!busy || draft.drafting || groups.conflict.length > 0 || (!rebasing && !message.trim() && !amend) || (!rebasing && !amend && repo.files.length === 0 && repo.operation !== "merge")}
+              disabled={!!busy || groups.conflict.length > 0 || (!rebasing && !message.trim() && !amend) || (!rebasing && !amend && repo.files.length === 0 && repo.operation !== "merge")}
               title={
                 groups.conflict.length && !repo.operation
                   ? STASH_CONFLICT.commitTitle
@@ -639,25 +624,21 @@ export function GitPanel() {
                     ? "Open each file under Merge Changes, fix the conflict, save, and mark it resolved with +. Then commit to finish, or Abort to go back."
                     : busy
                       ? "Another git action is running."
-                      : draft.drafting
-                        ? "Claude is drafting a message."
-                        : !rebasing && !amend && repo.files.length === 0 && repo.operation !== "merge"
-                          ? "There is nothing to commit."
-                          : !rebasing && !message.trim() && !amend
-                            ? "Type a commit message first."
-                            : undefined
+                      : !rebasing && !amend && repo.files.length === 0 && repo.operation !== "merge"
+                        ? "There is nothing to commit."
+                        : !rebasing && !message.trim() && !amend
+                          ? "Type a commit message first."
+                          : undefined
               }
               onClick={() => void doCommit()}
             >
               {commitLabel(groups.staged.length, repo.files.length, amend, groups.conflict.length, repo.operation)}
             </button>
-            {draft.button}
             <label className="check" title="Replace the last commit with this one (the message box empty keeps its message)">
               <input type="checkbox" checked={amend} disabled={!repo.head} onChange={(e) => setAmend(e.target.checked)} />
               Amend
             </label>
           </div>
-          {draft.note}
           {who?.name && who.email && (
             <div className="scm-hint truncate" title={`Commits are made as ${who.name} <${who.email}>. Change it under Repository, below.`}>
               as {who.name} &lt;{who.email}&gt;

@@ -9,7 +9,7 @@ Compare tabs (`kind: "diff"`): two texts side by side or inline, opened from fil
 
 ## DIFF-001: Compare two files
 
-- Status: draft
+- Status: verified
 - Commands: `compare.files`
 - Files:
   - `src/lib/commands.ts` — `compare.files` (two file pickers, or `[left, right]` paths as arguments)
@@ -19,7 +19,7 @@ Compare tabs (`kind: "diff"`): two texts side by side or inline, opened from fil
   - `src/components/MenuBar.tsx` — File › Compare submenu
   - `src/components/TitleBar.tsx` — `DocIcon` for Compare tabs
   - `src/App.tsx` — renders one `DiffView` per Compare doc
-  - `src/lib/actions.ts` — `sessionDocs()` keeps only text and Claude tabs, so Compare tabs are not saved
+  - `src/lib/actions.ts` — `sessionDocs()` keeps only text and large-file tabs, so Compare tabs are not saved
   - `src/styles/app.css` — `.diff-*` (colours from `--diff-*` in `src/styles/tokens.css`)
 - Tests: `src/__tests__/diff.test.ts`, `src/__tests__/diffSession.test.ts`
 - Docs: `docs/compare.md`
@@ -65,7 +65,7 @@ Scenario: DIFF-001.6 Not restored after a restart
 
 ## DIFF-002: Select a file for compare, then compare another with it
 
-- Status: draft
+- Status: verified
 - Commands: `compare.selectForCompare`, `compare.withSelected`
 - Files:
   - `src/lib/diff.ts` — `selectForCompare`, `compareWithSelected`, `compareCandidate` (one remembered path, in memory only)
@@ -116,14 +116,14 @@ Scenario: DIFF-002.6 Untitled tabs can't be selected
 
 Scenario: DIFF-002.7 Only a text tab is compared with the selected file
   Given "old.ts" is selected for compare
-  And the active tab is a large-file, terminal, Claude or Compare tab
+  And the active tab is a large-file, terminal or Compare tab
   When I open the File › Compare menu
   Then "Compare Active File with Selected" is greyed out
 ```
 
 ## DIFF-003: Compare the active tab with a file
 
-- Status: draft
+- Status: verified
 - Commands: `compare.activeWith`
 - Files:
   - `src/lib/commands.ts` — `compare.activeWith` (picked file = left; the tab's file when saved and clean, else a `tab` snapshot = right)
@@ -154,14 +154,14 @@ Scenario: DIFF-003.3 An untitled tab
   Then the right side shows the untitled text, read-only
 
 Scenario: DIFF-003.4 Only for text tabs
-  Given the active tab is a large-file, terminal, Claude or Compare tab
+  Given the active tab is a large-file, terminal or Compare tab
   When I open the File › Compare menu
   Then "Compare Active File With…" is greyed out
 ```
 
 ## DIFF-004: Compare unsaved edits with the saved file
 
-- Status: draft
+- Status: verified
 - Commands: `compare.withSaved`
 - Files:
   - `src/lib/commands.ts` — `compare.withSaved` (enabled for a text tab with a path and unsaved edits)
@@ -195,7 +195,7 @@ Scenario: DIFF-004.3 Untitled
 
 ## DIFF-005: Compare the active tab with the clipboard
 
-- Status: draft
+- Status: verified
 - Commands: `compare.withClipboard`
 - Files:
   - `src/lib/commands.ts` — `compare.withClipboard` (clipboard text = left `text` source labelled "Clipboard")
@@ -233,7 +233,7 @@ Scenario: DIFF-005.4 Only for text tabs
 
 ## DIFF-006: Compare a file with its last commit
 
-- Status: draft
+- Status: verified
 - Commands: `git.compareWithHead`
 - Files:
   - `src/lib/gitCommands.ts` — `git.compareWithHead` (enabled for a file in a repository that is not untracked)
@@ -290,7 +290,7 @@ Scenario: DIFF-006.7 The file is not open in a tab
 
 ## DIFF-007: Refuse what can't be compared
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/diff.ts` — `load` (folder, size ≥ `settings.largeFileThresholdMb`, `looksBinary`, non-text tab), `openCompare` error toast
@@ -324,7 +324,7 @@ Scenario: DIFF-007.4 Either side failing stops the comparison
 
 ## DIFF-008: Move between the changes
 
-- Status: draft
+- Status: verified
 - Commands: `compare.nextChange`, `compare.prevChange`
 - Files:
   - `src/components/DiffView.tsx` — `stepChange` (`goToNextChunk` / `goToPreviousChunk` on the right or inline editor), `position`, toolbar counter and arrow buttons
@@ -367,7 +367,7 @@ Scenario: DIFF-008.5 Only on a Compare tab
 
 ## DIFF-009: Choose the layout: side by side, inline, folded, swapped
 
-- Status: draft
+- Status: verified
 - Commands: `compare.toggleInline`, `compare.swap`
 - Files:
   - `src/components/DiffView.tsx` — layout switch (`unifiedMergeView` for inline), fold button (`collapseUnchanged: { margin: 3, minSize: 6 }`), rebuild effect on `version` / `inline` / `collapse`, `settingsReconfigure` on settings changes; toolbar words in `.seg-text` / `.long` / `.short` spans
@@ -430,7 +430,7 @@ Scenario: DIFF-009.8 A narrow Compare tab
 
 ## DIFF-010: Edit file sides; snapshots are read-only
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/diff.ts` — `Side.editable` (file not read-only on disk → true; `tab` and `text` sources → false), `markSideEdited`, `syncDirty`, `sideText`, `diffViews`
@@ -474,7 +474,7 @@ Scenario: DIFF-010.5 Inline layout edits the right side
 
 ## DIFF-011: Copy a change across with the arrows
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/DiffView.tsx` — `revertControls`: `"a-to-b"` when the right side is editable, else `"b-to-a"` when the left is, else none; `mergeControls: false` inline
@@ -523,7 +523,7 @@ Scenario: DIFF-011.6 Undo
 
 ## DIFF-012: Save an edited side
 
-- Status: draft
+- Status: verified
 - Commands: `file.save`
 - Files:
   - `src/lib/diff.ts` — `saveDiff` (per dirty file side: modified-on-disk check, `joinEol`, same encoding and BOM), `splitEol`, `joinEol`
@@ -591,7 +591,7 @@ Scenario: DIFF-012.8 Nothing to save
 
 ## DIFF-013: Reload the compared texts
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/diff.ts` — `reloadDiff` (files from disk, tab snapshots from the tab, a closed tab keeps its snapshot, `text` sources keep their text, folder labels kept; a Source Control comparison goes to `reloadChange`), `refreshDiff` (the same without a notice)
@@ -653,7 +653,7 @@ Scenario: DIFF-013.8 Reloaded by itself when a file side changes on disk
 
 ## DIFF-014: Preview comparisons replace each other
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/diff.ts` — `openCompare(a, b, { preview: true })`: closes the previous Compare tab that is `preview` and not dirty

@@ -9,7 +9,7 @@ Resolving git conflicts in the editor and in the Source Control panel, and carry
 
 ## CONFLICT-001: See each conflict marked in the editor
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/conflicts.ts` — `parseConflicts` (start / optional `|||||||` base / `=======` / end, CRLF tolerant, malformed blocks ignored), `sideLabel`
@@ -30,7 +30,6 @@ Scenario: CONFLICT-001.1 A conflict is marked
   Then my lines (current) are tinted green and the incoming lines blue
   And the three marker lines are shown muted and in italics
   And a bar above the block reads "Conflict 1 of 1" with the buttons Accept Current, Accept Incoming and Accept Both
-  And while Claude Code is switched on the bar also has "Explain" as its last button (GITAI-007); with it switched off there is none
 
 Scenario: CONFLICT-001.2 Several conflicts are numbered
   Given a file with 2 conflicts
@@ -68,7 +67,7 @@ Scenario: CONFLICT-001.7 Very large documents are not scanned
 
 ## CONFLICT-002: Accept one side of a conflict
 
-- Status: draft
+- Status: verified
 - Commands: `git.acceptCurrent`, `git.acceptIncoming`, `git.acceptBoth`
 - Files:
   - `src/editor/conflicts.ts` — `resolveChange` (the edit for one block), `accept` (one transaction, `userEvent: "input.conflict"`), `conflictAtCursor`, bar buttons (mousedown keeps editor focus)
@@ -108,7 +107,6 @@ Scenario: CONFLICT-002.5 From the menu, for the conflict at the cursor
   When I choose Git › Conflicts › Accept Incoming (Conflict at Cursor)
   Then the second conflict is resolved to its incoming side
   And with the cursor between conflicts the next one below is resolved, and below the last one the first
-  And a suggestion panel Claude put under that conflict (GITAI-007) closes with it
 
 Scenario: CONFLICT-002.6 An empty side
   Given a conflict whose current side has no lines
@@ -119,12 +117,11 @@ Scenario: CONFLICT-002.7 No conflicts in the file
   Given the active document has no conflicts, or the active tab is not a text tab
   When I open the Git › Conflicts menu or the command palette
   Then the Accept commands are greyed out in the menu and the palette
-  And so is Git › Claude › "Explain Conflict at Cursor with Claude" (GITAI-001.5)
 ```
 
 ## CONFLICT-003: Resolve every conflict in a file one way
 
-- Status: draft
+- Status: verified
 - Commands: `git.acceptAllCurrent`, `git.acceptAllIncoming`
 - Files:
   - `src/editor/conflicts.ts` — `acceptAll` (all blocks in one transaction)
@@ -161,7 +158,7 @@ Scenario: CONFLICT-003.4 Disabled without conflicts
 
 ## CONFLICT-004: Jump between conflicts
 
-- Status: draft
+- Status: verified
 - Commands: `git.nextConflict`, `git.prevConflict`
 - Files:
   - `src/editor/conflicts.ts` — `nextConflict` (which block, wrapping), `gotoConflict` (centres it)
@@ -199,7 +196,7 @@ Scenario: CONFLICT-004.4 No conflicts
 
 ## CONFLICT-005: Compare the two sides of a conflict
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/editor/conflicts.ts` — Compare button in `BarWidget`, `setConflictHooks` / `ConflictHooks.compare`
@@ -219,7 +216,7 @@ Scenario: CONFLICT-005.1 Compare from the bar
   Then a Compare tab opens with "store.ts · conflict 2 · current" on the left and "store.ts · conflict 2 · incoming" on the right
   And both sides are read-only
   And the conflicted document itself is unchanged
-  And "Compare" comes after the three Accept buttons and before "Explain" (GITAI-007), when that is shown
+  And "Compare" comes after the three Accept buttons
 
 Scenario: CONFLICT-005.2 The tab is reused
   Given that Compare tab is open and untouched
@@ -234,7 +231,7 @@ Scenario: CONFLICT-005.3 diff3 conflicts
 
 ## CONFLICT-006: Finish a file when its last conflict is gone
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/editor/conflicts.ts` — update listener in `conflictExtensions` (`hooks.cleared` when the count goes from some to none)
@@ -274,7 +271,6 @@ Scenario: CONFLICT-006.5 Deleting the markers by hand counts too
   Given I edit the text and delete the last marker lines myself
   When the last marker line is gone
   Then the same dialog appears
-  And it also appears when the last conflict is resolved with "Apply Suggestion" (GITAI-007.7): nothing is saved or staged before I answer
 
 Scenario: CONFLICT-006.6 Not for files git does not list as conflicted
   Given an untitled document, or a file that is not under Merge Changes, containing a conflict block
@@ -289,7 +285,7 @@ Scenario: CONFLICT-006.7 Not when the markers went because the operation did
 
 ## CONFLICT-007: Mark a conflicted file as resolved
 
-- Status: draft
+- Status: verified
 - Commands: `git.stageFile`
 - Files:
   - `src/lib/git.ts` — `resolveConflicts` (saves a dirty tab of the file first, checks the file on disk for markers, then `stage`)
@@ -347,7 +343,7 @@ Scenario: CONFLICT-007.7 A file deleted on one side
 
 ## CONFLICT-008: Take one side's version of a whole file
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — "Current" / "Incoming" buttons on Merge Changes rows (`FileRow`), rebase-aware and stash-aware tooltips
@@ -406,7 +402,7 @@ Scenario: CONFLICT-008.6 During a rebase the tooltips say which side is which
 
 ## CONFLICT-009: Open a conflicted file from Merge Changes
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/git.ts` — `openChange` (a conflict opens the file itself, not a Compare tab; toast when the file is not in the folder)
@@ -439,7 +435,7 @@ Scenario: CONFLICT-009.3 A file that is not in the folder
 
 ## CONFLICT-010: Commit only when every conflict is resolved
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — Commit button `disabled` / tooltip, message prefill effect (`offered`, `opKey`; `offeredText`: the unedited prepared message is taken out again when the operation ends without a commit)
@@ -504,7 +500,7 @@ Scenario: CONFLICT-010.8 A merge that changes none of my files is still committe
 
 ## CONFLICT-011: Abort a stopped operation
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — operation badge (`OPERATION` labels), "Abort" beside the branch
@@ -558,7 +554,7 @@ Scenario: CONFLICT-011.6 Disabled while git is busy
 
 ## CONFLICT-012: Skip the commit an operation stopped on
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — "Skip" button (not for a merge; disabled while conflicts remain), "Nothing is left to commit…" note
@@ -603,7 +599,7 @@ Scenario: CONFLICT-012.4 Nothing left to commit
 
 ## CONFLICT-013: Carry on with a rebase
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — `rebasing`, disabled message box and its placeholder, `doCommit` → `continueOperation`, "Rebasing 2 of 5" from `operationStep`
@@ -662,7 +658,7 @@ Scenario: CONFLICT-013.6 The sides are explained
 
 ## CONFLICT-014: Carry on with a patch series (git am)
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — badge, Skip / Abort tooltips, disabled message box and its placeholder, `doCommit` → `continueOperation`

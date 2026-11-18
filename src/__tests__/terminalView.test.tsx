@@ -74,7 +74,8 @@ vi.mock("@tauri-apps/api/event", () => ({
 const { render, cleanup, flush, act } = await import("./helpers/render");
 const { TerminalView } = await import("../components/TerminalView");
 
-const doc = (command?: string) => ({ id: "term-1", kind: "terminal", name: "Claude CLI", terminal: { cwd: "C:\\work\\proj", command } }) as unknown as Doc;
+/** A one-off command tab with `command`, else a PowerShell tab. */
+const doc = (command?: string) => ({ id: "term-1", kind: "terminal", name: "PowerShell · proj", terminal: { cwd: "C:\\work\\proj", command, shell: command ? undefined : { name: "PowerShell", argv: ["pwsh.exe"] } } }) as unknown as Doc;
 const term = () => h.terms[h.terms.length - 1];
 const screen = () => term().written.join("");
 const writes = () => h.calls.filter((c) => c.cmd === "pty_write").map((c) => c.args);
@@ -101,7 +102,7 @@ describe("TerminalView", () => {
   });
   afterEach(cleanup);
 
-  it("starts claude in the tab's folder and sends keystrokes to pty_write", async () => {
+  it("starts the shell in the tab's folder and sends keystrokes to pty_write", async () => {
     await mount();
     expect(starts()).toHaveLength(1);
     expect(starts()[0].args).toMatchObject({ cwd: "C:\\work\\proj", cols: 80, rows: 24 });
@@ -165,10 +166,10 @@ describe("TerminalView", () => {
     expect(key("a", { ctrl: false }).passed).toBe(true);
   });
 
-  it("an exit prints the exit line; other keys do nothing and Enter starts claude again", async () => {
+  it("a failed exit prints the exit line with its code; other keys do nothing and Enter starts the shell again", async () => {
     await mount();
-    await emit("pty:exit", { id: 7, code: 0 });
-    expect(screen()).toContain("[Claude Code ended. Press Enter to start it again.]");
+    await emit("pty:exit", { id: 7, code: 1 });
+    expect(screen()).toContain("[PowerShell ended (exit code 1). Press Enter to start it again.]");
     await act(async () => term().data!("x"));
     expect(writes()).toEqual([]);
     expect(starts()).toHaveLength(1);
@@ -178,12 +179,6 @@ describe("TerminalView", () => {
     expect(starts()).toHaveLength(2);
     await act(async () => term().data!("y"));
     expect(writes()).toEqual([{ id: 7, data: "y" }]);
-  });
-
-  it("an exit code is shown in the exit line", async () => {
-    await mount();
-    await emit("pty:exit", { id: 7, code: 1 });
-    expect(screen()).toContain("[Claude Code ended (exit code 1). Press Enter to start it again.]");
   });
 
   it("a one-off command reports Done / Failed and does not restart", async () => {
@@ -218,7 +213,7 @@ describe("TerminalView with a shell", () => {
   it("starts the shell with its arguments in the tab's folder", async () => {
     await open();
     expect(starts()).toHaveLength(1);
-    expect(starts()[0].args).toMatchObject({ cwd: "C:\\work\\proj", shell: SHELL.argv, command: undefined, resume: undefined });
+    expect(starts()[0].args).toMatchObject({ cwd: "C:\\work\\proj", shell: SHELL.argv, command: undefined });
   });
 
   it("closes the tab when the shell exits normally", async () => {
@@ -238,18 +233,5 @@ describe("TerminalView with a shell", () => {
     await flush();
     expect(starts()).toHaveLength(2);
     expect(starts()[1].args).toMatchObject({ shell: SHELL.argv });
-  });
-});
-
-describe("a Claude CLI tab still names Claude Code when it ends", () => {
-  afterEach(cleanup);
-  it("says Claude Code ended", async () => {
-    h.calls.length = 0;
-    h.listeners.clear();
-    h.terms.length = 0;
-    await mount();
-    expect(starts()[0].args.shell).toBeUndefined();
-    await emit("pty:exit", { id: 7, code: 0 });
-    expect(screen()).toContain("[Claude Code ended. Press Enter to start it again.]");
   });
 });

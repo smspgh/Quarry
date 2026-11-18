@@ -1,6 +1,5 @@
 // The engines are public so `examples/bench.rs` (bench/README.md) can time them directly.
 pub mod bigfile;
-mod claude;
 mod git;
 mod lsp;
 mod pty;
@@ -34,9 +33,7 @@ struct AppState {
     folder_watch: Mutex<Option<watch::FolderWatcher>>,
     /// The filter view's line set per large document (one filter per tab).
     filters: Mutex<HashMap<u32, bigfile::LineFilter>>,
-    /// Claude Code sessions (one process per Claude tab).
-    claude: claude::Sessions,
-    /// Terminal tabs running the `claude` command line.
+    /// Terminal tabs (shells and one-off commands).
     terminals: pty::Terminals,
     /// Language servers (code intelligence).
     lsp: lsp::Servers,
@@ -811,14 +808,6 @@ pub fn run() {
             fs_walk,
             startup_paths,
             format_external,
-            claude::claude_detect,
-            claude::claude_start,
-            claude::claude_send,
-            claude::claude_stop,
-            claude::claude_stop_all,
-            claude::claude_read_image,
-            claude::claude_conversations,
-            claude::claude_history,
             pty::pty_start,
             pty::pty_shells,
             pty::pty_write,
@@ -882,13 +871,6 @@ pub fn run() {
             git::git_branch_info,
             git::git_ref_action,
             git::git_push_ref,
-            // Claude git helpers (specs/git-claude.md)
-            git::ai::git_commit_diff,
-            git::ai::git_range_log,
-            git::ai::git_range_diff,
-            git::ai::git_default_branch,
-            claude::claude_oneshot,
-            claude::claude_oneshot_cancel,
             // edit history
             git::history::git_history_range,
             git::history::git_history_rewrite,

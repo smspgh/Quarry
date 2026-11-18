@@ -56,9 +56,8 @@ import { stepChange } from "../components/DiffView";
 import { hasLsp, lspCommands, restartServers, useLsp } from "./lsp";
 import { nextDiagnostic, previousDiagnostic } from "@codemirror/lint";
 import { startCompletion } from "@codemirror/autocomplete";
-import { openClaudeTerminal, openShellTerminal } from "./terminal";
+import { openShellTerminal } from "./terminal";
 import { loadShells, pickShell, terminalTitle } from "./shells";
-import { appendToDraft, claudeBusy, claudeEnabled, claudeTabFor, contextFor, interruptClaude, newClaudeSession, openClaudeTab } from "./claude";
 import { makeRoom } from "./tabLimit";
 import { big, json as jsonIpc } from "./ipc";
 import { copyJsonPath, copyJsonValue, dropJsonTree } from "./jsonModel";
@@ -619,7 +618,7 @@ function toggleRecording() {
 // ---------- registrations ----------
 
 const hasDoc = () => !!activeDoc(useStore.getState());
-/** A file tab (text or large file), not a Claude Code or terminal tab. */
+/** A file tab (text or large file), not a terminal, Compare or graph tab. */
 const hasFileDoc = () => { const d = activeDoc(useStore.getState()); return d?.kind === "text" || d?.kind === "big"; };
 const hasText = () => activeDoc(useStore.getState())?.kind === "text";
 const hasJson = () => { const d = activeDoc(useStore.getState()); return d?.kind === "text" && d.language === "JSON"; };
@@ -1292,63 +1291,18 @@ export function registerAllCommands() {
     },
   });
 
-  // Claude Code (hidden everywhere while the integration is off; see settings.claudeEnabled)
-  const claudeDoc = () => { const d = activeDoc(s()); return claudeEnabled() && d?.kind === "claude" ? d : undefined; };
-  register({
-    id: "claude.openHere",
-    title: "Work with Claude Code Here",
-    category: "Claude Code",
-    enabled: claudeEnabled,
-    // args: the folder; without one, the terminal tab's folder, the open folder, the active file's folder, or ask.
-    run: async (args) => {
-      let folder = typeof args === "string" ? args : null;
-      const d = activeDoc(s());
-      folder ??= (d?.kind === "terminal" ? d.terminal?.cwd : undefined) ?? s().folder ?? (d?.path ? dirName(d.path) : null);
-      if (!folder) {
-        const { open } = await import("@tauri-apps/plugin-dialog");
-        const picked = await open({ directory: true, title: "Work with Claude Code in…" });
-        if (!picked || Array.isArray(picked)) return false;
-        folder = picked;
-      }
-      const name = `Claude · ${folder.split(/[\\/]/).filter(Boolean).pop() ?? folder}`;
-      const open = s().docs.some((x) => x.kind === "claude" && samePath(x.claude?.cwd, folder));
-      if (!open && (await makeRoom([name], (id) => closeDocument(id))) === 0) return false;
-      await openClaudeTab(folder);
-    },
-  });
-  register({
-    id: "claude.openTerminal",
-    title: "Open Claude Code Terminal Here",
-    category: "Claude Code",
-    enabled: claudeEnabled,
-    // args: the folder (or { folder, resume }); without one, the Claude tab's folder, the open folder, the file's folder, or ask.
-    run: async (args) => {
-      const a = (typeof args === "string" ? { folder: args } : (args ?? {})) as { folder?: string; resume?: string };
-      const d = activeDoc(s());
-      let folder = a.folder ?? (d?.kind === "claude" ? d.claude?.cwd : undefined) ?? s().folder ?? (d?.path ? dirName(d.path) : null);
-      if (!folder) {
-        const { open } = await import("@tauri-apps/plugin-dialog");
-        const picked = await open({ directory: true, title: "Claude Code terminal in…" });
-        if (!picked || Array.isArray(picked)) return false;
-        folder = picked;
-      }
-      const name = `Claude CLI · ${folder.split(/[\\/]/).filter(Boolean).pop() ?? folder}`;
-      if ((await makeRoom([name], (id) => closeDocument(id))) === 0) return false;
-      openClaudeTerminal(folder, a.resume);
-    },
-  });
-  // Terminal tabs with a shell (specs/terminal.md TERM-010). Not part of the Claude Code integration.
+  // Terminal tabs with a shell (specs/terminal.md TERM-010).
   register({
     id: "terminal.new",
     title: "New Terminal",
     category: "View",
     keys: "Ctrl+`",
     // args: the folder, or { folder, shell } (shell: an id from pty_shells or "custom"; default: the setting).
-    // Without a folder: the terminal or Claude tab's folder, the open folder, the active file's folder, or the home folder.
+    // Without a folder: the terminal tab's folder, the open folder, the active file's folder, or the home folder.
     run: async (args) => {
       const a = (typeof args === "string" ? { folder: args } : (args ?? {})) as { folder?: string; shell?: string };
       const d = activeDoc(s());
-      let folder = a.folder ?? (d?.kind === "terminal" ? d.terminal?.cwd : d?.kind === "claude" ? d.claude?.cwd : undefined) ?? s().folder ?? (d?.path ? dirName(d.path) : null);
+      let folder = a.folder ?? (d?.kind === "terminal" ? d.terminal?.cwd : undefined) ?? s().folder ?? (d?.path ? dirName(d.path) : null);
       if (!folder) {
         const { homeDir } = await import("@tauri-apps/api/path");
         folder = await homeDir();
@@ -1364,42 +1318,6 @@ export function registerAllCommands() {
     },
   });
   void loadShells();
-  register({
-    id: "claude.openFolder",
-    title: "Work with Claude Code in Folder…",
-    category: "Claude Code",
-    enabled: claudeEnabled,
-    run: async () => {
-      const { open } = await import("@tauri-apps/plugin-dialog");
-      const picked = await open({ directory: true, title: "Work with Claude Code in…" });
-      if (!picked || Array.isArray(picked)) return false;
-      return runCommand("claude.openHere", picked);
-    },
-  });
-  /** Add the selection or the file of the active text tab to a Claude tab's message, opening one
-   *  for the folder when none is open, and switch to it. */
-  const toClaude = async (what: "selection" | "file") => {
-    const d = activeDoc(s());
-    if (d?.kind !== "text") return false;
-    let target = claudeTabFor(d.path);
-    if (!target) {
-      if (!(await runCommand("claude.openHere", s().folder ?? (d.path ? dirName(d.path) : undefined)))) return false;
-      target = claudeTabFor(d.path);
-    }
-    if (!target?.claude) return false;
-    const text = contextFor(d, target.claude.cwd, what);
-    if (!text) {
-      s().toast(what === "selection" ? "Select some text first." : "Save the file first.", "info");
-      return false;
-    }
-    appendToDraft(target.id, text);
-    s().setActive(target.id);
-  };
-  const textForClaude = () => claudeEnabled() && activeDoc(s())?.kind === "text";
-  register({ id: "claude.addSelection", title: "Add Selection to Claude Code", category: "Claude Code", keys: "Ctrl+Alt+L", enabled: textForClaude, run: () => toClaude("selection") });
-  register({ id: "claude.addFile", title: "Mention This File to Claude Code", category: "Claude Code", enabled: () => textForClaude() && !!activeDoc(s())?.path, run: () => toClaude("file") });
-  register({ id: "claude.newSession", title: "New Conversation", category: "Claude Code", enabled: () => !!claudeDoc(), run: () => { const d = claudeDoc(); if (!d) return false; newClaudeSession(d.id); } });
-  register({ id: "claude.stop", title: "Stop", category: "Claude Code", enabled: () => { const d = claudeDoc(); return !!d && claudeBusy(d.id); }, run: () => { const d = claudeDoc(); if (!d) return false; interruptClaude(d.id); } });
 
   // Code intelligence (language servers, lib/lsp.ts). Keys follow VS Code.
   const lspReady = () => hasText() && hasLsp(activeDoc(s())?.id);

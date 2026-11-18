@@ -9,7 +9,7 @@ Creating, opening, saving and reverting documents, encodings and line endings, n
 
 ## FILE-001: Create a new untitled file
 
-- Status: draft
+- Status: verified
 - Commands: `file.new`
 - Files:
   - `src/lib/commands.ts` — `file.new` registration: `makeRoom(["Untitled"])` then `newDocument()`
@@ -48,7 +48,7 @@ Scenario: FILE-001.3 A new file counts towards the open-tab limit
 
 ## FILE-002: Open files from a dialog
 
-- Status: draft
+- Status: verified
 - Commands: `file.open`
 - Files:
   - `src/lib/actions.ts` — `openFileDialog` (several picks go through `openFiles`: one tab-limit question), `openPath` (existing-tab check with `samePath`, binary / decode / mixed-EOL toasts, error toast)
@@ -105,7 +105,7 @@ Scenario: FILE-002.6 Several files over the open-tab limit ask once
 
 ## FILE-003: Open a folder
 
-- Status: draft
+- Status: verified
 - Commands: `file.openFolder`
 - Files:
   - `src/lib/actions.ts` — `openFolderDialog`, `openFolder` (stat check, `fs.normalize`, shows the Explorer, drops a missing folder from the recent list)
@@ -150,7 +150,7 @@ Scenario: FILE-003.4 A path that is a folder opens as a folder
 
 ## FILE-004: Recent files and folders
 
-- Status: draft
+- Status: verified
 - Commands: `file.openRecent`, `file.openRecentFolder`, `file.clearRecent`, `file.clearRecentFolders`
 - Files:
   - `src/lib/actions.ts` — `pushRecent` (most recent first, no duplicates by `samePath`, 15 kept), `pruneExisting` at start, `openFolder` removing a missing folder
@@ -207,7 +207,7 @@ Scenario: FILE-004.6 Clear Recent Folders
 
 ## FILE-005: Quick Open a file by name
 
-- Status: draft
+- Status: verified
 - Commands: `file.quickOpen`
 - Files:
   - `src/lib/commands.ts` — `file.quickOpen` sets `palette: "files"`
@@ -251,7 +251,7 @@ Scenario: FILE-005.4 What the folder list leaves out
 
 ## FILE-006: Large files open in large-file mode
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/actions.ts` — `openPath` compares `stat.size` with `settings.largeFileThresholdMb`; `openLarge`, `bigDocFields`, `pollBigIndex`; `sanitizeSettings` clamps the threshold to 1–4096
@@ -299,7 +299,7 @@ Scenario: FILE-006.5 Opening at a line
 
 ## FILE-007: Detect encoding and line endings on open
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src-tauri/src/files.rs` — `detect_encoding` (BOM, else chardetng over the first 1 MiB), `read_text`, `detect_eol`, `count_eols`, `has_mixed_eol`
@@ -341,7 +341,7 @@ Scenario: FILE-007.4 Mixed line endings
 
 ## FILE-008: Choose the encoding and line endings a file is saved with
 
-- Status: draft
+- Status: verified
 - Commands: `file.setEncoding`, `file.setEol`
 - Files:
   - `src/lib/commands.ts` — `file.setEncoding`, `file.setEol` (with an argument: apply; without: open the status-bar picker through the bus)
@@ -395,7 +395,7 @@ Scenario: FILE-008.6 Not available without a text document
 
 ## FILE-009: Reopen a file in another encoding
 
-- Status: draft
+- Status: verified
 - Commands: `file.reopenWithEncoding`
 - Files:
   - `src/lib/commands.ts` — `file.reopenWithEncoding` (no argument: `palette: "encoding"`)
@@ -438,7 +438,7 @@ Scenario: FILE-009.4 Only for files on disk
 
 ## FILE-010: Save a document
 
-- Status: draft
+- Status: verified
 - Commands: `file.save`
 - Files:
   - `src/lib/actions.ts` — `saveDocument` (untitled → Save dialog, read-only guard, large-file mapping guard, decode-error and changed-on-disk confirmations (the latter for text and large-file tabs), `parseUnmappable` fallback to UTF-8, `saving` set, `takeSnapshot`, toast, `pushRecent`), `normalizeEol`
@@ -508,14 +508,14 @@ Scenario: FILE-010.8 Saving keeps the file's identity
   And no ".quarry-*.tmp" file is left in the folder
 
 Scenario: FILE-010.9 Save is unavailable for tabs that are not files
-  Given the active tab is a Claude Code tab
+  Given the active tab is a terminal tab
   When I open the File menu
   Then Save is disabled
 ```
 
 ## FILE-011: Save a document under another name
 
-- Status: draft
+- Status: verified
 - Commands: `file.saveAs`
 - Files:
   - `src/lib/actions.ts` — `saveDocument(undefined, true)`: "Save As" dialog, tab takes the new path and name, `readonly` cleared, language re-detected, large-file mapping guard; a pick that `samePath`s the tab's own file keeps the read-only / decode-error / changed-on-disk guards
@@ -566,7 +566,7 @@ Scenario: FILE-011.5 Save As onto the same file keeps the Save guards
 
 ## FILE-012: Save all changed documents
 
-- Status: draft
+- Status: verified
 - Commands: `file.saveAll`
 - Files:
   - `src/lib/actions.ts` — `saveAll` (every `dirty` doc through `saveDocument`, in tab order)
@@ -599,7 +599,7 @@ Scenario: FILE-012.3 Unavailable with no tabs
 
 ## FILE-013: Revert a file to the version on disk
 
-- Status: draft
+- Status: verified
 - Commands: `file.revert`
 - Files:
   - `src/lib/actions.ts` — `revertDocument` (confirmation when dirty, `fs.readText`, `editor.replaceAll`, refreshes encoding / EOL / size, `takeSnapshot`)
@@ -639,7 +639,7 @@ Scenario: FILE-013.4 The file cannot be read
 
 ## FILE-014: Know which documents have unsaved changes
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/actions.ts` — `snapshots`, `takeSnapshot`, the `editor.onDocUpdate` listener that clears `dirty` when text, EOL, encoding and BOM equal the saved snapshot (`SNAPSHOT_COMPARE_MAX` = 4 MiB)
@@ -678,7 +678,7 @@ Scenario: FILE-014.4 A new file with pasted-and-removed text
 
 ## FILE-015: Notice changes made by other programs
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/actions.ts` — `checkExternalChanges` (checks run one after the other, a call during a running check is queued and plain calls share one queued check; per text / large-file doc with a path: stat, `missingWarned`, came-back handling for text and unedited large-file tabs, reload or ask; `checkCompareTabs` for Compare tabs with a file side; notices folded with `reloadedNotice` / `missingNotice`; `quiet` returns the result to a git action; `answerAhead` = answers given before a git operation, SAFE-002 / SAFE-004), `installExternalChangeWatch` (window `focus`, `visibilitychange`, tab activation), `reloadBig`, `revertDocument`, the `saving` set
@@ -762,7 +762,7 @@ Scenario: FILE-015.9 Lines picked up by follow mode are not an outside change
 
 ## FILE-016: Restore the previous session on start
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/actions.ts` — `buildSession`, `sessionDocs`, `saveSession` (500 ms debounce, blocked while `restoring`), `flushSession`, `restoreSession` / `restoreSessionTabs`, `pruneExisting`, `UNTITLED_SESSION_MAX`, `SESSION_FILE` (`session.json`)
@@ -811,7 +811,7 @@ Scenario: FILE-016.5 Session restore turned off
   And the recent files list and pinned side panels are still as I left them
 
 Scenario: FILE-016.6 Empty untitled tabs and tool tabs are not kept
-  Given an empty "Untitled-1", a commit graph tab and a Claude CLI terminal tab are open
+  Given an empty "Untitled-1", a commit graph tab and a terminal tab are open
   When I restart Quarry
   Then none of the three is reopened
 
@@ -829,15 +829,15 @@ Scenario: FILE-016.8 An untitled document too large for the session
 
 ## FILE-017: Exit without losing work (hot exit)
 
-- Status: draft
+- Status: verified
 - Commands: `app.exit`
 - Files:
   - `src/lib/actions.ts` — `installCloseGuard`, `needsSavePromptOnExit`, `askSaveChanges`, `flushSession`
   - `src/lib/commands.ts` — `app.exit` closes the window (which raises the close request)
   - `src/components/TitleBar.tsx` — `WindowControls` Close button
-  - `src/lib/claude.ts` — `stopAllClaude`
   - `src/lib/lsp.ts` — `stopAllServers`
-  - `src-tauri/src/writer.rs` — `run_all`: stops the child processes of Claude tabs, language servers and terminals in parallel when the window closes
+  - `src/lib/terminal.ts` — `killAllTerminals`
+  - `src-tauri/src/writer.rs` — `run_all`: stops the child processes of language servers and terminals in parallel when the window closes
   - `src/lib/dialogs.ts` — `choose`
 - Tests: `src/__tests__/paths.test.ts`, `src-tauri/src/writer.rs`
 - Docs: `docs/editing.md`
@@ -898,12 +898,11 @@ Scenario: FILE-017.8 An emptied untitled document is not asked about
 
 ## FILE-018: Open files by dropping them on the window
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
-  - `src/App.tsx` — `onDragDropEvent` handler: `openPath` per dropped path, except over `.claude-view` (`claude.drop`)
+  - `src/App.tsx` — `onDragDropEvent` handler: `openPath` per dropped path
   - `src/lib/actions.ts` — `openPath` (a dropped folder goes to `openFolder`)
-  - `src/lib/bus.ts` — `claude.drop`
   - `src/components/Welcome.tsx` — "Drop files anywhere to open them" hint
 - Tests: none
 - Docs: `docs/editing.md`
@@ -923,13 +922,7 @@ Scenario: FILE-018.2 Drop a folder
   When I drop the folder "C:\work\project" on the window
   Then it opens in the Explorer panel and no tab is created for it
 
-Scenario: FILE-018.3 A drop on a Claude tab is not opened as a file
-  Given a Claude Code tab is showing
-  When I drop "shot.png" on the conversation
-  Then no editor tab opens for "shot.png"
-  And the file goes to the Claude message instead
-
-Scenario: FILE-018.4 A large file dropped on the window
+Scenario: FILE-018.3 A large file dropped on the window
   Given the large-file threshold is 32 MB
   When I drop a 2 GB "big.log" on the window
   Then it opens as a large-file tab
@@ -937,7 +930,7 @@ Scenario: FILE-018.4 A large file dropped on the window
 
 ## FILE-019: Open files from the command line and File Explorer
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src-tauri/src/lib.rs` — `cli_paths` (skips `-` options, repairs `C:"`, resolves relative paths against the launch folder, keeps existing paths only), `startup_paths`, the single-instance plugin callback emitting `open-paths` and focusing the window
@@ -988,7 +981,7 @@ Scenario: FILE-019.6 A quoted folder path ending in a backslash
 
 ## FILE-020: Welcome screen
 
-- Status: draft
+- Status: verified
 - Commands: `file.new`, `file.open`, `file.openFolder`, `view.commandPalette`, `file.openRecent`
 - Files:
   - `src/components/Welcome.tsx` — `Welcome` (four actions and the Recent list, each through `runCommand`; focus landing), `displayRecent`

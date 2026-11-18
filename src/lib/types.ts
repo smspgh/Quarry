@@ -1,4 +1,4 @@
-export type DocKind = "text" | "big" | "claude" | "terminal" | "diff" | "graph";
+export type DocKind = "text" | "big" | "terminal" | "diff" | "graph";
 
 /** Encodings offered for saving and for Reopen with Encoding (names encoding_rs knows). */
 export const ENCODINGS = ["UTF-8", "UTF-16LE", "UTF-16BE", "windows-1252", "ISO-8859-1", "ISO-8859-2", "windows-1251", "Shift_JIS", "GBK", "EUC-KR"];
@@ -191,18 +191,6 @@ export interface Settings {
   maxOpenTabs: number;
   /** Syntax colours in large-file mode (JSON, logs, CSV / TSV, XML, SQL; visible lines only). */
   bigHighlight: boolean;
-  /** Claude Code integration (Explorer "Work with Claude Code here", Claude tabs). Off hides all of it. */
-  claudeEnabled: boolean;
-  /** The `claude` executable; empty = found on PATH or in the usual install folders. */
-  claudePath: string;
-  /** Model alias or name passed as `--model`; empty = Claude Code's own default. */
-  claudeModel: string;
-  /** `acceptEdits`: file edits go ahead without asking; `default`: ask before edits too. */
-  claudePermissionMode: "acceptEdits" | "default";
-  /** Model of the Claude git helpers (draft a commit message, explain a conflict, summarise): an alias or name passed as `--model`; empty = Claude Code's own default. Not the Claude tabs' `claudeModel`. */
-  claudeGitModel: string;
-  /** Ask before a Claude git helper sends repository content (the dialog's "Send and Don't Ask Again" turns it off). */
-  claudeGitConfirm: boolean;
   /** Merge may start with uncommitted changes to tracked files (git refuses one that would touch them). Off: a clean state is required (specs/git-merge-rebase.md). */
   gitMergeWithChanges: boolean;
   /** Compare with Branch…: "tips" = the two branch tips as they are; "split" = what the branch changed since it split off (from the common ancestor). */
@@ -246,12 +234,6 @@ export const DEFAULT_SETTINGS: Settings = {
   searchHistoryLimit: 0,
   maxOpenTabs: 50,
   bigHighlight: true,
-  claudeEnabled: true,
-  claudePath: "",
-  claudeModel: "",
-  claudePermissionMode: "acceptEdits",
-  claudeGitModel: "haiku",
-  claudeGitConfirm: true,
   gitMergeWithChanges: false,
   gitCompareBranch: "tips",
   lspEnabled: true,

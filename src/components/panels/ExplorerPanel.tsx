@@ -1,9 +1,8 @@
-import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp, ChevronUp, Files, FilePlus, FolderOpen, FolderPlus, Pencil, RefreshCw, Search, SquareTerminal, Terminal, X } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp, ChevronUp, Files, FilePlus, FolderOpen, FolderPlus, Pencil, RefreshCw, Search, Terminal, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { dirName, openFiles, openFolderDialog, openPath } from "../../lib/actions";
 import { filesToClipboard, pasteInto, trashPaths } from "../../lib/fileOps";
 import { FileMenu } from "../FileMenu";
-import { ClaudeMark } from "../ClaudeView";
 import { runCommand } from "../../lib/commands";
 import { bus } from "../../lib/bus";
 import { fs } from "../../lib/ipc";
@@ -114,7 +113,6 @@ export function FileTree({ variant }: { variant?: TreeVariant }) {
   const isVariant = !!variant;
   const readOnly = !!variant?.readOnly;
   const fileFilter = variant?.fileFilter;
-  const claudeOn = useStore((s) => s.settings.claudeEnabled);
   const expanded = useStore((s) => (isVariant ? s.scriptsExpanded : s.explorerExpanded));
   const getExpanded = () => (isVariant ? useStore.getState().scriptsExpanded : useStore.getState().explorerExpanded);
   const setExpanded = (next: Set<string>) => useStore.getState().set(isVariant ? { scriptsExpanded: next } : { explorerExpanded: next });
@@ -813,8 +811,6 @@ export function FileTree({ variant }: { variant?: TreeVariant }) {
               folder && !isVariant ? (
                 <>
                   <button className="palette-item" onClick={() => { setMenu(null); void runCommand("terminal.new", folder); }}><Terminal size={13} /><span className="title">Open in Terminal</span></button>
-                  {claudeOn && <button className="palette-item" onClick={() => { setMenu(null); void runCommand("claude.openHere", folder); }}><ClaudeMark size={13} className="accent" /><span className="title">Work with Claude Code Here</span></button>}
-                  {claudeOn && <button className="palette-item" onClick={() => { setMenu(null); void runCommand("claude.openTerminal", folder); }}><SquareTerminal size={13} /><span className="title">Claude Code Terminal Here</span></button>}
                   <div className="menu-sep" />
                 </>
               ) : undefined
@@ -838,12 +834,6 @@ export function FileTree({ variant }: { variant?: TreeVariant }) {
                 {!readOnly && (inSel || e.isDir) && <button className="palette-item" onClick={() => void openAll(paths)} title={inSel ? "Open each selected file in its own tab (and the files in selected folders)" : "Open each file in this folder in its own tab"}><Files size={13} /><span className="title">Open All Files</span></button>}
                 {e.isDir && !inSel && !isVariant && (
                   <button className="palette-item" onClick={() => { setMenu(null); void runCommand("terminal.new", e.path); }}><Terminal size={13} /><span className="title">Open in Terminal</span></button>
-                )}
-                {e.isDir && !inSel && claudeOn && !isVariant && (
-                  <button className="palette-item" onClick={() => { setMenu(null); void runCommand("claude.openHere", e.path); }}><ClaudeMark size={13} className="accent" /><span className="title">Work with Claude Code Here</span></button>
-                )}
-                {e.isDir && !inSel && claudeOn && !isVariant && (
-                  <button className="palette-item" onClick={() => { setMenu(null); void runCommand("claude.openTerminal", e.path); }}><SquareTerminal size={13} /><span className="title">Claude Code Terminal Here</span></button>
                 )}
                 {!isVariant && <button className="palette-item" onClick={() => findIn(paths)}><Search size={13} /><span className="title">{inSel ? `Find in Selected (${paths.length})` : e.isDir ? "Find in Folder" : "Find in File"}</span></button>}
                 {!inSel && !readOnly && <button className="palette-item" onClick={() => startRename(e)}><Pencil size={13} /><span className="title">Rename</span><span className="kbd">F2</span></button>}

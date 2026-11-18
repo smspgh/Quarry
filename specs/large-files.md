@@ -9,7 +9,7 @@ Files at or above the large-file threshold open as `kind: "big"` tabs: memory-ma
 
 ## BIG-001: Open a file in large-file mode
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/actions.ts` — `openLarge`, `bigDocFields`, `pollBigIndex` (called from `openPath` when the size is at or above the threshold), opening toasts
@@ -64,7 +64,7 @@ Scenario: BIG-001.5 Closing the tab releases the file
 
 ## BIG-002: Background indexing with progress
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src-tauri/src/bigfile.rs` — `start_indexing` (64 MiB chunks, one checkpoint per 1,024 lines), `LineIndex`, `stop_indexing`, `IndexProgress`
@@ -111,7 +111,7 @@ Scenario: BIG-002.4 Actions that need the whole index wait for it
 
 ## BIG-003: Scroll through the file in a virtual view
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/BigFileView.tsx` — `ensure` (256-line chunks, cache of 400 chunks), `scrollTo`, `onScroll`, `onWheel`, `onKey`, `clipRow` / `MAX_ROW_CHARS`, `visibleRowText`, view-state persistence on unmount
@@ -181,7 +181,7 @@ Scenario: BIG-003.8 After a restart the tab opens at the top
 
 ## BIG-004: Move the cursor, select lines and copy
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/BigFileView.tsx` — `moveCursor`, `revealCursor`, `onRowMouseDown`, `onRowMouseEnter`, `selectionRange`, `nativeRowSelection`, `copySelected`, cursor published to the store for the status bar
@@ -244,7 +244,7 @@ Scenario: BIG-004.8 Escape clears the selection
 
 ## BIG-005: Go to a line
 
-- Status: draft
+- Status: verified
 - Commands: `goto.line`, `big.gotoLine`
 - Files:
   - `src/lib/commands.ts` — `goto.line` (enabled for big tabs through `applyDefaultEnabled`), hidden `big.gotoLine`
@@ -301,7 +301,7 @@ Scenario: BIG-005.6 Go to Line during indexing does not call the line out of ran
 
 ## BIG-006: Find in a large file
 
-- Status: draft
+- Status: verified
 - Commands: `find.open`, `find.next`, `find.prev`
 - Files:
   - `src/lib/commands.ts` — `find.open`, `find.next`, `find.prev` emit `big.find`, `big.findNext`, `big.findPrev` on a big tab
@@ -378,7 +378,7 @@ Scenario: BIG-006.9 Edits drop the hits
 
 ## BIG-007: Replace All in a large file
 
-- Status: draft
+- Status: verified
 - Commands: `find.replace`
 - Files:
   - `src/lib/commands.ts` — `find.replace` emits `big.find` with `replace: true` on a big tab
@@ -451,7 +451,7 @@ Scenario: BIG-007.9 A dollar sign is literal in plain-text mode
 
 ## BIG-008: Edit, insert and delete lines
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/BigFileView.tsx` — `canChange` (one gate for Enter / F2 / double-click / Ctrl+Enter / Delete), `beginEdit`, `editGate`, `commitEdit`, `insertLine`, `deleteSelected`, the `.big-edit` input
@@ -523,7 +523,7 @@ Scenario: BIG-008.9 A typed line break uses the file's line ending
 
 ## BIG-009: Undo and redo line edits
 
-- Status: draft
+- Status: verified
 - Commands: `edit.undo`, `edit.redo`
 - Files:
   - `src/lib/commands.ts` — `edit.undo` / `edit.redo` emit `big.undo` / `big.redo` on a big tab
@@ -570,7 +570,7 @@ Scenario: BIG-009.5 A new edit clears redo
 
 ## BIG-010: Save and Save As
 
-- Status: draft
+- Status: verified
 - Commands: `file.save`, `file.saveAs`
 - Files:
   - `src/lib/actions.ts` — `saveDocument` (big branch, read-only guard, `mappedElsewhere` guard)
@@ -633,7 +633,7 @@ Scenario: BIG-010.7 Saving keeps the file's attributes and links
 
 ## BIG-011: Encodings and line endings
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src-tauri/src/bigfile.rs` — `detect_layout` (first 1 MiB), `Sep` (UTF-16 aware line ends), `decode_line`, `LinesChunk.lossy`, `ensure_editable`, `search_decoded`
@@ -693,7 +693,7 @@ Scenario: BIG-011.7 Other encodings are read as UTF-8
 
 ## BIG-012: Syntax colours for large files
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/bigHighlight.ts` — `bigLanguageOf` (extension, else sniffing the first 40 non-empty lines), `tokenize` (JSON, log, CSV, TSV, XML, SQL; first 4,000 characters), `segments`
@@ -755,7 +755,7 @@ Scenario: BIG-012.7 Every coloured extension and the sniffed formats
 
 ## BIG-013: Filter view of matching lines
 
-- Status: draft
+- Status: verified
 - Commands: `big.filter`
 - Files:
   - `src/lib/commands.ts` — `big.filter` ("Large File: Filter Lines") emits `big.filter` for the active big tab
@@ -843,7 +843,7 @@ Scenario: BIG-013.12 Long filtered lines say how much is cut
 
 ## BIG-014: Follow a file as it grows
 
-- Status: draft
+- Status: verified
 - Commands: `big.follow`
 - Files:
   - `src/lib/commands.ts` — `big.follow` ("Large File: Follow (Show Lines as They Are Added)")
@@ -913,7 +913,7 @@ Scenario: BIG-014.8 The palette command has the same guard as the button
 
 ## BIG-015: CSV and TSV grid
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/delimited.ts` — `splitDelimited`, `isNumeric`, `growWidths`, `MAX_COL_CH`
@@ -989,7 +989,7 @@ Scenario: BIG-015.10 The filter pane uses the same columns
 
 ## BIG-016: JSON tree read from the file
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/BigJsonTree.tsx` — `BigJsonTree`, `flattenRows`, `load` (pages of 200), `jump`, `copyPath`, keyboard handling, dirty / error notes
@@ -1069,7 +1069,7 @@ Scenario: BIG-016.10 Collapse and re-read
 
 ## BIG-017: Validate a large JSON file
 
-- Status: draft
+- Status: verified
 - Commands: `json.validate`
 - Files:
   - `src/lib/commands.ts` — `jsonValidate` → `bigJsonValidate`, `isBigJson`, `enabled` of `json.validate`
@@ -1123,7 +1123,7 @@ Scenario: BIG-017.6 UTF-16 files are refused
 
 ## BIG-018: Show large-file info
 
-- Status: draft
+- Status: verified
 - Commands: `big.info`
 - Files:
   - `src/lib/commands.ts` — `big.info` ("Large File: Show Info")
@@ -1151,7 +1151,7 @@ Scenario: BIG-018.2 Large-file commands need a large-file tab
 
 ## BIG-019: Reload when the file changes on disk
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/actions.ts` — `checkExternalChanges` (big branch), `reloadBig` (opens the file again under a new `bigId`, closes the old one)
@@ -1187,7 +1187,7 @@ Scenario: BIG-019.3 A deleted file
 
 ## BIG-020: What large-file tabs do not offer
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/commands.ts` — `applyDefaultEnabled` (`textOnly`, `fileOnly`, `hasText`, `hasFileDoc`), `file.revert` enabled only for text tabs

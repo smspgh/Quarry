@@ -36,7 +36,6 @@ It prints each story's id, title and `spec file:line` (and, for a story id, its 
 | --- | --- | --- | --- |
 | `BIG` | Large Files | [large-files.md](large-files.md) | 20 |
 | `BRANCH` | Branch and Tag Housekeeping | [git-branches.md](git-branches.md) | 9 |
-| `CLAUDE` | Claude Code Tabs | [claude-code.md](claude-code.md) | 20 |
 | `COMMITCMP` | Compare Commits | [git-compare-commits.md](git-compare-commits.md) | 6 |
 | `CONFLICT` | Merge Conflicts and Stopped Operations | [git-conflicts.md](git-conflicts.md) | 14 |
 | `DIFF` | Compare | [compare.md](compare.md) | 14 |
@@ -46,7 +45,6 @@ It prints each story's id, title and `spec file:line` (and, for a story id, its 
 | `FIND` | Find and Replace in a Document | [find.md](find.md) | 10 |
 | `FMT` | Formatting | [formatting.md](formatting.md) | 10 |
 | `GIT` | Source Control | [git.md](git.md) | 28 |
-| `GITAI` | Claude-Assisted Git | [git-claude.md](git-claude.md) | 9 |
 | `GRAPH` | Commit Graph | [git-graph.md](git-graph.md) | 19 |
 | `HISTORY` | Edit History | [git-history-edit.md](git-history-edit.md) | 11 |
 | `JSON` | JSON Tools | [json.md](json.md) | 14 |
@@ -56,12 +54,12 @@ It prints each story's id, title and `spec file:line` (and, for a story id, its 
 | `SAFE` | Unsaved Tabs and Git Operations | [git-safety.md](git-safety.md) | 7 |
 | `SCRIPT` | Scripts | [scripting.md](scripting.md) | 15 |
 | `SEARCH` | Find in Files | [search.md](search.md) | 16 |
-| `SET` | Settings | [settings.md](settings.md) | 20 |
+| `SET` | Settings | [settings.md](settings.md) | 19 |
 | `SPLIT` | Split Editor | [split.md](split.md) | 7 |
 | `STAGE` | Hunk and Line Staging | [git-staging.md](git-staging.md) | 9 |
 | `STASH` | Stash | [git-stash.md](git-stash.md) | 11 |
 | `TAB` | Tabs | [tabs.md](tabs.md) | 10 |
-| `TERM` | Terminal Tabs | [terminal.md](terminal.md) | 10 |
+| `TERM` | Terminal Tabs | [terminal.md](terminal.md) | 7 |
 | `THREEWAY` | Three-Way Merge View (deferred) | [git-merge-editor.md](git-merge-editor.md) | 5 |
 | `UI` | Application Shell | [app-shell.md](app-shell.md) | 25 |
 | `UPD` | Updates and About | [updates.md](updates.md) | 8 |
@@ -83,7 +81,7 @@ One or two sentences on what the area covers and where its user documentation is
 
 ## GIT-012: Commit staged changes
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/GitPanel.tsx` — commit box, button label

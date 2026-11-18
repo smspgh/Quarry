@@ -9,7 +9,7 @@ Two editor panes side by side under one shared tab strip: splitting and closing 
 
 ## SPLIT-001: Split the editor and close the split
 
-- Status: draft
+- Status: verified
 - Commands: `view.splitEditor`
 - Files:
   - `src/lib/split.ts` — `toggleSplit` (split: right pane shows the active text document and gets the keyboard; again: `split: null`)
@@ -61,7 +61,7 @@ Scenario: SPLIT-001.5 One tab strip for both panes
 
 ## SPLIT-002: Choose which pane has the keyboard
 
-- Status: draft
+- Status: verified
 - Commands: `view.focusLeftPane`, `view.focusRightPane`
 - Files:
   - `src/lib/split.ts` — `focusPane` (then `editor.focus()` on the next frame)
@@ -129,7 +129,7 @@ Scenario: SPLIT-002.8 Tab moves focus in both panes
 
 ## SPLIT-003: Open a document to the side
 
-- Status: draft
+- Status: verified
 - Commands: `file.openToSide`
 - Files:
   - `src/lib/split.ts` — `openToSide` (splits if needed; otherwise shows the document in the pane that is not focused and focuses it)
@@ -157,32 +157,32 @@ Scenario: SPLIT-003.2 With a split, it goes to the pane that is not focused
   And the left pane still shows "a.ts"
 
 Scenario: SPLIT-003.3 Only for text documents
-  Given a Claude Code tab and a large-file tab are open
+  Given a terminal tab and a large-file tab are open
   When I right-click either tab
   Then the menu has no Open to the Side item
 ```
 
 ## SPLIT-004: The right pane shows text documents only
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/store.ts` — `activePatch` (a non-text tab picked while the right pane is focused opens on the left and takes the focus there), `addDoc` using it
-  - `src/App.tsx` — the left pane hosts `BigFileView`, `ClaudeView`, `TerminalView`, `DiffView`, `GraphView` and `Welcome`; the right pane only a `CodeEditor`
+  - `src/App.tsx` — the left pane hosts `BigFileView`, `TerminalView`, `DiffView`, `GraphView` and `Welcome`; the right pane only a `CodeEditor`
   - `src/editor/manager.ts` — `syncPanes` (`textId`: a pane's text view shows nothing for other kinds)
 - Tests: `src/__tests__/splitGit.test.ts`
 - Docs: `docs/editing.md`
 
-**As a** developer using Claude, terminal, Compare or large-file tabs with a split editor
+**As a** developer using terminal, Compare or large-file tabs with a split editor
 **I want** those tabs to open in the left pane and my right-hand document to stay put
 **So that** the split keeps working whatever kind of tab I pick
 
 ```gherkin
 Scenario: SPLIT-004.1 Picking a non-text tab from the right pane
   Given the editor is split with "a.ts" on the left and "b.ts" on the right, and the right pane has the keyboard
-  And a Claude Code tab is open
-  When I click the Claude Code tab
-  Then the Claude tab shows in the left pane, which now has the keyboard
+  And a terminal tab is open
+  When I click the terminal tab
+  Then the terminal tab shows in the left pane, which now has the keyboard
   And the right pane still shows "b.ts"
 
 Scenario: SPLIT-004.2 Opening a large file while the right pane is focused
@@ -198,7 +198,7 @@ Scenario: SPLIT-004.3 Picking a non-text tab from the left pane
 
 ## SPLIT-005: Edit the same document in both panes
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/editor/manager.ts` — `show` (the second pane gets a copy of the state; hands the undo history over when the owning pane leaves the document), `dispatchIn` and the `paneSync` annotation (copies edits across, into the owner's history), `owner`, `historyView`, the Undo / Redo key bindings routed `viaOwner`, `onUpdate` ignoring copied edits
@@ -243,7 +243,7 @@ Scenario: SPLIT-005.5 Undo history survives closing the split
 
 ## SPLIT-006: Resize the panes
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/SplitDivider.tsx` — `SplitDivider`: drag sets `split.ratio` (clamped 0.15–0.85), double-click resets to 0.5, `role="separator"`
@@ -282,7 +282,7 @@ Scenario: SPLIT-006.4 The divider explains itself
 
 ## SPLIT-007: Keep the split sensible when tabs close and across restarts
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/store.ts` — `removeDoc` (closing the other pane's document or the last tab closes the split; closing the right pane's document shows the nearest text tab there, else closes the split)
@@ -309,9 +309,9 @@ Scenario: SPLIT-007.2 Closing the right pane's document shows the nearest text t
   And the left pane still shows "a.ts"
 
 Scenario: SPLIT-007.3 No other text tab for the right pane
-  Given the only tabs are "a.ts" and a Claude Code tab, the left pane shows the Claude tab and the right pane, with the keyboard, shows "a.ts"
+  Given the only tabs are "a.ts" and a terminal tab, the left pane shows the terminal tab and the right pane, with the keyboard, shows "a.ts"
   When I press Ctrl+W
-  Then the split closes and the Claude tab is shown
+  Then the split closes and the terminal tab is shown
 
 Scenario: SPLIT-007.4 Closing the last tab
   Given "a.ts" is the only tab and is shown in both panes

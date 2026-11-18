@@ -1,7 +1,7 @@
 import { RotateCcw, Search, Undo2, X } from "lucide-react";
 import React from "react";
 import { editor } from "../../editor/manager";
-import { askDialog, closeDocument, persistSettings } from "../../lib/actions";
+import { askDialog, persistSettings } from "../../lib/actions";
 import { appData } from "../../lib/ipc";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { loadMacros } from "../../lib/macros";
@@ -11,13 +11,10 @@ import { isPanelShown } from "../../lib/panels";
 import { DEFAULT_SETTINGS, type Settings } from "../../lib/types";
 import { Select } from "../Select";
 import { applyHistoryLimit, clearHistory } from "../../lib/searchHistory";
-import { detectClaude, type ClaudeInstall } from "../../lib/claude";
 import { invoke } from "@tauri-apps/api/core";
 import { restartServers } from "../../lib/lsp";
 import { SERVERS, splitCommand } from "../../lib/lspServers";
 import { installServer, resolveInstall } from "../../lib/lspInstall";
-import { InfoTip } from "../InfoTip";
-import { SENDS_TIP } from "../../lib/gitAi";
 import { ShortcutsSection } from "./ShortcutsSection";
 import { CUSTOM_SHELL, knownShells, loadShells, pickShell, shellOptions, type Shell } from "../../lib/shells";
 
@@ -282,87 +279,6 @@ function FolderRow({ label, hint, k, sub, value, onChange }: { label: string; hi
       <TextField value={value || dflt} placeholder="Default (app data folder)" onCommit={commit} />
       <button className="btn small" onClick={() => void browse()}>Browse…</button>
     </Row>
-  );
-}
-
-const CLAUDE_MODELS = [
-  { value: "", label: "Default", hint: "Claude Code's own choice" },
-  { value: "opus", label: "Opus" },
-  { value: "sonnet", label: "Sonnet" },
-  { value: "haiku", label: "Haiku" },
-];
-
-/** Claude Code: the on / off switch, and (while on) where `claude` is, the model and permissions. */
-function ClaudeSection({ change }: { change: <K extends keyof Settings>(key: K, value: Settings[K]) => void }) {
-  const s = useStore((st) => st.settings);
-  const isOpen = useStore((st) => isPanelShown(st, "settings"));
-  const [found, setFound] = React.useState<ClaudeInstall | string | null>(null);
-
-  React.useEffect(() => {
-    if (!s.claudeEnabled || !isOpen) return;
-    let live = true;
-    setFound(null);
-    detectClaude(s.claudePath).then((r) => live && setFound(r), (e) => live && setFound(String(e)));
-    return () => { live = false; };
-  }, [s.claudeEnabled, s.claudePath, isOpen]);
-
-  /** Turning it off closes the Claude tabs (after asking when there are any). */
-  const setEnabled = async (on: boolean) => {
-    if (!on) {
-      const tabs = useStore.getState().docs.filter((d) => d.kind === "claude" || d.kind === "terminal");
-      if (tabs.length) {
-        const ok = await askDialog(
-          "Turn off Claude Code?",
-          `${tabs.length === 1 ? "The Claude Code tab closes" : `The ${tabs.length} Claude Code tabs close`} and anything Claude is doing stops. Conversations stay in Claude Code's history.`,
-          "Turn off",
-        );
-        if (!ok) return;
-        for (const d of tabs) await closeDocument(d.id, true);
-      }
-    }
-    change("claudeEnabled", on);
-  };
-
-  const browse = async () => {
-    const picked = await openDialog({ title: "Claude Code executable", filters: [{ name: "Claude Code", extensions: ["exe", "cmd"] }] });
-    if (picked && !Array.isArray(picked)) change("claudePath", picked);
-  };
-  const models = CLAUDE_MODELS.some((m) => m.value === s.claudeModel) ? CLAUDE_MODELS : [...CLAUDE_MODELS, { value: s.claudeModel, label: s.claudeModel }];
-  const gitModels = CLAUDE_MODELS.some((m) => m.value === s.claudeGitModel) ? CLAUDE_MODELS : [...CLAUDE_MODELS, { value: s.claudeGitModel, label: s.claudeGitModel }];
-
-  return (
-    <Section title="Claude Code">
-      <Row label="Claude Code" hint="Work with Claude Code in a folder: Explorer right-click › Work with Claude Code Here. Off hides it everywhere" k="claudeEnabled" apply={(v: boolean) => void setEnabled(v)}>
-        <Switch on={s.claudeEnabled} onChange={(v) => void setEnabled(v)} />
-      </Row>
-      {s.claudeEnabled && (
-        <>
-          <Row
-            label="Claude Code location"
-            hint={found === null ? "Looking for Claude Code…" : typeof found === "string" ? `${found}. Install it from claude.com/claude-code, or browse to claude.exe` : `${found.version || "Claude Code"} · ${found.path}`}
-            k="claudePath"
-            stack
-          >
-            <TextField value={s.claudePath} placeholder="Found automatically" onCommit={(v) => change("claudePath", v.trim().replace(/^"|"$/g, ""))} />
-            <button className="btn small" onClick={() => void browse()}>Browse…</button>
-          </Row>
-          <Row label="Model" hint="Applies the next time Claude Code starts for a tab, including when a conversation continues; a running one keeps its model" k="claudeModel">
-            <Select value={s.claudeModel} options={models} title="Claude model" onChange={(v) => change("claudeModel", v)} />
-          </Row>
-          {/* Claude git helpers (specs/git-claude.md): their own model, and the question before anything is sent. */}
-          <Row label="Model for git helpers" hint="Used by Draft (commit message), Explain (conflict) and Summarise in Source Control; each is one short request on your Claude Code plan. Claude tabs keep their own Model" k="claudeGitModel">
-            <Select value={s.claudeGitModel} options={gitModels} title="Claude model for git helpers" onChange={(v) => change("claudeGitModel", v)} />
-          </Row>
-          <Row label="Ask before sending git content to Claude" hint="Each git helper first says exactly what it sends: diffs, a conflict or commit messages leave your computer through Claude Code" k="claudeGitConfirm">
-            <InfoTip text={SENDS_TIP} label="What the git helpers send" />
-            <Switch on={s.claudeGitConfirm} onChange={(v) => change("claudeGitConfirm", v)} />
-          </Row>
-          <Row label="Permissions" hint={`${s.claudePermissionMode === "acceptEdits" ? "File edits are applied without asking; commands and web access ask first" : "Claude asks before every edit and command"}. Open Claude tabs switch from their next message, once the current task ends`} k="claudePermissionMode">
-            <Segmented items={[["acceptEdits", "Auto-accept edits"], ["default", "Ask first"]] as const} value={s.claudePermissionMode} onChange={(v) => change("claudePermissionMode", v)} />
-          </Row>
-        </>
-      )}
-    </Section>
   );
 }
 
@@ -667,8 +583,6 @@ export function SettingsPanel() {
         </Section>
 
         <CodeIntelSection change={change} />
-
-        <ClaudeSection change={change} />
 
         <Section title="JSON">
           <Row label="Pretty-print indent" k="jsonIndent">

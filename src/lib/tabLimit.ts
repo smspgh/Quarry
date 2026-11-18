@@ -1,11 +1,10 @@
 /**
  * The open-tab limit (Settings › Tabs › Maximum open tabs). Opening more files than the limit
  * allows closes the least recently used tabs that have no unsaved changes and nothing running
- * (a terminal's program, a Claude task), after asking.
+ * (a terminal's program), after asking.
  */
 import { useStore, type Doc } from "./store";
 import { choose } from "./dialogs";
-import { claudeBusy } from "./claude";
 import { terminalPty } from "./terminal";
 
 /** When each tab was last shown (or opened); tabs never shown count as oldest. */
@@ -51,8 +50,8 @@ function ask(title: string, message: string, actions: { label: string; kind?: "p
   return choose(title, message, actions.map((a, i) => ({ ...a, default: i === 0, cancel: !a.value })), false);
 }
 
-/** Closing the tab would stop something: a terminal's program or a Claude task. */
-const inUse = (d: Doc) => (d.kind === "terminal" && terminalPty(d.id) !== null) || (d.kind === "claude" && claudeBusy(d.id));
+/** Closing the tab would stop something: a terminal's program. */
+const inUse = (d: Doc) => d.kind === "terminal" && terminalPty(d.id) !== null;
 
 const tabs = (n: number) => `${n} tab${n === 1 ? "" : "s"}`;
 

@@ -9,7 +9,7 @@ The Explorer panel shows the open folder as a tree, opens files from it, and car
 
 ## EXPL-001: Open a folder and browse its tree
 
-- Status: draft
+- Status: verified
 - Commands: `view.explorer`, `file.openFolder`
 - Files:
   - `src/components/panels/ExplorerPanel.tsx` — `ExplorerPanel`, `FileTree` (`load`, `rows`, `toggle`, header buttons, "No folder open" state), `compareEntries`, `FileIcon`
@@ -91,7 +91,7 @@ Scenario: EXPL-001.10 Another folder starts collapsed
 
 ## EXPL-002: Single click previews a file, double-click opens it
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/ExplorerPanel.tsx` — row `onClick` (`openPath(p, { preview: true })`, `editor.keepFocusOnNextOpen()`), row `onDoubleClick` (clears `preview`, `editor.focus()`)
@@ -131,7 +131,7 @@ Scenario: EXPL-002.4 Double-clicking a folder does not open anything
 
 ## EXPL-003: Navigate the tree with the keyboard
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/ExplorerPanel.tsx` — `onTreeKeyDown` (arrows, Home / End, PageUp / PageDown by 15 rows, Enter / Space, F2, Delete, type-ahead with a 700 ms window), `focusRow`, roving `tabIndex`, `role="tree"` / `treeitem` attributes
@@ -200,7 +200,7 @@ Scenario: EXPL-003.7 Keys are left alone while a name is being typed
 
 ## EXPL-004: Select several files and folders
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/ExplorerPanel.tsx` — `multi`, `anchor`, `rangeOf`, `toggleIn`, `selection()`, `pickTargets`, row `onContextMenu` (right-click outside the selection selects that row only)
@@ -250,7 +250,7 @@ Scenario: EXPL-004.6 A plain click or a click on blank space ends the multi-sele
 
 ## EXPL-005: Expand All and Collapse All for a folder
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/ExplorerPanel.tsx` — `expandAll` (`EXPAND_ALL_MAX` = 500, `EXPAND_ALL_SKIP` = `.git`, `node_modules`, batches of 16 listings), `collapseAll`, `collapseUnder`, the Expand / Expand All / Collapse / Collapse All menu items
@@ -301,7 +301,7 @@ Scenario: EXPL-005.6 Collapse All closes the folder and every folder under it
 
 ## EXPL-006: The tree follows the active tab and reveals a file on request
 
-- Status: draft
+- Status: verified
 - Commands: `file.showInQuarryExplorer`
 - Files:
   - `src/components/panels/ExplorerPanel.tsx` — `reveal`, `ancestorDirs`, `revealWanted` / `focusWanted`, `explorer.reveal` bus listener, `.active` row class
@@ -350,7 +350,7 @@ Scenario: EXPL-006.5 The Explorer's own menu does not offer it
 
 ## EXPL-007: The tree refreshes when files change on disk
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/ExplorerPanel.tsx` — watcher effect (`fs.onChanged`, reloads only loaded directories that contain a changed path, clears `fileListCache`), `refresh`, `explorer.reload` bus listener
@@ -401,7 +401,7 @@ Scenario: EXPL-007.6 The watcher cannot start
 
 ## EXPL-008: Create a file or folder from the Explorer
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/ExplorerPanel.tsx` — `startCreate`, `targetDir`, `commitCreate` (once-only guard `committingCreate`; `createClosed` stops a blur after Escape or a finished commit from committing again), `fileNameProblem`, the name box row
@@ -467,7 +467,7 @@ Scenario: EXPL-008.6 An existing name is never overwritten
 
 ## EXPL-009: Rename a file or folder
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/ExplorerPanel.tsx` — `startRename`, `commitRename` (runs once per box: `renameClosed` is set by Escape and by the first commit, so the blur as the box is removed does nothing; open tabs follow, `explorerExpanded` follows a renamed folder, case-only rename allowed), rename input (`onFocus` selects the name without its extension), "Rename" menu item, F2
@@ -536,7 +536,7 @@ Scenario: EXPL-009.9 Enter renames once
 
 ## EXPL-010: Delete files and folders to the Recycle Bin
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/fileOps.ts` — `trashPaths` (one confirmation for the whole selection, per-item error toasts, `explorer.reload`, then `checkExternalChanges` so open tabs of deleted files are flagged at once)
@@ -593,7 +593,7 @@ Scenario: EXPL-010.6 An open tab of a deleted file stays open
 
 ## EXPL-011: Cut, copy and paste files through the Windows clipboard
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/fileOps.ts` — `filesToClipboard`, `pasteInto` (toasts, `retargetDocs` after a move, `explorer.reload` for destination and source folders), `baseName`
@@ -689,7 +689,7 @@ Scenario: EXPL-011.11 Ctrl+C in the tree does not copy editor text
 
 ## EXPL-012: Copy a path or a name as text
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/fileOps.ts` — `copyLines` (CRLF-separated), `baseName`
@@ -723,7 +723,7 @@ Scenario: EXPL-012.3 Several items are copied one per line
 
 ## EXPL-013: Show a file in Windows File Explorer
 
-- Status: draft
+- Status: verified
 - Commands: `file.showInWindowsExplorer`
 - Files:
   - `src/lib/actions.ts` — `showInWindowsExplorer` (`revealItemInDir`)
@@ -757,7 +757,7 @@ Scenario: EXPL-013.3 Only for one saved file
 
 ## EXPL-014: Open all files of a folder or a selection
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/ExplorerPanel.tsx` — `openAll` (files directly inside a selected folder unless something of its own is selected), "Open All Files" menu item
@@ -799,7 +799,7 @@ Scenario: EXPL-014.5 Not offered for a single file
 
 ## EXPL-015: Start Find in Files from the Explorer
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/ExplorerPanel.tsx` — `findIn`, `pickTargets` (sets `search.treeTargets` on every click and selection change), "Find in File" / "Find in Folder" / "Find in Selected (N)" menu items
@@ -836,7 +836,7 @@ Scenario: EXPL-015.4 The last click is remembered as the search target
 
 ## EXPL-016: Git status in the tree
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/ExplorerPanel.tsx` — `gitFiles` / `gitDirs` lookup per row, `.tree-git` letter, `.tree-git-dot`, `git-<kind>` label class
@@ -877,11 +877,11 @@ Scenario: EXPL-016.3 Unchanged files and non-repositories show nothing
 
 ## EXPL-017: The file right-click menu
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/FileMenu.tsx` — `FileMenu` (item order, labels for one / several items, compare items for 1 or 2 files, Set as Source Control Context on one folder via `runCommand("git.setContext", { path })`, clamped to the window, closes on outside mouse-down, Escape or window blur)
-  - `src/components/panels/ExplorerPanel.tsx` — `menu` state, `lead` items (Expand…, Open All Files, Claude Code items when `claudeEnabled`, Find in…, Rename), blank-space menu
+  - `src/components/panels/ExplorerPanel.tsx` — `menu` state, `lead` items (Expand…, Open All Files, Open in Terminal, Find in…, Rename), blank-space menu
   - `src/lib/diff.ts` — `selectForCompare`, `compareWithSelected`, `compareCandidate`, `openCompare`
   - `src/styles/app.css` — `.ctx-menu`, `.file-menu`
 - Tests: none
@@ -897,21 +897,16 @@ Scenario: EXPL-017.1 Menu for one file
   Then the menu lists, in order, "Find in File", "Rename" (F2), "Cut" (Ctrl+X), "Copy" (Ctrl+C), "Paste" (Ctrl+V), "Select for Compare", "Delete" (Del), "Copy Path", "Copy File Name" and "Show in Windows Explorer"
 
 Scenario: EXPL-017.2 Menu for a folder
-  When I right-click the folder "src" with Claude Code enabled in Settings
-  Then the menu also offers "Open All Files", "Work with Claude Code Here", "Claude Code Terminal Here" and "Find in Folder"
+  When I right-click the folder "src"
+  Then the menu also offers "Open All Files", "Open in Terminal" and "Find in Folder"
   And it offers no compare items
 
-Scenario: EXPL-017.3 Claude Code items follow the setting
-  Given Claude Code is turned off in Settings
-  When I right-click a folder or the blank space below the rows
-  Then the menu has no "Work with Claude Code Here" and no "Claude Code Terminal Here"
-
-Scenario: EXPL-017.4 Menu on blank space
+Scenario: EXPL-017.3 Menu on blank space
   When I right-click the blank space below the rows
   Then the selection is cleared
   And the menu offers "Paste" into the open folder and none of Cut, Copy, Delete or Rename
 
-Scenario: EXPL-017.5 Compare items
+Scenario: EXPL-017.4 Compare items
   Given exactly two files are selected
   When I right-click one of them
   Then the menu offers "Compare Selected"
@@ -919,16 +914,16 @@ Scenario: EXPL-017.5 Compare items
   When I right-click the file "b.txt"
   Then the menu offers "Compare with “a.txt”"
 
-Scenario: EXPL-017.6 The menu closes without acting
+Scenario: EXPL-017.5 The menu closes without acting
   Given the menu is open
   When I press Escape, click elsewhere, or switch to another window
   Then the menu closes and nothing is changed
 
-Scenario: EXPL-017.7 The menu stays inside the window
+Scenario: EXPL-017.6 The menu stays inside the window
   When I right-click a row at the bottom-right corner of the window
   Then the whole menu is visible, at least 4 px from the window edges
 
-Scenario: EXPL-017.8 Set a folder as the Source Control context
+Scenario: EXPL-017.7 Set a folder as the Source Control context
   When I right-click the folder "src"
   Then the menu ends with "Set as Source Control Context" (GIT-028)
   When I right-click a file, or select several items and right-click one of them

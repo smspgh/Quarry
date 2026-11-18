@@ -148,7 +148,7 @@ It does not matter where the action was started: panel button, graph menu, Git m
 
 **Afterwards.** When the action ends, also when it stopped on a conflict or failed part-way, tabs without unsaved changes whose file changed are reloaded at once: **store.ts changed on disk and was reloaded.**, or **3 open files changed on disk and were reloaded.** Files that did not change are left alone, cursor and undo history included. Large-file tabs are reopened from disk (one in follow mode is left to follow mode), and Compare tabs with a file side, or showing a tab that was reloaded, follow. A tab whose file is not in the folder any more (a branch without that file) stays open and is marked unsaved, with one warning for all of them; switch back and it is clean again, without a question.
 
-Git run in a terminal tab, a Claude tab or another program is not covered by the question: there Quarry notices the change when its window gets focus (see [Editing › External changes](editing.md#external-changes)).
+Git run in a terminal tab or another program is not covered by the question: there Quarry notices the change when its window gets focus (see [Editing › External changes](editing.md#external-changes)).
 
 ## Commits
 
@@ -287,50 +287,6 @@ If a commit no longer applies while it is replayed (for example after dropping a
 Quarry marks commits that are on a remote branch (as last fetched) as **pushed**. Editing them is allowed, but the question is a danger dialog, **Rewrite commits that are already pushed?**, which names them and the remote branch, with **Cancel** as the default. Anyone who pulled those commits will have to repair their copy; **Revert This Commit…** is the safe way to undo a pushed commit.
 
 After such an edit the status line offers **Force Push…** instead of Pull, exactly as after [rebasing pushed commits](#rebasing-commits-that-are-already-pushed). The edit itself pushes nothing.
-
-## Claude-assisted git
-
-Three helpers ask Claude through your own [Claude Code](claude-code.md) installation. They exist only while **Settings › Claude Code › Claude Code** is on; with it off there is no trace of them.
-
-| Helper | Where | What you get |
-| --- | --- | --- |
-| **Draft** a commit message | The **Draft** button beside the Commit button; **Git › Claude › Draft Commit Message with Claude** | A message in the message box, for you to edit. Nothing is committed. |
-| **Explain** a conflict | The **Explain** button on a conflict's bar; **Git › Claude › Explain Conflict at Cursor with Claude** | A panel under that conflict with an explanation and, usually, a suggested resolution with **Apply Suggestion** / **Discard**. |
-| **Summarise** a branch or a run of commits | **Git › Claude › Summarise Branch with Claude…**; the last entries of a commit's right-click menu in the graph | A new untitled Markdown tab. Nothing is written to disk. |
-
-**What it costs.** Each click is one short request on the Claude Code login and plan you already have, counted against its usage limits like one message in a Claude tab. Quarry stores no API key and adds no charge. Nothing is ever sent without a click. The helpers use their own model, **Settings › Claude Code › Model for git helpers** (Haiku unless you change it), not the Model of the Claude tabs.
-
-**What is sent.** The first time, each helper shows a dialog that says exactly what will leave your computer; **Send and Don't Ask Again** turns the question off (back on with **Settings › Claude Code › Ask before sending git content to Claude**).
-
-| Helper | Sent to Claude |
-| --- | --- |
-| Draft | The diff of the staged files and the first lines of the last 10 commit messages. With nothing staged: the diff of **all** changed files, which includes the full text of new untracked files (the dialog counts and names them). Ignored files are never sent. With **Amend** ticked: the last commit together with what is staged. |
-| Explain | Both sides of that one conflict (and its common-ancestor section, if shown), up to 30 lines above and below it, the file's name and git's labels of the two sides. The tab's text as it is now, not the file on disk. |
-| Summarise | The id, author, date and full message of each commit in the range, and the diff of the files they changed. |
-
-Claude Code is started for that one request with every tool switched off, no MCP servers, no project instructions, in an empty scratch folder outside your repository, and nothing is saved to its conversation history. Claude sees only the text above and cannot read or change anything.
-
-**Size limits.** At most 120,000 characters of diff go in one request, 20,000 per file. Files go in smallest first; a longer file is cut after 20,000 characters, and what no longer fits is sent as a name with its added / removed line counts. Binary files are always sent by name only. When anything was cut, the dialog and a line under the commit box (or under the summary's heading) say so: "Large change: Claude saw only the start of 1 file (data\fixtures.json)." A conflict larger than 60,000 characters with its context is not sent, and a summary covers at most 300 commits.
-
-### Drafting a commit message
-
-**Draft** describes what the Commit button would commit: the staged files, or with nothing staged all changes. While Claude is drafting, the box reads "Claude is drafting a message…" and cannot be typed in, and the Commit button is off. The draft then appears in the box with the cursor in it: change it as you like and commit as usual. If the box already had text (including a message git prepared for a merge), Quarry asks before replacing it, and a failed or stopped draft leaves your text as it was. The draft is written from what is on disk, like the commit; unsaved tabs are mentioned in a warning. Draft is off during a rebase (each commit keeps its own message) and while files are in conflict.
-
-### Explaining a conflict
-
-The panel under the conflict is headed with the two sides ("Current (HEAD) · Incoming (feature)") and, during a rebase, patch series or a stash that conflicted, the same note as the conflict bar. Claude is told whose work each side is, so during a rebase it knows that Current is the branch you are rebasing onto and Incoming is your own commit.
-
-**Apply Suggestion** replaces the whole conflict, markers included, with the suggested lines as one edit you can undo with Ctrl+Z. Nothing is saved, staged or marked resolved: after the file's last conflict the usual "Save and Mark Resolved" question follows. **Discard** (or Escape with the cursor in that conflict) closes the panel. The Accept buttons keep working and close it too. If you edit the conflict after the answer, the suggestion can no longer be applied; if you edit it while Claude is still reading, the request is stopped. A proposal that still contains conflict markers is not offered.
-
-### Summarising
-
-**Summarise Branch with Claude…** asks which branch to compare the current one with (the remote's default branch, or main, is listed first) and summarises the commits the branch has that the other does not. In the graph, a commit with a local branch label offers **Summarise <branch> with Claude…** (the branch is not checked out), and a commit below the checked-out one offers **Summarise from Here to <branch> with Claude** for that run of commits. The tab starts with a heading, the number of commits and range, and "Written by Claude from the commit messages and diffs. Check it before relying on it."; it is an ordinary untitled tab.
-
-### While a request runs
-
-One request runs at a time. The status bar shows "Claude: drafting a commit message… 12s" with a stop button; **Git › Claude › Stop Claude Request**, the Draft button itself, Escape in the message box and **Stop** in a conflict's panel stop it too. Stopping ends the Claude Code process at once and changes nothing. A commit message or a conflict gets 2 minutes, a summary 5. Closing the tab a conflict request belongs to, switching the panel to another repository, switching Claude Code off, or quitting Quarry also stops it.
-
-If a request fails, Quarry says why and nothing is changed: Claude Code not found (with **Open Settings**), not signed in (with **Open Claude Code Terminal**, where you run `/login`), Claude Code's own reason such as a reached usage limit, or the exit code and last lines it printed.
 
 ## File history
 

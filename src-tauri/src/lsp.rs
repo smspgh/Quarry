@@ -232,9 +232,6 @@ pub fn lsp_start(app: AppHandle, state: State<'_, crate::AppState>, command: Str
         Command::new(&exe)
     };
     cmd.args(&args).current_dir(&cwd).stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped());
-    for v in crate::claude::SESSION_ENV {
-        cmd.env_remove(v);
-    }
     #[cfg(windows)]
     {
         use std::os::windows::process::CommandExt;

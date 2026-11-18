@@ -14,12 +14,6 @@
       "stories": 9
     },
     {
-      "prefix": "CLAUDE",
-      "title": "Claude Code Tabs",
-      "spec": "specs/claude-code.md",
-      "stories": 20
-    },
-    {
       "prefix": "COMMITCMP",
       "title": "Compare Commits",
       "spec": "specs/git-compare-commits.md",
@@ -72,12 +66,6 @@
       "title": "Source Control",
       "spec": "specs/git.md",
       "stories": 28
-    },
-    {
-      "prefix": "GITAI",
-      "title": "Claude-Assisted Git",
-      "spec": "specs/git-claude.md",
-      "stories": 9
     },
     {
       "prefix": "GRAPH",
@@ -137,7 +125,7 @@
       "prefix": "SET",
       "title": "Settings",
       "spec": "specs/settings.md",
-      "stories": 20
+      "stories": 19
     },
     {
       "prefix": "SPLIT",
@@ -167,7 +155,7 @@
       "prefix": "TERM",
       "title": "Terminal Tabs",
       "spec": "specs/terminal.md",
-      "stories": 10
+      "stories": 7
     },
     {
       "prefix": "THREEWAY",
@@ -195,7 +183,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/actions.ts",
@@ -244,7 +232,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 65,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src-tauri/src/bigfile.rs",
@@ -286,7 +274,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 112,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/BigFileView.tsx",
@@ -346,7 +334,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 182,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/BigFileView.tsx",
@@ -400,7 +388,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 245,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "goto.line",
         "big.gotoLine"
@@ -451,7 +439,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 302,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "find.open",
         "find.next",
@@ -519,7 +507,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 379,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "find.replace"
       ],
@@ -583,7 +571,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 452,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/BigFileView.tsx",
@@ -645,7 +633,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 524,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "edit.undo",
         "edit.redo"
@@ -692,7 +680,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 571,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.save",
         "file.saveAs"
@@ -747,7 +735,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 634,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src-tauri/src/bigfile.rs",
@@ -799,7 +787,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 694,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/bigHighlight.ts",
@@ -853,7 +841,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 756,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "big.filter"
       ],
@@ -931,7 +919,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 844,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "big.follow"
       ],
@@ -992,7 +980,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 914,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/delimited.ts",
@@ -1056,7 +1044,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 990,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/BigJsonTree.tsx",
@@ -1126,7 +1114,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 1070,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "json.validate"
       ],
@@ -1178,7 +1166,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 1124,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "big.info"
       ],
@@ -1209,7 +1197,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 1152,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/actions.ts",
@@ -1241,7 +1229,7 @@
       "area": "BIG",
       "spec": "specs/large-files.md",
       "line": 1188,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/commands.ts",
@@ -1278,7 +1266,7 @@
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
       "line": 33,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -1358,7 +1346,7 @@
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
       "line": 128,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.deleteBranch",
         "git.renameBranch",
@@ -1447,7 +1435,7 @@
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
       "line": 222,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.deleteBranch"
       ],
@@ -1530,7 +1518,7 @@
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
       "line": 322,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.renameBranch"
       ],
@@ -1605,7 +1593,7 @@
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
       "line": 410,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.setUpstream"
       ],
@@ -1672,7 +1660,7 @@
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
       "line": 485,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.pushBranch"
       ],
@@ -1750,7 +1738,7 @@
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
       "line": 580,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.deleteRemoteBranch"
       ],
@@ -1829,7 +1817,7 @@
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
       "line": 673,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.deleteTag"
       ],
@@ -1887,7 +1875,7 @@
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
       "line": 732,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.pushTag"
       ],
@@ -1948,1011 +1936,13 @@
         }
       ]
     },
-    "CLAUDE-001": {
-      "id": "CLAUDE-001",
-      "title": "Turn the Claude Code integration off and on",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 10,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/components/panels/SettingsPanel.tsx",
-        "src/lib/commands.ts",
-        "src/components/MenuBar.tsx",
-        "src/components/panels/ExplorerPanel.tsx",
-        "src/lib/actions.ts",
-        "src/lib/types.ts",
-        "src/lib/claude.ts"
-      ],
-      "tests": [],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-001.1",
-          "title": "Off hides it everywhere"
-        },
-        {
-          "id": "CLAUDE-001.2",
-          "title": "Turning it off with tabs open asks first"
-        },
-        {
-          "id": "CLAUDE-001.3",
-          "title": "Cancelling keeps everything"
-        },
-        {
-          "id": "CLAUDE-001.4",
-          "title": "Off without tabs does not ask"
-        },
-        {
-          "id": "CLAUDE-001.5",
-          "title": "Claude tabs are not restored while off"
-        },
-        {
-          "id": "CLAUDE-001.6",
-          "title": "On brings it back"
-        }
-      ]
-    },
-    "CLAUDE-002": {
-      "id": "CLAUDE-002",
-      "title": "Find the Claude Code installation",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 70,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src-tauri/src/claude.rs",
-        "src/components/panels/SettingsPanel.tsx",
-        "src/lib/claude.ts",
-        "src/lib/types.ts"
-      ],
-      "tests": [
-        "src-tauri/src/claude.rs"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-002.1",
-          "title": "Found automatically"
-        },
-        {
-          "id": "CLAUDE-002.2",
-          "title": "Usual install folders are searched when PATH has none"
-        },
-        {
-          "id": "CLAUDE-002.3",
-          "title": "Not found"
-        },
-        {
-          "id": "CLAUDE-002.4",
-          "title": "A location I set must exist"
-        },
-        {
-          "id": "CLAUDE-002.5",
-          "title": "Browse to it"
-        },
-        {
-          "id": "CLAUDE-002.6",
-          "title": "Sending without an installation"
-        }
-      ]
-    },
-    "CLAUDE-003": {
-      "id": "CLAUDE-003",
-      "title": "Open a Claude tab for a folder",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 117,
-      "status": "draft",
-      "commands": [
-        "claude.openHere",
-        "claude.openFolder"
-      ],
-      "files": [
-        "src/lib/commands.ts",
-        "src/lib/claude.ts",
-        "src-tauri/src/claude.rs",
-        "src/components/ClaudeView.tsx",
-        "src/components/panels/ExplorerPanel.tsx",
-        "src/components/MenuBar.tsx",
-        "src/components/TitleBar.tsx",
-        "src/App.tsx",
-        "src/lib/tabLimit.ts"
-      ],
-      "tests": [
-        "src-tauri/src/claude.rs",
-        "src/__tests__/claudeSession.test.ts"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-003.1",
-          "title": "From the Explorer"
-        },
-        {
-          "id": "CLAUDE-003.2",
-          "title": "The empty page"
-        },
-        {
-          "id": "CLAUDE-003.3",
-          "title": "Without a folder the command picks one"
-        },
-        {
-          "id": "CLAUDE-003.4",
-          "title": "Fallback order"
-        },
-        {
-          "id": "CLAUDE-003.5",
-          "title": "Pick any folder"
-        },
-        {
-          "id": "CLAUDE-003.6",
-          "title": "One Claude tab per folder"
-        },
-        {
-          "id": "CLAUDE-003.7",
-          "title": "The tab limit applies"
-        },
-        {
-          "id": "CLAUDE-003.8",
-          "title": "The folder must exist"
-        }
-      ]
-    },
-    "CLAUDE-004": {
-      "id": "CLAUDE-004",
-      "title": "Send messages and read streamed replies",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 188,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/components/ClaudeView.tsx",
-        "src/lib/claude.ts",
-        "src/lib/claudeProtocol.ts",
-        "src-tauri/src/claude.rs",
-        "src-tauri/src/writer.rs"
-      ],
-      "tests": [
-        "src/__tests__/claude.test.ts",
-        "src/__tests__/claudeSession.test.ts"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-004.1",
-          "title": "Send with Enter"
-        },
-        {
-          "id": "CLAUDE-004.2",
-          "title": "Shift+Enter makes a new line"
-        },
-        {
-          "id": "CLAUDE-004.3",
-          "title": "Nothing to send"
-        },
-        {
-          "id": "CLAUDE-004.4",
-          "title": "Sending while Claude is working"
-        },
-        {
-          "id": "CLAUDE-004.5",
-          "title": "The draft survives tab switches"
-        },
-        {
-          "id": "CLAUDE-004.6",
-          "title": "The view follows the conversation only at the bottom"
-        },
-        {
-          "id": "CLAUDE-004.7",
-          "title": "A failed request says why"
-        },
-        {
-          "id": "CLAUDE-004.8",
-          "title": "Sub-agent chatter is not shown"
-        }
-      ]
-    },
-    "CLAUDE-005": {
-      "id": "CLAUDE-005",
-      "title": "Stop the running task",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 252,
-      "status": "draft",
-      "commands": [
-        "claude.stop"
-      ],
-      "files": [
-        "src/lib/claude.ts",
-        "src/lib/claudeProtocol.ts",
-        "src/components/ClaudeView.tsx",
-        "src/lib/commands.ts"
-      ],
-      "tests": [
-        "src/__tests__/claude.test.ts"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-005.1",
-          "title": "Esc stops"
-        },
-        {
-          "id": "CLAUDE-005.2",
-          "title": "The stop button and the command"
-        },
-        {
-          "id": "CLAUDE-005.3",
-          "title": "Nothing to stop"
-        },
-        {
-          "id": "CLAUDE-005.4",
-          "title": "Open permission requests go away"
-        }
-      ]
-    },
-    "CLAUDE-006": {
-      "id": "CLAUDE-006",
-      "title": "See each step Claude takes",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 291,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/components/ClaudeView.tsx",
-        "src/lib/claudeProtocol.ts",
-        "src/lib/actions.ts"
-      ],
-      "tests": [
-        "src/__tests__/claude.test.ts"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-006.1",
-          "title": "A step from start to finish"
-        },
-        {
-          "id": "CLAUDE-006.2",
-          "title": "A failed step"
-        },
-        {
-          "id": "CLAUDE-006.3",
-          "title": "Summaries are short and relative"
-        },
-        {
-          "id": "CLAUDE-006.4",
-          "title": "Open the file of a step"
-        },
-        {
-          "id": "CLAUDE-006.5",
-          "title": "Very long output is cut"
-        },
-        {
-          "id": "CLAUDE-006.6",
-          "title": "Steps cut short"
-        }
-      ]
-    },
-    "CLAUDE-007": {
-      "id": "CLAUDE-007",
-      "title": "See what an edit changes",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 338,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/components/ClaudeView.tsx",
-        "src/lib/claudeProtocol.ts",
-        "src/lib/actions.ts"
-      ],
-      "tests": [
-        "src/__tests__/claude.test.ts"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-007.1",
-          "title": "A finished edit shows the real patch"
-        },
-        {
-          "id": "CLAUDE-007.2",
-          "title": "Large edits stay closed"
-        },
-        {
-          "id": "CLAUDE-007.3",
-          "title": "An edit that has not happened yet"
-        },
-        {
-          "id": "CLAUDE-007.4",
-          "title": "A new file"
-        },
-        {
-          "id": "CLAUDE-007.5",
-          "title": "Several hunks"
-        },
-        {
-          "id": "CLAUDE-007.6",
-          "title": "A failed edit shows the error"
-        },
-        {
-          "id": "CLAUDE-007.7",
-          "title": "The file is open in a tab"
-        }
-      ]
-    },
-    "CLAUDE-008": {
-      "id": "CLAUDE-008",
-      "title": "Answer permission requests",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 387,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/components/ClaudeView.tsx",
-        "src/lib/claude.ts",
-        "src/lib/claudeProtocol.ts",
-        "src-tauri/src/claude.rs"
-      ],
-      "tests": [
-        "src/__tests__/claude.test.ts",
-        "src-tauri/src/claude.rs"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-008.1",
-          "title": "A request appears"
-        },
-        {
-          "id": "CLAUDE-008.2",
-          "title": "Allow once"
-        },
-        {
-          "id": "CLAUDE-008.3",
-          "title": "Allow for this conversation"
-        },
-        {
-          "id": "CLAUDE-008.4",
-          "title": "Deny"
-        },
-        {
-          "id": "CLAUDE-008.5",
-          "title": "A request does not steal a half-typed message"
-        },
-        {
-          "id": "CLAUDE-008.6",
-          "title": "Requests Claude Code withdraws"
-        },
-        {
-          "id": "CLAUDE-008.7",
-          "title": "Wording for other tools"
-        }
-      ]
-    },
-    "CLAUDE-009": {
-      "id": "CLAUDE-009",
-      "title": "Choose how much Claude may do without asking",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 438,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/components/panels/SettingsPanel.tsx",
-        "src/lib/claude.ts",
-        "src-tauri/src/claude.rs",
-        "src/components/ClaudeView.tsx",
-        "src/lib/actions.ts",
-        "src/lib/types.ts"
-      ],
-      "tests": [
-        "src-tauri/src/claude.rs",
-        "src/__tests__/claudeSession.test.ts"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-009.1",
-          "title": "Auto-accept edits is the default"
-        },
-        {
-          "id": "CLAUDE-009.2",
-          "title": "Ask first"
-        },
-        {
-          "id": "CLAUDE-009.3",
-          "title": "Changing it while Claude is idle"
-        },
-        {
-          "id": "CLAUDE-009.4",
-          "title": "Changing it while Claude is working"
-        },
-        {
-          "id": "CLAUDE-009.5",
-          "title": "No other mode can be started"
-        },
-        {
-          "id": "CLAUDE-009.6",
-          "title": "The hint says open tabs switch too"
-        }
-      ]
-    },
-    "CLAUDE-010": {
-      "id": "CLAUDE-010",
-      "title": "Answer Claude's questions",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 489,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/components/ClaudeView.tsx",
-        "src/lib/claude.ts",
-        "src/lib/claudeProtocol.ts"
-      ],
-      "tests": [
-        "src/__tests__/claude.test.ts"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-010.1",
-          "title": "One question, one click"
-        },
-        {
-          "id": "CLAUDE-010.2",
-          "title": "Choose several"
-        },
-        {
-          "id": "CLAUDE-010.3",
-          "title": "Several questions"
-        },
-        {
-          "id": "CLAUDE-010.4",
-          "title": "My own answer"
-        },
-        {
-          "id": "CLAUDE-010.5",
-          "title": "Skip"
-        }
-      ]
-    },
-    "CLAUDE-011": {
-      "id": "CLAUDE-011",
-      "title": "Follow Claude's task list",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 535,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/components/ClaudeView.tsx",
-        "src/lib/claudeProtocol.ts"
-      ],
-      "tests": [
-        "src/__tests__/claude.test.ts"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-011.1",
-          "title": "The latest list is shown in full"
-        },
-        {
-          "id": "CLAUDE-011.2",
-          "title": "Earlier versions shrink"
-        },
-        {
-          "id": "CLAUDE-011.3",
-          "title": "The working line names the current task"
-        },
-        {
-          "id": "CLAUDE-011.4",
-          "title": "No to-do tool, no card"
-        }
-      ]
-    },
-    "CLAUDE-012": {
-      "id": "CLAUDE-012",
-      "title": "Attach pictures to a message",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 568,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/lib/claudeImages.ts",
-        "src/components/ClaudeView.tsx",
-        "src/lib/claude.ts",
-        "src/lib/claudeProtocol.ts",
-        "src-tauri/src/claude.rs",
-        "src/App.tsx"
-      ],
-      "tests": [
-        "src/__tests__/claude.test.ts",
-        "src-tauri/src/claude.rs"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-012.1",
-          "title": "Paste a screenshot"
-        },
-        {
-          "id": "CLAUDE-012.2",
-          "title": "Sent with the message"
-        },
-        {
-          "id": "CLAUDE-012.3",
-          "title": "Remove one before sending"
-        },
-        {
-          "id": "CLAUDE-012.4",
-          "title": "Large pictures are scaled down"
-        },
-        {
-          "id": "CLAUDE-012.5",
-          "title": "The paperclip"
-        },
-        {
-          "id": "CLAUDE-012.6",
-          "title": "Drop image files on the tab"
-        },
-        {
-          "id": "CLAUDE-012.7",
-          "title": "Limits"
-        }
-      ]
-    },
-    "CLAUDE-013": {
-      "id": "CLAUDE-013",
-      "title": "Point Claude at files and selections",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 626,
-      "status": "draft",
-      "commands": [
-        "claude.addSelection",
-        "claude.addFile"
-      ],
-      "files": [
-        "src/lib/commands.ts",
-        "src/lib/claude.ts",
-        "src/lib/claudeProtocol.ts",
-        "src/components/ClaudeView.tsx",
-        "src/App.tsx",
-        "src/components/MenuBar.tsx"
-      ],
-      "tests": [
-        "src/__tests__/claude.test.ts"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-013.1",
-          "title": "Add the selection"
-        },
-        {
-          "id": "CLAUDE-013.2",
-          "title": "Text already in the box is kept"
-        },
-        {
-          "id": "CLAUDE-013.3",
-          "title": "Which Claude tab gets it"
-        },
-        {
-          "id": "CLAUDE-013.4",
-          "title": "No Claude tab yet"
-        },
-        {
-          "id": "CLAUDE-013.5",
-          "title": "Nothing selected"
-        },
-        {
-          "id": "CLAUDE-013.6",
-          "title": "Mention the file"
-        },
-        {
-          "id": "CLAUDE-013.7",
-          "title": "The buttons in the Claude tab"
-        },
-        {
-          "id": "CLAUDE-013.8",
-          "title": "Drop other files on the tab"
-        },
-        {
-          "id": "CLAUDE-013.9",
-          "title": "Drops elsewhere still open files"
-        }
-      ]
-    },
-    "CLAUDE-014": {
-      "id": "CLAUDE-014",
-      "title": "Read formatted replies",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 695,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/lib/markdown.ts",
-        "src/components/Markdown.tsx",
-        "src/components/ClaudeView.tsx",
-        "src/styles/app.css"
-      ],
-      "tests": [
-        "src/__tests__/claude.test.ts"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-014.1",
-          "title": "Common Markdown"
-        },
-        {
-          "id": "CLAUDE-014.2",
-          "title": "Code blocks"
-        },
-        {
-          "id": "CLAUDE-014.3",
-          "title": "A block still being written"
-        },
-        {
-          "id": "CLAUDE-014.4",
-          "title": "Web links"
-        },
-        {
-          "id": "CLAUDE-014.5",
-          "title": "File links"
-        },
-        {
-          "id": "CLAUDE-014.6",
-          "title": "HTML is never rendered"
-        },
-        {
-          "id": "CLAUDE-014.7",
-          "title": "Line breaks are kept"
-        }
-      ]
-    },
-    "CLAUDE-015": {
-      "id": "CLAUDE-015",
-      "title": "Start a new conversation in the same folder",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 747,
-      "status": "draft",
-      "commands": [
-        "claude.newSession"
-      ],
-      "files": [
-        "src/lib/claude.ts",
-        "src/lib/commands.ts",
-        "src/components/ClaudeView.tsx"
-      ],
-      "tests": [
-        "src/__tests__/claudeSession.test.ts"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-015.1",
-          "title": "New conversation"
-        },
-        {
-          "id": "CLAUDE-015.2",
-          "title": "Only on a Claude tab"
-        },
-        {
-          "id": "CLAUDE-015.3",
-          "title": "Stopping the old one is not an error"
-        },
-        {
-          "id": "CLAUDE-015.4",
-          "title": "Other header buttons"
-        }
-      ]
-    },
-    "CLAUDE-016": {
-      "id": "CLAUDE-016",
-      "title": "Continue a conversation after restarting Quarry",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 785,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/lib/claude.ts",
-        "src/lib/actions.ts",
-        "src/lib/store.ts",
-        "src-tauri/src/claude.rs",
-        "src/lib/claudeProtocol.ts"
-      ],
-      "tests": [
-        "src/__tests__/claude.test.ts",
-        "src-tauri/src/claude.rs",
-        "src/__tests__/claudeSession.test.ts"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-016.1",
-          "title": "Tabs come back idle"
-        },
-        {
-          "id": "CLAUDE-016.2",
-          "title": "Earlier messages load when the tab is first shown"
-        },
-        {
-          "id": "CLAUDE-016.3",
-          "title": "The next message continues the conversation"
-        },
-        {
-          "id": "CLAUDE-016.4",
-          "title": "The folder is gone"
-        },
-        {
-          "id": "CLAUDE-016.5",
-          "title": "The conversation can no longer be resumed"
-        },
-        {
-          "id": "CLAUDE-016.6",
-          "title": "History that cannot be read"
-        },
-        {
-          "id": "CLAUDE-016.7",
-          "title": "Only a real conversation id is resumed"
-        }
-      ]
-    },
-    "CLAUDE-017": {
-      "id": "CLAUDE-017",
-      "title": "Browse and reopen past conversations",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 839,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/components/ClaudeView.tsx",
-        "src/lib/claude.ts",
-        "src/lib/claudeProtocol.ts",
-        "src-tauri/src/claude.rs"
-      ],
-      "tests": [
-        "src/__tests__/claude.test.ts",
-        "src-tauri/src/claude.rs"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-017.1",
-          "title": "The history list"
-        },
-        {
-          "id": "CLAUDE-017.2",
-          "title": "Conversations from the command line are included"
-        },
-        {
-          "id": "CLAUDE-017.3",
-          "title": "Reopen one"
-        },
-        {
-          "id": "CLAUDE-017.4",
-          "title": "Recent conversations on the empty page"
-        },
-        {
-          "id": "CLAUDE-017.5",
-          "title": "Nothing yet"
-        },
-        {
-          "id": "CLAUDE-017.6",
-          "title": "Closing the list"
-        },
-        {
-          "id": "CLAUDE-017.7",
-          "title": "Very long conversations"
-        },
-        {
-          "id": "CLAUDE-017.8",
-          "title": "What is not listed"
-        },
-        {
-          "id": "CLAUDE-017.9",
-          "title": "Continue in a terminal instead"
-        }
-      ]
-    },
-    "CLAUDE-018": {
-      "id": "CLAUDE-018",
-      "title": "Choose the model",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 904,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/components/panels/SettingsPanel.tsx",
-        "src/lib/claude.ts",
-        "src-tauri/src/claude.rs",
-        "src/components/ClaudeView.tsx",
-        "src/lib/claudeProtocol.ts",
-        "src/lib/types.ts"
-      ],
-      "tests": [
-        "src/__tests__/claude.test.ts",
-        "src-tauri/src/claude.rs",
-        "src/__tests__/claudeSession.test.ts"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-018.1",
-          "title": "Default leaves the choice to Claude Code"
-        },
-        {
-          "id": "CLAUDE-018.2",
-          "title": "A chosen model"
-        },
-        {
-          "id": "CLAUDE-018.3",
-          "title": "A running conversation keeps its model"
-        },
-        {
-          "id": "CLAUDE-018.4",
-          "title": "A model name from the settings file"
-        },
-        {
-          "id": "CLAUDE-018.5",
-          "title": "A continued conversation uses the new model"
-        },
-        {
-          "id": "CLAUDE-018.6",
-          "title": "The hint says when it applies"
-        },
-        {
-          "id": "CLAUDE-018.7",
-          "title": "The Model is for Claude tabs only"
-        }
-      ]
-    },
-    "CLAUDE-019": {
-      "id": "CLAUDE-019",
-      "title": "Know what background Claude tabs are doing",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 961,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/lib/claude.ts",
-        "src/components/TitleBar.tsx",
-        "src/styles/app.css"
-      ],
-      "tests": [],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-019.1",
-          "title": "Working in the background"
-        },
-        {
-          "id": "CLAUDE-019.2",
-          "title": "A question in the background"
-        },
-        {
-          "id": "CLAUDE-019.3",
-          "title": "Finished out of sight"
-        },
-        {
-          "id": "CLAUDE-019.4",
-          "title": "The tab in front has no badge"
-        }
-      ]
-    },
-    "CLAUDE-020": {
-      "id": "CLAUDE-020",
-      "title": "Closing tabs, quitting and a process that stops",
-      "area": "CLAUDE",
-      "spec": "specs/claude-code.md",
-      "line": 997,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/lib/actions.ts",
-        "src/lib/claude.ts",
-        "src/lib/claudeProtocol.ts",
-        "src-tauri/src/claude.rs",
-        "src-tauri/src/writer.rs",
-        "src/lib/updater.ts"
-      ],
-      "tests": [
-        "src/__tests__/claude.test.ts",
-        "src/__tests__/claudeSession.test.ts"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "CLAUDE-020.1",
-          "title": "Closing a working tab asks"
-        },
-        {
-          "id": "CLAUDE-020.2",
-          "title": "Closing an idle tab does not ask"
-        },
-        {
-          "id": "CLAUDE-020.3",
-          "title": "Quitting ends everything"
-        },
-        {
-          "id": "CLAUDE-020.4",
-          "title": "Claude Code stops by itself"
-        },
-        {
-          "id": "CLAUDE-020.5",
-          "title": "Recover by sending"
-        },
-        {
-          "id": "CLAUDE-020.6",
-          "title": "Quarry started from a Claude Code session"
-        }
-      ]
-    },
     "COMMITCMP-001": {
       "id": "COMMITCMP-001",
       "title": "Pick a second commit with Ctrl+click",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
       "line": 28,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -3023,7 +2013,7 @@
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
       "line": 114,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphCompare.tsx",
@@ -3100,7 +2090,7 @@
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
       "line": 209,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphCompare.tsx",
@@ -3166,7 +2156,7 @@
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
       "line": 282,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -3250,7 +2240,7 @@
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
       "line": 380,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.compareWithBranch",
         "git.compareBranchPick"
@@ -3344,7 +2334,7 @@
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
       "line": 489,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src-tauri/src/git.rs",
@@ -3391,7 +2381,7 @@
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/conflicts.ts",
@@ -3442,8 +2432,8 @@
       "title": "Accept one side of a conflict",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 69,
-      "status": "draft",
+      "line": 68,
+      "status": "verified",
       "commands": [
         "git.acceptCurrent",
         "git.acceptIncoming",
@@ -3498,8 +2488,8 @@
       "title": "Resolve every conflict in a file one way",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 125,
-      "status": "draft",
+      "line": 122,
+      "status": "verified",
       "commands": [
         "git.acceptAllCurrent",
         "git.acceptAllIncoming"
@@ -3540,8 +2530,8 @@
       "title": "Jump between conflicts",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 162,
-      "status": "draft",
+      "line": 159,
+      "status": "verified",
       "commands": [
         "git.nextConflict",
         "git.prevConflict"
@@ -3580,8 +2570,8 @@
       "title": "Compare the two sides of a conflict",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 200,
-      "status": "draft",
+      "line": 197,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/editor/conflicts.ts",
@@ -3612,8 +2602,8 @@
       "title": "Finish a file when its last conflict is gone",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 235,
-      "status": "draft",
+      "line": 232,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/editor/conflicts.ts",
@@ -3662,8 +2652,8 @@
       "title": "Mark a conflicted file as resolved",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 290,
-      "status": "draft",
+      "line": 286,
+      "status": "verified",
       "commands": [
         "git.stageFile"
       ],
@@ -3716,8 +2706,8 @@
       "title": "Take one side's version of a whole file",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 348,
-      "status": "draft",
+      "line": 344,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitPanel.tsx",
@@ -3765,8 +2755,8 @@
       "title": "Open a conflicted file from Merge Changes",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 407,
-      "status": "draft",
+      "line": 403,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/git.ts",
@@ -3799,8 +2789,8 @@
       "title": "Commit only when every conflict is resolved",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 440,
-      "status": "draft",
+      "line": 436,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitPanel.tsx",
@@ -3856,8 +2846,8 @@
       "title": "Abort a stopped operation",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 505,
-      "status": "draft",
+      "line": 501,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitPanel.tsx",
@@ -3904,8 +2894,8 @@
       "title": "Skip the commit an operation stopped on",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 559,
-      "status": "draft",
+      "line": 555,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitPanel.tsx",
@@ -3943,8 +2933,8 @@
       "title": "Carry on with a rebase",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 604,
-      "status": "draft",
+      "line": 600,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitPanel.tsx",
@@ -3992,8 +2982,8 @@
       "title": "Carry on with a patch series (git am)",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 663,
-      "status": "draft",
+      "line": 659,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitPanel.tsx",
@@ -4042,7 +3032,7 @@
       "area": "DIFF",
       "spec": "specs/compare.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "compare.files"
       ],
@@ -4097,7 +3087,7 @@
       "area": "DIFF",
       "spec": "specs/compare.md",
       "line": 66,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "compare.selectForCompare",
         "compare.withSelected"
@@ -4149,7 +3139,7 @@
       "area": "DIFF",
       "spec": "specs/compare.md",
       "line": 124,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "compare.activeWith"
       ],
@@ -4186,7 +3176,7 @@
       "area": "DIFF",
       "spec": "specs/compare.md",
       "line": 162,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "compare.withSaved"
       ],
@@ -4220,7 +3210,7 @@
       "area": "DIFF",
       "spec": "specs/compare.md",
       "line": 196,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "compare.withClipboard"
       ],
@@ -4261,7 +3251,7 @@
       "area": "DIFF",
       "spec": "specs/compare.md",
       "line": 234,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.compareWithHead"
       ],
@@ -4316,7 +3306,7 @@
       "area": "DIFF",
       "spec": "specs/compare.md",
       "line": 291,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/diff.ts"
@@ -4352,7 +3342,7 @@
       "area": "DIFF",
       "spec": "specs/compare.md",
       "line": 325,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "compare.nextChange",
         "compare.prevChange"
@@ -4396,7 +3386,7 @@
       "area": "DIFF",
       "spec": "specs/compare.md",
       "line": 368,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "compare.toggleInline",
         "compare.swap"
@@ -4456,7 +3446,7 @@
       "area": "DIFF",
       "spec": "specs/compare.md",
       "line": 431,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/diff.ts",
@@ -4498,7 +3488,7 @@
       "area": "DIFF",
       "spec": "specs/compare.md",
       "line": 475,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/DiffView.tsx",
@@ -4543,7 +3533,7 @@
       "area": "DIFF",
       "spec": "specs/compare.md",
       "line": 524,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.save"
       ],
@@ -4602,7 +3592,7 @@
       "area": "DIFF",
       "spec": "specs/compare.md",
       "line": 592,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/diff.ts",
@@ -4659,7 +3649,7 @@
       "area": "DIFF",
       "spec": "specs/compare.md",
       "line": 654,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/diff.ts",
@@ -4697,7 +3687,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "edit.undo",
         "edit.redo",
@@ -4742,7 +3732,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 58,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "edit.cut",
         "edit.copy",
@@ -4798,7 +3788,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 119,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "edit.selectAll",
         "edit.selectNextOccurrence",
@@ -4854,7 +3844,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 177,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "edit.selectAllMatches"
       ],
@@ -4889,7 +3879,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 211,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "selection.addCursorAbove",
         "selection.addCursorBelow",
@@ -4940,7 +3930,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 260,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "selection.toggleColumnMode"
       ],
@@ -5000,7 +3990,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 325,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/editor/bulkEdit.ts",
@@ -5045,7 +4035,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 375,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "edit.duplicateLine",
         "edit.duplicateLineUp",
@@ -5087,7 +4077,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 413,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.sortAsc",
         "code.sortDesc",
@@ -5175,7 +4165,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 510,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "edit.upper",
         "edit.lower",
@@ -5230,7 +4220,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 567,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "edit.indent",
         "edit.outdent",
@@ -5290,7 +4280,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 628,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "edit.toggleComment",
         "code.toggleBlockComment"
@@ -5328,7 +4318,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 667,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.fold",
         "code.unfold",
@@ -5371,7 +4361,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 709,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.foldLine",
         "code.unfoldLine",
@@ -5428,7 +4418,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 771,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.gotoBracket"
       ],
@@ -5468,7 +4458,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 810,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "goto.line"
       ],
@@ -5526,7 +4516,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 878,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.detectLanguage"
       ],
@@ -5583,7 +4573,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 951,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.setLanguage"
       ],
@@ -5636,7 +4626,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 1010,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/editor/cmSetup.ts",
@@ -5668,7 +4658,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 1043,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "view.toggleWrap",
         "view.toggleWhitespace"
@@ -5710,7 +4700,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 1086,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "view.zoomIn",
         "view.zoomInPlus",
@@ -5753,7 +4743,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 1128,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "view.toggleTabFocus"
       ],
@@ -5793,7 +4783,7 @@
       "area": "EDIT",
       "spec": "specs/editing.md",
       "line": 1172,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/editor/cmSetup.ts",
@@ -5829,7 +4819,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "view.explorer",
         "file.openFolder"
@@ -5901,7 +4891,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 92,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/ExplorerPanel.tsx",
@@ -5937,7 +4927,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 132,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/ExplorerPanel.tsx"
@@ -5983,7 +4973,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 201,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/ExplorerPanel.tsx"
@@ -6027,7 +5017,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 251,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/ExplorerPanel.tsx"
@@ -6071,7 +5061,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 302,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.showInQuarryExplorer"
       ],
@@ -6118,7 +5108,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 351,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/ExplorerPanel.tsx",
@@ -6165,7 +5155,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 402,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/ExplorerPanel.tsx",
@@ -6211,7 +5201,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 468,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/ExplorerPanel.tsx",
@@ -6269,7 +5259,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 537,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/fileOps.ts",
@@ -6316,7 +5306,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 594,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/fileOps.ts",
@@ -6386,7 +5376,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 690,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/fileOps.ts",
@@ -6417,7 +5407,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 724,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.showInWindowsExplorer"
       ],
@@ -6452,7 +5442,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 758,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/ExplorerPanel.tsx",
@@ -6492,7 +5482,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 800,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/ExplorerPanel.tsx",
@@ -6529,7 +5519,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 837,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/ExplorerPanel.tsx",
@@ -6564,7 +5554,7 @@
       "area": "EXPL",
       "spec": "specs/explorer.md",
       "line": 878,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/FileMenu.tsx",
@@ -6587,26 +5577,22 @@
         },
         {
           "id": "EXPL-017.3",
-          "title": "Claude Code items follow the setting"
-        },
-        {
-          "id": "EXPL-017.4",
           "title": "Menu on blank space"
         },
         {
-          "id": "EXPL-017.5",
+          "id": "EXPL-017.4",
           "title": "Compare items"
         },
         {
-          "id": "EXPL-017.6",
+          "id": "EXPL-017.5",
           "title": "The menu closes without acting"
         },
         {
-          "id": "EXPL-017.7",
+          "id": "EXPL-017.6",
           "title": "The menu stays inside the window"
         },
         {
-          "id": "EXPL-017.8",
+          "id": "EXPL-017.7",
           "title": "Set a folder as the Source Control context"
         }
       ]
@@ -6617,7 +5603,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.new"
       ],
@@ -6656,7 +5642,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 49,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.open"
       ],
@@ -6710,7 +5696,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 106,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.openFolder"
       ],
@@ -6755,7 +5741,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 151,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.openRecent",
         "file.openRecentFolder",
@@ -6808,7 +5794,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 208,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.quickOpen"
       ],
@@ -6850,7 +5836,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 252,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/actions.ts",
@@ -6895,7 +5881,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 300,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src-tauri/src/files.rs",
@@ -6934,7 +5920,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 342,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.setEncoding",
         "file.setEol"
@@ -6986,7 +5972,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 396,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.reopenWithEncoding"
       ],
@@ -7026,7 +6012,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 439,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.save"
       ],
@@ -7090,7 +6076,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 516,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.saveAs"
       ],
@@ -7134,7 +6120,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 567,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.saveAll"
       ],
@@ -7167,7 +6153,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 600,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.revert"
       ],
@@ -7205,7 +6191,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 640,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/actions.ts",
@@ -7242,7 +6228,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 679,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/actions.ts",
@@ -7305,7 +6291,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 763,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/actions.ts",
@@ -7363,7 +6349,7 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 830,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "app.exit"
       ],
@@ -7371,8 +6357,8 @@
         "src/lib/actions.ts",
         "src/lib/commands.ts",
         "src/components/TitleBar.tsx",
-        "src/lib/claude.ts",
         "src/lib/lsp.ts",
+        "src/lib/terminal.ts",
         "src-tauri/src/writer.rs",
         "src/lib/dialogs.ts"
       ],
@@ -7424,12 +6410,11 @@
       "area": "FILE",
       "spec": "specs/files.md",
       "line": 899,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/App.tsx",
         "src/lib/actions.ts",
-        "src/lib/bus.ts",
         "src/components/Welcome.tsx"
       ],
       "tests": [],
@@ -7447,10 +6432,6 @@
         },
         {
           "id": "FILE-018.3",
-          "title": "A drop on a Claude tab is not opened as a file"
-        },
-        {
-          "id": "FILE-018.4",
           "title": "A large file dropped on the window"
         }
       ]
@@ -7460,8 +6441,8 @@
       "title": "Open files from the command line and File Explorer",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 938,
-      "status": "draft",
+      "line": 931,
+      "status": "verified",
       "commands": [],
       "files": [
         "src-tauri/src/lib.rs",
@@ -7507,8 +6488,8 @@
       "title": "Welcome screen",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 989,
-      "status": "draft",
+      "line": 982,
+      "status": "verified",
       "commands": [
         "file.new",
         "file.open",
@@ -7562,7 +6543,7 @@
       "area": "FIND",
       "spec": "specs/find.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "find.open",
         "find.replace",
@@ -7618,7 +6599,7 @@
       "area": "FIND",
       "spec": "specs/find.md",
       "line": 68,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "find.next",
         "find.prev"
@@ -7680,7 +6661,7 @@
       "area": "FIND",
       "spec": "specs/find.md",
       "line": 141,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/FindBar.tsx",
@@ -7733,7 +6714,7 @@
       "area": "FIND",
       "spec": "specs/find.md",
       "line": 204,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/FindBar.tsx",
@@ -7778,7 +6759,7 @@
       "area": "FIND",
       "spec": "specs/find.md",
       "line": 255,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/FindBar.tsx",
@@ -7819,7 +6800,7 @@
       "area": "FIND",
       "spec": "specs/find.md",
       "line": 299,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/FindBar.tsx",
@@ -7866,7 +6847,7 @@
       "area": "FIND",
       "spec": "specs/find.md",
       "line": 351,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/searchHistory.ts",
@@ -7943,7 +6924,7 @@
       "area": "FIND",
       "spec": "specs/find.md",
       "line": 448,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "edit.selectAllMatches"
       ],
@@ -7984,7 +6965,7 @@
       "area": "FIND",
       "spec": "specs/find.md",
       "line": 489,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "edit.selectNextOccurrence",
         "edit.selectAllOccurrences"
@@ -8034,7 +7015,7 @@
       "area": "FIND",
       "spec": "specs/find.md",
       "line": 537,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "find.toggleInSelection"
       ],
@@ -8112,7 +7093,7 @@
       "area": "FMT",
       "spec": "specs/formatting.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.format"
       ],
@@ -8153,7 +7134,7 @@
       "area": "FMT",
       "spec": "specs/formatting.md",
       "line": 52,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.format"
       ],
@@ -8192,7 +7173,7 @@
       "area": "FMT",
       "spec": "specs/formatting.md",
       "line": 90,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.format"
       ],
@@ -8243,7 +7224,7 @@
       "area": "FMT",
       "spec": "specs/formatting.md",
       "line": 143,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.format"
       ],
@@ -8285,7 +7266,7 @@
       "area": "FMT",
       "spec": "specs/formatting.md",
       "line": 202,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.format"
       ],
@@ -8323,7 +7304,7 @@
       "area": "FMT",
       "spec": "specs/formatting.md",
       "line": 243,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.format"
       ],
@@ -8368,7 +7349,7 @@
       "area": "FMT",
       "spec": "specs/formatting.md",
       "line": 301,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.format"
       ],
@@ -8412,7 +7393,7 @@
       "area": "FMT",
       "spec": "specs/formatting.md",
       "line": 363,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.format"
       ],
@@ -8444,7 +7425,7 @@
       "area": "FMT",
       "spec": "specs/formatting.md",
       "line": 390,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.format"
       ],
@@ -8482,7 +7463,7 @@
       "area": "FMT",
       "spec": "specs/formatting.md",
       "line": 429,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "json.format",
         "json.minify"
@@ -8538,7 +7519,7 @@
       "area": "GIT",
       "spec": "specs/git.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.refresh"
       ],
@@ -8606,7 +7587,7 @@
       "area": "GIT",
       "spec": "specs/git.md",
       "line": 85,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/editor/git.ts",
@@ -8652,7 +7633,7 @@
       "area": "GIT",
       "spec": "specs/git.md",
       "line": 132,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.peekChange",
         "git.revertChange"
@@ -8705,7 +7686,7 @@
       "area": "GIT",
       "spec": "specs/git.md",
       "line": 188,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.nextChange",
         "git.prevChange"
@@ -8751,7 +7732,7 @@
       "area": "GIT",
       "spec": "specs/git.md",
       "line": 231,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.toggleBlame"
       ],
@@ -8802,7 +7783,7 @@
       "area": "GIT",
       "spec": "specs/git.md",
       "line": 284,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.compareWithHead"
       ],
@@ -8849,7 +7830,7 @@
       "area": "GIT",
       "spec": "specs/git.md",
       "line": 328,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.switchBranch",
         "git.checkoutTo",
@@ -8908,13 +7889,12 @@
       "area": "GIT",
       "spec": "specs/git.md",
       "line": 392,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.showPanel"
       ],
       "files": [
         "src/components/panels/GitPanel.tsx",
-        "src/components/panels/GitDraft.tsx",
         "src/lib/git.ts",
         "src/lib/gitStatus.ts",
         "src/lib/gitCommands.ts",
@@ -8960,10 +7940,6 @@
         {
           "id": "GIT-008.8",
           "title": "Ctrl+Enter while the button is disabled says why"
-        },
-        {
-          "id": "GIT-008.9",
-          "title": "The Draft button and a draft in progress"
         }
       ]
     },
@@ -8972,8 +7948,8 @@
       "title": "Amend the last commit",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 468,
-      "status": "draft",
+      "line": 461,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitPanel.tsx",
@@ -9011,8 +7987,8 @@
       "title": "See the changed files and open their changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 507,
-      "status": "draft",
+      "line": 500,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitPanel.tsx",
@@ -9069,8 +8045,8 @@
       "title": "Stage and unstage files",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 577,
-      "status": "draft",
+      "line": 570,
+      "status": "verified",
       "commands": [
         "git.stageFile",
         "git.unstageFile"
@@ -9123,8 +8099,8 @@
       "title": "Discard changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 634,
-      "status": "draft",
+      "line": 627,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitPanel.tsx",
@@ -9170,8 +8146,8 @@
       "title": "Status line: where the branch stands against its remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 690,
-      "status": "draft",
+      "line": 683,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/gitStatus.ts",
@@ -9230,8 +8206,8 @@
       "title": "Background check of the remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 761,
-      "status": "draft",
+      "line": 754,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/git.ts",
@@ -9285,8 +8261,8 @@
       "title": "Fetch, pull, push and publish a branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 827,
-      "status": "draft",
+      "line": 820,
+      "status": "verified",
       "commands": [
         "git.fetch",
         "git.pull",
@@ -9347,8 +8323,8 @@
       "title": "Recover when the remote repository is gone",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 897,
-      "status": "draft",
+      "line": 890,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/gitStatus.ts",
@@ -9391,8 +8367,8 @@
       "title": "Commits of the current branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 942,
-      "status": "draft",
+      "line": 935,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitPanel.tsx",
@@ -9456,8 +8432,8 @@
       "title": "File history",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1018,
-      "status": "draft",
+      "line": 1011,
+      "status": "verified",
       "commands": [
         "git.fileHistory"
       ],
@@ -9510,8 +8486,8 @@
       "title": "Commit identity (name and email)",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1073,
-      "status": "draft",
+      "line": 1066,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitRepoSettings.tsx",
@@ -9557,8 +8533,8 @@
       "title": "Add a remote by URL",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1124,
-      "status": "draft",
+      "line": 1117,
+      "status": "verified",
       "commands": [
         "git.addRemote"
       ],
@@ -9606,8 +8582,8 @@
       "title": "See, open and change remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1176,
-      "status": "draft",
+      "line": 1169,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitRepoSettings.tsx",
@@ -9658,8 +8634,8 @@
       "title": "Create a repository on GitHub and push to it",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1235,
-      "status": "draft",
+      "line": 1228,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitRepoSettings.tsx",
@@ -9715,8 +8691,8 @@
       "title": "GitHub accounts",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1302,
-      "status": "draft",
+      "line": 1295,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitRepoSettings.tsx",
@@ -9762,8 +8738,8 @@
       "title": "Private / Public badge on GitHub remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1354,
-      "status": "draft",
+      "line": 1347,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitRepoSettings.tsx",
@@ -9804,8 +8780,8 @@
       "title": "Work with more than one repository",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1398,
-      "status": "draft",
+      "line": 1391,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitPanel.tsx",
@@ -9860,8 +8836,8 @@
       "title": "Branch in the status bar",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1517,
-      "status": "draft",
+      "line": 1510,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/StatusBar.tsx",
@@ -9906,8 +8882,8 @@
       "title": "Git decorations in the Explorer",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1568,
-      "status": "draft",
+      "line": 1561,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/ExplorerPanel.tsx",
@@ -9950,8 +8926,8 @@
       "title": "Set a folder as the Source Control context",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1467,
-      "status": "draft",
+      "line": 1460,
+      "status": "verified",
       "commands": [
         "git.setContext"
       ],
@@ -9995,681 +8971,13 @@
         }
       ]
     },
-    "GITAI-001": {
-      "id": "GITAI-001",
-      "title": "Claude-assisted git exists only while Claude Code is switched on",
-      "area": "GITAI",
-      "spec": "specs/git-claude.md",
-      "line": 34,
-      "status": "draft",
-      "commands": [
-        "git.draftMessage",
-        "git.explainConflict",
-        "git.summariseBranch",
-        "git.stopClaude"
-      ],
-      "files": [
-        "src/lib/gitCommands.ts",
-        "src/lib/gitAssist.ts",
-        "src/components/panels/GitDraft.tsx",
-        "src/components/panels/GitPanel.tsx",
-        "src/editor/conflicts.ts",
-        "src/components/GraphSummarise.tsx",
-        "src/components/GraphView.tsx",
-        "src/components/MenuBar.tsx",
-        "src/components/panels/SettingsPanel.tsx"
-      ],
-      "tests": [
-        "src/__tests__/gitAssist.test.ts",
-        "src/__tests__/ui.test.ts",
-        "src/__tests__/gitDraft.test.tsx",
-        "src/__tests__/conflictSuggest.test.ts",
-        "src/__tests__/graphView.test.tsx"
-      ],
-      "docs": [
-        "docs/git.md",
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "GITAI-001.1",
-          "title": "On: where the helpers are"
-        },
-        {
-          "id": "GITAI-001.2",
-          "title": "Off hides all of it"
-        },
-        {
-          "id": "GITAI-001.3",
-          "title": "Off stops what is running and removes open suggestions"
-        },
-        {
-          "id": "GITAI-001.4",
-          "title": "On brings it back without a restart"
-        },
-        {
-          "id": "GITAI-001.5",
-          "title": "Commands outside their context are unavailable"
-        }
-      ]
-    },
-    "GITAI-002": {
-      "id": "GITAI-002",
-      "title": "Know what is sent to Claude before it goes",
-      "area": "GITAI",
-      "spec": "specs/git-claude.md",
-      "line": 94,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/lib/gitAssist.ts",
-        "src/lib/gitAi.ts",
-        "src/lib/types.ts",
-        "src/lib/actions.ts",
-        "src/components/panels/SettingsPanel.tsx",
-        "src/components/panels/GitDraft.tsx",
-        "src/editor/conflicts.ts"
-      ],
-      "tests": [
-        "src/__tests__/gitAi.test.ts",
-        "src/__tests__/gitAssist.test.ts",
-        "src/__tests__/gitDraft.test.tsx",
-        "src/__tests__/conflictSuggest.test.ts",
-        "src-tauri/src/git.rs"
-      ],
-      "docs": [
-        "docs/git.md",
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "GITAI-002.1",
-          "title": "The first draft asks"
-        },
-        {
-          "id": "GITAI-002.2",
-          "title": "Cancel sends nothing"
-        },
-        {
-          "id": "GITAI-002.3",
-          "title": "Send asks again next time"
-        },
-        {
-          "id": "GITAI-002.4",
-          "title": "Don't ask again covers all three helpers"
-        },
-        {
-          "id": "GITAI-002.5",
-          "title": "The question can be turned back on"
-        },
-        {
-          "id": "GITAI-002.6",
-          "title": "The conflict dialog names what it sends"
-        },
-        {
-          "id": "GITAI-002.7",
-          "title": "The summary dialog names what it sends"
-        },
-        {
-          "id": "GITAI-002.8",
-          "title": "The tooltips say it too"
-        },
-        {
-          "id": "GITAI-002.9",
-          "title": "Only the described text is sent"
-        },
-        {
-          "id": "GITAI-002.10",
-          "title": "Nothing staged: the dialog says that untracked files are sent too"
-        }
-      ]
-    },
-    "GITAI-003": {
-      "id": "GITAI-003",
-      "title": "Draft a commit message from the changes about to be committed",
-      "area": "GITAI",
-      "spec": "specs/git-claude.md",
-      "line": 175,
-      "status": "draft",
-      "commands": [
-        "git.draftMessage"
-      ],
-      "files": [
-        "src/components/panels/GitDraft.tsx",
-        "src/components/panels/GitPanel.tsx",
-        "src/lib/gitAssist.ts",
-        "src/lib/gitAi.ts",
-        "src/lib/gitCommands.ts",
-        "src/lib/gitApi.ts",
-        "src-tauri/src/git_ai.rs",
-        "src-tauri/src/git.rs",
-        "src-tauri/src/claude.rs",
-        "src/lib/types.ts",
-        "src/lib/actions.ts",
-        "src/components/panels/SettingsPanel.tsx",
-        "src/components/MenuBar.tsx"
-      ],
-      "tests": [
-        "src/__tests__/gitAi.test.ts",
-        "src/__tests__/gitAssist.test.ts",
-        "src/__tests__/gitDraft.test.tsx",
-        "src-tauri/src/git.rs",
-        "src-tauri/src/claude.rs"
-      ],
-      "docs": [
-        "docs/git.md"
-      ],
-      "scenarios": [
-        {
-          "id": "GITAI-003.1",
-          "title": "Draft from the staged changes"
-        },
-        {
-          "id": "GITAI-003.2",
-          "title": "The draft is ordinary text"
-        },
-        {
-          "id": "GITAI-003.3",
-          "title": "Nothing is committed without me"
-        },
-        {
-          "id": "GITAI-003.4",
-          "title": "An existing message is not overwritten silently"
-        },
-        {
-          "id": "GITAI-003.5",
-          "title": "The old message survives a failed or stopped draft"
-        },
-        {
-          "id": "GITAI-003.6",
-          "title": "The box cannot be edited while the draft is running"
-        },
-        {
-          "id": "GITAI-003.7",
-          "title": "Nothing staged: the draft covers what Commit All would take"
-        },
-        {
-          "id": "GITAI-003.8",
-          "title": "Nothing to commit"
-        },
-        {
-          "id": "GITAI-003.9",
-          "title": "Amend describes the amended commit"
-        },
-        {
-          "id": "GITAI-003.10",
-          "title": "Not during a rebase or with conflicts"
-        },
-        {
-          "id": "GITAI-003.11",
-          "title": "A merge's prepared message counts as my message"
-        },
-        {
-          "id": "GITAI-003.12",
-          "title": "The draft is cleaned up"
-        },
-        {
-          "id": "GITAI-003.13",
-          "title": "From the palette"
-        },
-        {
-          "id": "GITAI-003.14",
-          "title": "Unsaved tabs"
-        },
-        {
-          "id": "GITAI-003.15",
-          "title": "The git helpers have their own model, Haiku by default"
-        },
-        {
-          "id": "GITAI-003.16",
-          "title": "Choosing another model for the git helpers"
-        }
-      ]
-    },
-    "GITAI-004": {
-      "id": "GITAI-004",
-      "title": "Draft a message for a very large change",
-      "area": "GITAI",
-      "spec": "specs/git-claude.md",
-      "line": 298,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/lib/gitAi.ts",
-        "src/lib/gitAssist.ts",
-        "src/components/panels/GitDraft.tsx",
-        "src-tauri/src/git_ai.rs"
-      ],
-      "tests": [
-        "src/__tests__/gitAi.test.ts",
-        "src/__tests__/gitAssist.test.ts",
-        "src/__tests__/gitDraft.test.tsx",
-        "src-tauri/src/git.rs"
-      ],
-      "docs": [
-        "docs/git.md"
-      ],
-      "scenarios": [
-        {
-          "id": "GITAI-004.1",
-          "title": "Under the limit everything is sent"
-        },
-        {
-          "id": "GITAI-004.2",
-          "title": "One very long file is cut"
-        },
-        {
-          "id": "GITAI-004.3",
-          "title": "Too many files for the total"
-        },
-        {
-          "id": "GITAI-004.4",
-          "title": "Every file is always named"
-        },
-        {
-          "id": "GITAI-004.5",
-          "title": "Binary files"
-        },
-        {
-          "id": "GITAI-004.6",
-          "title": "The note stays until the message changes hands"
-        },
-        {
-          "id": "GITAI-004.7",
-          "title": "The limit is never exceeded"
-        },
-        {
-          "id": "GITAI-004.8",
-          "title": "Files cut and files left out at once"
-        }
-      ]
-    },
-    "GITAI-005": {
-      "id": "GITAI-005",
-      "title": "See that Claude is working, and stop it",
-      "area": "GITAI",
-      "spec": "specs/git-claude.md",
-      "line": 361,
-      "status": "draft",
-      "commands": [
-        "git.stopClaude"
-      ],
-      "files": [
-        "src/lib/gitAssist.ts",
-        "src/lib/gitAi.ts",
-        "src-tauri/src/claude.rs",
-        "src/components/GitAssistStatus.tsx",
-        "src/components/StatusBar.tsx",
-        "src/components/panels/GitDraft.tsx",
-        "src/editor/conflicts.ts",
-        "src/lib/gitCommands.ts"
-      ],
-      "tests": [
-        "src/__tests__/gitAssist.test.ts",
-        "src/__tests__/gitDraft.test.tsx",
-        "src/__tests__/gitAi.test.ts",
-        "src-tauri/src/claude.rs"
-      ],
-      "docs": [
-        "docs/git.md"
-      ],
-      "scenarios": [
-        {
-          "id": "GITAI-005.1",
-          "title": "A running request is visible"
-        },
-        {
-          "id": "GITAI-005.2",
-          "title": "Stop a draft"
-        },
-        {
-          "id": "GITAI-005.3",
-          "title": "A late answer is ignored"
-        },
-        {
-          "id": "GITAI-005.4",
-          "title": "One request at a time"
-        },
-        {
-          "id": "GITAI-005.5",
-          "title": "Time limit"
-        },
-        {
-          "id": "GITAI-005.6",
-          "title": "Editing goes on meanwhile"
-        },
-        {
-          "id": "GITAI-005.7",
-          "title": "Closing what the request belongs to stops it"
-        },
-        {
-          "id": "GITAI-005.8",
-          "title": "Quitting ends it"
-        },
-        {
-          "id": "GITAI-005.9",
-          "title": "The answer arrives while I am elsewhere"
-        }
-      ]
-    },
-    "GITAI-006": {
-      "id": "GITAI-006",
-      "title": "Be told why Claude could not answer",
-      "area": "GITAI",
-      "spec": "specs/git-claude.md",
-      "line": 435,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/lib/gitAi.ts",
-        "src/lib/gitAssist.ts",
-        "src-tauri/src/claude.rs",
-        "src/lib/commands.ts"
-      ],
-      "tests": [
-        "src/__tests__/gitAi.test.ts",
-        "src/__tests__/gitAssist.test.ts",
-        "src-tauri/src/claude.rs"
-      ],
-      "docs": [
-        "docs/git.md",
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "GITAI-006.1",
-          "title": "Claude Code is not installed"
-        },
-        {
-          "id": "GITAI-006.2",
-          "title": "A location I set that does not exist"
-        },
-        {
-          "id": "GITAI-006.3",
-          "title": "Not signed in"
-        },
-        {
-          "id": "GITAI-006.4",
-          "title": "Usage limit or another refusal from Claude Code"
-        },
-        {
-          "id": "GITAI-006.5",
-          "title": "The process fails"
-        },
-        {
-          "id": "GITAI-006.6",
-          "title": "An empty answer"
-        },
-        {
-          "id": "GITAI-006.7",
-          "title": "A failure changes nothing"
-        },
-        {
-          "id": "GITAI-006.8",
-          "title": "Errors for a conflict appear in its panel"
-        },
-        {
-          "id": "GITAI-006.9",
-          "title": "Trying again works after the cause is fixed"
-        }
-      ]
-    },
-    "GITAI-007": {
-      "id": "GITAI-007",
-      "title": "Have a conflict explained and a resolution proposed",
-      "area": "GITAI",
-      "spec": "specs/git-claude.md",
-      "line": 500,
-      "status": "draft",
-      "commands": [
-        "git.explainConflict"
-      ],
-      "files": [
-        "src/editor/conflicts.ts",
-        "src/lib/conflicts.ts",
-        "src/lib/gitAi.ts",
-        "src/lib/gitAssist.ts",
-        "src/lib/gitCommands.ts",
-        "src/components/MenuBar.tsx",
-        "src/styles/app.css"
-      ],
-      "tests": [
-        "src/__tests__/gitAi.test.ts",
-        "src/__tests__/conflictSuggest.test.ts",
-        "src/__tests__/gitAssist.test.ts"
-      ],
-      "docs": [
-        "docs/git.md"
-      ],
-      "scenarios": [
-        {
-          "id": "GITAI-007.1",
-          "title": "Explain one conflict"
-        },
-        {
-          "id": "GITAI-007.2",
-          "title": "Only that conflict is sent"
-        },
-        {
-          "id": "GITAI-007.3",
-          "title": "Apply the suggestion"
-        },
-        {
-          "id": "GITAI-007.4",
-          "title": "Applying is one undo step"
-        },
-        {
-          "id": "GITAI-007.5",
-          "title": "Discard"
-        },
-        {
-          "id": "GITAI-007.6",
-          "title": "Never applied by itself"
-        },
-        {
-          "id": "GITAI-007.7",
-          "title": "Applying the last one leads to the usual question"
-        },
-        {
-          "id": "GITAI-007.8",
-          "title": "The conflict changed while Claude was thinking"
-        },
-        {
-          "id": "GITAI-007.9",
-          "title": "The conflict changes after the answer"
-        },
-        {
-          "id": "GITAI-007.10",
-          "title": "A suggestion that still has markers is not offered"
-        },
-        {
-          "id": "GITAI-007.11",
-          "title": "Claude gives no resolution"
-        },
-        {
-          "id": "GITAI-007.12",
-          "title": "A conflict too large to send"
-        },
-        {
-          "id": "GITAI-007.13",
-          "title": "diff3 conflicts"
-        },
-        {
-          "id": "GITAI-007.14",
-          "title": "What is on screen is what is sent"
-        },
-        {
-          "id": "GITAI-007.15",
-          "title": "From the menu or palette, for the conflict at the cursor"
-        },
-        {
-          "id": "GITAI-007.16",
-          "title": "One suggestion per conflict, kept while I look around"
-        },
-        {
-          "id": "GITAI-007.17",
-          "title": "The split editor"
-        }
-      ]
-    },
-    "GITAI-008": {
-      "id": "GITAI-008",
-      "title": "Keep Current and Incoming straight in Claude's explanation",
-      "area": "GITAI",
-      "spec": "specs/git-claude.md",
-      "line": 619,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/lib/gitAi.ts",
-        "src/lib/gitStatus.ts",
-        "src/lib/gitStash.ts",
-        "src/lib/git.ts",
-        "src/editor/conflicts.ts",
-        "src/lib/gitAssist.ts"
-      ],
-      "tests": [
-        "src/__tests__/gitAi.test.ts",
-        "src/__tests__/conflictSuggest.test.ts",
-        "src/__tests__/gitAssist.test.ts"
-      ],
-      "docs": [
-        "docs/git.md"
-      ],
-      "scenarios": [
-        {
-          "id": "GITAI-008.1",
-          "title": "During a merge"
-        },
-        {
-          "id": "GITAI-008.2",
-          "title": "During a rebase"
-        },
-        {
-          "id": "GITAI-008.3",
-          "title": "While applying patches"
-        },
-        {
-          "id": "GITAI-008.4",
-          "title": "The explanation uses the bar's words"
-        },
-        {
-          "id": "GITAI-008.5",
-          "title": "A conflict outside any operation"
-        },
-        {
-          "id": "GITAI-008.6",
-          "title": "The note follows the operation"
-        },
-        {
-          "id": "GITAI-008.7",
-          "title": "A stash that came back with conflicts"
-        }
-      ]
-    },
-    "GITAI-009": {
-      "id": "GITAI-009",
-      "title": "Summarise a branch or a range of commits",
-      "area": "GITAI",
-      "spec": "specs/git-claude.md",
-      "line": 680,
-      "status": "draft",
-      "commands": [
-        "git.summariseBranch"
-      ],
-      "files": [
-        "src/lib/gitAssist.ts",
-        "src/lib/gitAi.ts",
-        "src/lib/gitCommands.ts",
-        "src/lib/gitRefs.ts",
-        "src/lib/git.ts",
-        "src/components/GraphSummarise.tsx",
-        "src/components/GraphView.tsx",
-        "src/lib/actions.ts",
-        "src/lib/tabLimit.ts",
-        "src/lib/gitApi.ts",
-        "src-tauri/src/git_ai.rs",
-        "src/components/MenuBar.tsx"
-      ],
-      "tests": [
-        "src/__tests__/gitAi.test.ts",
-        "src/__tests__/gitAssist.test.ts",
-        "src/__tests__/graphView.test.tsx",
-        "src-tauri/src/git.rs"
-      ],
-      "docs": [
-        "docs/git.md"
-      ],
-      "scenarios": [
-        {
-          "id": "GITAI-009.1",
-          "title": "Summarise the current branch"
-        },
-        {
-          "id": "GITAI-009.2",
-          "title": "What the summary tab contains"
-        },
-        {
-          "id": "GITAI-009.3",
-          "title": "The summary is only a document"
-        },
-        {
-          "id": "GITAI-009.4",
-          "title": "From a branch label in the graph"
-        },
-        {
-          "id": "GITAI-009.5",
-          "title": "A range of commits from the graph"
-        },
-        {
-          "id": "GITAI-009.6",
-          "title": "No range entry for a commit that is not in the current history"
-        },
-        {
-          "id": "GITAI-009.7",
-          "title": "What is sent"
-        },
-        {
-          "id": "GITAI-009.8",
-          "title": "Cut diffs are stated in the document"
-        },
-        {
-          "id": "GITAI-009.9",
-          "title": "Nothing to summarise"
-        },
-        {
-          "id": "GITAI-009.10",
-          "title": "Too many commits"
-        },
-        {
-          "id": "GITAI-009.11",
-          "title": "Cancelling the picker"
-        },
-        {
-          "id": "GITAI-009.12",
-          "title": "Stopping or failing opens no tab"
-        },
-        {
-          "id": "GITAI-009.13",
-          "title": "The tab limit applies"
-        },
-        {
-          "id": "GITAI-009.14",
-          "title": "A detached HEAD or no repository"
-        },
-        {
-          "id": "GITAI-009.15",
-          "title": "Each summary gets its own tab"
-        }
-      ]
-    },
     "GRAPH-001": {
       "id": "GRAPH-001",
       "title": "Open the commit graph in a tab",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.graph"
       ],
@@ -10723,7 +9031,7 @@
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
       "line": 71,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/gitGraph.ts",
@@ -10780,7 +9088,7 @@
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
       "line": 144,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/gitGraph.ts",
@@ -10821,7 +9129,7 @@
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
       "line": 189,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -10854,7 +9162,7 @@
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
       "line": 223,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -10913,7 +9221,7 @@
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
       "line": 297,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -10959,7 +9267,7 @@
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
       "line": 348,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -11004,7 +9312,7 @@
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
       "line": 401,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -11070,7 +9378,7 @@
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
       "line": 479,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -11126,7 +9434,7 @@
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
       "line": 544,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -11172,7 +9480,7 @@
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
       "line": 593,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -11234,8 +9542,8 @@
       "title": "Check out, cherry-pick or revert a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 671,
-      "status": "draft",
+      "line": 670,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -11289,8 +9597,8 @@
       "title": "Reset the branch to a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 734,
-      "status": "draft",
+      "line": 733,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -11333,8 +9641,8 @@
       "title": "See a stopped operation above the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 781,
-      "status": "draft",
+      "line": 780,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -11384,8 +9692,8 @@
       "title": "Uncommitted changes as the first row of the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 854,
-      "status": "draft",
+      "line": 853,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -11478,8 +9786,8 @@
       "title": "Drag the height of the Search All History results",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 977,
-      "status": "draft",
+      "line": 976,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -11541,8 +9849,8 @@
       "title": "Scroll sideways through a graph wider than 16 lanes",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1052,
-      "status": "draft",
+      "line": 1051,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -11601,8 +9909,8 @@
       "title": "List the history by date",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1130,
-      "status": "draft",
+      "line": 1129,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -11675,8 +9983,8 @@
       "title": "Show Commit Graph is in the palette without a repository",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1220,
-      "status": "draft",
+      "line": 1219,
+      "status": "verified",
       "commands": [
         "git.graph"
       ],
@@ -11727,7 +10035,7 @@
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
       "line": 31,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -11796,7 +10104,7 @@
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
       "line": 112,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.undoLastCommit"
       ],
@@ -11860,7 +10168,7 @@
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
       "line": 179,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphHistory.tsx",
@@ -11929,7 +10237,7 @@
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
       "line": 263,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphHistory.tsx",
@@ -11978,7 +10286,7 @@
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
       "line": 316,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphHistory.tsx",
@@ -12031,7 +10339,7 @@
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
       "line": 372,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/historyEdit.ts",
@@ -12097,7 +10405,7 @@
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
       "line": 453,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.editHistory"
       ],
@@ -12170,7 +10478,7 @@
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
       "line": 532,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/HistoryEditList.tsx",
@@ -12262,7 +10570,7 @@
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
       "line": 651,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/HistoryEditList.tsx",
@@ -12336,7 +10644,7 @@
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
       "line": 738,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/git.ts",
@@ -12415,7 +10723,7 @@
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
       "line": 832,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.forcePush"
       ],
@@ -12460,7 +10768,7 @@
       "area": "JSON",
       "spec": "specs/json.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "view.json"
       ],
@@ -12505,7 +10813,7 @@
       "area": "JSON",
       "spec": "specs/json.md",
       "line": 57,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/JsonPanel.tsx",
@@ -12552,7 +10860,7 @@
       "area": "JSON",
       "spec": "specs/json.md",
       "line": 111,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/JsonPanel.tsx",
@@ -12603,7 +10911,7 @@
       "area": "JSON",
       "spec": "specs/json.md",
       "line": 173,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/JsonPanel.tsx",
@@ -12654,7 +10962,7 @@
       "area": "JSON",
       "spec": "specs/json.md",
       "line": 236,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "json.copyPath",
         "json.copyJsonPath",
@@ -12698,7 +11006,7 @@
       "area": "JSON",
       "spec": "specs/json.md",
       "line": 279,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "json.copyValue"
       ],
@@ -12738,7 +11046,7 @@
       "area": "JSON",
       "spec": "specs/json.md",
       "line": 318,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/CodeEditor.tsx",
@@ -12781,7 +11089,7 @@
       "area": "JSON",
       "spec": "specs/json.md",
       "line": 369,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "json.validate"
       ],
@@ -12839,7 +11147,7 @@
       "area": "JSON",
       "spec": "specs/json.md",
       "line": 440,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "json.format"
       ],
@@ -12894,7 +11202,7 @@
       "area": "JSON",
       "spec": "specs/json.md",
       "line": 507,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "json.minify"
       ],
@@ -12936,7 +11244,7 @@
       "area": "JSON",
       "spec": "specs/json.md",
       "line": 550,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "json.toCsv"
       ],
@@ -12984,7 +11292,7 @@
       "area": "JSON",
       "spec": "specs/json.md",
       "line": 607,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "json.fromCsv"
       ],
@@ -13040,7 +11348,7 @@
       "area": "JSON",
       "spec": "specs/json.md",
       "line": 680,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "json.copyKeys"
       ],
@@ -13079,7 +11387,7 @@
       "area": "JSON",
       "spec": "specs/json.md",
       "line": 718,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "json.format",
         "json.minify",
@@ -13131,7 +11439,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/lspServers.ts",
@@ -13182,7 +11490,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 62,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src-tauri/src/lsp.rs",
@@ -13232,7 +11540,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 114,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src-tauri/src/lsp.rs",
@@ -13291,7 +11599,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 181,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/LspStatus.tsx",
@@ -13337,7 +11645,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 236,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/lspInstall.ts",
@@ -13393,7 +11701,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 296,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.triggerSuggest"
       ],
@@ -13438,7 +11746,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 340,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/lsp.ts",
@@ -13475,7 +11783,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 374,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.signatureHelp"
       ],
@@ -13508,7 +11816,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 407,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.gotoDefinition",
         "code.gotoTypeDefinition",
@@ -13556,7 +11864,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 455,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.findReferences"
       ],
@@ -13595,7 +11903,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 496,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.renameSymbol"
       ],
@@ -13637,7 +11945,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 543,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.nextProblem",
         "code.prevProblem"
@@ -13688,7 +11996,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 597,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "view.problems"
       ],
@@ -13735,7 +12043,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 648,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.formatWithServer"
       ],
@@ -13773,7 +12081,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 687,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/lsp.ts",
@@ -13819,7 +12127,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 733,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -13867,7 +12175,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 784,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "code.restartLanguageServers"
       ],
@@ -13921,7 +12229,7 @@
       "area": "MACRO",
       "spec": "specs/macros.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "macro.toggleRecord"
       ],
@@ -13970,7 +12278,7 @@
       "area": "MACRO",
       "spec": "specs/macros.md",
       "line": 67,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/macros.ts",
@@ -14026,7 +12334,7 @@
       "area": "MACRO",
       "spec": "specs/macros.md",
       "line": 130,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "macro.recordInto"
       ],
@@ -14060,7 +12368,7 @@
       "area": "MACRO",
       "spec": "specs/macros.md",
       "line": 166,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "macro.playLast",
         "macro.play"
@@ -14120,7 +12428,7 @@
       "area": "MACRO",
       "spec": "specs/macros.md",
       "line": 240,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/MacrosPanel.tsx",
@@ -14155,7 +12463,7 @@
       "area": "MACRO",
       "spec": "specs/macros.md",
       "line": 274,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "macro.playToEnd",
         "macro.play"
@@ -14200,7 +12508,7 @@
       "area": "MACRO",
       "spec": "specs/macros.md",
       "line": 318,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "macro.stop",
         "macro.pause"
@@ -14244,7 +12552,7 @@
       "area": "MACRO",
       "spec": "specs/macros.md",
       "line": 368,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/macros.ts"
@@ -14284,7 +12592,7 @@
       "area": "MACRO",
       "spec": "specs/macros.md",
       "line": 410,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/commands.ts",
@@ -14330,7 +12638,7 @@
       "area": "MACRO",
       "spec": "specs/macros.md",
       "line": 461,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "macro.panel",
         "macro.edit",
@@ -14394,7 +12702,7 @@
       "area": "MACRO",
       "spec": "specs/macros.md",
       "line": 535,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/MacroSteps.tsx",
@@ -14448,7 +12756,7 @@
       "area": "MACRO",
       "spec": "specs/macros.md",
       "line": 599,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/macros.ts",
@@ -14499,7 +12807,7 @@
       "area": "MACRO",
       "spec": "specs/macros.md",
       "line": 661,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/macros.ts",
@@ -14557,8 +12865,8 @@
       "title": "Merge and rebase from a commit's right-click menu in the graph",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 55,
-      "status": "draft",
+      "line": 53,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -14609,8 +12917,8 @@
       "title": "Merge and rebase from a branch or tag label in the graph",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 112,
-      "status": "draft",
+      "line": 110,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
@@ -14667,8 +12975,8 @@
       "title": "Merge Branch… and Rebase onto Branch… from the panel, the Git menu and the palette",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 181,
-      "status": "draft",
+      "line": 179,
+      "status": "verified",
       "commands": [
         "git.mergeBranch",
         "git.rebaseBranch",
@@ -14744,8 +13052,8 @@
       "title": "Merge asks first, then merges",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 264,
-      "status": "draft",
+      "line": 262,
+      "status": "verified",
       "commands": [
         "git.mergeRef"
       ],
@@ -14811,8 +13119,8 @@
       "title": "Rebase asks first, then rebases",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 343,
-      "status": "draft",
+      "line": 341,
+      "status": "verified",
       "commands": [
         "git.rebaseOnto"
       ],
@@ -14869,8 +13177,8 @@
       "title": "Rebase warns when commits to replay are already pushed",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 409,
-      "status": "draft",
+      "line": 407,
+      "status": "verified",
       "commands": [
         "git.rebaseOnto"
       ],
@@ -14923,8 +13231,8 @@
       "title": "A merge or rebase that stops on a conflict",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 468,
-      "status": "draft",
+      "line": 466,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/git.ts",
@@ -14985,8 +13293,8 @@
       "title": "Refuse to start when it is not safe",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 540,
-      "status": "draft",
+      "line": 538,
+      "status": "verified",
       "commands": [
         "git.mergeBranch",
         "git.rebaseBranch",
@@ -15064,8 +13372,8 @@
       "title": "Force Push after pushed commits were rewritten",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 635,
-      "status": "draft",
+      "line": 633,
+      "status": "verified",
       "commands": [
         "git.forcePush"
       ],
@@ -15152,7 +13460,7 @@
       "area": "SAFE",
       "spec": "specs/git-safety.md",
       "line": 66,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.switchBranch",
         "git.checkoutTo",
@@ -15235,7 +13543,7 @@
       "area": "SAFE",
       "spec": "specs/git-safety.md",
       "line": 165,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.switchBranch",
         "git.checkoutTo",
@@ -15304,7 +13612,7 @@
       "area": "SAFE",
       "spec": "specs/git-safety.md",
       "line": 246,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.switchBranch",
         "git.checkoutTo",
@@ -15407,7 +13715,7 @@
       "area": "SAFE",
       "spec": "specs/git-safety.md",
       "line": 347,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/git.ts",
@@ -15476,7 +13784,7 @@
       "area": "SAFE",
       "spec": "specs/git-safety.md",
       "line": 430,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.switchBranch",
         "git.checkoutTo",
@@ -15563,7 +13871,7 @@
       "area": "SAFE",
       "spec": "specs/git-safety.md",
       "line": 513,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.discardChange",
         "git.discardLines",
@@ -15652,7 +13960,7 @@
       "area": "SAFE",
       "spec": "specs/git-safety.md",
       "line": 607,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/actions.ts",
@@ -15708,7 +14016,7 @@
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "script.panel",
         "view.scripts"
@@ -15755,7 +14063,7 @@
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
       "line": 57,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "script.new"
       ],
@@ -15797,7 +14105,7 @@
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
       "line": 104,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "script.edit"
       ],
@@ -15835,7 +14143,7 @@
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
       "line": 141,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "script.runActive",
         "script.run"
@@ -15906,7 +14214,7 @@
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
       "line": 226,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/commands.ts",
@@ -15951,7 +14259,7 @@
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
       "line": 271,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/scripting.ts",
@@ -16015,7 +14323,7 @@
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
       "line": 348,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/scriptWorker.ts",
@@ -16058,7 +14366,7 @@
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
       "line": 400,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/scriptWorker.ts",
@@ -16101,7 +14409,7 @@
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
       "line": 449,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/scriptWorker.ts",
@@ -16152,7 +14460,7 @@
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
       "line": 509,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/scripting.ts",
@@ -16206,7 +14514,7 @@
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
       "line": 571,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/ScriptsPanel.tsx",
@@ -16246,7 +14554,7 @@
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
       "line": 617,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/scripting.ts",
@@ -16286,7 +14594,7 @@
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
       "line": 662,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/scripting.ts",
@@ -16329,7 +14637,7 @@
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
       "line": 709,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "help.scriptApi"
       ],
@@ -16363,7 +14671,7 @@
       "area": "SCRIPT",
       "spec": "specs/scripting.md",
       "line": 741,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/scripting.ts",
@@ -16403,7 +14711,7 @@
       "area": "SEARCH",
       "spec": "specs/search.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "find.inFiles",
         "find.replaceInFiles"
@@ -16459,7 +14767,7 @@
       "area": "SEARCH",
       "spec": "specs/search.md",
       "line": 70,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SearchPanel.tsx",
@@ -16517,7 +14825,7 @@
       "area": "SEARCH",
       "spec": "specs/search.md",
       "line": 140,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SearchPanel.tsx",
@@ -16579,7 +14887,7 @@
       "area": "SEARCH",
       "spec": "specs/search.md",
       "line": 213,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SearchPanel.tsx",
@@ -16645,7 +14953,7 @@
       "area": "SEARCH",
       "spec": "specs/search.md",
       "line": 297,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SearchPanel.tsx",
@@ -16699,7 +15007,7 @@
       "area": "SEARCH",
       "spec": "specs/search.md",
       "line": 364,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SearchPanel.tsx",
@@ -16766,7 +15074,7 @@
       "area": "SEARCH",
       "spec": "specs/search.md",
       "line": 444,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SearchPanel.tsx",
@@ -16822,7 +15130,7 @@
       "area": "SEARCH",
       "spec": "specs/search.md",
       "line": 512,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SearchPanel.tsx",
@@ -16879,7 +15187,7 @@
       "area": "SEARCH",
       "spec": "specs/search.md",
       "line": 577,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "find.nextResult",
         "find.prevResult"
@@ -16931,7 +15239,7 @@
       "area": "SEARCH",
       "spec": "specs/search.md",
       "line": 632,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SearchPanel.tsx",
@@ -16980,7 +15288,7 @@
       "area": "SEARCH",
       "spec": "specs/search.md",
       "line": 687,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SearchPanel.tsx",
@@ -17031,7 +15339,7 @@
       "area": "SEARCH",
       "spec": "specs/search.md",
       "line": 745,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SearchPanel.tsx",
@@ -17110,7 +15418,7 @@
       "area": "SEARCH",
       "spec": "specs/search.md",
       "line": 845,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src-tauri/src/search.rs",
@@ -17152,7 +15460,7 @@
       "area": "SEARCH",
       "spec": "specs/search.md",
       "line": 891,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src-tauri/src/search.rs",
@@ -17199,7 +15507,7 @@
       "area": "SEARCH",
       "spec": "specs/search.md",
       "line": 942,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SearchPanel.tsx",
@@ -17255,7 +15563,7 @@
       "area": "SEARCH",
       "spec": "specs/search.md",
       "line": 1013,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "find.undoReplaceInFiles"
       ],
@@ -17316,7 +15624,7 @@
       "area": "SET",
       "spec": "specs/settings.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "view.settings"
       ],
@@ -17369,7 +15677,7 @@
       "area": "SET",
       "spec": "specs/settings.md",
       "line": 67,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -17409,7 +15717,7 @@
       "area": "SET",
       "spec": "specs/settings.md",
       "line": 110,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/actions.ts",
@@ -17460,7 +15768,7 @@
       "area": "SET",
       "spec": "specs/settings.md",
       "line": 176,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -17515,7 +15823,7 @@
       "area": "SET",
       "spec": "specs/settings.md",
       "line": 240,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -17557,7 +15865,7 @@
       "area": "SET",
       "spec": "specs/settings.md",
       "line": 287,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "view.toggleTheme"
       ],
@@ -17603,7 +15911,7 @@
       "area": "SET",
       "spec": "specs/settings.md",
       "line": 338,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "view.zoomIn",
         "view.zoomInPlus",
@@ -17660,7 +15968,7 @@
       "area": "SET",
       "spec": "specs/settings.md",
       "line": 401,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "view.toggleWrap",
         "view.toggleWhitespace",
@@ -17715,7 +16023,7 @@
       "area": "SET",
       "spec": "specs/settings.md",
       "line": 463,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -17762,7 +16070,7 @@
       "area": "SET",
       "spec": "specs/settings.md",
       "line": 525,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -17804,7 +16112,7 @@
       "area": "SET",
       "spec": "specs/settings.md",
       "line": 567,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -17854,7 +16162,7 @@
       "area": "SET",
       "spec": "specs/settings.md",
       "line": 620,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -17891,7 +16199,7 @@
       "area": "SET",
       "spec": "specs/settings.md",
       "line": 661,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -17920,7 +16228,7 @@
       "area": "SET",
       "spec": "specs/settings.md",
       "line": 693,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -17962,77 +16270,13 @@
         }
       ]
     },
-    "SET-015": {
-      "id": "SET-015",
-      "title": "Claude Code settings",
-      "area": "SET",
-      "spec": "specs/settings.md",
-      "line": 744,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src/components/panels/SettingsPanel.tsx",
-        "src/lib/claude.ts",
-        "src/lib/actions.ts",
-        "src/lib/types.ts",
-        "src/lib/gitAi.ts",
-        "src/components/Select.tsx"
-      ],
-      "tests": [],
-      "docs": [
-        "docs/settings.md",
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "SET-015.1",
-          "title": "Turning Claude Code off hides its settings"
-        },
-        {
-          "id": "SET-015.2",
-          "title": "Turning it off with Claude tabs open asks first"
-        },
-        {
-          "id": "SET-015.3",
-          "title": "Cancelling keeps it on"
-        },
-        {
-          "id": "SET-015.4",
-          "title": "The location row reports what was found"
-        },
-        {
-          "id": "SET-015.5",
-          "title": "Claude Code is not found"
-        },
-        {
-          "id": "SET-015.6",
-          "title": "A pasted path loses its quotes"
-        },
-        {
-          "id": "SET-015.7",
-          "title": "Model"
-        },
-        {
-          "id": "SET-015.8",
-          "title": "Permissions"
-        },
-        {
-          "id": "SET-015.9",
-          "title": "Model for git helpers"
-        },
-        {
-          "id": "SET-015.10",
-          "title": "Ask before sending git content to Claude"
-        }
-      ]
-    },
     "SET-016": {
       "id": "SET-016",
       "title": "JSON pretty-print indent",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 818,
-      "status": "draft",
+      "line": 744,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -18059,8 +16303,8 @@
       "title": "Themed dropdown lists",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 845,
-      "status": "draft",
+      "line": 771,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/Select.tsx",
@@ -18115,8 +16359,8 @@
       "title": "Help \"i\" icons",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 919,
-      "status": "draft",
+      "line": 845,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/InfoTip.tsx",
@@ -18153,8 +16397,8 @@
       "title": "Git settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 962,
-      "status": "draft",
+      "line": 888,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -18193,8 +16437,8 @@
       "title": "Change keyboard shortcuts",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 1000,
-      "status": "draft",
+      "line": 926,
+      "status": "verified",
       "commands": [
         "view.shortcuts"
       ],
@@ -18273,7 +16517,7 @@
       "area": "SPLIT",
       "spec": "specs/split.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "view.splitEditor"
       ],
@@ -18323,7 +16567,7 @@
       "area": "SPLIT",
       "spec": "specs/split.md",
       "line": 62,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "view.focusLeftPane",
         "view.focusRightPane"
@@ -18386,7 +16630,7 @@
       "area": "SPLIT",
       "spec": "specs/split.md",
       "line": 130,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.openToSide"
       ],
@@ -18421,7 +16665,7 @@
       "area": "SPLIT",
       "spec": "specs/split.md",
       "line": 165,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/store.ts",
@@ -18455,7 +16699,7 @@
       "area": "SPLIT",
       "spec": "specs/split.md",
       "line": 199,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/editor/manager.ts",
@@ -18497,7 +16741,7 @@
       "area": "SPLIT",
       "spec": "specs/split.md",
       "line": 244,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/SplitDivider.tsx",
@@ -18534,7 +16778,7 @@
       "area": "SPLIT",
       "spec": "specs/split.md",
       "line": 283,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/store.ts",
@@ -18581,7 +16825,7 @@
       "area": "STAGE",
       "spec": "specs/git-staging.md",
       "line": 31,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.stageChange"
       ],
@@ -18656,7 +16900,7 @@
       "area": "STAGE",
       "spec": "specs/git-staging.md",
       "line": 116,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.unstageChange"
       ],
@@ -18708,7 +16952,7 @@
       "area": "STAGE",
       "spec": "specs/git-staging.md",
       "line": 172,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.discardChange"
       ],
@@ -18769,7 +17013,7 @@
       "area": "STAGE",
       "spec": "specs/git-staging.md",
       "line": 236,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.stageLines",
         "git.unstageLines",
@@ -18843,7 +17087,7 @@
       "area": "STAGE",
       "spec": "specs/git-staging.md",
       "line": 322,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.stageChange",
         "git.stageLines",
@@ -18894,7 +17138,7 @@
       "area": "STAGE",
       "spec": "specs/git-staging.md",
       "line": 378,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src-tauri/src/git/staging.rs",
@@ -18945,7 +17189,7 @@
       "area": "STAGE",
       "spec": "specs/git-staging.md",
       "line": 441,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.stageChange",
         "git.unstageChange",
@@ -19018,7 +17262,7 @@
       "area": "STAGE",
       "spec": "specs/git-staging.md",
       "line": 518,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.stageChange",
         "git.unstageChange",
@@ -19089,7 +17333,7 @@
       "area": "STAGE",
       "spec": "specs/git-staging.md",
       "line": 591,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/gitStaging.ts",
@@ -19155,7 +17399,7 @@
       "area": "STASH",
       "spec": "specs/git-stash.md",
       "line": 26,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.stash"
       ],
@@ -19218,7 +17462,7 @@
       "area": "STASH",
       "spec": "specs/git-stash.md",
       "line": 98,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.stash"
       ],
@@ -19273,7 +17517,7 @@
       "area": "STASH",
       "spec": "specs/git-stash.md",
       "line": 155,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.stash"
       ],
@@ -19322,7 +17566,7 @@
       "area": "STASH",
       "spec": "specs/git-stash.md",
       "line": 201,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.showStashes"
       ],
@@ -19389,7 +17633,7 @@
       "area": "STASH",
       "spec": "specs/git-stash.md",
       "line": 270,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/StashSection.tsx",
@@ -19449,7 +17693,7 @@
       "area": "STASH",
       "spec": "specs/git-stash.md",
       "line": 333,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.stashApply"
       ],
@@ -19522,7 +17766,7 @@
       "area": "STASH",
       "spec": "specs/git-stash.md",
       "line": 415,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.stashPop"
       ],
@@ -19570,7 +17814,7 @@
       "area": "STASH",
       "spec": "specs/git-stash.md",
       "line": 462,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.stashDrop"
       ],
@@ -19631,7 +17875,7 @@
       "area": "STASH",
       "spec": "specs/git-stash.md",
       "line": 524,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.stashApply",
         "git.stashPop"
@@ -19728,7 +17972,7 @@
       "area": "STASH",
       "spec": "specs/git-stash.md",
       "line": 644,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.graph"
       ],
@@ -19816,7 +18060,7 @@
       "area": "STASH",
       "spec": "specs/git-stash.md",
       "line": 738,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "git.stash",
         "git.stashApply",
@@ -19883,7 +18127,7 @@
       "area": "TAB",
       "spec": "specs/tabs.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/TitleBar.tsx",
@@ -19923,7 +18167,7 @@
       "area": "TAB",
       "spec": "specs/tabs.md",
       "line": 57,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.nextTab",
         "file.prevTab",
@@ -19972,7 +18216,7 @@
       "area": "TAB",
       "spec": "specs/tabs.md",
       "line": 107,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/TitleBar.tsx",
@@ -20013,7 +18257,7 @@
       "area": "TAB",
       "spec": "specs/tabs.md",
       "line": 150,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/TitleBar.tsx",
@@ -20050,7 +18294,7 @@
       "area": "TAB",
       "spec": "specs/tabs.md",
       "line": 189,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.close",
         "file.closeF4"
@@ -20061,7 +18305,6 @@
         "src/lib/commands.ts",
         "src/components/TitleBar.tsx",
         "src/editor/manager.ts",
-        "src/lib/claude.ts",
         "src/lib/terminal.ts",
         "src/lib/diff.ts",
         "src/lib/ipc.ts",
@@ -20108,8 +18351,8 @@
       "title": "Close other tabs or all tabs",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 254,
-      "status": "draft",
+      "line": 253,
+      "status": "verified",
       "commands": [
         "file.closeOthers",
         "file.closeAll"
@@ -20167,8 +18410,8 @@
       "title": "Act on a tab from its right-click menu",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 317,
-      "status": "draft",
+      "line": 316,
+      "status": "verified",
       "commands": [
         "file.close",
         "file.closeOthers",
@@ -20260,8 +18503,8 @@
       "title": "Preview tabs while browsing the Explorer",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 406,
-      "status": "draft",
+      "line": 405,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/actions.ts",
@@ -20313,8 +18556,8 @@
       "title": "Limit how many tabs are open",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 466,
-      "status": "draft",
+      "line": 465,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/tabLimit.ts",
@@ -20379,8 +18622,8 @@
       "title": "Reopen a tab I closed",
       "area": "TAB",
       "spec": "specs/tabs.md",
-      "line": 541,
-      "status": "draft",
+      "line": 540,
+      "status": "verified",
       "commands": [
         "file.reopenClosedTab"
       ],
@@ -20428,125 +18671,13 @@
         }
       ]
     },
-    "TERM-001": {
-      "id": "TERM-001",
-      "title": "Open a Claude CLI tab in a folder",
-      "area": "TERM",
-      "spec": "specs/terminal.md",
-      "line": 10,
-      "status": "draft",
-      "commands": [
-        "claude.openTerminal"
-      ],
-      "files": [
-        "src/lib/commands.ts",
-        "src/lib/terminal.ts",
-        "src/components/TerminalView.tsx",
-        "src-tauri/src/pty.rs",
-        "src-tauri/src/claude.rs",
-        "src/components/panels/ExplorerPanel.tsx",
-        "src/components/ClaudeView.tsx",
-        "src/components/MenuBar.tsx",
-        "src/components/TitleBar.tsx",
-        "src/App.tsx",
-        "src/lib/store.ts"
-      ],
-      "tests": [
-        "src/__tests__/claudeSession.test.ts"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "TERM-001.1",
-          "title": "From the Explorer"
-        },
-        {
-          "id": "TERM-001.2",
-          "title": "Folder fallback of the command"
-        },
-        {
-          "id": "TERM-001.3",
-          "title": "Every request opens a new terminal"
-        },
-        {
-          "id": "TERM-001.4",
-          "title": "From a Claude tab"
-        },
-        {
-          "id": "TERM-001.5",
-          "title": "The tab limit applies"
-        },
-        {
-          "id": "TERM-001.6",
-          "title": "Claude Code is not installed"
-        },
-        {
-          "id": "TERM-001.7",
-          "title": "Hidden while the integration is off"
-        }
-      ]
-    },
-    "TERM-002": {
-      "id": "TERM-002",
-      "title": "Continue a conversation in a terminal",
-      "area": "TERM",
-      "spec": "specs/terminal.md",
-      "line": 78,
-      "status": "draft",
-      "commands": [
-        "claude.openTerminal"
-      ],
-      "files": [
-        "src/components/ClaudeView.tsx",
-        "src/lib/commands.ts",
-        "src/lib/terminal.ts",
-        "src/components/TerminalView.tsx",
-        "src-tauri/src/pty.rs",
-        "src-tauri/src/claude.rs"
-      ],
-      "tests": [
-        "src-tauri/src/pty.rs",
-        "src/__tests__/claudeSession.test.ts"
-      ],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "TERM-002.1",
-          "title": "Started with a conversation"
-        },
-        {
-          "id": "TERM-002.2",
-          "title": "Only the first start resumes"
-        },
-        {
-          "id": "TERM-002.3",
-          "title": "An id that is not a conversation id is ignored"
-        },
-        {
-          "id": "TERM-002.4",
-          "title": "The other entry points start a fresh session"
-        },
-        {
-          "id": "TERM-002.5",
-          "title": "Continue a past conversation in a terminal"
-        },
-        {
-          "id": "TERM-002.6",
-          "title": "Not for the conversation open in the tab"
-        }
-      ]
-    },
     "TERM-003": {
       "id": "TERM-003",
       "title": "Keys go to the program",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 125,
-      "status": "draft",
+      "line": 10,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/App.tsx",
@@ -20558,7 +18689,7 @@
         "src/__tests__/terminalView.test.tsx"
       ],
       "docs": [
-        "docs/claude-code.md"
+        "docs/terminal.md"
       ],
       "scenarios": [
         {
@@ -20584,8 +18715,8 @@
       "title": "Copy and paste in the terminal",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 168,
-      "status": "draft",
+      "line": 53,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/TerminalView.tsx"
@@ -20594,7 +18725,7 @@
         "src/__tests__/terminalView.test.tsx"
       ],
       "docs": [
-        "docs/claude-code.md"
+        "docs/terminal.md"
       ],
       "scenarios": [
         {
@@ -20620,8 +18751,8 @@
       "title": "The terminal fits the tab and follows the theme",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 204,
-      "status": "draft",
+      "line": 89,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/TerminalView.tsx",
@@ -20633,7 +18764,7 @@
         "src-tauri/src/pty.rs"
       ],
       "docs": [
-        "docs/claude-code.md"
+        "docs/terminal.md"
       ],
       "scenarios": [
         {
@@ -20659,16 +18790,20 @@
         {
           "id": "TERM-005.6",
           "title": "Scrollback"
+        },
+        {
+          "id": "TERM-005.7",
+          "title": "The program is told it has a colour terminal"
         }
       ]
     },
     "TERM-006": {
       "id": "TERM-006",
-      "title": "When the program ends",
+      "title": "When the shell ends",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 249,
-      "status": "draft",
+      "line": 138,
+      "status": "verified",
       "commands": [],
       "files": [
         "src-tauri/src/pty.rs",
@@ -20676,16 +18811,15 @@
         "src/lib/terminal.ts"
       ],
       "tests": [
-        "src/__tests__/claudeSession.test.ts",
         "src/__tests__/terminalView.test.tsx"
       ],
       "docs": [
-        "docs/claude-code.md"
+        "docs/terminal.md"
       ],
       "scenarios": [
         {
           "id": "TERM-006.1",
-          "title": "A normal exit"
+          "title": "A normal exit closes the tab"
         },
         {
           "id": "TERM-006.2",
@@ -20710,22 +18844,20 @@
       "title": "Closing terminal tabs",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 291,
-      "status": "draft",
+      "line": 180,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/actions.ts",
         "src/lib/terminal.ts",
-        "src/lib/claude.ts",
         "src-tauri/src/pty.rs",
-        "src/lib/tabLimit.ts",
-        "src/components/panels/SettingsPanel.tsx"
+        "src/lib/tabLimit.ts"
       ],
       "tests": [
-        "src/__tests__/claudeSession.test.ts"
+        "src/__tests__/tabLimit.test.ts"
       ],
       "docs": [
-        "docs/claude-code.md"
+        "docs/terminal.md"
       ],
       "scenarios": [
         {
@@ -20739,45 +18871,6 @@
         {
           "id": "TERM-007.3",
           "title": "Terminal tabs are not restored"
-        },
-        {
-          "id": "TERM-007.4",
-          "title": "Closed with the integration"
-        }
-      ]
-    },
-    "TERM-008": {
-      "id": "TERM-008",
-      "title": "A clean environment for the program",
-      "area": "TERM",
-      "spec": "specs/terminal.md",
-      "line": 335,
-      "status": "draft",
-      "commands": [],
-      "files": [
-        "src-tauri/src/claude.rs",
-        "src-tauri/src/pty.rs"
-      ],
-      "tests": [],
-      "docs": [
-        "docs/claude-code.md"
-      ],
-      "scenarios": [
-        {
-          "id": "TERM-008.1",
-          "title": "Session markers are not inherited"
-        },
-        {
-          "id": "TERM-008.2",
-          "title": "My configuration is kept"
-        },
-        {
-          "id": "TERM-008.3",
-          "title": "The program is told it has a colour terminal"
-        },
-        {
-          "id": "TERM-008.4",
-          "title": "The folder must exist"
         }
       ]
     },
@@ -20786,8 +18879,8 @@
       "title": "One-off command terminals",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 368,
-      "status": "draft",
+      "line": 216,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/terminal.ts",
@@ -20796,7 +18889,6 @@
         "src/lib/lspInstall.ts"
       ],
       "tests": [
-        "src/__tests__/claudeSession.test.ts",
         "src/__tests__/lspInstall.test.ts",
         "src/__tests__/terminalView.test.tsx"
       ],
@@ -20827,10 +18919,6 @@
         {
           "id": "TERM-009.6",
           "title": "Closing while it runs asks"
-        },
-        {
-          "id": "TERM-009.7",
-          "title": "Available without Claude Code"
         }
       ]
     },
@@ -20839,8 +18927,8 @@
       "title": "Shell terminal tabs",
       "area": "TERM",
       "spec": "specs/terminal.md",
-      "line": 418,
-      "status": "draft",
+      "line": 262,
+      "status": "verified",
       "commands": [
         "terminal.new"
       ],
@@ -20906,6 +18994,10 @@
         {
           "id": "TERM-010.10",
           "title": "A shell that was uninstalled"
+        },
+        {
+          "id": "TERM-010.11",
+          "title": "The folder must exist"
         }
       ]
     },
@@ -21223,7 +19315,7 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "app.exit"
       ],
@@ -21267,7 +19359,7 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 61,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/TitleBar.tsx",
@@ -21313,7 +19405,7 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 112,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "help.scriptApi"
       ],
@@ -21383,7 +19475,7 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 204,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/MenuBar.tsx",
@@ -21458,7 +19550,7 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 326,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "view.commandPalette",
         "view.commandPaletteF1"
@@ -21519,7 +19611,7 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 399,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "file.quickOpen"
       ],
@@ -21565,7 +19657,7 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 449,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "goto.line"
       ],
@@ -21618,7 +19710,7 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 513,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/commands.ts",
@@ -21655,7 +19747,7 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 558,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "ui.escape"
       ],
@@ -21715,7 +19807,7 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 638,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/dialogs.ts",
@@ -21761,7 +19853,7 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 700,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/Toasts.tsx",
@@ -21796,7 +19888,7 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 740,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "view.explorer",
         "view.json",
@@ -21853,7 +19945,7 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 799,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/panels.ts",
@@ -21921,7 +20013,7 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 888,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "view.toggleSidebar"
       ],
@@ -21968,7 +20060,7 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 938,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/Sidebar.tsx",
@@ -22007,7 +20099,7 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 983,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "view.togglePanel",
         "view.problems"
@@ -22071,11 +20163,10 @@
       "area": "UI",
       "spec": "specs/app-shell.md",
       "line": 1055,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/components/StatusBar.tsx",
-        "src/components/GitAssistStatus.tsx",
         "src/lib/store.ts",
         "src/editor/manager.ts",
         "src/lib/actions.ts",
@@ -22105,10 +20196,6 @@
         {
           "id": "UI-017.5",
           "title": "No document"
-        },
-        {
-          "id": "UI-017.6",
-          "title": "A running Claude git request"
         }
       ]
     },
@@ -22117,8 +20204,8 @@
       "title": "Status bar pickers for indentation, encoding, line endings and language",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1109,
-      "status": "draft",
+      "line": 1102,
+      "status": "verified",
       "commands": [
         "view.setTabSize",
         "file.setEncoding",
@@ -22184,8 +20271,8 @@
       "title": "Light and dark themes",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1191,
-      "status": "draft",
+      "line": 1184,
+      "status": "verified",
       "commands": [
         "view.toggleTheme"
       ],
@@ -22234,8 +20321,8 @@
       "title": "Zoom and editor view toggles",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1246,
-      "status": "draft",
+      "line": 1239,
+      "status": "verified",
       "commands": [
         "view.zoomIn",
         "view.zoomInPlus",
@@ -22292,8 +20379,8 @@
       "title": "Keyboard focus returns to the active tab",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1310,
-      "status": "draft",
+      "line": 1303,
+      "status": "verified",
       "commands": [],
       "files": [
         "src/editor/manager.ts",
@@ -22303,7 +20390,6 @@
         "src/components/StatusBar.tsx",
         "src/components/Sidebar.tsx",
         "src/components/BigFileView.tsx",
-        "src/components/ClaudeView.tsx",
         "src/components/TerminalView.tsx",
         "src/components/DiffView.tsx",
         "src/components/GraphView.tsx"
@@ -22338,8 +20424,8 @@
       "title": "Tab key can leave the editor",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1361,
-      "status": "draft",
+      "line": 1353,
+      "status": "verified",
       "commands": [
         "view.toggleTabFocus"
       ],
@@ -22378,8 +20464,8 @@
       "title": "Single instance and files handed over by Windows",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1406,
-      "status": "draft",
+      "line": 1398,
+      "status": "verified",
       "commands": [],
       "files": [
         "src-tauri/src/lib.rs",
@@ -22430,8 +20516,8 @@
       "title": "Window size and position are remembered",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1465,
-      "status": "draft",
+      "line": 1457,
+      "status": "verified",
       "commands": [],
       "files": [
         "src-tauri/src/lib.rs",
@@ -22468,8 +20554,8 @@
       "title": "Notice after an unexpected exit",
       "area": "UI",
       "spec": "specs/app-shell.md",
-      "line": 1507,
-      "status": "draft",
+      "line": 1499,
+      "status": "verified",
       "commands": [],
       "files": [
         "src-tauri/src/lib.rs",
@@ -22499,7 +20585,7 @@
       "area": "UPD",
       "spec": "specs/updates.md",
       "line": 10,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "help.checkUpdates"
       ],
@@ -22544,7 +20630,7 @@
       "area": "UPD",
       "spec": "specs/updates.md",
       "line": 57,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/App.tsx",
@@ -22587,13 +20673,13 @@
       "area": "UPD",
       "spec": "specs/updates.md",
       "line": 103,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src/lib/updater.ts",
         "src/lib/actions.ts",
-        "src/lib/claude.ts",
         "src/lib/lsp.ts",
+        "src/lib/terminal.ts",
         "src/editor/manager.ts",
         "src-tauri/tauri.conf.json"
       ],
@@ -22644,7 +20730,7 @@
       "area": "UPD",
       "spec": "specs/updates.md",
       "line": 169,
-      "status": "draft",
+      "status": "verified",
       "commands": [
         "help.about"
       ],
@@ -22682,7 +20768,7 @@
       "area": "UPD",
       "spec": "specs/updates.md",
       "line": 212,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "src-tauri/tauri.conf.json",
@@ -22720,7 +20806,7 @@
       "area": "UPD",
       "spec": "specs/updates.md",
       "line": 253,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "scripts/release.ps1",
@@ -22785,7 +20871,7 @@
       "area": "UPD",
       "spec": "specs/updates.md",
       "line": 331,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "scripts/bump.ps1",
@@ -22830,7 +20916,7 @@
       "area": "UPD",
       "spec": "specs/updates.md",
       "line": 381,
-      "status": "draft",
+      "status": "verified",
       "commands": [],
       "files": [
         "scripts/quick-release.ps1"
@@ -22901,24 +20987,6 @@
       "BIG-017",
       "BIG-018"
     ],
-    "src-tauri/src/claude.rs": [
-      "CLAUDE-002",
-      "CLAUDE-003",
-      "CLAUDE-004",
-      "CLAUDE-008",
-      "CLAUDE-009",
-      "CLAUDE-012",
-      "CLAUDE-016",
-      "CLAUDE-017",
-      "CLAUDE-018",
-      "CLAUDE-020",
-      "GITAI-003",
-      "GITAI-005",
-      "GITAI-006",
-      "TERM-001",
-      "TERM-002",
-      "TERM-008"
-    ],
     "src-tauri/src/fileops.rs": [
       "EXPL-011"
     ],
@@ -22979,7 +21047,6 @@
       "GIT-022",
       "GIT-023",
       "GIT-024",
-      "GITAI-003",
       "GRAPH-002",
       "GRAPH-004",
       "GRAPH-005",
@@ -23032,11 +21099,6 @@
       "STAGE-004",
       "STAGE-006",
       "STAGE-009"
-    ],
-    "src-tauri/src/git_ai.rs": [
-      "GITAI-003",
-      "GITAI-004",
-      "GITAI-009"
     ],
     "src-tauri/src/json_tools.rs": [
       "BIG-017",
@@ -23111,13 +21173,10 @@
       "SET-014"
     ],
     "src-tauri/src/pty.rs": [
-      "TERM-001",
-      "TERM-002",
       "TERM-003",
       "TERM-005",
       "TERM-006",
       "TERM-007",
-      "TERM-008",
       "TERM-009",
       "TERM-010"
     ],
@@ -23138,8 +21197,6 @@
       "FILE-003"
     ],
     "src-tauri/src/writer.rs": [
-      "CLAUDE-004",
-      "CLAUDE-020",
       "FILE-017",
       "LSP-001",
       "TERM-003"
@@ -23162,9 +21219,6 @@
       "BIG-002",
       "BIG-004",
       "BIG-019",
-      "CLAUDE-003",
-      "CLAUDE-012",
-      "CLAUDE-013",
       "DIFF-001",
       "EDIT-014",
       "EDIT-022",
@@ -23198,7 +21252,6 @@
       "TAB-002",
       "TAB-003",
       "TAB-005",
-      "TERM-001",
       "TERM-003",
       "TERM-010",
       "THREEWAY-001",
@@ -23249,26 +21302,6 @@
     "src/components/BrandIcon.tsx": [
       "FILE-020",
       "UI-001"
-    ],
-    "src/components/ClaudeView.tsx": [
-      "CLAUDE-003",
-      "CLAUDE-004",
-      "CLAUDE-005",
-      "CLAUDE-006",
-      "CLAUDE-007",
-      "CLAUDE-008",
-      "CLAUDE-009",
-      "CLAUDE-010",
-      "CLAUDE-011",
-      "CLAUDE-012",
-      "CLAUDE-013",
-      "CLAUDE-014",
-      "CLAUDE-015",
-      "CLAUDE-017",
-      "CLAUDE-018",
-      "TERM-001",
-      "TERM-002",
-      "UI-021"
     ],
     "src/components/CodeEditor.tsx": [
       "EDIT-014",
@@ -23339,10 +21372,6 @@
       "FIND-007",
       "FIND-010"
     ],
-    "src/components/GitAssistStatus.tsx": [
-      "GITAI-005",
-      "UI-017"
-    ],
     "src/components/GraphCompare.tsx": [
       "COMMITCMP-002",
       "COMMITCMP-003",
@@ -23363,10 +21392,6 @@
     "src/components/GraphLaneScroll.tsx": [
       "GRAPH-017"
     ],
-    "src/components/GraphSummarise.tsx": [
-      "GITAI-001",
-      "GITAI-009"
-    ],
     "src/components/GraphUncommitted.tsx": [
       "GRAPH-015"
     ],
@@ -23385,8 +21410,6 @@
       "COMMITCMP-005",
       "CONFLICT-011",
       "CONFLICT-014",
-      "GITAI-001",
-      "GITAI-009",
       "GRAPH-001",
       "GRAPH-002",
       "GRAPH-003",
@@ -23443,14 +21466,8 @@
       "LSP-017",
       "UI-016"
     ],
-    "src/components/Markdown.tsx": [
-      "CLAUDE-014"
-    ],
     "src/components/MenuBar.tsx": [
       "BRANCH-002",
-      "CLAUDE-001",
-      "CLAUDE-003",
-      "CLAUDE-013",
       "COMMITCMP-005",
       "CONFLICT-002",
       "DIFF-001",
@@ -23480,10 +21497,6 @@
       "FMT-001",
       "GIT-004",
       "GIT-006",
-      "GITAI-001",
-      "GITAI-003",
-      "GITAI-007",
-      "GITAI-009",
       "GRAPH-001",
       "HISTORY-002",
       "HISTORY-007",
@@ -23501,7 +21514,6 @@
       "STASH-011",
       "TAB-006",
       "TAB-010",
-      "TERM-001",
       "TERM-010",
       "THREEWAY-001",
       "UI-002",
@@ -23525,7 +21537,6 @@
       "GIT-025",
       "HISTORY-008",
       "SET-007",
-      "SET-015",
       "SET-017"
     ],
     "src/components/Sidebar.tsx": [
@@ -23561,7 +21572,6 @@
       "GIT-015",
       "GIT-025",
       "GIT-026",
-      "GITAI-005",
       "LSP-004",
       "MACRO-001",
       "MACRO-004",
@@ -23576,8 +21586,6 @@
       "UI-022"
     ],
     "src/components/TerminalView.tsx": [
-      "TERM-001",
-      "TERM-002",
       "TERM-003",
       "TERM-004",
       "TERM-005",
@@ -23588,8 +21596,6 @@
     ],
     "src/components/TitleBar.tsx": [
       "BIG-001",
-      "CLAUDE-003",
-      "CLAUDE-019",
       "DIFF-001",
       "DIFF-002",
       "DIFF-004",
@@ -23612,7 +21618,6 @@
       "TAB-006",
       "TAB-007",
       "TAB-008",
-      "TERM-001",
       "THREEWAY-001",
       "UI-001",
       "UI-002",
@@ -23634,8 +21639,6 @@
       "BIG-016"
     ],
     "src/components/panels/ExplorerPanel.tsx": [
-      "CLAUDE-001",
-      "CLAUDE-003",
       "EXPL-001",
       "EXPL-002",
       "EXPL-003",
@@ -23658,16 +21661,7 @@
       "SEARCH-003",
       "SEARCH-011",
       "TAB-008",
-      "TERM-001",
       "TERM-010"
-    ],
-    "src/components/panels/GitDraft.tsx": [
-      "GIT-008",
-      "GITAI-001",
-      "GITAI-002",
-      "GITAI-003",
-      "GITAI-004",
-      "GITAI-005"
     ],
     "src/components/panels/GitMergeButton.tsx": [
       "MERGE-003",
@@ -23697,8 +21691,6 @@
       "GIT-018",
       "GIT-019",
       "GIT-025",
-      "GITAI-001",
-      "GITAI-003",
       "GRAPH-001",
       "HISTORY-002",
       "HISTORY-010",
@@ -23786,17 +21778,10 @@
     ],
     "src/components/panels/SettingsPanel.tsx": [
       "BIG-012",
-      "CLAUDE-001",
-      "CLAUDE-002",
-      "CLAUDE-009",
-      "CLAUDE-018",
       "EDIT-023",
       "FILE-006",
       "FILE-016",
       "FIND-007",
-      "GITAI-001",
-      "GITAI-002",
-      "GITAI-003",
       "LSP-003",
       "LSP-005",
       "LSP-016",
@@ -23817,12 +21802,10 @@
       "SET-012",
       "SET-013",
       "SET-014",
-      "SET-015",
       "SET-016",
       "SET-019",
       "SET-020",
       "TAB-009",
-      "TERM-007",
       "TERM-010",
       "UPD-002"
     ],
@@ -23889,11 +21872,6 @@
       "CONFLICT-005",
       "CONFLICT-006",
       "CONFLICT-013",
-      "GITAI-001",
-      "GITAI-002",
-      "GITAI-005",
-      "GITAI-007",
-      "GITAI-008",
       "STASH-009"
     ],
     "src/editor/findReplace.ts": [
@@ -23991,12 +21969,6 @@
       "BIG-014",
       "BIG-019",
       "BIG-020",
-      "CLAUDE-001",
-      "CLAUDE-006",
-      "CLAUDE-007",
-      "CLAUDE-009",
-      "CLAUDE-016",
-      "CLAUDE-020",
       "CONFLICT-008",
       "DIFF-001",
       "DIFF-012",
@@ -24026,9 +21998,6 @@
       "FILE-018",
       "FILE-019",
       "FILE-020",
-      "GITAI-002",
-      "GITAI-003",
-      "GITAI-009",
       "GRAPH-001",
       "GRAPH-012",
       "LSP-009",
@@ -24047,7 +22016,6 @@
       "SET-010",
       "SET-011",
       "SET-014",
-      "SET-015",
       "SET-019",
       "SET-020",
       "SPLIT-007",
@@ -24086,7 +22054,6 @@
       "BIG-005",
       "EXPL-006",
       "FILE-008",
-      "FILE-018",
       "FIND-001",
       "SCRIPT-002",
       "SEARCH-001",
@@ -24096,47 +22063,6 @@
       "UI-007",
       "UI-009",
       "UI-018"
-    ],
-    "src/lib/claude.ts": [
-      "CLAUDE-001",
-      "CLAUDE-002",
-      "CLAUDE-003",
-      "CLAUDE-004",
-      "CLAUDE-005",
-      "CLAUDE-008",
-      "CLAUDE-009",
-      "CLAUDE-010",
-      "CLAUDE-012",
-      "CLAUDE-013",
-      "CLAUDE-015",
-      "CLAUDE-016",
-      "CLAUDE-017",
-      "CLAUDE-018",
-      "CLAUDE-019",
-      "CLAUDE-020",
-      "FILE-017",
-      "SET-015",
-      "TAB-005",
-      "TERM-007",
-      "UPD-003"
-    ],
-    "src/lib/claudeImages.ts": [
-      "CLAUDE-012"
-    ],
-    "src/lib/claudeProtocol.ts": [
-      "CLAUDE-004",
-      "CLAUDE-005",
-      "CLAUDE-006",
-      "CLAUDE-007",
-      "CLAUDE-008",
-      "CLAUDE-010",
-      "CLAUDE-011",
-      "CLAUDE-012",
-      "CLAUDE-013",
-      "CLAUDE-016",
-      "CLAUDE-017",
-      "CLAUDE-018",
-      "CLAUDE-020"
     ],
     "src/lib/closedTabs.ts": [
       "TAB-010"
@@ -24152,11 +22078,6 @@
       "BIG-017",
       "BIG-018",
       "BIG-020",
-      "CLAUDE-001",
-      "CLAUDE-003",
-      "CLAUDE-005",
-      "CLAUDE-013",
-      "CLAUDE-015",
       "DIFF-001",
       "DIFF-002",
       "DIFF-003",
@@ -24205,7 +22126,6 @@
       "FIND-010",
       "FMT-001",
       "FMT-010",
-      "GITAI-006",
       "JSON-005",
       "JSON-006",
       "JSON-008",
@@ -24258,8 +22178,6 @@
       "TAB-007",
       "TAB-009",
       "TAB-010",
-      "TERM-001",
-      "TERM-002",
       "TERM-010",
       "THREEWAY-004",
       "UI-001",
@@ -24284,7 +22202,6 @@
       "CONFLICT-001",
       "CONFLICT-002",
       "CONFLICT-003",
-      "GITAI-007",
       "THREEWAY-001",
       "THREEWAY-002",
       "THREEWAY-005"
@@ -24418,8 +22335,6 @@
       "GIT-026",
       "GIT-027",
       "GIT-028",
-      "GITAI-008",
-      "GITAI-009",
       "GRAPH-001",
       "GRAPH-010",
       "GRAPH-011",
@@ -24474,17 +22389,6 @@
       "THREEWAY-004",
       "THREEWAY-005"
     ],
-    "src/lib/gitAi.ts": [
-      "GITAI-002",
-      "GITAI-003",
-      "GITAI-004",
-      "GITAI-005",
-      "GITAI-006",
-      "GITAI-007",
-      "GITAI-008",
-      "GITAI-009",
-      "SET-015"
-    ],
     "src/lib/gitApi.ts": [
       "BRANCH-001",
       "BRANCH-002",
@@ -24504,8 +22408,6 @@
       "GIT-001",
       "GIT-014",
       "GIT-022",
-      "GITAI-003",
-      "GITAI-009",
       "GRAPH-002",
       "GRAPH-006",
       "GRAPH-008",
@@ -24527,17 +22429,6 @@
       "STASH-005",
       "STASH-006",
       "STASH-010"
-    ],
-    "src/lib/gitAssist.ts": [
-      "GITAI-001",
-      "GITAI-002",
-      "GITAI-003",
-      "GITAI-004",
-      "GITAI-005",
-      "GITAI-006",
-      "GITAI-007",
-      "GITAI-008",
-      "GITAI-009"
     ],
     "src/lib/gitBranches.ts": [
       "BRANCH-001",
@@ -24570,11 +22461,6 @@
       "GIT-018",
       "GIT-020",
       "GIT-028",
-      "GITAI-001",
-      "GITAI-003",
-      "GITAI-005",
-      "GITAI-007",
-      "GITAI-009",
       "GRAPH-001",
       "GRAPH-019",
       "HISTORY-002",
@@ -24662,7 +22548,6 @@
       "BRANCH-007",
       "COMMITCMP-005",
       "GIT-007",
-      "GITAI-009",
       "MERGE-002",
       "MERGE-003"
     ],
@@ -24692,7 +22577,6 @@
     ],
     "src/lib/gitStash.ts": [
       "CONFLICT-008",
-      "GITAI-008",
       "GRAPH-014",
       "STASH-001",
       "STASH-002",
@@ -24727,7 +22611,6 @@
       "GIT-022",
       "GIT-026",
       "GIT-027",
-      "GITAI-008",
       "GRAPH-009",
       "GRAPH-012",
       "GRAPH-015",
@@ -24911,9 +22794,6 @@
       "TAB-007",
       "UI-008"
     ],
-    "src/lib/markdown.ts": [
-      "CLAUDE-014"
-    ],
     "src/lib/mergeModel.ts": [
       "THREEWAY-001",
       "THREEWAY-002",
@@ -24995,7 +22875,6 @@
       "BIG-003",
       "BIG-006",
       "BIG-014",
-      "CLAUDE-016",
       "COMMITCMP-005",
       "EDIT-006",
       "EDIT-022",
@@ -25036,7 +22915,6 @@
       "TAB-004",
       "TAB-005",
       "TAB-008",
-      "TERM-001",
       "UI-005",
       "UI-006",
       "UI-010",
@@ -25050,39 +22928,31 @@
       "UI-022"
     ],
     "src/lib/tabLimit.ts": [
-      "CLAUDE-003",
       "EXPL-014",
       "FILE-002",
-      "GITAI-009",
       "SET-010",
       "TAB-008",
       "TAB-009",
       "TERM-007"
     ],
     "src/lib/terminal.ts": [
+      "FILE-017",
       "LSP-005",
       "TAB-005",
-      "TERM-001",
-      "TERM-002",
       "TERM-006",
       "TERM-007",
       "TERM-009",
-      "TERM-010"
+      "TERM-010",
+      "UPD-003"
     ],
     "src/lib/types.ts": [
       "BIG-001",
       "BIG-006",
       "BIG-012",
-      "CLAUDE-001",
-      "CLAUDE-002",
-      "CLAUDE-009",
-      "CLAUDE-018",
       "FILE-002",
       "FILE-006",
       "FILE-008",
       "FILE-016",
-      "GITAI-002",
-      "GITAI-003",
       "LSP-016",
       "MACRO-002",
       "MACRO-009",
@@ -25095,7 +22965,6 @@
       "SET-010",
       "SET-012",
       "SET-013",
-      "SET-015",
       "SET-016",
       "SET-019",
       "SET-020",
@@ -25109,7 +22978,6 @@
       "UPD-002"
     ],
     "src/lib/updater.ts": [
-      "CLAUDE-020",
       "LSP-017",
       "UPD-001",
       "UPD-002",
@@ -25128,8 +22996,6 @@
       "BIG-015",
       "BRANCH-001",
       "BRANCH-002",
-      "CLAUDE-014",
-      "CLAUDE-019",
       "COMMITCMP-001",
       "COMMITCMP-002",
       "CONFLICT-001",
@@ -25150,7 +23016,6 @@
       "GIT-013",
       "GIT-025",
       "GIT-027",
-      "GITAI-007",
       "GRAPH-002",
       "GRAPH-015",
       "GRAPH-016",
@@ -25220,19 +23085,6 @@
       "BIG-013",
       "BIG-014"
     ],
-    "src-tauri/src/claude.rs": [
-      "CLAUDE-002",
-      "CLAUDE-003",
-      "CLAUDE-008",
-      "CLAUDE-009",
-      "CLAUDE-012",
-      "CLAUDE-016",
-      "CLAUDE-017",
-      "CLAUDE-018",
-      "GITAI-003",
-      "GITAI-005",
-      "GITAI-006"
-    ],
     "src-tauri/src/fileops.rs": [
       "EXPL-011"
     ],
@@ -25284,10 +23136,6 @@
       "GIT-022",
       "GIT-023",
       "GIT-024",
-      "GITAI-002",
-      "GITAI-003",
-      "GITAI-004",
-      "GITAI-009",
       "GRAPH-002",
       "GRAPH-004",
       "GRAPH-005",
@@ -25361,7 +23209,6 @@
       "LSP-005"
     ],
     "src-tauri/src/pty.rs": [
-      "TERM-002",
       "TERM-005",
       "TERM-010"
     ],
@@ -25414,46 +23261,10 @@
       "FIND-008",
       "FIND-009"
     ],
-    "src/__tests__/claude.test.ts": [
-      "CLAUDE-004",
-      "CLAUDE-005",
-      "CLAUDE-006",
-      "CLAUDE-007",
-      "CLAUDE-008",
-      "CLAUDE-010",
-      "CLAUDE-011",
-      "CLAUDE-012",
-      "CLAUDE-013",
-      "CLAUDE-014",
-      "CLAUDE-016",
-      "CLAUDE-017",
-      "CLAUDE-018",
-      "CLAUDE-020"
-    ],
-    "src/__tests__/claudeSession.test.ts": [
-      "CLAUDE-003",
-      "CLAUDE-004",
-      "CLAUDE-009",
-      "CLAUDE-015",
-      "CLAUDE-016",
-      "CLAUDE-018",
-      "CLAUDE-020",
-      "TERM-001",
-      "TERM-002",
-      "TERM-006",
-      "TERM-007",
-      "TERM-009"
-    ],
     "src/__tests__/columnMode.test.ts": [
       "EDIT-005",
       "EDIT-006",
       "EDIT-007"
-    ],
-    "src/__tests__/conflictSuggest.test.ts": [
-      "GITAI-001",
-      "GITAI-002",
-      "GITAI-007",
-      "GITAI-008"
     ],
     "src/__tests__/conflicts.test.ts": [
       "CONFLICT-001",
@@ -25517,27 +23328,6 @@
       "FMT-008",
       "FMT-009"
     ],
-    "src/__tests__/gitAi.test.ts": [
-      "GITAI-002",
-      "GITAI-003",
-      "GITAI-004",
-      "GITAI-005",
-      "GITAI-006",
-      "GITAI-007",
-      "GITAI-008",
-      "GITAI-009"
-    ],
-    "src/__tests__/gitAssist.test.ts": [
-      "GITAI-001",
-      "GITAI-002",
-      "GITAI-003",
-      "GITAI-004",
-      "GITAI-005",
-      "GITAI-006",
-      "GITAI-007",
-      "GITAI-008",
-      "GITAI-009"
-    ],
     "src/__tests__/gitBranches.test.ts": [
       "BRANCH-001",
       "BRANCH-002",
@@ -25558,13 +23348,6 @@
       "COMMITCMP-003",
       "COMMITCMP-004",
       "COMMITCMP-005"
-    ],
-    "src/__tests__/gitDraft.test.tsx": [
-      "GITAI-001",
-      "GITAI-002",
-      "GITAI-003",
-      "GITAI-004",
-      "GITAI-005"
     ],
     "src/__tests__/gitGraph.test.ts": [
       "GRAPH-002",
@@ -25744,8 +23527,6 @@
     "src/__tests__/graphView.test.tsx": [
       "COMMITCMP-001",
       "COMMITCMP-005",
-      "GITAI-001",
-      "GITAI-009",
       "GRAPH-001",
       "GRAPH-009",
       "GRAPH-011",
@@ -25931,7 +23712,8 @@
     ],
     "src/__tests__/tabLimit.test.ts": [
       "SET-010",
-      "TAB-009"
+      "TAB-009",
+      "TERM-007"
     ],
     "src/__tests__/tabs.test.ts": [
       "TAB-006",
@@ -25962,7 +23744,6 @@
     ],
     "src/__tests__/ui.test.ts": [
       "DIFF-009",
-      "GITAI-001",
       "SEARCH-007",
       "SET-001",
       "SET-004",
@@ -25990,28 +23771,6 @@
     ],
     "big.info": [
       "BIG-018"
-    ],
-    "claude.addFile": [
-      "CLAUDE-013"
-    ],
-    "claude.addSelection": [
-      "CLAUDE-013"
-    ],
-    "claude.newSession": [
-      "CLAUDE-015"
-    ],
-    "claude.openFolder": [
-      "CLAUDE-003"
-    ],
-    "claude.openHere": [
-      "CLAUDE-003"
-    ],
-    "claude.openTerminal": [
-      "TERM-001",
-      "TERM-002"
-    ],
-    "claude.stop": [
-      "CLAUDE-005"
     ],
     "code.dedupe": [
       "EDIT-009"
@@ -26447,19 +24206,11 @@
       "STAGE-007",
       "STAGE-008"
     ],
-    "git.draftMessage": [
-      "GITAI-001",
-      "GITAI-003"
-    ],
     "git.editHistory": [
       "HISTORY-007",
       "SAFE-003",
       "SAFE-005",
       "SAFE-006"
-    ],
-    "git.explainConflict": [
-      "GITAI-001",
-      "GITAI-007"
     ],
     "git.fetch": [
       "GIT-015",
@@ -26620,14 +24371,6 @@
       "STASH-007",
       "STASH-009",
       "STASH-011"
-    ],
-    "git.stopClaude": [
-      "GITAI-001",
-      "GITAI-005"
-    ],
-    "git.summariseBranch": [
-      "GITAI-001",
-      "GITAI-009"
     ],
     "git.switchBranch": [
       "GIT-007",

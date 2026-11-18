@@ -9,7 +9,7 @@ Format Document for text tabs: which formatter runs for which language (Quarry's
 
 ## FMT-001: Format the current document
 
-- Status: draft
+- Status: verified
 - Commands: `code.format`
 - Files:
   - `src/lib/format.ts` — `formatDocument` (read-only guard, picks the formatter from the document's language, "Already formatted", success toast), `canFormat`
@@ -51,7 +51,7 @@ Scenario: FMT-001.4 A read-only document is not formatted
 
 ## FMT-002: Format Document is one undo step and reports when nothing changed
 
-- Status: draft
+- Status: verified
 - Commands: `code.format`
 - Files:
   - `src/lib/format.ts` — `formatDocument` (`out === text` → "Already formatted"; "No formatter for …")
@@ -89,7 +89,7 @@ Scenario: FMT-002.4 Only text tabs
 
 ## FMT-003: Format JSON with Quarry's own formatter
 
-- Status: draft
+- Status: verified
 - Commands: `code.format`
 - Files:
   - `src/lib/format.ts` — `formatDocument`, the `lang === "JSON"` branch (`jsonIndent`, tabs when `insertSpaces` is off, error toast and cursor to the error via `editor.goTo`; an error at line 0 = valid JSON whose output is too large)
@@ -142,7 +142,7 @@ Scenario: FMT-003.6 Valid JSON whose pretty-printed text would be too large
 
 ## FMT-004: Format web languages with the bundled Prettier
 
-- Status: draft
+- Status: verified
 - Commands: `code.format`
 - Files:
   - `src/lib/format.ts` — `PRETTIER` table (language → parser and plugins, all loaded with dynamic `import()` on first use), Prettier options in `formatDocument` (`tabWidth`, `useTabs`, `printWidth: 100`, `endOfLine: "lf"`, `xmlWhitespaceSensitivity: "ignore"`, `bracketSameLine: false`)
@@ -201,7 +201,7 @@ Scenario: FMT-004.5 The language of the tab decides, not the file name
 
 ## FMT-005: Format only the selection
 
-- Status: draft
+- Status: verified
 - Commands: `code.format`
 - Files:
   - `src/lib/format.ts` — `hasRange` (non-empty main selection and a Prettier target with `range`: the babel, typescript, graphql and vue parsers, the only ones Prettier 3 range-formats; other parsers return the text unchanged for a range), `rangeStart` / `rangeEnd`, "Formatted selection" toast
@@ -242,7 +242,7 @@ Scenario: FMT-005.4 Prettier languages without range formatting take the whole d
 
 ## FMT-006: Prefer the formatter installed on the machine
 
-- Status: draft
+- Status: verified
 - Commands: `code.format`
 - Files:
   - `src/lib/format.ts` — `CODE` table (`external`: tool, arguments, install hint, `missing` pattern), the external branch of `formatDocument` (working folder = the document's folder, "Formatted (Python, ruff)")
@@ -300,7 +300,7 @@ Scenario: FMT-006.5 An untitled document is formatted too
 
 ## FMT-007: Built-in formatters when the tool isn't installed
 
-- Status: draft
+- Status: verified
 - Commands: `code.format`
 - Files:
   - `src/lib/format.ts` — `CODE` table (`builtin`), `clangFormat` / `clangStyle`, `sqlBuiltin`, fallback when the tool is not found or matches `missing` (C#: dotnet with an SDK prints "Could not execute because the specified command or file was not found"; dotnet with only a runtime prints "The command could not be loaded … The application 'csharpier' does not exist"; the pattern matches both); each formatter is a dynamic `import()` (`@wasm-fmt/gofmt`, `@wasm-fmt/ruff_fmt`, `@wasm-fmt/clang-format`, `@wasm-fmt/shfmt`, `prettier-plugin-java`, `sql-formatter`)
@@ -362,7 +362,7 @@ Scenario: FMT-007.5 dotnet without CSharpier falls back
 
 ## FMT-008: Rust needs rustfmt
 
-- Status: draft
+- Status: verified
 - Commands: `code.format`
 - Files:
   - `src/lib/format.ts` — `CODE.Rust` (external only, `install` hint), the "is not installed" warning in `formatDocument`
@@ -389,7 +389,7 @@ Scenario: FMT-008.2 rustfmt is installed
 
 ## FMT-009: Syntax errors leave the document unchanged
 
-- Status: draft
+- Status: verified
 - Commands: `code.format`
 - Files:
   - `src/lib/format.ts` — `formatDocument`'s `catch` ("Format failed: " + the first line of the formatter's message, shown for 6 s; returns false)
@@ -428,7 +428,7 @@ Scenario: FMT-009.4 The built-in ruff gives a byte range, not a line
 
 ## FMT-010: JSON pretty-print and minify commands
 
-- Status: draft
+- Status: verified
 - Commands: `json.format`, `json.minify`
 - Files:
   - `src/lib/commands.ts` — `jsonTransform` (error → cursor to the error and one toast via `toastOnce`; line 0 → "Cannot pretty-print / minify"; `dropJsonTree`), `jsonErrorText`, the two registrations (enabled only for JSON text tabs)

@@ -4,7 +4,6 @@ import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
 import { BigFileView } from "./components/BigFileView";
 import { BottomPanel } from "./components/BottomPanel";
-import { ClaudeView } from "./components/ClaudeView";
 import { TerminalView } from "./components/TerminalView";
 import { DiffView } from "./components/DiffView";
 import { GraphView } from "./components/GraphView";
@@ -20,11 +19,8 @@ import { editor } from "./editor/manager";
 import { flushSession, installCloseGuard, loadSettings, openPath, restoreSession, saveSession, installExternalChangeWatch } from "./lib/actions";
 import { eventToKeys, getCommand, getCommandsForKeys, getKeyCapture, handleKeyEvent, isVacatedKey, registerAllCommands } from "./lib/commands";
 import { appIpc, big } from "./lib/ipc";
-import { installClaudeEvents } from "./lib/claude";
 import { installLsp } from "./lib/lsp";
 import { installGit } from "./lib/git";
-import { installGitAssist } from "./lib/gitAssist";
-import { bus } from "./lib/bus";
 import { useShallow } from "zustand/react/shallow";
 import { installRecorderHooks, loadMacros } from "./lib/macros";
 import { migrateLegacyScripts } from "./lib/scripting";
@@ -59,8 +55,6 @@ export default function App() {
   const doc = useStore((s) => s.docs.find((d) => d.id === paneDocId(s, 0)));
   const split = useStore((s) => s.split);
   const docsCount = useStore((s) => s.docs.length);
-  // Claude tabs stay mounted while hidden, so scroll position and the half-typed message survive tab switches.
-  const claudeDocs = useStore(useShallow((s) => s.docs.filter((d) => d.kind === "claude")));
   const terminalDocs = useStore(useShallow((s) => s.docs.filter((d) => d.kind === "terminal")));
   const diffDocs = useStore(useShallow((s) => s.docs.filter((d) => d.kind === "diff")));
   const graphDocs = useStore(useShallow((s) => s.docs.filter((d) => d.kind === "graph")));
@@ -74,10 +68,8 @@ export default function App() {
       (async () => {
         await loadSettings();
         registerAllCommands();
-        installClaudeEvents();
         installLsp();
         installGit();
-        installGitAssist();
         installRecorderHooks();
         setReady(true);
         // The update check asks the server now, alongside the session restore, and shows its dialog
@@ -186,11 +178,7 @@ export default function App() {
     });
     const unDrop = getCurrentWebview().onDragDropEvent((ev) => {
       if (ev.payload.type !== "drop") return;
-      // Files dropped on a Claude tab go to its message (pictures attached, other files named).
-      const { x, y } = ev.payload.position;
-      const at = document.elementFromPoint(x / window.devicePixelRatio, y / window.devicePixelRatio);
-      if (at?.closest(".claude-view")) bus.emit("claude.drop", ev.payload.paths);
-      else for (const p of ev.payload.paths) void openPath(p);
+      for (const p of ev.payload.paths) void openPath(p);
     });
 
     // Persist session when the tab set changes.
@@ -254,7 +242,6 @@ export default function App() {
             <div className={`editor-stack pane ${split?.focused === 0 ? "focused" : ""}`} onMouseDownCapture={() => useStore.getState().focusPane(0)}>
               <CodeEditor pane={0} visible={doc?.kind === "text"} />
               {doc?.kind === "big" && <BigFileView key={`${doc.id}:${doc.bigId}`} doc={doc} />}
-              {claudeDocs.map((d) => <ClaudeView key={d.id} doc={d} visible={d.id === doc?.id} />)}
               {terminalDocs.map((d) => <TerminalView key={d.id} doc={d} visible={d.id === doc?.id} />)}
               {diffDocs.map((d) => <DiffView key={d.id} doc={d} visible={d.id === doc?.id} />)}
               {graphDocs.map((d) => <GraphView key={d.id} doc={d} visible={d.id === doc?.id} />)}

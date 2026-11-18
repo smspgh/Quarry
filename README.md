@@ -84,7 +84,6 @@ Quarry runs your own `git`, so your configuration, hooks and credentials apply.
 - **Stash.** Stash with or without untracked files, look inside a stash, then apply, pop or drop it.
 - **Branches and tags.** Rename, delete, set upstream, and push or delete on the remote.
 - **Unsaved tabs are safe.** Any git action that rewrites files checks your open tabs first and asks before anything unsaved could be lost.
-- **Claude helpers (optional).** Draft a commit message, explain a conflict, or summarise a branch or a run of commits. Nothing is applied without a click.
 
 See [Git](docs/git.md).
 
@@ -101,16 +100,6 @@ See [Terminal](docs/terminal.md).
 - **Scripts.** Plain JavaScript files with a small API (`doc`, `selection`, `util`, `clipboard`) that run in a sandboxed worker, with a Console panel.
 
 See [Macros](docs/macros.md) and [Scripts](docs/scripting.md).
-
-### Claude Code
-
-- **Claude tabs.** Right-click a folder in the Explorer and choose **Work with Claude Code Here** to work with [Claude Code](https://claude.com/claude-code) in that folder, in Quarry's own interface: streamed replies, a card for every step, diffs of each edit, and permission requests answered with a click. File edits are applied automatically and commands ask first, or set it to ask before everything.
-- **Screenshots and context.** Paste screenshots into the message box, drop files on it, or send the editor selection with **Ctrl+Alt+L**.
-- **History.** Restored tabs show their earlier messages, and any past conversation in the folder can be continued.
-- **Claude CLI.** **Claude Code Terminal Here** runs the `claude` command line itself in a terminal tab.
-- **Optional.** It uses your own Claude Code installation and login. One switch in Settings turns the whole integration off.
-
-See [Claude Code](docs/claude-code.md).
 
 ### Windows 11 feel
 
@@ -149,14 +138,13 @@ The installers end up in `src-tauri/target/release/bundle/`. Tests, project layo
 | [Large files](docs/large-files.md) | How large-file mode works: colours, CSV grid, JSON tree and validation, filter view, follow mode, find, replace, editing, limits |
 | [Code intelligence](docs/code-intelligence.md) | Language servers: suggestions, hover, definitions, references, rename, problems, installing servers |
 | [Compare](docs/compare.md) | Comparing files, a file with its unsaved edits or the clipboard; editing and saving |
-| [Git](docs/git.md) | Change markers, blame, Source Control panel, staging by line, commit graph, merge and rebase, conflicts, edit history, stash, branches and tags, Claude helpers |
+| [Git](docs/git.md) | Change markers, blame, Source Control panel, staging by line, commit graph, merge and rebase, conflicts, edit history, stash, branches and tags |
 | [Terminal](docs/terminal.md) | Shell tabs, choosing the shell, keys, closing |
 | [Find and replace](docs/find-and-replace.md) | Find bar, Find / Replace in Files, undo, regex flavours |
 | [JSON tools](docs/json.md) | Tree view, paths, validate, format, JSON ↔ CSV |
 | [Formatting](docs/formatting.md) | Built-in and installed formatters for each language |
 | [Macros](docs/macros.md) | Recording, playback, step editor, file format |
 | [Scripts](docs/scripting.md) | Script API reference, sandbox, examples |
-| [Claude Code](docs/claude-code.md) | Claude tabs, permissions, screenshots and context, past conversations, terminal tabs |
 | [Keyboard shortcuts](docs/keyboard-shortcuts.md) | Every shortcut and command id |
 | [Settings](docs/settings.md) | Every setting, and where Quarry keeps its files |
 | [Development](docs/development.md) | Building, tests, architecture, conventions |
@@ -179,7 +167,6 @@ The installers end up in `src-tauri/target/release/bundle/`. Tests, project layo
 | `Ctrl+Alt+P` / `Ctrl+Alt+C` | Copy JSON path / value at cursor |
 | `Ctrl+Shift+R` / `Ctrl+Shift+M` | Record macro / Play last macro |
 | `Ctrl+Shift+Enter` | Run current script |
-| `Ctrl+Alt+L` | Add the selection to Claude Code |
 | `Ctrl+Shift+G` / `Alt+F5` | Source Control / next change since the last commit |
 | `Ctrl+\` / `Ctrl+1` / `Ctrl+2` | Split editor / focus left / right pane |
 | ``Ctrl+` `` | New terminal |

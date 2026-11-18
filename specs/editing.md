@@ -9,7 +9,7 @@ Editing text in a normal (not large-file) tab: undo, clipboard, multi-cursor and
 
 ## EDIT-001: Undo and redo
 
-- Status: draft
+- Status: verified
 - Commands: `edit.undo`, `edit.redo`, `edit.redoAlt`
 - Files:
   - `src/lib/commands.ts` — `edit.undo` / `edit.redo` / `edit.redoAlt`, `cmCommand` (routes to `editor.historyView`), `editorFocused` shortcut guard, large-file tabs get `big.undo` / `big.redo` on the bus
@@ -57,7 +57,7 @@ Scenario: EDIT-001.5 Not available without a file tab
 
 ## EDIT-002: Cut, copy and paste
 
-- Status: draft
+- Status: verified
 - Commands: `edit.cut`, `edit.copy`, `edit.paste`
 - Files:
   - `src/editor/lineMenu.ts` — `clipboardText` (selections, or whole lines of empty ones), `cutSpec`, `pasteSpec` (one clipboard line per cursor when the counts match)
@@ -118,7 +118,7 @@ Scenario: EDIT-002.7 Cut, Copy and Paste in the Edit menu
 
 ## EDIT-003: Select all, and select occurrences of the selection
 
-- Status: draft
+- Status: verified
 - Commands: `edit.selectAll`, `edit.selectNextOccurrence`, `edit.selectAllOccurrences`
 - Files:
   - `src/lib/commands.ts` — `edit.selectAll` (only while the editor has focus), `edit.selectNextOccurrence` (CodeMirror `selectNextOccurrence`), `edit.selectAllOccurrences` and its limit toast
@@ -176,7 +176,7 @@ Scenario: EDIT-003.7 Select All leaves text boxes alone
 
 ## EDIT-004: Turn every find match into a selection
 
-- Status: draft
+- Status: verified
 - Commands: `edit.selectAllMatches`
 - Files:
   - `src/editor/bulkEdit.ts` — `findMatchSelection`, `selectAllFindMatches`
@@ -210,7 +210,7 @@ Scenario: EDIT-004.3 The selection stops at 200 000 matches
 
 ## EDIT-005: Add cursors above and below
 
-- Status: draft
+- Status: verified
 - Commands: `selection.addCursorAbove`, `selection.addCursorBelow`, `selection.blockToCursors`
 - Files:
   - `src/editor/columnMode.ts` — `blockCommands` (`addCursorBelow` / `addCursorAbove` = `extend(±1, 0)` over `extendBlock`), `blockSelection` (visual columns, short rows), `blockToCursors` (`cursorsOfBlock`)
@@ -259,7 +259,7 @@ Scenario: EDIT-005.6 Escape goes back to one cursor
 
 ## EDIT-006: Column (block) selection mode
 
-- Status: draft
+- Status: verified
 - Commands: `selection.toggleColumnMode`
 - Files:
   - `src/editor/columnMode.ts` — `columnModeExtensions`, `columnKeymap` (Shift+arrows, Home / End, Page Up / Down by 20 rows), `extend` / `extendBlock`, `extendHome` / `extendEnd` (`blockToEdge`), `currentBlock`, `blockSelection`, `columnModeEnabled` / `setColumnMode`
@@ -324,7 +324,7 @@ Scenario: EDIT-006.8 Off when Quarry starts
 
 ## EDIT-007: Huge multi-cursor selections stay responsive
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/editor/bulkEdit.ts` — `bulkEditing` (input handler and Backspace / Delete keys from `BULK_MIN` = 500 ranges), `bulkReplace`, `deletionSpans`
@@ -374,7 +374,7 @@ Scenario: EDIT-007.6 Cursors appear as they scroll into view
 
 ## EDIT-008: Duplicate, delete and move lines
 
-- Status: draft
+- Status: verified
 - Commands: `edit.duplicateLine`, `edit.duplicateLineUp`, `edit.deleteLine`, `edit.moveLineUp`, `edit.moveLineDown`
 - Files:
   - `src/lib/commands.ts` — registrations over CodeMirror's `copyLineDown` / `copyLineUp` / `deleteLine` / `moveLineUp` / `moveLineDown`; `applyDefaultEnabled` (text tabs only)
@@ -412,7 +412,7 @@ Scenario: EDIT-008.4 Greyed out outside text tabs
 
 ## EDIT-009: Sort, reverse, de-duplicate, clean up, join and number lines
 
-- Status: draft
+- Status: verified
 - Commands: `code.sortAsc`, `code.sortDesc`, `code.reverseLines`, `code.dedupe`, `code.removeBlank`, `code.removeEmpty`, `code.trimTrailing`, `code.joinLines`, `edit.numberLines`
 - Files:
   - `src/lib/commands.ts` — `lineTransform` (`cmEdit`: nothing on a read-only document) and the nine registrations after it
@@ -509,7 +509,7 @@ Scenario: EDIT-009.14 A column selection is sorted as one block
 
 ## EDIT-010: Change case and wrap selections in quotes
 
-- Status: draft
+- Status: verified
 - Commands: `edit.upper`, `edit.lower`, `code.titleCase`, `edit.quoteSelections`
 - Files:
   - `src/lib/commands.ts` — the four registrations (`cmEdit`: nothing on a read-only document; `changeByRange` over every selection; `edit.quoteSelections` uses `JSON.stringify` and its own `enabled`)
@@ -566,7 +566,7 @@ Scenario: EDIT-010.7 A read-only document is not changed
 
 ## EDIT-011: Indent, outdent and convert indentation
 
-- Status: draft
+- Status: verified
 - Commands: `edit.indent`, `edit.outdent`, `code.indentToSpaces`, `code.indentToTabs`, `view.setTabSize`
 - Files:
   - `src/lib/commands.ts` — `edit.indent` / `edit.outdent` (`indentMore` / `indentLess`, only while the editor has focus), `code.indentToSpaces` / `code.indentToTabs` (via `lineTransform`; `cmEdit` = nothing on a read-only document), `view.setTabSize` (1–16, otherwise opens the status-bar picker)
@@ -627,7 +627,7 @@ Scenario: EDIT-011.7 Mixed indentation is converted as a whole
 
 ## EDIT-012: Toggle line and block comments
 
-- Status: draft
+- Status: verified
 - Commands: `edit.toggleComment`, `code.toggleBlockComment`
 - Files:
   - `src/lib/commands.ts` — `withCommentSyntax` (explains a no-op), `edit.toggleComment`, `code.toggleBlockComment`
@@ -666,7 +666,7 @@ Scenario: EDIT-012.4 A language without comments says so
 
 ## EDIT-013: Fold and unfold regions
 
-- Status: draft
+- Status: verified
 - Commands: `code.fold`, `code.unfold`, `code.foldAll`, `code.unfoldAll`
 - Files:
   - `src/lib/commands.ts` — the four registrations over CodeMirror's `foldCode` / `unfoldCode` / `foldAll` / `unfoldAll`
@@ -708,7 +708,7 @@ Scenario: EDIT-013.4 Folding does not change the text
 
 ## EDIT-014: Right-click menu on a foldable line
 
-- Status: draft
+- Status: verified
 - Commands: `code.foldLine`, `code.unfoldLine`, `code.foldTree`, `code.unfoldTree`
 - Files:
   - `src/components/CodeEditor.tsx` — `onContextMenu` (line under the pointer, in the text or the gutter; only when `foldTargetAt` finds something)
@@ -770,7 +770,7 @@ Scenario: EDIT-014.7 Keyboard in the menu
 
 ## EDIT-015: Brackets: matching, jumping and auto-closing
 
-- Status: draft
+- Status: verified
 - Commands: `code.gotoBracket`
 - Files:
   - `src/lib/commands.ts` — `code.gotoBracket` (`cursorMatchingBracket`)
@@ -809,7 +809,7 @@ Scenario: EDIT-015.4 Both can be turned off
 
 ## EDIT-016: Go to Line
 
-- Status: draft
+- Status: verified
 - Commands: `goto.line`
 - Files:
   - `src/lib/commands.ts` — `goto.line` (opens palette mode `goto`; enabled for text and large-file tabs)
@@ -877,7 +877,7 @@ Scenario: EDIT-016.8 From the status bar
 
 ## EDIT-017: Detect a document's language
 
-- Status: draft
+- Status: verified
 - Commands: `code.detectLanguage`
 - Files:
   - `src/editor/cmSetup.ts` — `detectLanguage` (extension, then `@codemirror/language-data` file name match, then `sniffLanguage`), `sniffLanguage`, `languageByName`
@@ -950,7 +950,7 @@ Scenario: EDIT-017.8 A short first insert is not enough
 
 ## EDIT-018: Change the language of a document
 
-- Status: draft
+- Status: verified
 - Commands: `code.setLanguage`
 - Files:
   - `src/lib/commands.ts` — `code.setLanguage` (a name argument sets it; no argument opens palette mode `language`), chord key "Ctrl+K M"
@@ -1009,7 +1009,7 @@ Scenario: EDIT-018.7 A recorded macro replays a status-bar language change
 
 ## EDIT-019: Syntax highlighting
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/editor/cmSetup.ts` — `highlight` (`HighlightStyle` mapping Lezer tags to `--syn-*` variables), `syntaxHighlighting`, `builtin` (JSON, JavaScript, TypeScript, JSX, TSX loaded directly), other languages loaded on demand from `@codemirror/language-data`
@@ -1042,7 +1042,7 @@ Scenario: EDIT-019.3 Plain Text has no colours
 
 ## EDIT-020: Word wrap and visible whitespace
 
-- Status: draft
+- Status: verified
 - Commands: `view.toggleWrap`, `view.toggleWhitespace`
 - Files:
   - `src/lib/commands.ts` — `view.toggleWrap`, `view.toggleWhitespace` (update the setting, `editor.applySettings`, `persistSettings`); text tabs only via `applyDefaultEnabled`
@@ -1085,7 +1085,7 @@ Scenario: EDIT-020.4 Not available without a text tab
 
 ## EDIT-021: Zoom the editor text
 
-- Status: draft
+- Status: verified
 - Commands: `view.zoomIn`, `view.zoomInPlus`, `view.zoomOut`, `view.zoomReset`
 - Files:
   - `src/lib/commands.ts` — the four registrations (font size ±1 between 8 and 40, reset to 14, `persistSettings`)
@@ -1127,7 +1127,7 @@ Scenario: EDIT-021.4 The zoom is the Font size setting
 
 ## EDIT-022: Let Tab leave the editor
 
-- Status: draft
+- Status: verified
 - Commands: `view.toggleTabFocus`
 - Files:
   - `src/lib/commands.ts` — `view.toggleTabFocus` (store `tabMovesFocus`, `view.setTabFocusMode` on the focused pane's view, toast)
@@ -1171,7 +1171,7 @@ Scenario: EDIT-022.4 Any other key cancels Escape then Tab
 
 ## EDIT-023: Line numbers, active line and selection-match highlighting
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/editor/cmSetup.ts` — `compartments.lineNumbers` (`lineNumbers` + `highlightActiveLineGutter`), `compartments.activeLine` (`highlightActiveLine`), `highlightSelectionMatches({ minSelectionLength: 2 })`, `highlightSpecialChars`, `dropCursor`, `settingsReconfigure`

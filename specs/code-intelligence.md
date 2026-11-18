@@ -9,7 +9,7 @@ Language servers (LSP) give text tabs suggestions, hover documentation, navigati
 
 ## LSP-001: A language server starts for supported files
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/lspServers.ts` — `SERVERS` (ids, extensions, commands, install lines), `serverFor`, `languageIdOf`, `pathToUri`, `uriToPath`, `uriKey`
@@ -61,7 +61,7 @@ Scenario: LSP-001.6 Servers installed as .cmd shims are found
 
 ## LSP-002: The project folder of a file
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src-tauri/src/lsp.rs` — `find_root`, `lsp_find_root`
@@ -113,7 +113,7 @@ Scenario: LSP-002.7 Hovering shows the project
 
 ## LSP-003: TypeScript server choice
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src-tauri/src/lsp.rs` — `typescript_setup`, `lsp_typescript` (`tsserver.js` = TypeScript 5 / 6, `getExePath.js` = TypeScript 7; global package in `%APPDATA%\npm\node_modules\typescript`); `typescript_found` / `lsp_typescript_found` (any TypeScript, project or global: decides the install offer)
@@ -180,7 +180,7 @@ Scenario: LSP-003.8 Settings reports the same choice
 
 ## LSP-004: Server status in the status bar
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/LspStatus.tsx` — `LspStatusItem`, `SHORT` names
@@ -235,7 +235,7 @@ Scenario: LSP-004.6 A custom command that is not found
 
 ## LSP-005: Offer to install a missing language server
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/lspInstall.ts` — `installServer(def, command)` (terminal tab, toasts, `restartServers` on success), `resolveInstall` / `useInstallCommand` (TypeScript's command)
@@ -295,7 +295,7 @@ Scenario: LSP-005.7 No folder open
 
 ## LSP-006: Suggestions while typing
 
-- Status: draft
+- Status: verified
 - Commands: `code.triggerSuggest`
 - Files:
   - `src/lib/lsp.ts` — `serverCompletion()` in `makeClient`, `completionFor` (typing-triggered suggestions only with a server), `attachDoc` / `detachDoc` / `orphanDocs` (reconfigure `compartments.completion`)
@@ -339,7 +339,7 @@ Scenario: LSP-006.5 Only with the editor focused
 
 ## LSP-007: Documentation on hover
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/lsp.ts` — `hoverTooltips({ hoverTime: 350 })`, the document click handler in `installLsp` (links in `.cm-tooltip` / `.cm-lsp-documentation`)
@@ -373,7 +373,7 @@ Scenario: LSP-007.4 Other links do nothing
 
 ## LSP-008: Parameter hints
 
-- Status: draft
+- Status: verified
 - Commands: `code.signatureHelp`
 - Files:
   - `src/lib/lsp.ts` — `signatureHelp()` in `makeClient`, `lspCommands.signature` (`showSignatureHelp`)
@@ -406,7 +406,7 @@ Scenario: LSP-008.3 Unavailable without a ready server
 
 ## LSP-009: Go to definition, type definition and implementation
 
-- Status: draft
+- Status: verified
 - Commands: `code.gotoDefinition`, `code.gotoTypeDefinition`, `code.gotoImplementation`
 - Files:
   - `src/lib/lsp.ts` — `lspCommands.definition` / `typeDefinition` / `implementation`, `onView`, `hasLsp`, `QuarryWorkspace.displayFile` (opens the target with `openPath`, waits for the tab)
@@ -454,7 +454,7 @@ Scenario: LSP-009.6 Keys need the editor
 
 ## LSP-010: Find all references
 
-- Status: draft
+- Status: verified
 - Commands: `code.findReferences`
 - Files:
   - `src/lib/lsp.ts` — `lspCommands.references` (`findReferences`), `QuarryWorkspace.requestFile` (files that are not open are read from disk, not opened)
@@ -495,7 +495,7 @@ Scenario: LSP-010.4 Unavailable without a ready server
 
 ## LSP-011: Rename a symbol
 
-- Status: draft
+- Status: verified
 - Commands: `code.renameSymbol`
 - Files:
   - `src/lib/lsp.ts` — `lspCommands.rename` (`renameSymbol`), `QuarryWorkspace.updateFile` (edits only files open in tabs, through `editor.dispatchTo`), `openDoc` (background tabs are open on the server too)
@@ -542,7 +542,7 @@ Scenario: LSP-011.5 Unavailable without a ready server
 
 ## LSP-012: Problems in the editor
 
-- Status: draft
+- Status: verified
 - Commands: `code.nextProblem`, `code.prevProblem`
 - Files:
   - `src/lib/lsp.ts` — `applyDiagnostics`, `publishDiagnostics` handler, `QuarryWorkspace.pullSoon` / `pull` (pull diagnostics 400 ms after a change, for every open file; `workspace/diagnostic/refresh`), `orphanDocs`
@@ -596,7 +596,7 @@ Scenario: LSP-012.6 Problems are cleared with the server
 
 ## LSP-013: The Problems list and counts
 
-- Status: draft
+- Status: verified
 - Commands: `view.problems`
 - Files:
   - `src/components/LspStatus.tsx` — `ProblemsList`, `rank`, `useProblemCount`, the counts button of `LspStatusItem`
@@ -647,7 +647,7 @@ Scenario: LSP-013.6 Closing a tab removes its problems
 
 ## LSP-014: Format with the language server
 
-- Status: draft
+- Status: verified
 - Commands: `code.formatWithServer`
 - Files:
   - `src/lib/lsp.ts` — `lspCommands.format` (the library's `formatDocument`)
@@ -686,7 +686,7 @@ Scenario: LSP-014.4 A server that can't format
 
 ## LSP-015: Every open tab stays in sync with its server
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/lsp.ts` — `QuarryWorkspace` (`files`, `syncFiles`, `openFile`, `openDoc`, `closeFile` no-op, `closeDoc`, `getFile`), `QuarryFile`, `docUris`, `docForUri`, `attachDoc` / `detachDoc`, the store subscription in `installLsp` (new, closed and renamed tabs)
@@ -732,7 +732,7 @@ Scenario: LSP-015.6 Edits made while off screen
 
 ## LSP-016: Settings for code intelligence
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection` (`apply` = change + `restartServers`, per-server switch, command box, detection with `lsp_which`, or `lsp_typescript` for TypeScript)
@@ -783,7 +783,7 @@ Scenario: LSP-016.6 Any change restarts the servers
 
 ## LSP-017: Restart, crashes and quitting
 
-- Status: draft
+- Status: verified
 - Commands: `code.restartLanguageServers`
 - Files:
   - `src/lib/lsp.ts` — `restartServers`, `stopAllServers` (`generation` invalidates launches in flight), `lsp:exit` listener, `orphanDocs`, `reattach`, `forget` in `launch` (a failed start is retried by the next file), request `timeout` 15 s

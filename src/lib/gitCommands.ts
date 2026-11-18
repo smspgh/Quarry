@@ -13,8 +13,6 @@ import { showStashes, showStashForm, stashLatest } from "./git";
 import { applyChange, applySelection, canApply, type ApplyAction, type ApplyScope } from "./gitStaging";
 import { compareWithBranch } from "./git";
 import { refCommand, refRepo, type RefCommandId } from "./gitRefActions";
-import { askForDraft, cancelAssist, draftRepo, explainAtCursor, summariseBranch, summarisePicked, useGitAssist } from "./gitAssist";
-import { BUSY_ELSEWHERE, draftState } from "./gitAi";
 import { showPanel } from "./panels";
 // Edit History (specs/git-history-edit.md).
 import { openHistoryEdit, undoLastCommit } from "./git";
@@ -266,48 +264,6 @@ export function registerGitCommands() {
   register({ id: "git.deleteRemoteBranch", title: "Delete Remote Branch…", category: "Git", enabled: hasRefRepo, run: refRun("git.deleteRemoteBranch") });
   register({ id: "git.deleteTag", title: "Delete Tag…", category: "Git", enabled: hasRefRepo, run: refRun("git.deleteTag") });
   register({ id: "git.pushTag", title: "Push Tag…", category: "Git", enabled: hasRefRepo, run: refRun("git.pushTag") });
-
-  // ----- Claude git helpers (specs/git-claude.md): they exist only while Claude Code is switched on -----
-  const claudeOn = () => useStore.getState().settings.claudeEnabled;
-  const assist = () => useGitAssist.getState().assist;
-  register({
-    id: "git.draftMessage",
-    title: "Draft Commit Message with Claude",
-    category: "Git",
-    enabled: () => claudeOn() && hasRepo(),
-    run: () => {
-      const repo = currentRepo();
-      if (!claudeOn() || !repo) return false;
-      // Said here too, so the palette answers even when the panel is closed.
-      const why = assist() ? BUSY_ELSEWHERE : draftState(draftRepo(repo), false, null).disabled;
-      if (why) {
-        s().toast(why, "info", 4000);
-        return true;
-      }
-      // The commit box drafts: it knows the message already typed and whether Amend is ticked.
-      showPanel("git");
-      askForDraft();
-      return true;
-    },
-  });
-  register({ id: "git.explainConflict", title: "Explain Conflict at Cursor with Claude", category: "Git", enabled: () => claudeOn() && hasConflicts(), run: () => (claudeOn() ? explainAtCursor() : false) });
-  // `{ branch, base }` summarises at once; a name alone is a row picked in the branch picker;
-  // without either the picker asks what to compare the current branch with.
-  register({
-    id: "git.summariseBranch",
-    title: "Summarise Branch with Claude…",
-    category: "Git",
-    enabled: () => claudeOn() && hasRepo(),
-    run: (args) => {
-      const repo = currentRepo();
-      if (!claudeOn()) return false;
-      if (typeof args === "string") return void summarisePicked(args);
-      if (!repo) return false;
-      const a = (args && typeof args === "object" ? args : {}) as { branch?: unknown; base?: unknown };
-      void summariseBranch(repo.root, typeof a.branch === "string" ? a.branch : null, typeof a.base === "string" ? a.base : null);
-    },
-  });
-  register({ id: "git.stopClaude", title: "Stop Claude Request", category: "Git", enabled: () => claudeOn() && !!assist(), run: () => cancelAssist() });
 
   // ----- Edit History (specs/git-history-edit.md) -----
   // Greyed out on a detached HEAD, during a stopped operation, and (Undo) when the tip is the first

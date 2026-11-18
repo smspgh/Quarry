@@ -9,7 +9,7 @@ How an installed Quarry finds and installs a newer release, the About dialog, an
 
 ## UPD-001: Check for updates from the Help menu
 
-- Status: draft
+- Status: verified
 - Commands: `help.checkUpdates`
 - Files:
   - `src/lib/updater.ts` — `checkForUpdates(false)` (`check()`, "Quarry is up to date" / failure / "Update available" dialogs, `busy` guard)
@@ -56,7 +56,7 @@ Scenario: UPD-001.5 Only one check at a time
 
 ## UPD-002: Quiet update check at start
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/App.tsx` — boot sequence: `checkForUpdates(true, sessionReady)` started as soon as settings are loaded, only when `settings.autoUpdateCheck`; `sessionReady` resolves when the session is restored
@@ -102,13 +102,13 @@ Scenario: UPD-002.5 The switch is read at start
 
 ## UPD-003: Install an update and restart
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
-  - `src/lib/updater.ts` — `install` (unsaved-documents guard, `flushSession`, download toast, `stopAllClaude` / `stopAllServers`, `update.install()`, "Update failed" dialog)
+  - `src/lib/updater.ts` — `install` (unsaved-documents guard, `flushSession`, download toast, `killAllTerminals` / `stopAllServers`, `update.install()`, "Update failed" dialog)
   - `src/lib/actions.ts` — `needsSavePromptOnExit`, `flushSession`
-  - `src/lib/claude.ts` — `stopAllClaude`
   - `src/lib/lsp.ts` — `stopAllServers`
+  - `src/lib/terminal.ts` — `killAllTerminals`
   - `src/editor/manager.ts` — `stateOf` (length of untitled documents for the guard)
   - `src-tauri/tauri.conf.json` — `plugins.updater` (`pubkey` the download is verified against, `windows.installMode` = `passive`)
 - Tests: `src/__tests__/paths.test.ts`
@@ -161,14 +161,14 @@ Scenario: UPD-003.7 Download or installation fails
   And the installed version keeps running
 
 Scenario: UPD-003.8 Background processes are stopped before the installer takes over
-  Given a Claude Code conversation and language servers are running
+  Given language servers are running
   When the download has finished
   Then they are stopped before the installer starts
 ```
 
 ## UPD-004: About Quarry
 
-- Status: draft
+- Status: verified
 - Commands: `help.about`
 - Files:
   - `src/lib/about.ts` — `showAbout` (version from Tauri, WebView2 major version from the user agent, "Copy Version Info", "Open Log Folder")
@@ -211,7 +211,7 @@ Scenario: UPD-004.4 Close
 
 ## UPD-005: The updater only trusts the public, signed release channel
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src-tauri/tauri.conf.json` — `plugins.updater.endpoints` (`https://github.com/smspgh/Quarry/releases/latest/download/latest.json`; up to 0.1.10 it was smspgh/quarry-releases), `plugins.updater.pubkey` (minisign), `bundle.createUpdaterArtifacts`, `plugins.updater.windows.installMode`
@@ -252,7 +252,7 @@ Scenario: UPD-005.4 An equal or older version is not offered
 
 ## UPD-006: Build, sign and publish a release
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `scripts/release.ps1` — version check across the three files, signing key (`~/.tauri/quarry.key` or `$env:QUARRY_SIGNING_KEY`), `pnpm tauri build`, `release-out/` (installer, `.sig`, `latest.json`), `-Notes`, `-Publish` (refuses a `-Repo` that is not public; `gh release create` in `smspgh/Quarry`, then the bridge release with `latest.json` only in `-LegacyRepo` = `smspgh/quarry-releases`; refuses an existing tag in either or a version not higher than the latest release), `-Repo`, `-LegacyRepo`
@@ -330,7 +330,7 @@ Scenario: UPD-006.11 A private release repository is refused
 
 ## UPD-007: Set the version number everywhere
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `scripts/bump.ps1` — no version given = the next patch version (`Major.Minor.Build+1`); refuses a version not higher than the one in `tauri.conf.json`; rewrites `"version"` in `package.json` and `src-tauri/tauri.conf.json`, the first `version =` in `src-tauri/Cargo.toml`, then `cargo update -p quarry --offline` for `Cargo.lock`; files written as UTF-8 without BOM
@@ -380,7 +380,7 @@ Scenario: UPD-007.6 No version given: the next patch version
 
 ## UPD-008: Release in one step
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `scripts/quick-release.ps1` — refuses a dirty working tree; `bump.ps1` (next patch, or `-Version`), commits only the four version files as "Quarry <version>", `release.ps1 -Publish` with `-Notes` (default "Release Bump"), then `git push`; each failure says how to carry on without bumping again

@@ -9,7 +9,7 @@ User scripts: plain `.js` files under the scripts folder, browsed in the Scripts
 
 ## SCRIPT-001: Browse and select scripts in the Scripts panel
 
-- Status: draft
+- Status: verified
 - Commands: `script.panel`, `view.scripts`
 - Files:
   - `src/components/panels/ScriptsPanel.tsx` — `ScriptsPanel` (`TreeVariant` over the scripts root, `onSelect` sets `activeScriptId`, run bar text)
@@ -56,7 +56,7 @@ Scenario: SCRIPT-001.5 No scripts are built in
 
 ## SCRIPT-002: Create a script
 
-- Status: draft
+- Status: verified
 - Commands: `script.new`
 - Files:
   - `src/lib/commands.ts` — `script.new` (shows the panel, then emits the `script.new` bus event)
@@ -103,7 +103,7 @@ Scenario: SCRIPT-002.4 Existing name
 
 ## SCRIPT-003: Open a script to edit it
 
-- Status: draft
+- Status: verified
 - Commands: `script.edit`
 - Files:
   - `src/components/panels/ScriptsPanel.tsx` — `editScript`, `onActivate`, Edit button, context-menu Edit (`menuLead`)
@@ -140,7 +140,7 @@ Scenario: SCRIPT-003.4 Unsaved edits are what runs
 
 ## SCRIPT-004: Run a script on the document in front
 
-- Status: draft
+- Status: verified
 - Commands: `script.runActive`, `script.run`
 - Files:
   - `src/lib/commands.ts` — `runScriptPath` (macro guard, own-tab guard, `readScript`, sets `activeScriptId`, `confirmRun`), `script.runActive`, `script.run`
@@ -225,7 +225,7 @@ Scenario: SCRIPT-004.11 No scripts while a macro plays
 
 ## SCRIPT-005: Confirm before a script runs
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/commands.ts` — `confirmRun` (shared with macros), detail text chosen in `runScriptPath`
@@ -270,7 +270,7 @@ Scenario: SCRIPT-005.6 Setting off
 
 ## SCRIPT-006: A script's result is applied as one undo step
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/scripting.ts` — `runScript` `onmessage` (selection changes → document text → `newSelection`; both-changed, switched-tab and edited-meanwhile failures; selection changes go to the ranges captured at start; `userEvent: "input.script"`)
@@ -347,7 +347,7 @@ Scenario: SCRIPT-006.11 Editing the document during a run
 
 ## SCRIPT-007: Script API for the whole document (doc)
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/scriptWorker.ts` — `doc` object (`text`, `lines`, `lineCount`, `length`, `name`, `path`, `eol`, `mapLines`, `filterLines`, `replace`, `insert`, `append`, `prepend`, `lineAt`, `select`), `splitLines`
@@ -399,7 +399,7 @@ Scenario: SCRIPT-007.6 insert, append, prepend and lineAt
 
 ## SCRIPT-008: Script API for the selection
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/scriptWorker.ts` — `selection` object (`all`, `text`, `lines`, `isEmpty`, `map`), `selectionTexts`
@@ -448,7 +448,7 @@ Scenario: SCRIPT-008.6 Empty cursors
 
 ## SCRIPT-009: Script helpers, clipboard and console
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/scriptWorker.ts` — `util` (`sort`, `unique`, `trimLines`, `pad`, `csvSplit`, `json`), `clipboard`, `console`, `fmt`, `args`
@@ -508,7 +508,7 @@ Scenario: SCRIPT-009.8 args
 
 ## SCRIPT-010: Limit a script to certain languages or file types
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/scripting.ts` — `parseWhen` (first 20 lines, `@languages` / `@extensions`), `scriptApplies`, `describeWhen`, guard in `runScript`
@@ -570,7 +570,7 @@ Scenario: SCRIPT-010.8 Only the first 20 lines count
 
 ## SCRIPT-011: Run a script several times or until nothing changes
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/ScriptsPanel.tsx` — times input (1 to 100,000), "×N" and "To end" buttons
@@ -616,7 +616,7 @@ Scenario: SCRIPT-011.5 Safety limit
 
 ## SCRIPT-012: Cancel a running script; runaway scripts time out
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/scripting.ts` — `cancelScript`, `TIMEOUT_MS` (60 s), `kill` (terminates and drops the worker), `useScriptRunState`
@@ -661,7 +661,7 @@ Scenario: SCRIPT-012.5 Sandbox
 
 ## SCRIPT-013: Script errors and Console output
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/scripting.ts` — `formatScriptError` (maps wrapper lines to script lines, drops worker frames), `runScript` error path, `store.log`
@@ -708,7 +708,7 @@ Scenario: SCRIPT-013.5 Console housekeeping
 
 ## SCRIPT-014: Script API Reference tab
 
-- Status: draft
+- Status: verified
 - Commands: `help.scriptApi`
 - Files:
   - `src/lib/commands.ts` — `showScriptApi` (reuses an open tab, clears `dirty`)
@@ -740,7 +740,7 @@ Scenario: SCRIPT-014.3 One reference tab
 
 ## SCRIPT-015: Scripts folder location
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/lib/scripting.ts` — `scriptsDir`, `migrateLegacyScripts`

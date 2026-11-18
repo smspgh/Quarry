@@ -19,13 +19,13 @@ Decisions (taken where the roadmap left the choice open):
 - **A pop that conflicts.** git keeps the stash and records no operation, so Quarry remembers it itself (in memory, never in `.git`): the files go to Merge Changes and through the existing conflict bars, a badge **Stash conflicts** shows beside the branch (where the stopped-operation badge shows, after the "Merge or Rebase" button of MERGE-003), the stash's row says "applied with conflicts", and when the last file is resolved Quarry offers to drop the stash (**Keep Stash** is the default). An Apply that conflicts looks the same but ends without the offer. Nothing is committed for the user. The badge, the graph strip and the bars' note show whenever files are in conflict with no operation in progress (nothing else leaves that state), so they are still there after a restart; only the row's mark and the drop offer are forgotten.
 - **No Abort for a stash conflict.** git has no `stash pop --abort`, and the only general undo (`reset --merge`) could discard other work. The ways out are per file ("Current" on the row keeps the file as it was) and the stash is never lost. Messages for a stash conflict must not mention Abort.
 - **When it is off.** Stash Changes, Apply and Pop are disabled while a merge, rebase, cherry-pick, revert or patch series is stopped, or while any file is in conflict. Looking at a stash and dropping one still work. The sentence "Finish or abort the rebase first" is the shared `finishFirst(operation)` of `src/lib/gitStatus.ts` (see MERGE-003): no full stop as a tooltip, a full stop as a notification.
-- **Graph.** Stashes show only in *All branches*: one node per stash on its base commit with a "stash" label; git's helper commits (the staged snapshot, the untracked-files snapshot) are hidden. A stash row always sits directly above the commit it was made on (it is put there, not found by walking the history, so paging counts commits only); that commit is shown even when no branch reaches it any more. A stash node's right-click menu has only Apply / Pop / Drop / Copy, never the commit actions: none of the entries other specs add to the commit menu (merge, rebase, compare, edit history, Summarise with Claude) appears on a stash row, and a right-click on its "stash" label opens this same menu, not the ref-label menu of MERGE-002. A stash row cannot be picked for Compare Commits (COMMITCMP-001). Search All History does not cover stashes.
+- **Graph.** Stashes show only in *All branches*: one node per stash on its base commit with a "stash" label; git's helper commits (the staged snapshot, the untracked-files snapshot) are hidden. A stash row always sits directly above the commit it was made on (it is put there, not found by walking the history, so paging counts commits only); that commit is shown even when no branch reaches it any more. A stash node's right-click menu has only Apply / Pop / Drop / Copy, never the commit actions: none of the entries other specs add to the commit menu (merge, rebase, compare, edit history) appears on a stash row, and a right-click on its "stash" label opens this same menu, not the ref-label menu of MERGE-002. A stash row cannot be picked for Compare Commits (COMMITCMP-001). Search All History does not cover stashes.
 - **All or nothing (built 2026-11-13).** git itself does not apply a stash that holds untracked files all-or-nothing: it restores the untracked files it can and then gives up on a tracked file with changes of its own, or applies the tracked changes and then gives up on an untracked file that is in the way, leaving half the stash in the folder. Quarry checks both before git runs, for such a stash, and refuses in the same words, so "nothing in my files changes" (STASH-006.6, STASH-006.7, STASH-007.4) is true. Stashing with untracked files runs git without `--literal-pathspecs` (with it, git stashes the untracked files but leaves them in the folder).
 - **Commands.** `git.stash`, `git.stashApply`, `git.stashPop`, `git.stashDrop`, `git.showStashes`, in the palette and in a Git › Stash submenu, which sits after Stage Part of a File in the Git menu (the planned layout of the whole menu is in `specs/git-merge-rebase.md`, Decisions); the three "latest stash" commands go through exactly the same guards as the row buttons. Stash Changes… and Show Stashes are greyed out only without a repository, the three "latest stash" commands also without a stash; none is greyed out while a stash cannot run (a stopped operation, conflicts, nothing to stash): running it then says why. No keyboard shortcuts. There is no Drop All.
 
 ## STASH-001: Stash uncommitted changes
 
-- Status: draft
+- Status: verified
 - Commands: `git.stash`
 - Files:
   - `src/components/panels/StashSection.tsx` — `StashesSection` (section head with the Stash Changes… button), `StashForm` (message box, Stash / Cancel, Enter / Escape)
@@ -97,7 +97,7 @@ Scenario: STASH-001.8 The form belongs to its repository
 
 ## STASH-002: Choose whether untracked files go into the stash
 
-- Status: draft
+- Status: verified
 - Commands: `git.stash`
 - Files:
   - `src/components/panels/StashSection.tsx` — "Include untracked files (N)" checkbox of the form (starts ticked, hidden with no untracked files), Stash button disabled state
@@ -154,7 +154,7 @@ Scenario: STASH-002.7 Ignored files are never stashed
 
 ## STASH-003: Guards before stashing
 
-- Status: draft
+- Status: verified
 - Commands: `git.stash`
 - Files:
   - `src/lib/gitStash.ts` — `stashBlocked` (why Stash Changes / Apply / Pop cannot run now: no commit yet, a stopped operation, conflicted files, nothing to stash; the sentence shown)
@@ -200,7 +200,7 @@ Scenario: STASH-003.5 A repository with no commits
 
 ## STASH-004: See the stashes of the repository
 
-- Status: draft
+- Status: verified
 - Commands: `git.showStashes`
 - Files:
   - `src/components/panels/StashSection.tsx` — `StashesSection` (count in the heading, rows with title, branch and age, row buttons Apply / Pop / Drop, empty note)
@@ -269,7 +269,7 @@ Scenario: STASH-004.9 The section follows the repository
 
 ## STASH-005: See what a stash holds
 
-- Status: draft
+- Status: verified
 - Commands: none
 - Files:
   - `src/components/panels/StashSection.tsx` — expanding a row to its files (same row markup as `CommitsSection`'s files), click / Enter / double-click
@@ -332,7 +332,7 @@ Scenario: STASH-005.8 Available while actions are off
 
 ## STASH-006: Apply a stash and keep it
 
-- Status: draft
+- Status: verified
 - Commands: `git.stashApply`
 - Files:
   - `src/lib/git.ts` — `stashAction(root, stash, "apply" | "pop" | "drop")` (guards on a fresh status, then for apply / pop the unsaved-tabs question of SAFE-003.7 through the shared `guard`; `withTabs` reloads open tabs afterwards, also after a conflict or a refusal; notification), `stashRun` (busy label, refusal as a notification, reloads the list)
@@ -414,7 +414,7 @@ Scenario: STASH-006.11 The stash is gone
 
 ## STASH-007: Pop a stash
 
-- Status: draft
+- Status: verified
 - Commands: `git.stashPop`
 - Files:
   - `src/lib/git.ts` — `stashAction(…, "pop")` (same guards as apply; no confirmation)
@@ -461,7 +461,7 @@ Scenario: STASH-007.5 Popping the last stash
 
 ## STASH-008: Drop a stash
 
-- Status: draft
+- Status: verified
 - Commands: `git.stashDrop`
 - Files:
   - `src/lib/gitStash.ts` — `dropConfirm` (title, text and button labels of the dialog: stash title, branch, age, file count)
@@ -523,7 +523,7 @@ Scenario: STASH-008.8 No way to drop every stash at once
 
 ## STASH-009: A stash that conflicts when it comes back
 
-- Status: draft
+- Status: verified
 - Commands: `git.stashApply`, `git.stashPop`
 - Files:
   - `src/lib/git.ts` — `stashAction` (a conflicted apply / pop is not an error: records `stashPending` { root, stash id, title, pop } in `useGit`, in memory only, and shows Source Control); `stashAfterRefresh` / `settleStash` (offer the drop when a fresh status of that repository has no conflicted file left and the stash still exists); `conflictsCleared` wording (`stashLastFile`); the `note` hook in `installGit` passes the stash sides note to the editor bars; `commit` and `openChange` leave "or abort" out of their messages when no operation is in progress
@@ -643,7 +643,7 @@ Scenario: STASH-009.16 The stash was dropped in the meantime
 
 ## STASH-010: Stashes in the commit graph
 
-- Status: draft
+- Status: verified
 - Commands: `git.graph`
 - Files:
   - `src-tauri/src/git.rs` — `graph` (with `all`, the commit each stash was made on is added to the revisions; `graph_scope` still excludes `refs/stash`, so a stash's helper commits are never walked and `--skip` / `--max-count` count commits only), `fold_stashes` (puts one row per stash right above its base commit: only parent = the base, `refs` = `refs/stash`, `stash` = true), `GitGraphCommit.stash`
@@ -737,7 +737,7 @@ Scenario: STASH-010.14 Loading more commits
 
 ## STASH-011: Stash from the menu and the command palette
 
-- Status: draft
+- Status: verified
 - Commands: `git.stash`, `git.stashApply`, `git.stashPop`, `git.stashDrop`, `git.showStashes`
 - Files:
   - `src/lib/gitCommands.ts` — registers the five commands (`enabled()` from the repository and, for the three latest-stash commands, the status's stash count; each `run` goes through `showStashForm` / `stashLatest`, which check `stashBlocked` and then call the same `stashChanges` / `stashAction` the panel uses)

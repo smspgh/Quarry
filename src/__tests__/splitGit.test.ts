@@ -9,7 +9,7 @@ const doc = (id: string, kind: Doc["kind"] = "text"): Doc => ({ id, kind, path: 
 
 describe("split editor store", () => {
   beforeEach(() => {
-    useStore.setState({ docs: [doc("a"), doc("b"), doc("c"), doc("claude", "claude")], activeId: "a", split: null });
+    useStore.setState({ docs: [doc("a"), doc("b"), doc("c"), doc("term", "terminal")], activeId: "a", split: null });
   });
   const panes = () => {
     const s = useStore.getState();
@@ -34,8 +34,8 @@ describe("split editor store", () => {
 
   it("a tab that isn't text opens in the left pane, the right keeping its document", () => {
     useStore.setState({ activeId: "b", split: { otherId: "a", focused: 1, ratio: 0.5 } });
-    useStore.getState().setActive("claude");
-    expect(panes()).toEqual(["claude", "b", 0]);
+    useStore.getState().setActive("term");
+    expect(panes()).toEqual(["term", "b", 0]);
   });
 
   it("focusPane swaps which pane is active", () => {
@@ -53,7 +53,7 @@ describe("split editor store", () => {
   });
 
   it("closing the right pane's document shows the nearest text tab there", () => {
-    useStore.setState({ docs: [doc("a"), doc("b"), doc("claude", "claude"), doc("c")], activeId: "b", split: { otherId: "a", focused: 1, ratio: 0.5 } });
+    useStore.setState({ docs: [doc("a"), doc("b"), doc("term", "terminal"), doc("c")], activeId: "b", split: { otherId: "a", focused: 1, ratio: 0.5 } });
     useStore.getState().removeDoc("b");
     expect(panes()).toEqual(["a", "c", 1]);
   });
