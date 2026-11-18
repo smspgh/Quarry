@@ -2473,45 +2473,40 @@ select optgroup {
 }
 
 
-/* ---- Settings panel & Select fixes ---- */
+/* ---- Settings panel (SettingsPanel.tsx) ---- */
 .settings-body {
   padding: 0 12px 16px;
-  gap: 6px;
-  container-type: inline-size;
+  gap: 0;
+  container: settings / inline-size;
 }
-.settings-section {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-/* Hide a section when the filter leaves it with no rows / buttons. */
-.settings-section:not(:has(.field-row, .btn)) {
-  display: none;
-}
-.settings-empty {
-  display: none;
-  padding: 16px 4px;
-}
-.settings-body:not(:has(.settings-section .field-row, .settings-section .btn)) .settings-empty {
-  display: block;
-}
-.settings-filter {
+/* Filter, Modified and the section jump bar stay on top while the panel scrolls; opaque so rows never show through. */
+.settings-top {
   position: sticky;
   top: 0;
   z-index: 2;
   flex: none;
   display: flex;
-  align-items: center;
-  /* Exactly the input's size, and opaque so rows scrolled under it never show through. */
-  padding: 0;
-  margin-bottom: 4px;
-  border-radius: var(--radius-s);
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 0 8px;
   background: var(--sidebar-solid);
+  box-shadow: 0 1px 0 var(--divider);
+}
+.settings-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.settings-filter {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-s);
 }
 .settings-filter .input {
   flex: 1;
-}
-.settings-filter .input {
   padding-left: 28px;
   padding-right: 28px;
 }
@@ -2525,8 +2520,247 @@ select optgroup {
   position: absolute;
   right: 4px;
 }
-.settings-reset-all {
+.btn.toggle.on,
+.settings-modified.on {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+
+/* Jump bar: one row of section buttons that scrolls sideways; the current section is marked. */
+.settings-chips {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Fades out on the right so a bar wider than the panel reads as scrollable. */
+  mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+}
+.settings-chips button,
+.settings-toc button {
+  flex: none;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 12px;
+  color: var(--text-2);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.settings-chips button:hover:not(.on),
+.settings-toc button:hover:not(.on) {
+  background: var(--subtle-hover);
+  color: var(--text);
+}
+.settings-chips button.on,
+.settings-toc button.on {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+.settings-toc {
+  display: none;
+}
+/* Wide panel: the jump bar becomes a contents column on the left. */
+@container settings (min-width: 700px) {
+  .settings-chips { display: none; }
+  .settings-layout {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+  .settings-toc {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: sticky;
+    top: 52px;
+    padding-top: 12px;
+  }
+  .settings-toc button {
+    text-align: left;
+    border-radius: var(--radius-s);
+    height: 28px;
+    padding: 0 10px;
+  }
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 14px;
+}
+/* A section the filter / Modified leaves with no rows is hidden (the jump bar drops it too). */
+.settings-section:not(:has(.field-row)) {
+  display: none;
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   align-self: flex-start;
+  padding: 2px 6px 2px 2px;
+  border-radius: var(--radius-s);
+  font-family: var(--font-ui-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.section-head svg {
+  color: var(--text-3);
+}
+.section-head:hover {
+  background: var(--subtle-hover);
+}
+/* One card per section; its rows are separated by dividers instead of each being a card. */
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-m);
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  overflow: hidden;
+}
+.settings-card[hidden] {
+  display: none;
+}
+.settings-card .field-row {
+  position: relative;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 9px 12px;
+}
+.settings-card .field-row + .field-row,
+.settings-card .settings-group + .field-row,
+.settings-card .field-row + .settings-group,
+.settings-card .settings-group + .settings-group {
+  border-top: 1px solid var(--divider);
+}
+.settings-group {
+  display: flex;
+  flex-direction: column;
+}
+.settings-group:not(:has(.field-row)) {
+  display: none;
+}
+.settings-group > .field-row + .field-row {
+  border-top: 1px solid var(--divider);
+}
+.settings-group-title {
+  padding: 8px 12px 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-3);
+}
+/* A setting changed from its default gets an accent bar on its left edge. */
+.settings-card .field-row.modified::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--accent);
+}
+.match-hl {
+  background: var(--accent-soft);
+  color: inherit;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--accent-soft);
+}
+.settings-empty {
+  padding: 16px 4px;
+}
+
+/* Folder rows: the path with its middle shortened, the last folder always visible. */
+.path-display {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  cursor: text;
+  overflow: hidden;
+  font-size: 12.5px;
+}
+.path-display .path-head {
+  flex: 0 1 auto;
+  min-width: 1ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.path-display .path-tail {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* Languages › Code intelligence: one compact line per server; details open below it. */
+.field-row.lsp-server-row {
+  padding: 5px 12px 5px 8px;
+  row-gap: 4px;
+}
+.lsp-server-head {
+  flex: 1 1 160px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 28px;
+  padding: 0 6px 0 2px;
+  border-radius: var(--radius-s);
+  text-align: left;
+  color: var(--text);
+}
+.lsp-server-head:hover {
+  background: var(--subtle-hover);
+}
+.lsp-server-head svg {
+  flex: none;
+  color: var(--text-3);
+}
+.lsp-server-head small {
+  color: var(--text-3);
+  font-size: 11.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.lsp-server-name {
+  white-space: nowrap;
+}
+.lsp-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-3);
+  opacity: 0.6;
+}
+.lsp-dot.ok { background: var(--success); opacity: 1; }
+.lsp-dot.missing { background: var(--warning); opacity: 1; }
+.lsp-dot.off { background: transparent; box-shadow: inset 0 0 0 1px var(--text-3); }
+.lsp-server-details {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 0 6px 30px;
+  min-width: 0;
+}
+.lsp-server-details small {
+  color: var(--text-3);
+  font-size: 11.5px;
+  overflow-wrap: anywhere;
 }
 
 /* Rows wrap so the control drops under the label when the sidebar is narrow. */
@@ -4343,9 +4577,97 @@ textarea.input.he-box { display: block; width: calc(100% - 160px); max-width: 76
 .he-note { color: var(--warning); }
 .select-option.disabled { opacity: 0.45; cursor: default; }
 
-/* Settings › Keyboard shortcuts (ShortcutsSection.tsx). */
-.shortcut-row .field-label > span {
+/* Keyboard Shortcuts tab (ShortcutsView.tsx). */
+.shortcuts-view {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--editor-bg);
+  min-width: 0;
+  font-size: 13px;
+}
+.shortcuts-view[hidden] { display: none; }
+.shortcuts-toolbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--divider);
+}
+.shortcuts-filter {
+  flex: 1 1 260px;
+  max-width: 520px;
+}
+.shortcuts-list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 4px 0 12px;
+}
+/* Names and keys stay close together on a wide window. */
+.shortcut-group,
+.shortcut-row,
+.shortcuts-list > .panel-note {
+  max-width: 1040px;
+}
+.shortcut-group {
+  padding: 12px 14px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-3);
+}
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  min-height: 34px;
+  padding: 3px 14px;
+  border-bottom: 1px solid var(--divider);
+}
+.shortcut-row:hover {
+  background: var(--subtle-hover);
+}
+.shortcut-row.editing {
+  background: var(--accent-soft);
+}
+.shortcut-name {
+  flex: 1 1 240px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   overflow-wrap: anywhere;
+}
+.shortcut-name small {
+  color: var(--text-2);
+  font-size: 11.5px;
+}
+.shortcut-category {
+  color: var(--text-3);
+}
+.shortcut-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+.shortcut-keys {
+  min-width: 150px;
+  text-align: right;
+  margin-right: 6px;
+}
+.shortcut-row .icon-btn:disabled {
+  opacity: 0;
+}
+.shortcut-row:hover .icon-btn:disabled,
+.shortcut-row:focus-within .icon-btn:disabled {
+  opacity: 0.35;
 }
 .shortcut-row.changed .kbd {
   color: var(--accent-text);
@@ -4356,7 +4678,7 @@ textarea.input.he-box { display: block; width: calc(100% - 160px); max-width: 76
   color: var(--text-3);
 }
 .shortcut-capture {
-  min-width: 110px;
+  min-width: 140px;
   height: 26px;
   padding: 0 8px;
   display: inline-flex;
@@ -4368,13 +4690,12 @@ textarea.input.he-box { display: block; width: calc(100% - 160px); max-width: 76
   white-space: nowrap;
 }
 .shortcut-error {
-  color: var(--danger);
+  color: var(--danger) !important;
 }
-.shortcuts-section {
-  gap: 3px;
-  scroll-margin-top: 40px;
-}
-.field-row.shortcut-row {
-  padding: 4px 8px 4px 12px;
-  row-gap: 4px;
+.shortcuts-foot {
+  flex: none;
+  padding: 6px 14px;
+  border-top: 1px solid var(--divider);
+  color: var(--text-3);
+  font-size: 12px;
 }

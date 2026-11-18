@@ -740,7 +740,7 @@ Scenario: BIG-012.5 Only the start of a very long line is coloured
   Then its first 4,000 characters are coloured and the rest is plain
 
 Scenario: BIG-012.6 Colours can be turned off
-  Given Settings › Files › "Colours in large-file mode" is off
+  Given Settings › Files & tabs › "Colours in large-file mode" is off
   When I open a large log
   Then large-file tabs show plain text
   And the filter pane no longer offers the Errors and Warnings buttons

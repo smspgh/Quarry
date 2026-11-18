@@ -153,7 +153,7 @@ export function StatusBar() {
           {!doc.bigInfo.indexed && doc.indexProgress && ` · indexing ${Math.round((doc.indexProgress.indexedBytes / Math.max(1, doc.indexProgress.totalBytes)) * 100)}%`}
         </span>
       )}
-      {doc?.readonly && <span className="status-item">Read-only</span>}
+      {doc?.readonly && doc.kind !== "shortcuts" && <span className="status-item">Read-only</span>}
       {tabMovesFocus && (
         <button className="status-item clickable accent" title="Tab moves focus instead of indenting. Click or press Ctrl+M to turn off" onClick={() => runCommand("view.toggleTabFocus")}>
           Tab moves focus

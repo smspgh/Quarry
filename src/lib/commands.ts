@@ -75,6 +75,7 @@ import { showAbout } from "./about";
 import { showPanel as showPanelOnly, toggleAllPanels, togglePanel } from "./panels";
 import { choose, inform } from "./dialogs";
 import { vacatedKeys, type KeyOverrides, type KeyRow } from "./keybindings";
+import { openShortcuts } from "./shortcutsTab";
 
 export interface Command {
   id: string;
@@ -1021,7 +1022,7 @@ export function registerAllCommands() {
   register({ id: "view.macros", title: "Show Macros", category: "View", run: () => showPanel("macros") });
   register({ id: "view.scripts", title: "Show Scripts", category: "View", run: () => showPanel("scripts") });
   register({ id: "view.settings", title: "Settings", category: "View", keys: "Ctrl+,", run: () => showPanel("settings") });
-  register({ id: "view.shortcuts", title: "Keyboard Shortcuts…", category: "View", run: () => { showPanelOnly("settings"); window.setTimeout(() => bus.emit("settings.shortcuts"), 0); } });
+  register({ id: "view.shortcuts", title: "Keyboard Shortcuts…", category: "View", run: () => openShortcuts() });
   register({ id: "view.toggleWrap", title: "Toggle Word Wrap", category: "View", keys: "Alt+Z", run: () => { s().updateSettings({ wordWrap: !s().settings.wordWrap }); editor.applySettings(s().settings); persistSettings(); } });
   register({ id: "view.zoomIn", title: "Zoom In", category: "View", keys: "Ctrl+=", run: () => { s().updateSettings({ fontSize: Math.min(40, s().settings.fontSize + 1) }); editor.applySettings(s().settings); persistSettings(); } });
   register({ id: "view.zoomInPlus", title: "Zoom In", category: "View", keys: "Ctrl+Plus", hidden: true, run: () => runCommand("view.zoomIn") });

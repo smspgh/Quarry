@@ -215,9 +215,16 @@ These need the file's [language server](code-intelligence.md).
 
 ## Changing shortcuts
 
-**Tools › Keyboard Shortcuts…** (also **Help › Change Keyboard Shortcuts…** and the palette) opens **Settings › Keyboard shortcuts**. The section lists the shortcuts you have changed; **Show all** lists every command, and the filter box at the top of Settings finds a command by its name ("duplicate"), its menu ("git") or its keys ("ctrl+shift+d").
+**Tools › Keyboard Shortcuts…** (also **Help › Change Keyboard Shortcuts…**, the palette, and **Edit shortcuts…** in **Settings › Keyboard shortcuts**) opens the **Keyboard Shortcuts** tab. It lists every command under its menu category with its keys. There is only ever one such tab, and it isn't reopened when Quarry restarts.
 
-Each command has three buttons:
+- **Search** finds a command by its name ("duplicate"), its menu ("git") or its keys ("ctrl+shift+d"); the matching text is highlighted. **Escape** empties the box.
+- **By category / By name / By keys** changes the order. By keys lists commands without a shortcut last.
+- **Changed only** lists just the shortcuts you changed.
+- The line at the bottom counts the commands and your changes.
+
+Typing a command's name or keys in the Settings filter also works: the Keyboard shortcuts row then says how many commands match, and **Show matches** opens the tab with that search.
+
+Each command has three buttons (double-clicking the row is the same as Change):
 
 - **Change** (pencil). Press the new keys, then **Enter** or **Assign**. For a two-key shortcut such as Ctrl+K J, press the second combination before Enter. **Backspace** starts over and **Escape** cancels. Nothing else reacts to the keyboard while Quarry is waiting for the keys.
 - **Remove** (×). The command keeps working from the menus and the palette, without a shortcut.

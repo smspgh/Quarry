@@ -113,7 +113,7 @@ Scenario: LSP-002.7 Hovering shows the project
 
 ## LSP-003: TypeScript server choice
 
-- Status: verified
+- Status: draft
 - Commands: none
 - Files:
   - `src-tauri/src/lsp.rs` — `typescript_setup`, `lsp_typescript` (`tsserver.js` = TypeScript 5 / 6, `getExePath.js` = TypeScript 7; global package in `%APPDATA%\npm\node_modules\typescript`); `typescript_found` / `lsp_typescript_found` (any TypeScript, project or global: decides the install offer)
@@ -170,11 +170,11 @@ Scenario: LSP-003.7 My own command wins
 
 Scenario: LSP-003.8 Settings reports the same choice
   Given only TypeScript 5 is installed globally, with "tsc" on PATH, and typescript-language-server is not
-  When I open Settings › Code intelligence
+  When I open Settings › Languages › Code intelligence
   Then the TypeScript / JavaScript row says "Not installed · needs Node.js" and has an "Install…" button
   And that button runs "npm install -g typescript-language-server", the same command as the status bar's offer
   Given instead TypeScript 7 or typescript-language-server would be started
-  Then the row says "Installed · <path of the program that would be started>"
+  Then the row says "Installed", and pointing at its name or opening it shows the path of the program that would be started
   And with no folder open only the global installation is looked at
 ```
 
@@ -235,7 +235,7 @@ Scenario: LSP-004.6 A custom command that is not found
 
 ## LSP-005: Offer to install a missing language server
 
-- Status: verified
+- Status: draft
 - Commands: none
 - Files:
   - `src/lib/lspInstall.ts` — `installServer(def, command)` (terminal tab, toasts, `restartServers` on success), `resolveInstall` / `useInstallCommand` (TypeScript's command)
@@ -278,14 +278,14 @@ Scenario: LSP-005.4 Failure says what is needed
 
 Scenario: LSP-005.5 From Settings
   Given gopls is not installed
-  When I open Settings › Code intelligence
+  When I open Settings › Languages › Code intelligence
   Then the Go row says "Not installed · needs Go" and has an "Install…" button that runs "go install golang.org/x/tools/gopls@latest" the same way
-  And an installed server's row says "Installed · <path>" and has no Install button
+  And an installed server's row says "Installed", shows its path when opened, and has no Install button
 
 Scenario: LSP-005.6 Installed outside Quarry
-  Given I installed a server in another program while Settings › Code intelligence was open
+  Given I installed a server in another program while Settings › Languages › Code intelligence was open
   When I come back to the Quarry window
-  Then the row is checked again and shows "Installed · <path>"
+  Then the row is checked again and shows "Installed"
 
 Scenario: LSP-005.7 No folder open
   Given no folder is open
@@ -637,7 +637,7 @@ Scenario: LSP-013.4 Nothing to show
 Scenario: LSP-013.5 No server at all
   Given no open file is connected to a language server
   When I open the Problems list
-  Then it says "Problems from language servers appear here. Open a file in a supported language (Settings › Code intelligence)."
+  Then it says "Problems from language servers appear here. Open a file in a supported language (Settings › Languages › Code intelligence)."
 
 Scenario: LSP-013.6 Closing a tab removes its problems
   Given "b.ts" has problems in the list
@@ -732,10 +732,10 @@ Scenario: LSP-015.6 Edits made while off screen
 
 ## LSP-016: Settings for code intelligence
 
-- Status: verified
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection` (`apply` = change + `restartServers`, per-server switch, command box, detection with `lsp_which`, or `lsp_typescript` for TypeScript)
+  - `src/components/panels/SettingsPanel.tsx` — `CodeIntelGroup` (`apply` = change + `restartServers`, per-server switch, command box, detection with `lsp_which`, or `lsp_typescript` for TypeScript)
   - `src/lib/lsp.ts` — `attachDoc` (honours `lspEnabled`, `lspDisabled`), `launchOf` (`lspCommands` override), `restartServers`, `stopAllServers`
   - `src/lib/lspServers.ts` — `serverFor(path, disabled)`, `splitCommand`
   - `src/lib/actions.ts` — `mergeSettings` (`lspEnabled`, `lspDisabled`, `lspCommands`)
@@ -750,7 +750,7 @@ Scenario: LSP-015.6 Edits made while off screen
 ```gherkin
 Scenario: LSP-016.1 Everything off
   Given language servers are running
-  When I switch Settings › Code intelligence › "Code intelligence" off
+  When I switch Settings › Languages › "Code intelligence" off
   Then every language server process is stopped
   And the status bar shows no server item, underlines are removed and the Problems list is empty
   And the per-server rows and the restart button are hidden
@@ -767,7 +767,7 @@ Scenario: LSP-016.3 One server off
   Then .py tabs are connected again
 
 Scenario: LSP-016.4 My own command line
-  When I enter "\"C:\LLVM\bin\clangd.exe\" --background-index" in the C / C++ row and leave the field
+  When I open the C / C++ row, enter "\"C:\LLVM\bin\clangd.exe\" --background-index" in its command box and leave the field
   Then the servers restart and C and C++ files use that program with that argument
   And the row shows whether that program was found
 
@@ -783,7 +783,7 @@ Scenario: LSP-016.6 Any change restarts the servers
 
 ## LSP-017: Restart, crashes and quitting
 
-- Status: verified
+- Status: draft
 - Commands: `code.restartLanguageServers`
 - Files:
   - `src/lib/lsp.ts` — `restartServers`, `stopAllServers` (`generation` invalidates launches in flight), `lsp:exit` listener, `orphanDocs`, `reattach`, `forget` in `launch` (a failed start is retried by the next file), request `timeout` 15 s
@@ -808,7 +808,7 @@ Scenario: LSP-017.1 Restart from the palette
   And a message "Language servers restarted" is shown
 
 Scenario: LSP-017.2 Restart from Settings
-  When I click "Restart language servers" in Settings › Code intelligence
+  When I click "Restart" on the "Restart language servers" row in Settings › Languages
   Then the servers restart and the button is disabled until that is done
 
 Scenario: LSP-017.3 Not offered while off

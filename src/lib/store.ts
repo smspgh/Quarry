@@ -9,7 +9,7 @@ export type PaletteMode = "commands" | "files" | "goto" | "language" | "encoding
 
 export interface Doc {
   id: string;
-  kind: "text" | "big" | "terminal" | "diff" | "graph";
+  kind: "text" | "big" | "terminal" | "diff" | "graph" | "shortcuts";
   path: string | null;
   name: string;
   dirty: boolean;

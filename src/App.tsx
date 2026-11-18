@@ -7,6 +7,7 @@ import { BottomPanel } from "./components/BottomPanel";
 import { TerminalView } from "./components/TerminalView";
 import { DiffView } from "./components/DiffView";
 import { GraphView } from "./components/GraphView";
+import { ShortcutsView } from "./components/ShortcutsView";
 import { CodeEditor } from "./components/CodeEditor";
 import { CommandPalette } from "./components/CommandPalette";
 import { Sidebar } from "./components/Sidebar";
@@ -58,6 +59,7 @@ export default function App() {
   const terminalDocs = useStore(useShallow((s) => s.docs.filter((d) => d.kind === "terminal")));
   const diffDocs = useStore(useShallow((s) => s.docs.filter((d) => d.kind === "diff")));
   const graphDocs = useStore(useShallow((s) => s.docs.filter((d) => d.kind === "graph")));
+  const shortcutsDoc = useStore((s) => s.docs.find((d) => d.kind === "shortcuts"));
   useTheme();
 
   useEffect(() => {
@@ -245,6 +247,7 @@ export default function App() {
               {terminalDocs.map((d) => <TerminalView key={d.id} doc={d} visible={d.id === doc?.id} />)}
               {diffDocs.map((d) => <DiffView key={d.id} doc={d} visible={d.id === doc?.id} />)}
               {graphDocs.map((d) => <GraphView key={d.id} doc={d} visible={d.id === doc?.id} />)}
+              {shortcutsDoc && <ShortcutsView doc={shortcutsDoc} visible={shortcutsDoc.id === doc?.id} />}
               {docsCount === 0 && <Welcome />}
             </div>
             {split && (

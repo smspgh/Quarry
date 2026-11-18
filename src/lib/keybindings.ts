@@ -109,6 +109,18 @@ export function keyRowMatches(query: string, r: KeyRow): boolean {
   return `${r.category}: ${r.title} ${r.keys}`.toLowerCase().includes(q) || r.keys.toLowerCase().replace(/\+/g, " ").includes(q);
 }
 
+export type KeySort = "category" | "name" | "keys";
+
+/** The Keyboard Shortcuts tab's order: by category then title, by title, or by keys (commands without keys last). */
+export function sortKeyRows(rows: readonly KeyRow[], by: KeySort): KeyRow[] {
+  const cmp = (a: string, b: string) => a.localeCompare(b, undefined, { sensitivity: "base" });
+  const out = [...rows];
+  if (by === "name") out.sort((a, b) => cmp(a.title, b.title) || cmp(a.category, b.category));
+  else if (by === "keys") out.sort((a, b) => (!a.keys ? 1 : 0) - (!b.keys ? 1 : 0) || cmp(a.keys, b.keys) || cmp(a.title, b.title));
+  else out.sort((a, b) => cmp(a.category, b.category) || cmp(a.title, b.title));
+  return out;
+}
+
 /** Settings read from disk: keep string values only (at most two strokes); the registry normalizes them. */
 export function sanitizeKeybindings(v: unknown): KeyOverrides {
   if (!v || typeof v !== "object" || Array.isArray(v)) return {};

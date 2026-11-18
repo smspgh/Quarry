@@ -57,7 +57,7 @@ If the server for a file isn't installed, the status bar shows **Install … sup
 
 For TypeScript the offer depends on what you have. With TypeScript 5 or 6 installed (in the project or globally) and no typescript-language-server, it installs only typescript-language-server (`npm install -g typescript-language-server`) and leaves your TypeScript as it is. With no TypeScript at all, it installs both (`npm install -g typescript-language-server typescript`); whichever version npm installs, one of the two then serves.
 
-Install commands need the matching tool chain: Node.js for the npm ones, rustup for rust-analyzer, Go for gopls, the .NET SDK for csharp-ls. **Settings › Code intelligence** lists every server, says whether it's installed and where, and has an **Install…** button for each missing one.
+Install commands need the matching tool chain: Node.js for the npm ones, rustup for rust-analyzer, Go for gopls, the .NET SDK for csharp-ls. **Settings › Languages › Code intelligence** lists every server, says whether it's installed (click its name to see where), and has an **Install…** button for each missing one.
 
 ## Projects
 
@@ -68,10 +68,10 @@ Each server runs once per project. The project folder is the nearest folder abov
 
 ## Settings
 
-**Settings › Code intelligence**:
+**Settings › Languages › Code intelligence**:
 
 - **Code intelligence**: everything on or off.
-- **Each server**: whether it's installed, a switch to turn it off, and a box for your own command line (for example `"C:\LLVM\bin\clangd.exe" --background-index`). Empty means the default.
+- **Each server**: one line with a status dot (green installed, amber missing, hollow switched off), an **Install…** button when it's missing, and a switch to turn it off. Click the server's name to see where it's installed and to type your own command line (for example `"C:\LLVM\bin\clangd.exe" --background-index`). Empty means the default.
 - **Restart language servers**: after installing or updating one outside Quarry.
 
 ## Limits

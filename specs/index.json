@@ -125,7 +125,7 @@
       "prefix": "SET",
       "title": "Settings",
       "spec": "specs/settings.md",
-      "stories": 19
+      "stories": 20
     },
     {
       "prefix": "SPLIT",
@@ -11556,7 +11556,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 114,
-      "status": "verified",
+      "status": "draft",
       "commands": [],
       "files": [
         "src-tauri/src/lsp.rs",
@@ -11661,7 +11661,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 236,
-      "status": "verified",
+      "status": "draft",
       "commands": [],
       "files": [
         "src/lib/lspInstall.ts",
@@ -12143,7 +12143,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 733,
-      "status": "verified",
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -12191,7 +12191,7 @@
       "area": "LSP",
       "spec": "specs/code-intelligence.md",
       "line": 784,
-      "status": "verified",
+      "status": "draft",
       "commands": [
         "code.restartLanguageServers"
       ],
@@ -15643,12 +15643,13 @@
       "area": "SET",
       "spec": "specs/settings.md",
       "line": 10,
-      "status": "verified",
+      "status": "draft",
       "commands": [
         "view.settings"
       ],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
+        "src/components/MatchText.tsx",
         "src/components/Sidebar.tsx",
         "src/lib/panels.ts",
         "src/lib/commands.ts",
@@ -15657,7 +15658,8 @@
         "src/styles/app.css"
       ],
       "tests": [
-        "src/__tests__/ui.test.ts"
+        "src/__tests__/ui.test.ts",
+        "src/__tests__/settingsPanel.test.tsx"
       ],
       "docs": [
         "docs/settings.md",
@@ -15674,7 +15676,7 @@
         },
         {
           "id": "SET-001.3",
-          "title": "Filter by label, hint or section name"
+          "title": "Filter by label, hint, other words, or section and group name"
         },
         {
           "id": "SET-001.4",
@@ -15695,7 +15697,7 @@
       "title": "Changes apply at once and are saved automatically",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 67,
+      "line": 71,
       "status": "verified",
       "commands": [],
       "files": [
@@ -15735,7 +15737,7 @@
       "title": "Settings are loaded, completed and repaired at start",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 110,
+      "line": 114,
       "status": "verified",
       "commands": [],
       "files": [
@@ -15786,7 +15788,7 @@
       "title": "Use previous setting and Restore default on each row",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 176,
+      "line": 180,
       "status": "verified",
       "commands": [],
       "files": [
@@ -15841,8 +15843,8 @@
       "title": "Reset everything and open the settings folder",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 240,
-      "status": "verified",
+      "line": 244,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -15883,7 +15885,7 @@
       "title": "Theme, window material and menu bar position",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 287,
+      "line": 291,
       "status": "verified",
       "commands": [
         "view.toggleTheme"
@@ -15929,7 +15931,7 @@
       "title": "Editor font size and font family",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 338,
+      "line": 342,
       "status": "verified",
       "commands": [
         "view.zoomIn",
@@ -15986,7 +15988,7 @@
       "title": "Editor behaviour settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 401,
+      "line": 405,
       "status": "verified",
       "commands": [
         "view.toggleWrap",
@@ -16041,7 +16043,7 @@
       "title": "Number fields, switches and segmented choices",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 463,
+      "line": 467,
       "status": "verified",
       "commands": [],
       "files": [
@@ -16088,7 +16090,7 @@
       "title": "Tab limit, large-file and session settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 525,
+      "line": 529,
       "status": "verified",
       "commands": [],
       "files": [
@@ -16130,8 +16132,8 @@
       "title": "Scripts and macros folders",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 567,
-      "status": "verified",
+      "line": 571,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -16172,6 +16174,10 @@
         {
           "id": "SET-011.6",
           "title": "Cancelling a macros folder change keeps the previous folder"
+        },
+        {
+          "id": "SET-011.7",
+          "title": "Type a folder"
         }
       ]
     },
@@ -16180,8 +16186,8 @@
       "title": "Find and replace history size",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 620,
-      "status": "verified",
+      "line": 634,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -16217,7 +16223,7 @@
       "title": "Confirmation and update-check switches",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 661,
+      "line": 675,
       "status": "verified",
       "commands": [],
       "files": [
@@ -16246,8 +16252,8 @@
       "title": "Code intelligence settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 693,
-      "status": "verified",
+      "line": 707,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -16257,7 +16263,9 @@
         "src-tauri/src/lsp.rs",
         "src/lib/actions.ts"
       ],
-      "tests": [],
+      "tests": [
+        "src/__tests__/settingsPanel.test.tsx"
+      ],
       "docs": [
         "docs/settings.md",
         "docs/code-intelligence.md"
@@ -16294,7 +16302,7 @@
       "title": "JSON pretty-print indent",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 744,
+      "line": 763,
       "status": "verified",
       "commands": [],
       "files": [
@@ -16322,7 +16330,7 @@
       "title": "Themed dropdown lists",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 771,
+      "line": 790,
       "status": "verified",
       "commands": [],
       "files": [
@@ -16378,7 +16386,7 @@
       "title": "Help \"i\" icons",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 845,
+      "line": 864,
       "status": "verified",
       "commands": [],
       "files": [
@@ -16416,8 +16424,8 @@
       "title": "Git settings",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 888,
-      "status": "verified",
+      "line": 907,
+      "status": "draft",
       "commands": [],
       "files": [
         "src/components/panels/SettingsPanel.tsx",
@@ -16456,24 +16464,25 @@
       "title": "Change keyboard shortcuts",
       "area": "SET",
       "spec": "specs/settings.md",
-      "line": 926,
-      "status": "verified",
+      "line": 948,
+      "status": "draft",
       "commands": [
         "view.shortcuts"
       ],
       "files": [
-        "src/components/panels/ShortcutsSection.tsx",
+        "src/components/ShortcutsView.tsx",
+        "src/lib/shortcutsTab.ts",
         "src/lib/keybindings.ts",
         "src/lib/commands.ts",
         "src/App.tsx",
+        "src/components/TitleBar.tsx",
         "src/components/panels/SettingsPanel.tsx",
-        "src/components/MenuBar.tsx",
-        "src/lib/types.ts",
-        "src/lib/actions.ts"
+        "src/components/MenuBar.tsx"
       ],
       "tests": [
         "src/__tests__/keybindings.test.ts",
-        "src/__tests__/shortcutsSection.test.tsx"
+        "src/__tests__/shortcutsView.test.tsx",
+        "src/__tests__/settingsPanel.test.tsx"
       ],
       "docs": [
         "docs/keyboard-shortcuts.md",
@@ -16482,11 +16491,11 @@
       "scenarios": [
         {
           "id": "SET-020.1",
-          "title": "The section lists what I changed"
+          "title": "The Keyboard Shortcuts tab lists every command"
         },
         {
           "id": "SET-020.2",
-          "title": "Find a command with the Settings filter"
+          "title": "Search, sort and Changed only"
         },
         {
           "id": "SET-020.3",
@@ -16526,7 +16535,44 @@
         },
         {
           "id": "SET-020.12",
-          "title": "Open the list from a menu"
+          "title": "From Settings"
+        }
+      ]
+    },
+    "SET-021": {
+      "id": "SET-021",
+      "title": "Find your way around Settings",
+      "area": "SET",
+      "spec": "specs/settings.md",
+      "line": 1069,
+      "status": "draft",
+      "commands": [],
+      "files": [
+        "src/components/panels/SettingsPanel.tsx",
+        "src/styles/app.css"
+      ],
+      "tests": [
+        "src/__tests__/settingsPanel.test.tsx"
+      ],
+      "docs": [
+        "docs/settings.md"
+      ],
+      "scenarios": [
+        {
+          "id": "SET-021.1",
+          "title": "Sections are cards with groups"
+        },
+        {
+          "id": "SET-021.2",
+          "title": "Jump to a section"
+        },
+        {
+          "id": "SET-021.3",
+          "title": "Collapse a section"
+        },
+        {
+          "id": "SET-021.4",
+          "title": "Changed settings are marked"
         }
       ]
     },
@@ -21523,6 +21569,9 @@
       "LSP-017",
       "UI-016"
     ],
+    "src/components/MatchText.tsx": [
+      "SET-001"
+    ],
     "src/components/MenuBar.tsx": [
       "BRANCH-002",
       "COMMITCMP-005",
@@ -21596,6 +21645,9 @@
       "SET-007",
       "SET-017"
     ],
+    "src/components/ShortcutsView.tsx": [
+      "SET-020"
+    ],
     "src/components/Sidebar.tsx": [
       "SET-001",
       "SET-017",
@@ -21665,6 +21717,7 @@
       "GIT-018",
       "GRAPH-001",
       "SET-006",
+      "SET-020",
       "SPLIT-002",
       "SPLIT-003",
       "TAB-001",
@@ -21862,12 +21915,10 @@
       "SET-016",
       "SET-019",
       "SET-020",
+      "SET-021",
       "TAB-009",
       "TERM-010",
       "UPD-002"
-    ],
-    "src/components/panels/ShortcutsSection.tsx": [
-      "SET-020"
     ],
     "src/components/panels/StashSection.tsx": [
       "SAFE-005",
@@ -22074,7 +22125,6 @@
       "SET-011",
       "SET-014",
       "SET-019",
-      "SET-020",
       "SPLIT-007",
       "STAGE-005",
       "TAB-002",
@@ -22920,6 +22970,9 @@
     "src/lib/shells.ts": [
       "TERM-010"
     ],
+    "src/lib/shortcutsTab.ts": [
+      "SET-020"
+    ],
     "src/lib/split.ts": [
       "SPLIT-001",
       "SPLIT-002",
@@ -23024,7 +23077,6 @@
       "SET-013",
       "SET-016",
       "SET-019",
-      "SET-020",
       "TAB-009",
       "TERM-010",
       "THREEWAY-001",
@@ -23090,6 +23142,7 @@
       "SET-009",
       "SET-017",
       "SET-018",
+      "SET-021",
       "SPLIT-001",
       "SPLIT-002",
       "SPLIT-006",
@@ -23745,6 +23798,12 @@
       "SEARCH-012",
       "SEARCH-015"
     ],
+    "src/__tests__/settingsPanel.test.tsx": [
+      "SET-001",
+      "SET-014",
+      "SET-020",
+      "SET-021"
+    ],
     "src/__tests__/shell.test.ts": [
       "UI-009",
       "UI-010",
@@ -23753,7 +23812,7 @@
     "src/__tests__/shells.test.ts": [
       "TERM-010"
     ],
-    "src/__tests__/shortcutsSection.test.tsx": [
+    "src/__tests__/shortcutsView.test.tsx": [
       "SET-020"
     ],
     "src/__tests__/splitGit.test.ts": [

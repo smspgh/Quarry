@@ -54,7 +54,7 @@ It prints each story's id, title and `spec file:line` (and, for a story id, its 
 | `SAFE` | Unsaved Tabs and Git Operations | [git-safety.md](git-safety.md) | 7 |
 | `SCRIPT` | Scripts | [scripting.md](scripting.md) | 15 |
 | `SEARCH` | Find in Files | [search.md](search.md) | 16 |
-| `SET` | Settings | [settings.md](settings.md) | 19 |
+| `SET` | Settings | [settings.md](settings.md) | 20 |
 | `SPLIT` | Split Editor | [split.md](split.md) | 7 |
 | `STAGE` | Hunk and Line Staging | [git-staging.md](git-staging.md) | 9 |
 | `STASH` | Stash | [git-stash.md](git-stash.md) | 11 |

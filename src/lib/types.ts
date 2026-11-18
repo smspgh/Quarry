@@ -1,4 +1,4 @@
-export type DocKind = "text" | "big" | "terminal" | "diff" | "graph";
+export type DocKind = "text" | "big" | "terminal" | "diff" | "graph" | "shortcuts";
 
 /** Encodings offered for saving and for Reopen with Encoding (names encoding_rs knows). */
 export const ENCODINGS = ["UTF-8", "UTF-16LE", "UTF-16BE", "windows-1252", "ISO-8859-1", "ISO-8859-2", "windows-1251", "Shift_JIS", "GBK", "EUC-KR"];

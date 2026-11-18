@@ -69,7 +69,7 @@ export function ProblemsList() {
     .map((d) => ({ doc: d, list: [...problems[d.id]].sort((a, b) => rank(a) - rank(b) || a.from - b.from) }));
   if (!files.length) {
     const anyServer = Object.keys(useLsp.getState().docServer).length > 0;
-    return <div className="console-line muted">{anyServer ? "No problems in the open files." : "Problems from language servers appear here. Open a file in a supported language (Settings › Code intelligence)."}</div>;
+    return <div className="console-line muted">{anyServer ? "No problems in the open files." : "Problems from language servers appear here. Open a file in a supported language (Settings › Languages › Code intelligence)."}</div>;
   }
   const go = (d: Doc, p: Problem) => {
     useStore.getState().setActive(d.id);

@@ -762,7 +762,7 @@ Scenario: SCRIPT-015.1 Default folder
   Then the folder "scripts" under Quarry's app data folder is created if missing and shown as the tree's root
 
 Scenario: SCRIPT-015.2 Custom folder
-  When I set Settings › Folders › Scripts folder to D:\tools\quarry-scripts
+  When I set Settings › Scripts & macros › Scripts folder to D:\tools\quarry-scripts
   Then the folder is created if it does not exist
   And the Scripts panel shows that folder, subfolders included
 

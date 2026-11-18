@@ -414,7 +414,7 @@ Scenario: FIND-007.8 Long lists load as you scroll
   And scrolling near the end adds the next 100
 
 Scenario: FIND-007.9 Limits
-  Given Settings › Search › "Find & replace history" is limited to 2 entries
+  Given Settings › Find › "Find & replace history" is limited to 2 entries
   When I run searches for "a", "b" and "c"
   Then the Search history lists "c" and "b" only
   And a text longer than 10,000 characters is never added

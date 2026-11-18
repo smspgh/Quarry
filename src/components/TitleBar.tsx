@@ -1,5 +1,5 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Braces, Columns2, Copy, FileCode2, FileText, FolderOpen, FolderTree, FileDiff, GitGraph, HardDrive, History, Minus, Square, SquareTerminal, X } from "lucide-react";
+import { Braces, Columns2, Copy, FileCode2, FileText, FolderOpen, FolderTree, FileDiff, GitGraph, HardDrive, History, Keyboard, Minus, Square, SquareTerminal, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { anyPanelShown, toggleAllPanels } from "../lib/panels";
 import { BrandIcon } from "./BrandIcon";
@@ -14,6 +14,7 @@ function DocIcon({ doc }: { doc: Doc }) {
   if (doc.kind === "terminal") return <SquareTerminal className="tab-icon" />;
   if (doc.kind === "diff") return <FileDiff className="tab-icon" />;
   if (doc.kind === "graph") return <GitGraph className="tab-icon" />;
+  if (doc.kind === "shortcuts") return <Keyboard className="tab-icon" />;
   if (doc.language === "JSON") return <Braces className="tab-icon" />;
   if (doc.language === "Plain Text") return <FileText className="tab-icon" />;
   return <FileCode2 className="tab-icon" />;

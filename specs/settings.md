@@ -9,17 +9,18 @@ The Settings panel, every setting it holds and what changing it does, the per-ro
 
 ## SET-001: Open the Settings panel and filter it
 
-- Status: verified
+- Status: draft
 - Commands: `view.settings`
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — `SettingsPanel` (focus and scroll-to-top on open, filter box, Escape clears the filter), `rowMatches`, `Section`, `Row`
+  - `src/components/panels/SettingsPanel.tsx` — `SettingsPanel` (focus and scroll-to-top on open, filter box, Escape clears the filter), `SECTIONS`, `rowMatches`, `Section`, `Group`, `Row` (`keywords`, `info` are searched too), `ActionRow`
+  - `src/components/MatchText.tsx` — `MatchText`, `splitMatches` (the matched text is highlighted)
   - `src/components/Sidebar.tsx` — Settings width set to `SETTINGS_SHARE` of the window on every open (at least 200 px)
   - `src/lib/panels.ts` — `SETTINGS_SHARE` = 0.35, `showPanel`, `isPanelShown`, `panelWidth`
   - `src/lib/commands.ts` — `view.settings`
   - `src/components/MenuBar.tsx` — Tools › Settings and View › Panels › Settings
   - `src/components/SidebarRail.tsx` — the gear button below the other panel icons
-  - `src/styles/app.css` — `.settings-body`, `.settings-filter`, `.settings-empty` (visible only when no row or button is left)
-- Tests: `src/__tests__/ui.test.ts`
+  - `src/styles/app.css` — `.settings-body`, `.settings-top`, `.settings-filter`, `.match-hl`, `.settings-empty`
+- Tests: `src/__tests__/ui.test.ts`, `src/__tests__/settingsPanel.test.tsx`
 - Docs: `docs/settings.md`, `docs/keyboard-shortcuts.md`
 
 **As a** Quarry user
@@ -32,7 +33,7 @@ Scenario: SET-001.1 Open with the shortcut
   When I press Ctrl+,
   Then the Settings panel opens scrolled to the top
   And keyboard focus is in the "Filter settings" box
-  And the sections are Appearance, Editor, Tabs and panels, Files, Terminal, Folders, Search, Git, Code intelligence, JSON, Keyboard shortcuts and Data, in that order
+  And the sections are Appearance, Editor, Files & tabs, Find, Languages, Terminal, Git, Scripts & macros, Keyboard shortcuts and App, in that order
 
 Scenario: SET-001.2 Settings always opens at 35% of the window width
   Given the window is 2000 px wide and I dragged the Settings panel to 300 px before closing it
@@ -40,14 +41,17 @@ Scenario: SET-001.2 Settings always opens at 35% of the window width
   Then the panel is 700 px wide
   And I can still drag it to another width, which lasts until it is closed
 
-Scenario: SET-001.3 Filter by label, hint or section name
+Scenario: SET-001.3 Filter by label, hint, other words, or section and group name
   Given the Settings panel is open
   When I type "wrap" in the filter box
-  Then only the "Word wrap" row is shown
+  Then only the "Word wrap" row is shown, with "wrap" highlighted
   When I type "ALT+Z" instead
   Then the "Word wrap" row is shown, because its hint matches, ignoring case
+  When I type "indent" instead
+  Then "Tab size", "Insert spaces" and "Pretty-print indent" are shown, because "indent" is one of their search words
   When I type "json" instead
-  Then every row of the JSON section is shown
+  Then every row of the Languages section's JSON group is shown
+  And a section or group with no row left is hidden
 
 Scenario: SET-001.4 Nothing matches
   When I type "zzzz" in the filter box
@@ -239,10 +243,10 @@ Scenario: SET-004.8 Rows with side effects run them
 
 ## SET-005: Reset everything and open the settings folder
 
-- Status: verified
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — `resetAll` (confirmation, `DEFAULT_SETTINGS`, `loadMacros("switch")`, `restartServers` when a code-intelligence setting changes, toast), "Open settings folder" button (`appData.path`, `revealItemInDir`, falls back to a toast with the path)
+  - `src/components/panels/SettingsPanel.tsx` — section App: `resetAll` (confirmation, `DEFAULT_SETTINGS`, `loadMacros("switch")`, `restartServers` when a code-intelligence setting changes, toast) on the "Reset all to defaults" row, "Open settings folder" row (`appData.path`, `revealItemInDir`, falls back to a toast with the path)
   - `src/lib/actions.ts` — `askDialog`, `persistSettings`
   - `src/lib/macros.ts` — `loadMacros`
   - `src/lib/lsp.ts` — `restartServers`
@@ -256,7 +260,7 @@ Scenario: SET-004.8 Rows with side effects run them
 
 ```gherkin
 Scenario: SET-005.1 Reset all asks first
-  When I click "Reset all to defaults" in the Data section
+  When I click "Reset all…" on the "Reset all to defaults" row of the App section
   Then a dialog asks "Reset all settings?" with a "Reset all" button
   And nothing has changed yet
 
@@ -274,7 +278,7 @@ Scenario: SET-005.3 Cancelling changes nothing
   Then the font size is still 20
 
 Scenario: SET-005.4 Open settings folder
-  When I click "Open settings folder"
+  When I click "Open" on the "Open settings folder" row
   Then Windows File Explorer opens showing %APPDATA%\com.quarry.app
 
 Scenario: SET-005.5 Reset all reconnects the language servers
@@ -340,7 +344,7 @@ Scenario Outline: SET-006.5 Menu bar position
 - Status: verified
 - Commands: `view.zoomIn`, `view.zoomInPlus`, `view.zoomOut`, `view.zoomReset`
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — "Font size" row, `FontFamilyField` (`FONT_CHOICES`, only installed fonts listed, "Custom…"), `fontListFor`, `firstFontFamily`, `fontMissing`, `fontInstalled` (width measurement, since WebView2 reports every font as available)
+  - `src/components/panels/SettingsPanel.tsx` — Appearance › Editor font: "Font size" row, "Font family" row with `FontFamilyField` (`FONT_CHOICES`, only installed fonts listed, "Custom…"), `fontListFor`, `firstFontFamily`, `fontMissing`, `fontInstalled` (width measurement, since WebView2 reports every font as available)
   - `src/lib/commands.ts` — `view.zoomIn` (max 40), `view.zoomInPlus` (hidden alias on Ctrl+Plus), `view.zoomOut` (min 8), `view.zoomReset` (14)
   - `src/editor/cmSetup.ts` — `fontTheme` via `settingsReconfigure`
   - `src/components/Select.tsx` — the font list
@@ -403,7 +407,7 @@ Scenario: SET-007.7 A hand-written value opens in Custom
 - Status: verified
 - Commands: `view.toggleWrap`, `view.toggleWhitespace`, `view.setTabSize`
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — Editor section rows (`tabSize`, `insertSpaces`, `wordWrap`, `lineNumbers`, `highlightActiveLine`, `bracketMatching`, `autoCloseBrackets`, `renderWhitespace`, `defaultEol`)
+  - `src/components/panels/SettingsPanel.tsx` — Editor section: groups Typing (`tabSize`, `insertSpaces`, `autoCloseBrackets`) and Display (`wordWrap`, `lineNumbers`, `highlightActiveLine`, `bracketMatching`, `renderWhitespace`); `defaultEol` in Files & tabs
   - `src/editor/cmSetup.ts` — `settingsReconfigure` (compartments for line numbers, wrap, whitespace, indent, active line, brackets, close brackets)
   - `src/editor/manager.ts` — `applySettings`
   - `src/lib/commands.ts` — `view.toggleWrap` (Alt+Z), `view.toggleWhitespace`, `view.setTabSize` (1–16, or opens the status-bar picker when run without a size)
@@ -527,7 +531,7 @@ Scenario: SET-009.7 Switches are announced by their row label
 - Status: verified
 - Commands: none
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — "Tabs and panels" and "Files" sections (`maxOpenTabs`, `largeFileThresholdMb`, `bigHighlight`, `restoreSession`)
+  - `src/components/panels/SettingsPanel.tsx` — "Files & tabs" section (`restoreSession`, `maxOpenTabs`, group Large files: `largeFileThresholdMb`, `bigHighlight`)
   - `src/lib/tabLimit.ts` — `makeRoom` / `planRoom` read `maxOpenTabs`
   - `src/lib/actions.ts` — `openPath` (threshold decides large-file mode), `restoreSession`, `needsSavePromptOnExit`
   - `src/lib/bigHighlight.ts` — colours used when `bigHighlight` is on
@@ -566,10 +570,10 @@ Scenario: SET-010.4 Restore session on start
 
 ## SET-011: Scripts and macros folders
 
-- Status: verified
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — `FolderRow` (shows the folder in use, default path typed back in stores empty, "Browse…", hint suffix "· default folder"), `changeFolder`
+  - `src/components/panels/SettingsPanel.tsx` — `FolderRow` (shows the folder in use with its middle shortened and the full path in the tooltip, a click turns it into a text box, default path typed back in stores empty, "Browse…", hint suffix "· default folder"), `splitPath`, `changeFolder`
   - `src/lib/scripting.ts` — `scriptsDir` (resolves and reports an unusable folder)
   - `src/lib/macros.ts` — `resolveFolder` (creates a missing folder; one that can't be created resets the setting to empty with a warning), `loadMacros("switch")` (unsaved-macros guard; Cancel puts back the folder loaded before)
   - `src/lib/ipc.ts` — `appData.path`
@@ -586,6 +590,8 @@ Scenario: SET-011.1 The field shows the folder in use
   Given the Scripts folder setting is empty
   When I open Settings
   Then the "Scripts folder" field shows the scripts folder inside %APPDATA%\com.quarry.app
+  And when the panel is too narrow for the whole path, its middle is cut short with "…" and its last folder stays visible
+  And pointing at the field shows the whole path
   And the row's hint ends with "default folder"
 
 Scenario: SET-011.2 Choose a folder with Browse
@@ -595,7 +601,7 @@ Scenario: SET-011.2 Choose a folder with Browse
 
 Scenario: SET-011.3 Typing the default path keeps the setting empty
   Given the Macros folder is D:\macros
-  When I type the default macros folder path, with or without a trailing backslash and in any letter case, and press Enter
+  When I click the "Macros folder" field, type the default macros folder path, with or without a trailing backslash and in any letter case, and press Enter
   Then the setting is stored as empty
   And "Restore default" on that row is disabled
 
@@ -615,14 +621,22 @@ Scenario: SET-011.6 Cancelling a macros folder change keeps the previous folder
   When I set "Macros folder" to D:\team-macros and answer Cancel to "Switch macros folder?"
   Then the Macros folder is D:\macros again, not the default
   And a notice says "Macros folder change cancelled."
+
+Scenario: SET-011.7 Type a folder
+  When I click the "Scripts folder" field
+  Then it becomes a text box holding the whole path, with the cursor in it
+  When I type D:\my-scripts and press Enter, or leave the box
+  Then the setting is D:\my-scripts and the field shows it shortened again
+  When I click the field again and press Escape instead
+  Then the folder is unchanged
 ```
 
 ## SET-012: Find and replace history size
 
-- Status: verified
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — "Find & replace history" row (Unlimited / Limit, number field, default limit 500), `clearSearchHistory`
+  - `src/components/panels/SettingsPanel.tsx` — section Find: "Find & replace history" row (Unlimited / Limit, number field, default limit 500), "Clear find & replace history" row (`clearSearchHistory`)
   - `src/lib/searchHistory.ts` — `applyHistoryLimit`, `clearHistory`
   - `src/lib/types.ts` — `searchHistoryLimit` (0 = unlimited)
 - Tests: none
@@ -650,7 +664,7 @@ Scenario: SET-012.3 Back to unlimited
   Then the number field disappears and entries are no longer dropped
 
 Scenario: SET-012.4 Clear the history
-  When I click "Clear find & replace history"
+  When I click "Clear…" on the "Clear find & replace history" row
   Then a dialog asks "Clear find & replace history?" with a "Clear" button
   When I confirm
   Then the find bar and Find in Files offer no remembered entries
@@ -663,7 +677,7 @@ Scenario: SET-012.4 Clear the history
 - Status: verified
 - Commands: none
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — rows "Confirm script & macro runs" (`confirmRuns`) and "Check for updates on start" (`autoUpdateCheck`)
+  - `src/components/panels/SettingsPanel.tsx` — rows "Confirm script & macro runs" (`confirmRuns`, section Scripts & macros) and "Check for updates on start" (`autoUpdateCheck`, section App)
   - `src/lib/commands.ts` — `confirmRun` reads `confirmRuns`
   - `src/App.tsx` — start-up update check gated by `autoUpdateCheck`
   - `src/lib/types.ts` — both default to on
@@ -692,16 +706,16 @@ Scenario: SET-013.2 Check for updates on start
 
 ## SET-014: Code intelligence settings
 
-- Status: verified
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — `CodeIntelSection` (master switch, one row per server from `SERVERS`, installed / not installed line, own command box, "Install…", per-server switch, "Restart language servers", re-detect on window focus)
+  - `src/components/panels/SettingsPanel.tsx` — `CodeIntelGroup` in Languages (master switch, one compact line per server from `SERVERS`: status dot, Installed / Not installed, "Install…", per-server switch; opening the line shows the path and the own command box; "Restart language servers" row, re-detect on window focus)
   - `src/lib/lsp.ts` — `restartServers`
   - `src/lib/lspServers.ts` — `SERVERS`, `splitCommand`
   - `src/lib/lspInstall.ts` — `installServer`
   - `src-tauri/src/lsp.rs` — `lsp_which`
   - `src/lib/actions.ts` — `sanitizeSettings` (`lspEnabled`, `lspDisabled`, `lspCommands`)
-- Tests: none
+- Tests: `src/__tests__/settingsPanel.test.tsx`
 - Docs: `docs/settings.md`, `docs/code-intelligence.md`
 
 **As a** developer
@@ -711,13 +725,18 @@ Scenario: SET-013.2 Check for updates on start
 ```gherkin
 Scenario: SET-014.1 Each server shows whether it is installed
   Given "Code intelligence" is on
-  When I open Settings
-  Then every supported language server has a row reading either "Installed" with its path or "Not installed"
+  When I open Settings › Languages
+  Then every supported language server has a one-line row with a status dot reading "Installed", "Not installed" or "Looking…"
+  And pointing at an installed server's name shows its path
   And a server that is not installed has an "Install…" button
+  When I click a server's name
+  Then the row opens and shows the path of the program found ("Not found on PATH" when there is none) and the command box
+  When I click the name again
+  Then the row closes
 
 Scenario: SET-014.2 The master switch hides the server rows
   When I turn "Code intelligence" off
-  Then the server rows and "Restart language servers" disappear
+  Then the server rows and the "Restart language servers" row disappear
   And every running language server is stopped
 
 Scenario: SET-014.3 Turn one server off
@@ -726,14 +745,14 @@ Scenario: SET-014.3 Turn one server off
   And the other servers are restarted and keep working
 
 Scenario: SET-014.4 Use my own command
-  When I type a full path with arguments into a server's command box and leave the box
+  When I open a server's row, type a full path with arguments into its command box and leave the box
   Then the servers restart and that server is started with my command
   And its row shows whether that program was found
   When I empty the box again and leave it
   Then the default command is used
 
 Scenario: SET-014.5 Restart language servers
-  When I click "Restart language servers"
+  When I click "Restart" on the "Restart language servers" row
   Then the button is disabled until every server has been restarted
 
 Scenario: SET-014.6 The filter covers servers
@@ -746,7 +765,7 @@ Scenario: SET-014.6 The filter covers servers
 - Status: verified
 - Commands: none
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — JSON section, "Pretty-print indent" (`jsonIndent`, 1–8)
+  - `src/components/panels/SettingsPanel.tsx` — Languages › JSON, "Pretty-print indent" (`jsonIndent`, 1–8)
   - `src/lib/types.ts` — default 2
   - `src/lib/format.ts` — JSON formatting reads the setting
 - Tests: none
@@ -887,10 +906,10 @@ Scenario: SET-018.5 The text stays inside the window
 
 ## SET-019: Git settings
 
-- Status: verified
+- Status: draft
 - Commands: none
 - Files:
-  - `src/components/panels/SettingsPanel.tsx` — section "Git": "Allow merging with uncommitted changes" (switch) and "Compare with Branch shows" (The two tips / Changes since split), each hint following the current value
+  - `src/components/panels/SettingsPanel.tsx` — section "Git": "Allow merging with uncommitted changes" (switch) and "Compare with Branch shows" (The two tips / Changes since split), each hint and "i" text following the current value
   - `src/lib/types.ts` — `gitMergeWithChanges` (default off), `gitCompareBranch` (default `"tips"`)
   - `src/lib/actions.ts` — `sanitizeSettings` (`gitMergeWithChanges` in `BOOLEAN_SETTINGS`; `gitCompareBranch` anything but `"split"` → `"tips"`)
 - Tests: `src/__tests__/gitMerge.test.ts`, `src/__tests__/graphCompare.test.tsx`
@@ -909,9 +928,12 @@ Scenario: SET-019.1 The defaults are the careful ones
 
 Scenario: SET-019.2 The hint says what the current choice does
   When I turn "Allow merging with uncommitted changes" on
-  Then its hint says git refuses a merge that would change those files, and that Abort may not bring them back exactly after a conflict
+  Then its hint says a merge may start while tracked files have changes
+  And its "i" says git refuses a merge that would change those files, and that Abort may not bring them back exactly after a conflict
+  When I turn it off again
+  Then its hint says a merge only starts when every tracked file is committed, and its "i" says Abort can then always bring everything back
   When I choose "Changes since split"
-  Then its hint says only what the picked branch changed since it split off is shown, as a pull request shows it
+  Then its hint says only what the picked branch changed since it split off is shown, and its "i" adds "As a pull request shows it."
 
 Scenario: SET-019.3 What they change
   When I change either setting
@@ -925,18 +947,21 @@ Scenario: SET-019.4 A bad value in the file
 
 ## SET-020: Change keyboard shortcuts
 
-- Status: verified
+- Status: draft
 - Commands: `view.shortcuts`
 - Files:
-  - `src/components/panels/ShortcutsSection.tsx` — the section: `listedRows` (changed only / Show all / the Settings filter), Change / Remove / Restore default buttons, the recording box, Restore all
-  - `src/lib/keybindings.ts` — pure rules: `strokeProblem`, `checkKeys`, `withKeys`, `restoreDefault`, `captureStep`, `keyRowMatches`, `sanitizeKeybindings`, `vacatedKeys`
+  - `src/components/ShortcutsView.tsx` — the Keyboard Shortcuts tab: `listedRows` (search, Changed only), sort (`sortKeyRows`), Change / Remove / Restore default buttons, double-click to change, the recording box, Restore all, the count line
+  - `src/lib/shortcutsTab.ts` — `openShortcuts` (one tab, reused; takes the search text), `takePendingQuery`
+  - `src/lib/keybindings.ts` — pure rules: `strokeProblem`, `checkKeys`, `withKeys`, `restoreDefault`, `captureStep`, `keyRowMatches`, `sortKeyRows`, `sanitizeKeybindings`, `vacatedKeys`
   - `src/lib/commands.ts` — `setKeyOverrides` (rebuilds the key index, sets each command's `keys`), `keyRows`, `isVacatedKey`, `setKeyCapture` / `getKeyCapture`, the store subscription at the end of `registerAllCommands`, `view.shortcuts`
-  - `src/App.tsx` — `onKey`: key presses go to the recording handler first; a vacated built-in key is swallowed inside an editor
-  - `src/components/panels/SettingsPanel.tsx` — mounts the section above "Data"
+  - `src/App.tsx` — mounts the tab's view; `onKey`: key presses go to the recording handler first; a vacated built-in key is swallowed inside an editor
+  - `src/components/TitleBar.tsx` — the tab's keyboard icon
+  - `src/components/panels/SettingsPanel.tsx` — `ShortcutsRow`, section "Keyboard shortcuts": how many are changed, "Edit shortcuts…", "Restore all", and the commands the Settings filter finds ("Show matches")
   - `src/components/MenuBar.tsx` — Tools › Keyboard Shortcuts…, Help › Change Keyboard Shortcuts…; `MENU_MNEMONICS` (letters a shortcut may not take)
-  - `src/lib/types.ts` — `Settings.keybindings` (command id → keys, "" = none; default `{}`)
+  - `src/lib/store.ts`, `src/lib/types.ts` — doc kind `"shortcuts"` (not kept in the session); `Settings.keybindings` (command id → keys, "" = none; default `{}`)
   - `src/lib/actions.ts` — `sanitizeSettings` (`sanitizeKeybindings`)
-- Tests: `src/__tests__/keybindings.test.ts`, `src/__tests__/shortcutsSection.test.tsx`
+  - `src/styles/app.css` — `.shortcuts-view`, `.shortcut-row`, `.shortcut-capture`
+- Tests: `src/__tests__/keybindings.test.ts`, `src/__tests__/shortcutsView.test.tsx`, `src/__tests__/settingsPanel.test.tsx`
 - Docs: `docs/keyboard-shortcuts.md`, `docs/settings.md`
 
 **As a** developer coming from another editor
@@ -944,23 +969,30 @@ Scenario: SET-019.4 A bad value in the file
 **So that** I do not have to relearn my shortcuts
 
 ```gherkin
-Scenario: SET-020.1 The section lists what I changed
-  Given I have changed no shortcut
-  When I open Settings and look at "Keyboard shortcuts"
-  Then it says "No shortcuts changed" and lists no command
-  And "Restore all" is disabled
-  When I click "Show all"
-  Then every command of the palette is listed as "Category: Title" with its keys, or "None"
+Scenario: SET-020.1 The Keyboard Shortcuts tab lists every command
+  When I choose Tools › Keyboard Shortcuts…
+  Then a "Keyboard Shortcuts" tab opens with the cursor in its search box
+  And every command of the palette is listed under its category with its keys, or "None"
+  And the line at the bottom says how many commands there are and how many shortcuts are changed
+  When I choose Tools › Keyboard Shortcuts… again
+  Then the same tab is shown; there is never a second one
+  And the tab is not reopened when Quarry restarts
 
-Scenario: SET-020.2 Find a command with the Settings filter
-  When I type "duplicate" in the filter at the top of Settings
-  Then "Edit: Duplicate Line Down" is listed under Keyboard shortcuts with Ctrl+Shift+D
+Scenario: SET-020.2 Search, sort and Changed only
+  When I type "duplicate" in the tab's search box
+  Then "Duplicate Line Down" is listed with Ctrl+Shift+D, and "duplicate" is highlighted
   When I type "ctrl+shift+d" instead
   Then the same command is listed
+  When I choose "By name" or "By keys" in the sort list
+  Then the commands are listed by title, or by keys with the commands without keys last, each with its category
+  When I click "Changed only"
+  Then only the commands whose keys I changed are listed, and "No shortcuts changed" when there are none
+  When I press Escape in the search box
+  Then the search is emptied
 
 Scenario: SET-020.3 Record new keys
   Given "Edit: Duplicate Line Down" has Ctrl+Shift+D
-  When I click its Change button and press Ctrl+Alt+J
+  When I click its Change button, or double-click its row, and press Ctrl+Alt+J
   Then the box shows "Ctrl+Alt+J" and no command runs
   When I press Enter
   Then the command's keys are Ctrl+Alt+J in the list, the Edit menu and the palette
@@ -975,7 +1007,7 @@ Scenario: SET-020.5 Cancel and start over
   Given I clicked Change and pressed Ctrl+Alt+J
   When I press Backspace
   Then the box is empty again and waits for keys
-  When I press Escape, or click outside the row
+  When I press Escape, click outside the row, or switch to another tab
   Then recording ends and the shortcut is unchanged
 
 Scenario: SET-020.6 Keys another command has
@@ -1023,7 +1055,63 @@ Scenario: SET-020.11 A bad value in the file
   When Quarry starts
   Then the bad value is ignored and the built-in keys apply
 
-Scenario: SET-020.12 Open the list from a menu
-  When I choose Tools › Keyboard Shortcuts…
-  Then Settings opens with every command listed under Keyboard shortcuts, scrolled into view
+Scenario: SET-020.12 From Settings
+  When I open Settings › Keyboard shortcuts
+  Then its row says "No shortcuts changed" or how many are, with "Edit shortcuts…" (and "Restore all" when some are changed)
+  When I click "Edit shortcuts…"
+  Then the Keyboard Shortcuts tab opens
+  When I type "duplicate line" in the Settings filter
+  Then the row says how many commands match "duplicate line"
+  When I click "Show matches"
+  Then the Keyboard Shortcuts tab opens with "duplicate line" in its search box
+```
+
+## SET-021: Find your way around Settings
+
+- Status: draft
+- Commands: none
+- Files:
+  - `src/components/panels/SettingsPanel.tsx` — `SECTIONS`, `Section` (heading that collapses it, one card), `Group`, `Row` (`modified` mark), `ActionRow`, the jump bar and contents column (`nav`, `jump`, `onScroll`), collapsed sections in localStorage (`quarry.settingsCollapsed`), "Modified" (`modifiedKeys`, `sameValue`), the empty message
+  - `src/styles/app.css` — `.settings-top`, `.settings-chips`, `.settings-toc` (container query `settings` ≥ 700 px), `.section-head`, `.settings-card`, `.settings-group`, `.field-row.modified`
+- Tests: `src/__tests__/settingsPanel.test.tsx`
+- Docs: `docs/settings.md`
+
+**As a** Quarry user looking for one setting among many
+**I want** clearly separated sections I can jump to, fold away, or narrow to what I changed
+**So that** I find a setting without scrolling through all of them
+
+```gherkin
+Scenario: SET-021.1 Sections are cards with groups
+  When I open Settings
+  Then each section has a heading and one card holding its rows, separated by lines
+  And longer sections are split into named groups, such as Editor › Typing and Editor › Display
+  And a row with longer help has an "i" next to its name that shows it
+
+Scenario: SET-021.2 Jump to a section
+  Given the Settings panel is narrower than 700 px
+  Then a row of section buttons stays at the top under the filter box, marking the section being read
+  When I click "Git"
+  Then the panel scrolls so the Git section is at the top, and "Git" is marked
+  Given the panel is 700 px or wider
+  Then the section buttons are a contents column on the left instead
+  And while the filter or Modified hides a section, its button is hidden too
+
+Scenario: SET-021.3 Collapse a section
+  When I click the "Editor" heading
+  Then the Editor card folds away and the heading shows a closed arrow
+  And it stays folded the next time Settings opens
+  When I type in the filter box, or turn on Modified
+  Then the matching rows of folded sections are shown
+  When I click "Editor" in the jump bar, or the heading again
+  Then the section opens
+
+Scenario: SET-021.4 Changed settings are marked
+  Given "Tab size" is 2 and every other setting has its default
+  Then the "Tab size" row has an accent bar on its left edge and no other row has one
+  And "Modified (1)" is shown next to the filter box
+  When I click "Modified"
+  Then only the "Tab size" row is shown
+  And with every setting at its default the panel says "Every setting has its default value"
+  When I click "Modified" again
+  Then every row is shown
 ```
