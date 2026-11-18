@@ -57,7 +57,7 @@ export interface BigDocInfo {
   indexed: boolean;
   dirty: boolean;
   eol: "LF" | "CRLF" | "CR";
-  /** "UTF-8", or "UTF-16LE" / "UTF-16BE" (decoded for display, read-only). */
+  /** "UTF-8", or "UTF-16LE" / "UTF-16BE" (decoded for display; edits are encoded back). */
   encoding: string;
 }
 

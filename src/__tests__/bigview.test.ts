@@ -6,14 +6,16 @@ describe("large-file line editing gate", () => {
   it("allows ordinary lines", () => {
     expect(editGate(3, base)).toBeNull();
   });
-  it("refuses read-only (UTF-16) documents and lines cut at the read cap", () => {
-    expect(editGate(0, { ...base, readonly: true, encoding: "UTF-16LE" })).toEqual({ kind: "refuse", message: "UTF-16LE large files are read-only." });
+  it("refuses read-only documents and lines cut at the read cap; UTF-16 lines are editable", () => {
+    expect(editGate(0, { ...base, readonly: true })).toEqual({ kind: "refuse", message: "This document is read-only." });
+    expect(editGate(0, { ...base, encoding: "UTF-16LE" })).toBeNull();
     expect(editGate(0, { ...base, truncated: new Set([0]) })?.kind).toBe("refuse");
   });
   it("asks before editing a line with invalid UTF-8", () => {
     const g = editGate(41, { ...base, lossy: new Set([41]) });
     expect(g?.kind).toBe("confirm");
     expect(g?.message).toContain("Line 42");
+    expect(editGate(1, { ...base, encoding: "UTF-16BE", lossy: new Set([1]) })?.message).toContain("not valid UTF-16BE");
   });
   it("makes lone CR characters visible", () => {
     expect(visibleRowText("a\rb")).toBe("a␍b");

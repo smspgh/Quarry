@@ -71,9 +71,9 @@ export function utf8Span(text: string, byteCol: number, byteLen: number): [numbe
 }
 
 export function editGate(line: number, o: { readonly: boolean; encoding: string; truncated: Set<number>; lossy: Set<number> }): { kind: "refuse" | "confirm"; message: string } | null {
-  if (o.readonly) return { kind: "refuse", message: o.encoding !== "UTF-8" ? `${o.encoding} large files are read-only.` : "This document is read-only." };
+  if (o.readonly) return { kind: "refuse", message: "This document is read-only." };
   if (o.truncated.has(line)) return { kind: "refuse", message: `Line ${(line + 1).toLocaleString()} is longer than 16 MB and cannot be edited in large-file mode.` };
-  if (o.lossy.has(line)) return { kind: "confirm", message: `Line ${(line + 1).toLocaleString()} contains bytes that are not valid UTF-8. Editing it replaces them with the replacement character when saved; other lines are not affected.` };
+  if (o.lossy.has(line)) return { kind: "confirm", message: `Line ${(line + 1).toLocaleString()} contains bytes that are not valid ${o.encoding || "UTF-8"}. Editing it replaces them with the replacement character when saved; other lines are not affected.` };
   return null;
 }
 
@@ -515,7 +515,7 @@ export function BigFileView({ doc }: { doc: Doc }) {
   /** Edit / insert / delete keys share one gate: read-only first, then indexing. */
   const canChange = () => {
     if (doc.readonly) {
-      toast(doc.encoding !== "UTF-8" ? `${doc.encoding} large files are read-only.` : "This document is read-only.", "warning", 5000);
+      toast("This document is read-only.", "warning", 5000);
       return false;
     }
     if (!indexed) {

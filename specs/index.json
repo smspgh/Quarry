@@ -721,10 +721,6 @@
         },
         {
           "id": "BIG-010.6",
-          "title": "Read-only documents save only as a copy"
-        },
-        {
-          "id": "BIG-010.7",
           "title": "Saving keeps the file's attributes and links"
         }
       ]
@@ -734,7 +730,7 @@
       "title": "Encodings and line endings",
       "area": "BIG",
       "spec": "specs/large-files.md",
-      "line": 634,
+      "line": 629,
       "status": "verified",
       "commands": [],
       "files": [
@@ -753,11 +749,11 @@
       "scenarios": [
         {
           "id": "BIG-011.1",
-          "title": "UTF-16 files with a byte-order mark are shown decoded and read-only"
+          "title": "UTF-16 files with a byte-order mark are shown decoded"
         },
         {
           "id": "BIG-011.2",
-          "title": "A read-only file refuses edits"
+          "title": "UTF-16 files are edited and saved in UTF-16"
         },
         {
           "id": "BIG-011.3",
@@ -778,6 +774,10 @@
         {
           "id": "BIG-011.7",
           "title": "Other encodings are read as UTF-8"
+        },
+        {
+          "id": "BIG-011.8",
+          "title": "Replace All in a UTF-16 file"
         }
       ]
     },
@@ -5875,7 +5875,7 @@
         },
         {
           "id": "FILE-006.4",
-          "title": "A UTF-16 large file is read-only"
+          "title": "A UTF-16 large file opens editable"
         },
         {
           "id": "FILE-006.5",
@@ -5888,7 +5888,7 @@
       "title": "Detect encoding and line endings on open",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 300,
+      "line": 299,
       "status": "verified",
       "commands": [],
       "files": [
@@ -5927,7 +5927,7 @@
       "title": "Choose the encoding and line endings a file is saved with",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 342,
+      "line": 341,
       "status": "verified",
       "commands": [
         "file.setEncoding",
@@ -5979,7 +5979,7 @@
       "title": "Reopen a file in another encoding",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 396,
+      "line": 395,
       "status": "verified",
       "commands": [
         "file.reopenWithEncoding"
@@ -6019,7 +6019,7 @@
       "title": "Save a document",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 439,
+      "line": 438,
       "status": "verified",
       "commands": [
         "file.save"
@@ -6083,7 +6083,7 @@
       "title": "Save a document under another name",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 516,
+      "line": 515,
       "status": "verified",
       "commands": [
         "file.saveAs"
@@ -6127,7 +6127,7 @@
       "title": "Save all changed documents",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 567,
+      "line": 566,
       "status": "verified",
       "commands": [
         "file.saveAll"
@@ -6160,7 +6160,7 @@
       "title": "Revert a file to the version on disk",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 600,
+      "line": 599,
       "status": "verified",
       "commands": [
         "file.revert"
@@ -6198,7 +6198,7 @@
       "title": "Know which documents have unsaved changes",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 640,
+      "line": 639,
       "status": "verified",
       "commands": [],
       "files": [
@@ -6235,7 +6235,7 @@
       "title": "Notice changes made by other programs",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 679,
+      "line": 678,
       "status": "verified",
       "commands": [],
       "files": [
@@ -6298,7 +6298,7 @@
       "title": "Restore the previous session on start",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 763,
+      "line": 762,
       "status": "verified",
       "commands": [],
       "files": [
@@ -6356,7 +6356,7 @@
       "title": "Exit without losing work (hot exit)",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 830,
+      "line": 829,
       "status": "verified",
       "commands": [
         "app.exit"
@@ -6417,7 +6417,7 @@
       "title": "Open files by dropping them on the window",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 899,
+      "line": 898,
       "status": "verified",
       "commands": [],
       "files": [
@@ -6449,7 +6449,7 @@
       "title": "Open files from the command line and File Explorer",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 931,
+      "line": 930,
       "status": "verified",
       "commands": [],
       "files": [
@@ -6496,7 +6496,7 @@
       "title": "Welcome screen",
       "area": "FILE",
       "spec": "specs/files.md",
-      "line": 982,
+      "line": 981,
       "status": "verified",
       "commands": [
         "file.new",

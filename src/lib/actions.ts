@@ -199,11 +199,11 @@ export async function openPath(path: string, opts: { line?: number; col?: number
   }
 }
 
-/** Doc fields that follow from a (re)opened large file. UTF-16 files are shown decoded and read-only. */
+/** Doc fields that follow from a (re)opened large file. UTF-16 files are shown decoded; edits are encoded back (Rust). */
 function bigDocFields(info: BigDocInfo, modifiedMs: number): Partial<Doc> {
   const encoding = info.encoding ?? "UTF-8";
   // Doc.eol is CRLF | LF; CR-only files (big mode only) carry "CR" for the status bar.
-  return { bigId: info.id, bigInfo: info, encoding, readonly: encoding !== "UTF-8", eol: info.eol as Doc["eol"], modifiedMs, size: info.size };
+  return { bigId: info.id, bigInfo: info, encoding, readonly: false, eol: info.eol as Doc["eol"], modifiedMs, size: info.size };
 }
 
 /** Index progress events may fire before the tab exists or after a reload: poll until indexed. */
@@ -253,8 +253,7 @@ async function openLarge(path: string, size: number): Promise<Doc | null> {
       ...bigDocFields(info, await statMs(path)),
     };
     store.addDoc(doc, true);
-    if (doc.readonly) store.toast(`${doc.name} (${formatBytes(size)}) is ${doc.encoding}: opened read-only in large-file mode. Raise the large-file threshold to edit it.`, "warning", 8000);
-    else store.toast(`${doc.name} (${formatBytes(size)}) opened in large-file mode.`, "info");
+    store.toast(`${doc.name} (${formatBytes(size)}) opened in large-file mode.`, "info");
     if (info.eol === "CR") store.toast(`${doc.name} uses CR-only (classic Mac) line endings; they are kept when saving.`, "info", 5000);
     pollBigIndex(id, info.id);
     return doc;

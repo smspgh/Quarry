@@ -131,7 +131,7 @@ You can't save over a file that is open in large-file mode in another tab.
 | --- | --- |
 | UTF-8 (with or without BOM) | Full support. |
 | Invalid UTF-8 bytes | Shown as `�`; the line is flagged and asks before editing. |
-| UTF-16 LE / BE with a BOM | Viewing and Find work; the file is **read-only**. To edit, raise the threshold above the file's size and reopen it as a normal tab. |
+| UTF-16 LE / BE with a BOM | Shown decoded. Editing, Find and Replace All work; the file is saved in the same encoding, with its BOM and line endings. Replace All leaves a line that does not decode cleanly untouched. Filter and the JSON tree need UTF-8. |
 | UTF-16 without a BOM, other encodings | Read as UTF-8. |
 | CRLF, LF, CR-only line endings | Detected from the first 1 MiB and kept on save. |
 | Mixed line endings | A stray CR inside a line shows as `␍`. |

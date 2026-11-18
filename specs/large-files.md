@@ -618,12 +618,7 @@ Scenario: BIG-010.5 No saving over a file open in another large-file tab
   Then a warning says "a.log is open in another tab in large-file mode. Close that tab before saving over it."
   And nothing is written
 
-Scenario: BIG-010.6 Read-only documents save only as a copy
-  Given a UTF-16 large file, which is read-only
-  When I press Ctrl+S
-  Then a toast says the file is read-only and to use Save As
-
-Scenario: BIG-010.7 Saving keeps the file's attributes and links
+Scenario: BIG-010.6 Saving keeps the file's attributes and links
   Given a hidden large file, or a symbolic link to a large file, with edited lines
   When I save
   Then the file is still hidden, with its permissions and creation time kept
@@ -636,8 +631,8 @@ Scenario: BIG-010.7 Saving keeps the file's attributes and links
 - Status: verified
 - Commands: none
 - Files:
-  - `src-tauri/src/bigfile.rs` — `detect_layout` (first 1 MiB), `Sep` (UTF-16 aware line ends), `decode_line`, `LinesChunk.lossy`, `ensure_editable`, `search_decoded`
-  - `src/lib/actions.ts` — `bigDocFields` (`readonly` when not UTF-8), read-only and CR-only toasts in `openLarge`
+  - `src-tauri/src/bigfile.rs` — `detect_layout` (first 1 MiB; in UTF-16 only a whole U+000A / U+000D counts), `Sep` (UTF-16 aware line ends), `decode_line`, `utf16_content` / `encode_as` (UTF-16 line edits: even offsets, BOM kept), `line_range`, `replace_range` (refuses an edit that splits a code unit), `for_each_chunk` (joined chunks counted at their document offset), `LinesChunk.lossy`, `search_decoded`, `replace_all_decoded`
+  - `src/lib/actions.ts` — `bigDocFields`, CR-only toast in `openLarge`
   - `src/components/BigFileView.tsx` — `editGate`, `visibleRowText` (stray CR shown as `␍`), `lossyLines`
   - `src/components/StatusBar.tsx` — encoding, line ending and "Read-only" items
 - Tests: `src/__tests__/bigview.test.ts`, `src-tauri/src/bigfile.rs`
@@ -648,20 +643,19 @@ Scenario: BIG-010.7 Saving keeps the file's attributes and links
 **So that** I see readable text and never corrupt the file by saving
 
 ```gherkin
-Scenario: BIG-011.1 UTF-16 files with a byte-order mark are shown decoded and read-only
+Scenario: BIG-011.1 UTF-16 files with a byte-order mark are shown decoded
   Given a 100 MB UTF-16LE file that starts with a byte-order mark
   When I open it
   Then its text is readable
-  And a warning toast says it is UTF-16LE and opened read-only in large-file mode
-  And the status bar shows "UTF-16LE" and "Read-only"
-  And hovering "UTF-16LE" shows "UTF-16LE large files are shown decoded and read-only"
+  And the status bar shows "UTF-16LE", and hovering it shows "Shown decoded; edits are saved as UTF-16LE with its byte-order mark"
+  And its line ending is taken from the first whole line feed, never from the 0x0A byte of a character such as 上
 
-Scenario: BIG-011.2 A read-only file refuses edits
-  Given a UTF-16 large-file tab
-  When I press Enter on a line
-  Then a warning says "UTF-16LE large files are read-only."
-  And F2, a double-click, Delete and Ctrl+Enter show the same warning and change nothing
-  And Replace All reports that the file is read-only instead of changing it
+Scenario: BIG-011.2 UTF-16 files are edited and saved in UTF-16
+  Given a UTF-16LE or UTF-16BE large-file tab
+  When I edit, insert and delete lines, undo and redo, and save
+  Then the saved file is still UTF-16 in the same byte order, with its byte-order mark and its line endings
+  And every line I did not touch keeps its bytes
+  And Find afterwards finds text on the edited lines, on the right line numbers
 
 Scenario: BIG-011.3 Find works on UTF-16 files
   Given a UTF-16 large-file tab
@@ -689,6 +683,12 @@ Scenario: BIG-011.7 Other encodings are read as UTF-8
   Given a large file in UTF-16 without a byte-order mark
   When I open it
   Then it is read as UTF-8 and the status bar shows "UTF-8"
+
+Scenario: BIG-011.8 Replace All in a UTF-16 file
+  Given a UTF-16 large-file tab with "cat" on several lines
+  When I Replace All "cat" with "bird" (Preserve Case on or off, plain text or regex with groups)
+  Then each matching line is replaced in its decoded text and saved in UTF-16
+  And a line that does not decode cleanly (a lone surrogate) is left byte for byte as it was
 ```
 
 ## BIG-012: Syntax colours for large files

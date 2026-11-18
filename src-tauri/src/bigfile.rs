@@ -104,7 +104,7 @@ pub struct BigDocInfo {
     pub dirty: bool,
     pub eol: String,
     /// "UTF-8", or "UTF-16LE" / "UTF-16BE" when the file starts with a UTF-16 byte-order mark
-    /// (shown decoded, read-only).
+    /// (shown decoded; edits are encoded back to it).
     pub encoding: String,
 }
 
@@ -171,7 +171,7 @@ fn same_file(a: &Path, b: &Path) -> bool {
 }
 
 /// Line ending and encoding from the first bytes of a file. CR-only files (no LF at all, but CRs)
-/// use CR as the line separator; a UTF-16 byte-order mark selects decoded, read-only display.
+/// use CR as the line separator; a UTF-16 byte-order mark selects UTF-16 (decoded for display, edits encoded back).
 fn detect_layout(head: &[u8]) -> (&'static [u8], &'static str) {
     let encoding = if head.starts_with(&[0xff, 0xfe]) {
         "UTF-16LE"
@@ -180,13 +180,13 @@ fn detect_layout(head: &[u8]) -> (&'static [u8], &'static str) {
     } else {
         "UTF-8"
     };
-    let eol: &'static [u8] = match memchr(b'\n', head) {
-        Some(i) if i > 0 && head[i - 1] == b'\r' => b"\r\n",
+    // In UTF-16 only a whole U+000A / U+000D counts: 0x0A is also half of characters like 上 (0A 4E).
+    let eol: &'static [u8] = match Sep::new(b'\n', encoding).find(head, 0) {
+        Some(i) if encoding == "UTF-8" && i > 0 && head[i - 1] == b'\r' => b"\r\n",
         // UTF-16: CR LF is 0D 00 0A 00 (LE) or 00 0D 00 0A (BE).
-        Some(i) if encoding == "UTF-16LE" && i >= 2 && head[i - 2] == b'\r' => b"\r\n",
-        Some(i) if encoding == "UTF-16BE" && i >= 2 && head[i - 2] == b'\r' => b"\r\n",
+        Some(i) if encoding != "UTF-8" && i >= 2 && head[i - 2] == b'\r' => b"\r\n",
         Some(_) => b"\n",
-        None if memchr(b'\r', head).is_some() => b"\r",
+        None if Sep::new(b'\r', encoding).find(head, 0).is_some() => b"\r",
         None if cfg!(windows) => b"\r\n",
         None => b"\n",
     };
@@ -234,6 +234,38 @@ impl Sep {
             None => memchr_iter(self.byte, hay).count() as u64,
             Some(_) => self.iter(hay, base).count() as u64,
         }
+    }
+}
+
+/// Where the text of a UTF-16 line lies in `part`: its bytes from the line's start (just after the
+/// previous separator byte) up to, not including, its own separator byte. Leaves out the BOM (line
+/// 0), the half of the previous line feed (LE: its 0x00 starts this line), the half of this line's
+/// line feed (BE: its 0x00 ends this line, when `terminated`) and a CR before it. Both bounds are
+/// even file offsets when `part` starts at a line start.
+fn utf16_content(part: &[u8], n: u64, le: bool, terminated: bool) -> (usize, usize) {
+    let mut a = 0usize;
+    let mut b = part.len();
+    if n == 0 {
+        a = 2.min(b);
+    } else if le {
+        a = 1.min(b);
+    }
+    if !le && terminated && b > a && part[b - 1] == 0 {
+        b -= 1;
+    }
+    let cr: [u8; 2] = if le { [0x0d, 0x00] } else { [0x00, 0x0d] };
+    if b >= a + 2 && part[b - 2..b] == cr {
+        b -= 2;
+    }
+    (a, b)
+}
+
+/// `text` in the document's encoding.
+fn encode_as(encoding: &str, text: &str) -> Vec<u8> {
+    match encoding {
+        "UTF-16LE" => text.encode_utf16().flat_map(|u| u.to_le_bytes()).collect(),
+        "UTF-16BE" => text.encode_utf16().flat_map(|u| u.to_be_bytes()).collect(),
+        _ => text.as_bytes().to_vec(),
     }
 }
 
@@ -295,7 +327,8 @@ pub struct BigDoc {
     eol: &'static [u8],
     /// Line separator byte (see `LineIndex::sep`).
     sep: u8,
-    /// Encoding for display; anything but UTF-8 is read-only.
+    /// "UTF-8", "UTF-16LE" or "UTF-16BE". In UTF-16 every piece starts and ends on an even offset, so
+    /// separators found by `Sep` stay aligned however the document is edited.
     encoding: &'static str,
     /// Backing temp file after a materializing operation (replace-all).
     _temp_backing: Option<tempfile::TempPath>,
@@ -554,7 +587,7 @@ impl BigDoc {
             let p = &self.pieces[idx];
             let sl = &self.piece_slice(p)[off as usize..];
             let mut cut = None;
-            // UTF-16 files are read-only: their one piece is the file itself, so p.start + off is the file offset.
+            // p.start + off has the parity of the document offset (UTF-16 pieces start on even offsets).
             for i in Sep::new(self.sep, self.encoding).iter(sl, p.start + off) {
                 nls += 1;
                 if nls >= max_newlines {
@@ -615,10 +648,17 @@ impl BigDoc {
     }
 
     /// Doc byte range of line `n`'s content (excluding the line terminator).
+    /// In UTF-16 the range starts after the BOM / the previous line feed's other byte, so both ends
+    /// are even.
     fn line_range(&self, n: u64) -> Option<(u64, u64)> {
         let (idx, off, doc_off) = self.locate_line(n)?;
         let (bytes, nls, cap) = self.read_from(idx, off, 1, usize::MAX);
         let _ = cap;
+        if let Some(le) = Sep::new(self.sep, self.encoding).utf16 {
+            let part = if nls > 0 { &bytes[..bytes.len() - 1] } else { &bytes[..] };
+            let (a, b) = utf16_content(part, n, le, nls > 0);
+            return Some((doc_off + a as u64, doc_off + b as u64));
+        }
         let mut end = doc_off + bytes.len() as u64;
         if nls > 0 {
             end -= 1;
@@ -630,9 +670,6 @@ impl BigDoc {
     }
 
     fn ensure_editable(&self) -> Result<(), String> {
-        if self.encoding != "UTF-8" {
-            return Err(format!("{} large files are read-only; open them below the large-file threshold to edit.", self.encoding));
-        }
         if !self.is_indexed() {
             return Err("File is still being indexed; editing is available once indexing completes.".into());
         }
@@ -651,7 +688,7 @@ impl BigDoc {
         if orig {
             self.index.read().count_newlines(self.data(), start, start + len)
         } else {
-            memchr_iter(self.sep, &self.add[start as usize..(start + len) as usize]).count() as u64
+            Sep::new(self.sep, self.encoding).count(&self.add[start as usize..(start + len) as usize], start)
         }
     }
 
@@ -682,6 +719,10 @@ impl BigDoc {
         let len = self.doc_len();
         let from = from.min(len);
         let to = to.clamp(from, len);
+        // UTF-16: only whole code units, on even offsets (a split code unit would shift every separator after it).
+        if self.encoding != "UTF-8" && (!from.is_multiple_of(2) || !to.is_multiple_of(2) || !text.len().is_multiple_of(2)) {
+            return Err(format!("internal: a {} edit must cover whole code units", self.encoding));
+        }
         self.freeze_pieces();
         self.undo.push(self.pieces.clone());
         if self.undo.len() > 200 {
@@ -699,7 +740,7 @@ impl BigDoc {
         if !text.is_empty() {
             let start = self.add.len() as u64;
             self.add.extend_from_slice(text);
-            let nl = memchr_iter(self.sep, text).count() as u64;
+            let nl = Sep::new(self.sep, self.encoding).count(text, start);
             self.pieces.insert(a, Piece { orig: false, start, len: text.len() as u64, nl });
         }
         self.pieces.retain(|p| p.len > 0);
@@ -717,7 +758,8 @@ impl BigDoc {
             return Err(format!("Line {} is longer than {} MB and cannot be edited in large-file mode.", n + 1, MAX_READ_BYTES >> 20));
         }
         let normalized = text.replace("\r\n", "\n").replace('\n', std::str::from_utf8(self.eol).unwrap());
-        self.replace_range(s, e, normalized.as_bytes())
+        let bytes = encode_as(self.encoding, &normalized);
+        self.replace_range(s, e, &bytes)
     }
 
     pub fn delete_lines(&mut self, from: u64, to: u64) -> Result<(), String> {
@@ -728,7 +770,7 @@ impl BigDoc {
         }
         let (start, _) = self.line_range(from).ok_or("line out of range")?;
         let end = if to + 1 < total {
-            self.locate_line(to + 1).ok_or("line out of range")?.2
+            self.line_range(to + 1).ok_or("line out of range")?.0
         } else {
             self.doc_len()
         };
@@ -749,12 +791,12 @@ impl BigDoc {
         let body = text.replace("\r\n", "\n").replace('\n', eol);
         if at >= total {
             let len = self.doc_len();
-            let s = format!("{eol}{body}");
-            self.replace_range(len, len, s.as_bytes())
+            let s = encode_as(self.encoding, &format!("{eol}{body}"));
+            self.replace_range(len, len, &s)
         } else {
-            let off = self.locate_line(at).ok_or("line out of range")?.2;
-            let s = format!("{body}{eol}");
-            self.replace_range(off, off, s.as_bytes())
+            let off = self.line_range(at).ok_or("line out of range")?.0;
+            let s = encode_as(self.encoding, &format!("{body}{eol}"));
+            self.replace_range(off, off, &s)
         }
     }
 
@@ -788,11 +830,15 @@ impl BigDoc {
         let mut line = 0u64;
         let sep = Sep::new(self.sep, self.encoding);
         let mut carry: Vec<u8> = Vec::new();
-        let mut emit = |chunk: &[u8], base: u64, line: &mut u64| -> bool {
+        // Emitted chunks cover the document in order, so `doc_pos` is each one's document offset: the
+        // parity UTF-16 separators are checked against (a joined chunk starts with carried bytes).
+        let mut doc_pos = 0u64;
+        let mut emit = |chunk: &[u8], line: &mut u64| -> bool {
             if !f(*line, chunk) {
                 return false;
             }
-            *line += sep.count(chunk, base);
+            *line += sep.count(chunk, doc_pos);
+            doc_pos += chunk.len() as u64;
             true
         };
         let last = self.pieces.len().saturating_sub(1);
@@ -812,16 +858,24 @@ impl BigDoc {
                 let base = p.start + pos as u64;
                 pos = end;
                 // At the end of a piece (not the last) the line may go on in the next one: keep its
-                // start for the next chunk. UTF-16 files are read-only, one piece, so never here.
-                let tail_from = if end == sl.len() && pi < last { chunk.iter().rposition(|&b| b == sep.byte).map_or(0, |i| i + 1) } else { chunk.len() };
+                // start for the next chunk.
+                let tail_from = if end == sl.len() && pi < last {
+                    let last_sep = match sep.utf16 {
+                        None => chunk.iter().rposition(|&b| b == sep.byte),
+                        Some(_) => sep.iter(chunk, base).last(),
+                    };
+                    last_sep.map_or(0, |i| i + 1)
+                } else {
+                    chunk.len()
+                };
                 let (whole, tail) = chunk.split_at(tail_from);
                 if !whole.is_empty() {
                     let ok = if carry.is_empty() {
-                        emit(whole, base, &mut line)
+                        emit(whole, &mut line)
                     } else {
                         carry.extend_from_slice(whole);
                         let joined = std::mem::take(&mut carry);
-                        emit(&joined, base, &mut line)
+                        emit(&joined, &mut line)
                     };
                     if !ok {
                         return;
@@ -831,7 +885,7 @@ impl BigDoc {
             }
         }
         if !carry.is_empty() {
-            emit(&carry, 0, &mut line);
+            emit(&carry, &mut line);
         }
     }
 
@@ -894,7 +948,7 @@ impl BigDoc {
         let mut total = 0u64;
         let mut truncated = false;
         let sep = Sep::new(self.sep, self.encoding);
-        let mut base = 0u64; // file offset of `chunk` (a read-only UTF-16 file is one piece)
+        let mut base = 0u64; // document offset of `chunk`: chunks cover the document in order
         self.for_each_chunk(|first_line, chunk| {
             let chunk_base = base;
             base += chunk.len() as u64;
@@ -946,6 +1000,9 @@ impl BigDoc {
         F: Fn(IndexProgress) + Send + 'static,
     {
         self.ensure_editable()?;
+        if self.encoding != "UTF-8" {
+            return self.replace_all_decoded(opts, replacement, keep_case, on_progress);
+        }
         let re = build_regex(opts)?;
         let rep: &[u8] = replacement.as_bytes();
         // JavaScript `$` rules, as in Replace in Files; a plain-text search replaces literally.
@@ -1007,6 +1064,97 @@ impl BigDoc {
         self.rebind(&temp_path, on_progress)?;
         self._temp_backing = Some(temp_path);
         // The working copy on disk is not the user's file: dirty until saved.
+        self.clean_depth = None;
+        Ok(count)
+    }
+
+    /// Replace All in a UTF-16 document: each line is decoded, replaced as text (as Find sees it) and
+    /// encoded back; its separator bytes, the BOM and lines without a match are copied unchanged. A
+    /// line that does not decode cleanly is left as it is, so no byte is ever lost to U+FFFD.
+    fn replace_all_decoded<F>(&mut self, opts: &SearchOpts, replacement: &str, keep_case: bool, on_progress: F) -> Result<u64, String>
+    where
+        F: Fn(IndexProgress) + Send + 'static,
+    {
+        let re = build_regex(opts)?;
+        let parts = crate::search::parse_replacement(replacement, re.captures_len(), re.capture_names().any(|n| n.is_some()));
+        let le = self.encoding == "UTF-16LE";
+        let codec = if le { encoding_rs::UTF_16LE } else { encoding_rs::UTF_16BE };
+        let sep = Sep::new(self.sep, self.encoding);
+        let encoding = self.encoding;
+        let tmp = tempfile::Builder::new().prefix("quarry-").tempfile_in(std::env::temp_dir()).map_err(|e| e.to_string())?;
+        let mut w = BufWriter::with_capacity(4 << 20, tmp.reopen().map_err(|e| e.to_string())?);
+        let mut count = 0u64;
+        let mut io_err: Option<String> = None;
+        let mut base = 0u64;
+        self.for_each_chunk(|first_line, chunk| {
+            let chunk_base = base;
+            base += chunk.len() as u64;
+            let mut line = first_line;
+            let mut start = 0usize;
+            loop {
+                let end = sep.find(&chunk[start..], chunk_base + start as u64).map(|i| start + i);
+                let stop = end.unwrap_or(chunk.len());
+                let part = &chunk[start..stop];
+                let (a, b) = utf16_content(part, line, le, end.is_some());
+                let (text, bad) = codec.decode_without_bom_handling(&part[a..b]);
+                let mut out: Vec<u8> = Vec::new();
+                let mut last = 0usize;
+                let mut hits = 0u64;
+                if !bad {
+                    for caps in re.captures_iter(text.as_bytes()) {
+                        let m = caps.get(0).unwrap();
+                        let mut expanded = Vec::new();
+                        if opts.is_regex {
+                            let group = |i: usize| caps.get(i).map_or(&b""[..], |g| g.as_bytes());
+                            let named = |n: &str| caps.name(n).map_or(&b""[..], |g| g.as_bytes());
+                            crate::search::expand_replacement(&parts, group, named, &text.as_bytes()[..m.start()], &text.as_bytes()[m.end()..], &mut expanded);
+                        } else {
+                            expanded.extend_from_slice(replacement.as_bytes());
+                        }
+                        if keep_case && let (Ok(hit), Ok(r)) = (std::str::from_utf8(m.as_bytes()), std::str::from_utf8(&expanded)) {
+                            expanded = crate::search::preserve_case(hit, r).into_bytes();
+                        }
+                        out.extend_from_slice(&text.as_bytes()[last..m.start()]);
+                        out.extend_from_slice(&expanded);
+                        last = m.end();
+                        hits += 1;
+                    }
+                }
+                let res = if hits == 0 {
+                    w.write_all(part)
+                } else {
+                    out.extend_from_slice(&text.as_bytes()[last..]);
+                    count += hits;
+                    w.write_all(&part[..a]).and_then(|_| w.write_all(&encode_as(encoding, &String::from_utf8_lossy(&out)))).and_then(|_| w.write_all(&part[b..]))
+                };
+                if let Err(e) = res.and_then(|_| if end.is_some() { w.write_all(&[sep.byte]) } else { Ok(()) }) {
+                    io_err = Some(e.to_string());
+                    return false;
+                }
+                match end {
+                    Some(e) => {
+                        start = e + 1;
+                        line += 1;
+                        if start >= chunk.len() {
+                            break;
+                        }
+                    }
+                    None => break,
+                }
+            }
+            true
+        });
+        if let Some(e) = io_err {
+            return Err(e);
+        }
+        if count == 0 {
+            return Ok(0);
+        }
+        w.flush().map_err(|e| e.to_string())?;
+        drop(w);
+        let temp_path = tmp.into_temp_path();
+        self.rebind(&temp_path, on_progress)?;
+        self._temp_backing = Some(temp_path);
         self.clean_depth = None;
         Ok(count)
     }
@@ -1626,27 +1774,93 @@ y
         assert_eq!(c.lines[3], "fine");
     }
 
+    /// `text` as a UTF-16 file with its byte-order mark.
+    fn utf16_file(text: &str, le: bool) -> Vec<u8> {
+        let mut bytes = if le { vec![0xff, 0xfe] } else { vec![0xfe, 0xff] };
+        for u in text.encode_utf16() {
+            bytes.extend_from_slice(&if le { u.to_le_bytes() } else { u.to_be_bytes() });
+        }
+        bytes
+    }
+
     #[test]
-    fn utf16_files_are_decoded_and_read_only() {
+    fn utf16_files_are_decoded_and_searched() {
         let text = "h\u{e9}llo \u{4e16}\r\nsecond\r\nlast";
-        for (le, bom) in [(true, [0xffu8, 0xfe]), (false, [0xfe, 0xff])] {
-            let mut bytes = bom.to_vec();
-            for u in text.encode_utf16() {
-                bytes.extend_from_slice(&if le { u.to_le_bytes() } else { u.to_be_bytes() });
-            }
-            let (_f, mut d) = make_bytes(&bytes);
+        for le in [true, false] {
+            let (_f, d) = make_bytes(&utf16_file(text, le));
             assert_eq!(d.info().encoding, if le { "UTF-16LE" } else { "UTF-16BE" });
             assert_eq!(d.info().eol, "CRLF");
             let c = d.get_lines(0, 10);
             assert_eq!(c.lines, vec!["h\u{e9}llo \u{4e16}", "second", "last"], "le={le}");
             assert!(c.lossy.is_empty());
-            assert!(d.replace_line(0, "x").unwrap_err().contains("read-only"));
             let opts = SearchOpts { pattern: "SECOND|\u{4e16}", is_regex: true, case_sensitive: false, whole_word: false, dot_all: false, max_results: 10 };
             let r = d.search(&opts).unwrap();
             assert_eq!(r.total, 2, "le={le}");
             assert_eq!((r.matches[0].line, r.matches[0].col, r.matches[0].len), (0, 7, 3), "byte column in the decoded line");
             assert_eq!(r.matches[0].preview, "h\u{e9}llo \u{4e16}");
             assert_eq!((r.matches[1].line, r.matches[1].col, r.matches[1].preview.as_str()), (1, 0, "second"));
+        }
+    }
+
+    #[test]
+    fn utf16_files_can_be_edited_and_saved_in_their_encoding() {
+        // 上 (U+4E0A) has a 0x0A byte: it must never be taken for a line feed after the edits.
+        let text = "first \u{4e0a}\r\nsecond\r\nthird\r\nlast";
+        for le in [true, false] {
+            let (_f, mut d) = make_bytes(&utf16_file(text, le));
+            assert_eq!(d.info().eol, "CRLF", "the 0x0A byte of 上 is not the first line feed");
+            d.replace_line(1, "2nd \u{4e0a}").unwrap();
+            d.insert_lines(0, "new top").unwrap();
+            d.insert_lines(99, "new end").unwrap();
+            d.replace_line(3, "split\ninto two").unwrap();
+            assert_eq!(all_lines(&d), vec!["new top", "first \u{4e0a}", "2nd \u{4e0a}", "split", "into two", "last", "new end"], "le={le}");
+            d.delete_lines(4, 4).unwrap();
+            d.delete_lines(5, 5).unwrap(); // the last line: its separator before goes too
+            assert_eq!(all_lines(&d), vec!["new top", "first \u{4e0a}", "2nd \u{4e0a}", "split", "last"], "le={le}");
+            // Find sees the edited lines, across pieces, at whole line feeds only.
+            let opts = SearchOpts { pattern: "\u{4e0a}|split", is_regex: true, case_sensitive: true, whole_word: false, dot_all: false, max_results: 10 };
+            assert_eq!(d.search(&opts).unwrap().matches.iter().map(|m| m.line).collect::<Vec<_>>(), vec![1, 2, 3], "le={le}");
+            // Undo / redo, then save: the file stays UTF-16 with its BOM and CRLF line ends.
+            assert!(d.undo());
+            assert_eq!(d.total_lines(), 6);
+            assert!(d.redo());
+            let out = tempfile::NamedTempFile::new().unwrap().into_temp_path();
+            d.save(Some(&out), |_| {}).unwrap();
+            assert_eq!(std::fs::read(&out).unwrap(), utf16_file("new top\r\nfirst \u{4e0a}\r\n2nd \u{4e0a}\r\nsplit\r\nlast", le), "le={le}");
+            // A misaligned edit is refused instead of corrupting the file.
+            assert!(d.replace_range(3, 3, b"xx").is_err());
+            assert!(d.replace_range(2, 2, b"x").is_err());
+        }
+    }
+
+    #[test]
+    fn utf16_replace_all_rewrites_matching_lines_only() {
+        for le in [true, false] {
+            let mut bytes = utf16_file("cat \u{4e0a} cat\r\ndog\r\n", le);
+            // A lone surrogate (D800) on the last line: it is left byte for byte, even though it matches.
+            bytes.extend_from_slice(&if le { [0x00, 0xd8] } else { [0xd8, 0x00] });
+            bytes.extend_from_slice(&utf16_file("cat", le)[2..]);
+            let (_f, mut d) = make_bytes(&bytes);
+            d.replace_line(1, "Cat dog").unwrap(); // two pieces before Replace All
+            let opts = SearchOpts { pattern: "cat", is_regex: false, case_sensitive: false, whole_word: false, dot_all: false, max_results: 10 };
+            let n = d.replace_all(&opts, "bird", true, |_| {}).unwrap();
+            d.wait_indexed();
+            assert_eq!(n, 3, "le={le}");
+            let lines = all_lines(&d);
+            assert_eq!(&lines[..2], &["bird \u{4e0a} bird", "Bird dog"], "le={le}");
+            let out = tempfile::NamedTempFile::new().unwrap().into_temp_path();
+            d.save(Some(&out), |_| {}).unwrap();
+            let saved = std::fs::read(&out).unwrap();
+            let mut want = utf16_file("bird \u{4e0a} bird\r\nBird dog\r\n", le);
+            want.extend_from_slice(&if le { [0x00, 0xd8] } else { [0xd8, 0x00] });
+            want.extend_from_slice(&utf16_file("cat", le)[2..]);
+            assert_eq!(saved, want, "le={le}");
+            d.wait_indexed(); // saving re-maps the file
+            // A regex with groups works on the decoded text too.
+            let re = SearchOpts { pattern: r"(\w+) dog", is_regex: true, case_sensitive: true, whole_word: false, dot_all: false, max_results: 10 };
+            assert_eq!(d.replace_all(&re, "dog $1", false, |_| {}).unwrap(), 1);
+            d.wait_indexed();
+            assert_eq!(all_lines(&d)[1], "dog Bird", "le={le}");
         }
     }
 

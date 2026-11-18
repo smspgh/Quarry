@@ -285,11 +285,10 @@ Scenario: FILE-006.3 Changing the threshold changes the decision for the next op
   When I set Settings › Large-file threshold (MB) to 4 and open "data.csv"
   Then it opens as a large-file tab
 
-Scenario: FILE-006.4 A UTF-16 large file is read-only
-  Given "wide.log" is a 100 MB UTF-16 file
+Scenario: FILE-006.4 A UTF-16 large file opens editable
+  Given "wide.log" is a 100 MB UTF-16 file with a byte-order mark
   When I open it
-  Then it opens read-only in large-file mode
-  And a warning says to raise the large-file threshold to edit it
+  Then it opens in large-file mode, decoded and editable (BIG-011.2)
 
 Scenario: FILE-006.5 Opening at a line
   Given "big.log" is above the threshold
