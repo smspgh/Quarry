@@ -53,7 +53,7 @@ Stop and Pause take effect at the next checkpoint (every 20 steps), not instantl
 
 By default, a macro started from a menu or shortcut first asks **Run / Review first / Cancel**. Turn this off with **Settings › Confirm script & macro runs**.
 
-**Undo:** while a macro plays, its individual edits are kept out of the undo history, and the net change is applied as one step at the end. A single **Ctrl+Z** therefore undoes the entire playback, including all repetitions of ×N or To end. The exception is a macro that itself contains an Undo or Redo step. It plays with normal step-by-step history, so undoing it takes one Ctrl+Z per edit.
+**Undo:** while a macro plays, its individual edits are kept out of the undo history, and the net change is applied as one step at the end. A single **Ctrl+Z** therefore undoes the entire playback, including all repetitions of ×N or To end. This holds for a macro that contains Undo or Redo steps too: during playback, such a step takes back (or puts back) the macro's own previous step, and never anything you did before the macro started.
 
 ## Editing steps
 

@@ -370,7 +370,7 @@ Scenario: MACRO-007.5 Only available while playing
 - Status: verified
 - Commands: none
 - Files:
-  - `src/lib/macros.ts` — `beginSession` / `endSession` (snapshot, history suppression, net change re-applied with `userEvent: "input.macro"`), `macroHistoryExtension`, `ensureHistoryExtension`, `canGroupUndo`, `isUndoRedoStep`, `depth`
+  - `src/lib/macros.ts` — `beginSession` / `endSession` (snapshot, history suppression, net change re-applied with `userEvent: "input.macro"`), `macroHistoryExtension`, `ensureHistoryExtension`, `MacroUndo` (the playback's own undo stack, one entry per step) + `macroUndoRecorder`, `undoRedoKind`, `depth`
 - Tests: `src/__tests__/scripts.test.ts`
 - Docs: `docs/macros.md`
 
@@ -395,11 +395,12 @@ Scenario: MACRO-008.3 Earlier history is intact
   When I press Ctrl+Z twice
   Then the playback and then the typing are undone
 
-Scenario: MACRO-008.4 Macros that undo or redo keep normal history
-  Given a macro that contains an Undo or Redo step, or a Ctrl+Z / Ctrl+Y key step
+Scenario: MACRO-008.4 A macro that undoes or redoes is still one step
+  Given a macro that contains an Undo or Redo step, or a Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z key step
   When I play it
-  Then its edits go into the undo history one by one
-  And its Undo step undoes the macro's own previous edit, not my edit from before the playback
+  Then its Undo step takes back the macro's own previous step, and its Redo step puts it back
+  And an Undo step with no macro step left to take back does nothing: my edits from before the playback are never undone
+  And when the playback ends, one Ctrl+Z undoes all of it
 
 Scenario: MACRO-008.5 A stopped playback is still one step
   Given I stopped a playback part-way with Shift+Esc

@@ -3,8 +3,8 @@
  * Records editor keystrokes, typed text and app-level commands; replays them
  * through CodeMirror's own key dispatch so every binding behaves exactly as live.
  */
-import { EditorState, StateEffect, StateField, Transaction, type Extension } from "@codemirror/state";
-import { runScopeHandlers } from "@codemirror/view";
+import { Annotation, EditorState, StateEffect, StateField, Transaction, type ChangeSet, type EditorSelection, type Extension, type TransactionSpec } from "@codemirror/state";
+import { EditorView, runScopeHandlers } from "@codemirror/view";
 import { editor } from "../editor/manager";
 import { askDialog, persistSettings } from "./actions";
 import { useStore } from "./store";
@@ -155,42 +155,107 @@ async function checkpoint() {
 // ---------- single undo step ----------
 // While a macro plays, every transaction is kept out of the history; when the outermost run ends
 // the net change (before -> after) is re-applied as ONE history entry so Ctrl+Z undoes the whole run.
-// Macros that themselves contain Undo/Redo steps are played with normal history (grouping would make
-// their Undo step revert the user's pre-macro edit instead of the previous macro step).
+// An Undo / Redo step inside the macro (command or Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z key) works on the
+// playback's own stack (`MacroUndo`): it takes back the macro's previous step, never an edit made
+// before the playback, and does nothing when the macro has nothing left to undo (MACRO-008.4).
 let suppressHistory = false;
 let snapshot: { docId: string | null; text: string } | null = null;
+/** The running playback's own undo stack, and the document it belongs to. */
+let undoStack: MacroUndo | null = null;
+
+/** Marks the transactions `MacroUndo` makes itself, so they are not recorded as new edits. */
+const macroUndoMark = Annotation.define<boolean>();
+
+/** One macro step's edits, kept for an Undo / Redo step later in the same playback. */
+interface StepEdit {
+  changes: ChangeSet;
+  inverse: ChangeSet;
+  selBefore: EditorSelection;
+  selAfter: EditorSelection;
+}
+
+/**
+ * The undo stack of one playback. Every edit made while a macro step runs joins that step's entry
+ * (`step()` starts the next one); `undo` / `redo` return the transaction that takes a step back or
+ * puts it back, or null when there is none. A new edit clears what could be redone, as in the editor.
+ */
+export class MacroUndo {
+  private done: StepEdit[] = [];
+  private undone: StepEdit[] = [];
+  private open = false;
+
+  /** The next macro step starts: its edits form a new entry. */
+  step() {
+    this.open = false;
+  }
+
+  /** Record a transaction the playback made (this stack's own undo / redo are skipped). */
+  record(tr: Transaction) {
+    if (!tr.docChanged || tr.annotation(macroUndoMark)) return;
+    const inverse = tr.changes.invert(tr.startState.doc);
+    const last = this.done[this.done.length - 1];
+    if (this.open && last) {
+      last.changes = last.changes.compose(tr.changes);
+      last.inverse = inverse.compose(last.inverse);
+      last.selAfter = tr.newSelection;
+    } else {
+      this.done.push({ changes: tr.changes, inverse, selBefore: tr.startState.selection, selAfter: tr.newSelection });
+      this.open = true;
+    }
+    this.undone = [];
+  }
+
+  undo(): TransactionSpec | null {
+    const e = this.done.pop();
+    if (!e) return null;
+    this.undone.push(e);
+    this.open = false;
+    return { changes: e.inverse, selection: e.selBefore, annotations: macroUndoMark.of(true), scrollIntoView: true };
+  }
+
+  redo(): TransactionSpec | null {
+    const e = this.undone.pop();
+    if (!e) return null;
+    this.done.push(e);
+    this.open = false;
+    return { changes: e.changes, selection: e.selAfter, annotations: macroUndoMark.of(true), scrollIntoView: true };
+  }
+}
 
 /** Hides macro-playback transactions from the undo history while `suppressHistory` is set. */
 const macroHistoryExtension: Extension = EditorState.transactionExtender.of(() => (suppressHistory ? { annotations: Transaction.addToHistory.of(false) } : null));
+/** Feeds the playback's own undo stack, for the document the playback started in only. */
+const macroUndoRecorder: Extension = EditorView.updateListener.of((u) => {
+  if (!undoStack || !snapshot || snapshot.docId !== editor.currentDocId) return;
+  for (const tr of u.transactions) undoStack.record(tr);
+});
 /** Marker so the extension is appended to each editor state lineage only once (states are recreated per document). */
 const installedMarker = StateField.define<boolean>({ create: () => true, update: (v) => v });
 
 function ensureHistoryExtension(view: NonNullable<typeof editor.view>) {
   if (view.state.field(installedMarker, false) !== undefined) return;
-  view.dispatch({ effects: StateEffect.appendConfig.of([installedMarker, macroHistoryExtension]), annotations: Transaction.addToHistory.of(false) });
+  view.dispatch({ effects: StateEffect.appendConfig.of([installedMarker, macroHistoryExtension, macroUndoRecorder]), annotations: Transaction.addToHistory.of(false) });
 }
 
-function isUndoRedoStep(step: MacroStep): boolean {
-  if (step.type === "command") return step.id === "edit.undo" || step.id === "edit.redo";
-  if (step.type === "key") {
+/** "undo" / "redo" for a step that undoes or redoes (command or key), else null. */
+export function undoRedoKind(step: MacroStep): "undo" | "redo" | null {
+  if (step.type === "command") return step.id === "edit.undo" ? "undo" : step.id === "edit.redo" || step.id === "edit.redoAlt" ? "redo" : null;
+  if (step.type === "key" && (step.ctrl || step.meta) && !step.alt) {
     const k = step.key.toLowerCase();
-    return (step.ctrl || step.meta) && (k === "z" || k === "y");
+    if (k === "z") return step.shift ? "redo" : "undo";
+    if (k === "y" && !step.shift) return "redo";
   }
-  return false;
+  return null;
 }
 
-/** Pure helper: can this macro be collapsed into one undo step? */
-export function canGroupUndo(list: MacroStep[]): boolean {
-  return !list.some(isUndoRedoStep);
-}
-
-function beginSession(list: MacroStep[]) {
+function beginSession() {
   cancelled = false;
   useStore.getState().set({ macroPlaying: true, macroPaused: false });
   const view = editor.view;
-  if (view && canGroupUndo(list)) {
+  if (view) {
     ensureHistoryExtension(view);
     snapshot = { docId: editor.currentDocId, text: view.state.doc.toString() };
+    undoStack = new MacroUndo();
     suppressHistory = true;
   } else snapshot = null;
 }
@@ -198,6 +263,7 @@ function beginSession(list: MacroStep[]) {
 function endSession() {
   replaying = false;
   suppressHistory = false;
+  undoStack = null;
   useStore.getState().set({ macroPlaying: false, macroPaused: false });
   const view = editor.view;
   const snap = snapshot;
@@ -218,7 +284,7 @@ export async function playSteps(list: MacroStep[], times = 1): Promise<void> {
   const view = editor.view;
   if (!view) return;
   replaying = true;
-  if (depth++ === 0) beginSession(list);
+  if (depth++ === 0) beginSession();
   try {
     for (let n = 0; n < times; n++) {
       let i = 0;
@@ -227,6 +293,14 @@ export async function playSteps(list: MacroStep[], times = 1): Promise<void> {
         if (i++ % 20 === 0) {
           await sleep(0);
           await checkpoint();
+        }
+        undoStack?.step();
+        // Undo / Redo inside the macro: its own previous step only (MACRO-008.4).
+        const kind = undoRedoKind(step);
+        if (kind && undoStack && snapshot?.docId === editor.currentDocId) {
+          const spec = kind === "undo" ? undoStack.undo() : undoStack.redo();
+          if (spec) view.dispatch(spec);
+          continue;
         }
         if (step.type === "input") {
           view.dispatch(view.state.replaceSelection(step.text), { userEvent: "input.type", scrollIntoView: true });
@@ -288,7 +362,7 @@ export async function playToEnd(list: MacroStep[], maxIterations = PLAY_TO_END_M
   let i = 0;
   // Wrap in an outer playSteps "session" so Stop/Pause, the playing flag and the undo group span all iterations.
   depth++;
-  beginSession(list);
+  beginSession();
   try {
     while (i < maxIterations) {
       const lineBefore = view.state.doc.lineAt(view.state.selection.main.head).number;

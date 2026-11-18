@@ -12594,7 +12594,7 @@
         },
         {
           "id": "MACRO-008.4",
-          "title": "Macros that undo or redo keep normal history"
+          "title": "A macro that undoes or redoes is still one step"
         },
         {
           "id": "MACRO-008.5",
@@ -12607,7 +12607,7 @@
       "title": "Confirm before a macro plays",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 410,
+      "line": 411,
       "status": "verified",
       "commands": [],
       "files": [
@@ -12653,7 +12653,7 @@
       "title": "Manage macros in the Macros panel and menu",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 461,
+      "line": 462,
       "status": "verified",
       "commands": [
         "macro.panel",
@@ -12717,7 +12717,7 @@
       "title": "Edit a macro's steps",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 535,
+      "line": 536,
       "status": "verified",
       "commands": [],
       "files": [
@@ -12771,7 +12771,7 @@
       "title": "Save a macro to a file",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 599,
+      "line": 600,
       "status": "verified",
       "commands": [],
       "files": [
@@ -12822,7 +12822,7 @@
       "title": "Macros folder: loading, reloading and changing it",
       "area": "MACRO",
       "spec": "specs/macros.md",
-      "line": 661,
+      "line": 662,
       "status": "verified",
       "commands": [],
       "files": [
