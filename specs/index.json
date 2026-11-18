@@ -20845,7 +20845,7 @@
       "scenarios": [
         {
           "id": "UPD-006.1",
-          "title": "Build and sign without publishing"
+          "title": "Build, sign and publish"
         },
         {
           "id": "UPD-006.2",
@@ -20865,26 +20865,14 @@
         },
         {
           "id": "UPD-006.6",
-          "title": "Publish"
-        },
-        {
-          "id": "UPD-006.7",
           "title": "A version that is already published is refused"
         },
         {
-          "id": "UPD-006.8",
-          "title": "Uncommitted changes only warn"
-        },
-        {
-          "id": "UPD-006.9",
+          "id": "UPD-006.7",
           "title": "A version older than the latest release is refused"
         },
         {
-          "id": "UPD-006.10",
-          "title": "Copies of 0.1.10 and earlier still find the release"
-        },
-        {
-          "id": "UPD-006.11",
+          "id": "UPD-006.8",
           "title": "A private release repository is refused"
         }
       ]
@@ -20894,7 +20882,7 @@
       "title": "Set the version number everywhere",
       "area": "UPD",
       "spec": "specs/updates.md",
-      "line": 331,
+      "line": 314,
       "status": "verified",
       "commands": [],
       "files": [
@@ -20939,11 +20927,12 @@
       "title": "Release in one step",
       "area": "UPD",
       "spec": "specs/updates.md",
-      "line": 381,
+      "line": 364,
       "status": "verified",
       "commands": [],
       "files": [
-        "scripts/quick-release.ps1"
+        "scripts/release.ps1",
+        "scripts/bump.ps1"
       ],
       "tests": [],
       "docs": [
@@ -20956,15 +20945,19 @@
         },
         {
           "id": "UPD-008.2",
-          "title": "Own notes or a chosen version"
+          "title": "Notes are required"
         },
         {
           "id": "UPD-008.3",
-          "title": "Uncommitted work stops it"
+          "title": "A chosen version"
         },
         {
           "id": "UPD-008.4",
-          "title": "A failed build or upload"
+          "title": "Uncommitted work stops it"
+        },
+        {
+          "id": "UPD-008.5",
+          "title": "Running it again after a failed build or upload"
         }
       ]
     }
@@ -20975,14 +20968,13 @@
       "UPD-007"
     ],
     "scripts/bump.ps1": [
-      "UPD-007"
-    ],
-    "scripts/quick-release.ps1": [
+      "UPD-007",
       "UPD-008"
     ],
     "scripts/release.ps1": [
       "UPD-005",
-      "UPD-006"
+      "UPD-006",
+      "UPD-008"
     ],
     "src-tauri/Cargo.toml": [
       "UPD-005",

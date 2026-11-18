@@ -231,7 +231,7 @@ Scenario: UPD-005.1 Updates are found without signing in
   Given an installed Quarry on a computer with no GitHub account configured
   When it checks for updates
   Then it reads latest.json from the public repository smspgh/Quarry and finds the newest release
-  And a copy of 0.1.10 or earlier, which reads it from smspgh/quarry-releases, finds the same newest release there (UPD-006.10)
+  And a copy of 0.1.10 or earlier, which reads it from smspgh/quarry-releases, finds the bridge release v0.1.18 there (left in place on purpose), updates to it, and from then on reads smspgh/Quarry
 
 Scenario: UPD-005.2 No account or token is ever used
   Given the release repository smspgh/Quarry is public
@@ -255,7 +255,7 @@ Scenario: UPD-005.4 An equal or older version is not offered
 - Status: verified
 - Commands: none
 - Files:
-  - `scripts/release.ps1` — version check across the three files, signing key (`~/.tauri/quarry.key` or `$env:QUARRY_SIGNING_KEY`), `pnpm tauri build`, `release-out/` (installer, `.sig`, `latest.json`), `-Notes`, `-Publish` (refuses a `-Repo` that is not public; `gh release create` in `smspgh/Quarry`, then the bridge release with `latest.json` only in `-LegacyRepo` = `smspgh/quarry-releases`; refuses an existing tag in either or a version not higher than the latest release), `-Repo`, `-LegacyRepo`
+  - `scripts/release.ps1` — checks before anything changes (clean working tree, `gh` signed in, `smspgh/Quarry` public, signing key `~/.tauri/quarry.key` or `$env:QUARRY_SIGNING_KEY`), `Get-Versions` (the three files must agree), refuses a version already released or not higher than the latest release, `pnpm tauri build`, `release-out/` (installer, `.sig`, `latest.json`), `gh release create` in `smspgh/Quarry`
   - `src-tauri/tauri.conf.json` — `version`, `bundle.createUpdaterArtifacts`
   - `package.json` — `version`
   - `src-tauri/Cargo.toml` — `version`
@@ -263,69 +263,52 @@ Scenario: UPD-005.4 An equal or older version is not offered
 - Docs: `docs/releasing.md`
 
 **As a** maintainer releasing Quarry
-**I want** one script that builds, signs and optionally publishes a release, and stops on anything inconsistent
+**I want** the release script to build, sign and publish, and to stop on anything inconsistent before it changes anything
 **So that** every published release can be installed by the in-app updater
 
 ```gherkin
-Scenario: UPD-006.1 Build and sign without publishing
-  Given package.json, src-tauri/Cargo.toml and src-tauri/tauri.conf.json all say version 0.1.8
-  And the signing key exists at ~/.tauri/quarry.key
-  When I run .\scripts\release.ps1 -Notes "Faster search"
+Scenario: UPD-006.1 Build, sign and publish
+  Given the signing key exists at ~/.tauri/quarry.key and no release v0.1.8 exists
+  When .\scripts\release.ps1 "Faster search" releases version 0.1.8
   Then release-out contains Quarry_0.1.8_x64-setup.exe, Quarry_0.1.8_x64-setup.exe.sig and latest.json
-  And nothing is uploaded and the script says "Not published."
+  And the release v0.1.8 titled "Quarry 0.1.8" is created in smspgh/Quarry with those three files and the notes "Faster search"
+  And nothing is published to smspgh/quarry-releases
 
 Scenario: UPD-006.2 latest.json describes the release
-  When the script has built version 0.1.8 with -Notes "Faster search"
+  When the script has built version 0.1.8 with the notes "Faster search"
   Then latest.json has version "0.1.8", notes "Faster search" and a UTC pub_date
   And its windows-x86_64 entry holds the content of the .sig file and the url https://github.com/smspgh/Quarry/releases/download/v0.1.8/Quarry_0.1.8_x64-setup.exe
 
 Scenario: UPD-006.3 Mismatched versions stop the script
   Given package.json says 0.1.8 and src-tauri/Cargo.toml says 0.1.7
-  When I run .\scripts\release.ps1
+  When I run .\scripts\release.ps1 "Faster search"
   Then it stops with "Version mismatch" naming the three versions
-  And nothing is built
+  And nothing is bumped, committed or built
 
 Scenario: UPD-006.4 A missing signing key stops the script
   Given there is no key at ~/.tauri/quarry.key and QUARRY_SIGNING_KEY is not set
-  When I run .\scripts\release.ps1
-  Then it stops with "Signing key not found" before building
+  When I run .\scripts\release.ps1 "Faster search"
+  Then it stops with "Signing key not found" before the version is bumped
 
 Scenario: UPD-006.5 A missing signature stops the script
   Given the build produced no .sig file next to the installer
   When the script checks the build output
-  Then it stops and release-out is not written
+  Then it stops, release-out is not written, and it says the version commit is in place and to run the script again
 
-Scenario: UPD-006.6 Publish
-  Given no release v0.1.8 exists in smspgh/Quarry or smspgh/quarry-releases
-  When I run .\scripts\release.ps1 -Notes "Faster search" -Publish
-  Then the release v0.1.8 titled "Quarry 0.1.8" is created in smspgh/Quarry with the installer, its .sig and latest.json
+Scenario: UPD-006.6 A version that is already published is refused
+  Given the release v0.1.8 already exists in smspgh/Quarry
+  When I run .\scripts\release.ps1 "Faster search" -Version 0.1.8
+  Then it stops with "Release v0.1.8 already exists", the version files are put back and nothing is committed
 
-Scenario: UPD-006.7 A version that is already published is refused
-  Given the release v0.1.8 already exists in smspgh/Quarry (or in smspgh/quarry-releases)
-  When I run .\scripts\release.ps1 -Publish
-  Then it stops with "Release v0.1.8 already exists" before building
-
-Scenario: UPD-006.8 Uncommitted changes only warn
-  Given the working tree has uncommitted changes
-  When I run .\scripts\release.ps1
-  Then it warns that the release will include them and continues
-
-Scenario: UPD-006.9 A version older than the latest release is refused
+Scenario: UPD-006.7 A version older than the latest release is refused
   Given the latest release in smspgh/Quarry is v0.1.8 and the version files say 0.1.6
-  When I run .\scripts\release.ps1 -Publish
-  Then it stops with "Version 0.1.6 is not higher than the latest release v0.1.8" before building
+  When the script would release 0.1.7
+  Then it stops with "Version 0.1.7 is not higher than the latest release v0.1.8" before building
 
-Scenario: UPD-006.10 Copies of 0.1.10 and earlier still find the release
-  Given those copies read latest.json from smspgh/quarry-releases
-  When I publish v0.1.11
-  Then a release v0.1.11 in smspgh/quarry-releases holds the same latest.json, whose url points at the installer in smspgh/Quarry
-  And its notes say the releases have moved to https://github.com/smspgh/Quarry/releases
-  And with -LegacyRepo "" nothing is published there
-
-Scenario: UPD-006.11 A private release repository is refused
+Scenario: UPD-006.8 A private release repository is refused
   Given smspgh/Quarry is private
-  When I run .\scripts\release.ps1 -Publish
-  Then it stops before building, saying installed copies download updates without signing in and the repository must be made public first
+  When I run .\scripts\release.ps1 "Faster search"
+  Then it stops before changing anything, saying installed copies download updates without signing in and the repository must be made public first
 ```
 
 ## UPD-007: Set the version number everywhere
@@ -383,37 +366,42 @@ Scenario: UPD-007.6 No version given: the next patch version
 - Status: verified
 - Commands: none
 - Files:
-  - `scripts/quick-release.ps1` — refuses a dirty working tree; `bump.ps1` (next patch, or `-Version`), commits only the four version files as "Quarry <version>", `release.ps1 -Publish` with `-Notes` (default "Release Bump"), then `git push`; each failure says how to carry on without bumping again
-  - `scripts/bump.ps1`, `scripts/release.ps1`
+  - `scripts/release.ps1` — notes as the first argument, asked for (and required) when missing; refuses a dirty working tree; `bump.ps1` (next patch, or `-Version`); commits only the four version files as "Quarry <version>"; publishes (UPD-006); `git push`; carries on with an unpublished "Quarry <version>" commit instead of bumping again
+  - `scripts/bump.ps1`
 - Tests: none
 - Docs: `docs/releasing.md`
 
 **As a** maintainer who just wants the current code out as a new version
-**I want** one command that bumps, commits, builds, publishes and pushes
-**So that** I don't have to type or order the steps myself
+**I want** one command, with only the release notes to give, that bumps, commits, builds, publishes and pushes
+**So that** I don't have to type flags or order the steps myself
 
 ```gherkin
 Scenario: UPD-008.1 Release the next patch version
   Given the working tree is clean and the version is 0.1.9
-  When I run .\scripts\quick-release.ps1
+  When I run .\scripts\release.ps1 "Faster search"
   Then the version files say 0.1.10 and are committed as "Quarry 0.1.10"
-  And release v0.1.10 is published to smspgh/Quarry (and its latest.json to smspgh/quarry-releases) with the notes "Release Bump"
+  And release v0.1.10 is published to smspgh/Quarry with the notes "Faster search"
   And the commit is pushed
   And it prints "Quarry 0.1.10 is published and pushed."
 
-Scenario: UPD-008.2 Own notes or a chosen version
-  When I run .\scripts\quick-release.ps1 -Notes "Faster search" -Version 0.2.0
-  Then release v0.2.0 is published with the notes "Faster search"
+Scenario: UPD-008.2 Notes are required
+  When I run .\scripts\release.ps1 with no notes
+  Then it asks "Release notes (shown in the update dialog)"
+  And it asks again while the answer is empty, before anything else happens
 
-Scenario: UPD-008.3 Uncommitted work stops it
+Scenario: UPD-008.3 A chosen version
+  When I run .\scripts\release.ps1 "New look" -Version 0.2.0
+  Then release v0.2.0 is published with the notes "New look"
+
+Scenario: UPD-008.4 Uncommitted work stops it
   Given a source file has uncommitted changes
-  When I run .\scripts\quick-release.ps1
+  When I run .\scripts\release.ps1 "Faster search"
   Then it stops with "The working tree has uncommitted changes. Commit or stash them first, then run this again."
   And no version file is changed
 
-Scenario: UPD-008.4 A failed build or upload
-  Given the version commit "Quarry 0.1.10" was made
-  When the build or the upload fails
-  Then it stops before pushing, saying the version commit is in place and to run .\scripts\release.ps1 -Notes "Release Bump" -Publish; git push
-  And running quick-release.ps1 again would release 0.1.11 instead
+Scenario: UPD-008.5 Running it again after a failed build or upload
+  Given the version commit "Quarry 0.1.10" was made and the build or the upload failed
+  When I run .\scripts\release.ps1 "Faster search" again
+  Then it says the last commit is "Quarry 0.1.10", not published yet, and releases 0.1.10 without bumping again
 ```
+

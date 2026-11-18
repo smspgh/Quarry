@@ -143,7 +143,7 @@ From `CLAUDE.md`, plus lessons from building the above:
 - **Never write into `.git` unasked** (the commit-graph Speed Up is the model: explain, offer, wait).
 - Git errors go through `gitErrorText` (drops `hint:` lines). Never show raw CLI advice as the only guidance: there must be a button for the way out.
 - Pure logic goes in `lib/*.ts` with Vitest tests; git behaviour gets a Rust test in `git.rs` using its `repo()` temp-repo helper. Both existed for every feature so far; keep that.
-- Commits: no Claude attribution trailers. Commit, push and release only when the owner says so. Release = `scripts/bump.ps1 <ver>`, commit "Quarry <ver>", push, `scripts/release.ps1 -Publish -Notes "..."` (see `docs/releasing.md`).
+- Commits: no Claude attribution trailers. Commit, push and release only when the owner says so. Release = `scripts/release.ps1 "notes"` (see `docs/releasing.md`).
 - Report honestly: say what was checked live, what only passed in tests, and what was not checked.
 
 ## How to verify
