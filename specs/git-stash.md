@@ -33,10 +33,10 @@ Decisions (taken where the roadmap left the choice open):
   - `src/lib/git.ts` — `stashChanges(root, message, untracked)` (busy label "Stashing…", the unsaved-tabs question of SAFE-003.6, notification, open tabs reloaded through `rewrite`), `showStashForm()`, `useGit.stashForm`
   - `src/lib/gitStash.ts` — pure: `stashTitle` (git's subject → what is shown), `stashDone` (notifications)
   - `src/lib/gitCommands.ts` — `git.stash`
-  - `src-tauri/src/git.rs` — `stash_push` / `git_stash_push` (`stash push [--include-untracked] [--message=<message>]`; "nothing to stash" is an error), `git_stash` (the command without `--literal-pathspecs`)
+  - `src-tauri/src/git/stash.rs` — `stash_push` / `git_stash_push` (`stash push [--include-untracked] [--message=<message>]`; "nothing to stash" is an error), `git_stash` (the command without `--literal-pathspecs`)
   - `src-tauri/src/lib.rs` — the four `git_stash_*` commands in the invoke handler
   - `src/lib/gitApi.ts` — `git.stashPush`
-- Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src-tauri/src/git/stash.rs`
 - Docs: `docs/git.md`
 
 **As a** developer who has to switch to something else in the middle of a change
@@ -103,8 +103,8 @@ Scenario: STASH-001.8 The form belongs to its repository
   - `src/components/panels/StashSection.tsx` — "Include untracked files (N)" checkbox of the form (starts ticked, hidden with no untracked files), Stash button disabled state
   - `src/lib/gitStash.ts` — `stashCounts` (tracked / untracked files a stash would take, from the status)
   - `src/lib/git.ts` — `stashChanges` passes the choice
-  - `src-tauri/src/git.rs` — `stash_push` (`--include-untracked` only when asked; never `--all`)
-- Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/stash.rs` — `stash_push` (`--include-untracked` only when asked; never `--all`)
+- Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src-tauri/src/git/stash.rs`
 - Docs: `docs/git.md`
 
 **As a** developer whose change includes new files git does not track yet
@@ -162,8 +162,8 @@ Scenario: STASH-002.7 Ignored files are never stashed
   - `src/components/panels/StashSection.tsx` — disabled Stash Changes button with the reason as tooltip, disabled while `busy`
   - `src/lib/gitCommands.ts` — `git.stash` gives the same reason as a notification
   - `src/lib/gitStatus.ts` — `finishFirst(operation)` (the shared sentence naming the stopped operation, on `operationWords`; shared with MERGE-003)
-  - `src-tauri/src/git.rs` — `stash_push` (refuses before the first commit)
-- Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/stash.rs` — `stash_push` (refuses before the first commit)
+- Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src-tauri/src/git/stash.rs`
 - Docs: `docs/git.md`
 
 **As a** developer
@@ -206,12 +206,13 @@ Scenario: STASH-003.5 A repository with no commits
   - `src/components/panels/StashSection.tsx` — `StashesSection` (count in the heading, rows with title, branch and age, row buttons Apply / Pop / Drop, empty note)
   - `src/lib/git.ts` — `stashes` per repository in `useGit`, `loadStashes`, `stashAfterRefresh` (reloads a list when the status's stash id or count changes), `showStashes` (`useGit.stashReveal`)
   - `src/lib/gitStash.ts` — `stashTitle` ("On main: WIP parser" → "WIP parser" + branch "main"; "WIP on main: 1a2b3c4 Fix tab order" → "WIP at 1a2b3c4 Fix tab order" + branch "main"), `stashWhere`
-  - `src-tauri/src/git.rs` — `stash_list` / `git_stash_list` (`stash list -z --format=…`: commit id, parents, author, time, subject), `GitStash`, `stash_ids`; `status` gains the newest stash's id and the number of stashes (`GitStatus.stash`, `stash_count`)
+  - `src-tauri/src/git/stash.rs` — `stash_list` / `git_stash_list` (`stash list -z --format=…`: commit id, parents, author, time, subject), `GitStash`, `stash_ids`
+  - `src-tauri/src/git/status.rs` — `status` gains the newest stash's id and the number of stashes (`GitStatus.stash`, `stash_count`)
   - `src/lib/gitApi.ts` — `GitStash`, `git.stashList`, `GitStatus.stash` / `stashCount`
   - `src/editor/git.ts` — `relativeTime`
   - `src/lib/gitCommands.ts` — `git.showStashes`
   - `src/styles/app.css` — `.scm-stash*`
-- Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src-tauri/src/git/stash.rs`
 - Docs: `docs/git.md`
 
 **As a** developer who stashed work earlier
@@ -275,11 +276,13 @@ Scenario: STASH-004.9 The section follows the repository
   - `src/components/panels/StashSection.tsx` — expanding a row to its files (same row markup as `CommitsSection`'s files), click / Enter / double-click
   - `src/lib/git.ts` — `openStashFile` (base commit vs stash, `preview` Compare tab like `openCommitFile`; an untracked file is read from `<stash>^3`)
   - `src/lib/gitStatus.ts` — `commitFileKind` (status "?" = an untracked file of a stash), `KIND_LETTER` (it shows "U")
-  - `src-tauri/src/git.rs` — `stash_files` / `git_stash_files` (`diff --name-status -z -M <id>^1 <id>` through `parse_commit_files`, then the untracked files from `stash_untracked` = the tree of `<id>^3`, with status "?"), `show` (a stashed untracked file is read with the revision `<id>^3`)
+  - `src-tauri/src/git/stash.rs` — `stash_files` / `git_stash_files` (`diff --name-status -z -M <id>^1 <id>` through `parse_commit_files`, then the untracked files from `stash_untracked` = the tree of `<id>^3`, with status "?")
+  - `src-tauri/src/git/log.rs` — `parse_commit_files`
+  - `src-tauri/src/git/status.rs` — `show` (a stashed untracked file is read with the revision `<id>^3`)
   - `src/lib/gitApi.ts` — `git.stashFiles`
   - `src/lib/diff.ts` — `openCompare`
   - `src/lib/ipc.ts` — `fs.exists` (double-click opens only a file that is in the folder)
-- Tests: `src/__tests__/stashSection.test.tsx`, `src/__tests__/gitStash.test.ts`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/stashSection.test.tsx`, `src/__tests__/gitStash.test.ts`, `src-tauri/src/git/stash.rs`
 - Docs: `docs/git.md`
 
 **As a** developer deciding which stash to bring back
@@ -339,9 +342,9 @@ Scenario: STASH-005.8 Available while actions are off
   - `src/lib/gitStash.ts` — `stashBlocked`, `stashDone`, `stashErrorText` (git's "would be overwritten" / "already exists" output → a sentence naming the files and what to do)
   - `src/components/panels/StashSection.tsx` — "Apply" row button, disabled state and tooltip
   - `src/lib/gitCommands.ts` — `git.stashApply` (the newest stash)
-  - `src-tauri/src/git.rs` — `stash_op` / `git_stash_op` (finds the stash's current `stash@{n}` from its commit id, then `stash apply`; an id that is no longer a stash is an error; for a stash with untracked files it first refuses, in git's words, an untracked file that already exists or a tracked file with changes of its own, because git would otherwise apply half the stash)
+  - `src-tauri/src/git/stash.rs` — `stash_op` / `git_stash_op` (finds the stash's current `stash@{n}` from its commit id, then `stash apply`; an id that is no longer a stash is an error; for a stash with untracked files it first refuses, in git's words, an untracked file that already exists or a tracked file with changes of its own, because git would otherwise apply half the stash)
   - `src/lib/gitApi.ts` — `git.stashOp`
-- Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src-tauri/src/git/stash.rs`
 - Docs: `docs/git.md`
 
 **As a** developer
@@ -421,8 +424,8 @@ Scenario: STASH-006.11 The stash is gone
   - `src/lib/gitStash.ts` — `stashDone`
   - `src/components/panels/StashSection.tsx` — "Pop" row button
   - `src/lib/gitCommands.ts` — `git.stashPop` (the newest stash)
-  - `src-tauri/src/git.rs` — `stash_op` (`stash pop stash@{n}`)
-- Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/stash.rs` — `stash_op` (`stash pop stash@{n}`)
+- Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src-tauri/src/git/stash.rs`
 - Docs: `docs/git.md`
 
 **As a** developer returning to work I put aside
@@ -469,8 +472,8 @@ Scenario: STASH-007.5 Popping the last stash
   - `src/lib/dialogs.ts` — `choose`
   - `src/components/panels/StashSection.tsx` — "Drop" row button (styled as dangerous), Delete key on a focused row
   - `src/lib/gitCommands.ts` — `git.stashDrop` (the newest stash, same dialog)
-  - `src-tauri/src/git.rs` — `stash_op` (`stash drop stash@{n}`, addressed by commit id), `stash_files` (the file count for the dialog)
-- Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/stash.rs` — `stash_op` (`stash drop stash@{n}`, addressed by commit id), `stash_files` (the file count for the dialog)
+- Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src-tauri/src/git/stash.rs`
 - Docs: `docs/git.md`
 
 **As a** developer with stashes I no longer need
@@ -533,8 +536,9 @@ Scenario: STASH-008.8 No way to drop every stash at once
   - `src/components/panels/StashSection.tsx` — "applied with conflicts" mark on the pending stash's row
   - `src/components/GraphView.tsx` — warning strip for conflicted files with no operation in progress (no Abort button), in the place of the stopped-operation strip of GRAPH-014; it stays a strip; the conflicted files are also counted in the graph's uncommitted-changes row (GRAPH-015), which took the place of the old uncommitted-changes strip
   - `src/editor/conflicts.ts` — conflict bars show the sides note it is given (as for a rebase)
-  - `src-tauri/src/git.rs` — `stash_op` reports "conflicts" as a result instead of an error (git failed and unmerged files appeared: `has_unmerged`); test that a conflicted pop keeps the stash
-- Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src/__tests__/graphView.test.tsx`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/stash.rs` — `stash_op` reports "conflicts" as a result instead of an error (git failed and unmerged files appeared: `has_unmerged`); test that a conflicted pop keeps the stash
+  - `src-tauri/src/git.rs` — `has_unmerged`
+- Tests: `src/__tests__/gitStash.test.ts`, `src/__tests__/stashSection.test.tsx`, `src/__tests__/graphView.test.tsx`, `src-tauri/src/git/stash.rs`
 - Docs: `docs/git.md`
 
 **As a** developer whose stash no longer fits the files as they are now
@@ -646,7 +650,8 @@ Scenario: STASH-009.16 The stash was dropped in the meantime
 - Status: verified
 - Commands: `git.graph`
 - Files:
-  - `src-tauri/src/git.rs` — `graph` (with `all`, the commit each stash was made on is added to the revisions; `graph_scope` still excludes `refs/stash`, so a stash's helper commits are never walked and `--skip` / `--max-count` count commits only), `fold_stashes` (puts one row per stash right above its base commit: only parent = the base, `refs` = `refs/stash`, `stash` = true), `GitGraphCommit.stash`
+  - `src-tauri/src/git/graph.rs` — `graph` (with `all`, the commit each stash was made on is added to the revisions; `graph_scope` still excludes `refs/stash`, so a stash's helper commits are never walked and `--skip` / `--max-count` count commits only), `GitGraphCommit.stash`
+  - `src-tauri/src/git/stash.rs` — `fold_stashes` (puts one row per stash right above its base commit: only parent = the base, `refs` = `refs/stash`, `stash` = true)
   - `src/lib/gitGraph.ts` — `RefKind` "stash", `refLabels`, `commitMatches` (given the stash's title as its summary), `stashMenu` (the entries a stash node gets), `layoutGraph` unchanged (a stash is a commit with one parent and no children)
   - `src/components/GraphView.tsx` — `RowGraph` (stash dot drawn hollow), `RefBadge` ("stash" label), `GraphMenu` (stash entries instead of commit actions), details pane (files from `git.stashFiles`, `openStashFile` in `DetailFile`), reload when the status's stash id or count changes, paging by commits (`stashRows`)
   - `src/lib/git.ts` — `stashAction`, `openStashFile`
@@ -654,7 +659,7 @@ Scenario: STASH-009.16 The stash was dropped in the meantime
   - `src/lib/gitStash.ts` — `stashTitle`, `stashBlocked`
   - `src/styles/app.css` — `.graph-ref.stash`, stash dot
   - `src/styles/tokens.css` — colour variable for the stash label, light and dark
-- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphView.test.tsx`, `src/__tests__/gitStash.test.ts`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphView.test.tsx`, `src/__tests__/gitStash.test.ts`, `src-tauri/src/git/stash.rs`
 - Docs: `docs/git.md`
 
 **As a** developer looking at the whole repository in the graph

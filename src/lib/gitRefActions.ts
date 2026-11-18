@@ -5,7 +5,7 @@
  * `refCommand` is what the seven commands run and `refAction` the one function behind every entry
  * point (graph label menu, picker row menu, Git menu, palette, a macro), so no route skips a
  * question. Wording and checks are pure, in gitBranches.ts; the git work is `ref_action` /
- * `push_ref` in src-tauri/src/git.rs, which checks again.
+ * `push_ref` in src-tauri/src/git/refs.rs, which checks again.
  */
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { choose } from "./dialogs";

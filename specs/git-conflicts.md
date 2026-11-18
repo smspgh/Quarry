@@ -292,7 +292,7 @@ Scenario: CONFLICT-006.7 Not when the markers went because the operation did
   - `src/lib/gitStatus.ts` — `hasConflictMarkers` (`<<<<<<<` or `>>>>>>>` lines; a lone `=======` does not count)
   - `src/components/panels/GitPanel.tsx` — `+` on a Merge Changes row ("Mark as resolved (stage)") and on the section heading ("Mark all as resolved (stage)")
   - `src/lib/gitCommands.ts` — `git.stageFile` routes a conflicted file through `resolveConflicts`
-  - `src-tauri/src/git.rs` — `stage` / `git_stage` (`add -A`)
+  - `src-tauri/src/git/status.rs` — `stage` / `git_stage` (`add -A`)
 - Tests: `src/__tests__/gitRemote.test.ts`
 - Docs: `docs/git.md`
 
@@ -349,10 +349,10 @@ Scenario: CONFLICT-007.7 A file deleted on one side
   - `src/components/panels/GitPanel.tsx` — "Current" / "Incoming" buttons on Merge Changes rows (`FileRow`), rebase-aware and stash-aware tooltips
   - `src/lib/gitStash.ts` — `stashSideTitle`
   - `src/lib/git.ts` — `takeSide` (asks before discarding unsaved edits, reloads or closes the open tab)
-  - `src-tauri/src/git.rs` — `resolve_side` / `git_resolve_side` (`checkout --ours` / `--theirs` + `add`, or `rm -f` when that side has no stage 2 / 3 entry)
+  - `src-tauri/src/git/status.rs` — `resolve_side` / `git_resolve_side` (`checkout --ours` / `--theirs` + `add`, or `rm -f` when that side has no stage 2 / 3 entry)
   - `src/lib/gitApi.ts` — `git.resolveSide`
   - `src/lib/actions.ts` — `revertDocument`, `closeDocument`
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git/graph.rs`
 - Docs: `docs/git.md`
 
 **As a** developer who wants one side's version of an entire file
@@ -441,8 +441,8 @@ Scenario: CONFLICT-009.3 A file that is not in the folder
   - `src/components/panels/GitPanel.tsx` — Commit button `disabled` / tooltip, message prefill effect (`offered`, `opKey`; `offeredText`: the unedited prepared message is taken out again when the operation ends without a commit)
   - `src/lib/gitStatus.ts` — `commitLabel` ("Resolve N Conflict(s) First"; "Commit Merge" for a merge that changes no file)
   - `src/lib/git.ts` — `commit()` refuses while conflicted files exist; commits a merge with nothing to stage
-  - `src-tauri/src/git.rs` — `operation_message` (MERGE_MSG without `#` lines) in `GitStatus.operationMessage`
-- Tests: `src/__tests__/gitRemote.test.ts`, `src/__tests__/gitPanel.test.tsx`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/status.rs` — `operation_message` (MERGE_MSG without `#` lines) in `GitStatus.operationMessage`
+- Tests: `src/__tests__/gitRemote.test.ts`, `src/__tests__/gitPanel.test.tsx`, `src-tauri/src/git/graph.rs`
 - Docs: `docs/git.md`
 
 **As a** developer finishing a merge, cherry-pick or revert
@@ -506,9 +506,10 @@ Scenario: CONFLICT-010.8 A merge that changes none of my files is still committe
   - `src/components/panels/GitPanel.tsx` — operation badge (`OPERATION` labels), "Abort" beside the branch
   - `src/components/GraphView.tsx` — "Abort" in the stopped-operation strip
   - `src/lib/git.ts` — `abortOperation` (asks, naming the unsaved tabs with `lostEditsSentence`; then `rewrite`, which reloads open tabs; forgets a pending rewrite of pushed commits, MERGE-009)
-  - `src-tauri/src/git.rs` — `operation` (rebase-merge / rebase-apply / MERGE_HEAD / CHERRY_PICK_HEAD / REVERT_HEAD), `abort_operation` / `git_abort`
+  - `src-tauri/src/git/status.rs` — `operation` (rebase-merge / rebase-apply / MERGE_HEAD / CHERRY_PICK_HEAD / REVERT_HEAD)
+  - `src-tauri/src/git/graph.rs` — `abort_operation` / `git_abort`
   - `src/lib/gitApi.ts` — `git.abort`, `GitOperation`
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git/graph.rs`
 - Docs: `docs/git.md`
 
 **As a** developer whose merge, rebase, cherry-pick or revert stopped
@@ -559,9 +560,9 @@ Scenario: CONFLICT-011.6 Disabled while git is busy
 - Files:
   - `src/components/panels/GitPanel.tsx` — "Skip" button (not for a merge; disabled while conflicts remain), "Nothing is left to commit…" note
   - `src/lib/git.ts` — `continueOperation(root, operation, "skip")` (its question, then the unsaved-tabs `guard`, then `rewrite`)
-  - `src-tauri/src/git.rs` — `continue_operation` / `git_continue` (`--skip`, refused for a merge, `GIT_EDITOR=true`)
+  - `src-tauri/src/git/graph.rs` — `continue_operation` / `git_continue` (`--skip`, refused for a merge, `GIT_EDITOR=true`)
   - `src/lib/gitApi.ts` — `git.continueOp`
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git/graph.rs`
 - Docs: `docs/git.md`
 
 **As a** developer whose cherry-pick, revert or rebase stopped on a commit I don't need
@@ -606,8 +607,9 @@ Scenario: CONFLICT-012.4 Nothing left to commit
   - `src/lib/gitStatus.ts` — `commitLabel(..., operation)` → "Continue Rebase"
   - `src/lib/git.ts` — `continueOperation(root, "rebase", "continue")` (then `rewriteContinued`, MERGE-009), `note` hook in `installGit` (rebase / am wording, or the stash note)
   - `src/editor/conflicts.ts` — `ConflictHooks.note`, note shown in each bar
-  - `src-tauri/src/git.rs` — `operation_step` (msgnum / end, next / last; for an interactive rebase the commands of `done` and `git-rebase-todo` without `exec` lines, so the steps are commits: `history::rebase_step`, HISTORY-010), `continue_operation` (`rebase --continue`, `GIT_EDITOR=true`)
-- Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/status.rs` — `operation_step` (msgnum / end, next / last; for an interactive rebase the commands of `done` and `git-rebase-todo` without `exec` lines, so the steps are commits: `history::rebase_step`, HISTORY-010)
+  - `src-tauri/src/git/graph.rs` — `continue_operation` (`rebase --continue`, `GIT_EDITOR=true`)
+- Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git/graph.rs`
 - Docs: `docs/git.md`
 
 **As a** developer whose rebase (or Pull (Rebase)) stopped on a conflict
@@ -665,8 +667,9 @@ Scenario: CONFLICT-013.6 The sides are explained
   - `src/components/GraphView.tsx` — stopped-operation strip (`stoppedNoun`)
   - `src/lib/gitStatus.ts` — `operationWords("am")` (badge, button labels, placeholder, sides note), `operationDone` (notifications), `commitLabel(..., "am")`
   - `src/lib/git.ts` — `continueOperation`, `abortOperation`, `note` hook in `installGit`, `conflictsCleared`
-  - `src-tauri/src/git.rs` — `operation` (rebase-apply with `applying`), `operation_step` (next / last), `continue_operation` (`am --continue` / `--skip`), `abort_operation` (`am --abort`)
-- Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/status.rs` — `operation` (rebase-apply with `applying`), `operation_step` (next / last)
+  - `src-tauri/src/git/graph.rs` — `continue_operation` (`am --continue` / `--skip`), `abort_operation` (`am --abort`)
+- Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git/graph.rs`
 - Docs: `docs/git.md`
 
 **As a** developer applying a patch series with `git am` that stopped on a patch

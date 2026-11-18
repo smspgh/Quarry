@@ -1,7 +1,7 @@
 /**
  * Stash wording and rules (pure, unit-tested): how a stash is named, when Stash Changes / Apply /
  * Pop may run, what the notifications and dialogs say, and the words for a stash that came back
- * with conflicts. The git work is in src-tauri/src/git.rs (`stash_*`), the actions in lib/git.ts.
+ * with conflicts. The git work is in src-tauri/src/git/stash.rs (`stash_*`), the actions in lib/git.ts.
  */
 import type { GitFile, GitStatus } from "./gitApi";
 import { finishFirst } from "./gitStatus";

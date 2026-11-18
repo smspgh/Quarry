@@ -1276,7 +1276,7 @@
         "src/lib/git.ts",
         "src/lib/gitRefActions.ts",
         "src/lib/gitApi.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/refs.rs",
         "src/styles/app.css"
       ],
       "tests": [
@@ -1284,7 +1284,7 @@
         "src/__tests__/gitBranches.test.ts",
         "src/__tests__/graphBranches.test.tsx",
         "src/__tests__/graphMerge.test.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/refs.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -1365,7 +1365,7 @@
         "src/lib/gitBranches.ts",
         "src/components/MenuBar.tsx",
         "src/lib/gitApi.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/refs.rs",
         "src/styles/app.css"
       ],
       "tests": [
@@ -1373,7 +1373,7 @@
         "src/__tests__/gitBranches.test.ts",
         "src/__tests__/branchPickerRefs.test.tsx",
         "src/__tests__/gitRefActions.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/refs.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -1443,14 +1443,14 @@
         "src/lib/gitBranches.ts",
         "src/lib/gitRefActions.ts",
         "src/lib/gitApi.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/refs.rs",
         "src/components/GraphView.tsx",
         "src/components/CommandPalette.tsx"
       ],
       "tests": [
         "src/__tests__/gitBranches.test.ts",
         "src/__tests__/gitRefActions.test.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/refs.rs",
         "src/__tests__/graphBranches.test.tsx",
         "src/__tests__/branchPickerRefs.test.tsx"
       ],
@@ -1527,13 +1527,14 @@
         "src/components/CommandPalette.tsx",
         "src/lib/gitBranches.ts",
         "src/lib/gitRefActions.ts",
+        "src-tauri/src/git/refs.rs",
         "src-tauri/src/git.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
         "src/__tests__/gitBranches.test.ts",
         "src/__tests__/gitRefActions.test.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/refs.rs",
         "src/__tests__/graphBranches.test.tsx",
         "src/__tests__/branchPickerRefs.test.tsx"
       ],
@@ -1592,7 +1593,7 @@
       "title": "Set or clear a branch's upstream",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 410,
+      "line": 411,
       "status": "verified",
       "commands": [
         "git.setUpstream"
@@ -1601,14 +1602,14 @@
         "src/components/CommandPalette.tsx",
         "src/lib/gitBranches.ts",
         "src/lib/gitRefActions.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/refs.rs",
         "src/lib/gitApi.ts",
         "src/components/GraphView.tsx"
       ],
       "tests": [
         "src/__tests__/gitBranches.test.ts",
         "src/__tests__/gitRefActions.test.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/refs.rs",
         "src/__tests__/branchPickerRefs.test.tsx",
         "src/__tests__/graphBranches.test.tsx"
       ],
@@ -1659,7 +1660,7 @@
       "title": "Push a branch",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 485,
+      "line": 486,
       "status": "verified",
       "commands": [
         "git.pushBranch"
@@ -1667,7 +1668,7 @@
       "files": [
         "src/lib/gitBranches.ts",
         "src/lib/gitRefActions.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/refs.rs",
         "src/lib/gitApi.ts",
         "src/lib/gitStatus.ts",
         "src/components/GraphView.tsx"
@@ -1676,7 +1677,7 @@
         "src/__tests__/gitBranches.test.ts",
         "src/__tests__/gitRefs.test.ts",
         "src/__tests__/gitRefActions.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/refs.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -1737,7 +1738,7 @@
       "title": "Delete a branch on the remote",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 580,
+      "line": 581,
       "status": "verified",
       "commands": [
         "git.deleteRemoteBranch"
@@ -1746,7 +1747,7 @@
         "src/lib/gitBranches.ts",
         "src/lib/gitRefs.ts",
         "src/lib/gitRefActions.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/refs.rs",
         "src/lib/gitApi.ts",
         "src/components/GraphView.tsx"
       ],
@@ -1754,7 +1755,7 @@
         "src/__tests__/gitBranches.test.ts",
         "src/__tests__/gitRefs.test.ts",
         "src/__tests__/gitRefActions.test.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/refs.rs",
         "src/__tests__/graphBranches.test.tsx"
       ],
       "docs": [
@@ -1816,7 +1817,7 @@
       "title": "Delete a tag",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 673,
+      "line": 674,
       "status": "verified",
       "commands": [
         "git.deleteTag"
@@ -1824,6 +1825,7 @@
       "files": [
         "src/lib/gitBranches.ts",
         "src/lib/gitRefActions.ts",
+        "src-tauri/src/git/refs.rs",
         "src-tauri/src/git.rs",
         "src/lib/gitApi.ts",
         "src/components/GraphView.tsx"
@@ -1831,7 +1833,7 @@
       "tests": [
         "src/__tests__/gitBranches.test.ts",
         "src/__tests__/gitRefActions.test.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/refs.rs",
         "src/__tests__/graphBranches.test.tsx",
         "src/__tests__/branchPickerRefs.test.tsx"
       ],
@@ -1874,7 +1876,7 @@
       "title": "Push a tag",
       "area": "BRANCH",
       "spec": "specs/git-branches.md",
-      "line": 732,
+      "line": 734,
       "status": "verified",
       "commands": [
         "git.pushTag"
@@ -1882,7 +1884,7 @@
       "files": [
         "src/lib/gitBranches.ts",
         "src/lib/gitRefActions.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/refs.rs",
         "src/lib/gitApi.ts",
         "src/lib/gitStatus.ts",
         "src/components/GraphView.tsx"
@@ -1891,7 +1893,7 @@
         "src/__tests__/gitBranches.test.ts",
         "src/__tests__/gitRefs.test.ts",
         "src/__tests__/gitRefActions.test.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/refs.rs",
         "src/__tests__/graphBranches.test.tsx"
       ],
       "docs": [
@@ -2020,7 +2022,8 @@
         "src/components/GraphView.tsx",
         "src/lib/gitCompare.ts",
         "src/lib/gitStatus.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/compare.rs",
+        "src-tauri/src/git/log.rs",
         "src-tauri/src/lib.rs",
         "src/lib/gitApi.ts",
         "src/styles/app.css"
@@ -2028,7 +2031,7 @@
       "tests": [
         "src/__tests__/gitCompare.test.ts",
         "src/__tests__/graphCompare.test.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/compare.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -2089,7 +2092,7 @@
       "title": "Open a differing file in a Compare tab",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 209,
+      "line": 210,
       "status": "verified",
       "commands": [],
       "files": [
@@ -2097,7 +2100,7 @@
         "src/lib/git.ts",
         "src/lib/gitCompare.ts",
         "src/lib/diff.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "tests": [
         "src/__tests__/gitCompare.test.ts",
@@ -2155,7 +2158,7 @@
       "title": "Compare a commit with the working tree",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 282,
+      "line": 283,
       "status": "verified",
       "commands": [],
       "files": [
@@ -2163,13 +2166,13 @@
         "src/components/GraphCompare.tsx",
         "src/lib/git.ts",
         "src/lib/gitCompare.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/compare.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
         "src/__tests__/gitCompare.test.ts",
         "src/__tests__/graphCompare.test.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/compare.rs"
       ],
       "docs": [
         "docs/git.md",
@@ -2239,7 +2242,7 @@
       "title": "Compare with a branch",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 380,
+      "line": 381,
       "status": "verified",
       "commands": [
         "git.compareWithBranch",
@@ -2255,6 +2258,7 @@
         "src/lib/gitCompare.ts",
         "src/components/MenuBar.tsx",
         "src/lib/store.ts",
+        "src-tauri/src/git/compare.rs",
         "src-tauri/src/git.rs",
         "src/lib/gitApi.ts"
       ],
@@ -2264,7 +2268,7 @@
         "src/__tests__/graphView.test.tsx",
         "src/__tests__/branchPicker.test.tsx",
         "src/__tests__/gitRefs.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/compare.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -2333,16 +2337,17 @@
       "title": "Comparing never changes the repository",
       "area": "COMMITCMP",
       "spec": "specs/git-compare-commits.md",
-      "line": 489,
+      "line": 491,
       "status": "verified",
       "commands": [],
       "files": [
+        "src-tauri/src/git/compare.rs",
         "src-tauri/src/git.rs",
         "src/lib/git.ts",
         "src/components/GraphCompare.tsx"
       ],
       "tests": [
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/compare.rs",
         "src/__tests__/graphCompare.test.tsx"
       ],
       "docs": [
@@ -2662,7 +2667,7 @@
         "src/lib/gitStatus.ts",
         "src/components/panels/GitPanel.tsx",
         "src/lib/gitCommands.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "tests": [
         "src/__tests__/gitRemote.test.ts"
@@ -2713,12 +2718,12 @@
         "src/components/panels/GitPanel.tsx",
         "src/lib/gitStash.ts",
         "src/lib/git.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/status.rs",
         "src/lib/gitApi.ts",
         "src/lib/actions.ts"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -2796,12 +2801,12 @@
         "src/components/panels/GitPanel.tsx",
         "src/lib/gitStatus.ts",
         "src/lib/git.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "tests": [
         "src/__tests__/gitRemote.test.ts",
         "src/__tests__/gitPanel.test.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -2853,11 +2858,12 @@
         "src/components/panels/GitPanel.tsx",
         "src/components/GraphView.tsx",
         "src/lib/git.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/status.rs",
+        "src-tauri/src/git/graph.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -2894,17 +2900,17 @@
       "title": "Skip the commit an operation stopped on",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 555,
+      "line": 556,
       "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitPanel.tsx",
         "src/lib/git.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/graph.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -2933,7 +2939,7 @@
       "title": "Carry on with a rebase",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 600,
+      "line": 601,
       "status": "verified",
       "commands": [],
       "files": [
@@ -2941,11 +2947,12 @@
         "src/lib/gitStatus.ts",
         "src/lib/git.ts",
         "src/editor/conflicts.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs",
+        "src-tauri/src/git/graph.rs"
       ],
       "tests": [
         "src/__tests__/gitRemote.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -2982,7 +2989,7 @@
       "title": "Carry on with a patch series (git am)",
       "area": "CONFLICT",
       "spec": "specs/git-conflicts.md",
-      "line": 659,
+      "line": 661,
       "status": "verified",
       "commands": [],
       "files": [
@@ -2990,11 +2997,12 @@
         "src/components/GraphView.tsx",
         "src/lib/gitStatus.ts",
         "src/lib/git.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs",
+        "src-tauri/src/git/graph.rs"
       ],
       "tests": [
         "src/__tests__/gitRemote.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -3260,10 +3268,10 @@
         "src/lib/git.ts",
         "src/components/TitleBar.tsx",
         "src/components/MenuBar.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "docs": [
         "docs/git.md",
@@ -7527,12 +7535,13 @@
         "src/lib/git.ts",
         "src/lib/gitApi.ts",
         "src-tauri/src/git.rs",
+        "src-tauri/src/git/status.rs",
         "src/components/panels/GitPanel.tsx",
         "src/lib/gitCommands.ts",
         "src/App.tsx"
       ],
       "tests": [
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/status.rs",
         "src/__tests__/gitRefresh.test.ts"
       ],
       "docs": [
@@ -7586,20 +7595,20 @@
       "title": "Change markers in the gutter",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 85,
+      "line": 86,
       "status": "verified",
       "commands": [],
       "files": [
         "src/editor/git.ts",
         "src/lib/git.ts",
         "src/editor/manager.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/status.rs",
         "src/styles/app.css",
         "src/styles/tokens.css"
       ],
       "tests": [
         "src/__tests__/splitGit.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -7632,7 +7641,7 @@
       "title": "Peek at a change and revert it",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 132,
+      "line": 133,
       "status": "verified",
       "commands": [
         "git.peekChange",
@@ -7685,7 +7694,7 @@
       "title": "Jump to the next or previous change",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 188,
+      "line": 189,
       "status": "verified",
       "commands": [
         "git.nextChange",
@@ -7731,7 +7740,7 @@
       "title": "Line blame",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 231,
+      "line": 232,
       "status": "verified",
       "commands": [
         "git.toggleBlame"
@@ -7740,11 +7749,11 @@
         "src/lib/git.ts",
         "src/editor/git.ts",
         "src/lib/gitCommands.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/log.rs",
         "src/styles/app.css"
       ],
       "tests": [
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/log.rs",
         "src/__tests__/splitGit.test.ts"
       ],
       "docs": [
@@ -7782,7 +7791,7 @@
       "title": "Compare a file with the last commit",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 284,
+      "line": 285,
       "status": "verified",
       "commands": [
         "git.compareWithHead"
@@ -7792,10 +7801,10 @@
         "src/lib/gitCommands.ts",
         "src/components/TitleBar.tsx",
         "src/components/MenuBar.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "docs": [
         "docs/git.md",
@@ -7829,7 +7838,7 @@
       "title": "Switch and create branches",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 328,
+      "line": 329,
       "status": "verified",
       "commands": [
         "git.switchBranch",
@@ -7842,10 +7851,10 @@
         "src/components/CommandPalette.tsx",
         "src/lib/gitCommands.ts",
         "src/components/panels/GitPanel.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/refs.rs"
       ],
       "tests": [
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/refs.rs",
         "src/__tests__/branchPicker.test.tsx",
         "src/__tests__/gitRefs.test.ts"
       ],
@@ -7888,7 +7897,7 @@
       "title": "Commit from the Source Control panel",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 392,
+      "line": 393,
       "status": "verified",
       "commands": [
         "git.showPanel"
@@ -7899,11 +7908,11 @@
         "src/lib/gitStatus.ts",
         "src/lib/gitCommands.ts",
         "src/components/SidebarRail.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "tests": [
         "src/__tests__/gitRemote.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -7948,14 +7957,14 @@
       "title": "Amend the last commit",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 461,
+      "line": 462,
       "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitPanel.tsx",
         "src/lib/git.ts",
         "src/lib/gitStatus.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "tests": [
         "src/__tests__/gitRemote.test.ts"
@@ -7987,7 +7996,7 @@
       "title": "See the changed files and open their changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 500,
+      "line": 501,
       "status": "verified",
       "commands": [],
       "files": [
@@ -7995,12 +8004,12 @@
         "src/lib/gitStatus.ts",
         "src/lib/git.ts",
         "src/lib/gitStaging.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/status.rs",
         "src/styles/app.css"
       ],
       "tests": [
         "src/__tests__/splitGit.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -8045,7 +8054,7 @@
       "title": "Stage and unstage files",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 570,
+      "line": 571,
       "status": "verified",
       "commands": [
         "git.stageFile",
@@ -8055,10 +8064,10 @@
         "src/components/panels/GitPanel.tsx",
         "src/lib/git.ts",
         "src/lib/gitCommands.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -8099,17 +8108,17 @@
       "title": "Discard changes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 627,
+      "line": 628,
       "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitPanel.tsx",
         "src/lib/git.ts",
         "src/lib/dialogs.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -8146,18 +8155,18 @@
       "title": "Status line: where the branch stands against its remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 683,
+      "line": 684,
       "status": "verified",
       "commands": [],
       "files": [
         "src/lib/gitStatus.ts",
         "src/components/panels/GitPanel.tsx",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/status.rs",
         "src/styles/app.css"
       ],
       "tests": [
         "src/__tests__/gitRemote.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -8206,17 +8215,18 @@
       "title": "Background check of the remote",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 754,
+      "line": 755,
       "status": "verified",
       "commands": [],
       "files": [
         "src/lib/git.ts",
         "src/components/panels/GitPanel.tsx",
+        "src-tauri/src/git/remotes.rs",
         "src-tauri/src/git.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/remotes.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -8261,7 +8271,7 @@
       "title": "Fetch, pull, push and publish a branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 820,
+      "line": 822,
       "status": "verified",
       "commands": [
         "git.fetch",
@@ -8273,11 +8283,12 @@
         "src/components/panels/GitPanel.tsx",
         "src/lib/gitCommands.ts",
         "src/lib/gitStatus.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/remotes.rs",
+        "src-tauri/src/git/refs.rs",
         "src/components/StatusBar.tsx"
       ],
       "tests": [
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/remotes.rs",
         "src/__tests__/gitRemote.test.ts"
       ],
       "docs": [
@@ -8323,7 +8334,7 @@
       "title": "Recover when the remote repository is gone",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 890,
+      "line": 893,
       "status": "verified",
       "commands": [],
       "files": [
@@ -8367,7 +8378,7 @@
       "title": "Commits of the current branch",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 935,
+      "line": 938,
       "status": "verified",
       "commands": [],
       "files": [
@@ -8375,10 +8386,10 @@
         "src/lib/git.ts",
         "src/lib/gitStatus.ts",
         "src/editor/git.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/log.rs"
       ],
       "tests": [
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/log.rs",
         "src/__tests__/splitGit.test.ts"
       ],
       "docs": [
@@ -8432,7 +8443,7 @@
       "title": "File history",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1011,
+      "line": 1014,
       "status": "verified",
       "commands": [
         "git.fileHistory"
@@ -8442,10 +8453,11 @@
         "src/components/panels/GitPanel.tsx",
         "src/lib/gitCommands.ts",
         "src/components/TitleBar.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/log.rs",
+        "src-tauri/src/git/status.rs"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/log.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -8486,17 +8498,17 @@
       "title": "Commit identity (name and email)",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1066,
+      "line": 1070,
       "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitRepoSettings.tsx",
         "src/lib/git.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/remotes.rs",
         "src/components/panels/GitPanel.tsx"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/remotes.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -8533,7 +8545,7 @@
       "title": "Add a remote by URL",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1117,
+      "line": 1121,
       "status": "verified",
       "commands": [
         "git.addRemote"
@@ -8542,10 +8554,10 @@
         "src/components/panels/GitRepoSettings.tsx",
         "src/lib/git.ts",
         "src/lib/gitCommands.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/remotes.rs"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/remotes.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -8582,18 +8594,18 @@
       "title": "See, open and change remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1169,
+      "line": 1173,
       "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitRepoSettings.tsx",
         "src/lib/gitStatus.ts",
         "src/lib/git.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/remotes.rs"
       ],
       "tests": [
         "src/__tests__/gitRemote.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/remotes.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -8634,18 +8646,18 @@
       "title": "Create a repository on GitHub and push to it",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1228,
+      "line": 1232,
       "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitRepoSettings.tsx",
         "src/lib/git.ts",
         "src/lib/gitStatus.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/github.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/github.rs",
         "src/__tests__/gitRemote.test.ts"
       ],
       "docs": [
@@ -8691,17 +8703,17 @@
       "title": "GitHub accounts",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1295,
+      "line": 1299,
       "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitRepoSettings.tsx",
         "src/lib/git.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/github.rs",
         "src/components/Select.tsx"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/github.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -8738,16 +8750,16 @@
       "title": "Private / Public badge on GitHub remotes",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1347,
+      "line": 1351,
       "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/GitRepoSettings.tsx",
         "src/lib/git.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/github.rs"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/github.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -8780,7 +8792,7 @@
       "title": "Work with more than one repository",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1391,
+      "line": 1395,
       "status": "verified",
       "commands": [],
       "files": [
@@ -8836,7 +8848,7 @@
       "title": "Branch in the status bar",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1510,
+      "line": 1514,
       "status": "verified",
       "commands": [],
       "files": [
@@ -8882,7 +8894,7 @@
       "title": "Git decorations in the Explorer",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1561,
+      "line": 1565,
       "status": "verified",
       "commands": [],
       "files": [
@@ -8926,7 +8938,7 @@
       "title": "Set a folder as the Source Control context",
       "area": "GIT",
       "spec": "specs/git.md",
-      "line": 1460,
+      "line": 1464,
       "status": "verified",
       "commands": [
         "git.setContext"
@@ -9036,13 +9048,13 @@
       "files": [
         "src/lib/gitGraph.ts",
         "src/components/GraphView.tsx",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/graph.rs",
         "src/lib/gitApi.ts",
         "src/styles/app.css"
       ],
       "tests": [
         "src/__tests__/gitGraph.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -9133,10 +9145,10 @@
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -9167,11 +9179,11 @@
       "files": [
         "src/components/GraphView.tsx",
         "src/lib/gitGraph.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "tests": [
         "src/__tests__/gitGraph.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -9225,11 +9237,11 @@
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/graph.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -9316,11 +9328,11 @@
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/graph.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -9382,12 +9394,13 @@
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/graph.rs",
+        "src-tauri/src/git/log.rs",
         "src/lib/gitApi.ts",
         "src/lib/gitStatus.ts"
       ],
       "tests": [
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/graph.rs",
         "src/__tests__/graphView.test.tsx"
       ],
       "docs": [
@@ -9433,14 +9446,14 @@
       "title": "Open what a commit changed in a file",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 544,
+      "line": 545,
       "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
         "src/lib/git.ts",
         "src/lib/diff.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "tests": [],
       "docs": [
@@ -9479,18 +9492,20 @@
       "title": "Copy, switch, branch and tag from a commit's right-click menu",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 593,
+      "line": 594,
       "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
         "src/lib/gitGraph.ts",
         "src/lib/git.ts",
+        "src-tauri/src/git/graph.rs",
+        "src-tauri/src/git/refs.rs",
         "src-tauri/src/git.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/graph.rs",
         "src/__tests__/gitGraph.test.ts",
         "src/__tests__/graphView.test.tsx",
         "src/__tests__/graphMenuStyle.test.ts"
@@ -9542,7 +9557,7 @@
       "title": "Check out, cherry-pick or revert a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 670,
+      "line": 673,
       "status": "verified",
       "commands": [],
       "files": [
@@ -9551,10 +9566,10 @@
         "src/lib/git.ts",
         "src/lib/gitStatus.ts",
         "src/lib/actions.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "tests": [
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/graph.rs",
         "src/__tests__/gitRemote.test.ts",
         "src/__tests__/gitGraph.test.ts"
       ],
@@ -9597,17 +9612,17 @@
       "title": "Reset the branch to a commit",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 733,
+      "line": 736,
       "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
         "src/lib/gitGraph.ts",
         "src/lib/git.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "tests": [
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/graph.rs",
         "src/__tests__/gitGraph.test.ts"
       ],
       "docs": [
@@ -9641,7 +9656,7 @@
       "title": "See a stopped operation above the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 780,
+      "line": 783,
       "status": "verified",
       "commands": [],
       "files": [
@@ -9692,7 +9707,7 @@
       "title": "Uncommitted changes as the first row of the graph",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 853,
+      "line": 856,
       "status": "verified",
       "commands": [],
       "files": [
@@ -9701,7 +9716,7 @@
         "src/lib/gitGraph.ts",
         "src/lib/git.ts",
         "src/lib/gitStatus.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/graph.rs",
         "src/lib/gitApi.ts",
         "src/styles/app.css"
       ],
@@ -9709,7 +9724,7 @@
         "src/__tests__/gitGraph.test.ts",
         "src/__tests__/graphPolish.test.tsx",
         "src/__tests__/graphView.test.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -9786,7 +9801,7 @@
       "title": "Drag the height of the Search All History results",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 976,
+      "line": 979,
       "status": "verified",
       "commands": [],
       "files": [
@@ -9849,7 +9864,7 @@
       "title": "Scroll sideways through a graph wider than 16 lanes",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1051,
+      "line": 1054,
       "status": "verified",
       "commands": [],
       "files": [
@@ -9909,12 +9924,12 @@
       "title": "List the history by date",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1129,
+      "line": 1132,
       "status": "verified",
       "commands": [],
       "files": [
         "src/components/GraphView.tsx",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/graph.rs",
         "src/lib/gitApi.ts",
         "src/lib/gitGraph.ts",
         "src/styles/app.css"
@@ -9922,7 +9937,7 @@
       "tests": [
         "src/__tests__/gitGraph.test.ts",
         "src/__tests__/graphPolish.test.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/graph.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -9983,7 +9998,7 @@
       "title": "Show Commit Graph is in the palette without a repository",
       "area": "GRAPH",
       "spec": "specs/git-graph.md",
-      "line": 1219,
+      "line": 1222,
       "status": "verified",
       "commands": [
         "git.graph"
@@ -10045,7 +10060,7 @@
         "src/lib/git.ts",
         "src/lib/gitApi.ts",
         "src-tauri/src/git/history.rs",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/merge.rs"
       ],
       "tests": [
         "src/__tests__/historyEdit.test.ts",
@@ -10117,7 +10132,7 @@
         "src/components/panels/GitPanel.tsx",
         "src/lib/gitApi.ts",
         "src-tauri/src/git/history.rs",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs"
       ],
       "tests": [
         "src/__tests__/historyEdit.test.ts",
@@ -10347,7 +10362,7 @@
         "src/lib/git.ts",
         "src/lib/dialogs.ts",
         "src-tauri/src/git/history.rs",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/merge.rs"
       ],
       "tests": [
         "src/__tests__/historyEdit.test.ts",
@@ -10654,7 +10669,8 @@
         "src/components/GraphHistory.tsx",
         "src/components/HistoryEditList.tsx",
         "src-tauri/src/git/history.rs",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/status.rs",
+        "src-tauri/src/git/graph.rs"
       ],
       "tests": [
         "src-tauri/src/git/history.rs",
@@ -10722,7 +10738,7 @@
       "title": "Force Push is offered after a history edit of pushed commits",
       "area": "HISTORY",
       "spec": "specs/git-history-edit.md",
-      "line": 832,
+      "line": 833,
       "status": "verified",
       "commands": [
         "git.forcePush"
@@ -13061,12 +13077,12 @@
         "src/lib/gitMerge.ts",
         "src/lib/git.ts",
         "src/lib/dialogs.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/merge.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
         "src/__tests__/gitMerge.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/merge.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -13127,12 +13143,12 @@
       "files": [
         "src/lib/gitMerge.ts",
         "src/lib/git.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/merge.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
         "src/__tests__/gitMerge.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/merge.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -13185,12 +13201,12 @@
       "files": [
         "src/lib/gitMerge.ts",
         "src/lib/git.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/merge.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
         "src/__tests__/gitMerge.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/merge.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -13240,10 +13256,11 @@
         "src/components/panels/GitPanel.tsx",
         "src/components/GraphView.tsx",
         "src/lib/panels.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/merge.rs",
+        "src-tauri/src/git/status.rs"
       ],
       "tests": [
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/merge.rs",
         "src/__tests__/gitMerge.test.ts"
       ],
       "docs": [
@@ -13293,7 +13310,7 @@
       "title": "Refuse to start when it is not safe",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 538,
+      "line": 539,
       "status": "verified",
       "commands": [
         "git.mergeBranch",
@@ -13307,11 +13324,11 @@
         "src/lib/git.ts",
         "src/lib/gitCommands.ts",
         "src/lib/dialogs.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/merge.rs"
       ],
       "tests": [
         "src/__tests__/gitMerge.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/merge.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -13372,7 +13389,7 @@
       "title": "Force Push after pushed commits were rewritten",
       "area": "MERGE",
       "spec": "specs/git-merge-rebase.md",
-      "line": 633,
+      "line": 634,
       "status": "verified",
       "commands": [
         "git.forcePush"
@@ -13385,12 +13402,14 @@
         "src/components/panels/GitPanel.tsx",
         "src/components/MenuBar.tsx",
         "src/lib/gitApi.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/remotes.rs",
+        "src-tauri/src/git/merge.rs"
       ],
       "tests": [
         "src/__tests__/gitMerge.test.ts",
         "src/__tests__/gitPanel.test.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/merge.rs",
+        "src-tauri/src/git/remotes.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -17409,14 +17428,14 @@
         "src/lib/git.ts",
         "src/lib/gitStash.ts",
         "src/lib/gitCommands.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/stash.rs",
         "src-tauri/src/lib.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
         "src/__tests__/gitStash.test.ts",
         "src/__tests__/stashSection.test.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/stash.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -17470,12 +17489,12 @@
         "src/components/panels/StashSection.tsx",
         "src/lib/gitStash.ts",
         "src/lib/git.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/stash.rs"
       ],
       "tests": [
         "src/__tests__/gitStash.test.ts",
         "src/__tests__/stashSection.test.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/stash.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -17527,12 +17546,12 @@
         "src/components/panels/StashSection.tsx",
         "src/lib/gitCommands.ts",
         "src/lib/gitStatus.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/stash.rs"
       ],
       "tests": [
         "src/__tests__/gitStash.test.ts",
         "src/__tests__/stashSection.test.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/stash.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -17574,7 +17593,8 @@
         "src/components/panels/StashSection.tsx",
         "src/lib/git.ts",
         "src/lib/gitStash.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/stash.rs",
+        "src-tauri/src/git/status.rs",
         "src/lib/gitApi.ts",
         "src/editor/git.ts",
         "src/lib/gitCommands.ts",
@@ -17583,7 +17603,7 @@
       "tests": [
         "src/__tests__/gitStash.test.ts",
         "src/__tests__/stashSection.test.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/stash.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -17632,14 +17652,16 @@
       "title": "See what a stash holds",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 270,
+      "line": 271,
       "status": "verified",
       "commands": [],
       "files": [
         "src/components/panels/StashSection.tsx",
         "src/lib/git.ts",
         "src/lib/gitStatus.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/stash.rs",
+        "src-tauri/src/git/log.rs",
+        "src-tauri/src/git/status.rs",
         "src/lib/gitApi.ts",
         "src/lib/diff.ts",
         "src/lib/ipc.ts"
@@ -17647,7 +17669,7 @@
       "tests": [
         "src/__tests__/stashSection.test.tsx",
         "src/__tests__/gitStash.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/stash.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -17692,7 +17714,7 @@
       "title": "Apply a stash and keep it",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 333,
+      "line": 336,
       "status": "verified",
       "commands": [
         "git.stashApply"
@@ -17702,13 +17724,13 @@
         "src/lib/gitStash.ts",
         "src/components/panels/StashSection.tsx",
         "src/lib/gitCommands.ts",
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/stash.rs",
         "src/lib/gitApi.ts"
       ],
       "tests": [
         "src/__tests__/gitStash.test.ts",
         "src/__tests__/stashSection.test.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/stash.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -17765,7 +17787,7 @@
       "title": "Pop a stash",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 415,
+      "line": 418,
       "status": "verified",
       "commands": [
         "git.stashPop"
@@ -17775,12 +17797,12 @@
         "src/lib/gitStash.ts",
         "src/components/panels/StashSection.tsx",
         "src/lib/gitCommands.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/stash.rs"
       ],
       "tests": [
         "src/__tests__/gitStash.test.ts",
         "src/__tests__/stashSection.test.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/stash.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -17813,7 +17835,7 @@
       "title": "Drop a stash",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 462,
+      "line": 465,
       "status": "verified",
       "commands": [
         "git.stashDrop"
@@ -17824,12 +17846,12 @@
         "src/lib/dialogs.ts",
         "src/components/panels/StashSection.tsx",
         "src/lib/gitCommands.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/stash.rs"
       ],
       "tests": [
         "src/__tests__/gitStash.test.ts",
         "src/__tests__/stashSection.test.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/stash.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -17874,7 +17896,7 @@
       "title": "A stash that conflicts when it comes back",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 524,
+      "line": 527,
       "status": "verified",
       "commands": [
         "git.stashApply",
@@ -17888,13 +17910,14 @@
         "src/components/panels/StashSection.tsx",
         "src/components/GraphView.tsx",
         "src/editor/conflicts.ts",
+        "src-tauri/src/git/stash.rs",
         "src-tauri/src/git.rs"
       ],
       "tests": [
         "src/__tests__/gitStash.test.ts",
         "src/__tests__/stashSection.test.tsx",
         "src/__tests__/graphView.test.tsx",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/stash.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -17971,13 +17994,14 @@
       "title": "Stashes in the commit graph",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 644,
+      "line": 648,
       "status": "verified",
       "commands": [
         "git.graph"
       ],
       "files": [
-        "src-tauri/src/git.rs",
+        "src-tauri/src/git/graph.rs",
+        "src-tauri/src/git/stash.rs",
         "src/lib/gitGraph.ts",
         "src/components/GraphView.tsx",
         "src/lib/git.ts",
@@ -17990,7 +18014,7 @@
         "src/__tests__/gitGraph.test.ts",
         "src/__tests__/graphView.test.tsx",
         "src/__tests__/gitStash.test.ts",
-        "src-tauri/src/git.rs"
+        "src-tauri/src/git/stash.rs"
       ],
       "docs": [
         "docs/git.md"
@@ -18059,7 +18083,7 @@
       "title": "Stash from the menu and the command palette",
       "area": "STASH",
       "spec": "specs/git-stash.md",
-      "line": 738,
+      "line": 743,
       "status": "verified",
       "commands": [
         "git.stash",
@@ -21004,81 +21028,44 @@
       "SEARCH-013"
     ],
     "src-tauri/src/git.rs": [
-      "BRANCH-001",
-      "BRANCH-002",
-      "BRANCH-003",
       "BRANCH-004",
-      "BRANCH-005",
-      "BRANCH-006",
-      "BRANCH-007",
       "BRANCH-008",
-      "BRANCH-009",
-      "COMMITCMP-002",
-      "COMMITCMP-003",
-      "COMMITCMP-004",
       "COMMITCMP-005",
       "COMMITCMP-006",
-      "CONFLICT-007",
-      "CONFLICT-008",
-      "CONFLICT-010",
+      "GIT-001",
+      "GIT-014",
+      "GRAPH-011",
+      "STAGE-001",
+      "STASH-009"
+    ],
+    "src-tauri/src/git/compare.rs": [
+      "COMMITCMP-002",
+      "COMMITCMP-004",
+      "COMMITCMP-005",
+      "COMMITCMP-006"
+    ],
+    "src-tauri/src/git/github.rs": [
+      "GIT-022",
+      "GIT-023",
+      "GIT-024"
+    ],
+    "src-tauri/src/git/graph.rs": [
       "CONFLICT-011",
       "CONFLICT-012",
       "CONFLICT-013",
       "CONFLICT-014",
-      "DIFF-006",
-      "GIT-001",
-      "GIT-002",
-      "GIT-005",
-      "GIT-006",
-      "GIT-007",
-      "GIT-008",
-      "GIT-009",
-      "GIT-010",
-      "GIT-011",
-      "GIT-012",
-      "GIT-013",
-      "GIT-014",
-      "GIT-015",
-      "GIT-017",
-      "GIT-018",
-      "GIT-019",
-      "GIT-020",
-      "GIT-021",
-      "GIT-022",
-      "GIT-023",
-      "GIT-024",
       "GRAPH-002",
       "GRAPH-004",
       "GRAPH-005",
       "GRAPH-006",
       "GRAPH-008",
       "GRAPH-009",
-      "GRAPH-010",
       "GRAPH-011",
       "GRAPH-012",
       "GRAPH-013",
       "GRAPH-015",
       "GRAPH-018",
-      "HISTORY-001",
-      "HISTORY-002",
-      "HISTORY-006",
       "HISTORY-010",
-      "MERGE-004",
-      "MERGE-005",
-      "MERGE-006",
-      "MERGE-007",
-      "MERGE-008",
-      "MERGE-009",
-      "STAGE-001",
-      "STASH-001",
-      "STASH-002",
-      "STASH-003",
-      "STASH-004",
-      "STASH-005",
-      "STASH-006",
-      "STASH-007",
-      "STASH-008",
-      "STASH-009",
       "STASH-010"
     ],
     "src-tauri/src/git/history.rs": [
@@ -21092,6 +21079,46 @@
       "HISTORY-009",
       "HISTORY-010"
     ],
+    "src-tauri/src/git/log.rs": [
+      "COMMITCMP-002",
+      "GIT-005",
+      "GIT-017",
+      "GIT-018",
+      "GRAPH-009",
+      "STASH-005"
+    ],
+    "src-tauri/src/git/merge.rs": [
+      "HISTORY-001",
+      "HISTORY-006",
+      "MERGE-004",
+      "MERGE-005",
+      "MERGE-006",
+      "MERGE-007",
+      "MERGE-008",
+      "MERGE-009"
+    ],
+    "src-tauri/src/git/refs.rs": [
+      "BRANCH-001",
+      "BRANCH-002",
+      "BRANCH-003",
+      "BRANCH-004",
+      "BRANCH-005",
+      "BRANCH-006",
+      "BRANCH-007",
+      "BRANCH-008",
+      "BRANCH-009",
+      "GIT-007",
+      "GIT-015",
+      "GRAPH-011"
+    ],
+    "src-tauri/src/git/remotes.rs": [
+      "GIT-014",
+      "GIT-015",
+      "GIT-019",
+      "GIT-020",
+      "GIT-021",
+      "MERGE-009"
+    ],
     "src-tauri/src/git/staging.rs": [
       "STAGE-001",
       "STAGE-002",
@@ -21099,6 +21126,44 @@
       "STAGE-004",
       "STAGE-006",
       "STAGE-009"
+    ],
+    "src-tauri/src/git/stash.rs": [
+      "STASH-001",
+      "STASH-002",
+      "STASH-003",
+      "STASH-004",
+      "STASH-005",
+      "STASH-006",
+      "STASH-007",
+      "STASH-008",
+      "STASH-009",
+      "STASH-010"
+    ],
+    "src-tauri/src/git/status.rs": [
+      "COMMITCMP-003",
+      "CONFLICT-007",
+      "CONFLICT-008",
+      "CONFLICT-010",
+      "CONFLICT-011",
+      "CONFLICT-013",
+      "CONFLICT-014",
+      "DIFF-006",
+      "GIT-001",
+      "GIT-002",
+      "GIT-006",
+      "GIT-008",
+      "GIT-009",
+      "GIT-010",
+      "GIT-011",
+      "GIT-012",
+      "GIT-013",
+      "GIT-018",
+      "GRAPH-010",
+      "HISTORY-002",
+      "HISTORY-010",
+      "MERGE-007",
+      "STASH-004",
+      "STASH-005"
     ],
     "src-tauri/src/json_tools.rs": [
       "BIG-017",
@@ -23095,47 +23160,24 @@
       "FILE-008",
       "FILE-010"
     ],
-    "src-tauri/src/git.rs": [
-      "BRANCH-001",
-      "BRANCH-002",
-      "BRANCH-003",
-      "BRANCH-004",
-      "BRANCH-005",
-      "BRANCH-006",
-      "BRANCH-007",
-      "BRANCH-008",
-      "BRANCH-009",
+    "src-tauri/src/git/compare.rs": [
       "COMMITCMP-002",
       "COMMITCMP-004",
       "COMMITCMP-005",
-      "COMMITCMP-006",
+      "COMMITCMP-006"
+    ],
+    "src-tauri/src/git/github.rs": [
+      "GIT-022",
+      "GIT-023",
+      "GIT-024"
+    ],
+    "src-tauri/src/git/graph.rs": [
       "CONFLICT-008",
       "CONFLICT-010",
       "CONFLICT-011",
       "CONFLICT-012",
       "CONFLICT-013",
       "CONFLICT-014",
-      "DIFF-006",
-      "GIT-001",
-      "GIT-002",
-      "GIT-005",
-      "GIT-006",
-      "GIT-007",
-      "GIT-008",
-      "GIT-010",
-      "GIT-011",
-      "GIT-012",
-      "GIT-013",
-      "GIT-014",
-      "GIT-015",
-      "GIT-017",
-      "GIT-018",
-      "GIT-019",
-      "GIT-020",
-      "GIT-021",
-      "GIT-022",
-      "GIT-023",
-      "GIT-024",
       "GRAPH-002",
       "GRAPH-004",
       "GRAPH-005",
@@ -23146,23 +23188,7 @@
       "GRAPH-012",
       "GRAPH-013",
       "GRAPH-015",
-      "GRAPH-018",
-      "MERGE-004",
-      "MERGE-005",
-      "MERGE-006",
-      "MERGE-007",
-      "MERGE-008",
-      "MERGE-009",
-      "STASH-001",
-      "STASH-002",
-      "STASH-003",
-      "STASH-004",
-      "STASH-005",
-      "STASH-006",
-      "STASH-007",
-      "STASH-008",
-      "STASH-009",
-      "STASH-010"
+      "GRAPH-018"
     ],
     "src-tauri/src/git/history.rs": [
       "HISTORY-001",
@@ -23175,6 +23201,39 @@
       "HISTORY-009",
       "HISTORY-010"
     ],
+    "src-tauri/src/git/log.rs": [
+      "GIT-005",
+      "GIT-017",
+      "GIT-018"
+    ],
+    "src-tauri/src/git/merge.rs": [
+      "MERGE-004",
+      "MERGE-005",
+      "MERGE-006",
+      "MERGE-007",
+      "MERGE-008",
+      "MERGE-009"
+    ],
+    "src-tauri/src/git/refs.rs": [
+      "BRANCH-001",
+      "BRANCH-002",
+      "BRANCH-003",
+      "BRANCH-004",
+      "BRANCH-005",
+      "BRANCH-006",
+      "BRANCH-007",
+      "BRANCH-008",
+      "BRANCH-009",
+      "GIT-007"
+    ],
+    "src-tauri/src/git/remotes.rs": [
+      "GIT-014",
+      "GIT-015",
+      "GIT-019",
+      "GIT-020",
+      "GIT-021",
+      "MERGE-009"
+    ],
     "src-tauri/src/git/staging.rs": [
       "STAGE-001",
       "STAGE-002",
@@ -23182,6 +23241,29 @@
       "STAGE-004",
       "STAGE-006",
       "STAGE-009"
+    ],
+    "src-tauri/src/git/stash.rs": [
+      "STASH-001",
+      "STASH-002",
+      "STASH-003",
+      "STASH-004",
+      "STASH-005",
+      "STASH-006",
+      "STASH-007",
+      "STASH-008",
+      "STASH-009",
+      "STASH-010"
+    ],
+    "src-tauri/src/git/status.rs": [
+      "DIFF-006",
+      "GIT-001",
+      "GIT-002",
+      "GIT-006",
+      "GIT-008",
+      "GIT-010",
+      "GIT-011",
+      "GIT-012",
+      "GIT-013"
     ],
     "src-tauri/src/json_tools.rs": [
       "BIG-017",

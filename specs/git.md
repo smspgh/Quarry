@@ -14,11 +14,12 @@ Git in the editor (change markers, peek / revert, line blame), the Source Contro
 - Files:
   - `src/lib/git.ts` — `installGit`, `refreshGit` (debounce), `doRefresh` (a git failure goes to `statusErrors`, never `notRepo`; a known repository keeps its last status), `rescanGit` (clears `notRepo`, re-checks a missing git), `interesting`, `notRepo`, `repoOf`, `currentRepo`, `fileStatus`
   - `src/lib/gitApi.ts` — `git.available`, `git.status`, `GitStatus` / `GitFile`
-  - `src-tauri/src/git.rs` — `git_available`, `git_status`, `find_root`, `parse_status`, `git()` (`--no-optional-locks`, `GIT_TERMINAL_PROMPT=0`); `status` also reads the newest stash's id and the number of stashes (STASH-004)
+  - `src-tauri/src/git.rs` — `git_available`, `find_root`, `git()` (`--no-optional-locks`, `GIT_TERMINAL_PROMPT=0`)
+  - `src-tauri/src/git/status.rs` — `git_status`, `parse_status`; `status` also reads the newest stash's id and the number of stashes (STASH-004)
   - `src/components/panels/GitPanel.tsx` — header Refresh button (`rescanGit`), "Git was not found" / "not in a git repository" / "Git could not read" notes
   - `src/lib/gitCommands.ts` — `git.refresh` (runs `rescanGit`, like the panel's Refresh button)
   - `src/App.tsx` — calls `installGit()` at start-up
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitRefresh.test.ts`
+- Tests: `src-tauri/src/git/status.rs`, `src/__tests__/gitRefresh.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer who opens folders and files that live in git repositories
@@ -90,10 +91,10 @@ Scenario: GIT-001.10 A failed read keeps the last status
   - `src/editor/git.ts` — `gitDiff` field (`Chunk.build` / `Chunk.updateB`), `lineChange`, `changeRows`, `gitMarkers`, `ChangeMarker`, the `cm-git-gutter` gutter in `gitExtensions`
   - `src/lib/git.ts` — `syncBases` / `syncBase` (HEAD text per document, refetched when HEAD moves), `baseHead`
   - `src/editor/manager.ts` — installs `gitExtensions()` in every text document
-  - `src-tauri/src/git.rs` — `git_show` (`cat-file --filters`, so line endings match the checkout)
+  - `src-tauri/src/git/status.rs` — `git_show` (`cat-file --filters`, so line endings match the checkout)
   - `src/styles/app.css` — `.cm-git-mark`, `.cm-git-added` / `-modified` / `-deleted`
   - `src/styles/tokens.css` — `--git-added`, `--git-modified`, `--git-deleted`
-- Tests: `src/__tests__/splitGit.test.ts`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/splitGit.test.ts`, `src-tauri/src/git/status.rs`
 - Docs: `docs/git.md`
 
 **As a** developer editing a tracked file
@@ -236,9 +237,9 @@ Scenario: GIT-004.5 Only for text tabs
   - `src/lib/git.ts` — `toggleBlame`, `blameSoon` (0 ms on toggle / tab switch / save, 1500 ms after typing), `blameNow` (stale answers dropped), `blameOn`
   - `src/editor/git.ts` — `blameField`, `setBlame`, `blameDecorations`, `BlameWidget`, `relativeTime`
   - `src/lib/gitCommands.ts` — `git.toggleBlame` with `dynamicTitle` (Show / Hide Line Blame)
-  - `src-tauri/src/git.rs` — `git_blame` (`blame --porcelain --contents -`), `buffer_bytes` (encoding, BOM, line endings), `parse_blame`
+  - `src-tauri/src/git/log.rs` — `git_blame` (`blame --porcelain --contents -`), `buffer_bytes` (encoding, BOM, line endings), `parse_blame`
   - `src/styles/app.css` — `.cm-git-blame`
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/splitGit.test.ts`
+- Tests: `src-tauri/src/git/log.rs`, `src/__tests__/splitGit.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer reading unfamiliar code
@@ -290,8 +291,8 @@ Scenario: GIT-005.6 Hide blame
   - `src/lib/gitCommands.ts` — `git.compareWithHead`, `tracked()` enabled rule
   - `src/components/TitleBar.tsx` — tab right-click item "Compare with Last Commit" (`runCommand("git.compareWithHead", { docId })`)
   - `src/components/MenuBar.tsx` — Git menu entry
-  - `src-tauri/src/git.rs` — `git_show`
-- Tests: `src-tauri/src/git.rs`
+  - `src-tauri/src/git/status.rs` — `git_show`
+- Tests: `src-tauri/src/git/status.rs`
 - Docs: `docs/git.md`, `docs/compare.md`
 
 **As a** developer with uncommitted edits in a file
@@ -335,8 +336,8 @@ Scenario: GIT-006.5 Binary files
   - `src/components/CommandPalette.tsx` — `mode === "branch"` item list from the purpose in `useGit().branchPick` ("Create branch …" row, `current` / `remote` labels), placeholder, "Loading branches…"; each branch row also has the "⋯" row menu of BRANCH-002 (rename, set upstream, push, delete), which never changes what Enter and a click do
   - `src/lib/gitCommands.ts` — `git.switchBranch`, hidden `git.checkoutTo` / `git.createBranch`
   - `src/components/panels/GitPanel.tsx` — branch button (`branchLabel`, disabled while busy); the "Merge or Rebase" button after it is MERGE-003's
-  - `src-tauri/src/git.rs` — `git_branches` (`for-each-ref`, local first, newest first, symbolic refs skipped), `git_checkout` (`switch`, `switch -c`, `switch --track`)
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/branchPicker.test.tsx`, `src/__tests__/gitRefs.test.ts`
+  - `src-tauri/src/git/refs.rs` — `git_branches` (`for-each-ref`, local first, newest first, symbolic refs skipped), `git_checkout` (`switch`, `switch -c`, `switch --track`)
+- Tests: `src-tauri/src/git/refs.rs`, `src/__tests__/branchPicker.test.tsx`, `src/__tests__/gitRefs.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer working on several branches
@@ -399,8 +400,8 @@ Scenario: GIT-007.7 Unavailable without a repository or while git is busy
   - `src/lib/gitStatus.ts` — `commitLabel`, `groupFiles`
   - `src/lib/gitCommands.ts` — `git.showPanel` (Ctrl+Shift+G)
   - `src/components/SidebarRail.tsx` — Source Control rail button
-  - `src-tauri/src/git.rs` — `git_commit` (`commit -F -`, message on stdin; returns short id + summary)
-- Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/status.rs` — `git_commit` (`commit -F -`, message on stdin; returns short id + summary)
+- Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git/status.rs`
 - Docs: `docs/git.md`
 
 **As a** developer working in a git repository
@@ -466,7 +467,7 @@ Scenario: GIT-008.8 Ctrl+Enter while the button is disabled says why
   - `src/components/panels/GitPanel.tsx` — Amend checkbox (disabled without HEAD, cleared after a commit), button disabled rule
   - `src/lib/git.ts` — `commit(root, message, amend)` (no Stage All question when amending)
   - `src/lib/gitStatus.ts` — `commitLabel` ("Amend Last Commit")
-  - `src-tauri/src/git.rs` — `commit` (`--amend`, `--no-edit` when the message is empty)
+  - `src-tauri/src/git/status.rs` — `commit` (`--amend`, `--no-edit` when the message is empty)
 - Tests: `src/__tests__/gitRemote.test.ts`
 - Docs: `docs/git.md`
 
@@ -506,9 +507,9 @@ Scenario: GIT-009.4 Nothing to amend before the first commit
   - `src/lib/gitStatus.ts` — `groupFiles`, `rowKind`, `kindOf`, `KIND_LETTER`, `KIND_LABEL`
   - `src/lib/git.ts` — `openChange` (untracked files just open; the rest is a Source Control comparison)
   - `src/lib/gitStaging.ts` — `openChangeCompare` / `changeSources` (staged: HEAD vs index; changes: index vs tab / file, labelled "(staged)" or "(HEAD)"; an open comparison is reused)
-  - `src-tauri/src/git.rs` — `parse_status` (porcelain v2, renames with original path), `git_show` (`rev` "" / ":" = index)
+  - `src-tauri/src/git/status.rs` — `parse_status` (porcelain v2, renames with original path), `git_show` (`rev` "" / ":" = index)
   - `src/styles/app.css` — `.scm-*` rows, `.git-*` colours
-- Tests: `src/__tests__/splitGit.test.ts`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/splitGit.test.ts`, `src-tauri/src/git/status.rs`
 - Docs: `docs/git.md`
 
 **As a** developer about to commit
@@ -575,8 +576,8 @@ Scenario: GIT-010.8 Sections collapse and empty ones are hidden
   - `src/components/panels/GitPanel.tsx` — row "Stage" (+) / "Unstage" (−) buttons, heading "Stage all" / "Unstage all"
   - `src/lib/git.ts` — `stage`, `unstage` (open Source Control comparisons of the file are refreshed afterwards, STAGE-009; staging part of a file is STAGE-001 to STAGE-004)
   - `src/lib/gitCommands.ts` — `git.stageFile` (a conflicted file goes through `resolveConflicts`), `git.unstageFile`, their `enabled` rules
-  - `src-tauri/src/git.rs` — `git_stage` (`add -A`, paths on stdin as a NUL list), `git_unstage` (`restore --staged`, or `rm --cached` before the first commit)
-- Tests: `src-tauri/src/git.rs`
+  - `src-tauri/src/git/status.rs` — `git_stage` (`add -A`, paths on stdin as a NUL list), `git_unstage` (`restore --staged`, or `rm --cached` before the first commit)
+- Tests: `src-tauri/src/git/status.rs`
 - Docs: `docs/git.md`
 
 **As a** developer preparing a commit
@@ -632,8 +633,8 @@ Scenario: GIT-011.7 Menu commands are greyed out when they do not apply
   - `src/components/panels/GitPanel.tsx` — row "Discard changes" / "Delete (to the Recycle Bin)" button, heading "Discard all changes" (Changes section only)
   - `src/lib/git.ts` — `discard` (confirmation wording from `discardText` in gitSafety.ts, which names the unsaved tabs; then `rewrite`, so those tabs reload without a question and the tab of a deleted untracked file closes: SAFE-004, SAFE-007.6); discarding one change or some lines of a file is STAGE-003 / STAGE-004
   - `src/lib/dialogs.ts` — `choose`
-  - `src-tauri/src/git.rs` — `git_discard` (`restore --worktree` for tracked files, `trash::delete_all` for untracked ones)
-- Tests: `src-tauri/src/git.rs`
+  - `src-tauri/src/git/status.rs` — `git_discard` (`restore --worktree` for tracked files, `trash::delete_all` for untracked ones)
+- Tests: `src-tauri/src/git/status.rs`
 - Docs: `docs/git.md`
 
 **As a** developer who tried something that did not work out
@@ -687,9 +688,9 @@ Scenario: GIT-012.6 No discard for staged rows
 - Files:
   - `src/lib/gitStatus.ts` — `syncLine` (its `rewritten` case is MERGE-009's), `SyncKind`
   - `src/components/panels/GitPanel.tsx` — `SyncStatus` (text, icon per kind, action buttons, "Checking the remote…"; "Force Push…" after a rewrite of pushed commits, MERGE-009)
-  - `src-tauri/src/git.rs` — `parse_status` (`branch.upstream`, `branch.ab`, `upstream_gone`)
+  - `src-tauri/src/git/status.rs` — `parse_status` (`branch.upstream`, `branch.ab`, `upstream_gone`)
   - `src/styles/app.css` — `.scm-sync`, `.scm-status-row`
-- Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git/status.rs`
 - Docs: `docs/git.md`
 
 **As a** developer who needs to know whether my work is safe on the remote
@@ -758,9 +759,10 @@ Scenario: GIT-013.9 No line without a remote or a branch
 - Files:
   - `src/lib/git.ts` — `checkRemote` (`CHECK_EVERY` = 60 s counted from the last check, failed or not; skipped while busy / already checking / no remote), `markChecked`, `remoteCheck` state
   - `src/components/panels/GitPanel.tsx` — `SyncStatus` effect (on mount and window focus), ↻ "Check the remote now" button, "Couldn't check the remote" row with Fetch
-  - `src-tauri/src/git.rs` — `remote_op` "check" (`fetch --prune --quiet`, no `--all`: git fetches the branch's remote, else origin; `GCM_INTERACTIVE=never`), `quiet_options` (BatchMode ssh, HTTP low-speed limits), `GIT_TERMINAL_PROMPT=0` in `git()`
+  - `src-tauri/src/git/remotes.rs` — `remote_op` "check" (`fetch --prune --quiet`, no `--all`: git fetches the branch's remote, else origin; `GCM_INTERACTIVE=never`), `quiet_options` (BatchMode ssh, HTTP low-speed limits)
+  - `src-tauri/src/git.rs` — `GIT_TERMINAL_PROMPT=0` in `git()`
   - `src/lib/gitApi.ts` — `GitRemoteOp` "check"
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git/remotes.rs`
 - Docs: `docs/git.md`
 
 **As a** developer who shares a branch with others
@@ -826,9 +828,10 @@ Scenario: GIT-014.8 Only the branch's remote is checked
   - `src/components/panels/GitPanel.tsx` — header Fetch / Pull / Push buttons and tooltips, `SyncStatus` action buttons, busy label
   - `src/lib/gitCommands.ts` — `git.fetch`, `git.pull`, `git.push`
   - `src/lib/gitStatus.ts` — `gitErrorText` (hint lines dropped)
-  - `src-tauri/src/git.rs` — `git_remote` / `remote_op` (`fetch --all --prune`, `pull`, `pull --no-rebase`, `pull --rebase`, `push`, `push --set-upstream <origin or first remote> HEAD`; `"push-force"` is Force Push, MERGE-009: none of these ever forces). Pushing one named branch or tag, and deleting a remote branch, are `push_ref` (BRANCH-006, BRANCH-007, BRANCH-009)
+  - `src-tauri/src/git/remotes.rs` — `git_remote` / `remote_op` (`fetch --all --prune`, `pull`, `pull --no-rebase`, `pull --rebase`, `push`, `push --set-upstream <origin or first remote> HEAD`; `"push-force"` is Force Push, MERGE-009: none of these ever forces)
+  - `src-tauri/src/git/refs.rs` — pushing one named branch or tag, and deleting a remote branch, are `push_ref` (BRANCH-006, BRANCH-007, BRANCH-009)
   - `src/components/StatusBar.tsx` — busy label after the branch
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitRemote.test.ts`
+- Tests: `src-tauri/src/git/remotes.rs`, `src/__tests__/gitRemote.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer sharing work through a remote
@@ -941,8 +944,8 @@ Scenario: GIT-016.5 The warning clears when the remote is changed
   - `src/lib/git.ts` — `openCommitFile` (parent vs commit, `preview` Compare tab)
   - `src/lib/gitStatus.ts` — `commitFileKind`
   - `src/editor/git.ts` — `relativeTime`
-  - `src-tauri/src/git.rs` — `git_log` (repository log for the root), `git_unpushed` (`rev-list --max-count=500 @{upstream}..HEAD`), `git_commit_files` (`show --name-status -M --diff-merges=first-parent`)
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/splitGit.test.ts`
+  - `src-tauri/src/git/log.rs` — `git_log` (repository log for the root), `git_unpushed` (`rev-list --max-count=500 @{upstream}..HEAD`), `git_commit_files` (`show --name-status -M --diff-merges=first-parent`)
+- Tests: `src-tauri/src/git/log.rs`, `src/__tests__/splitGit.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer who just committed
@@ -1017,8 +1020,9 @@ Scenario: GIT-017.10 A long run of unpushed commits is counted in full
   - `src/components/panels/GitPanel.tsx` — `HistorySection` ("History: name", close, rows, "Show more")
   - `src/lib/gitCommands.ts` — `git.fileHistory` (takes an optional path), `tracked()`
   - `src/components/TitleBar.tsx` — tab right-click item "Show File History"
-  - `src-tauri/src/git.rs` — `git_log` (`--follow --name-only`), `parse_log` (path per commit across renames), `git_show` with `rel`
-- Tests: `src-tauri/src/git.rs`
+  - `src-tauri/src/git/log.rs` — `git_log` (`--follow --name-only`), `parse_log` (path per commit across renames)
+  - `src-tauri/src/git/status.rs` — `git_show` with `rel`
+- Tests: `src-tauri/src/git/log.rs`
 - Docs: `docs/git.md`
 
 **As a** developer wondering how a file got the way it is
@@ -1070,9 +1074,9 @@ Scenario: GIT-018.7 Not offered for untracked files
 - Files:
   - `src/components/panels/GitRepoSettings.tsx` — `RepoSettings` (Repository section, opens itself when something is missing, summary line), `IdentityForm` ("Only this repository", Enter saves, Escape cancels)
   - `src/lib/git.ts` — `loadIdentity`, `saveIdentity`, `identity` state
-  - `src-tauri/src/git.rs` — `git_identity` (`config --show-scope --get`), `git_set_identity` (`--global` or `--local`; a global save unsets the local values)
+  - `src-tauri/src/git/remotes.rs` — `git_identity` (`config --show-scope --get`), `git_set_identity` (`--global` or `--local`; a global save unsets the local values)
   - `src/components/panels/GitPanel.tsx` — "as name <email>" line under the Commit button
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git/remotes.rs`
 - Docs: `docs/git.md`
 
 **As a** developer on a new machine or a repository that needs another identity
@@ -1122,8 +1126,8 @@ Scenario: GIT-019.6 Change an existing identity
   - `src/components/panels/GitRepoSettings.tsx` — `RemoteForm` (URL choice, `RemoteNameInput`, "Add and Push" / "Add", Enter = and push, `canPush` needs a commit), `showForm` rule
   - `src/lib/git.ts` — `showAddRemote`, `saveRemote` (add, `noteRemote`, optional push, re-check), `addingRemote` state
   - `src/lib/gitCommands.ts` — `git.addRemote`
-  - `src-tauri/src/git.rs` — `git_add_remote` (`remote add -- name url`), `remote_list`
-- Tests: `src-tauri/src/git.rs`
+  - `src-tauri/src/git/remotes.rs` — `git_add_remote` (`remote add -- name url`), `remote_list`
+- Tests: `src-tauri/src/git/remotes.rs`
 - Docs: `docs/git.md`
 
 **As a** developer with a local repository and an existing repository elsewhere
@@ -1174,8 +1178,8 @@ Scenario: GIT-020.6 A name and a URL are required
   - `src/components/panels/GitRepoSettings.tsx` — remote rows (name, short URL, Open, Change), `RemoteForm` with `change` ("Save and Push" / "Save"; URL prefilled through `displayUrl`), `shortUrl`
   - `src/lib/gitStatus.ts` — `remoteWebUrl`, `displayUrl`
   - `src/lib/git.ts` — `saveRemote` with `replace` (toast via `displayUrl`), `markChecked`, `checkRemote(root, true)`
-  - `src-tauri/src/git.rs` — `git_set_remote_url` (`remote set-url`, then drops `refs/remotes/<name>/*` with `update-ref --no-deref --stdin`)
-- Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/remotes.rs` — `git_set_remote_url` (`remote set-url`, then drops `refs/remotes/<name>/*` with `update-ref --no-deref --stdin`)
+- Tests: `src/__tests__/gitRemote.test.ts`, `src-tauri/src/git/remotes.rs`
 - Docs: `docs/git.md`
 
 **As a** developer whose project moves to another repository
@@ -1233,9 +1237,9 @@ Scenario: GIT-021.7 A token in the URL stays hidden when changing it
   - `src/components/panels/GitRepoSettings.tsx` — `RemoteForm` GitHub choice (repository name, Private, `GithubTarget`, "Create and Push" / "Create")
   - `src/lib/git.ts` — `createOnGithub` (sign-in toast, "Repository already exists" dialog, then `saveRemote`)
   - `src/lib/gitStatus.ts` — `repoNameFor`
-  - `src-tauri/src/git.rs` — `github_create_repo` / `github_create` (`git credential fill` with optional `username=`, `approve` / `reject`), `github_api` (System32 curl, Authorization header in `-K -` on stdin), `create_repo_request` (POST /user/repos, 422 → `existing_repo`), `valid_repo_name`, `repo_from`
+  - `src-tauri/src/git/github.rs` — `github_create_repo` / `github_create` (`git credential fill` with optional `username=`, `approve` / `reject`), `github_api` (System32 curl, Authorization header in `-K -` on stdin), `create_repo_request` (POST /user/repos, 422 → `existing_repo`), `valid_repo_name`, `repo_from`
   - `src/lib/gitApi.ts` — `git.githubCreate`, `GithubRepo`
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitRemote.test.ts`
+- Tests: `src-tauri/src/git/github.rs`, `src/__tests__/gitRemote.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer with a local repository that is not on GitHub yet
@@ -1299,9 +1303,9 @@ Scenario: GIT-022.8 Carry a project on in a new GitHub repository
 - Files:
   - `src/components/panels/GitRepoSettings.tsx` — `GithubRow` (account text / `Select` for several / "Sign in" / add-account button), `GithubTarget`, `onGithub` rule
   - `src/lib/git.ts` — `loadGithub`, `setGithub`, `chooseGithub` (localStorage `quarry.githubAccount`), `githubSignIn`
-  - `src-tauri/src/git.rs` — `github_accounts_list` (`git credential-manager github list`), `github_sign_in` (`github login`), `account_lines`, `github_create` (`username=` in `credential fill`)
+  - `src-tauri/src/git/github.rs` — `github_accounts_list` (`git credential-manager github list`), `github_sign_in` (`github login`), `account_lines`, `github_create` (`username=` in `credential fill`)
   - `src/components/Select.tsx` — the account picker
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git/github.rs`
 - Docs: `docs/git.md`
 
 **As a** developer with a personal and a work GitHub account
@@ -1351,8 +1355,8 @@ Scenario: GIT-023.6 Only shown when GitHub is involved
 - Files:
   - `src/components/panels/GitRepoSettings.tsx` — `Visibility` badge, summary "(private)" / "(public)", section kept mounted while closed
   - `src/lib/git.ts` — `loadRemoteInfo` (once per account + URL), `remoteInfo` state
-  - `src-tauri/src/git.rs` — `github_repo` / `github_repo_info`, `github_slug`, `stored_github_token` (`credential fill` with `GCM_INTERACTIVE=never`), `repo_info_request`
-- Tests: `src-tauri/src/git.rs`
+  - `src-tauri/src/git/github.rs` — `github_repo` / `github_repo_info`, `github_slug`, `stored_github_token` (`credential fill` with `GCM_INTERACTIVE=never`), `repo_info_request`
+- Tests: `src-tauri/src/git/github.rs`
 - Docs: `docs/git.md`
 
 **As a** developer about to push

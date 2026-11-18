@@ -439,7 +439,7 @@ pub async fn git_history_rewrite(root: String, action: String, expected_tip: Str
 
 #[cfg(test)]
 mod tests {
-    use super::super::tests::{git_ok, repo, write};
+    use super::super::test_util::{git_ok, repo, write};
     use super::super::{abort_operation, add_remote, continue_operation, remote_op, stage, status};
     use super::*;
     use std::path::PathBuf;

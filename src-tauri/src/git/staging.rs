@@ -387,7 +387,7 @@ pub async fn git_apply_lines(root: String, path: String, mode: String, picks: Ve
 
 #[cfg(test)]
 mod tests {
-    use super::super::tests::{git_ok, repo, write};
+    use super::super::test_util::{git_ok, repo, write};
     use super::super::{run_text, show, status};
     use super::*;
     use std::path::PathBuf;

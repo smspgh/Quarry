@@ -87,7 +87,7 @@ One or two sentences on what the area covers and where its user documentation is
   - `src/components/panels/GitPanel.tsx` — commit box, button label
   - `src/lib/git.ts` — `commit()` action, unsaved-tabs warning
   - `src/lib/gitStatus.ts` — `commitLabel`
-  - `src-tauri/src/git.rs` — `git_commit`
+  - `src-tauri/src/git/status.rs` — `git_commit`
 - Tests: `src/__tests__/gitRemote.test.ts`
 - Docs: `docs/git.md`
 

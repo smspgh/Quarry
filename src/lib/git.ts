@@ -2,8 +2,8 @@
  * Git integration: which open folder / documents are in a repository and their status (for the
  * Explorer, the status bar and the Source Control panel), the HEAD text behind the editor's change
  * markers, line blame, and the actions (stage, commit, branches, pull / push, history). The git
- * work itself is Rust (src-tauri/src/git.rs, wrappers in gitApi.ts); see editor/git.ts for the
- * editor side.
+ * work itself is Rust (src-tauri/src/git.rs and its submodules in src-tauri/src/git/, wrappers
+ * in gitApi.ts); see editor/git.ts for the editor side.
  */
 import { Text } from "@codemirror/state";
 import { create } from "zustand";

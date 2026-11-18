@@ -1,5 +1,6 @@
-// Typed wrappers for the git commands in src-tauri/src/git.rs. Paths are absolute Windows paths
-// (the same form as the rest of the app); `rel` values are repo-relative with `/` separators.
+// Typed wrappers for the git commands in src-tauri/src/git.rs and its submodules in
+// src-tauri/src/git/. Paths are absolute Windows paths (the same form as the rest of the app);
+// `rel` values are repo-relative with `/` separators.
 // Errors reject with git's stderr (trimmed).
 import { invoke } from "@tauri-apps/api/core";
 

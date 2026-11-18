@@ -1,7 +1,7 @@
 /**
  * Compare commits (pure; specs/git-compare-commits.md): the graph's two-commit selection, which
  * commit goes on which side, and the wording of the comparison pane. The pane is
- * components/GraphCompare.tsx; git's part is `diff_files` in src-tauri/src/git.rs.
+ * components/GraphCompare.tsx; git's part is `diff_files` in src-tauri/src/git/compare.rs.
  */
 import type { GitCommitFile, GitCompare } from "./gitApi";
 import { commitFileKind, type GitKind } from "./gitStatus";

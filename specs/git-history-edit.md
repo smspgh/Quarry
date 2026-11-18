@@ -40,7 +40,7 @@ Decisions (made where the roadmap left the choice open):
   - `src/lib/git.ts` — `historyGuard` (the fresh re-check when an entry is chosen), `busy`
   - `src/lib/gitApi.ts` — `git.historyRange`, `GitHistoryCommit`, `GitHistoryRange`
   - `src-tauri/src/git/history.rs` — new; `history_range` / `git_history_range` (`merge-base --is-ancestor`, `log --topo-order` with parents; pushed = the definition of `pushed_commits`)
-  - `src-tauri/src/git.rs` — `pushed_commits` (which remote branch holds the pushed commits), `pub mod history`
+  - `src-tauri/src/git/merge.rs` — `pushed_commits` (which remote branch holds the pushed commits), `pub mod history`
 - Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/graphHistory.test.tsx`, `src-tauri/src/git/history.rs`
 - Docs: `docs/git.md`
 
@@ -122,7 +122,7 @@ Scenario: HISTORY-001.10 Git is busy
   - `src/components/panels/GitPanel.tsx` — the message box takes `useGit().undone` (the undone commit's message) when it is empty
   - `src/lib/gitApi.ts` — `GitStatus.headParents` (the tip is the first commit or a merge: the command is greyed out)
   - `src-tauri/src/git/history.rs` — `history_rewrite` action `undo` (`reset --soft HEAD~1`; refuses a merge or root tip, a detached HEAD, an operation in progress and a tip that moved), `tip_parents`
-  - `src-tauri/src/git.rs` — `GitStatus.head_parents`
+  - `src-tauri/src/git/status.rs` — `GitStatus.head_parents`
 - Tests: `src/__tests__/historyEdit.test.ts`, `src/__tests__/graphHistory.test.tsx`, `src-tauri/src/git/history.rs`
 - Docs: `docs/git.md`
 
@@ -379,7 +379,7 @@ Scenario: HISTORY-005.7 No stop for a message
   - `src/lib/git.ts` — `historyGuard(root, from, check, replay)` used by every entry point (menu actions, the list's Run, the commands): fresh status and `historyRange`, busy / operation / branch / merge checks, dirty check, then the dialog; `historyRun` (maps `quarry-moved`)
   - `src/lib/dialogs.ts` — `choose()` (unchanged: `default: true` on Cancel)
   - `src-tauri/src/git/history.rs` — `history_range` (pushed = reachable from any remote-tracking branch, and which one: `pushed_commits`), `history_rewrite` re-checks before running: expected tip id (`MOVED`), clean tracked files, no operation, on a branch, the steps name exactly the commits of the range, no merge among them
-  - `src-tauri/src/git.rs` — `pushed_commits` (shared with MERGE-006)
+  - `src-tauri/src/git/merge.rs` — `pushed_commits` (shared with MERGE-006)
 - Tests: `src/__tests__/historyEdit.test.ts`, `src-tauri/src/git/history.rs`
 - Docs: `docs/git.md`
 
@@ -747,7 +747,8 @@ Scenario: HISTORY-009.12 A failure that is not a conflict
   - `src/components/GraphHistory.tsx` — closes the Edit History list and the message strip when an operation is stopped
   - `src/components/HistoryEditList.tsx` — closes on a stop
   - `src-tauri/src/git/history.rs` — `todo_text` (messages live in the todo as `exec` lines, so `continue_operation` with `GIT_EDITOR=true` still applies them), `rebase_step` (the badge counts commits, not the `exec` lines), `run_plan` (`--reschedule-failed-exec`; a stop with nothing conflicted is aborted and returns `HALTED`), `failure_reason`, `message_step_failed`
-  - `src-tauri/src/git.rs` — `operation`, `operation_step` (uses `history::rebase_step` for an interactive rebase), `continue_operation` (a failed message step → `MESSAGE_FAILED`), `abort_operation`
+  - `src-tauri/src/git/status.rs` — `operation`, `operation_step` (uses `history::rebase_step` for an interactive rebase)
+  - `src-tauri/src/git/graph.rs` — `continue_operation` (a failed message step → `MESSAGE_FAILED`), `abort_operation`
 - Tests: `src-tauri/src/git/history.rs`, `src/__tests__/historyEdit.test.ts`, `src/__tests__/historyEditList.test.tsx`, `src/__tests__/graphHistory.test.tsx`, `src/__tests__/gitRemote.test.ts`
 - Docs: `docs/git.md`
 

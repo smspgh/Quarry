@@ -267,9 +267,9 @@ Scenario: MERGE-003.10 Rebase needs a branch
   - `src/lib/gitMerge.ts` — `mergeConfirm(preview, label, branch)` (title, text, buttons; Cancel default; "nothing to merge"), `mergeDone` (notifications)
   - `src/lib/git.ts` — `startMerge` (`startCheck` → `startPreview` → `cleanGuard`, the unsaved-tabs question of SAFE-003.4 → dialog via `choose()` → `runStart` with busy label "Merging…" → notification; open tabs reloaded through `rewrite`)
   - `src/lib/dialogs.ts` — `choose()` (unchanged: three choices, `default: true` on Cancel)
-  - `src-tauri/src/git.rs` — `merge_preview` / `git_merge_preview` (commits on each side: `rev-list --left-right --count HEAD...<ref>`), `resolve_target` (a branch, remote branch or tag name or a commit id; anything else, or a name starting with `-`, is refused), `start_merge` / `git_merge` (`merge --no-edit` with `--ff-only` or `--no-ff`; `GIT_EDITOR=true`; the short branch name is given to git so the message reads "Merge branch 'feature'")
+  - `src-tauri/src/git/merge.rs` — `merge_preview` / `git_merge_preview` (commits on each side: `rev-list --left-right --count HEAD...<ref>`), `resolve_target` (a branch, remote branch or tag name or a commit id; anything else, or a name starting with `-`, is refused), `start_merge` / `git_merge` (`merge --no-edit` with `--ff-only` or `--no-ff`; `GIT_EDITOR=true`; the short branch name is given to git so the message reads "Merge branch 'feature'")
   - `src/lib/gitApi.ts` — `git.mergePreview`, `git.merge`, `GitMergePreview`, `GitMergeMode`
-- Tests: `src/__tests__/gitMerge.test.ts`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitMerge.test.ts`, `src-tauri/src/git/merge.rs`
 - Docs: `docs/git.md`
 
 **As a** developer bringing another branch's work into mine
@@ -345,9 +345,9 @@ Scenario: MERGE-004.10 What a merge never does
 - Files:
   - `src/lib/gitMerge.ts` — `rebaseConfirm(preview, label, branch)` (title, text, buttons; Cancel default; merge-commit note; "nothing to rebase"; the fast-forward variant), `rebaseDone`
   - `src/lib/git.ts` — `startRebase` (`startCheck` → `startPreview` → `cleanGuard`, the unsaved-tabs question of SAFE-003.4 → dialog → `runStart` with busy label "Rebasing…" → notification; open tabs reloaded through `rewrite`; the fast-forward runs `git.merge(…, "ff-only")`)
-  - `src-tauri/src/git.rs` — `merge_preview` (also: how many of the commits to replay are merge commits), `start_rebase` / `git_rebase` (`rebase <ref>` with `rebase.autoStash`, `rebase.rebaseMerges` and `rebase.updateRefs` off, `GIT_EDITOR=true`, refused on a detached HEAD)
+  - `src-tauri/src/git/merge.rs` — `merge_preview` (also: how many of the commits to replay are merge commits), `start_rebase` / `git_rebase` (`rebase <ref>` with `rebase.autoStash`, `rebase.rebaseMerges` and `rebase.updateRefs` off, `GIT_EDITOR=true`, refused on a detached HEAD)
   - `src/lib/gitApi.ts` — `git.rebase`
-- Tests: `src/__tests__/gitMerge.test.ts`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitMerge.test.ts`, `src-tauri/src/git/merge.rs`
 - Docs: `docs/git.md`
 
 **As a** developer who wants their commits to sit on top of another branch
@@ -411,9 +411,9 @@ Scenario: MERGE-005.8 What a rebase never does
 - Files:
   - `src/lib/gitMerge.ts` — `rebaseConfirm` (danger variant: counts, the remote branch named, the commits listed by `commitLines`, "Rebase Anyway")
   - `src/lib/git.ts` — `startRebase` (uses the preview's pushed count; one dialog, never two; after "Rebase Anyway" finished it sets the `rewrotePushed` marker of MERGE-009 through `markRewritten`)
-  - `src-tauri/src/git.rs` — `pushed_commits(root, range)` → `GitPushed { count, on, commits }`: the commits of a range that are reachable from any remote-tracking branch (`rev-list <range>` minus `rev-list <range> --not --remotes`), and a remote branch that holds the newest of them (the upstream when it does). It is the one "already pushed" helper: `merge_preview` uses it for `<ref>..HEAD` (`pushed`, `pushedOn`, `pushedCommits`), and `history_range` of HISTORY-006 uses it too. Not `unpushed` / `git_unpushed`, which only looks at the upstream and returns nothing without one
+  - `src-tauri/src/git/merge.rs` — `pushed_commits(root, range)` → `GitPushed { count, on, commits }`: the commits of a range that are reachable from any remote-tracking branch (`rev-list <range>` minus `rev-list <range> --not --remotes`), and a remote branch that holds the newest of them (the upstream when it does). It is the one "already pushed" helper: `merge_preview` uses it for `<ref>..HEAD` (`pushed`, `pushedOn`, `pushedCommits`), and `history_range` of HISTORY-006 uses it too. Not `unpushed` / `git_unpushed`, which only looks at the upstream and returns nothing without one
   - `src/lib/gitApi.ts` — `GitMergePreview.pushed`, `pushedOn`, `pushedCommits`, `GitCommitRef`
-- Tests: `src/__tests__/gitMerge.test.ts`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitMerge.test.ts`, `src-tauri/src/git/merge.rs`
 - Docs: `docs/git.md`
 
 **As a** developer whose branch is already on a remote
@@ -473,8 +473,9 @@ Scenario: MERGE-006.7 A fast-forward rewrites nothing
   - `src/components/panels/GitPanel.tsx` — operation badge, Skip / Abort, prefilled message, Continue Rebase (existing; must show for an operation Quarry started)
   - `src/components/GraphView.tsx` — stopped-operation strip (existing)
   - `src/lib/panels.ts` — `showPanel`, `isPanelShown`
-  - `src-tauri/src/git.rs` — `start_merge` / `start_rebase` return git's output on a stop; `operation`, `operation_message`, `operation_step`
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitMerge.test.ts`
+  - `src-tauri/src/git/merge.rs` — `start_merge` / `start_rebase` return git's output on a stop
+  - `src-tauri/src/git/status.rs` — `operation`, `operation_message`, `operation_step`
+- Tests: `src-tauri/src/git/merge.rs`, `src/__tests__/gitMerge.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer whose merge or rebase hit a conflict
@@ -545,11 +546,11 @@ Scenario: MERGE-007.9 No second operation on top
   - `src/lib/git.ts` — `startCheck`: `startMerge` / `startRebase` call `startBlocked` and `trackedChanges` on a fresh status before the preview (covers every entry point, including the hidden commands and recorded macros); errors through `gitErrorText`
   - `src/lib/gitCommands.ts` — `enabled()` of `git.mergeBranch` / `git.rebaseBranch`; the hidden two always run and are refused by `startCheck`
   - `src/lib/dialogs.ts` — `choose()` for the "uncommitted changes" refusal with its Show Source Control button
-  - `src-tauri/src/git.rs` — `start_guard`: `start_merge` / `start_rebase` refuse again on their side (operation in progress, changed tracked files unless `allow_dirty`, merge only; detached HEAD for rebase)
+  - `src-tauri/src/git/merge.rs` — `start_guard`: `start_merge` / `start_rebase` refuse again on their side (operation in progress, changed tracked files unless `allow_dirty`, merge only; detached HEAD for rebase)
   - `src/lib/types.ts` / `src/lib/actions.ts` — setting `gitMergeWithChanges` (off by default; `BOOLEAN_SETTINGS`)
   - `src/components/panels/SettingsPanel.tsx` — Settings › Git "Allow merging with uncommitted changes"
   - `src/lib/gitApi.ts` — `git.merge(…, allowDirty)`
-- Tests: `src/__tests__/gitMerge.test.ts`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitMerge.test.ts`, `src-tauri/src/git/merge.rs`
 - Docs: `docs/git.md`
 
 **As a** developer with work in progress
@@ -642,8 +643,9 @@ Scenario: MERGE-008.12 Merging with uncommitted changes, when allowed in Setting
   - `src/components/panels/GitPanel.tsx` — `SyncStatus`: "Force Push…" as the action of the rewritten case, in place of Pull (Merge) / Pull (Rebase)
   - `src/components/MenuBar.tsx` — Git menu item after Push
   - `src/lib/gitApi.ts` — `GitRemoteOp` gains `"push-force"`; `git.forcePushPreview`, `GitForcePushPreview`
-  - `src-tauri/src/git.rs` — `remote_op` `"push-force"` → `force_push`: `push --force-with-lease=refs/heads/<upstream branch>:<upstream tip as last fetched> <remote> refs/heads/<branch>:refs/heads/<upstream branch>` (never a bare `--force`, never another branch; git's "stale info" refusal becomes "… has commits you have not fetched"); `upstream_parts`; `force_push_preview` / `git_force_push_preview` (the commits only the upstream has); `pushed_commits` (the shared "already pushed" helper, see MERGE-006)
-- Tests: `src/__tests__/gitMerge.test.ts`, `src/__tests__/gitPanel.test.tsx`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/remotes.rs` — `remote_op` `"push-force"` → `force_push`
+  - `src-tauri/src/git/merge.rs` — `force_push`: `push --force-with-lease=refs/heads/<upstream branch>:<upstream tip as last fetched> <remote> refs/heads/<branch>:refs/heads/<upstream branch>` (never a bare `--force`, never another branch; git's "stale info" refusal becomes "… has commits you have not fetched"); `upstream_parts`; `force_push_preview` / `git_force_push_preview` (the commits only the upstream has); `pushed_commits` (the shared "already pushed" helper, see MERGE-006)
+- Tests: `src/__tests__/gitMerge.test.ts`, `src/__tests__/gitPanel.test.tsx`, `src-tauri/src/git/merge.rs`, `src-tauri/src/git/remotes.rs`
 - Docs: `docs/git.md`
 
 **As a** developer who knowingly rewrote commits that were already pushed

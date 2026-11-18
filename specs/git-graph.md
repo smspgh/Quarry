@@ -75,10 +75,10 @@ Scenario: GRAPH-001.6 Not restored after a restart
 - Files:
   - `src/lib/gitGraph.ts` — `layoutGraph` (first parent keeps the lane, lowest free lane reused, carried `GraphState`), `refLabels`
   - `src/components/GraphView.tsx` — `RowGraph` (SVG lines and dot), `RefBadge` (its right-click opens the ref-label menu of MERGE-002 and BRANCH-001; `open` marks the label whose menu is showing), `MAX_LANES` = 16 (the lanes shown at once; a wider graph scrolls sideways, GRAPH-017), `LANE_COLORS` = 8, `ROW` = 26
-  - `src-tauri/src/git.rs` — `graph_ordered` (`log --topo-order --decorate=full`; `--author-date-order` when Date order is on, GRAPH-018), `parse_graph`, command `git_graph`
+  - `src-tauri/src/git/graph.rs` — `graph_ordered` (`log --topo-order --decorate=full`; `--author-date-order` when Date order is on, GRAPH-018), `parse_graph`, command `git_graph`
   - `src/lib/gitApi.ts` — `git.graph`, `GitGraphCommit`
   - `src/styles/app.css` — `.graph-*`, `.gl-*` lane colours
-- Tests: `src/__tests__/gitGraph.test.ts`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitGraph.test.ts`, `src-tauri/src/git/graph.rs`
 - Docs: `docs/git.md`
 
 **As a** developer reading a repository's history
@@ -192,8 +192,8 @@ Scenario: GRAPH-003.5 Paging does not change the picture
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — "Current branch" / "All branches" segmented control (`all` state, starts on Current branch)
-  - `src-tauri/src/git.rs` — `graph_scope` (HEAD + `@{upstream}`, or `--all` without `refs/stash`); with All branches `graph_ordered` adds one row per stash (STASH-010)
-- Tests: `src-tauri/src/git.rs`
+  - `src-tauri/src/git/graph.rs` — `graph_scope` (HEAD + `@{upstream}`, or `--all` without `refs/stash`); with All branches `graph_ordered` adds one row per stash (STASH-010)
+- Tests: `src-tauri/src/git/graph.rs`
 - Docs: `docs/git.md`
 
 **As a** developer
@@ -227,8 +227,8 @@ Scenario: GRAPH-004.3 A branch with no remote branch
 - Files:
   - `src/components/GraphView.tsx` — `load()`, `PAGE` = 300, `SLOW_PAGE_MS` = 400, `MAX_PAGE` = 4800, `generation` guard, reload on the `stamp` (head, branch, ahead / behind, upstream, operation) keeping `selected` and the scroll offset, windowed rows (`first` / `last`, 8 rows of overscan), next page when within 40 rows of the end; the first page asks git for one commit more than it shows (`takePage`), the next pages for exactly the page size
   - `src/lib/gitGraph.ts` — `GraphState` carried from page to page, `takePage` (keeps the page size, says whether one more commit came)
-  - `src-tauri/src/git.rs` — `graph_ordered` (`--skip`, `--max-count` clamped to 5000; no commits before the first commit; branch order unless asked for date order, GRAPH-018)
-- Tests: `src/__tests__/gitGraph.test.ts`, `src-tauri/src/git.rs`
+  - `src-tauri/src/git/graph.rs` — `graph_ordered` (`--skip`, `--max-count` clamped to 5000; no commits before the first commit; branch order unless asked for date order, GRAPH-018)
+- Tests: `src/__tests__/gitGraph.test.ts`, `src-tauri/src/git/graph.rs`
 - Docs: `docs/git.md`
 
 **As a** developer with a repository of many thousands of commits
@@ -300,9 +300,9 @@ Scenario: GRAPH-005.9 What a reload keeps
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — Speed Up strip (`slowMs`, `indexed`, `indexing`, `hideSpeedUp`)
-  - `src-tauri/src/git.rs` — `has_commit_graph` / `git_graph_indexed`, `write_commit_graph` / `git_graph_index` (`commit-graph write --reachable`)
+  - `src-tauri/src/git/graph.rs` — `has_commit_graph` / `git_graph_indexed`, `write_commit_graph` / `git_graph_index` (`commit-graph write --reachable`)
   - `src/lib/gitApi.ts` — `git.graphIndexed`, `git.graphIndex`
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git/graph.rs`
 - Docs: `docs/git.md`
 
 **As a** developer with a very large repository
@@ -404,9 +404,9 @@ Scenario: GRAPH-007.6 Nothing matches
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — `searchAll`, results list (`hits`, `hitsOpen`, `pickHit`), `goTo` (loads pages of 4,800 until the commit is in the graph, then centres it), "Show in Graph"
-  - `src-tauri/src/git.rs` — `graph_search` / `git_graph_search` (`--grep`, `--author`, `-i --fixed-strings`, branch / tag names via `for-each-ref` + `--simplify-by-decoration --decorate-refs`, an id of 4-64 hex digits; newest first, de-duplicated)
+  - `src-tauri/src/git/graph.rs` — `graph_search` / `git_graph_search` (`--grep`, `--author`, `-i --fixed-strings`, branch / tag names via `for-each-ref` + `--simplify-by-decoration --decorate-refs`, an id of 4-64 hex digits; newest first, de-duplicated)
   - `src/lib/gitApi.ts` — `git.graphSearch`
-- Tests: `src-tauri/src/git.rs`
+- Tests: `src-tauri/src/git/graph.rs`
 - Docs: `docs/git.md`
 
 **As a** developer looking for an old commit
@@ -482,10 +482,11 @@ Scenario: GRAPH-008.11 Search by branch or tag name
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — selection (`select`, `onKeyDown`: arrows, PageUp / PageDown, Home / End), details pane, `startResize` (120 px to 70% of the window), `copy`
-  - `src-tauri/src/git.rs` — `commit_detail` / `git_commit_detail` (`--shortstat --diff-merges=first-parent`), `commit_files`
+  - `src-tauri/src/git/graph.rs` — `commit_detail` / `git_commit_detail` (`--shortstat --diff-merges=first-parent`)
+  - `src-tauri/src/git/log.rs` — `commit_files`
   - `src/lib/gitApi.ts` — `git.commitDetail`, `GitCommitDetail`
   - `src/lib/gitStatus.ts` — `commitFileKind`, `KIND_LETTER`, `KIND_LABEL`
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/graphView.test.tsx`
+- Tests: `src-tauri/src/git/graph.rs`, `src/__tests__/graphView.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer inspecting a commit
@@ -549,7 +550,7 @@ Scenario: GRAPH-009.8 Resize and close
   - `src/components/GraphView.tsx` — `DetailFile` (click / Enter, double-click)
   - `src/lib/git.ts` — `openCommitFile` (parent's text vs the commit's, `preview: true`)
   - `src/lib/diff.ts` — `openCompare` replaces the previous clean preview Compare tab (also one opened from the comparison pane, `openCompareFile`, COMMITCMP-003)
-  - `src-tauri/src/git.rs` — `show` / `git_show`
+  - `src-tauri/src/git/status.rs` — `show` / `git_show`
 - Tests: none
 - Docs: `docs/git.md`, `docs/compare.md`
 
@@ -598,9 +599,11 @@ Scenario: GRAPH-010.6 Open the file as it is now
   - `src/components/GraphView.tsx` — `GraphMenu` (kept inside the window, as tall as the window allows and scrolling beyond that: `.graph-menu` in app.css; closes on outside click, Escape, window blur), naming strip (`Naming`, `commitNaming`; it also renames a branch, BRANCH-004), `act`
   - `src/lib/gitGraph.ts` — `actionDone` (success notifications)
   - `src/lib/git.ts` — `commitAction`, `checkoutRef`
-  - `src-tauri/src/git.rs` — `commit_action` / `git_commit_action` (`branch` = `branch`, `branch-switch` = `switch -c`, `tag`), `valid_ref_name`, `checkout`
+  - `src-tauri/src/git/graph.rs` — `commit_action` / `git_commit_action` (`branch` = `branch`, `branch-switch` = `switch -c`, `tag`)
+  - `src-tauri/src/git/refs.rs` — `checkout`
+  - `src-tauri/src/git.rs` — `valid_ref_name`
   - `src/lib/gitApi.ts` — `GitCommitAction`, `git.commitAction`
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphView.test.tsx`, `src/__tests__/graphMenuStyle.test.ts`
+- Tests: `src-tauri/src/git/graph.rs`, `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphView.test.tsx`, `src/__tests__/graphMenuStyle.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer
@@ -677,8 +680,8 @@ Scenario: GRAPH-011.9 Create a branch without switching
   - `src/lib/git.ts` — `commitAction` (busy label, error via `gitErrorText`; the unsaved-tabs `guard` for check-out, create-and-switch, cherry-pick and revert, and the tab check afterwards through `rewrite`, also after a stop or failure: SAFE-003, SAFE-006)
   - `src/lib/gitStatus.ts` — `gitErrorText` ("Stopped on a conflict…")
   - `src/lib/actions.ts` — `askDialog`
-  - `src-tauri/src/git.rs` — `commit_action` (`checkout --detach`, `cherry-pick`, `revert --no-edit`; merges with `-m 1`; `GIT_EDITOR=true`)
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitRemote.test.ts`, `src/__tests__/gitGraph.test.ts`
+  - `src-tauri/src/git/graph.rs` — `commit_action` (`checkout --detach`, `cherry-pick`, `revert --no-edit`; merges with `-m 1`; `GIT_EDITOR=true`)
+- Tests: `src-tauri/src/git/graph.rs`, `src/__tests__/gitRemote.test.ts`, `src/__tests__/gitGraph.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer
@@ -738,8 +741,8 @@ Scenario: GRAPH-012.7 Detached HEAD wording
   - `src/components/GraphView.tsx` — Reset menu entries (hard one styled as dangerous), `act()`
   - `src/lib/gitGraph.ts` — `actionConfirm` (the dialogs; the hard reset counts the changes it loses)
   - `src/lib/git.ts` — `commitAction`
-  - `src-tauri/src/git.rs` — `commit_action` (`reset --soft` / `--mixed` / `--hard`)
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/gitGraph.test.ts`
+  - `src-tauri/src/git/graph.rs` — `commit_action` (`reset --soft` / `--mixed` / `--hard`)
+- Tests: `src-tauri/src/git/graph.rs`, `src/__tests__/gitGraph.test.ts`
 - Docs: `docs/git.md`
 
 **As a** developer who wants to take commits back
@@ -860,10 +863,10 @@ Built as decided, with these additions: the uncommitted row's parent is the curr
   - `src/lib/gitGraph.ts` — `UNCOMMITTED`, `isUncommitted`, `withUncommitted` (the extra row first, before `layoutGraph`), `withoutUncommitted`, `rowOffset` (row index = commit index + this), `uncommittedLineEnd`
   - `src/lib/git.ts` — `openChange` (reused for a click on a file), `useGit` repository `files` (the row follows it without reloading the history)
   - `src/lib/gitStatus.ts` — `groupFiles`, `rowKind`: Merge Changes / Staged Changes / Changes and the letters, shared with the panel
-  - `src-tauri/src/git.rs` — `head_sha` / `git_head_sha` (the current commit's full id, when it is not on the first page)
+  - `src-tauri/src/git/graph.rs` — `head_sha` / `git_head_sha` (the current commit's full id, when it is not on the first page)
   - `src/lib/gitApi.ts` — `git.headSha`
   - `src/styles/app.css` — `.graph-row.uncommitted`, `.gn.uncommitted` (hollow dot), `.gl.dashed`, `.graph-uncommitted-*`
-- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphPolish.test.tsx`, `src/__tests__/graphView.test.tsx`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphPolish.test.tsx`, `src/__tests__/graphView.test.tsx`, `src-tauri/src/git/graph.rs`
 - Docs: `docs/git.md`
 
 **As a** developer with work that is not committed yet
@@ -1132,11 +1135,11 @@ Scenario: GRAPH-017.9 Reload and switching scope
 - Commands: none
 - Files:
   - `src/components/GraphView.tsx` — "Date order" toggle in the toolbar (`byDate` state, off by default; `orderOk`), enabled once the first page of the scope shown has arrived (`countedFor`), for a history of any size; pages in date order like branch order; `orderKeep` (the selected commit is brought back into view after the switch)
-  - `src-tauri/src/git.rs` — `graph_ordered` / `git_graph` take the order (`--topo-order`, or `--author-date-order` for `order: "date"`)
+  - `src-tauri/src/git/graph.rs` — `graph_ordered` / `git_graph` take the order (`--topo-order`, or `--author-date-order` for `order: "date"`)
   - `src/lib/gitApi.ts` — `git.graph` order argument
   - `src/lib/gitGraph.ts` — `takePage` (the "300+ commits" count); `layoutGraph` unchanged (works on any children-before-parents order)
   - `src/styles/app.css` — `.graph-order` (the toggle, disabled while loading)
-- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphPolish.test.tsx`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitGraph.test.ts`, `src/__tests__/graphPolish.test.tsx`, `src-tauri/src/git/graph.rs`
 - Docs: `docs/git.md`
 
 **As a** developer

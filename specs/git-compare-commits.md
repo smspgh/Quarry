@@ -120,11 +120,12 @@ Scenario: COMMITCMP-001.12 Rows that are not commits cannot be picked
   - `src/components/GraphView.tsx` — renders `GraphCompare` instead of the details pane while `selected` and `compare` are set; shares `startResize` / `detailH`
   - `src/lib/gitCompare.ts` — `arrange` (`orderSides`, then Swap Sides), `swapCompare` / `swapFile` (A ↔ D, rename direction, insertions ↔ deletions), `compareHeading`, `countsLine` (ahead / behind wording), `compareSummary`, `noDifferences`, `compareFileKind`
   - `src/lib/gitStatus.ts` — `commitFileKind`, `KIND_LETTER`, `KIND_LABEL` (reused for the letters), `gitErrorText`
-  - `src-tauri/src/git.rs` — `diff_files` / `git_diff_files`: `diff --name-status -z -M A B` through `parse_commit_files`, `--shortstat` (as `insertions` / `deletions`), `rev-list --left-right --count A...B` (`behind == 0` means the left commit is an ancestor, so no separate `merge-base` call), `compare_commit` (each side's labels and message); sides checked by `compare_side`
+  - `src-tauri/src/git/compare.rs` — `diff_files` / `git_diff_files`: `diff --name-status -z -M A B` through `parse_commit_files`, `--shortstat` (as `insertions` / `deletions`), `rev-list --left-right --count A...B` (`behind == 0` means the left commit is an ancestor, so no separate `merge-base` call), `compare_commit` (each side's labels and message); sides checked by `compare_side`
+  - `src-tauri/src/git/log.rs` — `parse_commit_files`
   - `src-tauri/src/lib.rs` — registers `git_diff_files`
   - `src/lib/gitApi.ts` — `git.diffFiles`, `GitCompare` (`left`, `right`, `head`, `files`, `insertions`, `deletions`, `ahead`, `behind`, `untracked`)
   - `src/styles/app.css` — `.graph-compare-*`
-- Tests: `src/__tests__/gitCompare.test.ts`, `src/__tests__/graphCompare.test.tsx`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitCompare.test.ts`, `src/__tests__/graphCompare.test.tsx`, `src-tauri/src/git/compare.rs`
 - Docs: `docs/git.md`
 
 **As a** developer comparing two commits
@@ -215,7 +216,7 @@ Scenario: COMMITCMP-002.12 Resize
   - `src/lib/git.ts` — `openCompareFile(left, right, file)`: `git.show` of each side (`origRel` on the left for a rename), binary check, labels, `preview: true`; a working-tree right side as in `compareWithHead`
   - `src/lib/gitCompare.ts` — `sideLabel` (`name @ shortid`, old name on the left of a rename)
   - `src/lib/diff.ts` — `openCompare(a, b, { preview: true })` (unchanged: replaces the previous clean preview Compare tab)
-  - `src-tauri/src/git.rs` — `show` / `git_show` (unchanged)
+  - `src-tauri/src/git/status.rs` — `show` / `git_show` (unchanged)
 - Tests: `src/__tests__/gitCompare.test.ts`, `src/__tests__/graphCompare.test.tsx`
 - Docs: `docs/git.md`, `docs/compare.md`
 
@@ -288,9 +289,9 @@ Scenario: COMMITCMP-003.10 Opening files changes nothing on disk
   - `src/components/GraphCompare.tsx` — "Working tree" side in the header (no Swap Sides), untracked-files note, reads again 250 ms after `tick` changes while keeping the list on screen
   - `src/lib/git.ts` — `openCompareFile` with a working-tree right side (`right` null): open tab → `tab` source, file on disk → `file` source, missing → "(deleted)"; conflicted file → `openPath`
   - `src/lib/gitCompare.ts` — `compareHeading` / `countsLine` / `noDifferences` for a working-tree side, `untrackedNote`
-  - `src-tauri/src/git.rs` — `diff_files` with no right-hand commit: `diff --name-status -z -M <sha>` (tracked files, staged and unstaged) over a scratch copy of the index (`scratch_index`), files unmerged in the index (`ls-files -u`) marked "U", untracked files counted with `ls-files --others --exclude-standard`, `head` and the counts taken against HEAD
+  - `src-tauri/src/git/compare.rs` — `diff_files` with no right-hand commit: `diff --name-status -z -M <sha>` (tracked files, staged and unstaged) over a scratch copy of the index (`scratch_index`), files unmerged in the index (`ls-files -u`) marked "U", untracked files counted with `ls-files --others --exclude-standard`, `head` and the counts taken against HEAD
   - `src/lib/gitApi.ts` — `git.diffFiles(root, left, right?)`
-- Tests: `src/__tests__/gitCompare.test.ts`, `src/__tests__/graphCompare.test.tsx`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitCompare.test.ts`, `src/__tests__/graphCompare.test.tsx`, `src-tauri/src/git/compare.rs`
 - Docs: `docs/git.md`, `docs/compare.md`
 
 **As a** developer with work in progress
@@ -391,11 +392,12 @@ Scenario: COMMITCMP-004.14 How the folder relates to the commit
   - `src/lib/gitCompare.ts` — `orderSides(…, picked)` (picked branch left unless it is ahead of the other commit), `noDifferences` for the same commit on both sides
   - `src/components/MenuBar.tsx` — Git menu item directly after Compare with Last Commit (HEAD)
   - `src/lib/store.ts` — `graphCompare`: the pending comparison for a graph tab (no new palette mode)
-  - `src-tauri/src/git.rs` — `compare_side` resolves "HEAD" or a branch name to its commit (name checked with `valid_ref_name`, then `refs/heads/<name>` or `refs/remotes/<name>` through `rev-parse --verify`); `merge_base` / command `git_merge_base` (read-only) for "Changes since split"
+  - `src-tauri/src/git/compare.rs` — `compare_side` resolves "HEAD" or a branch name to its commit (name checked with `valid_ref_name`, then `refs/heads/<name>` or `refs/remotes/<name>` through `rev-parse --verify`); `merge_base` / command `git_merge_base` (read-only) for "Changes since split"
+  - `src-tauri/src/git.rs` — `valid_ref_name`
   - `src/lib/gitApi.ts` — `git.mergeBase`
   - `src/lib/types.ts` / `src/lib/actions.ts` — setting `gitCompareBranch` ("tips" by default, or "split")
   - `src/components/panels/SettingsPanel.tsx` — Settings › Git "Compare with Branch shows": The two tips / Changes since split
-- Tests: `src/__tests__/gitCompare.test.ts`, `src/__tests__/graphCompare.test.tsx`, `src/__tests__/graphView.test.tsx`, `src/__tests__/branchPicker.test.tsx`, `src/__tests__/gitRefs.test.ts`, `src-tauri/src/git.rs`
+- Tests: `src/__tests__/gitCompare.test.ts`, `src/__tests__/graphCompare.test.tsx`, `src/__tests__/graphView.test.tsx`, `src/__tests__/branchPicker.test.tsx`, `src/__tests__/gitRefs.test.ts`, `src-tauri/src/git/compare.rs`
 - Docs: `docs/git.md`
 
 **As a** developer working on a branch
@@ -491,10 +493,11 @@ Scenario: COMMITCMP-005.14 Only what the branch changed since it split off, when
 - Status: verified
 - Commands: none
 - Files:
-  - `src-tauri/src/git.rs` — `diff_files`: read-only git commands only (`diff`, `rev-list`, `rev-parse`, `log`, `ls-files`) through `compare_git` (`GIT_OPTIONAL_LOCKS=0`); a working-tree comparison reads a scratch copy of the index (`scratch_index`, `GIT_INDEX_FILE`) because `git diff` would otherwise rewrite the index; `compare_side`: ids through `is_sha`, names through `valid_ref_name`, and git is only ever given the id, "HEAD" or the full `refs/…` name, so a name can't be read as an option
+  - `src-tauri/src/git/compare.rs` — `diff_files`: read-only git commands only (`diff`, `rev-list`, `rev-parse`, `log`, `ls-files`) through `compare_git` (`GIT_OPTIONAL_LOCKS=0`); a working-tree comparison reads a scratch copy of the index (`scratch_index`, `GIT_INDEX_FILE`) because `git diff` would otherwise rewrite the index; `compare_side`: ids through `is_sha`, names through `valid_ref_name`, and git is only ever given the id, "HEAD" or the full `refs/…` name, so a name can't be read as an option
+  - `src-tauri/src/git.rs` — `is_sha`, `valid_ref_name`
   - `src/lib/git.ts` — `openCompareFile`, `compareWithBranch`: no call to `git.checkout`, `git.stage`, `commitAction` or any write
   - `src/components/GraphCompare.tsx` — no button that acts on the repository
-- Tests: `src-tauri/src/git.rs`, `src/__tests__/graphCompare.test.tsx`
+- Tests: `src-tauri/src/git/compare.rs`, `src/__tests__/graphCompare.test.tsx`
 - Docs: `docs/git.md`
 
 **As a** developer with uncommitted work or a stopped operation

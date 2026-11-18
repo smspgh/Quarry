@@ -240,8 +240,8 @@ Scenario: DIFF-005.4 Only for text tabs
   - `src/lib/git.ts` — `compareWithHead` (HEAD text left; open tab, file on disk, or "(deleted)" right)
   - `src/components/TitleBar.tsx` — tab menu "Compare with Last Commit"
   - `src/components/MenuBar.tsx` — Git menu item
-  - `src-tauri/src/git.rs` — `show` / `git_show`, `decode_blob`
-- Tests: `src-tauri/src/git.rs`
+  - `src-tauri/src/git/status.rs` — `show` / `git_show`, `decode_blob`
+- Tests: `src-tauri/src/git/status.rs`
 - Docs: `docs/git.md`, `docs/compare.md`
 
 **As a** developer working in a git repository

@@ -2,7 +2,7 @@
  * Starting a merge or a rebase, and Force Push (specs/git-merge-rebase.md): pure wording and rules.
  * Which target a graph commit stands for, how the menu entries read and why they are disabled,
  * what each confirmation dialog says, and the notifications. The actions are in git.ts
- * (`startMerge`, `startRebase`, `forcePush`), the git work in src-tauri/src/git.rs.
+ * (`startMerge`, `startRebase`, `forcePush`), the git work in src-tauri/src/git/merge.rs.
  */
 import type { Choice } from "./dialogs";
 import type { GitCommitRef, GitForcePushPreview, GitMergeMode, GitMergePreview, GitStatus } from "./gitApi";
