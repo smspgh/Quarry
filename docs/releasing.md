@@ -55,7 +55,7 @@ file under `smspgh/quarry-releases` too, while the bridge is on).
 The script refuses to publish a version that already exists in either repo, or one that is not higher than the latest release. To retract a bad release:
 `gh release delete v0.1.2 --repo smspgh/Quarry --cleanup-tag --yes` and `gh release delete v0.1.2 --repo smspgh/quarry-releases --cleanup-tag --yes` (copies that already updated keep the new version).
 
-Installed copies check shortly after launch (Settings > Check for updates on start) or via Help > Check for Updates.
+Installed copies check while they start (Settings > Check for updates on start) or via Help > Check for Updates.
 The first build containing the updater must be installed by hand; only versions after it can update themselves.
 
 ## Testing an update end to end

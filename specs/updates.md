@@ -54,13 +54,13 @@ Scenario: UPD-001.5 Only one check at a time
   Then no second check starts and no second dialog appears
 ```
 
-## UPD-002: Quiet update check shortly after start
+## UPD-002: Quiet update check at start
 
 - Status: draft
 - Commands: none
 - Files:
-  - `src/App.tsx` — boot sequence: `checkForUpdates(true)` 6 seconds after the session is restored, only when `settings.autoUpdateCheck`
-  - `src/lib/updater.ts` — `checkForUpdates(true)` (silent: no dialog when up to date or when the check fails)
+  - `src/App.tsx` — boot sequence: `checkForUpdates(true, sessionReady)` started as soon as settings are loaded, only when `settings.autoUpdateCheck`; `sessionReady` resolves when the session is restored
+  - `src/lib/updater.ts` — `checkForUpdates(true, ready)` (silent: no dialog when up to date or when the check fails; the dialog waits for `ready`)
   - `src/lib/types.ts` — `autoUpdateCheck` (default on)
   - `src/lib/actions.ts` — `sanitizeSettings` (a non-boolean `autoUpdateCheck` becomes the default)
   - `src/components/panels/SettingsPanel.tsx` — "Check for updates on start" switch
@@ -75,7 +75,8 @@ Scenario: UPD-001.5 Only one check at a time
 Scenario: UPD-002.1 A newer release is offered after start
   Given "Check for updates on start" is on and a newer release is published
   When Quarry starts
-  Then about 6 seconds after the session is restored the "Update available" dialog appears
+  Then the "Update available" dialog appears as soon as the session is restored and the server has answered, with no fixed wait
+  And it never appears before the tabs of the last session are back
 
 Scenario: UPD-002.2 Silent when up to date
   Given "Check for updates on start" is on and the installed version is the latest

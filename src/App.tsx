@@ -80,10 +80,18 @@ export default function App() {
         installGitAssist();
         installRecorderHooks();
         setReady(true);
-        await Promise.all([loadMacros(), migrateLegacyScripts()]);
-        await restoreSession();
-        installCloseGuard();
-        if (useStore.getState().settings.autoUpdateCheck) setTimeout(() => void import("./lib/updater").then((m) => m.checkForUpdates(true)), 3000);
+        // The update check asks the server now, alongside the session restore, and shows its dialog
+        // as soon as both are done: no fixed wait (specs/updates.md UPD-002).
+        let restored = () => {};
+        const sessionReady = new Promise<void>((r) => (restored = r));
+        if (useStore.getState().settings.autoUpdateCheck) void import("./lib/updater").then((m) => m.checkForUpdates(true, sessionReady));
+        try {
+          await Promise.all([loadMacros(), migrateLegacyScripts()]);
+          await restoreSession();
+          installCloseGuard();
+        } finally {
+          restored();
+        }
         const crash = await appIpc.takeCrashReport().catch(() => null);
         if (crash) useStore.getState().toast(`Quarry closed unexpectedly last time. Details were saved to ${crash}`, "warning", 15000);
       })();

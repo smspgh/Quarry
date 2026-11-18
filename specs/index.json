@@ -22540,7 +22540,7 @@
     },
     "UPD-002": {
       "id": "UPD-002",
-      "title": "Quiet update check shortly after start",
+      "title": "Quiet update check at start",
       "area": "UPD",
       "spec": "specs/updates.md",
       "line": 57,
@@ -22586,7 +22586,7 @@
       "title": "Install an update and restart",
       "area": "UPD",
       "spec": "specs/updates.md",
-      "line": 102,
+      "line": 103,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22643,7 +22643,7 @@
       "title": "About Quarry",
       "area": "UPD",
       "spec": "specs/updates.md",
-      "line": 168,
+      "line": 169,
       "status": "draft",
       "commands": [
         "help.about"
@@ -22681,7 +22681,7 @@
       "title": "The updater only trusts the public, signed release channel",
       "area": "UPD",
       "spec": "specs/updates.md",
-      "line": 211,
+      "line": 212,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22719,7 +22719,7 @@
       "title": "Build, sign and publish a release",
       "area": "UPD",
       "spec": "specs/updates.md",
-      "line": 252,
+      "line": 253,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22784,7 +22784,7 @@
       "title": "Set the version number everywhere",
       "area": "UPD",
       "spec": "specs/updates.md",
-      "line": 330,
+      "line": 331,
       "status": "draft",
       "commands": [],
       "files": [
@@ -22829,7 +22829,7 @@
       "title": "Release in one step",
       "area": "UPD",
       "spec": "specs/updates.md",
-      "line": 380,
+      "line": 381,
       "status": "draft",
       "commands": [],
       "files": [

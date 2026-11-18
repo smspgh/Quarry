@@ -18,7 +18,7 @@ Settings are stored in `%APPDATA%\com.quarry.app\settings.json`. If that file ca
 | Theme | System | System (follows Windows), Light or Dark. |
 | Menu bar | Title bar | **Title bar**: the menus sit in the title bar next to the Quarry mark, and open documents get a tab row above it. **Top**: the menus get their own row below the title bar, and the tabs share the title bar. **Hidden**: like Top, but the menus show only when you press Alt or F10. |
 | Confirm script & macro runs | On | Ask before a script or macro started from a menu or shortcut edits the document. |
-| Check for updates on start | On | Quietly looks for a new Quarry release shortly after launch and offers it if there is one. **Help › Check for Updates** works either way. |
+| Check for updates on start | On | Quietly looks for a new Quarry release while Quarry starts and offers it, once your tabs are back, if there is one. **Help › Check for Updates** works either way. |
 | Mica material | On | Translucent Windows 11 background. Off gives an opaque background. |
 | Font size | 14 | 8–40. Ctrl+= / Ctrl+- / Ctrl+0 change it too. |
 | Editor font family | `"Cascadia Code", "Cascadia Mono", Consolas, "Courier New", monospace` | Pick from the monospaced fonts installed on your PC, or choose **Custom…** and type a CSS font list. Quarry warns if the first font in a custom list isn't installed. |

@@ -11,8 +11,10 @@ let busy = false;
 /**
  * Looks for a newer release (endpoint and public key are in tauri.conf.json; the installer is verified against
  * the key before it runs). `silent` = the start-up check: say nothing unless an update exists, ignore failures.
+ * `ready`: the start-up check asks the server at once, while the session is still being restored, and
+ * waits for this before it shows anything.
  */
-export async function checkForUpdates(silent: boolean): Promise<void> {
+export async function checkForUpdates(silent: boolean, ready?: Promise<unknown>): Promise<void> {
   if (busy) return;
   busy = true;
   try {
@@ -27,6 +29,7 @@ export async function checkForUpdates(silent: boolean): Promise<void> {
       if (!silent) await inform("Check for Updates", "Quarry is up to date.");
       return;
     }
+    await ready?.catch(() => {});
     const notes = (update.body ?? "").trim();
     const pick = await choose(
       "Update available",
