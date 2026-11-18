@@ -1,6 +1,6 @@
 [package]
 name = "quarry"
-version = "0.1.14"
+version = "0.1.15"
 description = "Fast text, JSON and large-file editor"
 authors = ["Steve Shirey"]
 edition = "2024"
