@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f5d8f"/>
+      <stop offset="1" stop-color="#14304f"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9cc7f2" stop-opacity="0.55"/>
+      <stop offset="0.5" stop-color="#9cc7f2" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#9cc7f2" stop-opacity="0.06"/>
+    </linearGradient>
+    <linearGradient id="blade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffc35a"/>
+      <stop offset="1" stop-color="#f08a1c"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="992" height="992" rx="220" fill="url(#tile)"/>
+  <rect x="24" y="24" width="976" height="976" rx="212" fill="none" stroke="url(#edge)" stroke-width="16"/>
+  <!-- code braces -->
+  <g fill="none" stroke="#8fd3ff" stroke-width="70" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M352 268 Q272 268 272 348 V448 Q272 512 208 512 Q272 512 272 576 V676 Q272 756 352 756"/>
+    <path d="M672 268 Q752 268 752 348 V448 Q752 512 816 512 Q752 512 752 576 V676 Q752 756 672 756"/>
+  </g>
+  <!-- shovel, drawn upright, then turned to cross the braces -->
+  <g transform="rotate(40 512 512) translate(512 512) scale(0.9) translate(-512 -512)" stroke="#14304f" stroke-width="24" stroke-linejoin="round">
+    <path d="M430 150 H594 Q624 150 624 180 V212 Q624 242 594 242 H430 Q400 242 400 212 V180 Q400 150 430 150 Z" fill="#eef4fa"/>
+    <rect x="478" y="226" width="68" height="380" rx="24" fill="#eef4fa"/>
+    <path d="M420 590 H604 V720 Q604 808 512 862 Q420 808 420 720 Z" fill="url(#blade)"/>
+  </g>
+</svg>

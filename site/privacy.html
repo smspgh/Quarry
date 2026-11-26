@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy policy · Quarry</title>
+  <meta name="description" content="Quarry does not collect, store or share personal information. This page lists the network connections it makes, the files it keeps on your PC, and what happens to your details if you buy a license.">
+  <link rel="icon" href="quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="./"><img src="quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="https://github.com/smspgh/Quarry#documentation" target="_blank" rel="noopener">Documentation</a>
+        <a href="./#support">Support</a>
+        <a href="privacy.html" aria-current="page">Privacy</a>
+        <a href="https://github.com/smspgh/Quarry" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <article>
+        <h1>Privacy policy</h1>
+        <p class="dated">Effective 26 November 2026</p>
+
+        <div class="summary">
+          <p><strong>In short:</strong> Quarry does not collect, store or share any personal information. It has no accounts, no analytics, no telemetry and no advertising. Your files stay on your PC, and the developer of Quarry receives nothing from the app. If you buy a commercial license, the details you give at checkout are used only for that order: see <a href="#buying">Buying a commercial license</a>.</p>
+        </div>
+
+        <h2>Who this covers</h2>
+        <p>This policy covers Quarry, a text and code editor for Windows published by Stephen Shirey ("the developer"), however you installed it: from the Microsoft Store or from the releases page on GitHub.</p>
+
+        <h2>Information the developer collects</h2>
+        <p>None. Quarry does not send the developer your files, file names, settings, usage statistics, crash reports, device identifiers or anything else. The developer runs no servers for Quarry.</p>
+
+        <h2>What stays on your PC</h2>
+        <p>Quarry reads and writes the files you open, in place. It also keeps a few files of its own in your Windows user profile, which never leave your PC:</p>
+        <ul>
+          <li><code>%APPDATA%\com.quarry.app</code>: your settings, your session (the open folder and tabs, the text of untitled tabs and of unsaved changes to files, recent files and folders, panel layout), find and replace history, your scripts and macros, and the API requests you save (header values marked secret are encrypted with Windows' Data Protection API, so only your Windows account can read them).</li>
+          <li><code>%LOCALAPPDATA%\com.quarry.app</code>: a crash log, written only if Quarry crashes and shown only to you, backups for undoing the last Replace in Files (removed by the next one, by undoing, or after a week), and the app's own browser storage (the previous values of settings you changed, recently used commands, and the name of the GitHub account you picked).</li>
+        </ul>
+        <p>Replace All in a large file writes a temporary working copy of that file to your Windows temporary folder, which Quarry removes when it is no longer needed. Responses to API requests are received into that folder too; Quarry removes each one once it is in a tab, and a large one after a day.</p>
+        <p>Uninstalling Quarry and deleting those two folders removes everything it stored.</p>
+
+        <h2>Network connections Quarry makes</h2>
+        <p>Quarry works offline. It connects to the internet only in the cases below, and each connection goes from your PC straight to the service named. As with any internet connection, that service sees your IP address.</p>
+
+        <h3>Checking for updates</h3>
+        <p>When it starts, Quarry asks GitHub whether a newer release exists, and downloads the update from GitHub if you accept it. No information about you or your files is sent. You can turn this off with <strong>Settings › Check for updates on start</strong>. GitHub handles the request under the <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub Privacy Statement</a>.</p>
+
+        <h3>Git</h3>
+        <p>Quarry's Git features run the <code>git</code> program installed on your PC. Fetch, pull and push contact the remotes configured in your repository, using your own Git configuration and credentials. While a repository with a remote is open, Quarry may fetch from that remote in the background to show whether you are ahead or behind.</p>
+
+        <h3>GitHub</h3>
+        <p>Quarry contacts <code>api.github.com</code> in two cases. When you ask it to create a repository on GitHub, it obtains your GitHub credential from Git's credential manager on your PC and sends it with that request. When the repository settings show a remote on github.com, it asks GitHub whether that repository is private or public: first without any credential, which answers for every public repository, and only if GitHub does not show the repository that way a second time with your credential, if you are signed in. The credential goes only to <code>api.github.com</code>. Quarry never stores it and never sends it anywhere else. <strong>Sign in</strong> opens Git Credential Manager's own sign-in window; the sign-in is between that program and GitHub.</p>
+
+        <h3>API requests</h3>
+        <p>When you click <strong>Send</strong> in the API Requests panel, Quarry sends that request, with the headers and body you typed, to the address you typed. If that server redirects the request, Quarry follows up to 10 redirects; it never follows one from https to plain http, never carries a header you marked secret (or <code>Authorization</code> / <code>Cookie</code>) to a different site, and sends the request nowhere else. Nothing is sent until you click Send.</p>
+
+        <h3>Language servers and tools you install</h3>
+        <p>Code intelligence uses language servers, which are separate programs from other publishers that run on your PC. If you accept Quarry's offer to install one, Quarry runs the install command shown (for example <code>npm</code>, <code>rustup</code>, <code>go</code>, <code>winget</code> or <code>dotnet</code>), which downloads the server from that tool's own registry. Those programs and registries follow their own privacy policies.</p>
+
+        <h3>Programs you run</h3>
+        <p>Programs you start in a terminal tab, and external formatters you have installed, are yours: what they do on the network is up to them, not Quarry.</p>
+
+        <h2 id="buying">Buying a commercial license</h2>
+        <p>Online orders are processed by Paddle.com, our reseller and the merchant of record. Paddle collects your payment details and processes your order under the <a href="https://www.paddle.com/legal/privacy" target="_blank" rel="noopener">Paddle Privacy Policy</a>. The developer never sees your card or bank details.</p>
+        <p>From Paddle, the developer receives what is needed to keep a record of the licenses and to help you: your name, email address, company name, country, postal code, business tax number if you gave one, and the number of users, the amount and the dates of your payments. If you buy by invoice directly from the developer, the developer keeps the same details from your order and your emails. They are used only to record the licenses, answer you about your order and meet tax and accounting obligations. They are kept for as long as tax law requires, then deleted, and they are never sold or used for marketing.</p>
+        <p>You can ask to see, correct or delete these details by writing to the address below, except where the law requires them to be kept.</p>
+
+        <h3>On this website</h3>
+        <p>The website has no analytics, cookies or advertising. Paddle's checkout script loads only when you click <strong>Buy licenses</strong>; until then your browser loads nothing from Paddle. The download button asks GitHub for the newest release, so GitHub sees your IP address when the page loads.</p>
+
+        <h2>Sharing with third parties</h2>
+        <p>The developer has no personal information from the app, and so shares none of it. Details from a license order are shared only with Paddle, which processed it, and with tax authorities or others where the law requires. They are never sold.</p>
+
+        <h2>Microsoft Store</h2>
+        <p>If you install Quarry from the Microsoft Store, Microsoft processes the installation under the <a href="https://privacy.microsoft.com/privacystatement" target="_blank" rel="noopener">Microsoft Privacy Statement</a>. Microsoft may give the developer aggregated figures such as install counts, which do not identify you.</p>
+
+        <h2>Children</h2>
+        <p>Quarry is a general-purpose developer tool. It is not directed at children and collects no information from anyone.</p>
+
+        <h2>Changes to this policy</h2>
+        <p>If Quarry's behaviour changes in a way that affects this policy, this page will be updated together with the release that changes it, and the date at the top will change.</p>
+
+        <h2>Contact</h2>
+        <p>Questions about this policy: write to <a href="mailto:smspgh@outlook.com">smspgh@outlook.com</a>, or <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">open an issue on GitHub</a>.</p>
+      </article>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="privacy.html">Privacy policy</a> · <a href="terms.html">Terms of sale</a> · <a href="refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="https://github.com/smspgh/Quarry/blob/main/LICENSE" target="_blank" rel="noopener">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>

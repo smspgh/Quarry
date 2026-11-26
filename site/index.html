@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quarry: a fast Windows editor for code and huge files</title>
+  <meta name="description" content="Quarry is a Windows 11 editor for code and data that opens multi-gigabyte logs, JSON and CSV in about half a second, with JSON tools, find in files, Git, scripts and macros.">
+  <link rel="icon" href="quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="./"><img src="quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="https://github.com/smspgh/Quarry#documentation" target="_blank" rel="noopener">Documentation</a>
+        <a href="#why">Why Quarry</a>
+        <a href="#install">Install</a>
+        <a href="#licensing">Licensing</a>
+        <a href="#support">Support</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="https://github.com/smspgh/Quarry" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <img src="quarry.svg" alt="Quarry app icon">
+        <h1>A fast Windows editor for code and huge files</h1>
+        <p>Quarry opens multi-gigabyte logs, JSON and CSV in about half a second, and keeps colours, a JSON tree, a log filter and a CSV grid working on files that large.</p>
+        <div class="actions">
+          <a class="btn primary" id="download" href="https://github.com/smspgh/Quarry/releases/latest">Download for Windows</a>
+          <a class="btn" href="#why">Why Quarry</a>
+        </div>
+        <p class="note"><span id="version"></span>Free for individuals. Windows 11, 64-bit. No administrator rights needed.</p>
+        <figure class="shot hero-shot"><img src="shot-log.png" width="1440" height="810" fetchpriority="high" alt="Quarry showing a 5 GB server log, with the filter view below it listing only the 7,396,563 error lines"><figcaption>A 5 GB log with the filter showing only its 7.4 million error lines.</figcaption></figure>
+      </section>
+
+      <ul class="stats" aria-label="Measured on real 5 GB files">
+        <li><strong>0.6 s</strong><span>to open a 5 GB log, JSON or CSV file</span></li>
+        <li><strong>0.4 s</strong><span>to find a string in 59 million lines</span></li>
+        <li><strong>0.5 GB</strong><span>memory with a 5 GB file open</span></li>
+        <li><strong>7 MB</strong><span>installer, no administrator rights</span></li>
+      </ul>
+
+
+      <section class="block" id="why">
+        <h2>Why Quarry</h2>
+        <p class="lead">Shows a file of any size in about half a second, and is a modern Windows editor with Git, a terminal, compare and code intelligence built in for everything else.</p>
+
+        <h3 class="sub">Huge files, in half a second</h3>
+        <p>Files of 128 MB and up open in large-file mode, which never loads the file into memory. Showing it reads only the lines on screen, so a 5 GB file opens as fast as a 1 GB one and stays quick to search, filter and edit. Smaller files open as normal tabs with every editing feature. Those are loaded into memory, but the first lines of a 100 MB file are on screen just as fast, about a second before the rest of it has arrived.</p>
+        <div class="table-wrap">
+          <table class="compare">
+            <caption>Measured on real 5 GB files</caption>
+            <thead>
+              <tr><th scope="col">What</th><th scope="col">Time</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Open a 5 GB log, JSON or CSV file</th><td>0.6 s</td></tr>
+              <tr><th scope="row">Find a string in 59 million lines</th><td>0.4 s</td></tr>
+              <tr><th scope="row">Keep only the 7.4 million ERROR lines</th><td>0.4 s</td></tr>
+              <tr><th scope="row">Jump to any line</th><td>under 1 ms</td></tr>
+              <tr><th scope="row">Expand a record in the JSON tree</th><td>4 ms</td></tr>
+              <tr><th scope="row">Validate all 5 GB of JSON</th><td>6 to 8 s</td></tr>
+              <tr><th scope="row">Replace All across the file</th><td>2 to 3 s</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <details class="fine"><summary>How these were measured</summary><p>Find and the filter do not wait for the line index. The times in the table are for a file that has been open a couple of seconds; started the moment a 5 GB file opens, while its index is still being built, the first search or filter takes 0.8 to 1.5 s. Replace All and other edits start once the index is built, about 1 s after a 5 GB file opens. Validation takes 7 to 8 s the first time and about 6 s after that. Replace All writes a working copy of the file, so it depends on the disk: 2 to 3 s when Windows can buffer the writes, 10 to 35 s on a drive busy with other writes. Memory with a 5 GB file open: about 0.5 GB, up to 0.7 GB in the first seconds. Measured in November 2026 on one PC (Core Ultra 7 265KF, 32 GB RAM, NVMe SSD). Every number and the method are in the <a href="https://github.com/smspgh/Quarry/blob/main/bench/RESULTS.md" target="_blank" rel="noopener">full results</a>.</p></details>
+        <div class="grid two">
+          <div class="card">
+            <h3>Big files stay useful</h3>
+            <p>At 5 GB you still get colours for JSON, logs, CSV, XML, SQL, YAML and source code, a JSON tree, validation, a CSV grid, regex search and line editing with undo. Large-file mode leaves out multi-cursor, column mode, formatting, compare, code intelligence and scripts: see <a href="https://github.com/smspgh/Quarry/blob/main/docs/large-files.md#what-is-not-available" target="_blank" rel="noopener">what is not available</a>.</p>
+          </div>
+          <div class="card">
+            <h3>Logs in seconds</h3>
+            <p>Keep only the ERROR lines of a 5 GB log in 0.4 s, or hide the noise instead. Follow mode shows new lines as they are written, like <code>tail -f</code>.</p>
+          </div>
+          <div class="card">
+            <h3>JSON without the wait</h3>
+            <p>Browse a 5 GB JSON file as a tree straight away: opening a node reads only that node. Validation of all 5 GB takes 6 to 8 s and gives the exact line and column.</p>
+          </div>
+          <div class="card">
+            <h3>Search that keeps up</h3>
+            <p>Find a string or a regex across 5 GB in about half a second, or about a second if you search the moment the file opens. Replace All streams the file instead of loading it.</p>
+          </div>
+        </div>
+
+        <figure class="shot"><img src="shot-json.png" width="1440" height="810" loading="lazy" alt="Quarry in the Grey theme showing a 5 GB JSON file with its tree view, 20,079,290 records, the first one expanded"><figcaption>A 5 GB JSON file as a tree, in the Grey theme: 20 million records, one expanded.</figcaption></figure>
+
+        <h3 class="sub">Built in, nothing to hunt for</h3>
+        <p>Git, a terminal, file compare and code intelligence are part of Quarry. There are no editor extensions to find, install and keep up to date. Quarry works with the Git already on your PC, and each language's server is a separate program that Quarry offers to install for you.</p>
+        <div class="grid">
+          <div class="card">
+            <h3>Git</h3>
+            <p>Change markers and blame in the editor, staging by line, a commit graph, merge and rebase with conflict tools, stash, branches and tags.</p>
+          </div>
+          <div class="card">
+            <h3>Terminal</h3>
+            <p>PowerShell, Command Prompt or Git Bash in a tab, opened in the folder you are working in.</p>
+          </div>
+          <div class="card">
+            <h3>Compare</h3>
+            <p>Two files, a file against its unsaved edits, or against the clipboard, side by side with changed words marked and arrows to copy a change across.</p>
+          </div>
+          <div class="card">
+            <h3>Code intelligence</h3>
+            <p>Suggestions, hover documentation, Go to Definition, Find References, Rename and live problems for eight languages, from standard language servers. A missing server installs with one click.</p>
+          </div>
+          <div class="card">
+            <h3>Find in Files</h3>
+            <p>Search a file, your open tabs or whole folders; folder search runs on ripgrep's engine. The last Replace in Files can be undone, even after a restart, and each file keeps its encoding.</p>
+          </div>
+          <div class="card">
+            <h3>Editing tools</h3>
+            <p>Column mode, multi-cursor, line tools, colours for about 140 languages, Format Document, JSON tools, macros and JavaScript scripts.</p>
+          </div>
+        </div>
+
+        <figure class="shot"><img src="shot-code.png" width="1440" height="810" loading="lazy" alt="Quarry in the Light theme editing a TypeScript file, with the Source Control panel listing changes and commits"><figcaption>Editing code with Source Control beside it: changed lines are marked in the margin.</figcaption></figure>
+
+        <h3 class="sub">Made for Windows 11</h3>
+        <div class="grid two">
+          <div class="card">
+            <h3>A modern look</h3>
+            <p>Windows 11 styling with light, grey and dark themes, tabs in the title bar, and side panels you pin or let float. High Contrast and full keyboard access are supported.</p>
+          </div>
+          <div class="card">
+            <h3>Easy from the first minute</h3>
+            <p>A command palette finds every action, and any shortcut can be changed in Settings. Close Quarry without saving: your tabs come back when you reopen it, with untitled notes and unsaved changes to files as you left them.</p>
+          </div>
+          <div class="card">
+            <h3>Updates that ask first</h3>
+            <p>Quarry tells you when a new version is ready and installs it when you say so. The check can be turned off.</p>
+          </div>
+          <div class="card">
+            <h3>Private by design</h3>
+            <p>No account, no telemetry, no ads. Nothing about you or your files is sent to the developer. <a href="privacy.html">Privacy policy</a>.</p>
+          </div>
+        </div>
+
+      </section>
+
+      <section class="block band" id="install">
+        <h2>Install</h2>
+        <ol class="steps">
+          <li>Click <strong>Download for Windows</strong> above. The file is <code>Quarry_&lt;version&gt;_x64-setup.exe</code>, about 7 MB.</li>
+          <li>Run it. Quarry installs for your Windows account only and does not change your default apps.</li>
+          <li>Start Quarry from the Start menu, or right-click a file in File Explorer and choose <strong>Open with Quarry</strong> (under <strong>Show more options</strong>).</li>
+        </ol>
+        <p>Releases from 1.0.0 on are signed by Stephen Shirey. Windows SmartScreen can still warn about a new release: check the publisher name, then choose <strong>More info › Run anyway</strong>.</p>
+        <p>Quarry updates itself: it checks for a new version when it starts and asks before installing. To remove it, use <strong>Settings › Apps › Installed apps</strong>. More in the <a href="https://github.com/smspgh/Quarry/blob/main/docs/install.md" target="_blank" rel="noopener">install guide</a>.</p>
+      </section>
+
+      <section class="block" id="licensing">
+        <h2>Licensing</h2>
+        <div class="plans">
+          <div class="plan">
+            <h3>Individuals</h3>
+            <p class="price">Free</p>
+            <p>Quarry is free for individuals, including freelancers working on their own, and for an organization with a single user.</p>
+          </div>
+          <div class="plan featured">
+            <h3>Organizations</h3>
+            <p class="price">$50 <span>per user per year</span></p>
+            <p>An organization with two or more people using Quarry needs a commercial license for each of them, after a free 30-day evaluation. Billed annually. The full terms are in the <a href="https://github.com/smspgh/Quarry/blob/main/LICENSE" target="_blank" rel="noopener">license</a>.</p>
+            <form class="buy" id="buy" hidden>
+              <label for="seats">Users</label>
+              <input id="seats" type="number" min="1" max="99" value="2" inputmode="numeric" required>
+              <button class="btn primary" type="submit">Buy licenses</button>
+              <span class="total" id="total" aria-live="polite"></span>
+            </form>
+          </div>
+        </div>
+        <p class="note" id="buy-note" hidden>Checkout is run by Paddle, our reseller and the merchant of record, which adds sales tax or VAT where it applies and sends the receipt and invoice. Subscriptions renew yearly; cancel at any time. See the <a href="terms.html">terms of sale</a> and the <a href="refunds.html">30-day refund policy</a>.</p>
+        <p>To buy by invoice, or for 100 or more users, purchase orders or custom terms, write to <a href="mailto:smspgh@outlook.com">smspgh@outlook.com</a>.</p>
+        <div class="faq">
+          <h3>I'm the only person at my company using Quarry. Do we need a license?</h3>
+          <p>No. An organization with a single user of Quarry is covered by the free license, at no cost.</p>
+          <h3>What happens when a second person starts using it?</h3>
+          <p>The organization can evaluate Quarry free of charge for 30 days from that day. After that it needs a commercial license for each of its users, the first one included, or goes back to a single user. Two users cost $100 a year.</p>
+          <h3>Does Quarry check or report how many people use it?</h3>
+          <p>No. Quarry has no license keys and sends no usage data, so nothing about your use reaches the developer. The organization counts its own users: license the people who use Quarry for its work.</p>
+        </div>
+      </section>
+
+      <section class="block band" id="support">
+        <h2>Support</h2>
+        <p>Found a bug or have a question? <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Open an issue on GitHub</a>. The guides for every feature are in the <a href="https://github.com/smspgh/Quarry#documentation" target="_blank" rel="noopener">documentation</a>.</p>
+      </section>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="privacy.html">Privacy policy</a> · <a href="terms.html">Terms of sale</a> · <a href="refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="https://github.com/smspgh/Quarry/blob/main/LICENSE" target="_blank" rel="noopener">License</a></span>
+    </footer>
+  </div>
+  <script>
+    // Point the button straight at the newest installer. Without this (no script, or GitHub's API not
+    // answering) it goes to the release page, where the same file is listed.
+    fetch("https://api.github.com/repos/smspgh/Quarry/releases/latest")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (rel) {
+        if (!rel || !rel.assets) return;
+        var file = rel.assets.filter(function (a) { return /_x64-setup\.exe$/.test(a.name); })[0];
+        if (!file) return;
+        document.getElementById("download").href = file.browser_download_url;
+        document.getElementById("version").textContent = "Version " + rel.tag_name.replace(/^v/, "") + ". ";
+      })
+      .catch(function () {});
+
+    // Commercial license checkout (Paddle). Paddle's script is loaded only when someone clicks Buy, so
+    // ordinary visitors load nothing from Paddle. The token and price id are public by design.
+    // A sandbox token ("test_…") shows the form only on a local copy or with ?paddle-test in the URL,
+    // so a test checkout can never reach real buyers by accident.
+    (function () {
+      var PADDLE = {
+        token: "live_6405fa313c33e57de5b249a1c97",  // client-side token: "test_…" (sandbox) or "live_…"
+        priceId: "pri_01m8awcbyyb2fzt98c53q7gt41",  // Commercial license, $50 per user per year (live)
+        unitPrice: 50
+      };
+      var sandbox = PADDLE.token.indexOf("test_") === 0;
+      var testing = /[?&]paddle-test\b/.test(location.search) || location.protocol === "file:" ||
+        location.hostname === "localhost" || location.hostname === "127.0.0.1";
+      if (!PADDLE.token || (sandbox && !testing)) return;
+
+      var form = document.getElementById("buy");
+      var seats = document.getElementById("seats");
+      var total = document.getElementById("total");
+      form.hidden = false;
+      document.getElementById("buy-note").hidden = false;
+
+      function count() {
+        var n = Math.floor(Number(seats.value));
+        return n >= 1 && n <= 99 ? n : 0;
+      }
+      function showTotal() {
+        var n = count();
+        total.textContent = n ? "$" + n * PADDLE.unitPrice + " a year, plus tax where it applies" : "1 to 99 users";
+      }
+      seats.addEventListener("input", showTotal);
+      showTotal();
+
+      var ready = null;
+      function loadPaddle() {
+        if (!ready) {
+          ready = new Promise(function (resolve, reject) {
+            var s = document.createElement("script");
+            s.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
+            s.onload = function () {
+              if (sandbox) Paddle.Environment.set("sandbox");
+              Paddle.Initialize({ token: PADDLE.token });
+              resolve();
+            };
+            s.onerror = function () { ready = null; reject(); };
+            document.head.appendChild(s);
+          });
+        }
+        return ready;
+      }
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var n = count();
+        if (!n) { seats.focus(); return; }
+        loadPaddle().then(function () {
+          Paddle.Checkout.open({
+            items: [{ priceId: PADDLE.priceId, quantity: n }],
+            settings: {
+              displayMode: "overlay",
+              theme: matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light",
+              locale: "en"
+            }
+          });
+        }, function () {
+          total.textContent = "Checkout could not load. Please try again, or write to smspgh@outlook.com.";
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
