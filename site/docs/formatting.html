@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Formatting · Quarry</title>
+  <meta name="description" content="Formatting: Built-in and installed formatters for each language.">
+  <link rel="icon" href="../quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="../"><img src="../quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="../docs/" aria-current="page">Documentation</a>
+        <a href="../#install">Install</a>
+        <a href="../#licensing">Licensing</a>
+        <a href="../#support">Support</a>
+        <a href="../privacy.html">Privacy</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="docs">
+      <nav class="guides" aria-label="Guides">
+        <a href="./">All guides</a>
+        <a href="install.html">Installing</a>
+        <a href="editing.html">Editing</a>
+        <a href="large-files.html">Large files</a>
+        <a href="code-intelligence.html">Code intelligence</a>
+        <a href="compare.html">Compare</a>
+        <a href="git.html">Git</a>
+        <a href="terminal.html">Terminal</a>
+        <a href="find-and-replace.html">Find and replace</a>
+        <a href="json.html">JSON tools</a>
+        <a href="api-requests.html">API requests</a>
+        <a href="formatting.html" aria-current="page">Formatting</a>
+        <a href="macros.html">Macros</a>
+        <a href="scripting.html">Scripts</a>
+        <a href="keyboard-shortcuts.html">Keyboard shortcuts</a>
+        <a href="settings.html">Settings</a>
+        <a href="benchmarks.html">Benchmarks</a>
+      </nav>
+        <article class="guide">
+<h1 id="formatting">Formatting</h1>
+<p><strong>Format Document</strong> (<strong>Shift+Alt+F</strong>, or <strong>Code › Format Document</strong>) reformats the current file. Which formatter runs depends on the document&#39;s language, shown in the status bar.</p>
+<p>Formatting works out of the box for every language below except Rust. Nothing extra needs installing.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Language</th><th>Formatter</th></tr></thead>
+<tbody>
+<tr><td>JSON</td><td>Quarry&#39;s own formatter (see <a href="json.html#format-and-minify">JSON › Format and minify</a>)</td></tr>
+<tr><td>JavaScript, JSX, TypeScript, TSX, CSS, SCSS, Less, HTML, Vue, Angular, Markdown, YAML, GraphQL, XML, SVG</td><td><a href="https://prettier.io/" target="_blank" rel="noopener">Prettier</a>, built in</td></tr>
+<tr><td>Go, Python, C, C++, C#, Java, Shell, SQL (and its MySQL, MariaDB, PostgreSQL, SQL Server, SQLite and PL/SQL variants)</td><td>Your installed formatter if you have one, otherwise a built-in one (below)</td></tr>
+<tr><td>Rust</td><td><code>rustfmt</code>, which you install (it comes with Rust)</td></tr>
+</tbody>
+</table></div>
+<p>When it&#39;s done, the message says which formatter ran, for example &quot;Formatted (Python, built-in ruff)&quot; or &quot;Formatted (Python, ruff)&quot;. Formatting is one undo step. If the language is wrong (for example an untitled file), set it with <strong>Code › Language</strong> or <strong>Ctrl+K M</strong> first.</p>
+<h2 id="web-languages-prettier">Web languages (Prettier)</h2>
+<p>Prettier is bundled and loaded the first time you format. It uses:</p>
+<ul>
+<li><strong>Tab size</strong> and <strong>Insert spaces</strong> from Settings;</li>
+<li>a line width of 100;</li>
+<li>for XML and SVG, <a href="https://github.com/prettier/plugin-xml" target="_blank" rel="noopener"><code>@prettier/plugin-xml</code></a>, formatting without regard to whitespace and putting closing brackets on their own line.</li>
+</ul>
+<p>With a non-empty selection in JavaScript, JSX, TypeScript, TSX, GraphQL or Vue, only the selection is formatted (Prettier widens it to whole statements or elements). Prettier cannot format part of a CSS, SCSS, Less, HTML, Angular, Markdown, YAML or XML file, so there the selection is ignored and the whole document is formatted.</p>
+<h2 id="other-languages-installed-or-built-in">Other languages: installed or built in</h2>
+<p>For these languages, Quarry first looks for the standard command-line formatter on your <code>PATH</code>. If it&#39;s installed, Quarry uses it, so the result matches what you, your editor and your CI already produce, including your project&#39;s configuration files. If it isn&#39;t installed, Quarry uses the built-in formatter instead.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Language</th><th>Installed tool (preferred)</th><th>Built-in fallback</th></tr></thead>
+<tbody>
+<tr><td>Go</td><td><code>gofmt</code></td><td><a href="https://pkg.go.dev/cmd/gofmt" target="_blank" rel="noopener">gofmt</a>, compiled to WebAssembly: identical output</td></tr>
+<tr><td>Python</td><td><code>ruff format</code></td><td><a href="https://docs.astral.sh/ruff/formatter/" target="_blank" rel="noopener">Ruff</a>&#39;s formatter, compiled to WebAssembly (Black-compatible style)</td></tr>
+<tr><td>C, C++</td><td><code>clang-format</code></td><td><a href="https://clang.llvm.org/docs/ClangFormat.html" target="_blank" rel="noopener">clang-format</a>, compiled to WebAssembly, LLVM style</td></tr>
+<tr><td>C#</td><td><code>dotnet csharpier</code></td><td>clang-format, Microsoft style</td></tr>
+<tr><td>Java</td><td><code>google-java-format</code></td><td><a href="https://github.com/jhipster/prettier-java" target="_blank" rel="noopener">prettier-plugin-java</a></td></tr>
+<tr><td>Shell</td><td><code>shfmt</code></td><td><a href="https://github.com/mvdan/sh" target="_blank" rel="noopener">shfmt</a>, compiled to WebAssembly</td></tr>
+<tr><td>SQL</td><td><code>sqlfluff fix</code></td><td><a href="https://github.com/sql-formatter-org/sql-formatter" target="_blank" rel="noopener">sql-formatter</a>, using the dialect of the document&#39;s language</td></tr>
+<tr><td>MySQL, MariaDB SQL, PostgreSQL, MS SQL, SQLite, PLSQL</td><td>–</td><td>sql-formatter with that dialect</td></tr>
+<tr><td>Rust</td><td><code>rustfmt</code></td><td>none</td></tr>
+</tbody>
+</table></div>
+<p><strong>Built-in formatters</strong></p>
+<ul>
+<li>They run inside Quarry, offline, and are loaded the first time you format a file of that language. Until then they cost no memory or start-up time.</li>
+<li>They use <strong>Tab size</strong> and <strong>Insert spaces</strong> from Settings and a line width of 100. Exceptions: gofmt always uses tabs, as Go requires, and Ruff uses its usual 88.</li>
+<li>They don&#39;t read project configuration files such as <code>.clang-format</code>, <code>pyproject.toml</code> or <code>.editorconfig</code>. If your project has those, install the tool so Quarry uses it instead.</li>
+<li>For C#, clang-format gives clean, consistent layout but is less C#-aware than CSharpier. Install CSharpier if you need its exact style.</li>
+<li>SQL keywords keep their case.</li>
+</ul>
+<p><strong>Installed tools</strong></p>
+<p>Quarry runs these without a console window, sends the document on standard input, and replaces the document with their output:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Tool</th><th>Command run</th><th>Install</th></tr></thead>
+<tbody>
+<tr><td>rustfmt</td><td><code>rustfmt --edition 2021 --emit stdout</code></td><td><code>rustup component add rustfmt</code></td></tr>
+<tr><td>gofmt</td><td><code>gofmt</code></td><td>Install <a href="https://go.dev/dl/" target="_blank" rel="noopener">Go</a></td></tr>
+<tr><td>Ruff</td><td><code>ruff format -</code></td><td><code>pip install ruff</code></td></tr>
+<tr><td>clang-format</td><td><code>clang-format</code></td><td>Install <a href="https://releases.llvm.org/" target="_blank" rel="noopener">LLVM</a></td></tr>
+<tr><td>CSharpier</td><td><code>dotnet csharpier --</code></td><td><code>dotnet tool install -g csharpier</code></td></tr>
+<tr><td>google-java-format</td><td><code>google-java-format -</code></td><td><a href="https://github.com/google/google-java-format" target="_blank" rel="noopener">google-java-format</a></td></tr>
+<tr><td>shfmt</td><td><code>shfmt -</code></td><td><a href="https://github.com/mvdan/sh" target="_blank" rel="noopener">shfmt</a></td></tr>
+<tr><td>SQLFluff</td><td><code>sqlfluff fix -</code></td><td><code>pip install sqlfluff</code></td></tr>
+</tbody>
+</table></div>
+<ul>
+<li>The tool runs in the document&#39;s folder, so it finds project configuration files as it would on the command line (<code>rustfmt.toml</code>, <code>.clang-format</code>, <code>pyproject.toml</code>, <code>.sqlfluff</code>, …).</li>
+<li>If the tool reports an error, for example a syntax error in the file, the document is left unchanged and the tool&#39;s message is shown. Quarry doesn&#39;t fall back to the built-in formatter in that case, because it would most likely hit the same error.</li>
+<li>For Rust without rustfmt installed, a message says how to install it.</li>
+</ul>
+<h2 id="syntax-errors">Syntax errors</h2>
+<p>A formatter can&#39;t format code it can&#39;t parse. If the file has a syntax error, the document is left unchanged and the message shows where the error is, for example <code>2:12: expected &#39;)&#39;, found &#39;{&#39;</code>. For JSON, the cursor is also moved to the error.</p>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="../privacy.html">Privacy policy</a> · <a href="../terms.html">Terms of sale</a> · <a href="../refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="../license.html">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>

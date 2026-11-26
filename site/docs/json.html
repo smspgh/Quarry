@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JSON tools · Quarry</title>
+  <meta name="description" content="JSON tools: Tree view, paths, validate, format, JSON ↔ CSV.">
+  <link rel="icon" href="../quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="../"><img src="../quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="../docs/" aria-current="page">Documentation</a>
+        <a href="../#install">Install</a>
+        <a href="../#licensing">Licensing</a>
+        <a href="../#support">Support</a>
+        <a href="../privacy.html">Privacy</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="docs">
+      <nav class="guides" aria-label="Guides">
+        <a href="./">All guides</a>
+        <a href="install.html">Installing</a>
+        <a href="editing.html">Editing</a>
+        <a href="large-files.html">Large files</a>
+        <a href="code-intelligence.html">Code intelligence</a>
+        <a href="compare.html">Compare</a>
+        <a href="git.html">Git</a>
+        <a href="terminal.html">Terminal</a>
+        <a href="find-and-replace.html">Find and replace</a>
+        <a href="json.html" aria-current="page">JSON tools</a>
+        <a href="api-requests.html">API requests</a>
+        <a href="formatting.html">Formatting</a>
+        <a href="macros.html">Macros</a>
+        <a href="scripting.html">Scripts</a>
+        <a href="keyboard-shortcuts.html">Keyboard shortcuts</a>
+        <a href="settings.html">Settings</a>
+        <a href="benchmarks.html">Benchmarks</a>
+      </nav>
+        <article class="guide">
+<h1 id="json-tools">JSON tools</h1>
+<ul>
+<li><a href="#when-a-file-counts-as-json">When a file counts as JSON</a></li>
+<li><a href="#the-json-panel">The JSON panel</a></li>
+<li><a href="#paths">Paths</a></li>
+<li><a href="#validate">Validate</a></li>
+<li><a href="#format-and-minify">Format and minify</a></li>
+<li><a href="#converting-between-json-and-csv">Converting between JSON and CSV</a></li>
+<li><a href="#commands-and-shortcuts">Commands and shortcuts</a></li>
+</ul>
+<h2 id="when-a-file-counts-as-json">When a file counts as JSON</h2>
+<p>A document is treated as JSON when:</p>
+<ul>
+<li>its extension is <code>.json</code>, <code>.jsonc</code>, <code>.json5</code>, <code>.har</code> or <code>.webmanifest</code>, or one known as JSON to CodeMirror;</li>
+<li>it is untitled, or of an unknown type, and its text starts like JSON: <code>{&quot;</code>, <code>{}</code>, <code>[{</code>, <code>[[</code>, <code>[&quot;</code>, <code>[</code> followed by a digit, or <code>[]</code>. This includes JSON pasted into a new tab;</li>
+<li>you choose <strong>JSON</strong> with <strong>Code › Language</strong> or <strong>Ctrl+K M</strong>.</li>
+</ul>
+<p><strong>JSON with comments (JSONC).</strong> Quarry treats these files as JSONC, which allows <code>//</code> and <code>/* */</code> comments and trailing commas:</p>
+<ul>
+<li><code>.jsonc</code> files;</li>
+<li><code>.code-workspace</code> files;</li>
+<li><code>tsconfig*.json</code> and <code>jsconfig*.json</code>;</li>
+<li><code>.json</code> files inside a <code>.vscode</code> folder.</li>
+</ul>
+<p><code>.json5</code> files are checked as JSONC too. JSON5-only syntax, such as unquoted keys or single quotes, is reported as an error.</p>
+<p>Opening a JSON file shows the JSON panel when that panel is pinned (see <a href="editing.html#window-layout">Window layout</a>); otherwise open it from its rail icon or with <strong>Ctrl+Shift+J</strong>. The <strong>JSON</strong> commands are available only when the document&#39;s language is JSON.</p>
+<h2 id="the-json-panel">The JSON panel</h2>
+<p><strong>Ctrl+Shift+J</strong> or <strong>View › Panels › JSON Tools</strong> opens the panel.</p>
+<ul>
+<li><strong>Tree.</strong> A tree of the document that updates 250 ms after you stop typing. Objects show their number of keys (<code>{3}</code>), arrays their length (<code>[5]</code>), and numbers their exact source text.</li>
+<li><strong>Follow cursor.</strong> When on, the tree reveals and highlights the node under the editor cursor.</li>
+<li><strong>Click a node</strong>, or press Enter on it, to select that value in the editor.</li>
+<li><strong>Expand all / Collapse all.</strong> Expand all opens up to 12 levels deep or 50,000 nodes.</li>
+<li><strong>Keyboard.</strong> Arrow keys move through and expand the tree.<ul>
+<li><strong>Ctrl+C</strong> copies the node&#39;s value. Strings are copied without quotes; objects and arrays as their source text.</li>
+<li><strong>Ctrl+Shift+C</strong> copies its path.</li>
+</ul>
+</li>
+<li><strong>Status.</strong><ul>
+<li><strong>Parsed</strong>: valid JSON.</li>
+<li><strong>Lenient</strong>: parsed, but uses something JSON doesn&#39;t allow, such as comments or a trailing comma. The reason is shown.</li>
+<li><strong>Invalid</strong>: click the error to jump to it.</li>
+<li><strong>Too large</strong>: over the size limit below, so there is no tree.</li>
+<li><strong>Not JSON</strong> or <strong>Empty</strong>.</li>
+</ul>
+</li>
+<li><strong>While you edit.</strong> If the document stops being valid JSON, the last good tree stays visible, dimmed, until it parses again.</li>
+<li><strong>Size limit.</strong> Documents over 64 million characters (about 64 MB of plain ASCII text) or 2,000,000 nodes don&#39;t get a tree.</li>
+</ul>
+<p>The tree&#39;s parser is tolerant on purpose so it keeps working while you type. It accepts <code>//</code> and <code>/* */</code> comments, trailing commas, single-quoted strings, unquoted keys, and <code>NaN</code> / <code>Infinity</code> / hex numbers. <strong>Validate</strong> and <strong>Format</strong> are strict, as described below.</p>
+<h2 id="paths">Paths</h2>
+<p>The path format box in the JSON panel sets the style used when copying from the tree. From the editor, <strong>Copy Path at Cursor</strong> (<strong>Ctrl+Alt+P</strong>) always copies the dot style, and the JSON menu has a command for each of the other styles.</p>
+<p>For the value <code>&quot;Ada&quot;</code> in <code>{&quot;users&quot;: [{&quot;name&quot;: &quot;Ada&quot;, &quot;e-mail&quot;: &quot;ada@example.com&quot;}]}</code>:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Style</th><th>Path to <code>name</code></th><th>Path to <code>e-mail</code></th></tr></thead>
+<tbody>
+<tr><td>Dot (default)</td><td><code>users[0].name</code></td><td><code>users[0].e-mail</code></td></tr>
+<tr><td>JSONPath (<a href="https://www.rfc-editor.org/rfc/rfc9535" target="_blank" rel="noopener">RFC 9535</a>)</td><td><code>$.users[0].name</code></td><td><code>$.users[0][&#39;e-mail&#39;]</code></td></tr>
+<tr><td>JavaScript</td><td><code>users[0].name</code></td><td><code>users[0][&quot;e-mail&quot;]</code></td></tr>
+<tr><td>Bracket</td><td><code>[&quot;users&quot;][0][&quot;name&quot;]</code></td><td><code>[&quot;users&quot;][0][&quot;e-mail&quot;]</code></td></tr>
+<tr><td>JSON Pointer (<a href="https://www.rfc-editor.org/rfc/rfc6901" target="_blank" rel="noopener">RFC 6901</a>)</td><td><code>/users/0/name</code></td><td><code>/users/0/e-mail</code></td></tr>
+</tbody>
+</table></div>
+<p>The dot style never quotes keys, so it&#39;s best for display. Use JSONPath, JavaScript or bracket style when keys contain special characters. In JSON Pointer, <code>~</code> is written <code>~0</code> and <code>/</code> is written <code>~1</code>.</p>
+<p>The breadcrumb bar above the editor shows the path of the value under the cursor.</p>
+<h2 id="validate">Validate</h2>
+<p><strong>Ctrl+Alt+V</strong> checks the document against strict JSON (<a href="https://www.rfc-editor.org/rfc/rfc8259" target="_blank" rel="noopener">RFC 8259</a>). It also works on files open in large-file mode, whatever their size; see <a href="large-files.html#json-tree-and-validation">Large files › JSON tree and validation</a>.</p>
+<p>On an error, Quarry marks it in the editor, moves the cursor to it, and reports the line and column with a specific message: &quot;trailing comma&quot;, &quot;expected <code>,</code> or <code>}</code>&quot;, &quot;key must be a string&quot;, &quot;invalid escape&quot;, &quot;invalid number (leading zero)&quot;, &quot;trailing characters&quot;, and so on. The mark clears on your next edit.</p>
+<p>A leading byte-order mark is allowed. In a plain JSON file, a comment is reported as &quot;comments are not allowed in JSON (they are in JSONC)&quot;. In a JSONC file, comments and trailing commas pass, and the result reads &quot;Valid JSONC ✓&quot; (&quot;Valid JSON5 ✓&quot; for a <code>.json5</code> file, which is checked the same way).</p>
+<h2 id="format-and-minify">Format and minify</h2>
+<p><strong>Ctrl+Alt+F</strong> pretty-prints and <strong>Ctrl+Alt+M</strong> minifies. <strong>Format Document</strong> (<strong>Shift+Alt+F</strong>) on a JSON file pretty-prints too.</p>
+<p>They change <strong>only whitespace</strong>, apart from comments:</p>
+<ul>
+<li>Key order is kept, and duplicate keys are kept as written.</li>
+<li>Numbers keep their exact text: <code>1e400</code>, <code>-0</code>, <code>0.10</code> and 40-digit integers come out unchanged, without being rounded or converted to floating point.</li>
+<li>Escapes are kept as written, including <code>é</code> and unpaired surrogates.</li>
+<li>There is no nesting limit; 100,000 levels deep is tested.</li>
+<li><strong>Comments and trailing commas</strong> are accepted in any file.<ul>
+<li>Format keeps them. A comment that followed a value on the same line stays there; other comments go on their own line.</li>
+<li>Minify removes them, so the minified result is always strict JSON. The message says when it did this.</li>
+</ul>
+</li>
+</ul>
+<p>The indent comes from <strong>Settings › JSON › Pretty-print indent</strong> (default 2, from 1 to 8). It uses tabs when <strong>Insert spaces</strong> is off. Formatting is one undo step.</p>
+<h2 id="converting-between-json-and-csv">Converting between JSON and CSV</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Command</th><th>Input</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td><strong>JSON: Convert to CSV</strong></td><td>An object or an array of objects</td><td>One column per top-level key (in first-seen order), one row per object. Nested objects and arrays are written as JSON text in the cell; <code>null</code> and missing keys become empty cells. Comma-delimited; cells containing <code>&quot;</code>, <code>,</code> or a line break are quoted.</td></tr>
+<tr><td><strong>JSON: Convert CSV to JSON</strong></td><td>A <code>.csv</code> or <code>.tsv</code> file</td><td>An array of objects keyed by the header row. The delimiter (<code>,</code> <code>;</code> tab or `</td></tr>
+<tr><td><strong>JSON: Copy Top-level Keys</strong></td><td>An object, or an array whose first element is an object</td><td>Copies the keys, one per line.</td></tr>
+</tbody>
+</table></div>
+<p>Both conversions replace the current document (one undo step) and keep its file name, so use <strong>Save As</strong> to save the result under a new extension.</p>
+<h2 id="commands-and-shortcuts">Commands and shortcuts</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Command</th><th>Keys</th></tr></thead>
+<tbody>
+<tr><td>Format / Pretty-print</td><td>Ctrl+Alt+F</td></tr>
+<tr><td>Minify</td><td>Ctrl+Alt+M</td></tr>
+<tr><td>Validate</td><td>Ctrl+Alt+V</td></tr>
+<tr><td>Copy Path at Cursor</td><td>Ctrl+Alt+P</td></tr>
+<tr><td>Copy Value at Cursor</td><td>Ctrl+Alt+C</td></tr>
+<tr><td>Copy JSONPath / JSON Pointer / Bracket Path at Cursor</td><td>–</td></tr>
+<tr><td>Show JSON Tools</td><td>Ctrl+Shift+J</td></tr>
+<tr><td>Convert to CSV, Convert CSV to JSON, Copy Top-level Keys</td><td>–</td></tr>
+</tbody>
+</table></div>
+<p>All of these are in the <strong>JSON</strong> menu and the command palette (type <code>json</code>).</p>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="../privacy.html">Privacy policy</a> · <a href="../terms.html">Terms of sale</a> · <a href="../refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="../license.html">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scripts · Quarry</title>
+  <meta name="description" content="Scripts: Script API reference, sandbox, examples.">
+  <link rel="icon" href="../quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="../"><img src="../quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="../docs/" aria-current="page">Documentation</a>
+        <a href="../#install">Install</a>
+        <a href="../#licensing">Licensing</a>
+        <a href="../#support">Support</a>
+        <a href="../privacy.html">Privacy</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="docs">
+      <nav class="guides" aria-label="Guides">
+        <a href="./">All guides</a>
+        <a href="install.html">Installing</a>
+        <a href="editing.html">Editing</a>
+        <a href="large-files.html">Large files</a>
+        <a href="code-intelligence.html">Code intelligence</a>
+        <a href="compare.html">Compare</a>
+        <a href="git.html">Git</a>
+        <a href="terminal.html">Terminal</a>
+        <a href="find-and-replace.html">Find and replace</a>
+        <a href="json.html">JSON tools</a>
+        <a href="api-requests.html">API requests</a>
+        <a href="formatting.html">Formatting</a>
+        <a href="macros.html">Macros</a>
+        <a href="scripting.html" aria-current="page">Scripts</a>
+        <a href="keyboard-shortcuts.html">Keyboard shortcuts</a>
+        <a href="settings.html">Settings</a>
+        <a href="benchmarks.html">Benchmarks</a>
+      </nav>
+        <article class="guide">
+<h1 id="scripts">Scripts</h1>
+<p>A Quarry script is a plain JavaScript file that transforms the current document: reorder lines, rewrite selections, pull values out of CSV, reshape JSON, and so on. Scripts run in a sandboxed Web Worker, and whatever a script changes is applied back to the editor as <strong>one undo step</strong>.</p>
+<ul>
+<li><a href="#where-scripts-live">Where scripts live</a></li>
+<li><a href="#writing-and-running-a-script">Writing and running a script</a></li>
+<li><a href="#how-a-script-runs">How a script runs</a></li>
+<li><a href="#api-reference">API reference</a></li>
+<li><a href="#limiting-a-script-to-certain-files">Limiting a script to certain files</a></li>
+<li><a href="#sandbox-and-limits">Sandbox and limits</a></li>
+<li><a href="#errors-and-the-console">Errors and the Console</a></li>
+<li><a href="#examples">Examples</a></li>
+</ul>
+<h2 id="where-scripts-live">Where scripts live</h2>
+<p>Each script is one <code>.js</code> file in the scripts folder or in a subfolder of it. The file name without <code>.js</code> is the script&#39;s name.</p>
+<ul>
+<li>Default folder: <code>%APPDATA%\com.quarry.app\scripts</code> (created on first use).</li>
+<li><strong>Settings › Folders › Scripts folder</strong> always shows the folder in use, and is where you change it. If a custom folder can&#39;t be used, Quarry falls back to the default and says so.</li>
+<li>Subfolders are yours to organise scripts with; the Scripts panel shows the whole tree.</li>
+<li>The tree reloads when the panel opens and when Quarry regains focus, so you can also manage scripts in File Explorer or another editor.</li>
+</ul>
+<p>Quarry ships with no scripts. Common conversions (JSON ↔ CSV, listing keys) are built-in <a href="json.html#converting-between-json-and-csv">JSON commands</a> instead.</p>
+<h2 id="writing-and-running-a-script">Writing and running a script</h2>
+<p>The Scripts panel (<strong>Scripts › Scripts</strong>, or the Scripts icon in the panel rail) is the scripts folder as a tree, with a run bar under it. It works like the <a href="editing.html">Explorer</a> with one difference: a click only <em>selects</em> a script, so the document you want to run it on stays in front. Double-click a script to open it in a tab.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Action</th><th>How</th></tr></thead>
+<tbody>
+<tr><td>New script</td><td><strong>New Script</strong> in the panel header, or <strong>Scripts › New Script</strong>. Type a name; <code>.js</code> is added, and the file opens in a tab with a short starting template.</td></tr>
+<tr><td>New folder</td><td><strong>New Script Folder</strong> in the panel header. From the header, both go into the selected folder (or the folder of the selected script); <strong>Scripts › New Script</strong> always creates at the top of the scripts folder.</td></tr>
+<tr><td>Run on the current document</td><td>Select the script and press <strong>Run</strong> below the tree, or right-click › <strong>Run</strong>.</td></tr>
+<tr><td>Edit</td><td>Double-click the script, press <strong>Enter</strong>, use <strong>Edit</strong> in the run bar, or right-click › <strong>Edit</strong>. It opens in a tab; edit and save it like any other file.</td></tr>
+<tr><td>Run several times</td><td><strong>×N</strong> (1 to 100,000; each run is its own undo step, stops at the first error).</td></tr>
+<tr><td>Run until nothing changes</td><td><strong>To end</strong> repeats until a run leaves both the text and the selection unchanged, up to 10,000 runs.</td></tr>
+<tr><td>Cancel</td><td><strong>Cancel</strong> in the run bar, or the stop button beside <strong>SCRIPT</strong> in the status bar.</td></tr>
+<tr><td>Rename / Cut / Copy / Paste / Delete</td><td>Right-click, or <strong>F2</strong>, <strong>Ctrl+X / C / V</strong>, <strong>Delete</strong>, as in the Explorer. Delete moves the file to the Recycle Bin.</td></tr>
+<tr><td>API reference</td><td><strong>Help › Script API Reference</strong> opens the list below in a tab.</td></tr>
+</tbody>
+</table></div>
+<p>The script you last selected or ran is the <em>current script</em>: <strong>Ctrl+Shift+Enter</strong> (<strong>Scripts › Run Script &quot;name&quot;</strong>) runs it again on the document in front, with the panel open or not.</p>
+<p>A script that is open in a tab runs as it is in the tab, unsaved changes included, so you can try an edit before saving it. A script never runs on its own tab: switch to the document it should change first.</p>
+<p>By default, a script first asks <strong>Run / Review first / Cancel</strong>. <strong>Review first</strong> opens the script in a tab without running it. Turn the prompt off with <strong>Settings › Confirm script &amp; macro runs</strong>.</p>
+<p>Scripts run on regular text tabs only, not on files open in <a href="large-files.html">large-file mode</a>. Only one script runs at a time, and none runs while a <a href="macros.html">macro</a> is recording or playing: the Run buttons are disabled and <strong>Ctrl+Shift+Enter</strong> shows a message saying why.</p>
+<h2 id="how-a-script-runs">How a script runs</h2>
+<p>When you run a script, Quarry takes a snapshot of the current document: its text, every selection range (including multi-cursor and column selections), its name, path and line ending, and the clipboard text. The script works on that snapshot in a worker. When it finishes, Quarry applies the result:</p>
+<ol>
+<li><strong>If the script assigned to <code>selection</code></strong> (<code>selection.text</code>, <code>selection.lines</code> or <code>selection.map</code>), those selection replacements are applied. A script can&#39;t change both <code>doc</code> and <code>selection</code> in one run, because selection offsets refer to the original text. If it does, nothing is applied and the Console explains why.</li>
+<li><strong>Otherwise, if the document text changed</strong>, the new text replaces the old. Quarry only rewrites the part that actually changed.</li>
+<li><strong>Otherwise, if the script returned a string</strong>, that string replaces the document.</li>
+<li>Then <code>doc.select(from, to)</code>, if called, sets the selection in the new text.</li>
+</ol>
+<p>Either way the edit is one transaction, so a single <strong>Ctrl+Z</strong> undoes it.</p>
+<p>If you switch to another tab, or edit the document, while a script is running, its changes are not applied, and a message tells you so. Moving the cursor is fine: selection changes go to the ranges the script was given.</p>
+<p>The script body is wrapped in an <code>async</code> function in strict mode, so top-level <code>await</code> and <code>return</code> are allowed. <code>doc</code>, <code>selection</code>, <code>util</code>, <code>clipboard</code>, <code>console</code> and <code>args</code> are its parameters.</p>
+<h2 id="api-reference">API reference</h2>
+<h3 id="doc"><code>doc</code></h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Member</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>doc.text</code></td><td>The whole text. Read it or assign a new string.</td></tr>
+<tr><td><code>doc.lines</code></td><td>The text as an array of lines. Assigning joins them with <code>doc.eol</code>.</td></tr>
+<tr><td><code>doc.lineCount</code></td><td>Number of lines.</td></tr>
+<tr><td><code>doc.length</code></td><td>Number of characters (UTF-16 code units).</td></tr>
+<tr><td><code>doc.name</code></td><td>File name, e.g. <code>data.csv</code>. Read-only in practice; assigning it does nothing.</td></tr>
+<tr><td><code>doc.path</code></td><td>Full path, or <code>null</code> for an unsaved document.</td></tr>
+<tr><td><code>doc.eol</code></td><td>The line ending in use, as the actual characters: <code>&quot;\r\n&quot;</code>, <code>&quot;\n&quot;</code> or <code>&quot;\r&quot;</code>.</td></tr>
+<tr><td><code>doc.mapLines((line, i) =&gt; …)</code></td><td>Replaces every line with the function&#39;s result. Return <code>null</code> or <code>undefined</code> to delete the line. <code>i</code> is 0-based.</td></tr>
+<tr><td><code>doc.filterLines((line, i) =&gt; bool)</code></td><td>Keeps only the lines where the function returns a truthy value.</td></tr>
+<tr><td><code>doc.replace(pattern, replacement)</code></td><td>A <strong>string</strong> pattern replaces <em>every</em> occurrence (matched literally). A <strong>RegExp</strong> is used as given, so add the <code>g</code> flag to replace all matches. <code>replacement</code> may be a string (<code>$1</code>, <code>$&amp;</code>, …) or a function, as in <code>String.prototype.replace</code>.</td></tr>
+<tr><td><code>doc.insert(offset, text)</code></td><td>Inserts text at a character offset.</td></tr>
+<tr><td><code>doc.append(text)</code> / <code>doc.prepend(text)</code></td><td>Adds text at the end / start.</td></tr>
+<tr><td><code>doc.lineAt(offset)</code></td><td>1-based line number of a character offset in the current text.</td></tr>
+<tr><td><code>doc.select(from, to)</code></td><td>Sets the selection after the run. Offsets refer to the new text.</td></tr>
+</tbody>
+</table></div>
+<p><code>doc.lines</code>, <code>mapLines</code> and <code>filterLines</code> split on any line ending and join with <code>doc.eol</code>, so they also normalise mixed line endings.</p>
+<h3 id="selection"><code>selection</code></h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Member</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>selection.all</code></td><td>Array of <code>{ from, to, text }</code>, one per selection range or cursor, with offsets in the original document.</td></tr>
+<tr><td><code>selection.text</code></td><td>All selected text, joined with <code>doc.eol</code>. Assigning with <strong>one</strong> range replaces it; with <strong>several</strong> ranges, the new value is split into lines and line <em>i</em> goes into range <em>i</em> (missing lines become empty).</td></tr>
+<tr><td><code>selection.lines</code></td><td><code>selection.text</code> as an array of lines. Assigning joins them and assigns <code>selection.text</code>.</td></tr>
+<tr><td><code>selection.isEmpty</code></td><td><code>true</code> when every range is an empty cursor.</td></tr>
+<tr><td><code>selection.map((text, i, range) =&gt; …)</code></td><td>Replaces each range with the function&#39;s result, independently.</td></tr>
+</tbody>
+</table></div>
+<p>Assigning to an empty cursor inserts text at the cursor.</p>
+<h3 id="util"><code>util</code></h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Function</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>util.sort(lines, { numeric, desc, caseInsensitive })</code></td><td>Returns a new sorted array using locale-aware comparison. <code>numeric</code> sorts <code>2</code> before <code>10</code>; <code>caseInsensitive</code> also ignores accents.</td></tr>
+<tr><td><code>util.unique(lines)</code></td><td>Removes duplicates, keeping the first occurrence and the original order.</td></tr>
+<tr><td><code>util.trimLines(lines)</code></td><td>Removes trailing whitespace from each line.</td></tr>
+<tr><td><code>util.pad(text, width, ch = &quot; &quot;)</code></td><td>Left-pads to <code>width</code>.</td></tr>
+<tr><td><code>util.csvSplit(line, delim = &quot;,&quot;)</code></td><td>Splits one CSV line, honouring quotes and <code>&quot;&quot;</code>. Does not handle line breaks inside quoted cells.</td></tr>
+<tr><td><code>util.json.parse(s)</code></td><td><code>JSON.parse</code>.</td></tr>
+<tr><td><code>util.json.stringify(value, indent = 2)</code></td><td><code>JSON.stringify</code> with indentation.</td></tr>
+</tbody>
+</table></div>
+<h3 id="clipboard-console-args-return"><code>clipboard</code>, <code>console</code>, <code>args</code>, <code>return</code></h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Member</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>clipboard.text</code></td><td>Clipboard text read just before the run (empty if it holds no text). Assign to write it to the clipboard after a successful run.</td></tr>
+<tr><td><code>console.log / info / warn / error</code></td><td>Writes to the Console panel. Objects are printed as JSON. Output appears when the script finishes.</td></tr>
+<tr><td><code>args</code></td><td>Reserved for passing values to a script. Runs started from the UI pass <code>undefined</code>.</td></tr>
+<tr><td><code>return &quot;…&quot;</code></td><td>A returned string replaces the document, unless the script assigned to <code>selection</code> (see <a href="#how-a-script-runs">How a script runs</a>). Other return values are ignored.</td></tr>
+</tbody>
+</table></div>
+<h2 id="limiting-a-script-to-certain-files">Limiting a script to certain files</h2>
+<p>Header comments in the first 20 lines restrict where a script can run:</p>
+<pre><code class="language-js">// @languages JSON, YAML
+// @extensions .csv, .tsv
+</code></pre>
+<ul>
+<li><code>@languages</code> matches the language shown in the status bar, <strong>exactly and case-sensitively</strong> (<code>JSON</code>, <code>JavaScript</code>, <code>TypeScript</code>, <code>YAML</code>, …). Values are separated by commas or spaces, so a two-word language name such as <code>Plain Text</code> can&#39;t be used. There is no CSV language; use <code>@extensions .csv</code> for CSV files.</li>
+<li><code>@extensions</code> matches the end of the file name, ignoring case.</li>
+<li>If both are given, matching <strong>either</strong> is enough.</li>
+<li>A script with neither tag runs on any text document.</li>
+</ul>
+<p>In the run bar, the selected script shows a note such as &quot;JSON / YAML only&quot;, and its <strong>Run</strong> is greyed out for a document it doesn&#39;t apply to; running it another way shows a message. The header is read each time the script runs.</p>
+<h2 id="sandbox-and-limits">Sandbox and limits</h2>
+<ul>
+<li>Each run gets its own Web Worker with no DOM and no access to the editor, the file system or Quarry&#39;s internal APIs. A script only sees the snapshot described above.</li>
+<li>A script has no network: <code>fetch</code>, <code>WebSocket</code>, <code>EventSource</code>, <code>import()</code> and <code>importScripts</code> of anything outside Quarry fail, and so do <code>eval</code> and <code>new Function</code>. So a script you were given cannot send your text anywhere; what it can do is change the document and the clipboard, which you can undo.</li>
+<li>A run is stopped after <strong>60 seconds</strong>, and anything the script logged is lost.</li>
+<li>Nothing carries over from one run to the next: a value a script stores on <code>globalThis</code> is gone when the run ends.</li>
+</ul>
+<h2 id="errors-and-the-console">Errors and the Console</h2>
+<p>A run opens the <strong>Console</strong> tab of the bottom panel (<strong>Ctrl+J</strong> toggles it). It shows <code>▶ Running script on &lt;file&gt;</code>, the script&#39;s output, then <code>✓ Done in N ms</code> or the error. When the error comes from a line of your script, the toast and the Console give the line number (<code>script:12:5</code>). The Console keeps the last 2,000 lines.</p>
+<h2 id="examples">Examples</h2>
+<p>Sort lines, numbers in natural order, and drop duplicates:</p>
+<pre><code class="language-js">doc.lines = util.unique(util.sort(doc.lines, { numeric: true }));
+</code></pre>
+<p>Remove blank lines and trailing whitespace:</p>
+<pre><code class="language-js">doc.lines = util.trimLines(doc.lines).filter(l =&gt; l !== &quot;&quot;);
+</code></pre>
+<p>Upper-case every selection (works with multi-cursor and column mode):</p>
+<pre><code class="language-js">selection.map(t =&gt; t.toUpperCase());
+</code></pre>
+<p>Number the lines of the selection:</p>
+<pre><code class="language-js">selection.lines = selection.lines.map((l, i) =&gt; `${i + 1}. ${l}`);
+</code></pre>
+<p>Keep only the second column of a CSV file:</p>
+<pre><code class="language-js">// @extensions .csv
+doc.mapLines(line =&gt; util.csvSplit(line)[1] ?? &quot;&quot;);
+</code></pre>
+<p>Wrap each line in quotes and join them with commas, ready for an SQL <code>IN (...)</code> list, and copy the result:</p>
+<pre><code class="language-js">const list = doc.lines.filter(Boolean).map(l =&gt; `&#39;${l.replace(/&#39;/g, &quot;&#39;&#39;&quot;)}&#39;`).join(&quot;, &quot;);
+clipboard.text = list;
+console.log(`Copied ${doc.lineCount} values`);
+</code></pre>
+<p>Pretty-print every JSON object in a JSON Lines file:</p>
+<pre><code class="language-js">// @extensions .jsonl, .ndjson
+doc.mapLines(line =&gt; line.trim() ? util.json.stringify(util.json.parse(line), 0) : null);
+</code></pre>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="../privacy.html">Privacy policy</a> · <a href="../terms.html">Terms of sale</a> · <a href="../refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="../license.html">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>

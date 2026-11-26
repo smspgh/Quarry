@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Terminal · Quarry</title>
+  <meta name="description" content="Terminal: Shell tabs, choosing the shell, keys, closing.">
+  <link rel="icon" href="../quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="../"><img src="../quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="../docs/" aria-current="page">Documentation</a>
+        <a href="../#install">Install</a>
+        <a href="../#licensing">Licensing</a>
+        <a href="../#support">Support</a>
+        <a href="../privacy.html">Privacy</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="docs">
+      <nav class="guides" aria-label="Guides">
+        <a href="./">All guides</a>
+        <a href="install.html">Installing</a>
+        <a href="editing.html">Editing</a>
+        <a href="large-files.html">Large files</a>
+        <a href="code-intelligence.html">Code intelligence</a>
+        <a href="compare.html">Compare</a>
+        <a href="git.html">Git</a>
+        <a href="terminal.html" aria-current="page">Terminal</a>
+        <a href="find-and-replace.html">Find and replace</a>
+        <a href="json.html">JSON tools</a>
+        <a href="api-requests.html">API requests</a>
+        <a href="formatting.html">Formatting</a>
+        <a href="macros.html">Macros</a>
+        <a href="scripting.html">Scripts</a>
+        <a href="keyboard-shortcuts.html">Keyboard shortcuts</a>
+        <a href="settings.html">Settings</a>
+        <a href="benchmarks.html">Benchmarks</a>
+      </nav>
+        <article class="guide">
+<h1 id="terminal">Terminal</h1>
+<p>A terminal tab runs a shell inside Quarry, in the folder you are working in: PowerShell, Command Prompt, Git Bash, or any shell you name. It is a real Windows console (ConPTY), so full-screen programs, colours and prompts work as in Windows Terminal.</p>
+<h2 id="opening-a-terminal">Opening a terminal</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>From</th><th>How</th></tr></thead>
+<tbody>
+<tr><td>Anywhere</td><td><strong>Ctrl+`</strong>, <strong>Tools › New Terminal</strong>, or <strong>New Terminal</strong> in the command palette</td></tr>
+<tr><td>Explorer</td><td>Right-click a folder, or blank space for the open folder, and choose <strong>Open in Terminal</strong></td></tr>
+<tr><td>Another shell, once</td><td><strong>Tools › New Terminal With</strong>, then the shell</td></tr>
+</tbody>
+</table></div>
+<p>The terminal starts in the folder of the active terminal tab if there is one; otherwise in the open folder, then the active file&#39;s folder, then your home folder. The tab is named after the shell and the folder (&quot;PowerShell 7 · proj&quot;). You can open as many as the <a href="settings.html#files--tabs">tab limit</a> allows.</p>
+<h2 id="choosing-the-shell">Choosing the shell</h2>
+<p><strong>Settings › Terminal › Shell</strong> lists the shells Quarry found:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Shell</th><th>Found when</th></tr></thead>
+<tbody>
+<tr><td>PowerShell 7</td><td><code>pwsh.exe</code> is on your PATH or in <code>Program Files\PowerShell\7</code></td></tr>
+<tr><td>Windows PowerShell</td><td>Always (part of Windows)</td></tr>
+<tr><td>Command Prompt</td><td>Always</td></tr>
+<tr><td>Git Bash</td><td>Git for Windows is installed</td></tr>
+</tbody>
+</table></div>
+<p><strong>Automatic</strong> (the default) uses the first of these that is installed. <strong>Custom…</strong> runs a command line you type, such as <code>&quot;C:\msys64\usr\bin\bash.exe&quot; --login -i</code> or <code>wsl.exe</code>; put a path with spaces in quotes. A change applies to the next terminal you open; open terminals keep their shell.</p>
+<h2 id="keys">Keys</h2>
+<p>Every key goes to the shell, so Ctrl+R, Ctrl+L, Ctrl+W, Esc and the rest behave as in a terminal. Quarry keeps only:</p>
+<ul>
+<li><strong>Ctrl+Tab</strong> / <strong>Ctrl+Shift+Tab</strong>: switch tabs</li>
+<li><strong>Ctrl+Shift+P</strong>: command palette</li>
+<li><strong>Ctrl+F4</strong>: close the tab</li>
+<li><strong>Ctrl+`</strong> (or the keys you gave New Terminal): another terminal in the same folder</li>
+</ul>
+<p>Copy and paste work as in Windows Terminal: <strong>Ctrl+C</strong> copies when text is selected and otherwise interrupts the program, <strong>Ctrl+Shift+C</strong> copies, and <strong>Ctrl+V</strong> / <strong>Ctrl+Shift+V</strong> paste.</p>
+<h2 id="closing">Closing</h2>
+<ul>
+<li>Typing <code>exit</code> closes the tab.</li>
+<li>If the shell ends with an error code, the tab stays so you can read what happened; press <strong>Enter</strong> to start the shell again.</li>
+<li>Closing the tab while the shell is running asks first, then ends the shell and everything it started.</li>
+<li>Terminal tabs are not reopened when Quarry restarts.</li>
+</ul>
+<p>The terminal follows Quarry&#39;s theme and the editor font and size.</p>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="../privacy.html">Privacy policy</a> · <a href="../terms.html">Terms of sale</a> · <a href="../refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="../license.html">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>

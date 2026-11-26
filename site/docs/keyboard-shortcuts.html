@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Keyboard shortcuts · Quarry</title>
+  <meta name="description" content="Keyboard shortcuts: Every shortcut and command id.">
+  <link rel="icon" href="../quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="../"><img src="../quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="../docs/" aria-current="page">Documentation</a>
+        <a href="../#install">Install</a>
+        <a href="../#licensing">Licensing</a>
+        <a href="../#support">Support</a>
+        <a href="../privacy.html">Privacy</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="docs">
+      <nav class="guides" aria-label="Guides">
+        <a href="./">All guides</a>
+        <a href="install.html">Installing</a>
+        <a href="editing.html">Editing</a>
+        <a href="large-files.html">Large files</a>
+        <a href="code-intelligence.html">Code intelligence</a>
+        <a href="compare.html">Compare</a>
+        <a href="git.html">Git</a>
+        <a href="terminal.html">Terminal</a>
+        <a href="find-and-replace.html">Find and replace</a>
+        <a href="json.html">JSON tools</a>
+        <a href="api-requests.html">API requests</a>
+        <a href="formatting.html">Formatting</a>
+        <a href="macros.html">Macros</a>
+        <a href="scripting.html">Scripts</a>
+        <a href="keyboard-shortcuts.html" aria-current="page">Keyboard shortcuts</a>
+        <a href="settings.html">Settings</a>
+        <a href="benchmarks.html">Benchmarks</a>
+      </nav>
+        <article class="guide">
+<h1 id="keyboard-shortcuts">Keyboard shortcuts</h1>
+<p>Every command is also in the command palette (<strong>Ctrl+Shift+P</strong> or <strong>F1</strong>), which shows its shortcut, and nearly all are in the menus.</p>
+<p>Letter and digit shortcuts follow the physical key position, so they work on any keyboard layout. <strong>Ctrl+K M</strong> is a chord: press Ctrl+K, release, then press M. So are <strong>Ctrl+K S</strong>, <strong>Ctrl+K U</strong>, <strong>Ctrl+K L</strong> and <strong>Ctrl+K N</strong>.</p>
+<p>The <strong>Id</strong> column is the command id used in <a href="macros.html#file-format">macro files</a>.</p>
+<p>These are the built-in keys. You can change or remove the shortcut of any command, or give one to a command that has none: see <a href="#changing-shortcuts">Changing shortcuts</a>.</p>
+<h2 id="file-and-tabs">File and tabs</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Command</th><th>Id</th></tr></thead>
+<tbody>
+<tr><td>Ctrl+N</td><td>New File</td><td><code>file.new</code></td></tr>
+<tr><td>Ctrl+O</td><td>Open File</td><td><code>file.open</code></td></tr>
+<tr><td>Ctrl+Shift+O</td><td>Open Folder</td><td><code>file.openFolder</code></td></tr>
+<tr><td>–</td><td>Close All Folders (asks first when several are open)</td><td><code>file.closeFolder</code></td></tr>
+<tr><td>–</td><td>Trust Folder… (lets git and language servers run in a folder; see <a href="editing.html#trusted-folders">Trusted folders</a>)</td><td><code>file.trustFolder</code></td></tr>
+<tr><td>Ctrl+P</td><td>Quick Open File</td><td><code>file.quickOpen</code></td></tr>
+<tr><td>Ctrl+S</td><td>Save</td><td><code>file.save</code></td></tr>
+<tr><td>Ctrl+Shift+S</td><td>Save As</td><td><code>file.saveAs</code></td></tr>
+<tr><td>Ctrl+Alt+S</td><td>Save All</td><td><code>file.saveAll</code></td></tr>
+<tr><td>Ctrl+W, Ctrl+F4</td><td>Close Tab</td><td><code>file.close</code> (Ctrl+F4: <code>file.closeF4</code>)</td></tr>
+<tr><td>–</td><td>Close Other Tabs / Close All Tabs</td><td><code>file.closeOthers</code> / <code>file.closeAll</code></td></tr>
+<tr><td>Ctrl+Shift+T</td><td>Reopen Closed Tab</td><td><code>file.reopenClosedTab</code></td></tr>
+<tr><td>–</td><td>Copy Path of Active File / Open to the Side</td><td><code>file.copyPath</code> / <code>file.openToSide</code></td></tr>
+<tr><td>–</td><td>Revert File</td><td><code>file.revert</code></td></tr>
+<tr><td>Ctrl+Tab, Ctrl+Page Down</td><td>Next Tab</td><td><code>file.nextTab</code> (Ctrl+Page Down: <code>file.nextTabPg</code>)</td></tr>
+<tr><td>Ctrl+Shift+Tab, Ctrl+Page Up</td><td>Previous Tab</td><td><code>file.prevTab</code> (Ctrl+Page Up: <code>file.prevTabPg</code>)</td></tr>
+<tr><td>Alt+F4</td><td>Exit</td><td><code>app.exit</code></td></tr>
+</tbody>
+</table></div>
+<h2 id="edit">Edit</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Command</th><th>Id</th></tr></thead>
+<tbody>
+<tr><td>Ctrl+Z</td><td>Undo</td><td><code>edit.undo</code></td></tr>
+<tr><td>Ctrl+Y, Ctrl+Shift+Z</td><td>Redo</td><td><code>edit.redo</code></td></tr>
+<tr><td>Ctrl+X / Ctrl+C / Ctrl+V</td><td>Cut / Copy / Paste (with nothing selected, Cut and Copy take the whole line)</td><td><code>edit.cut</code> / <code>edit.copy</code> / <code>edit.paste</code></td></tr>
+<tr><td>Ctrl+A</td><td>Select All</td><td><code>edit.selectAll</code></td></tr>
+<tr><td>Ctrl+Shift+D</td><td>Duplicate Line Down</td><td><code>edit.duplicateLine</code></td></tr>
+<tr><td>–</td><td>Duplicate Line Up</td><td><code>edit.duplicateLineUp</code></td></tr>
+<tr><td>Ctrl+Shift+K</td><td>Delete Line</td><td><code>edit.deleteLine</code></td></tr>
+<tr><td>Alt+↑ / Alt+↓</td><td>Move Line Up / Down</td><td><code>edit.moveLineUp</code> / <code>edit.moveLineDown</code></td></tr>
+<tr><td>Tab / Shift+Tab</td><td>Indent / Outdent</td><td><code>edit.indent</code> / <code>edit.outdent</code></td></tr>
+<tr><td>–</td><td>Uppercase / Lowercase / Title Case</td><td><code>edit.upper</code> / <code>edit.lower</code> / <code>code.titleCase</code></td></tr>
+<tr><td>–</td><td>Wrap Selections in Quotes</td><td><code>edit.quoteSelections</code></td></tr>
+<tr><td>–</td><td>Sort Lines Ascending / Descending</td><td><code>code.sortAsc</code> / <code>code.sortDesc</code></td></tr>
+<tr><td>–</td><td>Reverse Lines</td><td><code>code.reverseLines</code></td></tr>
+<tr><td>–</td><td>Remove Duplicate Lines</td><td><code>code.dedupe</code></td></tr>
+<tr><td>–</td><td>Delete Blank Lines / Delete Empty Lines</td><td><code>code.removeBlank</code> / <code>code.removeEmpty</code></td></tr>
+<tr><td>–</td><td>Trim Trailing Whitespace</td><td><code>code.trimTrailing</code></td></tr>
+<tr><td>–</td><td>Join Lines</td><td><code>code.joinLines</code></td></tr>
+<tr><td>–</td><td>Number Lines</td><td><code>edit.numberLines</code></td></tr>
+</tbody>
+</table></div>
+<h2 id="selection-and-multi-cursor">Selection and multi-cursor</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Command</th><th>Id</th></tr></thead>
+<tbody>
+<tr><td>Ctrl+D</td><td>Add Selection to Next Find Match</td><td><code>edit.selectNextOccurrence</code></td></tr>
+<tr><td>Ctrl+Shift+L</td><td>Select All Occurrences</td><td><code>edit.selectAllOccurrences</code></td></tr>
+<tr><td>Alt+Enter</td><td>Select All Find Matches</td><td><code>edit.selectAllMatches</code></td></tr>
+<tr><td>Ctrl+Alt+↑ / Ctrl+Alt+↓</td><td>Add Cursor Above / Below</td><td><code>selection.addCursorAbove</code> / <code>selection.addCursorBelow</code></td></tr>
+<tr><td>Alt+Shift+C</td><td>Toggle Column (Block) Selection Mode</td><td><code>selection.toggleColumnMode</code></td></tr>
+<tr><td>Alt+Shift+I</td><td>Split Block Selection into Cursors</td><td><code>selection.blockToCursors</code></td></tr>
+<tr><td>Alt+drag</td><td>Rectangular selection</td><td>–</td></tr>
+<tr><td>Esc</td><td>Back to a single cursor</td><td>–</td></tr>
+</tbody>
+</table></div>
+<h2 id="code">Code</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Command</th><th>Id</th></tr></thead>
+<tbody>
+<tr><td>Shift+Alt+F</td><td>Format Document</td><td><code>code.format</code></td></tr>
+<tr><td>Ctrl+/</td><td>Toggle Line Comment</td><td><code>edit.toggleComment</code></td></tr>
+<tr><td>Shift+Alt+A</td><td>Toggle Block Comment</td><td><code>code.toggleBlockComment</code></td></tr>
+<tr><td>Ctrl+Shift+[ / Ctrl+Shift+]</td><td>Fold / Unfold Region</td><td><code>code.fold</code> / <code>code.unfold</code></td></tr>
+<tr><td>–</td><td>Fold All / Unfold All</td><td><code>code.foldAll</code> / <code>code.unfoldAll</code></td></tr>
+<tr><td>Ctrl+Shift+\</td><td>Go to Matching Bracket</td><td><code>code.gotoBracket</code></td></tr>
+<tr><td>Ctrl+K M</td><td>Change Language Mode</td><td><code>code.setLanguage</code></td></tr>
+<tr><td>–</td><td>Auto-detect Language</td><td><code>code.detectLanguage</code></td></tr>
+<tr><td>–</td><td>Indentation: Convert to Spaces / Tabs</td><td><code>code.indentToSpaces</code> / <code>code.indentToTabs</code></td></tr>
+</tbody>
+</table></div>
+<h2 id="find">Find</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Command</th><th>Id</th></tr></thead>
+<tbody>
+<tr><td>Ctrl+F</td><td>Find</td><td><code>find.open</code></td></tr>
+<tr><td>Ctrl+H</td><td>Replace</td><td><code>find.replace</code></td></tr>
+<tr><td>F3 / Shift+F3</td><td>Find Next / Previous</td><td><code>find.next</code> / <code>find.prev</code></td></tr>
+<tr><td>Alt+L</td><td>Toggle Find in Selection</td><td><code>find.toggleInSelection</code></td></tr>
+<tr><td>Ctrl+Shift+F</td><td>Find in Files</td><td><code>find.inFiles</code></td></tr>
+<tr><td>Ctrl+Shift+H</td><td>Replace in Files</td><td><code>find.replaceInFiles</code></td></tr>
+<tr><td>–</td><td>Undo Replace in Files</td><td><code>find.undoReplaceInFiles</code></td></tr>
+<tr><td>F4 / Shift+F4</td><td>Next / Previous Search Result</td><td><code>find.nextResult</code> / <code>find.prevResult</code></td></tr>
+<tr><td>Ctrl+G</td><td>Go to Line</td><td><code>goto.line</code></td></tr>
+</tbody>
+</table></div>
+<p>Inside the find bar: <strong>Enter / Shift+Enter</strong> next / previous, <strong>Alt+C / Alt+W / Alt+R / Alt+P</strong> toggle case / whole word / regex / preserve case, <strong>Ctrl+Enter</strong> insert a line break, <strong>Ctrl+Alt+Enter</strong> replace all.</p>
+<h2 id="view">View</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Command</th><th>Id</th></tr></thead>
+<tbody>
+<tr><td>Ctrl+Shift+P, F1</td><td>Command Palette</td><td><code>view.commandPalette</code></td></tr>
+<tr><td>Ctrl+B</td><td>Collapse / Restore Side Panels</td><td><code>view.toggleSidebar</code></td></tr>
+<tr><td>Ctrl+J</td><td>Toggle Bottom Panel</td><td><code>view.togglePanel</code></td></tr>
+<tr><td>Ctrl+\</td><td>Split Editor / Close Split Editor</td><td><code>view.splitEditor</code></td></tr>
+<tr><td>Ctrl+1 / Ctrl+2</td><td>Focus Left / Right Editor Pane</td><td><code>view.focusLeftPane</code> / <code>view.focusRightPane</code></td></tr>
+<tr><td>Ctrl+Shift+E</td><td>Show Explorer</td><td><code>view.explorer</code></td></tr>
+<tr><td>Ctrl+Shift+J</td><td>Show JSON Tools</td><td><code>view.json</code></td></tr>
+<tr><td>–</td><td>Show Macros / Show Scripts</td><td><code>view.macros</code> / <code>view.scripts</code></td></tr>
+<tr><td>–</td><td>Show API Requests</td><td><code>view.api</code></td></tr>
+<tr><td>Ctrl+`</td><td>New Terminal</td><td><code>terminal.new</code></td></tr>
+<tr><td>Ctrl+,</td><td>Settings</td><td><code>view.settings</code></td></tr>
+<tr><td>(none)</td><td>Keyboard Shortcuts… (opens the list in Settings)</td><td><code>view.shortcuts</code></td></tr>
+<tr><td>Alt+Z</td><td>Toggle Word Wrap</td><td><code>view.toggleWrap</code></td></tr>
+<tr><td>–</td><td>Toggle Render Whitespace</td><td><code>view.toggleWhitespace</code></td></tr>
+<tr><td>–</td><td>Toggle Light/Dark Theme</td><td><code>view.toggleTheme</code></td></tr>
+<tr><td>–</td><td>Theme: System</td><td><code>view.themeSystem</code></td></tr>
+<tr><td>–</td><td>Theme: Light</td><td><code>view.themeLight</code></td></tr>
+<tr><td>–</td><td>Theme: Grey</td><td><code>view.themeGrey</code></td></tr>
+<tr><td>–</td><td>Theme: Dark</td><td><code>view.themeDark</code></td></tr>
+<tr><td>Ctrl+M</td><td>Toggle Tab Key Moves Focus</td><td><code>view.toggleTabFocus</code></td></tr>
+<tr><td>Ctrl+= / Ctrl+- / Ctrl+0</td><td>Zoom In / Out / Reset</td><td><code>view.zoomIn</code> / <code>view.zoomOut</code> / <code>view.zoomReset</code></td></tr>
+<tr><td>Alt, F10</td><td>Open the menu bar</td><td>–</td></tr>
+<tr><td>Alt+F / E / O / S / N / V / G / J / I / M / T / H</td><td>Open File / Edit / Code / Selection / Find / View / Git / JSON / Scripts / Macros / Tools / Help (the letter is underlined while Alt is held)</td><td>–</td></tr>
+</tbody>
+</table></div>
+<h2 id="json">JSON</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Command</th><th>Id</th></tr></thead>
+<tbody>
+<tr><td>Ctrl+Alt+F</td><td>Format / Pretty-print</td><td><code>json.format</code></td></tr>
+<tr><td>Ctrl+Alt+M</td><td>Minify</td><td><code>json.minify</code></td></tr>
+<tr><td>Ctrl+Alt+V</td><td>Validate</td><td><code>json.validate</code></td></tr>
+<tr><td>Ctrl+Alt+P</td><td>Copy Path at Cursor (dot)</td><td><code>json.copyPath</code></td></tr>
+<tr><td>–</td><td>Copy JSONPath / JSON Pointer / Bracket Path at Cursor</td><td><code>json.copyJsonPath</code> / <code>json.copyPointer</code> / <code>json.copyBracket</code></td></tr>
+<tr><td>Ctrl+Alt+C</td><td>Copy Value at Cursor</td><td><code>json.copyValue</code></td></tr>
+<tr><td>–</td><td>Convert to CSV / Convert CSV to JSON</td><td><code>json.toCsv</code> / <code>json.fromCsv</code></td></tr>
+<tr><td>–</td><td>Copy Top-level Keys</td><td><code>json.copyKeys</code></td></tr>
+</tbody>
+</table></div>
+<p>In the JSON tree: <strong>Ctrl+C</strong> copies the value, <strong>Ctrl+Shift+C</strong> copies the path.</p>
+<h2 id="api-requests">API requests</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Command</th><th>Id</th></tr></thead>
+<tbody>
+<tr><td>Enter (URL box), Ctrl+Enter (anywhere in the form)</td><td>Send Request</td><td><code>api.send</code></td></tr>
+<tr><td>–</td><td>Cancel Request</td><td><code>api.cancel</code></td></tr>
+<tr><td>–</td><td>New Request</td><td><code>api.new</code></td></tr>
+<tr><td>–</td><td>Save Request / Save Request as New</td><td><code>api.save</code> / <code>api.saveAsNew</code></td></tr>
+<tr><td>–</td><td>Show Response in JSON Tools</td><td><code>api.showInJson</code></td></tr>
+</tbody>
+</table></div>
+<p>In the saved-requests dropdown: <strong>↓</strong> or <strong>Enter</strong> opens it, <strong>↑ / ↓</strong> move, <strong>Enter</strong> loads, <strong>F2</strong> renames, <strong>Delete</strong> deletes, <strong>Escape</strong> closes. API commands are never recorded into macros. See <a href="api-requests.html">API requests</a>.</p>
+<h2 id="macros-and-scripts">Macros and scripts</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Command</th><th>Id</th></tr></thead>
+<tbody>
+<tr><td>Ctrl+Shift+R</td><td>Start / Stop Recording</td><td><code>macro.toggleRecord</code></td></tr>
+<tr><td>Ctrl+Shift+M</td><td>Play Last Macro</td><td><code>macro.playLast</code></td></tr>
+<tr><td>–</td><td>Play Last Until End of File</td><td><code>macro.playToEnd</code></td></tr>
+<tr><td>–</td><td>Pause / Resume Playback</td><td><code>macro.pause</code></td></tr>
+<tr><td>Shift+Esc</td><td>Stop Playback</td><td><code>macro.stop</code></td></tr>
+<tr><td>Ctrl+Shift+Enter</td><td>Run Current Script</td><td><code>script.runActive</code></td></tr>
+<tr><td>–</td><td>Show Scripts / New Script</td><td><code>script.panel</code> / <code>script.new</code></td></tr>
+<tr><td>–</td><td>Script API Reference (Help menu)</td><td><code>help.scriptApi</code></td></tr>
+</tbody>
+</table></div>
+<h2 id="code-intelligence">Code intelligence</h2>
+<p>These need the file&#39;s <a href="code-intelligence.html">language server</a>.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Command</th><th>Id</th></tr></thead>
+<tbody>
+<tr><td>Ctrl+Space</td><td>Show Suggestions</td><td><code>code.triggerSuggest</code></td></tr>
+<tr><td>Ctrl+Shift+Space</td><td>Show Parameter Hints</td><td><code>code.signatureHelp</code></td></tr>
+<tr><td>F12</td><td>Go to Definition</td><td><code>code.gotoDefinition</code></td></tr>
+<tr><td>Ctrl+F12</td><td>Go to Implementation</td><td><code>code.gotoImplementation</code></td></tr>
+<tr><td>–</td><td>Go to Type Definition</td><td><code>code.gotoTypeDefinition</code></td></tr>
+<tr><td>Shift+F12</td><td>Find All References</td><td><code>code.findReferences</code></td></tr>
+<tr><td>F2</td><td>Rename Symbol</td><td><code>code.renameSymbol</code></td></tr>
+<tr><td>F8 / Shift+F8</td><td>Next / Previous Problem</td><td><code>code.nextProblem</code> / <code>code.prevProblem</code></td></tr>
+<tr><td>–</td><td>Format Document with Language Server</td><td><code>code.formatWithServer</code></td></tr>
+<tr><td>–</td><td>Restart Language Servers</td><td><code>code.restartLanguageServers</code></td></tr>
+<tr><td>–</td><td>Problems (bottom panel)</td><td><code>view.problems</code></td></tr>
+</tbody>
+</table></div>
+<h2 id="compare">Compare</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Command</th><th>Id</th></tr></thead>
+<tbody>
+<tr><td>–</td><td>Compare Two Files…</td><td><code>compare.files</code></td></tr>
+<tr><td>–</td><td>Compare Active File With…</td><td><code>compare.activeWith</code></td></tr>
+<tr><td>–</td><td>Compare with Saved</td><td><code>compare.withSaved</code></td></tr>
+<tr><td>–</td><td>Compare with Clipboard</td><td><code>compare.withClipboard</code></td></tr>
+<tr><td>–</td><td>Select Active File for Compare / Compare Active File with Selected</td><td><code>compare.selectForCompare</code> / <code>compare.withSelected</code></td></tr>
+<tr><td>F7 / Shift+F7</td><td>Next / Previous Change</td><td><code>compare.nextChange</code> / <code>compare.prevChange</code></td></tr>
+<tr><td>–</td><td>Swap Sides</td><td><code>compare.swap</code></td></tr>
+<tr><td>–</td><td>Toggle Inline / Side by Side</td><td><code>compare.toggleInline</code></td></tr>
+<tr><td>Ctrl+S</td><td>Save the edited side</td><td><code>file.save</code></td></tr>
+</tbody>
+</table></div>
+<h2 id="git">Git</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Command</th><th>Id</th></tr></thead>
+<tbody>
+<tr><td>Ctrl+Shift+G</td><td>Show Source Control</td><td><code>git.showPanel</code></td></tr>
+<tr><td>Alt+F5 / Shift+Alt+F5</td><td>Next / Previous Change (since the last commit)</td><td><code>git.nextChange</code> / <code>git.prevChange</code></td></tr>
+<tr><td>–</td><td>Show Change at Cursor / Revert Change at Cursor</td><td><code>git.peekChange</code> / <code>git.revertChange</code></td></tr>
+<tr><td>–</td><td>Compare with Last Commit (HEAD)</td><td><code>git.compareWithHead</code></td></tr>
+<tr><td>–</td><td>Show File History</td><td><code>git.fileHistory</code></td></tr>
+<tr><td>–</td><td>Show Commit Graph</td><td><code>git.graph</code></td></tr>
+<tr><td>Alt+F6 / Shift+Alt+F6</td><td>Next / Previous Conflict</td><td><code>git.nextConflict</code> / <code>git.prevConflict</code></td></tr>
+<tr><td>–</td><td>Accept Current / Incoming / Both (conflict at cursor)</td><td><code>git.acceptCurrent</code> / <code>git.acceptIncoming</code> / <code>git.acceptBoth</code></td></tr>
+<tr><td>–</td><td>Accept All Current / Incoming in This File</td><td><code>git.acceptAllCurrent</code> / <code>git.acceptAllIncoming</code></td></tr>
+<tr><td>–</td><td>Show / Hide Line Blame</td><td><code>git.toggleBlame</code></td></tr>
+<tr><td>–</td><td>Stage / Unstage Current File</td><td><code>git.stageFile</code> / <code>git.unstageFile</code></td></tr>
+<tr><td>Ctrl+K S / Ctrl+K U</td><td>Stage / Unstage Change at Cursor (in a comparison opened from Source Control)</td><td><code>git.stageChange</code> / <code>git.unstageChange</code></td></tr>
+<tr><td>Ctrl+K L / Ctrl+K N</td><td>Stage / Unstage Selected Lines</td><td><code>git.stageLines</code> / <code>git.unstageLines</code></td></tr>
+<tr><td>–</td><td>Discard Change at Cursor… / Discard Selected Lines… (no shortcut on purpose)</td><td><code>git.discardChange</code> / <code>git.discardLines</code></td></tr>
+<tr><td>–</td><td>Switch Branch…</td><td><code>git.switchBranch</code></td></tr>
+<tr><td>–</td><td>Fetch / Pull / Push</td><td><code>git.fetch</code> / <code>git.pull</code> / <code>git.push</code></td></tr>
+<tr><td>–</td><td>Add Remote…</td><td><code>git.addRemote</code></td></tr>
+<tr><td>–</td><td>Refresh Git Status</td><td><code>git.refresh</code></td></tr>
+</tbody>
+</table></div>
+<h2 id="large-file-tabs">Large-file tabs</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td>Enter, F2, double-click</td><td>Edit the selected line</td></tr>
+<tr><td>Ctrl+Enter</td><td>Insert a line below</td></tr>
+<tr><td>Delete</td><td>Delete the selected lines</td></tr>
+<tr><td>Ctrl+C</td><td>Copy the selected lines</td></tr>
+<tr><td>Ctrl+F, then Enter</td><td>Find</td></tr>
+<tr><td>F3 / Shift+F3</td><td>Next / previous hit</td></tr>
+<tr><td>Ctrl+G</td><td>Go to line</td></tr>
+<tr><td>Ctrl+Z / Ctrl+Y</td><td>Undo / redo</td></tr>
+</tbody>
+</table></div>
+<h2 id="changing-shortcuts">Changing shortcuts</h2>
+<p><strong>Tools › Keyboard Shortcuts…</strong> (also <strong>Help › Change Keyboard Shortcuts…</strong>, the palette, and <strong>Edit shortcuts…</strong> in <strong>Settings › Keyboard shortcuts</strong>) opens the <strong>Keyboard Shortcuts</strong> tab. It lists every command under its menu category with its keys. There is only ever one such tab, and it isn&#39;t reopened when Quarry restarts.</p>
+<ul>
+<li><strong>Search</strong> finds a command by its name (&quot;duplicate&quot;), its menu (&quot;git&quot;) or its keys (&quot;ctrl+shift+d&quot;); the matching text is highlighted. <strong>Escape</strong> empties the box.</li>
+<li><strong>By category / By name / By keys</strong> changes the order. By keys lists commands without a shortcut last.</li>
+<li><strong>Changed only</strong> lists just the shortcuts you changed.</li>
+<li>The line at the bottom counts the commands and your changes.</li>
+</ul>
+<p>Typing a command&#39;s name or keys in the Settings filter also works: the Keyboard shortcuts row then says how many commands match, and <strong>Show matches</strong> opens the tab with that search.</p>
+<p>Each command has three buttons (double-clicking the row is the same as Change):</p>
+<ul>
+<li><strong>Change</strong> (pencil). Press the new keys, then <strong>Enter</strong> or <strong>Assign</strong>. For a two-key shortcut such as Ctrl+K J, press the second combination before Enter. <strong>Backspace</strong> starts over and <strong>Escape</strong> cancels. Nothing else reacts to the keyboard while Quarry is waiting for the keys.</li>
+<li><strong>Remove</strong> (×). The command keeps working from the menus and the palette, without a shortcut.</li>
+<li><strong>Restore default</strong> (↺). Back to the built-in keys.</li>
+</ul>
+<p><strong>Restore all</strong> puts every shortcut back, after asking.</p>
+<p>Rules Quarry applies:</p>
+<ul>
+<li>A shortcut needs Ctrl or Alt, or is a function key (F5, Shift+F6). The second key of a two-key shortcut can be anything.</li>
+<li>If another command has the keys, Quarry names it; assigning takes the keys away from that command. Restoring a command&#39;s default takes its keys back in the same way.</li>
+<li>A single shortcut can&#39;t be the first half of a two-key shortcut (Ctrl+K on its own while Ctrl+K M exists), and a two-key shortcut can&#39;t start with a key that is a shortcut itself.</li>
+<li>Ctrl+C, Ctrl+X and Ctrl+V stay with the clipboard, F10 with the menu bar, and Alt+letter with the menu that letter opens (Alt+F for File, and so on).</li>
+</ul>
+<p>Menus and the palette show your keys at once. A built-in key you moved or removed does nothing in the editor afterwards. Tooltips and this page keep naming the built-in keys.</p>
+<p>The keys under <a href="#editor-keys-from-codemirror">Editor keys from CodeMirror</a> and the keys of the find bar, lists and dialogs are not commands and can&#39;t be changed; a shortcut you assign to one of those editor keys wins over it.</p>
+<p>Your shortcuts are stored in <code>settings.json</code> as <code>keybindings</code> (command id → keys; an empty text means no shortcut). <strong>Reset all to defaults</strong> in Settings restores them too.</p>
+<h2 id="editor-keys-from-codemirror">Editor keys from CodeMirror</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td>Ctrl+Enter</td><td>Insert a blank line below</td></tr>
+<tr><td>Alt+L</td><td>Select line</td></tr>
+<tr><td>Ctrl+I</td><td>Select the enclosing syntax node</td></tr>
+<tr><td>Ctrl+[ / Ctrl+]</td><td>Outdent / indent</td></tr>
+<tr><td>Ctrl+Alt+\</td><td>Re-indent the selection</td></tr>
+<tr><td>Shift+Alt+↑ / Shift+Alt+↓</td><td>Copy line up / down</td></tr>
+<tr><td>Alt+← / Alt+→</td><td>Move by syntax node</td></tr>
+<tr><td>Ctrl+U / Alt+U</td><td>Undo / redo the last selection change</td></tr>
+<tr><td>Ctrl+Alt+[ / Ctrl+Alt+]</td><td>Fold all / unfold all</td></tr>
+<tr><td>Ctrl+Space</td><td>Show completions</td></tr>
+<tr><td>Ctrl+Backspace / Ctrl+Delete</td><td>Delete word</td></tr>
+<tr><td>Esc, then Tab</td><td>Move focus out of the editor</td></tr>
+</tbody>
+</table></div>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="../privacy.html">Privacy policy</a> · <a href="../terms.html">Terms of sale</a> · <a href="../refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="../license.html">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>

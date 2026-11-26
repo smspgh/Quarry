@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Editing · Quarry</title>
+  <meta name="description" content="Editing: Layout, opening files, trusted folders, palette, multi-cursor and column mode, line commands, languages, encodings, saving, sessions, Explorer, accessibility.">
+  <link rel="icon" href="../quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="../"><img src="../quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="../docs/" aria-current="page">Documentation</a>
+        <a href="../#install">Install</a>
+        <a href="../#licensing">Licensing</a>
+        <a href="../#support">Support</a>
+        <a href="../privacy.html">Privacy</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="docs">
+      <nav class="guides" aria-label="Guides">
+        <a href="./">All guides</a>
+        <a href="install.html">Installing</a>
+        <a href="editing.html" aria-current="page">Editing</a>
+        <a href="large-files.html">Large files</a>
+        <a href="code-intelligence.html">Code intelligence</a>
+        <a href="compare.html">Compare</a>
+        <a href="git.html">Git</a>
+        <a href="terminal.html">Terminal</a>
+        <a href="find-and-replace.html">Find and replace</a>
+        <a href="json.html">JSON tools</a>
+        <a href="api-requests.html">API requests</a>
+        <a href="formatting.html">Formatting</a>
+        <a href="macros.html">Macros</a>
+        <a href="scripting.html">Scripts</a>
+        <a href="keyboard-shortcuts.html">Keyboard shortcuts</a>
+        <a href="settings.html">Settings</a>
+        <a href="benchmarks.html">Benchmarks</a>
+      </nav>
+        <article class="guide">
+<h1 id="editing">Editing</h1>
+<ul>
+<li><a href="#window-layout">Window layout</a></li>
+<li><a href="#opening-files-and-folders">Opening files and folders</a></li>
+<li><a href="#trusted-folders">Trusted folders</a></li>
+<li><a href="#command-palette-quick-open-and-go-to-line">Command palette, Quick Open and Go to Line</a></li>
+<li><a href="#multi-cursor-and-column-mode">Multi-cursor and column mode</a></li>
+<li><a href="#line-and-text-commands">Line and text commands</a></li>
+<li><a href="#languages">Languages</a></li>
+<li><a href="#encodings-and-line-endings">Encodings and line endings</a></li>
+<li><a href="#saving">Saving</a></li>
+<li><a href="#external-changes">External changes</a></li>
+<li><a href="#sessions-and-hot-exit">Sessions and hot exit</a></li>
+<li><a href="#explorer">Explorer</a></li>
+<li><a href="#appearance-and-accessibility">Appearance and accessibility</a></li>
+<li><a href="#crash-reports">Crash reports</a></li>
+</ul>
+<h2 id="window-layout">Window layout</h2>
+<ul>
+<li><strong>Title bar.</strong> By default it holds the Quarry mark and the menus (File, Edit, View, …). <strong>Alt</strong> or <strong>F10</strong> opens the menus from the keyboard, and <strong>Alt+letter</strong> opens one menu directly: hold Alt and each menu&#39;s letter is underlined (<strong>Alt+F</strong> File, <strong>Alt+E</strong> Edit, <strong>Alt+O</strong> Code, <strong>Alt+N</strong> Find, <strong>Alt+I</strong> Scripts, …). A menu taller than the window (the Git menu in a small window) scrolls with the mouse wheel; its submenus still open beside their entry.</li>
+<li><strong>Tabs.</strong> Once a document is open, its tab appears in a row above the title bar. The active tab is always highlighted with an accent bar and bold name. Right-click a tab for Close, Close Others, Close All, Copy Path, <strong>Show in Quarry Explorer</strong> and <strong>Show in Windows Explorer</strong> (the last three for saved files only).<ul>
+<li><strong>Close All Tabs / Close Others</strong> ask once, before anything closes: &quot;Save changes to 3 files?&quot; with Save All, Don&#39;t Save and Cancel (and one &quot;Stop … running tabs?&quot; for terminal tabs still working). Cancel leaves every tab open.</li>
+<li><strong>Reopen Closed Tab</strong> (<strong>Ctrl+Shift+T</strong>, File menu) brings back the file tabs you closed, most recent first, with the cursor and scroll where they were. The last 20 are remembered; untitled, terminal, Compare and commit graph tabs are not, and files that were deleted since are skipped.</li>
+<li><strong>More tabs than fit</strong> wrap onto another row below, starting under the first tab, so every tab stays visible. The tab area grows a row at a time.</li>
+<li><strong>New files</strong> are named Untitled-1, Untitled-2, … using the lowest number no open tab has, so closing Untitled-1 makes the next new file Untitled-1 again.</li>
+<li><strong>Preview tabs.</strong> A file you single-click in the Explorer opens in a <em>preview</em> tab, with its name in italics. Clicking another file in the Explorer replaces it, so browsing the tree doesn&#39;t pile up tabs. The tab is kept once you edit the file, double-click its tab, or double-click the file in the Explorer.</li>
+<li><strong>Tab limit.</strong> <strong>Settings › Tabs and panels › Maximum open tabs</strong> (default 50) caps how many tabs are open at once. Opening a file past the limit asks first, naming the least recently used tabs without unsaved changes that Quarry would close to make room. <strong>Cancel</strong> opens nothing, so you can close tabs yourself. Tabs with unsaved changes are never closed for you; when every tab has changes, Quarry says so and opens nothing.</li>
+<li><strong>Show in Quarry Explorer</strong> opens the Explorer panel, expands the tree down to the file, selects it and puts keyboard focus on it. If the file isn&#39;t inside a folder open in the Explorer, its own folder is opened there, beside the folders that are already open.</li>
+<li><strong>Show in Windows Explorer</strong> opens Windows File Explorer at the file&#39;s folder with the file selected.</li>
+<li>Both are also in the <strong>File</strong> menu and the command palette, for the active document. New documents come from <strong>File › New</strong>, <strong>Ctrl+N</strong> or the welcome screen.</li>
+</ul>
+</li>
+<li><strong>Menu position.</strong> <strong>Settings › Appearance › Menu bar</strong> can instead put the menus on their own row (<strong>Top</strong>) or hide them (<strong>Hidden</strong>, shown with Alt, F10 or an Alt+letter). In both of those, the tabs share the title bar.</li>
+<li><strong>Quarry mark.</strong> Clicking the icon at the left of the title bar collapses every open side panel. Clicking it again brings back the pinned ones. Collapsing lasts until you restart: pinned panels always come back expanded on start.</li>
+<li><strong>Panel rail and side panels.</strong> A strip of coloured icons on the left edge opens the panels: Search, Explorer, Source Control (<a href="git.html">Git</a>), JSON Tools, Scripts, Macros and, at the bottom, Settings. Hover an icon to see its name (&quot;Explorer Panel&quot;, …); click it to open the panel, and click it again to close it. The panels are also in <strong>View › Panels</strong>. <strong>Ctrl+B</strong> collapses the open panels, or brings them back; with nothing pinned it reopens the panel you had open last (the Quarry mark only brings back pinned panels).<ul>
+<li><strong>Floating or pinned.</strong> A panel opens floating: it pushes the editor over (it never covers the document) and closes when you click back into the document (or press <strong>Escape</strong>). Click the pin button at the top of a panel to keep it open beside the editor. Pinned panels stay visible together, side by side in the order you pinned them, and a panel you open next floats just to their right. A pinned panel has a pin in its top-left corner, in the panel&#39;s colour, and a dot on its rail icon. Click the pin button again to unpin it; the panel-close button unpins and closes it. Only pinned panels reopen when Quarry starts.</li>
+<li><strong>Search with results.</strong> While Find in Files has results, the Search panel docks beside the editor as if pinned (without the pin), so it stays open while you work in a file you opened from the results. It goes back to floating when you close it or clear the results.</li>
+<li><strong>Width.</strong> Drag a panel&#39;s right edge; each panel keeps its own width. Settings always opens at 35% of the window width; a width you drag it to lasts until you close it.</li>
+</ul>
+</li>
+<li><strong>Split editor</strong> (<strong>Ctrl+\</strong>, <strong>View › Split Editor</strong>). Shows a second pane to the right with the same document; both panes edit it, with one undo history. The tab strip is shared: picking a tab changes the pane that has the keyboard (the one with the accent line on top), and the other pane&#39;s tab gets a lighter accent line. Picking the tab the other pane shows moves the keyboard there; so do a click in it and <strong>Ctrl+1</strong> / <strong>Ctrl+2</strong> (left / right). <strong>Open to the Side</strong> on a tab&#39;s right-click menu shows it in the other pane, splitting the editor if needed. Only text documents go in the right pane; terminal, Compare and large-file tabs always open on the left. Drag the bar between the panes to resize them (double-click it for half and half). <strong>Ctrl+\</strong> again, or closing the right pane&#39;s document, closes the split. The split comes back with the session.</li>
+<li><strong>Bottom panel</strong> (<strong>Ctrl+J</strong>). The Console used by scripts, and the Problems list. Drag its top edge to resize it; the height is kept for the next start, but the panel always starts hidden, on Console.</li>
+<li><strong>Status bar.</strong> Cursor position, column mode, indentation, encoding, line endings and language. Click any of these to change it.</li>
+</ul>
+<p>With no tabs open, the welcome screen offers New, Open file, Open folder, the command list and your recent files. Quarry starts on this screen when there is nothing to restore; it doesn&#39;t create an empty Untitled document.</p>
+<p><strong>Help tips.</strong> An <strong>ⓘ</strong> icon next to a panel title shows tips for that panel. Hover it to read them, or click it to keep them open while you work; click it again, click elsewhere or press <strong>Escape</strong> to close them.</p>
+<h2 id="opening-files-and-folders">Opening files and folders</h2>
+<ul>
+<li><strong>Ctrl+O / Ctrl+Shift+O</strong> open a file / folder. A folder you open is shown beside the ones already open; <strong>File › Close Folder</strong> closes them (see <a href="#explorer">Explorer</a>). <strong>File › Open Recent File / Open Recent Folder</strong> list the last 12 files and 10 folders (Quarry remembers 15 of each; Quick Open with no folder lists all 15 files, the welcome screen the last 8). Each submenu ends with a Clear command.</li>
+<li>Drop files anywhere on the window to open them. Dropping a folder opens it in the Explorer.</li>
+<li>In File Explorer, right-click any file and choose <strong>Open with Quarry</strong>, or any folder and choose <strong>Open folder in Quarry</strong>. On Windows 11 these are under <strong>Show more options</strong>. Quarry is also listed in <strong>Open with</strong> for common text, data and code files. The installer adds these entries without changing your default apps.</li>
+<li><code>quarry.exe &lt;path&gt; [&lt;path&gt; …]</code> opens files or a folder from the command line. Quarry runs as a single instance, so opening a file while it&#39;s running sends the file to the existing window.</li>
+<li>Files that look binary (a NUL byte near the start) open read-only with a warning.</li>
+<li>Files at or above the large-file threshold (128 MB by default) open in <a href="large-files.html">large-file mode</a>.</li>
+</ul>
+<h2 id="trusted-folders">Trusted folders</h2>
+<p>Git and language servers run programs that a folder&#39;s own files can name: a repository&#39;s git configuration, a project&#39;s own compiler and build scripts. Quarry therefore runs them only in folders you have said you trust.</p>
+<ul>
+<li><strong>Asked once.</strong> The first time you open a folder, Quarry shows it and asks <strong>Trust the files in <folder>?</strong> <strong>Trust Folder</strong> remembers the folder, with everything in it. <strong>Open Restricted</strong> (also Enter and Escape) leaves it open without trust. A session that is restored does not ask.</li>
+<li><strong>What restricted means.</strong> Source Control and code intelligence stay off for the folder: no git status, change markers or blame, and no language server. Everything else works as usual: editing, Find in Files, compare, formatting, scripts, macros and the terminal.</li>
+<li><strong>Trust later.</strong> <strong>File › Trust Folder…</strong>, <strong>Trust This Folder</strong> in the Source Control panel, or <strong>Restricted</strong> in the status bar.</li>
+<li><strong>Never ask.</strong> Tick <strong>Trust every folder I open from now on, and don&#39;t ask again</strong> in that dialog and choose <strong>Trust Folder</strong>, or turn on <strong>Settings › Files &amp; tabs › Trusted folders › Trust every folder I open</strong>. Git and language servers then run in every folder. Leave it off if you open downloads or other people&#39;s repositories. Turning it off later keeps the folders on the list trusted.</li>
+<li><strong>A file opened on its own</strong> follows the same rule: git and its language server run only when the file&#39;s repository or project folder is trusted.</li>
+<li><strong>The repository&#39;s folder decides.</strong> Trusting a subfolder of a repository does not turn git on, because git reads the configuration at the repository&#39;s top folder; the panel offers to trust that one.</li>
+<li><strong>The list</strong> is in <strong>Settings › Files &amp; tabs › Trusted folders</strong>, with <strong>Remove</strong> for each folder. It is kept in <code>trust.json</code> in Quarry&#39;s settings folder, and <strong>Reset all to defaults</strong> does not change it.</li>
+<li><strong>After updating</strong> from a version without trusted folders, the folders of your last session are trusted already, since git and language servers ran there before.</li>
+</ul>
+<h2 id="command-palette-quick-open-and-go-to-line">Command palette, Quick Open and Go to Line</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Opens</th></tr></thead>
+<tbody>
+<tr><td><strong>Ctrl+Shift+P</strong> or <strong>F1</strong></td><td><strong>Command palette.</strong> Every command with its shortcut, matched fuzzily against &quot;Category: Title&quot;, so typing <code>json</code> lists all JSON commands. With an empty box, recently used commands come first. Unavailable commands are hidden.</td></tr>
+<tr><td><strong>Ctrl+P</strong></td><td><strong>Quick Open.</strong> Fuzzy search over the files in the open folder (up to 30,000 files; <code>.git</code>, <code>node_modules</code> and <code>target</code> skipped, and in a git repository whatever <code>.gitignore</code> excludes). With several folders open it searches all of them and shows full paths. With no folder, it lists open and recent files.</td></tr>
+<tr><td><strong>Ctrl+G</strong></td><td><strong>Go to Line.</strong> Accepts <code>120</code>, <code>120:8</code> or <code>120,8</code>. The cursor previews the target as you type, and Esc puts it back.</td></tr>
+<tr><td><strong>Ctrl+K M</strong></td><td><strong>Language picker.</strong></td></tr>
+</tbody>
+</table></div>
+<p>In every list, ↑/↓ or Tab/Shift+Tab move, Page Up/Down jump 10, Enter runs and Esc cancels.</p>
+<h2 id="multi-cursor-and-column-mode">Multi-cursor and column mode</h2>
+<p><strong>Multi-cursor</strong></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><strong>Ctrl+D</strong></td><td>Add the next occurrence of the selection (or the word) as another cursor.</td></tr>
+<tr><td><strong>Ctrl+Shift+L</strong></td><td>Select every occurrence.</td></tr>
+<tr><td><strong>Alt+Enter</strong> (in the find bar)</td><td>Select every find match.</td></tr>
+<tr><td><strong>Ctrl+Alt+↑ / ↓</strong></td><td>Add a cursor above / below, at the same column.</td></tr>
+<tr><td><strong>Alt+drag</strong></td><td>Rectangular selection.</td></tr>
+<tr><td><strong>Alt+Shift+I</strong></td><td>Split a block selection into one cursor per line.</td></tr>
+<tr><td><strong>Esc</strong></td><td>Back to a single cursor.</td></tr>
+</tbody>
+</table></div>
+<p><strong>Column (block) mode</strong> — <strong>Alt+Shift+C</strong>, <strong>Selection › Toggle Column Mode</strong>, or the <strong>Column</strong> button in the status bar:</p>
+<ul>
+<li>Any mouse drag selects a rectangle; no Alt is needed.</li>
+<li><strong>Shift+arrows</strong> grow or shrink the block. <strong>Shift+Home / End</strong> extend it to column 0 or to the longest line in the block. <strong>Shift+Page Up / Down</strong> move 20 rows.</li>
+<li>Typing, deleting and pasting edit every row of the block at once.</li>
+<li>Columns are visual, so tabs count as their width. A row too short to reach the block gets a cursor at its end.</li>
+<li>Column mode is a single switch for all tabs and is off when Quarry starts.</li>
+</ul>
+<h2 id="line-and-text-commands">Line and text commands</h2>
+<p>From the <strong>Edit</strong> menu or the palette. With no selection, the <strong>Lines</strong> commands work on the whole document (a final line break stays at the end). With a selection, they work on the lines it touches (with several selections, each block of lines on its own; selections on neighbouring lines, such as a column selection, count as one block); a line the selection reaches only at its start is not included.</p>
+<ul>
+<li><strong>Cut / Copy / Paste</strong> (<strong>Ctrl+X / C / V</strong>): with nothing selected, Cut and Copy take the whole line.</li>
+<li><strong>Line:</strong> Duplicate Line Down (<strong>Ctrl+Shift+D</strong>) / Up, Delete Line (<strong>Ctrl+Shift+K</strong>), Move Line Up / Down (<strong>Alt+↑ / ↓</strong>).</li>
+<li><strong>Lines:</strong> Sort Ascending / Descending (natural order, case-insensitive, so <code>file2</code> sorts before <code>file10</code>), Reverse, Remove Duplicates, Delete Blank Lines (whitespace-only lines too), Delete Empty Lines, Trim Trailing Whitespace, Join Lines, Number Lines.</li>
+<li><strong>Transform:</strong> Uppercase, Lowercase, Title Case, Wrap Selections in Quotes.</li>
+<li><strong>Code menu:</strong><ul>
+<li>Toggle Line Comment (<strong>Ctrl+/</strong>) and Block Comment (<strong>Shift+Alt+A</strong>).</li>
+<li>Fold / Unfold (<strong>Ctrl+Shift+[</strong> / <strong>]</strong>), Fold All / Unfold All. Right-click a line that starts a foldable region (a JSON object or array, a code block…), or its fold arrow, for <strong>Collapse</strong> (or <strong>Expand</strong>, when it is folded), <strong>Collapse All</strong> and <strong>Expand All</strong> (that region and every region inside it; its siblings and the levels above it stay as they are, and children folded this way stay folded when you expand just the parent), next to Cut / Copy / Paste / Select All. Other lines keep the usual right-click menu.</li>
+<li>Go to Matching Bracket (<strong>Ctrl+Shift+\</strong>).</li>
+<li>Indentation › Convert to Spaces / Tabs.</li>
+<li><a href="formatting.html">Format Document</a> (<strong>Shift+Alt+F</strong>).</li>
+</ul>
+</li>
+</ul>
+<p>CodeMirror&#39;s standard keys also work, for example <strong>Ctrl+Space</strong> for the language&#39;s completions, where it has any, <strong>Alt+L</strong> to select a line, <strong>Ctrl+[ / ]</strong> to outdent / indent, and <strong>Shift+Alt+↑ / ↓</strong> to copy a line up / down.</p>
+<h2 id="languages">Languages</h2>
+<p>Syntax highlighting covers about 140 languages through <a href="https://github.com/codemirror/language-data" target="_blank" rel="noopener"><code>@codemirror/language-data</code></a>, plus Plain Text.</p>
+<p>Quarry picks the language from the file extension. For untitled files and unknown extensions, it looks at the start of the text and recognises:</p>
+<ul>
+<li>JSON, XML/SVG, HTML and PHP;</li>
+<li>shebang scripts (Node, Python, shell);</li>
+<li>YAML, Rust, TypeScript, JavaScript, Go, C++ (C code starting with <code>#include</code> is shown as C++ too; pick C under Code › Language if you need it), C#, Java and Python;</li>
+<li>SQL, CSS and Markdown.</li>
+</ul>
+<p>Text pasted into an empty untitled tab is checked again, so pasting JSON into a new tab gives you JSON highlighting and the JSON tools straight away.</p>
+<p>To change the language, click it in the status bar, use <strong>Code › Language</strong>, or press <strong>Ctrl+K M</strong>. <strong>Auto-detect Language</strong> checks the text again.</p>
+<h2 id="encodings-and-line-endings">Encodings and line endings</h2>
+<p><strong>On open</strong></p>
+<ul>
+<li>A byte-order mark decides the encoding: UTF-8, UTF-16 LE or UTF-16 BE.</li>
+<li>Without one, the encoding is detected from the first 1 MiB with <a href="https://github.com/hsivonen/chardetng" target="_blank" rel="noopener">chardetng</a>, the detector Firefox uses.</li>
+<li>If a file can&#39;t be decoded cleanly, Quarry warns you.</li>
+<li>Line endings are detected by majority (CRLF, LF or CR). If a file mixes them, Quarry warns you, and saving converts them all to the detected style.</li>
+</ul>
+<p><strong>In the status bar</strong></p>
+<ul>
+<li>The <strong>encoding</strong> picker sets the encoding the file is <strong>saved</strong> in. It offers UTF-8, UTF-16LE, UTF-16BE, windows-1252, ISO-8859-1, ISO-8859-2, windows-1251, Shift_JIS, GBK and EUC-KR. It does not reload the file in that encoding.</li>
+<li>If the text contains characters the chosen encoding can&#39;t represent (for example <code>€</code> or Japanese text in ISO-8859-1), Save stops and tells you how many there are and where the first one is. You can then save as UTF-8 instead or cancel. Quarry never silently replaces characters.</li>
+<li><code>BOM</code> after the encoding means the file had a byte-order mark. It is kept on save.</li>
+<li>The <strong>line endings</strong> picker switches between CRLF and LF. CR-only files keep CR.</li>
+</ul>
+<p>New files use UTF-8 without a BOM and the line ending set in <strong>Settings › Editor › Default line endings</strong> (CRLF by default).</p>
+<h2 id="saving">Saving</h2>
+<ul>
+<li><strong>Ctrl+S</strong> saves, <strong>Ctrl+Shift+S</strong> is Save As, and <strong>Ctrl+Alt+S</strong> saves all.</li>
+<li>Saves are atomic. Quarry writes a temporary file in the same folder, flushes it to disk and then replaces the original, so a crash or power cut can&#39;t leave a half-written file.</li>
+<li>Missing parent folders are created.</li>
+<li>If the file changed on disk after you opened it, Save asks before overwriting.</li>
+<li><strong>File › Revert File</strong> discards your changes and reloads the file.</li>
+</ul>
+<h2 id="external-changes">External changes</h2>
+<p>When Quarry&#39;s window regains focus, or you switch tabs, it checks whether open files changed on disk.</p>
+<ul>
+<li><strong>No unsaved changes:</strong> the file reloads, with a short notice. When several open files changed, one notice gives the count.</li>
+<li><strong>Unsaved changes:</strong> Quarry asks whether to reload from disk or keep your version. <strong>Keep my version</strong> is asked once: saving then writes your text.</li>
+<li><strong>File deleted or moved:</strong> Quarry tells you (one warning, however many files). The tab stays open with your text and is marked unsaved, and saving recreates the file. If the file comes back and you did not type in the tab meanwhile, the mark goes away, and the tab reloads when the file is newer.</li>
+<li><strong>Compare tabs</strong> with a file side follow as well: when the file changed and nothing in the comparison is edited, it shows the new text.</li>
+</ul>
+<p>The same check runs after every git action of Quarry that can rewrite files (switching branch, pull, merge, rebase, stash, discard and so on), also one that stopped on a conflict or failed. There the questions are asked before the action runs, not after it: see <a href="git.html#unsaved-tabs-and-git">Git › Unsaved tabs and git</a>. A check that is due while a &quot;changed on disk&quot; question is still open waits for your answer and then runs.</p>
+<p>The Explorer tree also updates by itself when files are added, removed or renamed in the open folder.</p>
+<h2 id="sessions-and-hot-exit">Sessions and hot exit</h2>
+<p>With <strong>Settings › Files › Restore session on start</strong> on (the default), Quarry reopens your folder (with the Explorer folders you had expanded, minus any that no longer exist), tabs, cursor positions and side-panel layout. Opening another folder starts with only its root expanded. Untitled tabs are restored with their contents, and so are unsaved changes to files: the file on disk is left as it was, and its tab comes back with your changes, still marked as unsaved. You can close Quarry without saving anything. That text is written to the session file whenever you pause typing, and at least every 10 seconds while you type, so a crash loses very little.</p>
+<p>If a file changed on disk while Quarry was closed, its tab still shows your unsaved text and Quarry tells you the file changed, as it does for any tab with unsaved changes. If the file is gone, your text comes back in an untitled tab with the file&#39;s name.</p>
+<p>When you close the window, Quarry asks to save only what the session can&#39;t keep:</p>
+<ul>
+<li>unsaved changes in large-file tabs;</li>
+<li>an untitled tab, or a file with unsaved changes, holding more than 2 MB of text.</li>
+</ul>
+<p>With session restore off, it asks for every unsaved tab.</p>
+<p>Files given on the command line take the place of the restored tabs.</p>
+<h2 id="explorer">Explorer</h2>
+<p><strong>Ctrl+Shift+E</strong> shows the Explorer for the open folder.</p>
+<ul>
+<li><p><strong>Open folders.</strong> Every open folder has a row of its own in the tree, with its name in bold and that folder&#39;s buttons at the end of the row: <strong>New File</strong>, <strong>New Folder</strong> and <strong>Close Folder</strong> (×). Opening a folder never closes one that is already open: <strong>File › Open Folder…</strong> (<strong>Ctrl+Shift+O</strong>, also the toolbar&#39;s <strong>Open Folder</strong> button and the right-click menu of the blank space below the rows), <strong>Open Recent Folder</strong>, a folder dropped on the window or passed on the command line, and <strong>Show in Quarry Explorer</strong> all show the folder beside the ones that are open. You can pick several folders in the dialog. A folder that is already in the tree is not added again, and opening the parent of an open folder takes the inner one&#39;s row away, since the parent&#39;s tree shows it. <strong>Close Folder</strong> on a folder&#39;s row (or on its right-click menu) closes just that folder, without asking: nothing is deleted and its tabs stay open. The toolbar&#39;s <strong>Close All Folders</strong> closes every folder and asks first when more than one is open. A folder&#39;s own row can&#39;t be renamed, cut or deleted from here. Quick Open (<strong>Ctrl+P</strong>), Find in Files&#39; Folder scope and the git colours cover every open folder; Source Control shows the repository of the folder you opened last, with the others in its repository list. The set of folders comes back with the session.</p>
+</li>
+<li><p><strong>Which files are open.</strong> A file that is open in a tab of its own has a green tint and bar on its row. The file you are only previewing (single click) has the accent colour and its name in italics, like its tab; double-click it and the row turns green. Close the tab and the row goes back to plain.</p>
+</li>
+<li><p><strong>Toolbar:</strong> Open Folder, Refresh, Close All Folders (then the panel&#39;s pin and close buttons). New File and New Folder are on each open folder&#39;s row, and on the right-click menu of any folder. The row&#39;s buttons create the item in the selected folder when the selection is inside that open folder (or next to the selected file), otherwise at the top level of that open folder; the menu&#39;s create it in the folder you right-clicked. A name box appears under the folder&#39;s row, and a new file opens straight away. The tree follows the active tab, and a tab&#39;s <strong>Show in Quarry Explorer</strong> finds its file in the tree.</p>
+</li>
+<li><p><strong>Mouse:</strong> click a file to open it; keyboard focus stays in the tree, so Ctrl+C, Ctrl+X and Delete act on that file. <strong>Double-click</strong> opens it and moves you into the editor. <strong>Ctrl+click</strong> adds a file or folder to the selection (or takes it out), and <strong>Shift+click</strong> selects every row from the last one you clicked; neither opens anything.</p>
+</li>
+<li><p><strong>Right-click</strong> a file or folder (or a selection of several) for:</p>
+<ul>
+<li>on a folder, <strong>Expand</strong> (when it&#39;s closed) and <strong>Expand All</strong> (when it has folders inside; opens it and every folder below it, up to 500, passing over <code>.git</code> and <code>node_modules</code>), or <strong>Collapse</strong> (when it&#39;s open) and <strong>Collapse All</strong> (when folders inside it are open too; closes them all);</li>
+<li>on a folder, <strong>New File</strong> and <strong>New Folder</strong> (created in that folder);</li>
+<li><strong>Open Selected Files</strong> (on a selection of several that includes files): opens each selected file in its own tab. Folders in the selection are left alone, and no menu item opens all the files of a folder. The <a href="#window-layout">tab limit</a> applies, with one question for the whole batch;</li>
+<li><strong>Find in File</strong> / <strong>Find in Folder</strong> / <strong>Find in Selected</strong>, and <strong>Rename</strong> (<strong>F2</strong>);</li>
+<li><strong>Cut</strong> (<strong>Ctrl+X</strong>), <strong>Copy</strong> (<strong>Ctrl+C</strong>), <strong>Paste</strong> (<strong>Ctrl+V</strong>) and <strong>Delete</strong> (<strong>Del</strong>);</li>
+<li><strong>Copy Path</strong> and <strong>Copy File Name</strong> (one per line for several);</li>
+<li><strong>Show in Windows Explorer</strong>;</li>
+<li>on one file, what its tab&#39;s right-click menu offers: <strong>Compare with Saved</strong> (when it has unsaved changes), <strong>Compare with Clipboard</strong>, <strong>Compare with Last Commit</strong> and <strong>Show File History</strong> (for a file git tracks), <strong>Open to the Side</strong>, and, when the file is open in a tab, <strong>Close Tab</strong>, <strong>Close Other Tabs</strong> and <strong>Close All Tabs</strong>. A file that isn&#39;t open yet is opened first, without leaving the tab you are on;</li>
+<li>on a folder, <strong>Set as Source Control Context</strong>: the Source Control panel opens on the git repository that folder is in (see <a href="git.html">Git</a>).</li>
+</ul>
+<p>Right-click on the blank space below the rows to paste into the open folder itself, open a terminal there, or open another folder (with several folders open there is no folder to paste into, so only Open Another Folder is offered).</p>
+</li>
+<li><p><strong>Copy, Cut and Paste</strong> use the Windows clipboard, so you can copy files in Quarry and paste them in File Explorer, or the other way round. Paste goes into the folder you right-clicked (or the folder of the file). Nothing is overwritten: a name that&#39;s taken gets &quot; - Copy&quot; for a copy, as in File Explorer, or &quot; (2)&quot; for a move. Pasting after Cut moves the items, and open tabs follow the files they show.</p>
+</li>
+<li><p><strong>Find in Files</strong> searches what you last clicked or selected here when its scope is Folder / Selection; see <a href="find-and-replace.html#where-it-searches">Find in Files</a>.</p>
+</li>
+<li><p><strong>Keyboard:</strong></p>
+<ul>
+<li>↑/↓ move, Home / End go to the first / last row, Page Up / Page Down move 15 rows.</li>
+<li>←/→ collapse or expand a folder (→ on an open folder goes into it, ← on a file goes to its folder).</li>
+<li>Enter or Space opens a file or opens / closes a folder.</li>
+<li>F2 renames, Delete deletes, Ctrl+C / Ctrl+X / Ctrl+V copy, cut and paste.</li>
+<li>Type the start of a name to jump to it.</li>
+</ul>
+</li>
+<li><p><strong>Delete</strong> asks first, then moves the file or folder (or everything selected) to the Recycle Bin.</p>
+</li>
+<li><p><strong>Renaming</strong> a file updates any open tab for it.</p>
+</li>
+<li><p><strong>What&#39;s shown:</strong> hidden files are included. Folders are listed first, then natural sort order. A folder with nothing in it has no expand arrow (a hidden file or an empty subfolder counts as something); the arrow appears as soon as something is put in it.</p>
+</li>
+</ul>
+<h2 id="appearance-and-accessibility">Appearance and accessibility</h2>
+<ul>
+<li><strong>Theme:</strong> System (follows Windows), Light, Grey or Dark. Grey is the one in between: neutral mid-grey surfaces with light text, for when Dark is too stark and Light too bright. Pick a theme from the <strong>theme button</strong> on the panel rail (just above the Settings gear), from <strong>View › Theme</strong>, from Settings, or with the <strong>Theme: …</strong> commands in the command palette. <strong>View › Toggle Light/Dark Theme</strong> switches between light and dark, leaving System mode (from Grey it goes to Light).</li>
+<li><strong>Mica:</strong> the translucent Windows 11 background. Turn it off in Settings for an opaque one.</li>
+<li><strong>Font:</strong> size and family are in Settings. <strong>Ctrl+= / Ctrl+-</strong> zoom and <strong>Ctrl+0</strong> resets. The default font is Cascadia Code, falling back to Consolas.</li>
+<li><strong>High Contrast:</strong> Windows High Contrast themes are followed: solid system colours, visible focus and borders.</li>
+<li><strong>Reduced motion:</strong> with Windows&#39; <em>Animation effects</em> turned off, Quarry turns off its animations.</li>
+<li><strong>Keyboard and screen readers:</strong> every control is keyboard-reachable and labelled for screen readers.<ul>
+<li><strong>Ctrl+M</strong> makes Tab move focus instead of inserting a tab; the status bar shows <strong>Tab moves focus</strong> while this is on.</li>
+<li><strong>Esc</strong> then <strong>Tab</strong> also leaves the editor once.</li>
+</ul>
+</li>
+</ul>
+<h2 id="crash-reports">Crash reports</h2>
+<p>If Quarry stops unexpectedly, it writes <code>crash.log</code> to its log folder, <code>%LOCALAPPDATA%\com.quarry.app\logs</code>. On the next start a notice tells you where the file is. <strong>Help › About Quarry</strong> has <strong>Copy Version Info</strong> and <strong>Open Log Folder</strong>, for including in a bug report.</p>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="../privacy.html">Privacy policy</a> · <a href="../terms.html">Terms of sale</a> · <a href="../refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="../license.html">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>

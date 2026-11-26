@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Macros · Quarry</title>
+  <meta name="description" content="Macros: Recording, playback, step editor, file format.">
+  <link rel="icon" href="../quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="../"><img src="../quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="../docs/" aria-current="page">Documentation</a>
+        <a href="../#install">Install</a>
+        <a href="../#licensing">Licensing</a>
+        <a href="../#support">Support</a>
+        <a href="../privacy.html">Privacy</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="docs">
+      <nav class="guides" aria-label="Guides">
+        <a href="./">All guides</a>
+        <a href="install.html">Installing</a>
+        <a href="editing.html">Editing</a>
+        <a href="large-files.html">Large files</a>
+        <a href="code-intelligence.html">Code intelligence</a>
+        <a href="compare.html">Compare</a>
+        <a href="git.html">Git</a>
+        <a href="terminal.html">Terminal</a>
+        <a href="find-and-replace.html">Find and replace</a>
+        <a href="json.html">JSON tools</a>
+        <a href="api-requests.html">API requests</a>
+        <a href="formatting.html">Formatting</a>
+        <a href="macros.html" aria-current="page">Macros</a>
+        <a href="scripting.html">Scripts</a>
+        <a href="keyboard-shortcuts.html">Keyboard shortcuts</a>
+        <a href="settings.html">Settings</a>
+        <a href="benchmarks.html">Benchmarks</a>
+      </nav>
+        <article class="guide">
+<h1 id="macros">Macros</h1>
+<p>A macro records what you do in the editor (typing, editing keys and commands) and plays it back, once, a set number of times, or line by line down to the end of the file. A whole playback, however many repetitions, is undone with a single <strong>Ctrl+Z</strong>.</p>
+<ul>
+<li><a href="#recording">Recording</a></li>
+<li><a href="#what-is-recorded">What is recorded</a></li>
+<li><a href="#playing">Playing</a></li>
+<li><a href="#editing-steps">Editing steps</a></li>
+<li><a href="#where-macros-live">Where macros live</a></li>
+<li><a href="#file-format">File format</a></li>
+<li><a href="#tips-and-limitations">Tips and limitations</a></li>
+</ul>
+<h2 id="recording">Recording</h2>
+<ol>
+<li>Open a text document and put the cursor where the macro should start.</li>
+<li>Press <strong>Ctrl+Shift+R</strong> (or <strong>Macros › Start/Stop Recording</strong>). The status bar shows <strong>REC</strong> and the number of steps so far.</li>
+<li>Do the edit once.</li>
+<li>Press <strong>Ctrl+Shift+R</strong> again.</li>
+</ol>
+<p>The recording becomes a new, <strong>unsaved</strong> macro called <code>Macro N</code> at the top of the <strong>Macros</strong> panel. Rename it there and click <strong>Save</strong> to keep it. Unsaved macros are lost when Quarry closes.</p>
+<p>To add steps to an existing macro, select it and use <strong>Record more</strong> in its step editor.</p>
+<h2 id="what-is-recorded">What is recorded</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Recorded</th><th>As</th></tr></thead>
+<tbody>
+<tr><td>Text you type in the editor (consecutive typing is merged into one step)</td><td><code>Type &quot;…&quot;</code></td></tr>
+<tr><td>Editing and navigation keys in the editor: arrows, Home/End, Page Up/Down, Enter, Backspace, Delete, Tab, and their Ctrl/Shift/Alt combinations</td><td><code>Key: Ctrl+Shift+Left</code></td></tr>
+<tr><td>Commands, whether run from a shortcut, a menu, the command palette or a panel button</td><td><code>Command: Sort Lines Ascending</code></td></tr>
+</tbody>
+</table></div>
+<p>A registered shortcut is recorded as its <strong>command</strong>, not as a key. For example, Ctrl+D is recorded as &quot;Add Selection to Next Find Match&quot;, so playback does the same thing even if the binding changes.</p>
+<p><strong>Not recorded:</strong></p>
+<ul>
+<li>Mouse clicks and mouse selections.</li>
+<li>Text typed into the find bar, the palette or other input boxes. A recorded Find opens the find bar and steps to the next match, but the search term is not stored. Type the term in the find bar before recording, and record only <strong>F3</strong> (Find Next).</li>
+<li>Macro commands themselves, so a macro can&#39;t start another macro.</li>
+<li>Script runs. Scripts can&#39;t run while a macro is recording or playing; trying shows a message instead.</li>
+</ul>
+<h2 id="playing">Playing</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>How</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><strong>Ctrl+Shift+M</strong> / <strong>Macros › Play Last</strong></td><td>Plays the last recorded or played macro once.</td></tr>
+<tr><td><strong>Play</strong> in the panel or <strong>Macros › <em>name</em> › Play</strong></td><td>Plays that macro once.</td></tr>
+<tr><td><strong>Play ×N</strong> in the panel</td><td>Plays it N times in a row (1 to 100,000).</td></tr>
+<tr><td><strong>To end</strong> in the panel, or <strong>Play Until End of File</strong></td><td>Repeats the macro while each pass moves the cursor down at least one line, stopping once a pass starts on the last line. The safety limit is 10,000 passes.</td></tr>
+<tr><td><strong>Shift+Esc</strong> / <strong>Stop</strong></td><td>Stops playback.</td></tr>
+<tr><td><strong>Pause / Resume</strong></td><td>In the panel, the status bar or <strong>Macros › Pause/Resume</strong>.</td></tr>
+</tbody>
+</table></div>
+<p>Stop and Pause take effect at the next checkpoint (every 20 steps), not instantly.</p>
+<p>By default, a macro started from a menu or shortcut first asks <strong>Run / Review first / Cancel</strong>. Turn this off with <strong>Settings › Confirm script &amp; macro runs</strong>.</p>
+<p><strong>Undo:</strong> while a macro plays, its individual edits are kept out of the undo history, and the net change is applied as one step at the end. A single <strong>Ctrl+Z</strong> therefore undoes the entire playback, including all repetitions of ×N or To end. This holds for a macro that contains Undo or Redo steps too: during playback, such a step takes back (or puts back) the macro&#39;s own previous step, and never anything you did before the macro started.</p>
+<h2 id="editing-steps">Editing steps</h2>
+<p>Select a macro in the <strong>Macros</strong> panel to see its numbered steps.</p>
+<ul>
+<li><strong>Text steps:</strong> edit the text (pencil, then Enter to apply or Esc to cancel).</li>
+<li><strong>Key steps:</strong> re-capture the key (pencil, then press the new combination).</li>
+<li><strong>Command steps:</strong> can be moved or deleted but not changed.</li>
+<li><strong>Move up / down</strong> and <strong>Delete</strong> work on every step.</li>
+<li><strong>+ Text</strong> and <strong>+ Key</strong> add a step at the end.</li>
+</ul>
+<p>Changes mark the macro unsaved (<code>•</code>) until you click <strong>Save</strong>.</p>
+<h2 id="where-macros-live">Where macros live</h2>
+<p>Each macro is a file named <code>&lt;name&gt;.macro.json</code>.</p>
+<ul>
+<li>Default folder: <code>%APPDATA%\com.quarry.app\macros</code>.</li>
+<li>Change it in <strong>Settings › Folders › Macros folder</strong> or with the panel&#39;s folder button.</li>
+<li>Saving a renamed macro renames its file: the file under the old name is deleted, not moved to the Recycle Bin, since its steps are now in the new one. <strong>Delete</strong> asks first and moves the file to the Recycle Bin.</li>
+<li>The list reloads when Quarry regains focus, unless a macro is unsaved, recording or playing.</li>
+</ul>
+<h2 id="file-format">File format</h2>
+<pre><code class="language-json">{
+  &quot;steps&quot;: [
+    { &quot;type&quot;: &quot;key&quot;, &quot;key&quot;: &quot;Home&quot;, &quot;code&quot;: &quot;Home&quot;, &quot;ctrl&quot;: false, &quot;shift&quot;: false, &quot;alt&quot;: false, &quot;meta&quot;: false },
+    { &quot;type&quot;: &quot;input&quot;, &quot;text&quot;: &quot;// &quot; },
+    { &quot;type&quot;: &quot;key&quot;, &quot;key&quot;: &quot;ArrowDown&quot;, &quot;code&quot;: &quot;ArrowDown&quot;, &quot;ctrl&quot;: false, &quot;shift&quot;: false, &quot;alt&quot;: false, &quot;meta&quot;: false },
+    { &quot;type&quot;: &quot;command&quot;, &quot;id&quot;: &quot;code.trimTrailing&quot; }
+  ],
+  &quot;createdAt&quot;: 1761480000000
+}
+</code></pre>
+<div class="table-wrap"><table>
+<thead><tr><th>Step</th><th>Fields</th></tr></thead>
+<tbody>
+<tr><td><code>key</code></td><td><code>key</code> and <code>code</code> as in a browser <code>KeyboardEvent</code>, plus the four modifier flags.</td></tr>
+<tr><td><code>input</code></td><td><code>text</code> to insert at every cursor.</td></tr>
+<tr><td><code>command</code></td><td><code>id</code> of a Quarry command (the palette shows titles; see <a href="keyboard-shortcuts.html">keyboard shortcuts</a> for ids), and optional <code>args</code>.</td></tr>
+</tbody>
+</table></div>
+<p><code>createdAt</code> is a Unix time in milliseconds. A file without a <code>steps</code> array, or with invalid JSON, is skipped without a message.</p>
+<p>The example above comments out a line and moves down. Played with <strong>To end</strong>, it comments out every line from the cursor to the end of the file.</p>
+<h2 id="tips-and-limitations">Tips and limitations</h2>
+<ul>
+<li>For <strong>To end</strong>, the macro must finish each pass at least one line lower than it started, usually by ending with <strong>↓</strong> or <strong>Home ↓</strong>. Otherwise it stops after one pass.</li>
+<li>Commands that aren&#39;t available at that moment (for example, a JSON command in a non-JSON file) are skipped.</li>
+<li>A macro can&#39;t run a script: script runs are not recorded, and they are refused while a macro records or plays.</li>
+<li>Macros run only on regular text tabs, not on files open in <a href="large-files.html">large-file mode</a>.</li>
+<li>If a macro switches tabs, the single-undo grouping may not apply.</li>
+</ul>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="../privacy.html">Privacy policy</a> · <a href="../terms.html">Terms of sale</a> · <a href="../refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="../license.html">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>

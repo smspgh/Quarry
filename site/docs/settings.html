@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settings · Quarry</title>
+  <meta name="description" content="Settings: Every setting, and where Quarry keeps its files.">
+  <link rel="icon" href="../quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="../"><img src="../quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="../docs/" aria-current="page">Documentation</a>
+        <a href="../#install">Install</a>
+        <a href="../#licensing">Licensing</a>
+        <a href="../#support">Support</a>
+        <a href="../privacy.html">Privacy</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="docs">
+      <nav class="guides" aria-label="Guides">
+        <a href="./">All guides</a>
+        <a href="install.html">Installing</a>
+        <a href="editing.html">Editing</a>
+        <a href="large-files.html">Large files</a>
+        <a href="code-intelligence.html">Code intelligence</a>
+        <a href="compare.html">Compare</a>
+        <a href="git.html">Git</a>
+        <a href="terminal.html">Terminal</a>
+        <a href="find-and-replace.html">Find and replace</a>
+        <a href="json.html">JSON tools</a>
+        <a href="api-requests.html">API requests</a>
+        <a href="formatting.html">Formatting</a>
+        <a href="macros.html">Macros</a>
+        <a href="scripting.html">Scripts</a>
+        <a href="keyboard-shortcuts.html">Keyboard shortcuts</a>
+        <a href="settings.html" aria-current="page">Settings</a>
+        <a href="benchmarks.html">Benchmarks</a>
+      </nav>
+        <article class="guide">
+<h1 id="settings">Settings</h1>
+<p>Open Settings with <strong>Ctrl+,</strong>, <strong>Tools › Settings</strong>, <strong>View › Panels › Settings</strong> or the gear icon at the bottom of the side rail. Changes apply immediately and are saved automatically. Settings opens at 35% of the window width so its descriptions are readable.</p>
+<h2 id="finding-a-setting">Finding a setting</h2>
+<ul>
+<li><strong>Filter.</strong> Type in the box at the top. It matches a setting&#39;s name, its description, its section and group, and other words it is known by (&quot;indent&quot; finds Tab size, &quot;dark&quot; finds Theme). The matching text is highlighted, and sections with nothing left are hidden.</li>
+<li><strong>Jump bar.</strong> The row of buttons under the filter jumps to a section and marks the one you&#39;re reading. When the panel is 700 px or wider, it becomes a list of sections on the left.</li>
+<li><strong>Collapse.</strong> Click a section&#39;s heading to fold it away. Folded sections stay folded the next time you open Settings, but the filter and Modified still show their matching rows.</li>
+<li><strong>Modified.</strong> A setting you changed from its default has an accent bar on its left edge. The <strong>Modified</strong> button next to the filter (with the count) shows only those settings.</li>
+<li><strong>More help.</strong> A setting with a longer explanation has an <strong>i</strong> next to its name.</li>
+</ul>
+<p>Each section is one card. Longer sections are split into groups, such as Editor › Typing and Editor › Display.</p>
+<h2 id="use-previous-and-restore-default">Use previous and Restore default</h2>
+<p>Each setting has two buttons next to its name:</p>
+<ul>
+<li><strong>Use previous setting</strong> (↶) puts back the value it had before your last change. Click it again to swap back, which makes it easy to compare two choices, such as two fonts. The previous values are remembered between sessions.</li>
+<li><strong>Restore default</strong> (⟲) sets it back to Quarry&#39;s default.</li>
+</ul>
+<p>A button with nothing to do is hidden until you point at the setting. <strong>App › Reset all to defaults</strong> resets everything.</p>
+<p>Settings are stored in <code>%APPDATA%\com.quarry.app\settings.json</code>. If that file can&#39;t be read, Quarry starts with the defaults and keeps the unreadable file as <code>settings.json.bak</code>.</p>
+<h2 id="appearance">Appearance</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Theme</td><td>System</td><td>System (follows Windows), Light, Grey (neutral mid-grey, between Light and Dark) or Dark. Also on the panel rail&#39;s theme button (above the Settings gear) and in View › Theme.</td></tr>
+<tr><td>Menu bar</td><td>Title bar</td><td><strong>Title bar</strong>: the menus sit in the title bar next to the Quarry mark, and open documents get a tab row above it. <strong>Top</strong>: the menus get their own row below the title bar, and the tabs share the title bar. <strong>Hidden</strong>: like Top, but the menus show only when you press Alt or F10.</td></tr>
+<tr><td>Mica material</td><td>On</td><td>Translucent Windows 11 background. Off gives an opaque background.</td></tr>
+<tr><td><em>Editor font</em> › Font family</td><td><code>&quot;Cascadia Code&quot;, &quot;Cascadia Mono&quot;, Consolas, &quot;Courier New&quot;, monospace</code></td><td>Pick from the monospaced fonts installed on your PC, or choose <strong>Custom…</strong> and type a CSS font list. Quarry warns if the first font in a custom list isn&#39;t installed.</td></tr>
+<tr><td><em>Editor font</em> › Font size</td><td>14</td><td>8–40. Ctrl+= / Ctrl+- / Ctrl+0 change it too.</td></tr>
+</tbody>
+</table></div>
+<h2 id="editor">Editor</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><em>Typing</em> › Tab size</td><td>4</td><td>1–16. Width of a tab and of one indent level. Also set from the status bar.</td></tr>
+<tr><td><em>Typing</em> › Insert spaces</td><td>On</td><td>Indent with spaces instead of tab characters.</td></tr>
+<tr><td><em>Typing</em> › Auto-close brackets and quotes</td><td>On</td><td></td></tr>
+<tr><td><em>Display</em> › Word wrap</td><td>Off</td><td>Wrap long lines (Alt+Z).</td></tr>
+<tr><td><em>Display</em> › Line numbers</td><td>On</td><td>Show the line-number gutter.</td></tr>
+<tr><td><em>Display</em> › Highlight active line</td><td>On</td><td></td></tr>
+<tr><td><em>Display</em> › Bracket matching</td><td>On</td><td>Highlight the bracket matching the one at the cursor.</td></tr>
+<tr><td><em>Display</em> › Render whitespace</td><td>Off</td><td>Show spaces, tabs and trailing whitespace.</td></tr>
+</tbody>
+</table></div>
+<h2 id="files--tabs">Files &amp; tabs</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Restore session on start</td><td>On</td><td>Reopen the folder and tabs, including untitled tabs, from last time. See <a href="editing.html#sessions-and-hot-exit">Sessions and hot exit</a>.</td></tr>
+<tr><td>Maximum open tabs</td><td>50</td><td>1–1000. Opening more closes the least recently used tabs without unsaved changes, after asking. See <a href="editing.html#window-layout">Tabs</a>.</td></tr>
+<tr><td>Default line endings</td><td>CRLF</td><td>Line endings for new files (CRLF or LF).</td></tr>
+<tr><td><em>Large files</em> › Large-file threshold (MB)</td><td>128</td><td>1–256. Files this size or larger open in <a href="large-files.html">large-file mode</a>; smaller ones open as normal tabs with every feature.</td></tr>
+<tr><td><em>Large files</em> › Colours in large-file mode</td><td>On</td><td>Syntax colours for JSON, logs, CSV / TSV, XML and SQL files open in <a href="large-files.html#colours">large-file mode</a>. Only the lines on screen are coloured.</td></tr>
+<tr><td><em>Trusted folders</em> › Trust every folder I open</td><td>Off</td><td>On: git and language servers run in any folder and Quarry never asks. Also turned on by the tick box in the <strong>Trust the files in …?</strong> dialog. See <a href="editing.html#trusted-folders">Trusted folders</a>.</td></tr>
+<tr><td><em>Trusted folders</em></td><td>none</td><td>The folders in which Quarry runs git and language servers, each with <strong>Remove</strong>. Folders are added when you answer <strong>Trust Folder</strong>; see <a href="editing.html#trusted-folders">Trusted folders</a>. Not a setting: <strong>Reset all to defaults</strong> leaves the list as it is.</td></tr>
+</tbody>
+</table></div>
+<h2 id="find">Find</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Find &amp; replace history</td><td>Unlimited</td><td>How many <a href="find-and-replace.html#clearing-a-box-and-history">find and replace entries</a> to remember. Choose <strong>Limit</strong> and a number to keep only that many of each; the oldest are dropped.</td></tr>
+</tbody>
+</table></div>
+<p><strong>Clear find &amp; replace history</strong> asks first, then removes every remembered entry.</p>
+<h2 id="languages">Languages</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><em>JSON</em> › Pretty-print indent</td><td>2</td><td>1–8 spaces, used by Format and by CSV → JSON. Tabs are used instead when <strong>Insert spaces</strong> is off.</td></tr>
+<tr><td><em>Code intelligence</em> › Code intelligence</td><td>On</td><td>Suggestions, hover, Go to Definition, references, rename and problems from <a href="code-intelligence.html">language servers</a>. Off stops every server.</td></tr>
+<tr><td><em>Code intelligence</em> › <em>each server</em></td><td>On</td><td>One line per server: a status dot (green installed, amber missing, hollow switched off), <strong>Install…</strong> when it&#39;s missing, and a switch to turn it off. Click the server&#39;s name to see where it&#39;s installed and to type your own command line (empty = the default).</td></tr>
+</tbody>
+</table></div>
+<p><strong>Restart language servers</strong> stops every server and connects the open files again.</p>
+<h2 id="terminal">Terminal</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Shell</td><td>Automatic</td><td>The shell of new <a href="terminal.html">terminal tabs</a>: Automatic (the first one found: PowerShell 7, Windows PowerShell, Command Prompt), any installed shell including Git Bash, or Custom….</td></tr>
+<tr><td>Custom shell command</td><td>(empty)</td><td>Shown for Custom…: the program and its arguments, for example <code>&quot;C:\msys64\usr\bin\bash.exe&quot; --login -i</code> or <code>wsl.exe</code>.</td></tr>
+</tbody>
+</table></div>
+<h2 id="git">Git</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Allow merging with uncommitted changes</td><td>Off</td><td>Off: a <a href="git.html#merge-and-rebase">merge</a> only starts when every tracked file is committed, so <strong>Abort</strong> can always bring everything back. On: a merge may start with uncommitted changes; git refuses one that would change those files, and if the merge stops on a conflict, Abort may not be able to bring your changes back exactly. A rebase always needs a clean state.</td></tr>
+<tr><td>Compare with Branch shows</td><td>The two tips</td><td><strong>The two tips</strong>: how the two branches differ right now. <strong>Changes since split</strong>: only what the picked branch changed since it split off from yours, as a pull request shows it. See <a href="git.html#comparing-commits">Comparing commits</a>.</td></tr>
+</tbody>
+</table></div>
+<h2 id="scripts--macros">Scripts &amp; macros</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Confirm script &amp; macro runs</td><td>On</td><td>Ask before a script or macro started from a menu or shortcut edits the document.</td></tr>
+<tr><td>Scripts folder</td><td><code>%APPDATA%\com.quarry.app\scripts</code></td><td>The root folder of your <a href="scripting.html">scripts</a>, subfolders included. The field always shows the folder in use, also when it is the default.</td></tr>
+<tr><td>Macros folder</td><td><code>%APPDATA%\com.quarry.app\macros</code></td><td>Where <a href="macros.html">macros</a> are loaded from and saved to. Shows the folder in use, like the scripts folder.</td></tr>
+</tbody>
+</table></div>
+<p>When the panel is narrow, a folder&#39;s path is shortened in the middle; point at it to see all of it, click it to type a folder, or use <strong>Browse…</strong>. A folder that doesn&#39;t exist yet is created. If a folder you choose can&#39;t be used, Quarry switches back to the default and tells you. Changing the macros folder while a recorded macro is unsaved asks first; Cancel keeps the previous folder.</p>
+<h2 id="keyboard-shortcuts">Keyboard shortcuts</h2>
+<p>Says how many shortcuts you changed. <strong>Edit shortcuts…</strong> opens the <strong>Keyboard Shortcuts</strong> tab, which lists every command with Change, Remove and Restore default, and <strong>Restore all</strong> puts every shortcut back after asking. When the filter at the top of Settings matches commands, this row says how many and <strong>Show matches</strong> opens the tab with that search. See <a href="keyboard-shortcuts.html#changing-shortcuts">Keyboard shortcuts › Changing shortcuts</a>.</p>
+<h2 id="app">App</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Check for updates on start</td><td>On</td><td>Quietly looks for a new Quarry release while Quarry starts and offers it, once your tabs are back, if there is one. <strong>Help › Check for Updates</strong> works either way.</td></tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Open settings folder</strong> opens <code>%APPDATA%\com.quarry.app</code> in File Explorer.</li>
+<li><strong>Reset all to defaults</strong> asks first, then resets every setting and reloads scripts and macros from the default folders.</li>
+</ul>
+<h2 id="files-quarry-keeps">Files Quarry keeps</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Location</th><th>Contents</th></tr></thead>
+<tbody>
+<tr><td><code>%APPDATA%\com.quarry.app\settings.json</code></td><td>Settings</td></tr>
+<tr><td><code>%APPDATA%\com.quarry.app\session.json</code></td><td>Open folder and tabs, contents of untitled tabs, recent files and folders, panel layout</td></tr>
+<tr><td><code>%APPDATA%\com.quarry.app\search-history.json</code></td><td>Find and replace history</td></tr>
+<tr><td><code>%APPDATA%\com.quarry.app\scripts\</code>, <code>…\macros\</code></td><td>Default scripts and macros folders</td></tr>
+<tr><td><code>%LOCALAPPDATA%\com.quarry.app\logs\</code></td><td><code>crash.log</code> / <code>crash-last.log</code></td></tr>
+<tr><td><code>%LOCALAPPDATA%\com.quarry.app\replace-undo\</code></td><td>Backups for <a href="find-and-replace.html#undo-replace-in-files">Undo Replace in Files</a>, cleared on start</td></tr>
+<tr><td><code>%TEMP%\quarry-*</code></td><td>Working copies made by large-file Replace All</td></tr>
+</tbody>
+</table></div>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="../privacy.html">Privacy policy</a> · <a href="../terms.html">Terms of sale</a> · <a href="../refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="../license.html">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>
