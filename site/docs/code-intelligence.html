@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Code intelligence · Quarry</title>
+  <meta name="description" content="Code intelligence: Language servers: suggestions, hover, definitions, references, rename, problems, installing servers.">
+  <link rel="icon" href="../quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="../"><img src="../quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="../docs/" aria-current="page">Documentation</a>
+        <a href="../#install">Install</a>
+        <a href="../#licensing">Licensing</a>
+        <a href="../#support">Support</a>
+        <a href="../privacy.html">Privacy</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="docs">
+      <nav class="guides" aria-label="Guides">
+        <a href="./">All guides</a>
+        <a href="install.html">Installing</a>
+        <a href="editing.html">Editing</a>
+        <a href="large-files.html">Large files</a>
+        <a href="code-intelligence.html" aria-current="page">Code intelligence</a>
+        <a href="compare.html">Compare</a>
+        <a href="git.html">Git</a>
+        <a href="terminal.html">Terminal</a>
+        <a href="find-and-replace.html">Find and replace</a>
+        <a href="json.html">JSON tools</a>
+        <a href="api-requests.html">API requests</a>
+        <a href="formatting.html">Formatting</a>
+        <a href="macros.html">Macros</a>
+        <a href="scripting.html">Scripts</a>
+        <a href="keyboard-shortcuts.html">Keyboard shortcuts</a>
+        <a href="settings.html">Settings</a>
+        <a href="benchmarks.html">Benchmarks</a>
+      </nav>
+        <article class="guide">
+<h1 id="code-intelligence">Code intelligence</h1>
+<p>Quarry uses <a href="https://microsoft.github.io/language-server-protocol/" target="_blank" rel="noopener">language servers</a>, the same ones VS Code and other editors use, to understand your code. When a file&#39;s language server is installed, its tab gets suggestions while you type, documentation on hover, Go to Definition, Find All References, Rename and live problems. Nothing has to be configured: Quarry starts the right server when you open a file and stops it when you quit.</p>
+<p>A language server runs the project&#39;s own tools (its compiler, build scripts, plugins), so Quarry starts one only when the file&#39;s project folder is <a href="editing.html#trusted-folders">trusted</a>. Otherwise the status bar shows <strong>Restricted</strong>; click it to trust the folder.</p>
+<ul>
+<li><a href="#languages">Languages</a></li>
+<li><a href="#what-you-get">What you get</a></li>
+<li><a href="#problems">Problems</a></li>
+<li><a href="#installing-a-language-server">Installing a language server</a></li>
+<li><a href="#projects">Projects</a></li>
+<li><a href="#settings">Settings</a></li>
+<li><a href="#limits">Limits</a></li>
+</ul>
+<h2 id="languages">Languages</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Language</th><th>Server</th><th>Install command</th></tr></thead>
+<tbody>
+<tr><td>TypeScript, JavaScript (<code>.ts .tsx .js .jsx .mjs .cjs</code>)</td><td>TypeScript 7&#39;s built-in server (<code>tsc --lsp</code>), or <a href="https://github.com/typescript-language-server/typescript-language-server" target="_blank" rel="noopener">typescript-language-server</a> for TypeScript 5 / 6</td><td><code>npm install -g typescript-language-server</code> (with <code>typescript</code> too when none is installed)</td></tr>
+<tr><td>Python (<code>.py .pyi</code>)</td><td><a href="https://github.com/microsoft/pyright" target="_blank" rel="noopener">Pyright</a></td><td><code>npm install -g pyright</code></td></tr>
+<tr><td>Rust (<code>.rs</code>)</td><td><a href="https://rust-analyzer.github.io/" target="_blank" rel="noopener">rust-analyzer</a></td><td><code>rustup component add rust-analyzer</code></td></tr>
+<tr><td>Go (<code>.go</code>)</td><td><a href="https://pkg.go.dev/golang.org/x/tools/gopls" target="_blank" rel="noopener">gopls</a></td><td><code>go install golang.org/x/tools/gopls@latest</code></td></tr>
+<tr><td>C, C++ (<code>.c .h .cpp .hpp …</code>)</td><td><a href="https://clangd.llvm.org/" target="_blank" rel="noopener">clangd</a></td><td><code>winget install --id LLVM.LLVM -e</code></td></tr>
+<tr><td>C# (<code>.cs</code>)</td><td><a href="https://github.com/razzmatazz/csharp-language-server" target="_blank" rel="noopener">csharp-ls</a></td><td><code>dotnet tool install --global csharp-ls</code></td></tr>
+<tr><td>CSS, SCSS, Less</td><td>vscode-css-language-server</td><td><code>npm install -g vscode-langservers-extracted</code></td></tr>
+<tr><td>HTML</td><td>vscode-html-language-server</td><td><code>npm install -g vscode-langservers-extracted</code></td></tr>
+</tbody>
+</table></div>
+<p>For TypeScript, a project&#39;s own <code>node_modules\typescript</code> is used before the global one.</p>
+<p>JSON keeps Quarry&#39;s own <a href="json.html">JSON tools</a>. Files in <a href="large-files.html">large-file mode</a> don&#39;t use language servers.</p>
+<h2 id="what-you-get">What you get</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><em>typing</em></td><td>Suggestions from the server; <strong>Ctrl+Space</strong> asks for them</td></tr>
+<tr><td><em>hover</em></td><td>The symbol&#39;s type and documentation</td></tr>
+<tr><td><strong>Ctrl+Shift+Space</strong></td><td>Parameter hints for the call you&#39;re typing (they also appear by themselves after <code>(</code> and <code>,</code>)</td></tr>
+<tr><td><strong>F12</strong></td><td>Go to Definition, in another tab if it&#39;s in another file</td></tr>
+<tr><td><strong>Ctrl+F12</strong></td><td>Go to Implementation</td></tr>
+<tr><td><strong>Shift+F12</strong></td><td>Find All References, listed in a panel under the editor that takes the keyboard: ↑ / ↓ and Enter go to a reference, Esc or × closes it</td></tr>
+<tr><td><strong>F2</strong></td><td>Rename Symbol across the project&#39;s open files: type the new name and press Enter (Esc cancels). Each changed tab undoes its part with Ctrl+Z</td></tr>
+<tr><td><strong>F8</strong> / <strong>Shift+F8</strong></td><td>Next / previous problem</td></tr>
+</tbody>
+</table></div>
+<p>All of these are also in the <strong>Code</strong> category of the command palette, along with <strong>Go to Type Definition</strong>, <strong>Format Document with Language Server</strong> and <strong>Restart Language Servers</strong>. Quarry&#39;s own <strong>Format Document</strong> (Shift+Alt+F) is unchanged.</p>
+<p>The status bar shows the server for the file in front (for example <strong>TypeScript</strong>), and what it&#39;s doing while it indexes (<strong>rust-analyzer: Indexing 40%</strong>). Hover over it to see the project folder the server works in.</p>
+<h2 id="problems">Problems</h2>
+<p>Errors and warnings from the server are underlined in the editor and marked in the gutter. Hover over an underline to read the message.</p>
+<ul>
+<li><strong>Status bar.</strong> The ✖ and ⚠ counts are for the file in front. Click them to open the <strong>Problems</strong> list.</li>
+<li><strong>Problems list.</strong> <strong>View › Problems</strong> (or the Problems tab of the bottom panel, <strong>Ctrl+J</strong>) lists the problems in every open file, errors first. Click one to go to it.</li>
+</ul>
+<h2 id="installing-a-language-server">Installing a language server</h2>
+<p>If the server for a file isn&#39;t installed, the status bar shows <strong>Install … support</strong>. Clicking it runs the install command in a terminal tab, so you can see what happens. When it finishes, the servers restart and your open files connect.</p>
+<p>For TypeScript the offer depends on what you have. With TypeScript 5 or 6 installed (in the project or globally) and no typescript-language-server, it installs only typescript-language-server (<code>npm install -g typescript-language-server</code>) and leaves your TypeScript as it is. With no TypeScript at all, it installs both (<code>npm install -g typescript-language-server typescript</code>); whichever version npm installs, one of the two then serves.</p>
+<p>Install commands need the matching tool chain: Node.js for the npm ones, rustup for rust-analyzer, Go for gopls, the .NET SDK for csharp-ls. <strong>Settings › Languages › Code intelligence</strong> lists every server, says whether it&#39;s installed (click its name to see where), and has an <strong>Install…</strong> button for each missing one.</p>
+<h2 id="projects">Projects</h2>
+<p>Each server runs once per project. The project folder is the nearest folder above the file that has one of the server&#39;s marker files: <code>tsconfig.json</code> / <code>package.json</code> for TypeScript, <code>pyproject.toml</code> for Python, <code>Cargo.toml</code> for Rust, <code>go.mod</code> for Go, <code>compile_commands.json</code> for clangd, <code>*.sln</code> / <code>*.csproj</code> for C#, or <code>.git</code>.</p>
+<ul>
+<li><strong>Open folder.</strong> When the file is inside the open folder, the search stops there, and with no marker found the open folder is the project.</li>
+<li><strong>Never too wide.</strong> A drive root or your home folder is never used as a project, so a server doesn&#39;t try to index the whole disk.</li>
+</ul>
+<h2 id="settings">Settings</h2>
+<p><strong>Settings › Languages › Code intelligence</strong>:</p>
+<ul>
+<li><strong>Code intelligence</strong>: everything on or off.</li>
+<li><strong>Each server</strong>: one line with a status dot (green installed, amber missing, hollow switched off), an <strong>Install…</strong> button when it&#39;s missing, and a switch to turn it off. Click the server&#39;s name to see where it&#39;s installed and to type your own command line (for example <code>&quot;C:\LLVM\bin\clangd.exe&quot; --background-index</code>). Empty means the default.</li>
+<li><strong>Restart language servers</strong>: after installing or updating one outside Quarry.</li>
+</ul>
+<h2 id="limits">Limits</h2>
+<ul>
+<li><strong>Rename</strong> changes only the files that are open in tabs; uses in files that aren&#39;t open stay as they are. Open the files first (or use Replace in Files) to rename everywhere.</li>
+<li><strong>Hover links.</strong> Documentation from servers is shown with scripts and styles removed, and its links open in your browser.</li>
+<li><strong>Pull diagnostics.</strong> Servers that only report problems when asked (TypeScript 7) are asked after each pause in typing, for every open file of the project.</li>
+</ul>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="../privacy.html">Privacy policy</a> · <a href="../terms.html">Terms of sale</a> · <a href="../refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="../license.html">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Benchmark results · Quarry</title>
+  <meta name="description" content="Benchmark results: Open, search, filter and replace times on files of 1 to 5 GB, and how they were measured.">
+  <link rel="icon" href="../quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="../"><img src="../quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="../docs/" aria-current="page">Documentation</a>
+        <a href="../#install">Install</a>
+        <a href="../#licensing">Licensing</a>
+        <a href="../#support">Support</a>
+        <a href="../privacy.html">Privacy</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="docs">
+      <nav class="guides" aria-label="Guides">
+        <a href="./">All guides</a>
+        <a href="install.html">Installing</a>
+        <a href="editing.html">Editing</a>
+        <a href="large-files.html">Large files</a>
+        <a href="code-intelligence.html">Code intelligence</a>
+        <a href="compare.html">Compare</a>
+        <a href="git.html">Git</a>
+        <a href="terminal.html">Terminal</a>
+        <a href="find-and-replace.html">Find and replace</a>
+        <a href="json.html">JSON tools</a>
+        <a href="api-requests.html">API requests</a>
+        <a href="formatting.html">Formatting</a>
+        <a href="macros.html">Macros</a>
+        <a href="scripting.html">Scripts</a>
+        <a href="keyboard-shortcuts.html">Keyboard shortcuts</a>
+        <a href="settings.html">Settings</a>
+        <a href="benchmarks.html" aria-current="page">Benchmarks</a>
+      </nav>
+        <article class="guide">
+<h1 id="benchmark-results">Benchmark results</h1>
+<p>Measured 24 November 2026.</p>
+<p><strong>Machine:</strong> Intel Core Ultra 7 265KF (20 threads), 32 GB RAM, NVMe SSD, Windows 11 Pro.
+<strong>App:</strong> Quarry release build of the code released as 1.0.0, default settings.
+<strong>Files:</strong> generated test files of 1 GB and 5 GB: a request log (59 million lines at 5 GB), a
+pretty-printed JSON array of records (321 million lines, 20 million records) and a CSV table
+(57 million rows). They had been read before, so they were in the Windows file cache.</p>
+<h2 id="opening-a-file">Opening a file</h2>
+<p>Time from starting Quarry with the file until its first lines are drawn on screen, and the private
+memory of all of Quarry&#39;s processes with the file open. Three runs each; the table gives the middle one.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>File</th><th>Time to open</th><th>Memory</th></tr></thead>
+<tbody>
+<tr><td>1 GB log</td><td>0.50 s</td><td>0.5 GB</td></tr>
+<tr><td>1 GB JSON</td><td>0.50 s</td><td>0.5 GB</td></tr>
+<tr><td>1 GB CSV</td><td>0.52 s</td><td>0.5 GB</td></tr>
+<tr><td>5 GB log</td><td>0.57 s</td><td>0.5 GB</td></tr>
+<tr><td>5 GB JSON</td><td>0.55 s</td><td>0.5 GB</td></tr>
+<tr><td>5 GB CSV</td><td>0.57 s</td><td>0.5 GB</td></tr>
+</tbody>
+</table></div>
+<p>All eighteen runs were between 0.48 s and 0.64 s. The time does not grow with the file because
+Quarry maps the file and reads only the first screen before showing it; the line index is built in
+the background while the file is already usable. Most of the memory is the WebView2 engine that
+draws the interface: the large-file engine itself holds about 11 MB for a 5 GB file.</p>
+<h2 id="working-in-a-5-gb-file">Working in a 5 GB file</h2>
+<p>Quarry&#39;s large-file engine, measured without the interface. One run each.</p>
+<div class="table-wrap"><table>
+<thead><tr><th></th><th>5 GB log</th><th>5 GB JSON</th></tr></thead>
+<tbody>
+<tr><td>First screen ready</td><td>63 ms</td><td>75 ms</td></tr>
+<tr><td>Full line index (background)</td><td>4.0 s (59 million lines)</td><td>5.2 s (321 million lines)</td></tr>
+<tr><td>Jump to the middle line</td><td>under 1 ms</td><td>under 1 ms</td></tr>
+<tr><td>Find a rare string</td><td>0.64 s</td><td>0.46 s</td></tr>
+<tr><td>Find a common word</td><td>0.37 s</td><td>0.51 s</td></tr>
+<tr><td>Find a regex</td><td>0.57 s</td><td>0.54 s</td></tr>
+<tr><td>Replace All (rare string)</td><td>2.2 s</td><td>2.3 to 2.5 s</td></tr>
+<tr><td>Engine memory while open</td><td>11 MB</td><td>11 MB</td></tr>
+</tbody>
+</table></div>
+<p><strong>Log filter</strong> (5 GB log):</p>
+<div class="table-wrap"><table>
+<thead><tr><th></th><th>Time</th><th>Lines kept</th></tr></thead>
+<tbody>
+<tr><td>Keep the ERROR lines</td><td>0.56 s</td><td>7.4 million</td></tr>
+<tr><td>Hide the DEBUG lines</td><td>0.84 s</td><td>44 million</td></tr>
+</tbody>
+</table></div>
+<p><strong>JSON</strong> (5 GB file):</p>
+<div class="table-wrap"><table>
+<thead><tr><th></th><th>Time</th></tr></thead>
+<tbody>
+<tr><td>Validate the whole file</td><td>4.8 to 6.3 s</td></tr>
+<tr><td>Tree: open the root, list 200 children, expand one record</td><td>3.6 ms</td></tr>
+<tr><td>Tree: count every top-level item (background)</td><td>5.0 s (20 million items)</td></tr>
+</tbody>
+</table></div>
+<p>The filter, Replace All and other edits wait for the full line index (the 4 to 5 s above, counted
+from opening); Find does not, and a jump to a line waits only until the index has reached it.</p>
+<h2 id="checked-again-on-25-november-2026">Checked again on 25 November 2026</h2>
+<p>The same build and files, measured again on the same machine a day later.</p>
+<div class="table-wrap"><table>
+<thead><tr><th></th><th>Published above</th><th>Measured again</th></tr></thead>
+<tbody>
+<tr><td>Open a 5 GB file (18 launches)</td><td>0.55 to 0.57 s</td><td>0.48 to 0.77 s; middle run 0.60 s (log), 0.55 s (JSON), 0.60 s (CSV)</td></tr>
+<tr><td>Memory with a 5 GB file open</td><td>0.5 GB</td><td>0.47 to 0.48 GB after 10 s; 0.61 to 0.72 GB while it opens</td></tr>
+<tr><td>Find, 5 GB log (3 runs)</td><td>0.37 to 0.64 s</td><td>0.37 to 0.59 s</td></tr>
+<tr><td>Find, 5 GB JSON (3 runs)</td><td>0.46 to 0.54 s</td><td>0.43 to 0.84 s</td></tr>
+<tr><td>Find, 5 GB CSV (1 run)</td><td>not published</td><td>0.34 to 0.98 s</td></tr>
+<tr><td>Keep the ERROR lines (3 runs)</td><td>0.56 s</td><td>0.57 s</td></tr>
+<tr><td>Hide the DEBUG lines (3 runs)</td><td>0.84 s</td><td>0.85 to 0.95 s</td></tr>
+<tr><td>Full line index (3 runs)</td><td>4.0 s log, 5.2 s JSON</td><td>4.2 to 4.6 s log, 5.2 to 5.8 s JSON</td></tr>
+<tr><td>Validate 5 GB of JSON (3 runs)</td><td>4.8 to 6.3 s</td><td>4.6 to 5.8 s</td></tr>
+<tr><td>JSON tree: root, 200 children, one record</td><td>3.6 ms</td><td>0.1 ms</td></tr>
+<tr><td>Replace All (7 runs)</td><td>2.2 to 2.5 s</td><td>2.3 to 2.9 s in four runs, 10 to 19 s in three</td></tr>
+</tbody>
+</table></div>
+<p>The three slow Replace All runs each came straight after the benchmark&#39;s own 5 GB &quot;save to a copy&quot;,
+so the drive was still writing: see &quot;Replace All depends on the disk&quot; below.</p>
+<h2 id="after-the-25-november-changes-not-in-100">After the 25 November changes (not in 1.0.0)</h2>
+<p>Measured on the same machine and files with the code as it stands after 1.0.0: the line index is
+built on up to eight cores, the filter no longer waits for it, and normal tabs show their first
+lines before the whole file has arrived. Three runs each; ranges are lowest to highest.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>5 GB file</th><th>1.0.0</th><th>Now</th></tr></thead>
+<tbody>
+<tr><td>Time to open (text on screen, 6 launches)</td><td>0.48 to 0.77 s</td><td>0.50 to 0.54 s</td></tr>
+<tr><td>First screen ready (engine)</td><td>63 to 75 ms</td><td>7 to 27 ms</td></tr>
+<tr><td>Full line index (background)</td><td>4.0 to 5.8 s</td><td>1.1 to 1.2 s</td></tr>
+<tr><td>Filter entered straight after opening</td><td>waits for the index, then 0.6 s</td><td>1.1 to 1.3 s</td></tr>
+<tr><td>First search straight after opening</td><td>not measured</td><td>0.37 to 0.62 s</td></tr>
+<tr><td>Find, later searches (log)</td><td>0.37 to 0.64 s</td><td>0.27 to 0.31 s</td></tr>
+<tr><td>Find, later searches (JSON, CSV)</td><td>0.34 to 0.98 s</td><td>0.20 to 0.60 s</td></tr>
+<tr><td>Keep the ERROR lines, later runs</td><td>0.56 s</td><td>0.27 to 0.43 s</td></tr>
+<tr><td>Hide the DEBUG lines, later runs</td><td>0.84 s</td><td>0.32 to 0.49 s</td></tr>
+<tr><td>Validate 5 GB of JSON, first time</td><td>4.6 to 6.9 s</td><td>7.0 to 8.2 s</td></tr>
+<tr><td>Validate 5 GB of JSON, again</td><td>not measured</td><td>5.8 to 6.0 s</td></tr>
+<tr><td>JSON tree: count every top-level item</td><td>4.7 to 5.0 s</td><td>6.9 to 7.1 s</td></tr>
+<tr><td>Find and filter through the app window, later runs</td><td>not measured</td><td>0.43 to 0.66 s</td></tr>
+<tr><td>Find or filter through the app window, the moment the file opens</td><td>not measured</td><td>0.76 to 0.82 s; 1.3 to 1.5 s in two of eight launches</td></tr>
+<tr><td>Replace All</td><td>2.2 to 2.9 s, 10 to 19 s on a busy drive</td><td>2.2 to 2.8 s, 9.9 s once</td></tr>
+</tbody>
+</table></div>
+<p>The first pass over a file&#39;s mapping is slower than later ones: Windows has
+to map the file&#39;s pages into Quarry. In 1.0.0 the index did that pass, in 4 to 6 s; now the index,
+Find and the filter read the file with ordinary reads on up to eight cores and never pay it. JSON
+validation and the JSON tree&#39;s count still go through the mapping, and are about 2 s slower on a
+5 GB file than in 1.0.0, where the index and earlier searches had already been through it. Checking
+the text encoding from disk first was tried and gave nothing back: the validator&#39;s own pass over
+the mapping took 6.9 s on its own, and the encoding check ahead of it was what had been warming it.
+The window timings use the find bar&#39;s and the filter&#39;s defaults (not case-sensitive).</p>
+<p>Normal tabs (below the 128 MB threshold), time until the first lines are on screen, three launches
+each:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>File</th><th>1.0.0</th><th>Now</th></tr></thead>
+<tbody>
+<tr><td>32 MB log</td><td>1.2 s</td><td>0.49 to 0.64 s</td></tr>
+<tr><td>64 MB log</td><td>1.4 s</td><td>0.53 to 0.56 s</td></tr>
+<tr><td>64 MB JSON</td><td>not measured</td><td>0.53 to 0.56 s</td></tr>
+<tr><td>100 MB log</td><td>not measured</td><td>0.60 to 0.71 s</td></tr>
+<tr><td>100 MB JSON</td><td>not measured</td><td>0.61 to 0.69 s</td></tr>
+</tbody>
+</table></div>
+<p>The rest of the file follows the first lines at about 100 MB a second (0.6 s for 64 MB); until it
+has arrived the tab can be read but not edited.</p>
+<h2 id="normal-tabs">Normal tabs</h2>
+<p>Files below the large-file threshold (128 MB by default, 256 MB at most) open as normal tabs with
+every editing feature, and their whole text is held in memory. One run each.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>File</th><th>Time to open</th><th>Delay after typing a character</th><th>Memory</th></tr></thead>
+<tbody>
+<tr><td>32 MB log</td><td>1.2 s</td><td>11 ms</td><td>0.5 GB</td></tr>
+<tr><td>64 MB log</td><td>1.4 s</td><td>15 ms</td><td>0.5 GB</td></tr>
+<tr><td>128 MB log</td><td>2.2 s</td><td>13 ms</td><td>0.6 GB</td></tr>
+<tr><td>256 MB log</td><td>4.0 s</td><td>14 ms</td><td>0.8 GB</td></tr>
+<tr><td>128 MB JSON</td><td>2.8 s</td><td>12 ms</td><td>1.4 GB</td></tr>
+<tr><td>256 MB JSON</td><td>5.1 s</td><td>11 ms</td><td>1.7 GB</td></tr>
+</tbody>
+</table></div>
+<h2 id="reading-these-numbers">Reading these numbers</h2>
+<ul>
+<li><strong>One machine.</strong> A slower processor or disk gives slower numbers. On a hard disk or a network
+share the background line index takes longer; the first screen does not depend on it.</li>
+<li><strong>Warm cache.</strong> A file read for the first time after a restart comes straight from the disk. In
+October 2026 that made no measurable difference to opening on this SSD.</li>
+<li><strong>Large-file mode has fewer features</strong> than a normal tab: no multi-cursor, column mode or
+formatting. See <a href="large-files.html">Large files</a>.</li>
+<li><strong>Replace All depends on the disk.</strong> It writes a working copy of the whole file, so a 5 GB file
+means 5 GB of writing. The times above are with Windows buffering those writes in memory, which
+is the usual case. When the drive had just taken tens of gigabytes of other writes, the same
+Replace All took 20 to 35 s, on any of the three file types.</li>
+</ul>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="../privacy.html">Privacy policy</a> · <a href="../terms.html">Terms of sale</a> · <a href="../refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="../license.html">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+# Publishes the site/ folder to GitHub Pages: https://smspgh.github.io/Quarry/
+# (the privacy policy the Microsoft Store listing links to is site/privacy.html).
+# Lives in the private source repo as scripts/public-repo/pages.yml; publish-public.ps1 copies it here.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  # Two jobs, as in GitHub's own Pages template: with upload and deploy in one job, deploy-pages asked
+  # for the artifact a second after it was uploaded and was told there was none.
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

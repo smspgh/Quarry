@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Find and replace · Quarry</title>
+  <meta name="description" content="Find and replace: Find bar, Find / Replace in Files, undo, regex flavours.">
+  <link rel="icon" href="../quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="../"><img src="../quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="../docs/" aria-current="page">Documentation</a>
+        <a href="../#install">Install</a>
+        <a href="../#licensing">Licensing</a>
+        <a href="../#support">Support</a>
+        <a href="../privacy.html">Privacy</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="docs">
+      <nav class="guides" aria-label="Guides">
+        <a href="./">All guides</a>
+        <a href="install.html">Installing</a>
+        <a href="editing.html">Editing</a>
+        <a href="large-files.html">Large files</a>
+        <a href="code-intelligence.html">Code intelligence</a>
+        <a href="compare.html">Compare</a>
+        <a href="git.html">Git</a>
+        <a href="terminal.html">Terminal</a>
+        <a href="find-and-replace.html" aria-current="page">Find and replace</a>
+        <a href="json.html">JSON tools</a>
+        <a href="api-requests.html">API requests</a>
+        <a href="formatting.html">Formatting</a>
+        <a href="macros.html">Macros</a>
+        <a href="scripting.html">Scripts</a>
+        <a href="keyboard-shortcuts.html">Keyboard shortcuts</a>
+        <a href="settings.html">Settings</a>
+        <a href="benchmarks.html">Benchmarks</a>
+      </nav>
+        <article class="guide">
+<h1 id="find-and-replace">Find and replace</h1>
+<ul>
+<li><a href="#find-in-the-current-file">Find in the current file</a></li>
+<li><a href="#find-in-files">Find in Files</a></li>
+<li><a href="#clearing-a-box-and-history">Clearing a box, and history</a></li>
+<li><a href="#replace-in-files">Replace in Files</a></li>
+<li><a href="#undo-replace-in-files">Undo Replace in Files</a></li>
+<li><a href="#regex-flavours">Regex flavours</a></li>
+</ul>
+<p>Files open in large-file mode have their own find bar; see <a href="large-files.html#find">Large files › Find</a>.</p>
+<h2 id="find-in-the-current-file">Find in the current file</h2>
+<p><strong>Ctrl+F</strong> opens the find bar and <strong>Ctrl+H</strong> opens it with the replace field. If you have a short single-line selection (under 500 characters), it fills the search box, every time: select something else in the document and press <strong>Ctrl+F</strong> again, with the bar still open, and that becomes the search text. Pressing <strong>Ctrl+F</strong> while the cursor is in the search box only selects what you typed.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><strong>Enter / Shift+Enter</strong> (or <strong>F3 / Shift+F3</strong>)</td><td>Next / previous match.</td></tr>
+<tr><td><strong>Alt+C / Alt+W / Alt+R</strong></td><td>Toggle Match Case / Whole Word / Regex.</td></tr>
+<tr><td><strong>Alt+P</strong></td><td>Toggle Preserve Case (for Replace).</td></tr>
+<tr><td><strong>Alt+L</strong></td><td>Toggle Find in Selection.</td></tr>
+<tr><td><strong>Ctrl+Enter</strong> in the search box</td><td>Insert a line break, to search across lines.</td></tr>
+<tr><td><strong>Alt+Enter</strong></td><td>Select every match as a separate cursor (up to 200,000), then type to edit them all.</td></tr>
+<tr><td><strong>Enter</strong> in the replace box</td><td>Replace the current match.</td></tr>
+<tr><td><strong>Ctrl+Alt+Enter</strong></td><td>Replace all matches (one undo step).</td></tr>
+<tr><td><strong>Esc</strong></td><td>Close the find bar and return to the editor.</td></tr>
+</tbody>
+</table></div>
+<ul>
+<li>The match count updates as you type (it shows &quot;100k+&quot; above 100,000).</li>
+<li>A multi-line search without Regex is matched literally.</li>
+<li>In regex mode the replacement can use <code>$1</code>, <code>$2</code>, … and <code>$&amp;</code> for the whole match.</li>
+<li><strong>Preserve Case</strong> (the <strong>Aa</strong> toggle in the replace box, or <strong>Alt+P</strong>) matches the case of each replaced text, as in <a href="#replace-in-files">Replace in Files</a>: <code>foo</code> → <code>bar</code> also turns <code>FOO</code> into <code>BAR</code> and <code>Foo</code> into <code>Bar</code>.</li>
+<li><strong>Find in Selection</strong> (the last toggle in the search box, <strong>Alt+L</strong>, or <strong>Find › Toggle Find in Selection</strong>) limits the search to the text that was selected when you turned it on; with several selections, to all of them. Those ranges get a faint background and follow your edits. The match count, Enter / F3, Replace, Replace All and <strong>Alt+Enter</strong> then only see matches that lie wholly inside them. With nothing selected it takes the line the cursor is on (the lines, with several cursors); on an empty line there is nothing to search in, so it stays off. Turning it on with the find bar closed opens the bar without putting the selection in the search box. It turns off when you close the find bar, press <strong>Alt+L</strong> again, or switch to another document.</li>
+<li>Related commands: <strong>Ctrl+D</strong> adds the next occurrence of the selection as a cursor, and <strong>Ctrl+Shift+L</strong> selects all occurrences.</li>
+</ul>
+<h2 id="clearing-a-box-and-history">Clearing a box, and history</h2>
+<p>These work the same in the find bar and in Find in Files.</p>
+<ul>
+<li><strong>×</strong> inside a find or replace box clears it. It shows only while the box has text.</li>
+<li><strong>History</strong> (the clock icon, or <strong>Alt+↓</strong> in the box) lists what you searched for or replaced with before, newest first, with the date and time each was last used. Click an entry, or move to it with the arrow keys and press <strong>Enter</strong>, to put it back in the box.<ul>
+<li>Find and replace have separate lists. Entries are shared between the find bar and Find in Files.</li>
+<li>An entry is added when you run it: a search (Enter / Shift+Enter in the box, the Next / Previous Match buttons, or the Search button) or a replace. <strong>F3 / Shift+F3</strong> only step to the next / previous match and add nothing, so a macro that repeats them does not fill the history. Running the same text again doesn&#39;t add a copy: the entry moves to the top with the new time and its use count goes up, shown as <strong>×3</strong>, <strong>×12</strong> and so on. From 10 uses the count is highlighted, a hint that a search you repeat that often might be worth a <a href="macros.html">macro</a> or <a href="scripting.html">script</a>.</li>
+<li>In the list, <strong>Delete</strong> or the <strong>×</strong> on an entry removes that entry, and the bin icon clears the whole list.</li>
+<li>The list is long-scrolling. It shows 100 entries at a time and adds more as you scroll, so a long history stays fast.</li>
+<li>History is saved to <code>search-history.json</code> in the settings folder and survives restarts. It&#39;s read only when first needed, not at start-up.</li>
+<li>It&#39;s unlimited by default. <strong>Settings › Search › Find &amp; replace history</strong> can limit it to a number of entries instead. Entries longer than 10,000 characters aren&#39;t kept.</li>
+</ul>
+</li>
+</ul>
+<h2 id="find-in-files">Find in Files</h2>
+<p><strong>Ctrl+Shift+F</strong> opens the Search panel; <strong>Ctrl+Shift+H</strong> opens it with the replace field.</p>
+<h3 id="where-it-searches">Where it searches</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Scope</th><th>Searches</th></tr></thead>
+<tbody>
+<tr><td><strong>Current File</strong> (default)</td><td>The active document, including unsaved changes. A large-file tab is searched on disk.</td></tr>
+<tr><td><strong>Open Files</strong></td><td>The text in every open tab, including unsaved changes. Large-file tabs are skipped.</td></tr>
+<tr><td><strong>Folder</strong> / <strong>Selection</strong></td><td>The folder open in the Explorer, recursively, or what you last clicked or selected in the Explorer: a folder, a file, or several of each (<strong>Ctrl+click</strong> / <strong>Shift+click</strong>). The button reads <strong>Folder</strong> for a folder and <strong>Selection</strong> otherwise, and the line under it shows what is searched (&quot;In Quarry\src&quot;, &quot;In 3 items: a.txt, src, b.md&quot;). <strong>Whole folder</strong> goes back to the whole open folder. With several folders open in the Explorer the button reads <strong>Folders</strong> and all of them are searched (&quot;In 2 folders: site, lib&quot;) until you click something in the Explorer; <strong>All folders</strong> goes back to all of them. Right-click in the Explorer and choose <strong>Find in File</strong>, <strong>Find in Folder</strong> or <strong>Find in Selected</strong> to jump straight here.</td></tr>
+<tr><td><strong>Choose…</strong></td><td>One or more folders you pick.</td></tr>
+</tbody>
+</table></div>
+<p>Find in Files starts on <strong>Current File</strong> each time Quarry opens. A scope you pick stays selected until you close Quarry. The selected scope is highlighted in the accent colour, so it&#39;s clear at a glance whether you&#39;re searching the file or a folder. <strong>Current File</strong> is shown only while a file is open, and <strong>Open Files</strong> only while tabs are open; until then, the search falls back to the next scope that applies. When the panel is too narrow for the buttons in one row, they wrap onto more rows rather than being cut off, and the Search panel can&#39;t be made narrower than 280 pixels, so the search box always has room.</p>
+<h3 id="options">Options</h3>
+<p><strong>Match Case</strong>, <strong>Whole Word</strong> and <strong>Regex</strong> are the toggles inside the search box. The rest are under the <strong>Filters</strong> button (next to the scope buttons), which shows how many filters differ from their defaults:</p>
+<ul>
+<li><strong>Dot matches newline</strong>.</li>
+<li><strong>Use .gitignore</strong> (on by default) skips files ignored by <code>.gitignore</code>, <code>.ignore</code>, <code>.git/info/exclude</code> and your global gitignore.</li>
+<li><strong>Include / exclude</strong>: comma-separated glob patterns such as <code>*.ts, src/**</code> or <code>*.min.js, dist/**</code>. With an include pattern, only matching files are searched. Include / exclude and <strong>Use .gitignore</strong> apply only to the folder scopes.</li>
+<li><code>.git</code>, <code>node_modules</code> and <code>target</code> folders are skipped, unless you give an include pattern.</li>
+<li>Hidden files are searched. Symbolic links are not followed.</li>
+<li>Binary files (any containing a NUL byte) are not searched past that byte.</li>
+<li>A pattern that contains a line break, or any regex, can match across lines. Without Regex, a line break (<strong>Ctrl+Enter</strong>) matches both Windows (CRLF) and Unix (LF) line ends; in a regex searched on disk, <code>\n</code> is only the LF, so write <code>\r?\n</code> to match either (Current File and Open Files see every line end as <code>\n</code>).</li>
+<li><strong>Max</strong> (results) defaults to 20,000 (adjustable up to 1,000,000). The status line says &quot;(limit reached)&quot; when the limit was hit. A folder search also lists at most 1,000 matches of any one line (a minified file, say); the rest of that line is not listed.</li>
+</ul>
+<p>Results stream in as they are found, grouped by file, and you can cancel a running search. While there are results, the Search panel stays docked beside the editor instead of floating, so it doesn&#39;t close when you click into a document you opened from it; see <a href="editing.html#window-layout">Window layout</a>. Long searches show the first 1,500 rows; <strong>Show more results</strong> adds more.</p>
+<p>Each result row shows the match with a few whole words before it (up to three) and the rest of the line after it, so the match is always in view. <strong>…</strong> marks text left out at the start; a match at the start of a line is shown from the line&#39;s first word.</p>
+<p>Opening a result scrolls the editor so the whole match is in view. If the match is off to the side on a long line, the editor scrolls sideways to bring it near the left edge, with 10 characters of the line before it, so the text after it shows too; a match near the start of a line is shown from the line&#39;s beginning. (With word wrap on there is no sideways scrolling.) <strong>Go to Line</strong> positions the cursor the same way.</p>
+<p>Opening a result highlights every match in that document the same way the find bar (<strong>Ctrl+F</strong>) does, with the selected match in the stronger colour. The highlighting stays while you move through the results, and clears when you press <strong>Escape</strong> in the editor, open the find bar, clear the results or run a new search.</p>
+<h3 id="moving-through-results">Moving through results</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><strong>↑ / ↓</strong></td><td>Move through the results, previewing each in the editor.</td></tr>
+<tr><td><strong>Enter</strong></td><td>Open the result and move focus to the editor.</td></tr>
+<tr><td><strong>← / →</strong></td><td>Collapse / expand a file&#39;s results.</td></tr>
+<tr><td><strong>F4 / Shift+F4</strong></td><td>Next / previous result, from anywhere. The <strong>↓ / ↑</strong> buttons next to the Search button do the same, and show which result you&#39;re on (&quot;3 of 12&quot;).</td></tr>
+<tr><td><strong>Delete</strong></td><td>Leave the result (or, on a file row, the whole file) out of the list and of Replace All.</td></tr>
+</tbody>
+</table></div>
+<p>If a file has changed since the search ran, its results are marked as stale.</p>
+<p>Right-click a file&#39;s name in the results for Cut, Copy, Paste (into that file&#39;s folder), Delete (to the Recycle Bin; the file leaves the results), Copy Path, Copy File Name, <strong>Show in Quarry Explorer</strong> and <strong>Show in Windows Explorer</strong>. <strong>Ctrl+click</strong> and <strong>Shift+click</strong> on file names select several, and the menu then acts on all of them. These work like the <a href="editing.html#explorer">Explorer&#39;s</a>. In the results, the <strong>Delete</strong> key still means &quot;leave this result out&quot;, not delete the file.</p>
+<p>Hovering a result or file row shows an <strong>×</strong> that does the same as <strong>Delete</strong>: the row leaves the list, and Replace All will not touch it. The status line counts what you left out (&quot;12 results in 3 files · 2 left out&quot;). Running the search again brings everything back.</p>
+<h2 id="replace-in-files">Replace in Files</h2>
+<p>With the replace field shown, each result previews the change: the match struck through, followed by the replacement. <strong>Replace All</strong> asks for confirmation and then:</p>
+<ul>
+<li>edits every matching file on disk, writing each file atomically;</li>
+<li><strong>skips files that are open with unsaved changes</strong> and lists them, so your edits are never overwritten;</li>
+<li>reloads open tabs whose files it changed;</li>
+<li>refuses files over 256 MB, which you can open in <a href="large-files.html#replace-all">large-file mode</a> and use Replace All there;</li>
+<li>changes nothing you left out of the results (see above);</li>
+<li>replaces <strong>every</strong> match in each listed file, including matches that aren&#39;t listed: past the first 500 results of a file, past the 1,000 listed from one line, or past <strong>Max</strong> in the file where the search stopped. The confirmation says so: how many aren&#39;t listed when that&#39;s known (&quot;300 of them are not listed…&quot;; with Current File / Open Files also the exact number past Max), and &quot;More matches that are not listed may also be replaced&quot; when it isn&#39;t (a folder search that reached Max or the per-line limit). Files the search never reached are not changed;</li>
+<li>keeps each file&#39;s encoding: a file is decoded as it would be when opened (its BOM, else the detected encoding, such as Windows-1252 or UTF-16), replaced, and written back in the same encoding with the same BOM;</li>
+<li>leaves a file unchanged if its encoding can&#39;t store the result (for example, a Chinese character in a Windows-1252 file) or if it doesn&#39;t decode cleanly, and says why;</li>
+<li>reports per-file failures under the file (&quot;Replace failed: …&quot;).</li>
+</ul>
+<p><strong>Preserve Case</strong> (the <strong>Aa</strong> toggle in the replace box) matches the case of each replaced text: replacing <code>foo</code> with <code>bar</code> turns <code>FOO</code> into <code>BAR</code>, <code>Foo</code> into <code>Bar</code> and <code>foo</code> into <code>bar</code>. Mixed case such as <code>fOO</code> gets the replacement as typed. The preview in the results shows the result.</p>
+<p>In regex mode the replacement follows JavaScript&#39;s rules in every scope, on disk too: <code>$1</code> … <code>$99</code> or <code>$&lt;name&gt;</code> for groups, <code>$&amp;</code> for the whole match, <code>$`</code> and <code>$&#39;</code> for the text before and after it, and <code>$$</code> for a literal <code>$</code>. A reference to a group that doesn&#39;t exist, and <code>${name}</code>, stay as typed. In plain-text mode, <code>$</code> is literal.</p>
+<p>With the <strong>Current File</strong> and <strong>Open Files</strong> scopes, Replace All edits the open documents in the editor instead of the files on disk. Each document can then be undone with <strong>Ctrl+Z</strong>, and the changes are saved when you save. A document you edited after the search is skipped and listed, as a file changed on disk since the search is; search again to include it.</p>
+<h2 id="undo-replace-in-files">Undo Replace in Files</h2>
+<p>Before a Replace in Files changes a file, Quarry keeps a backup copy. <strong>Find › Undo Replace in Files</strong>, or the <strong>Undo</strong> link in the Search panel&#39;s status line, restores them byte for byte.</p>
+<ul>
+<li>Only the <strong>most recent</strong> Replace in Files can be undone.</li>
+<li>The backups and the undo are kept when you close Quarry, so a replace can still be undone after a restart. They are cleared when the next Replace in Files starts, when you undo, and at the first start more than 7 days after the replace.</li>
+<li>Backups are limited to 1 GiB in total. Files beyond that are still replaced, but without a backup, and can&#39;t be restored.</li>
+<li>A file that has changed again since the replace is not restored. It is listed instead.</li>
+</ul>
+<h2 id="regex-flavours">Regex flavours</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Where</th><th>Engine</th></tr></thead>
+<tbody>
+<tr><td>Find bar (current file), and Find in Files with the <strong>Current File</strong> and <strong>Open Files</strong> scopes</td><td>JavaScript <code>RegExp</code></td></tr>
+<tr><td>Find in Files with the <strong>Folder</strong> or <strong>Choose…</strong> scopes, Replace in Files on disk, and large-file Find / Replace All</td><td>Rust <a href="https://docs.rs/regex/latest/regex/#syntax" target="_blank" rel="noopener"><code>regex</code></a> (the engine used by ripgrep): no look-around and no backreferences, but guaranteed linear-time matching</td></tr>
+</tbody>
+</table></div>
+<p>Everyday patterns (<code>\d+</code>, <code>^\s*$</code>, <code>(foo|bar)</code>, <code>[A-Z]\w*</code>) behave the same in both. Look-around (<code>(?=…)</code>, <code>(?&lt;!…)</code>) and backreferences (<code>\1</code>) work only in the JavaScript engine. Quarry checks a Find in Files pattern as you type, with the engine that will run it, and flags an invalid one: with <strong>Current File</strong> (on a normal tab) and <strong>Open Files</strong> a look-around pattern is accepted, while switching to <strong>Folder</strong> or <strong>Choose…</strong>, or making a large-file tab the current file, marks it invalid with the Rust engine&#39;s message.</p>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="../privacy.html">Privacy policy</a> · <a href="../terms.html">Terms of sale</a> · <a href="../refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="../license.html">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>

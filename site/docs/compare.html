@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Compare · Quarry</title>
+  <meta name="description" content="Compare: Comparing files, a file with its unsaved edits or the clipboard; editing and saving.">
+  <link rel="icon" href="../quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="../"><img src="../quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="../docs/" aria-current="page">Documentation</a>
+        <a href="../#install">Install</a>
+        <a href="../#licensing">Licensing</a>
+        <a href="../#support">Support</a>
+        <a href="../privacy.html">Privacy</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="docs">
+      <nav class="guides" aria-label="Guides">
+        <a href="./">All guides</a>
+        <a href="install.html">Installing</a>
+        <a href="editing.html">Editing</a>
+        <a href="large-files.html">Large files</a>
+        <a href="code-intelligence.html">Code intelligence</a>
+        <a href="compare.html" aria-current="page">Compare</a>
+        <a href="git.html">Git</a>
+        <a href="terminal.html">Terminal</a>
+        <a href="find-and-replace.html">Find and replace</a>
+        <a href="json.html">JSON tools</a>
+        <a href="api-requests.html">API requests</a>
+        <a href="formatting.html">Formatting</a>
+        <a href="macros.html">Macros</a>
+        <a href="scripting.html">Scripts</a>
+        <a href="keyboard-shortcuts.html">Keyboard shortcuts</a>
+        <a href="settings.html">Settings</a>
+        <a href="benchmarks.html">Benchmarks</a>
+      </nav>
+        <article class="guide">
+<h1 id="compare">Compare</h1>
+<p>A <strong>Compare</strong> tab shows two versions of a text side by side, or in one editor with the removed lines shown inline. It has syntax colours, a line-number gutter for each side, and the changed words highlighted within changed lines.</p>
+<ul>
+<li><a href="#opening-a-compare">Opening a compare</a></li>
+<li><a href="#reading-the-differences">Reading the differences</a></li>
+<li><a href="#editing-and-saving">Editing and saving</a></li>
+<li><a href="#comparisons-from-source-control">Comparisons from Source Control</a></li>
+<li><a href="#limits">Limits</a></li>
+</ul>
+<h2 id="opening-a-compare">Opening a compare</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Where</th><th>How</th></tr></thead>
+<tbody>
+<tr><td>Explorer, Find in Files results</td><td>Right-click a file › <strong>Select for Compare</strong>, then right-click another › <strong>Compare with &quot;…&quot;</strong></td></tr>
+<tr><td>Explorer</td><td>Select two files (Ctrl+click) › right-click › <strong>Compare Selected</strong></td></tr>
+<tr><td>Tab right-click</td><td><strong>Compare with Saved</strong> (your unsaved edits against the file on disk), <strong>Compare with Clipboard</strong>, <strong>Select for Compare</strong> / <strong>Compare with Selected</strong></td></tr>
+<tr><td>File › Compare</td><td><strong>Compare Two Files…</strong>, <strong>Compare Active File With…</strong>, <strong>Compare with Saved</strong>, <strong>Compare with Clipboard</strong></td></tr>
+<tr><td>Commit graph</td><td>Click a file of a commit, or of a comparison of two commits, of a commit with your files, or with a branch (<a href="git.html#comparing-commits">Comparing commits</a>)</td></tr>
+</tbody>
+</table></div>
+<p>Comparisons opened from the commit graph are labelled <code>name @ commit id</code> and reuse one tab as you click through the files (double-click the tab to keep it). Versions from a commit are read-only; when a commit is compared with your files, the right side is the file on disk and can be edited and saved.</p>
+<p>The first file is the left (original) side and the second the right (changed) side. If the two have the same name, each side is labelled with its folder, as in <code>old\stats.ts</code> and <code>new\stats.ts</code>.</p>
+<h2 id="reading-the-differences">Reading the differences</h2>
+<ul>
+<li><strong>Colours.</strong> Removed lines are red on the left, added lines green on the right, and the words that changed are highlighted more strongly.</li>
+<li><strong>Moving between changes.</strong> <strong>F7</strong> / <strong>Shift+F7</strong> (or the arrows in the toolbar) go to the next / previous change. The toolbar shows where you are, for example <strong>Change 2 of 5</strong>.</li>
+<li><strong>Layout.</strong> <strong>Side by side</strong> / <strong>Inline</strong> switches the layout. In inline mode the removed lines appear above the lines that replaced them.</li>
+<li><strong>A narrow tab.</strong> Below about 1000 px the layout switch shows only its icons and the Source Control buttons read <strong>Stage Lines</strong> / <strong>Discard Lines</strong> / <strong>Unstage Lines</strong>; below about 680 px the file names get a row of their own above the buttons.</li>
+<li><strong>Unchanged lines.</strong> The fold button hides long unchanged stretches. Click a folded stretch to show it.</li>
+<li><strong>Swap</strong> (⇄) puts each side on the other side. <strong>Reload</strong> reads the files from disk again and takes a tab&#39;s current text; clipboard and git versions keep the text they had, except in a comparison opened from Source Control, which reads its git side again too (it is off while a side has unsaved edits). A comparison with a file side also reloads by itself when that file changes on disk and nothing in the comparison is edited (see <a href="editing.html#external-changes">Editing › External changes</a>).</li>
+</ul>
+<h2 id="editing-and-saving">Editing and saving</h2>
+<ul>
+<li><strong>What you can edit.</strong> Sides that are files can be edited directly. The other kinds are read-only snapshots: a tab&#39;s text, the clipboard, and versions from git. In Inline layout there is only one editor, holding the right side: only that side can be edited there (switch to side by side to edit the left one).</li>
+<li><strong>Copying a change across.</strong> In side-by-side layout, the arrows between the two sides copy a change from the left side into the right one. When the right side is read-only and the left one is a file, they copy from right to left instead. There are no arrows when both sides are read-only, or in Inline layout.</li>
+<li><strong>Saving.</strong> An edited side is tagged <strong>edited</strong>. Save with <strong>Ctrl+S</strong> or the <strong>Save</strong> button. Each file keeps its encoding, byte order mark and line-ending style.</li>
+<li><strong>Closing.</strong> Closing a compare with unsaved edits asks first.</li>
+<li><strong>Other tabs.</strong> If the file is also open in a normal tab, that tab notices the change like any other change made outside it.</li>
+</ul>
+<h2 id="comparisons-from-source-control">Comparisons from Source Control</h2>
+<p>A Compare tab opened by clicking a file under <strong>Changes</strong> or <strong>Staged Changes</strong> in the Source Control panel can also stage, unstage or discard part of the file:</p>
+<ul>
+<li>A bar above each change has <strong>Stage Change</strong> and <strong>Discard Change</strong> (from Changes) or <strong>Unstage Change</strong> (from Staged Changes). In side-by-side layout the bar is in the right side; the Inline layout has it too.</li>
+<li>The toolbar has <strong>Stage Selected Lines</strong> / <strong>Discard Selected Lines</strong> (or <strong>Unstage Selected Lines</strong>), which act on the lines selected in the right side; a bare cursor counts as its line. They are off when the selection touches no change.</li>
+<li>The arrows between the sides are unchanged: they edit the right side (an edit you can undo and must save), they don&#39;t stage or discard anything.</li>
+<li>The tab follows the index: after a staging action or a commit it is refreshed in place, its left side relabelled <strong>(staged)</strong> or <strong>(HEAD)</strong>, without moving away from where you were. A tab with unsaved edits is not refreshed.</li>
+<li>While the sides are swapped the staging controls are hidden; swap back to get them.</li>
+</ul>
+<p>What each action does, when it asks and what it saves first is in <a href="git.html#source-control-panel">Git: Source Control panel</a>.</p>
+<h2 id="limits">Limits</h2>
+<ul>
+<li>Files at or above the large-file threshold (Settings › Files, default 128 MB) and binary files can&#39;t be compared.</li>
+<li>Compare tabs aren&#39;t restored when Quarry restarts.</li>
+<li>Very different texts are compared with a time limit of a few seconds; past it, the comparison is less precise.</li>
+</ul>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="../privacy.html">Privacy policy</a> · <a href="../terms.html">Terms of sale</a> · <a href="../refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="../license.html">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>

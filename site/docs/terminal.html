@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Terminal · Quarry</title>
+  <meta name="description" content="Terminal: The terminal panel, split, run text and files, find, choosing the shell, keys.">
+  <link rel="icon" href="../quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="../"><img src="../quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="../docs/" aria-current="page">Documentation</a>
+        <a href="../#install">Install</a>
+        <a href="../#licensing">Licensing</a>
+        <a href="../#support">Support</a>
+        <a href="../privacy.html">Privacy</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="docs">
+      <nav class="guides" aria-label="Guides">
+        <a href="./">All guides</a>
+        <a href="install.html">Installing</a>
+        <a href="editing.html">Editing</a>
+        <a href="large-files.html">Large files</a>
+        <a href="code-intelligence.html">Code intelligence</a>
+        <a href="compare.html">Compare</a>
+        <a href="git.html">Git</a>
+        <a href="terminal.html" aria-current="page">Terminal</a>
+        <a href="find-and-replace.html">Find and replace</a>
+        <a href="json.html">JSON tools</a>
+        <a href="api-requests.html">API requests</a>
+        <a href="formatting.html">Formatting</a>
+        <a href="macros.html">Macros</a>
+        <a href="scripting.html">Scripts</a>
+        <a href="keyboard-shortcuts.html">Keyboard shortcuts</a>
+        <a href="settings.html">Settings</a>
+        <a href="benchmarks.html">Benchmarks</a>
+      </nav>
+        <article class="guide">
+<h1 id="terminal">Terminal</h1>
+<p>Quarry has a terminal panel under the editor, so you see your code and your shell together. It runs PowerShell, Command Prompt, Git Bash, or any shell you name, in the folder you are working in. Each terminal is a real Windows console (ConPTY), so full-screen programs, colours and prompts work as in Windows Terminal.</p>
+<ul>
+<li><a href="#opening-the-terminal">Opening the terminal</a></li>
+<li><a href="#the-list-of-terminals">The list of terminals</a></li>
+<li><a href="#the-toolbar">The toolbar</a></li>
+<li><a href="#split">Split</a></li>
+<li><a href="#run-text-and-files">Run text and files</a></li>
+<li><a href="#find">Find</a></li>
+<li><a href="#keys">Keys</a></li>
+<li><a href="#choosing-the-shell">Choosing the shell</a></li>
+<li><a href="#when-a-shell-ends">When a shell ends</a></li>
+<li><a href="#a-terminal-as-an-editor-tab">A terminal as an editor tab</a></li>
+</ul>
+<h2 id="opening-the-terminal">Opening the terminal</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>From</th><th>How</th></tr></thead>
+<tbody>
+<tr><td>Anywhere</td><td><strong>Ctrl+`</strong> shows the terminal and gives it the keyboard. The first time, it starts one.</td></tr>
+<tr><td>The rail on the left</td><td>The <strong>Terminal</strong> icon, under Macros: click to show the terminal, click again to hide the panel</td></tr>
+<tr><td>Another terminal</td><td><strong>Ctrl+Shift+`</strong>, <strong>New</strong> in the panel&#39;s toolbar, or <strong>Tools › New Terminal</strong></td></tr>
+<tr><td>Explorer</td><td>Right-click a folder, or blank space for the open folder, and choose <strong>Open in Terminal</strong></td></tr>
+<tr><td>Another shell, once</td><td>The menu beside <strong>New</strong>, or <strong>Tools › New Terminal With</strong></td></tr>
+</tbody>
+</table></div>
+<p><strong>Ctrl+`</strong> goes back and forth: with the keyboard in the terminal it hides the panel and returns to the editor; pressed again it brings the panel back as you left it. Hiding the panel, or switching it to Console or Problems, never stops a shell.</p>
+<p>A new terminal starts in the open folder, else in the folder of the file in front, else in your home folder. With several folders open, the menu beside <strong>New</strong> has an entry for each.</p>
+<h2 id="the-list-of-terminals">The list of terminals</h2>
+<p>The terminals are listed on the left of the panel, each with its shell&#39;s name and the folder it was started in. Click one to show it; the panel&#39;s <strong>Terminal</strong> tab shows how many there are.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>To</th><th>Do</th></tr></thead>
+<tbody>
+<tr><td>Switch</td><td>Click it, or <strong>Ctrl+PageDown</strong> / <strong>Ctrl+PageUp</strong> in a terminal</td></tr>
+<tr><td>Rename</td><td>Double-click it, or <strong>Rename</strong> (the pencil) in the toolbar; <strong>Enter</strong> keeps the name, <strong>Escape</strong> drops it</td></tr>
+<tr><td>Split or kill one</td><td>The two buttons that appear on its row</td></tr>
+<tr><td>More</td><td>Right-click it: Rename, Split, Clear, Kill, Kill All Terminals</td></tr>
+</tbody>
+</table></div>
+<p>With the keyboard in the list, <strong>Up</strong> and <strong>Down</strong> move, <strong>Enter</strong> goes into the terminal, <strong>F2</strong> renames and <strong>Delete</strong> kills.</p>
+<h2 id="the-toolbar">The toolbar</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Button</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><strong>New</strong></td><td>A terminal with the shell set in Settings. The arrow beside it: another shell, another open folder, a terminal as an editor tab, Terminal Settings.</td></tr>
+<tr><td><strong>Split</strong></td><td>Another terminal beside this one, with the same shell in the same folder</td></tr>
+<tr><td><strong>Run</strong></td><td>Run Selected Text, Run Active File, Go to Folder of Active File, Paste Path of Active File</td></tr>
+<tr><td><strong>Go to File&#39;s Folder</strong></td><td>Changes the terminal&#39;s folder to that of the file in front</td></tr>
+<tr><td>Find (magnifier)</td><td>Search what the terminal printed</td></tr>
+<tr><td>Clear (eraser)</td><td>Empties the screen and the scrollback; the program keeps running</td></tr>
+<tr><td>Rename (pencil)</td><td>Names the terminal in the list</td></tr>
+<tr><td>Kill (bin)</td><td>Ends the shell and everything it started, without asking</td></tr>
+<tr><td>Pin (right)</td><td>Keeps the terminal panel: it opens with a new terminal when Quarry starts, and stays open when its last terminal ends</td></tr>
+<tr><td>Maximize (right)</td><td>Gives the panel all the height the window allows; again puts it back</td></tr>
+</tbody>
+</table></div>
+<p>In a narrow window the toolbar wraps onto a second row; no button is hidden.</p>
+<h2 id="split">Split</h2>
+<p><strong>Split</strong> (or <strong>Ctrl+Shift+5</strong> in a terminal) puts a second terminal beside the active one. They stay side by side as a group, joined by a line in the list. Click a terminal of another group to show that group instead; the first keeps running.</p>
+<p>Drag the line between two terminals to give one more room; double-click it for equal widths. With the keyboard on the line, <strong>Left</strong> and <strong>Right</strong> move it.</p>
+<h2 id="run-text-and-files">Run text and files</h2>
+<p>These type into the active terminal for you, and start a terminal first when there is none.</p>
+<ul>
+<li><p><strong>Run Selected Text in Terminal</strong> runs what you selected, line by line. With nothing selected it runs the line the cursor is on.</p>
+</li>
+<li><p><strong>Run Active File in Terminal</strong> runs the file in front with the program for its kind:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>File</th><th>Runs with</th></tr></thead>
+<tbody>
+<tr><td><code>.py</code></td><td><code>python</code></td></tr>
+<tr><td><code>.js</code>, <code>.mjs</code>, <code>.cjs</code></td><td><code>node</code></td></tr>
+<tr><td><code>.rb</code>, <code>.php</code>, <code>.pl</code>, <code>.lua</code></td><td><code>ruby</code>, <code>php</code>, <code>perl</code>, <code>lua</code></td></tr>
+<tr><td><code>.go</code></td><td><code>go run</code></td></tr>
+<tr><td><code>.ps1</code></td><td>PowerShell</td></tr>
+<tr><td><code>.bat</code>, <code>.cmd</code>, <code>.exe</code></td><td>itself</td></tr>
+<tr><td><code>.sh</code></td><td><code>bash</code>, in Git Bash or another POSIX shell</td></tr>
+</tbody>
+</table></div>
+<p>For any other kind Quarry types nothing and says so. The saved file is what runs: save first if it has changes.</p>
+</li>
+<li><p><strong>Go to Folder of Active File</strong> changes the terminal&#39;s folder, in the way its shell needs (<code>Set-Location</code> in PowerShell, <code>cd /d</code> in Command Prompt so another drive works, <code>cd</code> in Git Bash).</p>
+</li>
+<li><p><strong>Paste Path of Active File</strong> puts the file&#39;s path on the command line, quoted for the shell, without pressing Enter.</p>
+</li>
+</ul>
+<p>All four are also under <strong>Tools</strong> and in the command palette.</p>
+<h2 id="find">Find</h2>
+<p><strong>Find</strong> in the toolbar, or <strong>Ctrl+F</strong> in a terminal, opens a find box at the top right. It searches as you type, starting from the newest output. <strong>Enter</strong> goes to the match before, <strong>Shift+Enter</strong> to the one after, and <strong>Escape</strong> closes the box. &quot;Not found&quot; means the terminal never printed that text (or it has scrolled out of the 10,000 lines that are kept).</p>
+<h2 id="keys">Keys</h2>
+<p>Every key goes to the shell, so Ctrl+R, Ctrl+L, Ctrl+W, Esc and the rest behave as in a terminal. Quarry keeps only:</p>
+<ul>
+<li><strong>Ctrl+`</strong>: hide the panel (or the keys you gave Toggle Terminal)</li>
+<li><strong>Ctrl+Shift+`</strong>: another terminal</li>
+<li><strong>Ctrl+Tab</strong> / <strong>Ctrl+Shift+Tab</strong>: switch editor tabs</li>
+<li><strong>Ctrl+Shift+P</strong>: command palette</li>
+<li><strong>Ctrl+F4</strong>: close the editor tab</li>
+<li>In the panel: <strong>Ctrl+F</strong> find, <strong>Ctrl+PageDown</strong> / <strong>Ctrl+PageUp</strong> next / previous terminal, <strong>Ctrl+Shift+5</strong> split</li>
+</ul>
+<p>Copy and paste work as in Windows Terminal: <strong>Ctrl+C</strong> copies when text is selected and otherwise interrupts the program, <strong>Ctrl+Shift+C</strong> copies, and <strong>Ctrl+V</strong> / <strong>Ctrl+Shift+V</strong> paste.</p>
+<p>The terminal follows Quarry&#39;s theme and the editor font and size, so <strong>Ctrl + mouse wheel</strong> over a terminal zooms it with the editor.</p>
+<h2 id="choosing-the-shell">Choosing the shell</h2>
+<p><strong>Settings › Terminal › Shell</strong> lists the shells Quarry found:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Shell</th><th>Found when</th></tr></thead>
+<tbody>
+<tr><td>PowerShell 7</td><td><code>pwsh.exe</code> is on your PATH or in <code>Program Files\PowerShell\7</code></td></tr>
+<tr><td>Windows PowerShell</td><td>Always (part of Windows)</td></tr>
+<tr><td>Command Prompt</td><td>Always</td></tr>
+<tr><td>Git Bash</td><td>Git for Windows is installed</td></tr>
+</tbody>
+</table></div>
+<p><strong>Automatic</strong> (the default) uses the first of these that is installed. <strong>Custom…</strong> runs a command line you type, such as <code>&quot;C:\msys64\usr\bin\bash.exe&quot; --login -i</code> or <code>wsl.exe</code>; put a path with spaces in quotes. A change applies to the next terminal you open; open terminals keep their shell.</p>
+<h2 id="when-a-shell-ends">When a shell ends</h2>
+<ul>
+<li>Typing <code>exit</code> takes the terminal off the list. When the last one goes, the panel closes, unless it is pinned.</li>
+<li>If the shell ends with an error code, the terminal stays so you can read what happened, and the list shows the code beside it; press <strong>Enter</strong> in it to start the shell again.</li>
+<li>Quitting Quarry ends every shell. Terminals are not reopened when Quarry restarts; a <strong>pinned</strong> panel opens with one fresh terminal instead. Hiding a pinned panel (Ctrl+`, the rail&#39;s Terminal icon) is for now only: it is back at the next start.</li>
+</ul>
+<h2 id="a-terminal-as-an-editor-tab">A terminal as an editor tab</h2>
+<p><strong>Tools › New Terminal Tab</strong> (also in the menu beside <strong>New</strong>) opens a shell as a tab in the editor area instead, named after the shell and the folder (&quot;PowerShell 7 · proj&quot;). It takes the full editor height and can sit in a <a href="editing.html#window-layout">split editor</a> pane. Such a tab counts towards the <a href="settings.html#files--tabs">tab limit</a>, closes when you type <code>exit</code>, and asks before closing while its shell is running. The panel&#39;s list, toolbar and find box are for the panel&#39;s terminals only.</p>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="../privacy.html">Privacy policy</a> · <a href="../terms.html">Terms of sale</a> · <a href="../refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="../license.html">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>

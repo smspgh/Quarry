@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Large files · Quarry</title>
+  <meta name="description" content="Large files: How large-file mode works: colours, CSV grid, JSON tree and validation, filter view, follow mode, find, replace, editing, limits.">
+  <link rel="icon" href="../quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="../"><img src="../quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="../docs/" aria-current="page">Documentation</a>
+        <a href="../#install">Install</a>
+        <a href="../#licensing">Licensing</a>
+        <a href="../#support">Support</a>
+        <a href="../privacy.html">Privacy</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="docs">
+      <nav class="guides" aria-label="Guides">
+        <a href="./">All guides</a>
+        <a href="install.html">Installing</a>
+        <a href="editing.html">Editing</a>
+        <a href="large-files.html" aria-current="page">Large files</a>
+        <a href="code-intelligence.html">Code intelligence</a>
+        <a href="compare.html">Compare</a>
+        <a href="git.html">Git</a>
+        <a href="terminal.html">Terminal</a>
+        <a href="find-and-replace.html">Find and replace</a>
+        <a href="json.html">JSON tools</a>
+        <a href="api-requests.html">API requests</a>
+        <a href="formatting.html">Formatting</a>
+        <a href="macros.html">Macros</a>
+        <a href="scripting.html">Scripts</a>
+        <a href="keyboard-shortcuts.html">Keyboard shortcuts</a>
+        <a href="settings.html">Settings</a>
+        <a href="benchmarks.html">Benchmarks</a>
+      </nav>
+        <article class="guide">
+<h1 id="large-files">Large files</h1>
+<p>Files at or above the <strong>large-file threshold</strong> (default <strong>128 MB</strong>) open in a disk-backed mode built for logs, dumps and data exports of many gigabytes. The file is memory-mapped and never loaded into memory as a whole, so it opens instantly whatever its size.</p>
+<ul>
+<li><a href="#how-it-works">How it works</a></li>
+<li><a href="#viewing-and-navigating">Viewing and navigating</a></li>
+<li><a href="#colours">Colours</a></li>
+<li><a href="#csv-and-tsv-grid">CSV and TSV grid</a></li>
+<li><a href="#find">Find</a></li>
+<li><a href="#filter-view">Filter view</a></li>
+<li><a href="#follow-mode">Follow mode</a></li>
+<li><a href="#replace-all">Replace All</a></li>
+<li><a href="#editing">Editing</a></li>
+<li><a href="#saving">Saving</a></li>
+<li><a href="#encodings-and-line-endings">Encodings and line endings</a></li>
+<li><a href="#json-tree-and-validation">JSON tree and validation</a></li>
+<li><a href="#what-is-not-available">What is not available</a></li>
+<li><a href="#changing-the-threshold">Changing the threshold</a></li>
+</ul>
+<h2 id="how-it-works">How it works</h2>
+<ul>
+<li>The file is memory-mapped by the Rust core. Only the lines on screen are read.</li>
+<li>A line index is built in the background, on up to eight processor cores (about a second for a 5 GB file on the benchmark machine). Progress shows in the tab&#39;s banner and the status bar (&quot;indexing N%&quot;). The index stores one 8-byte checkpoint per 1,024 lines, so a file with 100 million lines needs under a megabyte for its index.</li>
+<li>The view is virtualized. It fetches 256 lines at a time and keeps a bounded cache.</li>
+<li>Your edits are stored separately from the file (in a piece table) until you save. The original file is not modified before then.</li>
+</ul>
+<p>The status bar shows the file size and line count, and once the index is complete how long it took, for example &quot;indexed in 0.139 s (8 threads, 9.04 GB/s)&quot;. After Find, Replace All, a filter, Save or JSON: Validate it also shows how long that took and the rate through the file, for example &quot;Find: 251,694 matches in 0.114 s (11.0 GB/s)&quot;. The times are what the window waited, so they are handy for comparing with other editors. <strong>Large File: Show Info</strong> in the command palette gives more detail.</p>
+<h2 id="viewing-and-navigating">Viewing and navigating</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td>Arrows, Page Up/Down, <strong>Ctrl+Home / Ctrl+End</strong></td><td>Move through the file.</td></tr>
+<tr><td><strong>Home / End</strong></td><td>Scroll horizontally.</td></tr>
+<tr><td><strong>Shift+arrows</strong>, mouse drag</td><td>Select whole lines.</td></tr>
+<tr><td><strong>Ctrl+A</strong></td><td>Select all lines.</td></tr>
+<tr><td><strong>Ctrl+C</strong></td><td>Copy the selected lines (up to 200,000), or text selected inside one line.</td></tr>
+<tr><td><strong>Ctrl+G</strong></td><td>Go to line. If indexing hasn&#39;t reached that line yet, the jump happens as soon as it does.</td></tr>
+</tbody>
+</table></div>
+<p>Very long lines are shown up to 20,000 characters, followed by &quot;… (N more chars)&quot;.</p>
+<h2 id="colours">Colours</h2>
+<p>Large files are coloured as you scroll: only the lines on screen are coloured, so it costs the same at any size.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Files</th><th>Colours</th></tr></thead>
+<tbody>
+<tr><td><code>.json</code>, <code>.jsonc</code>, <code>.json5</code>, <code>.jsonl</code>, <code>.ndjson</code>, <code>.geojson</code>, <code>.har</code></td><td>keys, strings, numbers, <code>true</code> / <code>false</code> / <code>null</code></td></tr>
+<tr><td><code>.log</code>, <code>.out</code>, <code>.err</code></td><td>timestamps, the log level (ERROR and FATAL in red, WARN in amber, DEBUG and TRACE dimmed), <code>[tags]</code>, <code>key=</code> names and numbers</td></tr>
+<tr><td><code>.csv</code>, <code>.tsv</code>, <code>.tab</code></td><td>one colour per column, so a row is easy to follow; quoted fields stay in one column</td></tr>
+<tr><td><code>.xml</code>, <code>.html</code>, <code>.htm</code>, <code>.xhtml</code>, <code>.svg</code>, <code>.plist</code>, <code>.xsd</code>, <code>.kml</code>, <code>.gpx</code></td><td>tags, attributes, values and comments</td></tr>
+<tr><td><code>.sql</code></td><td>keywords, strings, numbers and comments</td></tr>
+<tr><td><code>.yaml</code>, <code>.yml</code></td><td>keys, list dashes, values (text, numbers, <code>true</code> / <code>false</code>) and <code>#</code> comments</td></tr>
+<tr><td><code>.ini</code>, <code>.cfg</code>, <code>.conf</code>, <code>.properties</code>, <code>.toml</code>, <code>.env</code>, <code>.reg</code></td><td><code>[sections]</code>, keys, values and <code>#</code> / <code>;</code> comments</td></tr>
+<tr><td><code>.js</code>, <code>.mjs</code>, <code>.cjs</code>, <code>.jsx</code>, <code>.ts</code>, <code>.tsx</code>, <code>.c</code>, <code>.h</code>, <code>.cpp</code>, <code>.cc</code>, <code>.hpp</code>, <code>.cs</code>, <code>.java</code>, <code>.go</code>, <code>.rs</code>, <code>.kt</code>, <code>.swift</code>, <code>.php</code>, <code>.css</code>, <code>.scss</code></td><td>strings, numbers, common keywords, <code>//</code> and <code>/* */</code> comments</td></tr>
+<tr><td><code>.py</code>, <code>.rb</code>, <code>.sh</code>, <code>.bash</code>, <code>.ps1</code>, <code>.pl</code>, <code>.r</code>, <code>.tcl</code></td><td>strings, numbers, common keywords and <code>#</code> comments</td></tr>
+</tbody>
+</table></div>
+<p>A file with any other extension (<code>.txt</code>, say) is coloured as a log, JSON or XML when its first 40 non-empty lines look like one; otherwise it stays plain.</p>
+<p>Source code gets the same simple colouring whatever the language: it is not the full highlighting of a normal tab. Each line is coloured on its own, so something that spans lines (an XML or block comment, say) is coloured only on its first line. Lines are coloured up to 4,000 characters. Turn it off with <strong>Settings › Files › Colours in large-file mode</strong>.</p>
+<h2 id="csv-and-tsv-grid">CSV and TSV grid</h2>
+<p>A large <code>.csv</code>, <code>.tsv</code> or <code>.tab</code> file opens as a grid: each field in its own column, with the file&#39;s first line as a header that stays at the top while you scroll.</p>
+<ul>
+<li>Quoted fields are read as one cell (<code>&quot;Smith, Jo&quot;</code>), with <code>&quot;&quot;</code> shown as <code>&quot;</code>. Numbers are right-aligned.</li>
+<li>Columns are sized to fit the rows you have seen (up to 40 characters; hover a cut value to see all of it). They only widen as you scroll, so the layout doesn&#39;t jump.</li>
+<li>A search hit marks the cell it is in. The <a href="#filter-view">filter view</a> shows its lines in the same columns, under the same header.</li>
+<li><strong>Grid</strong> in the banner switches between the grid and the raw text. Editing a line (Enter) edits its raw text.</li>
+<li>Each line is read on its own, so a quoted field that contains a line break shows its parts on separate rows.</li>
+</ul>
+<h2 id="find">Find</h2>
+<p><strong>Ctrl+F</strong> opens the find bar; text you selected with the mouse inside one line is put in the search box. Type the search and press <strong>Enter</strong> to run it. There is no find-as-you-type, because each search reads the whole file.</p>
+<ul>
+<li>Options: <strong>Match Case</strong>, <strong>Whole Word</strong>, <strong>Regex</strong>, and <strong>Dot matches newline</strong> (regex only).</li>
+<li>Regex syntax is Rust&#39;s <a href="https://docs.rs/regex/latest/regex/#syntax" target="_blank" rel="noopener"><code>regex</code></a> crate: Unicode-aware, <code>^</code> and <code>$</code> match at line boundaries, no look-around and no backreferences.</li>
+<li>Up to 20,000 hits are collected and the first 2,000 are listed. The total count stops at 5,000,000.</li>
+<li><strong>F3 / Shift+F3</strong> go to the next / previous hit.</li>
+</ul>
+<h2 id="filter-view">Filter view</h2>
+<p><strong>Filter</strong> in the large-file banner (or <strong>Large File: Filter Lines</strong> in the command palette) opens a pane under the file that shows only the lines matching a search: every one of them, however many, scrolled like the file itself.</p>
+<ul>
+<li>Type a search and press <strong>Enter</strong>. Match Case, Whole Word and Regex work as in Find, except that <code>.</code> never matches a line break (there is no option for it): a line is listed when a match starts on it.</li>
+<li><strong>Hide matching lines</strong> (the crossed-out eye) shows the opposite: every line <em>without</em> a match, for example to hide all DEBUG lines.</li>
+<li>For logs, <strong>Errors</strong> and <strong>Warnings</strong> filter by log level in one click.</li>
+<li>Click a line, or move with the arrow keys, to show it in context in the file above. Each line shows its line number in the file.</li>
+<li>Long lines are shown up to 2,000 characters (20,000 in the grid), followed by &quot;… (N more chars)&quot;; click the line to see it in the file view.</li>
+<li>The filter does not wait for indexing: it runs as soon as you press Enter. Until the index reaches a filtered line, that line shows &quot;…&quot;. It re-runs after you edit the file.</li>
+<li>Speed on the benchmark machine (<a href="benchmarks.html">bench/RESULTS.md</a>): keeping the ERROR lines of a 5 GB log (7.4 million of 59 million) takes 0.3 to 0.5 s (up to 1.3 s while the file is still being indexed); hiding its DEBUG lines (44 million left) 0.3 to 0.5 s. Find works the same way and takes 0.2 to 0.6 s on a 5 GB file. The file is read on up to eight processor cores. A file with unsaved edits, or a regular expression that could match across a line break (one with <code>\s</code>, <code>[^…]</code> or <code>\n</code>, say), is scanned on one core instead, at about twice those times. The filter needs one bit per line of the file: about 7 MB for 60 million lines.</li>
+</ul>
+<h2 id="follow-mode">Follow mode</h2>
+<p><strong>Follow</strong> in the banner (or <strong>Large File: Follow</strong>) shows lines as they are added to the file, like <code>tail -f</code>: for a log that is still being written.</p>
+<ul>
+<li>Quarry checks the file once a second and reads only what was added. The view jumps to the end and stays there; scroll up to read and it stops moving, scroll back to the end and it follows again. An open filter picks up new matching lines too.</li>
+<li>If the file is rewritten instead of added to (a rotated log, say), Quarry reloads it.</li>
+<li>Follow mode needs the file unedited and fully indexed. Editing a line stops it.</li>
+<li>While a file is open, Windows doesn&#39;t let other programs <strong>shrink</strong> it, so a logger that rotates by truncating the file in place (copy-truncate) can&#39;t do so while Quarry has it open. Loggers that rename the file and start a new one are fine.</li>
+</ul>
+<h2 id="replace-all">Replace All</h2>
+<p>Large-file mode supports <strong>Replace All</strong> but not replacing one match at a time.</p>
+<ul>
+<li>It asks for confirmation, then streams the whole file into a new working copy in <code>%TEMP%</code>. The original file is untouched until you save. On an unedited file the work is split across up to eight processor cores, so a 1.25 GB file takes about half a second; writing the copy is most of that, so a drive busy with other writes makes it slower.</li>
+<li>In regex mode the replacement follows the same JavaScript rules as Find in Files: <code>$1</code> or <code>$&lt;name&gt;</code> for capture groups, <code>$&amp;</code> for the whole match and <code>$$</code> for a literal <code>$</code> (<code>${name}</code> stays as typed). In plain-text mode, <code>$</code> is literal.</li>
+<li><strong>Preserve Case</strong> (the <strong>Aa</strong> toggle in the replace box) matches the case of each replaced text: <code>FOO</code> → <code>BAR</code>, <code>Foo</code> → <code>Bar</code>, <code>foo</code> → <code>bar</code>.</li>
+<li>Replace All clears the undo history.</li>
+<li>It is available once indexing has finished.</li>
+</ul>
+<h2 id="editing">Editing</h2>
+<p>Editing works line by line and is available once indexing has finished.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Keys</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><strong>Enter</strong>, <strong>F2</strong> or double-click</td><td>Edit the selected line in place. Enter (or leaving the field) commits; Esc cancels. A line break typed into the line is saved with the file&#39;s own line ending.</td></tr>
+<tr><td><strong>Ctrl+Enter</strong></td><td>Insert an empty line below and edit it.</td></tr>
+<tr><td><strong>Delete</strong></td><td>Delete the selected lines (up to 100,000 at a time).</td></tr>
+<tr><td><strong>Ctrl+Z / Ctrl+Y</strong></td><td>Undo / redo, up to 200 steps. Undoing back to the saved state clears the modified mark.</td></tr>
+</tbody>
+</table></div>
+<ul>
+<li>Lines longer than 16 MB can&#39;t be edited.</li>
+<li>Lines containing invalid UTF-8 ask before editing, because the invalid bytes are replaced with U+FFFD (<code>�</code>) when you edit them.</li>
+</ul>
+<h2 id="saving">Saving</h2>
+<p><strong>Ctrl+S</strong> and <strong>Save As</strong> stream the original file plus your edits to a temporary file in the same folder, flush it to disk, then replace the target in one step. The saved file keeps the original&#39;s attributes (such as hidden), permissions and creation time, and saving through a symbolic link writes the file it points to and keeps the link. If anything fails, the original stays intact and the document stays open.</p>
+<p>You can&#39;t save over a file that is open in large-file mode in another tab.</p>
+<h2 id="encodings-and-line-endings">Encodings and line endings</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>File</th><th>Behaviour</th></tr></thead>
+<tbody>
+<tr><td>UTF-8 (with or without BOM)</td><td>Full support.</td></tr>
+<tr><td>Invalid UTF-8 bytes</td><td>Shown as <code>�</code>; the line is flagged and asks before editing.</td></tr>
+<tr><td>UTF-16 LE / BE with a BOM</td><td>Shown decoded. Editing, Find and Replace All work; the file is saved in the same encoding, with its BOM and line endings. Replace All leaves a line that does not decode cleanly untouched. Filter and the JSON tree need UTF-8.</td></tr>
+<tr><td>UTF-16 without a BOM, other encodings</td><td>Read as UTF-8.</td></tr>
+<tr><td>CRLF, LF, CR-only line endings</td><td>Detected from the first 1 MiB and kept on save.</td></tr>
+<tr><td>Mixed line endings</td><td>A stray CR inside a line shows as <code>␍</code>.</td></tr>
+</tbody>
+</table></div>
+<h2 id="json-tree-and-validation">JSON tree and validation</h2>
+<p>For a large <code>.json</code>, <code>.jsonc</code>, <code>.json5</code>, <code>.geojson</code> or <code>.har</code> file, the <strong>JSON</strong> panel shows its tree, read from the file itself rather than loaded into memory, so it works at any size.</p>
+<ul>
+<li>The tree opens straight away with the top level listed. Expanding a node reads just that node: its children appear with their type, a value preview, and for objects and arrays how many members or items they have.</li>
+<li>Long objects and arrays list 200 children at a time; <strong>Load 200 more</strong> at the end lists the next ones (&quot;400 of 20,079,290 shown&quot;).</li>
+<li>The top-level count is worked out in the background (it reads the whole file; about 7 s for 5 GB on the benchmark machine) and shows as &quot;counting…&quot; until then.</li>
+<li>Click a row to go to its line in the file, even while the file is still being indexed. <strong>Copy path</strong> (or <strong>Ctrl+Shift+C</strong>) copies its path in the chosen format, as in the normal tree.</li>
+<li>Arrow keys move through the tree: <strong>→</strong> / <strong>←</strong> expand and collapse, <strong>Enter</strong> goes to the line (or loads more).</li>
+<li>The tree reads the file as saved. With unsaved changes it asks you to save first; <strong>Re-read the file</strong> refreshes it after saving.</li>
+</ul>
+<p><strong>JSON: Validate</strong> (<strong>Ctrl+Alt+V</strong>) works on large <code>.json</code>, <code>.jsonc</code>, <code>.json5</code>, <code>.geojson</code> and <code>.har</code> files of any size. It checks the file in place, without loading it into memory: 6 to 8 seconds for a 5 GB file on the benchmark machine. A valid file says so, with the time taken. For an invalid one it gives the line and column and jumps to the line. Files ending in <code>.jsonc</code> or <code>.json5</code> are checked as JSONC (comments and trailing commas allowed).</p>
+<p>JSON Lines files (<code>.jsonl</code>, <code>.ndjson</code>) are coloured as JSON but get neither the tree nor Validate: they hold one JSON value per line, not a single document. Use Find or the filter to work with them.</p>
+<p>The file is checked as saved, so save your changes first; Quarry says so if you haven&#39;t.</p>
+<h2 id="what-is-not-available">What is not available</h2>
+<p>Large-file tabs are a viewer with line editing, not a full editor. Compared with normal tabs, they have:</p>
+<ul>
+<li>no column mode, multi-cursor, or Edit / Code / Selection menu commands, and syntax colours only for the formats <a href="#colours">listed above</a>;</li>
+<li>no Format Document, and of the JSON commands only <strong>JSON: Validate</strong> (<a href="#json-tree-and-validation">above</a>);</li>
+<li>no scripts or macros;</li>
+<li>no Compare, split editor or Open to the Side, no code intelligence, and no Git change markers, blame or change navigation;</li>
+<li>no word wrap or render-whitespace toggles;</li>
+<li>no single-match Replace, and no Revert;</li>
+<li>no encoding or line-ending changes.</li>
+</ul>
+<p>Find in Files covers large files when it searches a folder, but not in the <strong>Open Files</strong> scope.</p>
+<p>While a file is open in large-file mode, Quarry holds it memory-mapped. On Windows, other programs may be unable to delete or replace it until you close the tab. Quarry checks for outside changes when its window regains focus or you switch tabs, as it does for normal files (see <a href="editing.html#external-changes">Editing › External changes</a>).</p>
+<h2 id="changing-the-threshold">Changing the threshold</h2>
+<p><strong>Settings › Files › Large-file threshold (MB)</strong> accepts 1 to 256 (MiB); the default is 128. It applies to files opened after the change. Files below the threshold open as normal tabs with every feature, but their whole text is loaded into memory. A file of 4 MB or more shows its first lines at once (about half a second after you open it, like a large file) while the rest arrives; until it has, about a second per 100 MB on the benchmark machine, the tab can be read and scrolled but not edited or saved. Lower the threshold if you would rather have large-file mode&#39;s low memory use for files of that size. 256 is the limit because larger files cannot be loaded as a normal tab at all.</p>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="../privacy.html">Privacy policy</a> · <a href="../terms.html">Terms of sale</a> · <a href="../refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="../license.html">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>

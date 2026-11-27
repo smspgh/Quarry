@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>API Requests · Quarry</title>
+  <meta name="description" content="API Requests: Sending requests, secret headers, saved requests.">
+  <link rel="icon" href="../quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="../"><img src="../quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="../docs/" aria-current="page">Documentation</a>
+        <a href="../#install">Install</a>
+        <a href="../#licensing">Licensing</a>
+        <a href="../#support">Support</a>
+        <a href="../privacy.html">Privacy</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="docs">
+      <nav class="guides" aria-label="Guides">
+        <a href="./">All guides</a>
+        <a href="install.html">Installing</a>
+        <a href="editing.html">Editing</a>
+        <a href="large-files.html">Large files</a>
+        <a href="code-intelligence.html">Code intelligence</a>
+        <a href="compare.html">Compare</a>
+        <a href="git.html">Git</a>
+        <a href="terminal.html">Terminal</a>
+        <a href="find-and-replace.html">Find and replace</a>
+        <a href="json.html">JSON tools</a>
+        <a href="api-requests.html" aria-current="page">API requests</a>
+        <a href="formatting.html">Formatting</a>
+        <a href="macros.html">Macros</a>
+        <a href="scripting.html">Scripts</a>
+        <a href="keyboard-shortcuts.html">Keyboard shortcuts</a>
+        <a href="settings.html">Settings</a>
+        <a href="benchmarks.html">Benchmarks</a>
+      </nav>
+        <article class="guide">
+<h1 id="api-requests">API Requests</h1>
+<p>The <strong>API Requests</strong> panel sends an HTTP request and opens the response in a new tab, so you can format, browse, query and convert it with the <a href="json.html">JSON tools</a> straight away. Open it from its icon on the left rail, below Macros, or with <strong>View › Panels › API Requests</strong>.</p>
+<p>It is meant to stay small: one request at a time, with no collections, environments, variables, sign-in flows or cookie jar.</p>
+<ul>
+<li><a href="#sending-a-request">Sending a request</a></li>
+<li><a href="#headers-and-secrets">Headers and secrets</a></li>
+<li><a href="#saving-requests">Saving requests</a></li>
+<li><a href="#where-requests-live">Where requests live</a></li>
+<li><a href="#limits">Limits</a></li>
+</ul>
+<h2 id="sending-a-request">Sending a request</h2>
+<ol>
+<li>Pick the method (GET, POST, PUT, PATCH, DELETE or OPTIONS) and type the URL. It must start with <code>http://</code> or <code>https://</code>.</li>
+<li>Add headers if you need them (see below).</li>
+<li>For POST, PUT and PATCH, type the body in the <strong>Body</strong> box. If the body is JSON and you have not set a <code>Content-Type</code> header, <code>Content-Type: application/json</code> is added for you.</li>
+<li>Click <strong>Send</strong>, or press <strong>Enter</strong> in the URL box or <strong>Ctrl+Enter</strong> anywhere in the form. While the request runs, the button becomes <strong>Cancel</strong>.</li>
+</ol>
+<p>The status line then shows the status code, the time taken and the size, for example <code>200 OK · 312 ms · 4.2 KB</code>. It&#39;s green for 2xx, amber for 3xx and red for errors.</p>
+<p>The response body opens in a new unsaved tab named after the host and the last part of the path, for example <code>api.github.com-repos.json</code>. A JSON body is formatted with your <strong>JSON indent</strong> setting. Error responses (4xx, 5xx) open too, so you can read the error the server sent. A response with no body (204) opens nothing; a notification tells you so. A response larger than the large-file threshold opens in <a href="large-files.html">large-file mode</a> instead.</p>
+<p>The <strong>JSON Tools</strong> button (<code>{ }</code>) beside the status lights up once a request has opened a JSON response tab. Click it to bring that tab to the front and open the JSON Tools panel on it. It is dimmed before the first JSON response, after you close that tab, and when the last response was not JSON.</p>
+<p>Compressed responses are unpacked.</p>
+<h3 id="redirects">Redirects</h3>
+<p>Quarry follows up to 10 redirects itself, one at a time, and checks each one:</p>
+<ul>
+<li><strong>Never from https to plain http.</strong> The request stops with a message instead, so nothing is sent unencrypted.</li>
+<li><strong>Secret headers stay with the site you typed.</strong> If the server redirects to another site (another host or port) while any header is marked secret, Quarry stops and says so. <code>Authorization</code>, <code>Proxy-Authorization</code> and <code>Cookie</code> are never carried to another site, even when marked plain.</li>
+<li><strong>POST becomes GET where browsers do it.</strong> A POST answered with 301 or 302, or any request answered with 303, continues as a GET without its body. 307 and 308 keep the method and the body.</li>
+<li>Only <code>http</code> and <code>https</code> addresses are followed.</li>
+</ul>
+<h2 id="headers-and-secrets">Headers and secrets</h2>
+<p>Each header row has a name and a value. Click <strong>+</strong> to add a row and <strong>×</strong> to remove one; rows with no name are not sent.</p>
+<p>A header whose name looks like it carries a credential (<code>Authorization</code>, <code>Proxy-Authorization</code>, <code>Cookie</code>, <code>X-API-Key</code>, or any name containing <em>token</em>, <em>secret</em>, <em>password</em>, <em>auth</em> or <em>session</em>) is marked <strong>secret</strong>: its value is masked, and the eye button shows it. Click the lock to make any header secret or plain yourself.</p>
+<p>Secret values are what Quarry encrypts when you save the request. The URL and the body are saved as typed, so put API keys in a secret header rather than in the URL&#39;s query string.</p>
+<h2 id="saving-requests">Saving requests</h2>
+<p>Type a <strong>Name</strong> and, if you like, a <strong>Description</strong>, then click <strong>Save</strong>.</p>
+<p>The <strong>saved requests</strong> dropdown at the top of the panel shows the request in the form. Click it to list <strong>New request</strong> and every saved request with its method, name and description:</p>
+<ul>
+<li>Click a request to load it into the form, ready to send.</li>
+<li>Click its <strong>✎</strong> (or press <strong>F2</strong>) to rename it in place, then <strong>Enter</strong> to keep the name or <strong>Escape</strong> to cancel. The contents stay as saved.</li>
+<li>Click its <strong>🗑</strong> (or press <strong>Delete</strong>) to move it to the Recycle Bin, after you confirm.</li>
+</ul>
+<p>With the keyboard: <strong>↓</strong> or <strong>Enter</strong> on the dropdown opens it, <strong>↑ ↓</strong> move, <strong>Enter</strong> loads and <strong>Escape</strong> closes.</p>
+<ul>
+<li>A request with changes you have not saved shows <strong>•</strong> after its name in the dropdown. Switching to another request, or to <strong>New request</strong>, asks before discarding them.</li>
+<li><strong>Save as New</strong> (shown once a saved request is open) writes the form as a new saved request and leaves the original as it was, which is handy for trying a variation of a call. If you kept the name, the copy gets a number: <code>Create item (2)</code>. The form then edits the new request.</li>
+<li>Changing the name and saving renames the file. Saving under the name of another saved request asks before replacing it.</li>
+<li>Nothing is written to disk until you click <strong>Save</strong>.</li>
+</ul>
+<h2 id="where-requests-live">Where requests live</h2>
+<p>Each saved request is a file <code>&lt;name&gt;.request.json</code> in <code>%APPDATA%\com.quarry.app\requests</code>, with the description, method, URL, headers and body.</p>
+<p>Secret header values are encrypted with Windows&#39; Data Protection API (DPAPI) for your Windows account. Only you, signed in to Windows on this PC, can decrypt them. Copying the file elsewhere is safe, but on another PC or account those values are empty and the panel asks you to type them again.</p>
+<h2 id="limits">Limits</h2>
+<ul>
+<li>Requests are sent by Windows&#39; own <code>curl.exe</code>, which checks certificates against the Windows certificate store. It does <strong>not</strong> use the Windows proxy setting: to send requests through a proxy, set the <code>HTTPS_PROXY</code> / <code>HTTP_PROXY</code> environment variables (and <code>NO_PROXY</code> for exceptions) before starting Quarry.</li>
+<li>Your own curl settings file (<code>.curlrc</code> / <code>_curlrc</code>) is ignored, so a setting in it can&#39;t switch off certificate checks for Quarry&#39;s requests.</li>
+<li>Characters such as <code>[ ]</code> and <code>{ }</code> in a URL are sent as typed (<code>?filter[name]=x</code> works).</li>
+<li>Response headers are not shown; only the status, the time taken and the size.</li>
+<li>Bodies are text. A binary response (an image, a zip file) opens as text, which is rarely useful.</li>
+<li>Response files of large-file size are kept in <code>%TEMP%\Quarry\api</code> and removed after a day. Use <strong>Save As</strong> to keep one.</li>
+</ul>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="../privacy.html">Privacy policy</a> · <a href="../terms.html">Terms of sale</a> · <a href="../refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="../license.html">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>

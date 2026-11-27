@@ -1,0 +1,93 @@
+Quarry License
+
+Copyright (c) 2026 Stephen Shirey. All rights reserved.
+
+"Quarry" means the Quarry application, its installers and its documentation,
+in any version published by the copyright holder.
+
+An "organization" is any company, partnership, public body, institution,
+non-profit or other legal entity, together with the entities it controls. Its
+"users" are the people who use Quarry for its work, whether employees,
+contractors or anyone else acting on its behalf.
+
+1. Free use by individuals
+
+   If you are an individual, you may install and use Quarry, free of charge,
+   on any number of computers. This includes paid work that you do on your
+   own, for example as a freelancer or sole proprietor.
+
+   An organization with only one user of Quarry is covered by this section
+   and needs no commercial license.
+
+2. Use by organizations
+
+   An organization with two or more users of Quarry needs a commercial
+   license for each of those users.
+
+   Such an organization may evaluate Quarry free of charge for 30 days,
+   counted from the day its second user starts using Quarry. After that, it
+   must obtain commercial licenses or reduce its use to a single user.
+
+   Commercial licenses are available from the copyright holder: see the end
+   of this license.
+
+3. Source code
+
+   The source code of Quarry is not published, and this license gives you no
+   right to it.
+
+4. What is not permitted
+
+   Without prior written permission from the copyright holder, you may not:
+
+   a. distribute, publish, sublicense, sell, rent or lease Quarry, its source
+      code, or any build of it, whether alone or as part of another product or
+      service;
+   b. modify Quarry or create derivative works of it, or distribute modified
+      versions of it;
+   c. decompile, disassemble or reverse engineer Quarry, except to the extent
+      that the law allows it despite this restriction;
+   d. remove or alter any copyright, license or attribution notice in Quarry;
+   e. use the name "Quarry" or its logo in a way that suggests your product or
+      service is Quarry or is endorsed by the copyright holder.
+
+5. Contributions
+
+   If you submit a contribution (such as a pull request or a patch) and it is
+   accepted, you assign all rights in that contribution to the copyright
+   holder, or, where assignment is not possible, grant the copyright holder a
+   perpetual, worldwide, irrevocable, royalty-free license to use, modify,
+   distribute and relicense it without restriction. You confirm that you have
+   the right to do so.
+
+6. Third-party components
+
+   Quarry includes third-party software that is licensed under its own terms.
+   Those terms apply to that software, and nothing in this license limits the
+   rights they give you.
+
+7. Future versions
+
+   The copyright holder may publish later versions of Quarry under different
+   terms. This license continues to apply to the versions published under it.
+
+8. Termination
+
+   Your rights under this license end automatically if you breach it. You must
+   then stop using Quarry and delete your copies of it.
+
+9. No warranty
+
+   QUARRY IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+10. Limitation of liability
+
+   TO THE EXTENT PERMITTED BY LAW, IN NO EVENT SHALL THE COPYRIGHT HOLDER BE
+   LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, INCLUDING LOSS OF DATA,
+   WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
+   OR IN CONNECTION WITH QUARRY OR THE USE OF OR OTHER DEALINGS IN QUARRY.
+
+For commercial licenses, and for permissions beyond this license, write to
+smspgh@outlook.com. Current prices are at https://smspgh.github.io/Quarry/#licensing.

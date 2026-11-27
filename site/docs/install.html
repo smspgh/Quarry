@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Installing Quarry · Quarry</title>
+  <meta name="description" content="Installing Quarry: Requirements, which file to download, checking it, updates, uninstalling, silent installs.">
+  <link rel="icon" href="../quarry.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a class="brand" href="../"><img src="../quarry.svg" alt="">Quarry</a>
+      <nav class="site" aria-label="Site">
+        <a href="../docs/" aria-current="page">Documentation</a>
+        <a href="../#install">Install</a>
+        <a href="../#licensing">Licensing</a>
+        <a href="../#support">Support</a>
+        <a href="../privacy.html">Privacy</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="docs">
+      <nav class="guides" aria-label="Guides">
+        <a href="./">All guides</a>
+        <a href="install.html" aria-current="page">Installing</a>
+        <a href="editing.html">Editing</a>
+        <a href="large-files.html">Large files</a>
+        <a href="code-intelligence.html">Code intelligence</a>
+        <a href="compare.html">Compare</a>
+        <a href="git.html">Git</a>
+        <a href="terminal.html">Terminal</a>
+        <a href="find-and-replace.html">Find and replace</a>
+        <a href="json.html">JSON tools</a>
+        <a href="api-requests.html">API requests</a>
+        <a href="formatting.html">Formatting</a>
+        <a href="macros.html">Macros</a>
+        <a href="scripting.html">Scripts</a>
+        <a href="keyboard-shortcuts.html">Keyboard shortcuts</a>
+        <a href="settings.html">Settings</a>
+        <a href="benchmarks.html">Benchmarks</a>
+      </nav>
+        <article class="guide">
+<h1 id="installing-quarry">Installing Quarry</h1>
+<p>Quarry runs on <strong>Windows 11, 64-bit (x64)</strong>. It is free for individuals; an organization with two or more people using it needs a commercial license (see <a href="../license.html">License</a>).</p>
+<h2 id="install">Install</h2>
+<ol>
+<li>Open the <a href="https://github.com/smspgh/Quarry/releases/latest" target="_blank" rel="noopener">latest release</a>.</li>
+<li>Under <strong>Assets</strong>, download <strong><code>Quarry_&lt;version&gt;_x64-setup.exe</code></strong> (about 7 MB).</li>
+<li>Run it and follow the two steps of the installer. Quarry starts from the Start menu.</li>
+</ol>
+<p>The installer needs no administrator rights: it installs for your Windows account only, into <code>%LOCALAPPDATA%\Quarry</code>. It does not change your default apps. You can choose another folder, as long as it is one your account can write to: a folder that needs administrator rights, such as <code>C:\Program Files</code>, is refused with a message and nothing is installed.</p>
+<h3 id="which-file-is-which">Which file is which</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>File</th><th>What it is</th></tr></thead>
+<tbody>
+<tr><td><code>Quarry_&lt;version&gt;_x64-setup.exe</code></td><td>The installer. This is the one you want.</td></tr>
+<tr><td><code>latest.json</code></td><td>Used by Quarry&#39;s own updater. You never need to download it.</td></tr>
+<tr><td>Source code (zip, tar.gz)</td><td>Added by GitHub to every release. They hold only these guides and the website, not Quarry itself.</td></tr>
+</tbody>
+</table></div>
+<p>A PC with no internet access and no WebView2 (Windows 11 comes with it) can use the installer made for the Microsoft Store instead, which has WebView2 inside (about 290 MB): <code>https://quarrydist.blob.core.windows.net/releases/v&lt;version&gt;/Quarry_&lt;version&gt;_x64-store-setup.exe</code>, with the version number of the release in both places.</p>
+<h3 id="checking-the-download">Checking the download</h3>
+<p>Releases are code-signed. Right-click the downloaded file, choose <strong>Properties › Digital Signatures</strong>, and the signer is <strong>Stephen Shirey</strong>. If Windows asks whether to run the file, the publisher shown is the same name.</p>
+<p>Windows SmartScreen can still show &quot;Windows protected your PC&quot; for a release that few people have downloaded yet. Check the publisher as above, then choose <strong>More info › Run anyway</strong>.</p>
+<h2 id="what-the-installer-adds">What the installer adds</h2>
+<ul>
+<li>Quarry in the Start menu, and in <strong>Settings › Apps › Installed apps</strong>.</li>
+<li><strong>Open with Quarry</strong> in File Explorer&#39;s right-click menu for files, and <strong>Open folder in Quarry</strong> for folders (on Windows 11 under <strong>Show more options</strong>).</li>
+<li>Quarry in the <strong>Open with</strong> list for common text, data and code files.</li>
+</ul>
+<h2 id="updates">Updates</h2>
+<p>Quarry looks for a new version when it starts and offers to install it. The update is downloaded from GitHub, verified against Quarry&#39;s signing key, installed in a small progress window, and Quarry restarts with your tabs. It will not update while you have unsaved changes.</p>
+<ul>
+<li>Check yourself: <strong>Help › Check for Updates</strong>.</li>
+<li>Turn the check at start off: <strong>Settings › App › Check for updates on start</strong>.</li>
+<li>See which version you have: <strong>Help › About Quarry</strong>.</li>
+</ul>
+<h2 id="uninstall">Uninstall</h2>
+<p><strong>Settings › Apps › Installed apps › Quarry › Uninstall.</strong> This removes the app and the File Explorer entries.</p>
+<p>Your settings, session, scripts and macros are in <code>%APPDATA%\com.quarry.app</code>, and logs in <code>%LOCALAPPDATA%\com.quarry.app</code>. Delete those two folders to remove everything Quarry stored (<a href="settings.html#files-quarry-keeps">Settings: Files Quarry keeps</a>).</p>
+<h2 id="installing-on-many-pcs">Installing on many PCs</h2>
+<p>For scripted installs, run the installer silently:</p>
+<pre><code class="language-powershell">Quarry_&lt;version&gt;_x64-setup.exe /S
+</code></pre>
+<p>It still installs per user, so run it as the user who will use Quarry. An organization installing Quarry for two or more people needs commercial licenses: see <a href="../license.html">License</a>.</p>
+<h2 id="help">Help</h2>
+<ul>
+<li>Questions and bug reports: <strong>Help › Report a Problem…</strong>, or <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">open an issue</a>. <strong>Help › About Quarry › Copy Version Info</strong> gives the details worth including.</li>
+<li>Licensing: <a href="mailto:smspgh@outlook.com">smspgh@outlook.com</a>.</li>
+<li>Privacy: Quarry collects no personal information. <a href="https://smspgh.github.io/Quarry/privacy.html" target="_blank" rel="noopener">Privacy policy</a>.</li>
+</ul>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site">
+      <span>© 2026 Stephen Shirey. All rights reserved.</span>
+      <span><a href="../privacy.html">Privacy policy</a> · <a href="../terms.html">Terms of sale</a> · <a href="../refunds.html">Refunds</a> · <a href="https://github.com/smspgh/Quarry/issues" target="_blank" rel="noopener">Support</a> · <a href="../license.html">License</a></span>
+    </footer>
+  </div>
+</body>
+</html>
